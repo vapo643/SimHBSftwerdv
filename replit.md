@@ -7,6 +7,9 @@ This is a full-stack TypeScript application for credit management called "Simpix
 ## Recent Changes
 
 ### December 2024
+- **401 Unauthorized Error Fix**: Implemented fetchWithToken API client for secure authenticated requests
+- Created centralized API client with automatic JWT token inclusion
+- Refactored all fetch calls to use new authenticated request system
 - **Supabase Refactoring Complete**: Implemented proper singleton pattern for Supabase client instances
 - Fixed multiple GoTrueClient instances warning with proper client management
 - Enhanced client/server separation with dedicated creation functions

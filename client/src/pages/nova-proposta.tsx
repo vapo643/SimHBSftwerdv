@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import fetchWithToken from "@/lib/apiClient";
 import { useToast } from "@/hooks/use-toast";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
@@ -88,15 +89,11 @@ export default function NovaProposta() {
       const formData = new FormData();
       formData.append("file", file);
       
-      const response = await fetch("/api/upload", {
+      const response = await fetchWithToken("/api/upload", {
         method: "POST",
         body: formData,
         credentials: "include",
       });
-      
-      if (!response.ok) {
-        throw new Error("Upload failed");
-      }
       
       return response.json();
     },

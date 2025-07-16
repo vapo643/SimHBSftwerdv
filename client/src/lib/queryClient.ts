@@ -1,7 +1,5 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
-import { createClientSupabaseClient } from "./supabase";
-
-const supabase = createClientSupabaseClient();
+import fetchWithToken from "./apiClient";
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
@@ -10,35 +8,17 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
-async function getAuthHeaders() {
-  const { data: { session } } = await supabase.auth.getSession();
-  const headers: Record<string, string> = {};
-  
-  if (session?.access_token) {
-    headers.Authorization = `Bearer ${session.access_token}`;
-  }
-  
-  return headers;
-}
-
 export async function apiRequest(
   method: string,
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
-  const authHeaders = await getAuthHeaders();
-  
-  const res = await fetch(url, {
+  const res = await fetchWithToken(url, {
     method,
-    headers: {
-      ...authHeaders,
-      ...(data ? { "Content-Type": "application/json" } : {}),
-    },
     body: data ? JSON.stringify(data) : undefined,
     credentials: "include",
   });
 
-  await throwIfResNotOk(res);
   return res;
 }
 
@@ -48,19 +28,18 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    const authHeaders = await getAuthHeaders();
-    
-    const res = await fetch(queryKey.join("/") as string, {
-      headers: authHeaders,
-      credentials: "include",
-    });
-
-    if (unauthorizedBehavior === "returnNull" && res.status === 401) {
-      return null;
+    try {
+      const res = await fetchWithToken(queryKey.join("/") as string, {
+        credentials: "include",
+      });
+      
+      return await res.json();
+    } catch (error: any) {
+      if (unauthorizedBehavior === "returnNull" && error.message?.includes("401")) {
+        return null;
+      }
+      throw error;
     }
-
-    await throwIfResNotOk(res);
-    return await res.json();
   };
 
 export const queryClient = new QueryClient({
