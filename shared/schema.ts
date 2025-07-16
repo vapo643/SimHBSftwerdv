@@ -16,6 +16,9 @@ export const statusEnum = pgEnum("status", [
   "em_analise",
   "aprovado",
   "rejeitado",
+  "documentos_enviados",
+  "contratos_preparados",
+  "contratos_assinados",
   "pronto_pagamento",
   "pago",
   "cancelado"
@@ -45,6 +48,15 @@ export const propostas = pgTable("propostas", {
   
   // Documentos
   documentos: text("documentos").array(),
+  
+  // Formalização
+  dataAprovacao: timestamp("data_aprovacao"),
+  documentosAdicionais: text("documentos_adicionais").array(),
+  contratoGerado: boolean("contrato_gerado").default(false),
+  contratoAssinado: boolean("contrato_assinado").default(false),
+  dataAssinatura: timestamp("data_assinatura"),
+  dataPagamento: timestamp("data_pagamento"),
+  observacoesFormalização: text("observacoes_formalizacao"),
   
   // Auditoria
   userId: integer("user_id").references(() => users.id),

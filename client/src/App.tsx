@@ -42,6 +42,11 @@ function Router() {
           <Pagamentos />
         </ProtectedRoute>
       </Route>
+      <Route path="/formalizacao">
+        <ProtectedRoute>
+          <Formalizacao />
+        </ProtectedRoute>
+      </Route>
       <Route path="/formalizacao/acompanhamento/:id">
         <ProtectedRoute>
           <Formalizacao />

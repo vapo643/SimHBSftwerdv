@@ -2,7 +2,16 @@
 
 ## Overview
 
-This is a full-stack TypeScript application for credit management called "Simpix". It provides a complete workflow for credit proposals, from creation through analysis to payment processing. The application follows a modern web architecture with a React frontend, Express.js backend, and PostgreSQL database using Drizzle ORM.
+This is a full-stack TypeScript application for credit management called "Simpix". It provides a complete workflow for credit proposals, from creation through analysis to payment processing and formalization tracking. The application follows a modern web architecture with a React frontend, Express.js backend, and PostgreSQL database using Drizzle ORM.
+
+## Recent Changes
+
+### December 2024
+- **T-04 - Painel de Acompanhamento da Formalização**: Complete formalization tracking panel with timeline view, document management, contract tracking, and status updates
+- Enhanced database schema with formalization fields: dataAprovacao, documentosAdicionais, contratoGerado, contratoAssinado, dataAssinatura, dataPagamento, observacoesFormalização
+- Added comprehensive status tracking: aprovado → documentos_enviados → contratos_preparados → contratos_assinados → pronto_pagamento → pago
+- Implemented tabbed interface for timeline, documents, and contracts management
+- Added progress tracking with percentage completion and visual indicators
 
 ## User Preferences
 

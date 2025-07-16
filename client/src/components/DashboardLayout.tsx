@@ -10,7 +10,8 @@ import {
   CreditCard, 
   Bell,
   User,
-  LogOut
+  LogOut,
+  FileText
 } from "lucide-react";
 
 interface DashboardLayoutProps {
@@ -26,6 +27,7 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     { name: "Nova Proposta", href: "/propostas/nova", icon: PlusCircle },
     { name: "Fila de Análise", href: "/credito/fila", icon: List },
+    { name: "Formalização", href: "/formalizacao", icon: FileText },
     { name: "Pagamentos", href: "/financeiro/pagamentos", icon: CreditCard },
   ];
 
