@@ -7,6 +7,9 @@ This is a full-stack TypeScript application for credit management called "Simpix
 ## Recent Changes
 
 ### December 2024
+- **Authentication Enhancement**: Improved authentication flow with JWT token management and secure session handling
+- Enhanced query client with automatic JWT token inclusion in API requests
+- Strengthened backend API protection with comprehensive auth middleware
 - **T-05 - Fila de Pagamento**: Complete payment queue system with batch processing, payment tracking, and comprehensive filtering
 - Enhanced payment processing with individual and batch operations, multiple payment methods (PIX, TED, transferência, boleto)
 - Implemented tabbed interface for payment queue and payment history with real-time statistics
