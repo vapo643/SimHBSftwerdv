@@ -1,5 +1,7 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
-import { supabase } from "./supabase";
+import { createClientSupabaseClient } from "./supabase";
+
+const supabase = createClientSupabaseClient();
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
