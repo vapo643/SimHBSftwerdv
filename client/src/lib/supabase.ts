@@ -1,4 +1,6 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
+
+let clientSupabaseInstance: SupabaseClient | null = null;
 
 // Função para criar o cliente Supabase para o lado do servidor (Express.js)
 export const createServerSupabaseClient = () => {
@@ -12,10 +14,7 @@ export const createServerSupabaseClient = () => {
   return createClient(supabaseUrl, supabaseAnonKey);
 };
 
-// Singleton instance para o cliente Supabase no lado do cliente
-let clientSupabaseInstance: any = null;
-
-// Função para criar o cliente Supabase para o lado do cliente (React)
+// Função para criar ou retornar a instância única do cliente para o lado do cliente (React)
 export const createClientSupabaseClient = () => {
   if (clientSupabaseInstance) {
     return clientSupabaseInstance;

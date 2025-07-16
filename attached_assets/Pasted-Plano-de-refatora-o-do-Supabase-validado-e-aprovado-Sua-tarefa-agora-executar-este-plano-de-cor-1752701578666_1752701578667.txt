@@ -1,0 +1,48 @@
+Plano de refatoração do Supabase validado e aprovado.
+
+Sua tarefa agora é executar este plano de correção para estabilizar a aplicação. Substitua e modifique os arquivos exatamente como descrito abaixo:
+
+1.  **Corrija o Cliente Supabase (`/client/src/lib/supabase.ts`):** Substitua todo o conteúdo deste arquivo pelo seguinte código, que implementa corretamente o padrão "singleton" para o cliente do navegador.
+
+    ```typescript
+    import { createClient, SupabaseClient } from "@supabase/supabase-js";
+
+    let clientSupabaseInstance: SupabaseClient | null = null;
+
+    // Função para criar o cliente Supabase para o lado do servidor (Express.js)
+    export const createServerSupabaseClient = () => {
+      const supabaseUrl = process.env.SUPABASE_URL || "";
+      const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || "";
+
+      if (!supabaseUrl || !supabaseAnonKey) {
+        throw new Error("Missing Supabase environment variables");
+      }
+
+      return createClient(supabaseUrl, supabaseAnonKey);
+    };
+
+    // Função para criar ou retornar a instância única do cliente para o lado do cliente (React)
+    export const createClientSupabaseClient = () => {
+      if (clientSupabaseInstance) {
+        return clientSupabaseInstance;
+      }
+
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "";
+      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || "";
+
+      if (!supabaseUrl || !supabaseAnonKey) {
+        throw new Error("Missing Supabase environment variables");
+      }
+
+      clientSupabaseInstance = createClient(supabaseUrl, supabaseAnonKey);
+      return clientSupabaseInstance;
+    };
+    ```
+
+2.  **Atualize o Serviço de Autenticação (`/client/src/lib/auth.ts`):** Verifique este arquivo e garanta que ele importe a função `createClientSupabaseClient` e a utilize para criar a instância do Supabase.
+
+3.  **Atualize o Cliente de Query (`/client/src/lib/queryClient.ts`):** Se este arquivo existir e utilizar o Supabase, garanta que ele também seja atualizado para usar a nova função `createClientSupabaseClient()`.
+
+4.  **Verificação Global:** Faça uma varredura em todo o projeto por quaisquer outras importações diretas de `createClient` da biblioteca `@supabase/supabase-js` e substitua-as pelo uso de nossas novas funções.
+
+Execute este plano de correção e me confirme a conclusão.

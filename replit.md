@@ -7,6 +7,9 @@ This is a full-stack TypeScript application for credit management called "Simpix
 ## Recent Changes
 
 ### December 2024
+- **Supabase Refactoring Complete**: Implemented proper singleton pattern for Supabase client instances
+- Fixed multiple GoTrueClient instances warning with proper client management
+- Enhanced client/server separation with dedicated creation functions
 - **Authentication Enhancement**: Improved authentication flow with JWT token management and secure session handling
 - Enhanced query client with automatic JWT token inclusion in API requests
 - Strengthened backend API protection with comprehensive auth middleware
