@@ -7,6 +7,11 @@ This is a full-stack TypeScript application for credit management called "Simpix
 ## Recent Changes
 
 ### December 2024
+- **T-05 - Fila de Pagamento**: Complete payment queue system with batch processing, payment tracking, and comprehensive filtering
+- Enhanced payment processing with individual and batch operations, multiple payment methods (PIX, TED, transferência, boleto)
+- Implemented tabbed interface for payment queue and payment history with real-time statistics
+- Added advanced search, filtering, and sorting capabilities for payment management
+- Enhanced status workflow integration with formalization tracking
 - **T-04 - Painel de Acompanhamento da Formalização**: Complete formalization tracking panel with timeline view, document management, contract tracking, and status updates
 - Enhanced database schema with formalization fields: dataAprovacao, documentosAdicionais, contratoGerado, contratoAssinado, dataAssinatura, dataPagamento, observacoesFormalização
 - Added comprehensive status tracking: aprovado → documentos_enviados → contratos_preparados → contratos_assinados → pronto_pagamento → pago
