@@ -5,9 +5,10 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Search, Filter, Clock, TrendingUp, Eye, CheckCircle, XCircle, AlertCircle } from "lucide-react";
 
 interface Proposta {
   id: number;
@@ -23,6 +24,8 @@ export default function FilaAnalise() {
   const [valorMinimo, setValorMinimo] = useState("");
   const [valorMaximo, setValorMaximo] = useState("");
   const [busca, setBusca] = useState("");
+  const [prioridadeFilter, setPrioridadeFilter] = useState("");
+  const [ordenacao, setOrdenacao] = useState("data_desc");
 
   const { data: propostas, isLoading } = useQuery<Proposta[]>({
     queryKey: ["/api/propostas"],
@@ -65,7 +68,36 @@ export default function FilaAnalise() {
       matchesValor = matchesValor && parseFloat(proposta.valor) <= parseFloat(valorMaximo);
     }
     
-    return matchesStatus && matchesBusca && matchesValor;
+    // Filtro por prioridade
+    let matchesPrioridade = true;
+    if (prioridadeFilter) {
+      const valorNum = parseFloat(proposta.valor);
+      const prioridade = getPriorityBadge(proposta.valor).label;
+      matchesPrioridade = prioridade === prioridadeFilter;
+    }
+    
+    return matchesStatus && matchesBusca && matchesValor && matchesPrioridade;
+  })?.sort((a, b) => {
+    switch (ordenacao) {
+      case "data_desc":
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      case "data_asc":
+        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      case "valor_desc":
+        return parseFloat(b.valor) - parseFloat(a.valor);
+      case "valor_asc":
+        return parseFloat(a.valor) - parseFloat(b.valor);
+      case "prioridade":
+        const getPriorityValue = (valor: string) => {
+          const num = parseFloat(valor);
+          if (num > 100000) return 3;
+          if (num > 50000) return 2;
+          return 1;
+        };
+        return getPriorityValue(b.valor) - getPriorityValue(a.valor);
+      default:
+        return 0;
+    }
   });
 
   const clearFilters = () => {
@@ -73,7 +105,34 @@ export default function FilaAnalise() {
     setValorMinimo("");
     setValorMaximo("");
     setBusca("");
+    setPrioridadeFilter("");
+    setOrdenacao("data_desc");
   };
+
+  // Estatísticas
+  const getStats = () => {
+    if (!propostas) return null;
+    
+    const aguardando = propostas.filter(p => p.status === "aguardando_analise").length;
+    const emAnalise = propostas.filter(p => p.status === "em_analise").length;
+    const aprovadas = propostas.filter(p => p.status === "aprovado").length;
+    const rejeitadas = propostas.filter(p => p.status === "rejeitado").length;
+    
+    const valorTotal = propostas.reduce((acc, p) => acc + parseFloat(p.valor), 0);
+    const valorMedio = valorTotal / propostas.length;
+    
+    return {
+      aguardando,
+      emAnalise,
+      aprovadas,
+      rejeitadas,
+      valorTotal,
+      valorMedio,
+      total: propostas.length
+    };
+  };
+
+  const stats = getStats();
 
   if (isLoading) {
     return (
@@ -99,10 +158,69 @@ export default function FilaAnalise() {
   return (
     <DashboardLayout title="Fila de Análise de Crédito">
       <div className="space-y-6">
+        {/* Statistics Cards */}
+        {stats && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600">Aguardando Análise</p>
+                    <p className="text-2xl font-bold text-orange-600">{stats.aguardando}</p>
+                  </div>
+                  <Clock className="h-8 w-8 text-orange-600" />
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600">Em Análise</p>
+                    <p className="text-2xl font-bold text-blue-600">{stats.emAnalise}</p>
+                  </div>
+                  <AlertCircle className="h-8 w-8 text-blue-600" />
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600">Aprovadas</p>
+                    <p className="text-2xl font-bold text-green-600">{stats.aprovadas}</p>
+                  </div>
+                  <CheckCircle className="h-8 w-8 text-green-600" />
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600">Rejeitadas</p>
+                    <p className="text-2xl font-bold text-red-600">{stats.rejeitadas}</p>
+                  </div>
+                  <XCircle className="h-8 w-8 text-red-600" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
         {/* Filters */}
         <Card>
-          <CardContent className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Filter className="h-5 w-5" />
+              Filtros e Ordenação
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
               <div>
                 <Label htmlFor="status">Status</Label>
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -115,6 +233,21 @@ export default function FilaAnalise() {
                     <SelectItem value="em_analise">Em Análise</SelectItem>
                     <SelectItem value="aprovado">Aprovado</SelectItem>
                     <SelectItem value="rejeitado">Rejeitado</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <Label htmlFor="prioridade">Prioridade</Label>
+                <Select value={prioridadeFilter} onValueChange={setPrioridadeFilter}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Todas" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Todas</SelectItem>
+                    <SelectItem value="Alta">Alta</SelectItem>
+                    <SelectItem value="Média">Média</SelectItem>
+                    <SelectItem value="Baixa">Baixa</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -140,34 +273,66 @@ export default function FilaAnalise() {
               </div>
               
               <div>
-                <Label htmlFor="busca">Buscar</Label>
-                <Input
-                  id="busca"
-                  placeholder="Nome do cliente..."
-                  value={busca}
-                  onChange={(e) => setBusca(e.target.value)}
-                />
+                <Label htmlFor="busca">Buscar Cliente</Label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    id="busca"
+                    placeholder="Nome do cliente..."
+                    value={busca}
+                    onChange={(e) => setBusca(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <Label htmlFor="ordenacao">Ordenar por</Label>
+                <Select value={ordenacao} onValueChange={setOrdenacao}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Ordenação" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="data_desc">Data (Mais Recente)</SelectItem>
+                    <SelectItem value="data_asc">Data (Mais Antigo)</SelectItem>
+                    <SelectItem value="valor_desc">Valor (Maior)</SelectItem>
+                    <SelectItem value="valor_asc">Valor (Menor)</SelectItem>
+                    <SelectItem value="prioridade">Prioridade</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             
-            <div className="flex justify-end mt-4 space-x-2">
-              <Button variant="outline" onClick={clearFilters}>
-                Limpar
-              </Button>
-              <Button>
-                Filtrar
-              </Button>
+            <div className="flex justify-between items-center mt-4">
+              <div className="text-sm text-gray-600">
+                {filteredPropostas ? `${filteredPropostas.length} de ${propostas?.length || 0} propostas` : ''}
+              </div>
+              <div className="space-x-2">
+                <Button variant="outline" onClick={clearFilters}>
+                  Limpar Filtros
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
 
         {/* Proposals Table */}
         <Card>
-          <CardContent className="p-6">
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold text-gray-900">Propostas para Análise</h3>
-            </div>
-            
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <span className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5" />
+                Propostas para Análise
+              </span>
+              {stats && (
+                <div className="text-sm text-gray-600">
+                  Valor Total: {formatCurrency(stats.valorTotal.toString())} | 
+                  Média: {formatCurrency(stats.valorMedio.toString())}
+                </div>
+              )}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
@@ -191,6 +356,9 @@ export default function FilaAnalise() {
                       Prioridade
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Data
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Ações
                     </th>
                   </tr>
@@ -209,7 +377,7 @@ export default function FilaAnalise() {
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                             {proposta.clienteNome}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
                             {formatCurrency(proposta.valor)}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -225,20 +393,35 @@ export default function FilaAnalise() {
                               {priorityInfo.label}
                             </Badge>
                           </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {new Date(proposta.createdAt).toLocaleDateString('pt-BR')}
+                          </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <Link href={`/credito/analise/${proposta.id}`}>
-                              <Button size="sm">
-                                Analisar
-                              </Button>
-                            </Link>
+                            <div className="flex gap-2">
+                              <Link href={`/credito/analise/${proposta.id}`}>
+                                <Button size="sm" variant="default">
+                                  <Eye className="h-4 w-4 mr-1" />
+                                  Analisar
+                                </Button>
+                              </Link>
+                              {proposta.status === 'aguardando_analise' && (
+                                <Button size="sm" variant="outline">
+                                  Iniciar
+                                </Button>
+                              )}
+                            </div>
                           </td>
                         </tr>
                       );
                     })
                   ) : (
                     <tr>
-                      <td colSpan={7} className="px-6 py-4 text-center text-gray-500">
-                        Nenhuma proposta encontrada
+                      <td colSpan={8} className="px-6 py-12 text-center text-gray-500">
+                        <div className="flex flex-col items-center">
+                          <Search className="h-8 w-8 text-gray-400 mb-2" />
+                          <p>Nenhuma proposta encontrada</p>
+                          <p className="text-sm">Tente ajustar os filtros ou criar uma nova proposta</p>
+                        </div>
                       </td>
                     </tr>
                   )}
