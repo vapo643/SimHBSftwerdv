@@ -15,6 +15,7 @@ if (!databaseUrl) {
   throw new Error("Missing DATABASE_URL environment variable");
 }
 
+// Server-side Supabase client - properly isolated from client-side singleton
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Database connection using Drizzle

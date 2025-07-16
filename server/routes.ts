@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { supabase } from "./lib/supabase";
+import { createServerSupabaseClient } from "../client/src/lib/supabase";
 import { authMiddleware, type AuthRequest } from "./lib/auth";
 import { insertPropostaSchema, updatePropostaSchema } from "@shared/schema";
 import { z } from "zod";
@@ -15,6 +15,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { email, password } = req.body;
       
+      const supabase = createServerSupabaseClient();
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
@@ -38,6 +39,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { email, password, name } = req.body;
       
+      const supabase = createServerSupabaseClient();
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -64,6 +66,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/auth/logout", authMiddleware, async (req, res) => {
     try {
+      const supabase = createServerSupabaseClient();
       const { error } = await supabase.auth.signOut();
       
       if (error) {
@@ -153,6 +156,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const fileName = `${Date.now()}-${req.file.originalname}`;
       
+      const supabase = createServerSupabaseClient();
       const { data, error } = await supabase.storage
         .from("documents")
         .upload(fileName, req.file.buffer, {

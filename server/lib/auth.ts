@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { supabase } from "./supabase";
+import { createServerSupabaseClient } from "../../client/src/lib/supabase";
 
 export interface AuthRequest extends Request {
   user?: {
@@ -22,6 +22,7 @@ export async function authMiddleware(
 
     const token = authHeader.split(" ")[1];
     
+    const supabase = createServerSupabaseClient();
     const { data: { user }, error } = await supabase.auth.getUser(token);
     
     if (error || !user) {
