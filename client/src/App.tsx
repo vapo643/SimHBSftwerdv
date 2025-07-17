@@ -16,6 +16,7 @@ import TabelasComerciais from "@/pages/configuracoes/tabelas";
 import UsuariosPage from "@/pages/admin/usuarios";
 import PartnersPage from "@/pages/parceiros/index";
 import PartnerDetailPage from "@/pages/parceiros/detalhe";
+import ProdutosPage from "@/pages/configuracoes/produtos";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -75,6 +76,11 @@ function Router() {
       <Route path="/parceiros/detalhe/:id">
         <ProtectedRoute>
           <PartnerDetailPage />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/configuracoes/produtos">
+        <ProtectedRoute>
+          <ProdutosPage />
         </ProtectedRoute>
       </Route>
       <Route path="/">
