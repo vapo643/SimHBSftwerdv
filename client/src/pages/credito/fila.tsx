@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'wouter';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -43,7 +44,9 @@ const FilaAnalise: React.FC = () => {
                     <TableCell>{proposta.score}</TableCell>
                     <TableCell>{proposta.status}</TableCell>
                     <TableCell>
-                      <Button variant="outline" size="sm">Analisar</Button>
+                      <Link to={`/credito/analise/${proposta.id}`}>
+                        <Button variant="outline" size="sm">Analisar</Button>
+                      </Link>
                     </TableCell>
                   </TableRow>
                 ))}

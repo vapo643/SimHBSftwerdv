@@ -29,6 +29,7 @@ This is a full-stack TypeScript application for credit management called "Simpix
 - **T-01 - Nova Proposta**: Complete three-tab proposal creation form with client data, loan conditions, and document upload functionality
 - **T-02 - Fila de Análise**: Credit analysis queue page with proposal listing, filtering, and analysis routing functionality
 - **T-03 - Painel de Análise Manual**: Manual analysis panel structure with dynamic routing, tabs for different analysis views, and document viewer
+- **Navigation Enhancement**: Added functional navigation from T-02 to T-03 using wouter Link component for seamless user flow between analysis queue and individual proposal analysis
 
 ## User Preferences
 
