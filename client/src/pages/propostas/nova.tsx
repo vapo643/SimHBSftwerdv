@@ -1,6 +1,7 @@
 import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Tabs, Tab } from '@/components/ui/tabs';
+import DadosClienteForm from '@/components/forms/DadosClienteForm';
 
 const NovaProposta: React.FC = () => {
   return (
@@ -12,8 +13,7 @@ const NovaProposta: React.FC = () => {
       </Tabs>
 
       <div className="mt-6">
-        <h2>Conteúdo da aba selecionada</h2>
-        <p>Este é apenas um texto simples para a aba.</p>
+        <DadosClienteForm />
       </div>
     </DashboardLayout>
   );
