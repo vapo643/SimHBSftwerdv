@@ -232,6 +232,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     return res.json({ valorParcela: valorDaParcela });
   });
 
+  // Rota para fila de formalização
+  app.get('/api/formalizacao/propostas', (req, res) => {
+    const mockPropostas = [
+      { id: 'PROP-098', cliente: 'Empresa A', status: 'Assinatura Pendente' },
+      { id: 'PROP-101', cliente: 'Empresa B', status: 'Biometria Concluída' },
+      { id: 'PROP-105', cliente: 'Empresa C', status: 'CCB Gerada' },
+    ];
+    res.json(mockPropostas);
+  });
+
   // Dashboard stats
   app.get("/api/dashboard/stats", authMiddleware, async (req, res) => {
     try {

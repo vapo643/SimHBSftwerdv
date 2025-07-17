@@ -31,7 +31,7 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     { name: "Nova Proposta", href: "/propostas/nova", icon: PlusCircle },
     { name: "Fila de Análise", href: "/credito/fila", icon: List },
-    { name: "Acompanhamento", href: "/formalizacao/acompanhamento/1", icon: FileText }, // Link de exemplo
+    { name: "Formalização", href: "/formalizacao/fila", icon: FileText },
     { name: "Pagamentos", href: "/financeiro/pagamentos", icon: CreditCard },
     { name: "Tabelas Comerciais", href: "/configuracoes/tabelas", icon: Settings }, // Novo item adicionado
     { name: "Usuários", href: "/admin/usuarios", icon: Users }, // Novo item adicionado
