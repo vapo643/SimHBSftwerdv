@@ -53,7 +53,7 @@ const PartnersPage: React.FC = () => {
         </TableBody>
       </Table>
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent>
+        <DialogContent className="max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{selectedPartner ? "Editar Parceiro" : "Novo Parceiro"}</DialogTitle>
           </DialogHeader>
