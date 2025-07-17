@@ -43,7 +43,11 @@ const CondicoesEmprestimoForm: React.FC = () => {
           const response = await fetch('/api/simular', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ valorSolicitado, prazoEmMeses: prazo, taxaDeJurosMensal }),
+            body: JSON.stringify({ 
+              valorSolicitado: Number(valorSolicitado),
+              prazoEmMeses: Number(prazo),
+              taxaDeJurosMensal 
+            }),
           });
           
           const data = await response.json();
