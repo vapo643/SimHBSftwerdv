@@ -1,3 +1,8 @@
+O plano para construir a aba "Condições do Empréstimo" foi validado.
+
+Sua tarefa é atualizar a página `/client/src/pages/propostas/nova.tsx`. Por favor, substitua todo o conteúdo deste arquivo pelo seguinte código exato, que agora inclui o formulário da segunda aba:
+
+```typescript
 import React from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
