@@ -14,6 +14,8 @@ import Formalizacao from "@/pages/formalizacao";
 import AcompanhamentoFormalizacao from "@/pages/formalizacao/acompanhamento";
 import TabelasComerciais from "@/pages/configuracoes/tabelas";
 import UsuariosPage from "@/pages/admin/usuarios";
+import PartnersPage from "@/pages/parceiros/index";
+import PartnerDetailPage from "@/pages/parceiros/detalhe";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -63,6 +65,16 @@ function Router() {
       <Route path="/admin/usuarios">
         <ProtectedRoute>
           <UsuariosPage />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/parceiros">
+        <ProtectedRoute>
+          <PartnersPage />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/parceiros/detalhe/:id">
+        <ProtectedRoute>
+          <PartnerDetailPage />
         </ProtectedRoute>
       </Route>
       <Route path="/">

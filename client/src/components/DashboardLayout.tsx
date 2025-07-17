@@ -13,7 +13,8 @@ import {
   LogOut,
   FileText,
   Settings, // Adicionando o ícone para configurações
-  Users // Adicionando o ícone para usuários
+  Users, // Adicionando o ícone para usuários
+  Building2 // Adicionando o ícone para parceiros
 } from "lucide-react";
 
 interface DashboardLayoutProps {
@@ -33,6 +34,7 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
     { name: "Pagamentos", href: "/financeiro/pagamentos", icon: CreditCard },
     { name: "Tabelas Comerciais", href: "/configuracoes/tabelas", icon: Settings }, // Novo item adicionado
     { name: "Usuários", href: "/admin/usuarios", icon: Users }, // Novo item adicionado
+    { name: "Parceiros", href: "/parceiros", icon: Building2 }, // Novo item adicionado
   ];
 
   const handleSignOut = async () => {

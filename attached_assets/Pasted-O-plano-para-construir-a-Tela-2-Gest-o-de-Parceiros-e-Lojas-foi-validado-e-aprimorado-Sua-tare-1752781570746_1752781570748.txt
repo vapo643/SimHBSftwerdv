@@ -1,0 +1,193 @@
+O plano para construir a "Tela 2 - Gestão de Parceiros e Lojas" foi validado e aprimorado.
+
+Sua tarefa agora é executar o seguinte plano de 5 etapas para criar a funcionalidade completa:
+
+**1. Crie o Arquivo de Dados Fictícios:**
+Crie um novo arquivo em `/client/src/data/partners.ts` com o seguinte conteúdo:
+```typescript
+export interface Loja {
+  id: string;
+  nome: string;
+}
+export interface Partner {
+  id: string;
+  cnpj: string;
+  razaoSocial: string;
+  nomeFantasia: string;
+  lojas: Loja[];
+}
+
+export const mockPartners: Partner[] = [
+  { id: '1', cnpj: '11.222.333/0001-44', razaoSocial: 'Comércio de Veículos A Ltda', nomeFantasia: 'Parceiro A', lojas: [{id: '101', nome: 'Loja Centro'}] },
+  { id: '2', cnpj: '44.555.666/0001-77', razaoSocial: 'Varejo de Bens B S.A.', nomeFantasia: 'Parceiro B', lojas: [{id: '201', nome: 'Loja Sul'}, {id: '202', nome: 'Loja Norte'}] },
+];
+2. Crie o Componente do Formulário de Parceiro:
+Crie um novo arquivo em /client/src/components/parceiros/PartnerForm.tsx com o código completo do formulário, incluindo todos os campos de Pessoa Jurídica e validação zod.
+
+TypeScript
+
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+
+const partnerSchema = z.object({
+  razaoSocial: z.string().min(3, "Razão Social é obrigatória."),
+  nomeFantasia: z.string().min(3, "Nome Fantasia é obrigatório."),
+  cnpj: z.string().length(18, "CNPJ deve ter 14 dígitos."), // 18 com máscara
+});
+
+type PartnerFormData = z.infer<typeof partnerSchema>;
+
+interface PartnerFormProps {
+  initialData?: any;
+  onSubmit: (data: PartnerFormData) => void;
+  onCancel: () => void;
+}
+
+const PartnerForm: React.FC<PartnerFormProps> = ({ initialData, onSubmit, onCancel }) => {
+  const { register, handleSubmit, formState: { errors } } = useForm<PartnerFormData>({
+    resolver: zodResolver(partnerSchema),
+    defaultValues: initialData || {},
+  });
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <div>
+        <Label htmlFor="cnpj">CNPJ</Label>
+        <Input id="cnpj" {...register("cnpj")} placeholder="00.000.000/0001-00" />
+        {errors.cnpj && <p className="text-red-500 text-sm mt-1">{errors.cnpj.message}</p>}
+      </div>
+      <div>
+        <Label htmlFor="razaoSocial">Razão Social</Label>
+        <Input id="razaoSocial" {...register("razaoSocial")} />
+        {errors.razaoSocial && <p className="text-red-500 text-sm mt-1">{errors.razaoSocial.message}</p>}
+      </div>
+      <div>
+        <Label htmlFor="nomeFantasia">Nome Fantasia</Label>
+        <Input id="nomeFantasia" {...register("nomeFantasia")} />
+        {errors.nomeFantasia && <p className="text-red-500 text-sm mt-1">{errors.nomeFantasia.message}</p>}
+      </div>
+      <div className="flex justify-end gap-2 pt-4">
+        <Button type="button" variant="ghost" onClick={onCancel}>Cancelar</Button>
+        <Button type="submit">Salvar</Button>
+      </div>
+    </form>
+  );
+};
+
+export default PartnerForm;
+3. Crie a Página Principal de Gestão de Parceiros:
+Crie um novo arquivo em /client/src/pages/parceiros/index.tsx com a tabela e a lógica do modal.
+
+TypeScript
+
+import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/components/ui/table';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import PartnerForm from '@/components/parceiros/PartnerForm';
+import { mockPartners, Partner } from '@/data/partners';
+import DashboardLayout from '@/components/DashboardLayout';
+import { Link } from 'wouter';
+
+const PartnersPage: React.FC = () => {
+  const [partners, setPartners] = useState<Partner[]>(mockPartners);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedPartner, setSelectedPartner] = useState<Partner | null>(null);
+
+  const handleCreateOrEdit = (partner: any) => {
+    // Lógica para criar ou editar parceiros
+    setIsModalOpen(false);
+  };
+  
+  const openNewModal = () => {
+    setSelectedPartner(null);
+    setIsModalOpen(true);
+  };
+
+  return (
+    <DashboardLayout title="Gestão de Parceiros">
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold">Parceiros</h1>
+        <Button onClick={openNewModal}>Novo Parceiro</Button>
+      </div>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Razão Social</TableHead>
+            <TableHead>CNPJ</TableHead>
+            <TableHead>Lojas</TableHead>
+            <TableHead>Ações</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {partners.map(partner => (
+            <TableRow key={partner.id}>
+              <TableCell>{partner.razaoSocial}</TableCell>
+              <TableCell>{partner.cnpj}</TableCell>
+              <TableCell>{partner.lojas.length}</TableCell>
+              <TableCell>
+                <Link to={`/parceiros/detalhe/${partner.id}`}>
+                  <Button variant="outline" size="sm">Ver Detalhes</Button>
+                </Link>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{selectedPartner ? "Editar Parceiro" : "Novo Parceiro"}</DialogTitle>
+          </DialogHeader>
+          <PartnerForm 
+            initialData={selectedPartner}
+            onSubmit={handleCreateOrEdit}
+            onCancel={() => { setIsModalOpen(false); setSelectedPartner(null); }}
+          />
+        </DialogContent>
+      </Dialog>
+    </DashboardLayout>
+  );
+};
+export default PartnersPage;
+4. Crie a Página de Detalhe do Parceiro:
+Crie um novo arquivo em /client/src/pages/parceiros/detalhe.tsx com o código corrigido para usar wouter.
+
+TypeScript
+
+import React from 'react';
+import { useRoute } from 'wouter';
+import DashboardLayout from '@/components/DashboardLayout';
+import { mockPartners } from '@/data/partners'; // Supondo que você tenha dados fictícios
+  
+const PartnerDetailPage: React.FC = () => {
+  const [match, params] = useRoute("/parceiros/detalhe/:id");
+  const id = params ? params.id : null;
+  const partner = mockPartners.find(p => p.id === id);
+
+  return (
+    <DashboardLayout title={`Detalhe do Parceiro: ${partner?.nomeFantasia || ''}`}>
+      <h1 className="text-2xl font-bold">{partner?.razaoSocial}</h1>
+      <p>CNPJ: {partner?.cnpj}</p>
+      <div className="mt-6">
+        <h2 className="text-xl font-semibold">Lojas</h2>
+        {/* Aqui virá a tabela de lojas e o botão "Adicionar Nova Loja" */}
+      </div>
+       <div className="mt-6">
+        <h2 className="text-xl font-semibold">Configuração Comercial</h2>
+        {/* Aqui virá o formulário de configuração comercial */}
+      </div>
+    </DashboardLayout>
+  );
+};
+
+export default PartnerDetailPage;
+5. Adicione as Novas Rotas:
+Modifique o arquivo /client/src/App.tsx para adicionar as novas rotas, garantindo que sejam protegidas.
+
+Execute este plano de 5 etapas.
