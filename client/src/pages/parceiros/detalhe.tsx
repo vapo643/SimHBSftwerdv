@@ -2,6 +2,7 @@ import React from 'react';
 import { useRoute } from 'wouter';
 import DashboardLayout from '@/components/DashboardLayout';
 import { mockPartners } from '@/data/partners';
+import ConfiguracaoComercialForm from '@/components/parceiros/ConfiguracaoComercialForm';
   
 const PartnerDetailPage: React.FC = () => {
   const [match, params] = useRoute("/parceiros/detalhe/:id");
@@ -17,8 +18,7 @@ const PartnerDetailPage: React.FC = () => {
         {/* Aqui virá a tabela de lojas e o botão "Adicionar Nova Loja" */}
       </div>
        <div className="mt-6">
-        <h2 className="text-xl font-semibold">Configuração Comercial</h2>
-        {/* Aqui virá o formulário de configuração comercial */}
+        <ConfiguracaoComercialForm />
       </div>
     </DashboardLayout>
   );
