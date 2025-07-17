@@ -12,7 +12,8 @@ import {
   User,
   LogOut,
   FileText,
-  Settings // Adicionando o ícone para configurações
+  Settings, // Adicionando o ícone para configurações
+  Users // Adicionando o ícone para usuários
 } from "lucide-react";
 
 interface DashboardLayoutProps {
@@ -31,6 +32,7 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
     { name: "Acompanhamento", href: "/formalizacao/acompanhamento/1", icon: FileText }, // Link de exemplo
     { name: "Pagamentos", href: "/financeiro/pagamentos", icon: CreditCard },
     { name: "Tabelas Comerciais", href: "/configuracoes/tabelas", icon: Settings }, // Novo item adicionado
+    { name: "Usuários", href: "/admin/usuarios", icon: Users }, // Novo item adicionado
   ];
 
   const handleSignOut = async () => {

@@ -34,6 +34,7 @@ This is a full-stack TypeScript application for credit management called "Simpix
 - **T-05 - Fila de Pagamento**: Created payment queue page with proposal listing, payment processing functionality, and bank details management
 - **Dashboard Navigation**: Added functional navigation from dashboard "Criar Nova Proposta" button to T-01 Nova Proposta page using wouter Link component
 - **F-PRO-03 - Gestão de Tabelas Comerciais**: Complete CRUD functionality for commercial tables management with form validation, modal interfaces, and comprehensive testing
+- **Tela 1 - Gestão de Usuários e Perfis**: Complete user management system with CRUD operations, user profile management, and status toggling functionality
 
 ## User Preferences
 

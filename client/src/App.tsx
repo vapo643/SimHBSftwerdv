@@ -13,6 +13,7 @@ import Pagamentos from "@/pages/financeiro/pagamentos";
 import Formalizacao from "@/pages/formalizacao";
 import AcompanhamentoFormalizacao from "@/pages/formalizacao/acompanhamento";
 import TabelasComerciais from "@/pages/configuracoes/tabelas";
+import UsuariosPage from "@/pages/admin/usuarios";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -57,6 +58,11 @@ function Router() {
       <Route path="/configuracoes/tabelas">
         <ProtectedRoute>
           <TabelasComerciais />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/admin/usuarios">
+        <ProtectedRoute>
+          <UsuariosPage />
         </ProtectedRoute>
       </Route>
       <Route path="/">
