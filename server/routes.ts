@@ -205,6 +205,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(prazos);
   });
 
+  // Função para calcular o valor da parcela usando a fórmula da Tabela Price
+  const calcularParcela = (valorSolicitado: number, prazoEmMeses: number, taxaDeJurosMensal: number): number => {
+    if (taxaDeJurosMensal <= 0) {
+      return valorSolicitado / prazoEmMeses;
+    }
+    const i = taxaDeJurosMensal / 100; // Convertendo a taxa percentual para decimal
+    const pmt = valorSolicitado * (i * Math.pow(1 + i, prazoEmMeses)) / (Math.pow(1 + i, prazoEmMeses) - 1);
+    return parseFloat(pmt.toFixed(2));
+  };
+
+  // Rota para simular crédito
+  app.post('/api/simular', (req, res) => {
+    const { valorSolicitado, prazoEmMeses, taxaDeJurosMensal } = req.body;
+
+    // Validação básica
+    if (typeof valorSolicitado !== 'number' || typeof prazoEmMeses !== 'number' || typeof taxaDeJurosMensal !== 'number') {
+      return res.status(400).json({ error: 'Entrada inválida. Certifique-se de que os valores são números.' });
+    }
+
+    if (valorSolicitado <= 0 || prazoEmMeses <= 0 || taxaDeJurosMensal <= 0) {
+      return res.status(400).json({ error: 'Valores, prazos e taxas devem ser positivos.' });
+    }
+
+    const valorDaParcela = calcularParcela(valorSolicitado, prazoEmMeses, taxaDeJurosMensal);
+    return res.json({ valorParcela: valorDaParcela });
+  });
+
   // Dashboard stats
   app.get("/api/dashboard/stats", authMiddleware, async (req, res) => {
     try {
