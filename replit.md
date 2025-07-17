@@ -32,6 +32,7 @@ This is a full-stack TypeScript application for credit management called "Simpix
 - **Navigation Enhancement**: Added functional navigation from T-02 to T-03 using wouter Link component for seamless user flow between analysis queue and individual proposal analysis
 - **T-04 - Acompanhamento da Formalização**: Created formalization tracking page with dynamic routing, checklist functionality, and client interaction tools
 - **T-05 - Fila de Pagamento**: Created payment queue page with proposal listing, payment processing functionality, and bank details management
+- **Dashboard Navigation**: Added functional navigation from dashboard "Criar Nova Proposta" button to T-01 Nova Proposta page using wouter Link component
 
 ## User Preferences
 

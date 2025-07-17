@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from "wouter";
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/components/ui/table';
@@ -16,7 +17,9 @@ const Dashboard: React.FC = () => {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold">Propostas</h1>
-          <Button>Criar Nova Proposta</Button>
+          <Link to="/propostas/nova">
+            <Button>Criar Nova Proposta</Button>
+          </Link>
         </div>
         <Card>
           <CardContent className="p-6">
