@@ -1,0 +1,110 @@
+O plano para adicionar o link de navegação para a tela "Gestão de Tabelas Comerciais" foi validado.
+
+Sua tarefa agora é atualizar o arquivo de layout principal. Por favor, substitua todo o conteúdo do arquivo `/client/src/components/DashboardLayout.tsx` pelo seguinte código exato:
+
+```typescript
+import { useState } from "react";
+import { Link, useLocation } from "wouter";
+import { signOut } from "@/lib/auth";
+import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { 
+  LayoutDashboard, 
+  PlusCircle, 
+  List, 
+  CreditCard, 
+  Bell,
+  User,
+  LogOut,
+  FileText,
+  Settings // Adicionando o ícone para configurações
+} from "lucide-react";
+
+interface DashboardLayoutProps {
+  children: React.ReactNode;
+  title: string;
+}
+
+export default function DashboardLayout({ children, title }: DashboardLayoutProps) {
+  const [location] = useLocation();
+  const { toast } = useToast();
+
+  const navigation = [
+    { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+    { name: "Nova Proposta", href: "/propostas/nova", icon: PlusCircle },
+    { name: "Fila de Análise", href: "/credito/fila", icon: List },
+    { name: "Acompanhamento", href: "/formalizacao/acompanhamento/1", icon: FileText }, // Link de exemplo
+    { name: "Pagamentos", href: "/financeiro/pagamentos", icon: CreditCard },
+    { name: "Tabelas Comerciais", href: "/configuracoes/tabelas", icon: Settings }, // Novo item adicionado
+  ];
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      toast({
+        title: "Logout realizado com sucesso",
+        description: "Você foi desconectado do sistema.",
+      });
+      // A lógica de redirecionamento será tratada pelo listener de auth
+    } catch (error) {
+      toast({
+        title: "Erro ao fazer logout",
+        description: "Tente novamente em alguns instantes.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  return (
+    <div className="grid min-h-screen w-full lg:grid-cols-[280px_1fr]">
+      <div className="hidden border-r bg-card text-card-foreground lg:block">
+        <div className="flex h-full max-h-screen flex-col gap-2">
+          <div className="flex h-16 items-center border-b px-6">
+            <Link to="/dashboard">
+              <a className="flex items-center gap-2 font-semibold">
+                {/* Ícone da Simpix aqui, se houver */}
+                <span className="">Simpix</span>
+              </a>
+            </Link>
+          </div>
+          <div className="flex-1 overflow-auto py-2">
+            <nav className="grid items-start px-4 text-sm font-medium">
+              {navigation.map((item) => {
+                const Icon = item.icon;
+                const isActive = location === item.href;
+                return (
+                  <Link key={item.name} href={item.href}>
+                    <a
+                      className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all ${
+                        isActive
+                          ? "bg-primary text-primary-foreground"
+                          : "text-muted-foreground hover:text-primary"
+                      }`}
+                    >
+                      <Icon className="h-4 w-4" />
+                      {item.name}
+                    </a>
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
+        </div>
+      </div>
+      <div className="flex flex-col">
+        <header className="flex h-14 lg:h-[60px] items-center gap-4 border-b bg-muted/40 px-6">
+          {/* Lógica do cabeçalho, como busca ou menu de usuário, pode vir aqui */}
+          <div className="flex-1">
+            <h1 className="font-semibold text-lg">{title}</h1>
+          </div>
+          <Button onClick={handleSignOut} variant="outline" size="icon">
+            <LogOut className="h-5 w-5" />
+          </Button>
+        </header>
+        <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6">
+          {children}
+        </main>
+      </div>
+    </div>
+  );
+}
