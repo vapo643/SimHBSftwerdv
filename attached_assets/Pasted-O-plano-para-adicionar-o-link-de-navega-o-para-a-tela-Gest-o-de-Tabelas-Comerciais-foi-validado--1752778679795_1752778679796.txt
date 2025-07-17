@@ -1,3 +1,8 @@
+O plano para adicionar o link de navegação para a tela "Gestão de Tabelas Comerciais" foi validado.
+
+Sua tarefa agora é atualizar o arquivo de layout principal. Por favor, substitua todo o conteúdo do arquivo `/client/src/components/DashboardLayout.tsx` pelo seguinte código exato:
+
+```typescript
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { signOut } from "@/lib/auth";
