@@ -1,3 +1,8 @@
+O plano para completar o formulário de cadastro de parceiros foi validado.
+
+Sua tarefa agora é executar a atualização do formulário. Substitua todo o conteúdo do arquivo `/client/src/components/parceiros/PartnerForm.tsx` pelo seguinte código exato e final:
+
+```typescript
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -99,3 +104,4 @@ const PartnerForm: React.FC<PartnerFormProps> = ({ initialData, onSubmit, onCanc
 };
 
 export default PartnerForm;
+Execute a substituição deste arquivo e confirme a conclusão.
