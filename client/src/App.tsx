@@ -6,7 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Login from "@/pages/login";
 import Dashboard from "@/pages/dashboard";
-import NovaProposta from "@/pages/nova-proposta";
+import NovaProposta from "@/pages/propostas/nova";
 import FilaAnalise from "@/pages/fila-analise";
 import AnaliseManual from "@/pages/analise-manual";
 import Pagamentos from "@/pages/pagamentos";
