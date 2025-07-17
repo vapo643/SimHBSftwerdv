@@ -7,14 +7,18 @@ const NovaProposta: React.FC = () => {
   return (
     <DashboardLayout title="Nova Proposta de Crédito">
       <Tabs defaultValue="dados-cliente">
-        <Tab value="dados-cliente">Dados do Cliente</Tab>
-        <Tab value="condicoes-emprestimo">Condições do Empréstimo</Tab>
-        <Tab value="anexo-documentos">Anexo de Documentos</Tab>
+        <Tab label="Dados do Cliente" value="dados-cliente">
+          <DadosClienteForm />
+        </Tab>
+        <Tab label="Condições do Empréstimo" value="condicoes-emprestimo">
+          <h2>Condições do Empréstimo</h2>
+          <p>Este é apenas um texto simples para a aba.</p>
+        </Tab>
+        <Tab label="Anexo de Documentos" value="anexo-documentos">
+          <h2>Anexo de Documentos</h2>
+          <p>Este é apenas um texto simples para a aba.</p>
+        </Tab>
       </Tabs>
-
-      <div className="mt-6">
-        <DadosClienteForm />
-      </div>
     </DashboardLayout>
   );
 };

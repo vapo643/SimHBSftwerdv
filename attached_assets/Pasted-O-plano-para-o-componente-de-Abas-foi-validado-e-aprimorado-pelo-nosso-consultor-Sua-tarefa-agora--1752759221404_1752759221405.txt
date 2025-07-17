@@ -1,3 +1,8 @@
+O plano para o componente de Abas foi validado e aprimorado pelo nosso consultor. Sua tarefa agora é executar a implementação final e robusta.
+
+Crie um novo arquivo no caminho `/client/src/components/ui/tabs.tsx` e cole exatamente o seguinte código dentro dele:
+
+```typescript
 import React, { useState, ReactNode, Children, cloneElement, isValidElement } from 'react';
 import { cn } from "@/lib/utils";
 
