@@ -26,6 +26,7 @@ This is a full-stack TypeScript application for credit management called "Simpix
 - Added comprehensive status tracking: aprovado → documentos_enviados → contratos_preparados → contratos_assinados → pronto_pagamento → pago
 - Implemented tabbed interface for timeline, documents, and contracts management
 - Added progress tracking with percentage completion and visual indicators
+- **T-01 - Nova Proposta**: Complete three-tab proposal creation form with client data, loan conditions, and document upload functionality
 
 ## User Preferences
 
