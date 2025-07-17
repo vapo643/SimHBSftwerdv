@@ -36,6 +36,9 @@ This is a full-stack TypeScript application for credit management called "Simpix
 - **F-PRO-03 - Gestão de Tabelas Comerciais**: Complete CRUD functionality for commercial tables management with form validation, modal interfaces, and comprehensive testing
 - **Tela 1 - Gestão de Usuários e Perfis**: Complete user management system with CRUD operations, user profile management, and status toggling functionality
 - **Tela 2 - Gestão de Parceiros e Lojas**: Complete partner management system with CRUD operations, partner listing, and detailed partner view with stores management
+- **Tela 3 - Gestão de Produtos de Crédito**: Complete product management system with CRUD operations, form validation, and business rules
+- **T-01 Dynamic Integration**: Connected Nova Proposta to backend with real-time credit simulation API using Tabela Price formula
+- **Credit Simulation API**: Implemented POST /api/simular with mathematical loan calculation and proper validation
 
 ## User Preferences
 

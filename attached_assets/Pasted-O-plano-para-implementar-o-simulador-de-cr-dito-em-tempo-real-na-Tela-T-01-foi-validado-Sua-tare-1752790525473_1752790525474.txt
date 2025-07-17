@@ -1,3 +1,10 @@
+O plano para implementar o simulador de crédito em tempo real na "Tela T-01" foi validado.
+
+Sua tarefa agora é atualizar a página `/client/src/pages/propostas/nova.tsx` com a sua versão final e interativa.
+
+Por favor, substitua todo o conteúdo do arquivo `/client/src/pages/propostas/nova.tsx` pelo seguinte código exato. Ele combina a estrutura de abas existente com a nova lógica de chamada de API em tempo real:
+
+```typescript
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { useForm, Controller } from 'react-hook-form';
@@ -135,3 +142,4 @@ const NovaProposta: React.FC = () => {
 };
 
 export default NovaProposta;
+Execute este plano.
