@@ -11,6 +11,7 @@ import FilaAnalise from "@/pages/credito/fila";
 import AnaliseManual from "@/pages/credito/analise";
 import Pagamentos from "@/pages/pagamentos";
 import Formalizacao from "@/pages/formalizacao";
+import AcompanhamentoFormalizacao from "@/pages/formalizacao/acompanhamento";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -49,7 +50,7 @@ function Router() {
       </Route>
       <Route path="/formalizacao/acompanhamento/:id">
         <ProtectedRoute>
-          <Formalizacao />
+          <AcompanhamentoFormalizacao />
         </ProtectedRoute>
       </Route>
       <Route path="/">
