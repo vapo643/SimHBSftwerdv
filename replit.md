@@ -31,6 +31,7 @@ This is a full-stack TypeScript application for credit management called "Simpix
 - **T-03 - Painel de Análise Manual**: Manual analysis panel structure with dynamic routing, tabs for different analysis views, and document viewer
 - **Navigation Enhancement**: Added functional navigation from T-02 to T-03 using wouter Link component for seamless user flow between analysis queue and individual proposal analysis
 - **T-04 - Acompanhamento da Formalização**: Created formalization tracking page with dynamic routing, checklist functionality, and client interaction tools
+- **T-05 - Fila de Pagamento**: Created payment queue page with proposal listing, payment processing functionality, and bank details management
 
 ## User Preferences
 

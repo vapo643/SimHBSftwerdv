@@ -9,7 +9,7 @@ import Dashboard from "@/pages/dashboard";
 import NovaProposta from "@/pages/propostas/nova";
 import FilaAnalise from "@/pages/credito/fila";
 import AnaliseManual from "@/pages/credito/analise";
-import Pagamentos from "@/pages/pagamentos";
+import Pagamentos from "@/pages/financeiro/pagamentos";
 import Formalizacao from "@/pages/formalizacao";
 import AcompanhamentoFormalizacao from "@/pages/formalizacao/acompanhamento";
 import NotFound from "@/pages/not-found";
