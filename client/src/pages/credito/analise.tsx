@@ -3,6 +3,9 @@ import { useRoute } from 'wouter';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 
 const AnaliseManual: React.FC = () => {
   const [match, params] = useRoute("/credito/analise/:id");
@@ -39,6 +42,33 @@ const AnaliseManual: React.FC = () => {
               </div>
             </TabsContent>
           </Tabs>
+          
+          {/* Seção do Painel de Decisão */}
+          <Card className="mt-6">
+            <CardHeader>
+              <CardTitle>Painel de Decisão</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex space-x-2">
+                  <Button>Aprovar Proposta</Button>
+                  <Button variant="destructive">Negar Proposta</Button>
+                  <Button variant="outline">Pendenciar</Button>
+                </div>
+                <div>
+                  <Label htmlFor="observacoes">Observações</Label>
+                  <Textarea
+                    id="observacoes"
+                    rows={4}
+                    placeholder="Adicione observações sobre a decisão..."
+                  />
+                </div>
+                <Button type="submit" className="w-full">
+                  Confirmar Decisão
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
         
         {/* Coluna da direita - mais estreita */}
