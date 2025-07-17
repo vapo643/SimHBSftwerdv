@@ -182,6 +182,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Mock data para produtos e prazos
+  const produtos = [
+    { id: 1, nome: 'Crédito Pessoal' },
+    { id: 2, nome: 'Crédito Imobiliário' },
+    { id: 3, nome: 'Crédito Consignado' },
+  ];
+
+  const prazos = [
+    { id: 1, valor: '12 meses' },
+    { id: 2, valor: '24 meses' },
+    { id: 3, valor: '36 meses' },
+  ];
+
+  // Rota para buscar produtos
+  app.get('/api/produtos', (req, res) => {
+    res.json(produtos);
+  });
+
+  // Rota para buscar prazos
+  app.get('/api/prazos', (req, res) => {
+    res.json(prazos);
+  });
+
   // Dashboard stats
   app.get("/api/dashboard/stats", authMiddleware, async (req, res) => {
     try {

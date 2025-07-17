@@ -1,3 +1,38 @@
+O plano para tornar a "Tela T-01" dinâmica, conectando-a ao backend, foi validado.
+
+Sua tarefa agora é executar o seguinte plano de 2 etapas:
+
+**1. Crie as Rotas de API no Backend:**
+Modifique o arquivo de rotas do seu servidor Express.js (provavelmente em `/server/routes.ts` ou `/server/index.ts`) para adicionar as duas novas rotas GET abaixo. Elas servirão os dados para nossos formulários.
+
+```typescript
+// Mock data para produtos e prazos
+const produtos = [
+  { id: 1, nome: 'Crédito Pessoal' },
+  { id: 2, nome: 'Crédito Imobiliário' },
+  { id: 3, nome: 'Crédito Consignado' },
+];
+
+const prazos = [
+  { id: 1, valor: '12 meses' },
+  { id: 2, valor: '24 meses' },
+  { id: 3, valor: '36 meses' },
+];
+
+// Rota para buscar produtos
+app.get('/api/produtos', (req, res) => {
+  res.json(produtos);
+});
+
+// Rota para buscar prazos
+app.get('/api/prazos', (req, res) => {
+  res.json(prazos);
+});
+2. Atualize o Componente de Frontend:
+Substitua todo o conteúdo do arquivo /client/src/pages/propostas/nova.tsx pelo seguinte código exato, que agora irá buscar e exibir os dados dinâmicos do backend:
+
+TypeScript
+
 import React, { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -135,3 +170,4 @@ const NovaProposta: React.FC = () => {
 };
 
 export default NovaProposta;
+Execute este plano.
