@@ -8,7 +8,7 @@ import Login from "@/pages/login";
 import Dashboard from "@/pages/dashboard";
 import NovaProposta from "@/pages/propostas/nova";
 import FilaAnalise from "@/pages/credito/fila";
-import AnaliseManual from "@/pages/analise-manual";
+import AnaliseManual from "@/pages/credito/analise";
 import Pagamentos from "@/pages/pagamentos";
 import Formalizacao from "@/pages/formalizacao";
 import NotFound from "@/pages/not-found";
