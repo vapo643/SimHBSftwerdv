@@ -1,79 +1,52 @@
-import React, { useState, ReactNode, Children, cloneElement, isValidElement } from 'react';
-import { cn } from "@/lib/utils";
+import * as React from "react"
+import * as TabsPrimitive from "@radix-ui/react-tabs"
+import { cn } from "@/lib/utils"
 
-// Interface para as props de cada Aba individual
-interface TabProps {
-  label: string;
-  value: string;
-  children: ReactNode;
-  isActive?: boolean;
-  onClick?: () => void;
-}
+const Tabs = TabsPrimitive.Root
 
-// O componente da Aba (o botão clicável)
-const Tab: React.FC<TabProps> = ({ isActive, onClick, label }) => {
-  return (
-    <button
-      role="tab"
-      aria-selected={isActive}
-      onClick={onClick}
-      className={cn(
-        "py-2 px-4 text-sm font-medium border-b-2",
-        isActive
-          ? "border-blue-500 text-blue-600"
-          : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-      )}
-    >
-      {label}
-    </button>
-  );
-};
+const TabsList = React.forwardRef<
+  React.ElementRef<typeof TabsPrimitive.List>,
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>
+>(({ className, ...props }, ref) => (
+  <TabsPrimitive.List
+    ref={ref}
+    className={cn(
+      "inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground",
+      className
+    )}
+    {...props}
+  />
+))
+TabsList.displayName = TabsPrimitive.List.displayName
 
-// Interface para as props do container de Abas
-interface TabsProps {
-  children: React.ReactElement<TabProps>[];
-  defaultValue: string;
-}
+const TabsTrigger = React.forwardRef<
+  React.ElementRef<typeof TabsPrimitive.Trigger>,
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger>
+>(({ className, ...props }, ref) => (
+  <TabsPrimitive.Trigger
+    ref={ref}
+    className={cn(
+      "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm",
+      className
+    )}
+    {...props}
+  />
+))
+TabsTrigger.displayName = TabsPrimitive.Trigger.displayName
 
-// O componente container que gerencia tudo
-const Tabs: React.FC<TabsProps> & { Tab: React.FC<TabProps> } = ({ children, defaultValue }) => {
-  const [activeTab, setActiveTab] = useState(defaultValue);
+const TabsContent = React.forwardRef<
+  React.ElementRef<typeof TabsPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Content>
+>(({ className, ...props }, ref) => (
+  <TabsPrimitive.Content
+    ref={ref}
+    className={cn(
+      "mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+      className
+    )}
+    {...props}
+  />
+))
+TabsContent.displayName = TabsPrimitive.Content.displayName
 
-  const handleTabClick = (value: string) => {
-    setActiveTab(value);
-  };
-
-  const renderTabs = () => {
-    return Children.map(children, (child) => {
-      if (isValidElement(child) && child.type === Tab) {
-        return cloneElement(child, {
-          isActive: child.props.value === activeTab,
-          onClick: () => handleTabClick(child.props.value),
-        });
-      }
-      return null;
-    });
-  };
-
-  const renderActiveContent = () => {
-    const activeChild = Children.toArray(children).find(
-      (child) => isValidElement(child) && child.props.value === activeTab
-    );
-    return activeChild ? <div>{(activeChild as React.ReactElement<TabProps>).props.children}</div> : null;
-  };
-
-  return (
-    <div>
-      <div className="flex space-x-4 border-b">
-        {renderTabs()}
-      </div>
-      <div className="mt-6 p-4 border rounded-md">
-        {renderActiveContent()}
-      </div>
-    </div>
-  );
-};
-
-Tabs.Tab = Tab;
-
-export { Tabs, Tab };
+export { Tabs, TabsList, TabsTrigger, TabsContent }
