@@ -7,7 +7,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import Login from "@/pages/login";
 import Dashboard from "@/pages/dashboard";
 import NovaProposta from "@/pages/propostas/nova";
-import FilaAnalise from "@/pages/fila-analise";
+import FilaAnalise from "@/pages/credito/fila";
 import AnaliseManual from "@/pages/analise-manual";
 import Pagamentos from "@/pages/pagamentos";
 import Formalizacao from "@/pages/formalizacao";
