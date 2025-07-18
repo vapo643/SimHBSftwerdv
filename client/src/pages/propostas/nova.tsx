@@ -61,7 +61,7 @@ const NovaProposta: React.FC = () => {
                         valor: String(valorSolicitado),
                         prazo: prazo,
                         produto_id: produto,
-                        incluir_tac: String(incluirTac),
+                        incluir_tac: String(incluirTac || false), // Garante "true" ou "false"
                         dataVencimento: dataPrimeiroVencimento
                     });
                     const response = await fetch(`/api/simulacao?${params.toString()}`);

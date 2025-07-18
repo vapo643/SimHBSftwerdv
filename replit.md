@@ -68,6 +68,7 @@ This is a full-stack TypeScript application for credit management called "Simpix
 - **Backend API Bug Fix**: Corrected taxaJurosMensal undefined error in credit simulation endpoint
 - **Server-Side Time Management**: Added GET /api/server-time endpoint for reliable timestamp source and server-based grace period calculations
 - **Enhanced Grace Period Validation**: Updated simulation API to use server-side date calculations for consistent 45-day validation across time zones
+- **TAC Parameter Bug Fix**: Corrected incluir_tac parameter handling in both frontend and backend to ensure proper boolean string conversion and interpretation
 
 ## User Preferences
 

@@ -293,7 +293,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     return res.json({ 
         valorParcela: parseFloat(valorParcela.toFixed(2)), 
-        taxaJurosMensal, 
+        taxaJurosMensal: taxaDeJurosMensal, 
         iof: parseFloat(iof.toFixed(2)),
         valorTac: tac,
         cet: parseFloat(cetAnual.toFixed(2)) 
