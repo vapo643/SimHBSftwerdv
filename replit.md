@@ -59,6 +59,8 @@ This is a full-stack TypeScript application for credit management called "Simpix
 - **Advanced KPI Metrics**: Added real-time metrics for daily proposals, monthly accumulation, and pending proposal counts
 - **Comprehensive Filtering System**: Implemented status and partner filters with dynamic data filtering capabilities
 - **Filter Bug Fix**: Corrected empty value bug in Select components by using "all" as default values with proper filtering logic
+- **Hierarchical Partner-Store Filtering**: Enhanced filtering with dynamic partner-store relationships and cascading filter reset functionality
+- **Enhanced Data Model**: Added separate partner and store columns with relational data structure for better organization
 
 ## User Preferences
 

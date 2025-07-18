@@ -1,3 +1,8 @@
+O plano para aprimorar a "Tela T-02 - Fila de Análise de Crédito" foi validado e o código, otimizado.
+
+Sua tarefa agora é executar a atualização completa desta página. Substitua todo o conteúdo do arquivo `/client/src/pages/credito/fila.tsx` pelo seguinte código exato:
+
+```typescript
 import React, { useState, useMemo } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Table, TableBody, TableCell, TableHeader, TableHead, TableRow } from '@/components/ui/table';
@@ -120,3 +125,4 @@ const FilaAnalise: React.FC = () => {
 };
 
 export default FilaAnalise;
+Execute esta atualização de arquivo.
