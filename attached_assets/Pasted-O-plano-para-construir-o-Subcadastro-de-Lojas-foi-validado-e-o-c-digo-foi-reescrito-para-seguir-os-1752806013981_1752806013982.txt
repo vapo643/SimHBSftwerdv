@@ -1,3 +1,61 @@
+O plano para construir o "Subcadastro de Lojas" foi validado e o código foi reescrito para seguir os padrões do nosso projeto.
+
+Sua tarefa agora é executar o seguinte plano de 2 etapas:
+
+**1. Crie o Componente do Formulário da Loja:**
+Crie um novo arquivo no caminho `/client/src/components/parceiros/LojaForm.tsx` e cole exatamente o seguinte código dentro dele:
+```typescript
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+
+const lojaSchema = z.object({
+  nome: z.string().min(3, "Nome da loja é obrigatório."),
+  endereco: z.string().min(10, "Endereço é obrigatório."),
+});
+
+type LojaFormData = z.infer<typeof lojaSchema>;
+
+interface LojaFormProps {
+  onSubmit: (data: LojaFormData) => void;
+  onCancel: () => void;
+}
+
+const LojaForm: React.FC<LojaFormProps> = ({ onSubmit, onCancel }) => {
+  const { register, handleSubmit, formState: { errors } } = useForm<LojaFormData>({
+    resolver: zodResolver(lojaSchema),
+  });
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <div>
+        <Label htmlFor="nome">Nome da Loja</Label>
+        <Input id="nome" {...register("nome")} />
+        {errors.nome && <p className="text-red-500 text-sm mt-1">{errors.nome.message}</p>}
+      </div>
+      <div>
+        <Label htmlFor="endereco">Endereço Completo</Label>
+        <Input id="endereco" {...register("endereco")} />
+        {errors.endereco && <p className="text-red-500 text-sm mt-1">{errors.endereco.message}</p>}
+      </div>
+      <div className="flex justify-end gap-2 pt-4">
+        <Button type="button" variant="ghost" onClick={onCancel}>Cancelar</Button>
+        <Button type="submit">Salvar Loja</Button>
+      </div>
+    </form>
+  );
+};
+
+export default LojaForm;
+2. Integre o Subcadastro na Página de Detalhe:
+Agora, substitua todo o conteúdo do arquivo /client/src/pages/parceiros/detalhe.tsx pelo código abaixo, que utiliza nossos componentes de UI corretos e integra o novo LojaForm:
+
+TypeScript
+
 import React, { useState } from 'react';
 import { useRoute, Link } from 'wouter';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -18,7 +76,7 @@ const PartnerDetailPage: React.FC = () => {
 
   const handleAddStore = (data: any) => {
     console.log("Nova Loja Adicionada:", data);
-    // Lógica para adicionar a loja ao parceiro no estado/backend será implementada na Fase 2
+    // Lógica para adicionar a loja ao parceiro no estado/backend
     setIsLojaModalOpen(false);
   };
 
@@ -35,7 +93,7 @@ const PartnerDetailPage: React.FC = () => {
       <h1 className="text-2xl font-bold">{partner.razaoSocial}</h1>
       <p className="text-muted-foreground">CNPJ: {partner.cnpj}</p>
       
-      <div className="mt-8 grid gap-8">
+      <div className="mt-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Lojas</CardTitle>
@@ -46,7 +104,7 @@ const PartnerDetailPage: React.FC = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>Nome da Loja</TableHead>
-                  <TableHead>Endereço (a ser adicionado)</TableHead>
+                  <TableHead>Endereço</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -60,7 +118,9 @@ const PartnerDetailPage: React.FC = () => {
             </Table>
           </CardContent>
         </Card>
+      </div>
 
+      <div className="mt-6">
         <ConfiguracaoComercialForm />
       </div>
       
@@ -81,3 +141,4 @@ const PartnerDetailPage: React.FC = () => {
 };
 
 export default PartnerDetailPage;
+Execute este plano de 2 etapas.
