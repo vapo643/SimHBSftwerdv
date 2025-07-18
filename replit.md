@@ -46,6 +46,8 @@ This is a full-stack TypeScript application for credit management called "Simpix
 - **Enhanced Credit Simulation**: Added debounced API calls with loading states and comprehensive error handling with toast notifications
 - **Complete DadosClienteForm Reconstruction**: Implemented comprehensive client data form with all required fields for Brazilian credit operations
 - **Advanced Client Data Collection**: Added RG, órgão emissor, estado civil, nacionalidade, CEP, endereço, telefone, ocupação, and renda mensal fields
+- **CET Calculation Enhancement**: Updated POST /api/simular to include CET (Custo Efetivo Total) calculation alongside installment values
+- **Enhanced Credit Simulation API**: Added comprehensive cost calculation with annual CET percentage for better loan transparency
 
 ## User Preferences
 

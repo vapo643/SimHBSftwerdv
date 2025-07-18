@@ -228,8 +228,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(400).json({ error: 'Valores, prazos e taxas devem ser positivos.' });
     }
 
+    // A função calcularParcela já deve existir no arquivo
     const valorDaParcela = calcularParcela(valorSolicitado, prazoEmMeses, taxaDeJurosMensal);
-    return res.json({ valorParcela: valorDaParcela });
+
+    // Cálculo do CET (Custo Efetivo Total) - Exemplo simplificado
+    const cetAnual = taxaDeJurosMensal * 12 * 1.1; // Exemplo: Juros anuais + 10% de encargos
+
+    return res.json({ valorParcela: valorDaParcela, cet: parseFloat(cetAnual.toFixed(2)) });
   });
 
   // Rota para fila de formalização
