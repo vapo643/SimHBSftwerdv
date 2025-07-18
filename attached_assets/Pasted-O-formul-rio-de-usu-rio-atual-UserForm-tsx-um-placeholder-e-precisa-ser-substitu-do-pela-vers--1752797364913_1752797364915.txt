@@ -1,3 +1,10 @@
+O formulário de usuário atual (`UserForm.tsx`) é um placeholder e precisa ser substituído pela versão completa e robusta.
+
+Sua tarefa é executar a seguinte modificação:
+
+Substitua todo o conteúdo do arquivo `/client/src/components/usuarios/UserForm.tsx` pelo seguinte código exato, que implementa todos os campos, validação com `zod` e a lógica de campos dinâmicos:
+
+```typescript
 import React, { useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -13,6 +20,7 @@ const mockLojas: { [key: string]: { id: string, nome: string }[] } = {
   '1': [{ id: '101', nome: 'Loja Matriz A' }],
   '2': [{ id: '201', nome: 'Loja Filial Sul' }, { id: '202', nome: 'Loja Filial Norte' }],
 };
+
 
 const userSchema = z.object({
   nome: z.string().min(3, "Nome é obrigatório."),
@@ -138,3 +146,4 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, onSubmit, onCancel }) 
 };
 
 export default UserForm;
+Execute a substituição deste arquivo.

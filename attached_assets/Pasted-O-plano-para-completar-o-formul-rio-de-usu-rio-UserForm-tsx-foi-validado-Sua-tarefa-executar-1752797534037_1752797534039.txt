@@ -1,3 +1,10 @@
+O plano para completar o formulário de usuário (`UserForm.tsx`) foi validado.
+
+Sua tarefa é executar a seguinte modificação:
+
+Substitua todo o conteúdo do arquivo `/client/src/components/usuarios/UserForm.tsx` pelo seguinte código exato e final:
+
+```typescript
 import React, { useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -138,3 +145,4 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, onSubmit, onCancel }) 
 };
 
 export default UserForm;
+Execute a substituição deste arquivo e confirme a conclusão.
