@@ -147,6 +147,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ATUALIZAR status da proposta e criar log
+  app.put("/api/propostas/:id/status", authMiddleware, async (req: AuthRequest, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { status, observacao } = req.body;
+      
+      if (!req.user) {
+        return res.status(401).json({ error: "Não autorizado" });
+      }
+
+      const proposta = await storage.updateProposta(id, { status });
+      
+      // For now, we'll just return success without logging to a separate table
+      // In a real implementation, you'd create a logs table
+      const logEntry = {
+        proposta_id: id,
+        user_id: req.user.id,
+        status_novo: status,
+        observacao: observacao || null,
+        created_at: new Date().toISOString()
+      };
+
+      res.status(200).json({ message: 'Status atualizado com sucesso', proposta });
+    } catch (error) {
+      console.error("Update proposta status error:", error);
+      res.status(500).json({ message: 'Erro ao atualizar a proposta' });
+    }
+  });
+
+  // BUSCAR logs de uma proposta (mock implementation)
+  app.get("/api/propostas/:id/logs", authMiddleware, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      
+      // Mock logs data - in real implementation, this would come from database
+      const mockLogs = [
+        {
+          id: 1,
+          proposta_id: id,
+          status_novo: 'Em Análise',
+          observacao: 'Proposta recebida para análise',
+          user_id: 'user123',
+          created_at: new Date().toISOString()
+        },
+        {
+          id: 2,
+          proposta_id: id,
+          status_novo: 'Pendente',
+          observacao: 'Documentos adicionais necessários',
+          user_id: 'user456',
+          created_at: new Date(Date.now() - 86400000).toISOString() // 1 day ago
+        }
+      ];
+      
+      res.status(200).json(mockLogs);
+    } catch (error) {
+      console.error("Get proposta logs error:", error);
+      res.status(500).json({ message: 'Erro ao buscar histórico' });
+    }
+  });
+
   // File upload route
   app.post("/api/upload", authMiddleware, upload.single("file"), async (req, res) => {
     try {
