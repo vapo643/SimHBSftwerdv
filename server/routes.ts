@@ -241,6 +241,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     return res.json({ valorParcela: valorDaParcela, cet: parseFloat(cetAnual.toFixed(2)) });
   });
 
+  // Funções de mock para a simulação
+  const buscarTaxas = (produtoId: string) => {
+    // Lógica futura: buscar no DB a tabela do produto/parceiro
+    return { taxaDeJurosMensal: 5.0, valorTac: 150.0 }; // Exemplo: 5% a.m. e R$150 de TAC
+  };
+
+  const calcularIOF = (valor: number) => {
+      return valor * 0.0038; // Exemplo de alíquota
+  };
+
+  // Endpoint GET para simulação de crédito
+  app.get('/api/simulacao', (req, res) => {
+    const { valor, prazo, produto_id, incluir_tac } = req.query;
+
+    const valorSolicitado = parseFloat(valor as string);
+    const prazoEmMeses = parseInt(prazo as string);
+    
+    if (isNaN(valorSolicitado) || isNaN(prazoEmMeses) || !produto_id) {
+      return res.status(400).json({ error: 'Parâmetros inválidos.' });
+    }
+
+    const { taxaDeJurosMensal, valorTac } = buscarTaxas(produto_id as string);
+    const iof = calcularIOF(valorSolicitado);
+    const tac = incluir_tac === 'true' ? valorTac : 0;
+    
+    const valorTotalFinanciado = valorSolicitado + iof + tac;
+
+    // A função calcularParcela já deve existir no arquivo
+    const valorParcela = calcularParcela(valorTotalFinanciado, prazoEmMeses, taxaDeJurosMensal);
+    
+    const custoTotal = (valorParcela * prazoEmMeses);
+    const cetAnual = (((custoTotal / valorSolicitado) - 1) / (prazoEmMeses / 12)) * 100;
+
+    return res.json({ 
+        valorParcela: parseFloat(valorParcela.toFixed(2)), 
+        taxaJurosMensal: taxaDeJurosMensal, 
+        iof: parseFloat(iof.toFixed(2)),
+        valorTac: tac,
+        cet: parseFloat(cetAnual.toFixed(2)) 
+    });
+  });
+
   // Rota para fila de formalização
   app.get('/api/formalizacao/propostas', (req, res) => {
     const mockPropostas = [

@@ -50,6 +50,9 @@ This is a full-stack TypeScript application for credit management called "Simpix
 - **Enhanced Credit Simulation API**: Added comprehensive cost calculation with annual CET percentage for better loan transparency
 - **Business Logic Implementation**: Refactored simulation API to use commercial table IDs for dynamic interest rate calculation
 - **Commercial Table Integration**: Added tabela comercial selector with mock data (Tabela A: 5.0%, Tabela B: 7.5%) and dynamic rate lookup
+- **T-01 Refinement and Dynamic Simulator**: Implemented comprehensive credit simulation with IOF, TAC, and detailed cost breakdown
+- **Enhanced Simulation API**: Added GET /api/simulacao endpoint with advanced calculations including IOF (0.38%), TAC, and accurate CET calculation
+- **Comprehensive Cost Display**: Enhanced simulation results to show installment value, interest rate, IOF, TAC, and annual CET in detailed format
 
 ## User Preferences
 

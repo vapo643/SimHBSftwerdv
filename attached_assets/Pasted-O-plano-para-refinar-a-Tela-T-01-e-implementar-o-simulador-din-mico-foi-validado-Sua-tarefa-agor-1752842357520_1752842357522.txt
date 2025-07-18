@@ -1,3 +1,57 @@
+O plano para refinar a "Tela T-01" e implementar o simulador dinâmico foi validado.
+
+Sua tarefa agora é executar o seguinte plano de 2 etapas:
+
+**1. Aprimore a API de Simulação no Backend:**
+Modifique o arquivo de rotas do seu servidor Express.js (provavelmente em `/server/routes.ts`) para adicionar a nova rota `GET /api/simulacao` que lida com a lógica completa do `Blueprint`. Adicione o seguinte código:
+
+```typescript
+// Funções de mock para a simulação
+const buscarTaxas = (produtoId: string) => {
+  // Lógica futura: buscar no DB a tabela do produto/parceiro
+  return { taxaDeJurosMensal: 5.0, valorTac: 150.0 }; // Exemplo: 5% a.m. e R$150 de TAC
+};
+
+const calcularIOF = (valor: number) => {
+    return valor * 0.0038; // Exemplo de alíquota
+};
+
+// Endpoint GET para simulação de crédito
+app.get('/api/simulacao', (req, res) => {
+  const { valor, prazo, produto_id, incluir_tac } = req.query;
+
+  const valorSolicitado = parseFloat(valor as string);
+  const prazoEmMeses = parseInt(prazo as string);
+  
+  if (isNaN(valorSolicitado) || isNaN(prazoEmMeses) || !produto_id) {
+    return res.status(400).json({ error: 'Parâmetros inválidos.' });
+  }
+
+  const { taxaDeJurosMensal, valorTac } = buscarTaxas(produto_id as string);
+  const iof = calcularIOF(valorSolicitado);
+  const tac = incluir_tac === 'true' ? valorTac : 0;
+  
+  const valorTotalFinanciado = valorSolicitado + iof + tac;
+
+  // A função calcularParcela já deve existir no arquivo
+  const valorParcela = calcularParcela(valorTotalFinanciado, prazoEmMeses, taxaDeJurosMensal);
+  
+  const custoTotal = (valorParcela * prazoEmMeses);
+  const cetAnual = (((custoTotal / valorSolicitado) - 1) / (prazoEmMeses / 12)) * 100;
+
+  return res.json({ 
+      valorParcela: parseFloat(valorParcela.toFixed(2)), 
+      taxaJurosMensal, 
+      iof: parseFloat(iof.toFixed(2)),
+      valorTac: tac,
+      cet: parseFloat(cetAnual.toFixed(2)) 
+  });
+});
+2. Refatore Completamente o Frontend da "Tela T-01":
+Substitua todo o conteúdo do arquivo /client/src/pages/propostas/nova.tsx pelo seguinte código exato. Ele integra todos os novos campos, a lógica de estado unificado e a chamada à nova API:
+
+TypeScript
+
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
@@ -15,19 +69,8 @@ import { useToast } from '@/hooks/use-toast';
 
 // Schema Unificado
 const fullProposalSchema = z.object({
-  nomeCompleto: z.string().min(3, "Nome completo é obrigatório."),
-  cpfCnpj: z.string().refine(value => value.length === 14 || value.length === 18, "CPF/CNPJ inválido."),
-  rg: z.string().min(5, "RG é obrigatório.").optional(),
-  orgaoEmissor: z.string().min(2, "Órgão Emissor é obrigatório.").optional(),
-  estadoCivil: z.string().nonempty("Estado Civil é obrigatório."),
-  dataNascimento: z.string().min(1, "Data de nascimento é obrigatória."),
-  nacionalidade: z.string().min(3, "Nacionalidade é obrigatória."),
-  endereco: z.string().min(5, "Endereço completo é obrigatório."),
-  cep: z.string().length(9, "CEP deve ter 9 dígitos (incluindo traço)."),
-  telefone: z.string().min(10, "Telefone / WhatsApp é obrigatório."),
-  email: z.string().email("Email inválido."),
-  ocupacao: z.string().min(3, "Ocupação / Profissão é obrigatória."),
-  rendaMensal: z.coerce.number().positive("Renda ou Faturamento deve ser um número positivo."),
+  clienteNome: z.string().min(3, "Nome é obrigatório"),
+  // Adicione aqui todos os outros campos do DadosClienteForm que estão no Zod schema dele
   valorSolicitado: z.coerce.number().positive("Valor deve ser positivo"),
   produto: z.string().nonempty("Produto é obrigatório."),
   prazo: z.string().nonempty("Prazo é obrigatório."),
@@ -115,7 +158,6 @@ const NovaProposta: React.FC = () => {
                                       </SelectContent>
                                     </Select>
                                 )} />
-                                {errors.produto && <p className="text-red-500 text-sm mt-1">{errors.produto.message}</p>}
                             </div>
                             <div>
                                 <Label>Prazo de Pagamento</Label>
@@ -128,7 +170,6 @@ const NovaProposta: React.FC = () => {
                                       </SelectContent>
                                     </Select>
                                 )} />
-                                {errors.prazo && <p className="text-red-500 text-sm mt-1">{errors.prazo.message}</p>}
                             </div>
                             <div>
                                 <Label htmlFor="dataPrimeiroVencimento">Data do Primeiro Vencimento</Label>
@@ -170,3 +211,4 @@ CET: ${resumoSimulacao.cet.toFixed(2)}% a.a.`
 };
 
 export default NovaProposta;
+Execute este plano.
