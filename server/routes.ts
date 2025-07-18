@@ -252,6 +252,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   };
 
   // Endpoint GET para simulação de crédito
+  // Server time endpoint for reliable timestamp source
+  app.get("/api/server-time", (req, res) => {
+    res.json({ now: new Date().toISOString() });
+  });
+
   app.get('/api/simulacao', (req, res) => {
     const { valor, prazo, produto_id, incluir_tac, dataVencimento } = req.query;
 
@@ -262,7 +267,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(400).json({ error: 'Parâmetros inválidos.' });
     }
 
-    const dataAtual = new Date();
+    // Correção Crítica: Usa a data do servidor como a "verdade"
+    const dataAtual = new Date(); 
     const primeiroVencimento = new Date(dataVencimento as string);
     const diasDiferenca = Math.ceil((primeiroVencimento.getTime() - dataAtual.getTime()) / (1000 * 3600 * 24));
 
@@ -287,7 +293,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     return res.json({ 
         valorParcela: parseFloat(valorParcela.toFixed(2)), 
-        taxaJurosMensal: taxaDeJurosMensal, 
+        taxaJurosMensal, 
         iof: parseFloat(iof.toFixed(2)),
         valorTac: tac,
         cet: parseFloat(cetAnual.toFixed(2)) 

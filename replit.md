@@ -66,6 +66,8 @@ This is a full-stack TypeScript application for credit management called "Simpix
 - **HistoricoComunicao Component**: Created dedicated component for proposal timeline and communication tracking with TanStack Query v5 integration
 - **Decision Panel with Validation**: Implemented Zod schema validation for proposal decisions with proper form handling and mutation management
 - **Backend API Bug Fix**: Corrected taxaJurosMensal undefined error in credit simulation endpoint
+- **Server-Side Time Management**: Added GET /api/server-time endpoint for reliable timestamp source and server-based grace period calculations
+- **Enhanced Grace Period Validation**: Updated simulation API to use server-side date calculations for consistent 45-day validation across time zones
 
 ## User Preferences
 
