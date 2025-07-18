@@ -1,7 +1,6 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import fetchWithToken from '@/lib/apiClient';
 
 interface Log {
     id: number;
@@ -13,9 +12,7 @@ interface Log {
 
 const fetchLogs = async (propostaId: string | undefined) => {
     if (!propostaId) return [];
-    
-    const response = await fetchWithToken(`/api/propostas/${propostaId}/logs`);
-    
+    const response = await fetch(`/api/propostas/${propostaId}/logs`);
     if (!response.ok) {
         throw new Error('Erro ao carregar histórico');
     }

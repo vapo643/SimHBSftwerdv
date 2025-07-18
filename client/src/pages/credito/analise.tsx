@@ -12,26 +12,20 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import HistoricoComunicao from '@/components/analise/HistoricoComunicao';
-import fetchWithToken from '@/lib/apiClient';
 
 const fetchProposta = async (id: string | undefined) => {
     if (!id) throw new Error("ID da proposta não fornecido.");
-    
-    const res = await fetchWithToken(`/api/propostas/${id}`);
-    
+    const res = await fetch(`/api/propostas/${id}`);
     if (!res.ok) throw new Error('Proposta não encontrada');
     return res.json();
 }
 
 const updatePropostaStatus = async ({ id, status, observacao }: { id: string, status: string, observacao?: string }) => {
-    const res = await fetchWithToken(`/api/propostas/${id}/status`, {
+    const res = await fetch(`/api/propostas/${id}/status`, {
         method: 'PUT',
-        headers: { 
-            'Content-Type': 'application/json' 
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status, observacao })
     });
-    
     if (!res.ok) {
         const errorData = await res.json();
         throw new Error(errorData.message || 'Falha ao atualizar status');
