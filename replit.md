@@ -53,6 +53,8 @@ This is a full-stack TypeScript application for credit management called "Simpix
 - **T-01 Refinement and Dynamic Simulator**: Implemented comprehensive credit simulation with IOF, TAC, and detailed cost breakdown
 - **Enhanced Simulation API**: Added GET /api/simulacao endpoint with advanced calculations including IOF (0.38%), TAC, and accurate CET calculation
 - **Comprehensive Cost Display**: Enhanced simulation results to show installment value, interest rate, IOF, TAC, and annual CET in detailed format
+- **Daily Interest Logic with Grace Period**: Implemented daily interest calculation with 45-day maximum grace period validation
+- **Enhanced Grace Period Calculation**: Added taxaJurosDiaria calculation and jurosCarencia integration for accurate loan scheduling
 
 ## User Preferences
 

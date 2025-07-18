@@ -50,17 +50,19 @@ const NovaProposta: React.FC = () => {
     const prazo = watch("prazo");
     const produto = watch("produto");
     const incluirTac = watch("incluirTac");
+    const dataPrimeiroVencimento = watch("dataPrimeiroVencimento");
 
     useEffect(() => {
         const handleSimulacao = async () => {
-            if (valorSolicitado > 0 && prazo && produto) {
+            if (valorSolicitado > 0 && prazo && produto && dataPrimeiroVencimento) {
                 setLoadingSimulacao(true);
                 try {
                     const params = new URLSearchParams({
                         valor: String(valorSolicitado),
                         prazo: prazo,
                         produto_id: produto,
-                        incluir_tac: String(incluirTac)
+                        incluir_tac: String(incluirTac),
+                        dataVencimento: dataPrimeiroVencimento
                     });
                     const response = await fetch(`/api/simulacao?${params.toString()}`);
                     const data = await response.json();
@@ -75,7 +77,7 @@ const NovaProposta: React.FC = () => {
         };
         const debounce = setTimeout(() => handleSimulacao(), 800);
         return () => clearTimeout(debounce);
-    }, [valorSolicitado, prazo, produto, incluirTac, toast]);
+    }, [valorSolicitado, prazo, produto, incluirTac, dataPrimeiroVencimento, toast]);
 
     const onSubmit: SubmitHandler<FullFormData> = data => {
         console.log("DADOS COMPLETOS DA PROPOSTA:", data);

@@ -253,22 +253,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Endpoint GET para simulação de crédito
   app.get('/api/simulacao', (req, res) => {
-    const { valor, prazo, produto_id, incluir_tac } = req.query;
+    const { valor, prazo, produto_id, incluir_tac, dataVencimento } = req.query;
 
     const valorSolicitado = parseFloat(valor as string);
     const prazoEmMeses = parseInt(prazo as string);
     
-    if (isNaN(valorSolicitado) || isNaN(prazoEmMeses) || !produto_id) {
+    if (isNaN(valorSolicitado) || isNaN(prazoEmMeses) || !produto_id || !dataVencimento) {
       return res.status(400).json({ error: 'Parâmetros inválidos.' });
     }
 
+    const dataAtual = new Date();
+    const primeiroVencimento = new Date(dataVencimento as string);
+    const diasDiferenca = Math.ceil((primeiroVencimento.getTime() - dataAtual.getTime()) / (1000 * 3600 * 24));
+
+    if (diasDiferenca > 45) {
+      return res.status(400).json({ error: "A data do primeiro vencimento não pode ser superior a 45 dias." });
+    }
+
     const { taxaDeJurosMensal, valorTac } = buscarTaxas(produto_id as string);
+    
+    const taxaJurosDiaria = taxaDeJurosMensal / 30; 
+    const jurosCarencia = valorSolicitado * (taxaJurosDiaria / 100) * diasDiferenca;
+
     const iof = calcularIOF(valorSolicitado);
     const tac = incluir_tac === 'true' ? valorTac : 0;
     
-    const valorTotalFinanciado = valorSolicitado + iof + tac;
+    const valorTotalFinanciado = valorSolicitado + iof + tac + jurosCarencia;
 
-    // A função calcularParcela já deve existir no arquivo
     const valorParcela = calcularParcela(valorTotalFinanciado, prazoEmMeses, taxaDeJurosMensal);
     
     const custoTotal = (valorParcela * prazoEmMeses);
@@ -276,7 +287,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     return res.json({ 
         valorParcela: parseFloat(valorParcela.toFixed(2)), 
-        taxaJurosMensal: taxaDeJurosMensal, 
+        taxaJurosMensal, 
         iof: parseFloat(iof.toFixed(2)),
         valorTac: tac,
         cet: parseFloat(cetAnual.toFixed(2)) 
