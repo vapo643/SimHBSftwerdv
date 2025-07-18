@@ -44,6 +44,8 @@ This is a full-stack TypeScript application for credit management called "Simpix
 - **Form Architecture Improvement**: Moved from separate form states to unified form state with prop drilling for better data persistence
 - **T-01 Complete Refactoring**: Enhanced Nova Proposta with real-time credit simulation, TAC checkbox, email validation, and improved UX
 - **Enhanced Credit Simulation**: Added debounced API calls with loading states and comprehensive error handling with toast notifications
+- **Complete DadosClienteForm Reconstruction**: Implemented comprehensive client data form with all required fields for Brazilian credit operations
+- **Advanced Client Data Collection**: Added RG, órgão emissor, estado civil, nacionalidade, CEP, endereço, telefone, ocupação, and renda mensal fields
 
 ## User Preferences
 

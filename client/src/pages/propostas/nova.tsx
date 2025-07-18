@@ -14,9 +14,19 @@ import DadosClienteForm from '@/components/forms/DadosClienteForm';
 import { useToast } from '@/hooks/use-toast';
 
 const fullProposalSchema = z.object({
-  clienteNome: z.string().min(3, "Nome é obrigatório"),
-  clienteCpf: z.string().length(14, "CPF deve ter 14 dígitos."),
-  clienteEmail: z.string().email("Email inválido."),
+  nomeCompleto: z.string().min(3, "Nome completo é obrigatório."),
+  cpfCnpj: z.string().refine(value => value.length === 14 || value.length === 18, "CPF/CNPJ inválido."),
+  rg: z.string().min(5, "RG é obrigatório.").optional(),
+  orgaoEmissor: z.string().min(2, "Órgão Emissor é obrigatório.").optional(),
+  estadoCivil: z.string().nonempty("Estado Civil é obrigatório."),
+  dataNascimento: z.string().min(1, "Data de nascimento é obrigatória."),
+  nacionalidade: z.string().min(3, "Nacionalidade é obrigatória."),
+  endereco: z.string().min(5, "Endereço completo é obrigatório."),
+  cep: z.string().length(9, "CEP deve ter 9 dígitos (incluindo traço)."),
+  telefone: z.string().min(10, "Telefone / WhatsApp é obrigatório."),
+  email: z.string().email("Email inválido."),
+  ocupacao: z.string().min(3, "Ocupação / Profissão é obrigatória."),
+  rendaMensal: z.coerce.number().positive("Renda ou Faturamento deve ser um número positivo."),
   valorSolicitado: z.coerce.number().positive("Valor deve ser positivo"),
   produto: z.string().nonempty("Produto é obrigatório."),
   prazo: z.string().nonempty("Prazo é obrigatório."),
@@ -51,7 +61,11 @@ const NovaProposta: React.FC = () => {
                     const response = await fetch('/api/simular', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ valorSolicitado, prazoEmMeses: parseInt(prazo), taxaDeJurosMensal }),
+                        body: JSON.stringify({ 
+                            valorSolicitado: Number(valorSolicitado), 
+                            prazoEmMeses: Number(prazo), 
+                            taxaDeJurosMensal: Number(taxaDeJurosMensal) 
+                        }),
                     });
                     
                     const data = await response.json();
@@ -91,7 +105,7 @@ const NovaProposta: React.FC = () => {
 
                     <TabsContent value="dados-cliente">
                         <div className="p-4 border rounded-md mt-4">
-                            <DadosClienteForm register={register} errors={errors} />
+                            <DadosClienteForm register={register} control={control} errors={errors} />
                         </div>
                     </TabsContent>
 
