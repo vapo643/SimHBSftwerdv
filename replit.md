@@ -58,6 +58,7 @@ This is a full-stack TypeScript application for credit management called "Simpix
 - **T-02 Enhanced Dashboard**: Upgraded Fila de Análise de Crédito with comprehensive KPIs, advanced filtering, and improved UX
 - **Advanced KPI Metrics**: Added real-time metrics for daily proposals, monthly accumulation, and pending proposal counts
 - **Comprehensive Filtering System**: Implemented status and partner filters with dynamic data filtering capabilities
+- **Filter Bug Fix**: Corrected empty value bug in Select components by using "all" as default values with proper filtering logic
 
 ## User Preferences
 
