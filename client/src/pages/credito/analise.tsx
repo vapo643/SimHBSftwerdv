@@ -45,9 +45,9 @@ const AnaliseManualPage: React.FC = () => {
   const propostaId = params?.id;
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  
+
   const { data: proposta, isLoading, isError } = useQuery(['proposta', propostaId], () => fetchProposta(propostaId), { enabled: !!propostaId });
-  
+
   const { register, handleSubmit, control } = useForm<DecisionFormData>({
     resolver: zodResolver(decisionSchema),
   });
