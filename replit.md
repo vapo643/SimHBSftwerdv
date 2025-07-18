@@ -48,6 +48,8 @@ This is a full-stack TypeScript application for credit management called "Simpix
 - **Advanced Client Data Collection**: Added RG, órgão emissor, estado civil, nacionalidade, CEP, endereço, telefone, ocupação, and renda mensal fields
 - **CET Calculation Enhancement**: Updated POST /api/simular to include CET (Custo Efetivo Total) calculation alongside installment values
 - **Enhanced Credit Simulation API**: Added comprehensive cost calculation with annual CET percentage for better loan transparency
+- **Business Logic Implementation**: Refactored simulation API to use commercial table IDs for dynamic interest rate calculation
+- **Commercial Table Integration**: Added tabela comercial selector with mock data (Tabela A: 5.0%, Tabela B: 7.5%) and dynamic rate lookup
 
 ## User Preferences
 

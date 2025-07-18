@@ -1,0 +1,44 @@
+O plano para implementar a lógica de negócio do simulador de crédito foi validado.
+
+Sua tarefa é refatorar a API de simulação e a Tela T-01 para que a taxa de juros seja baseada na Tabela Comercial selecionada. Execute o seguinte plano de 2 etapas:
+
+**1. Atualize a API de Simulação no Backend:**
+Modifique o arquivo de rotas do servidor (provavelmente `/server/routes.ts`). Substitua a rota `POST /api/simular` existente pela seguinte versão, que agora utiliza um `tabelaComercialId` para buscar a taxa de juros:
+
+```typescript
+// Mock de tabelas comerciais para simulação
+const tabelasComerciais = {
+  'tabela-a': 5.0, // Tabela A, 5% de taxa de juros
+  'tabela-b': 7.5, // Tabela B, 7.5% de taxa de juros
+};
+
+// Função para obter a taxa de juros (substituirá a lógica real do DB)
+const obterTaxaJurosPorTabela = (tabelaId: string): number => {
+  return tabelasComerciais[tabelaId] || 5.0; // Retorna 5% como padrão
+};
+
+// Rota para simular crédito ATUALIZADA
+app.post('/api/simular', (req, res) => {
+  const { valorSolicitado, prazoEmMeses, tabelaComercialId } = req.body;
+
+  if (typeof valorSolicitado !== 'number' || typeof prazoEmMeses !== 'number' || typeof tabelaComercialId !== 'string') {
+    return res.status(400).json({ error: 'Entrada inválida.' });
+  }
+
+  const taxaDeJurosMensal = obterTaxaJurosPorTabela(tabelaComercialId);
+  const valorDaParcela = calcularParcela(valorSolicitado, prazoEmMeses, taxaDeJurosMensal);
+  const cetAnual = taxaDeJurosMensal * 12 * 1.1;
+
+  return res.json({ valorParcela: valorDaParcela, cet: parseFloat(cetAnual.toFixed(2)) });
+});
+2. Atualize a Chamada da API no Frontend:
+Modifique o arquivo /client/src/pages/propostas/nova.tsx. Dentro do componente CondicoesEmprestimoForm, na função useEffect, atualize a chamada fetch para que ela envie o ID da tabelaDeJuros selecionada no corpo da requisição. O trecho modificado do body deve ficar assim:
+
+JavaScript
+
+body: JSON.stringify({
+  valorSolicitado: Number(valorSolicitado),
+  prazoEmMeses: Number(prazo),
+  tabelaComercialId: tabelaDeJuros // Enviando o ID da tabela
+})
+Execute este plano de refatoração.

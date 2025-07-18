@@ -215,24 +215,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     return parseFloat(pmt.toFixed(2));
   };
 
-  // Rota para simular crédito
+  // Mock de tabelas comerciais para simulação
+  const tabelasComerciais: { [key: string]: number } = {
+    'tabela-a': 5.0, // Tabela A, 5% de taxa de juros
+    'tabela-b': 7.5, // Tabela B, 7.5% de taxa de juros
+  };
+
+  // Função para obter a taxa de juros (substituirá a lógica real do DB)
+  const obterTaxaJurosPorTabela = (tabelaId: string): number => {
+    return tabelasComerciais[tabelaId] || 5.0; // Retorna 5% como padrão
+  };
+
+  // Rota para simular crédito ATUALIZADA
   app.post('/api/simular', (req, res) => {
-    const { valorSolicitado, prazoEmMeses, taxaDeJurosMensal } = req.body;
+    const { valorSolicitado, prazoEmMeses, tabelaComercialId } = req.body;
 
-    // Validação básica
-    if (typeof valorSolicitado !== 'number' || typeof prazoEmMeses !== 'number' || typeof taxaDeJurosMensal !== 'number') {
-      return res.status(400).json({ error: 'Entrada inválida. Certifique-se de que os valores são números.' });
+    if (typeof valorSolicitado !== 'number' || typeof prazoEmMeses !== 'number' || typeof tabelaComercialId !== 'string') {
+      return res.status(400).json({ error: 'Entrada inválida.' });
     }
 
-    if (valorSolicitado <= 0 || prazoEmMeses <= 0 || taxaDeJurosMensal <= 0) {
-      return res.status(400).json({ error: 'Valores, prazos e taxas devem ser positivos.' });
-    }
-
-    // A função calcularParcela já deve existir no arquivo
+    const taxaDeJurosMensal = obterTaxaJurosPorTabela(tabelaComercialId);
     const valorDaParcela = calcularParcela(valorSolicitado, prazoEmMeses, taxaDeJurosMensal);
-
-    // Cálculo do CET (Custo Efetivo Total) - Exemplo simplificado
-    const cetAnual = taxaDeJurosMensal * 12 * 1.1; // Exemplo: Juros anuais + 10% de encargos
+    const cetAnual = taxaDeJurosMensal * 12 * 1.1;
 
     return res.json({ valorParcela: valorDaParcela, cet: parseFloat(cetAnual.toFixed(2)) });
   });

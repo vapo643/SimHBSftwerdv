@@ -30,6 +30,7 @@ const fullProposalSchema = z.object({
   valorSolicitado: z.coerce.number().positive("Valor deve ser positivo"),
   produto: z.string().nonempty("Produto é obrigatório."),
   prazo: z.string().nonempty("Prazo é obrigatório."),
+  tabelaComercial: z.string().nonempty("Tabela comercial é obrigatória."),
   incluirTac: z.boolean().default(false),
   documentos: z.any().optional(),
 });
@@ -47,24 +48,24 @@ const NovaProposta: React.FC = () => {
 
     const valorSolicitado = watch("valorSolicitado");
     const prazo = watch("prazo");
-    const produto = watch("produto"); // Usaremos este para buscar a taxa de juros real no futuro
+    const produto = watch("produto");
+    const tabelaComercial = watch("tabelaComercial");
 
     useEffect(() => {
         const handleSimulacao = async () => {
-            if (valorSolicitado > 0 && prazo) {
+            if (valorSolicitado > 0 && prazo && tabelaComercial) {
                 setLoadingSimulacao(true);
                 try {
                     // Simulação de chamada de API
                     await new Promise(resolve => setTimeout(resolve, 500));
-                    const taxaDeJurosMensal = 5.0; // Exemplo, virá do backend
                     
                     const response = await fetch('/api/simular', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ 
-                            valorSolicitado: Number(valorSolicitado), 
-                            prazoEmMeses: Number(prazo), 
-                            taxaDeJurosMensal: Number(taxaDeJurosMensal) 
+                        body: JSON.stringify({
+                            valorSolicitado: Number(valorSolicitado),
+                            prazoEmMeses: Number(prazo),
+                            tabelaComercialId: tabelaComercial // Enviando o ID da tabela
                         }),
                     });
                     
@@ -86,7 +87,7 @@ const NovaProposta: React.FC = () => {
 
         return () => clearTimeout(debounceSimulate);
 
-    }, [valorSolicitado, prazo, produto, toast]);
+    }, [valorSolicitado, prazo, tabelaComercial, toast]);
 
     const onSubmit: SubmitHandler<FullFormData> = data => {
         console.log("DADOS COMPLETOS DA PROPOSTA:", data);
@@ -129,6 +130,13 @@ const NovaProposta: React.FC = () => {
                                     <Select onValueChange={field.onChange} defaultValue={field.value}><SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger><SelectContent><SelectItem value="12">12 meses</SelectItem><SelectItem value="24">24 meses</SelectItem></SelectContent></Select>
                                 )} />
                                 {errors.prazo && <p className="text-red-500 text-sm mt-1">{errors.prazo.message}</p>}
+                            </div>
+                            <div>
+                                <Label>Tabela Comercial</Label>
+                                <Controller name="tabelaComercial" control={control} render={({ field }) => (
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}><SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger><SelectContent><SelectItem value="tabela-a">Tabela A (5.0% a.m.)</SelectItem><SelectItem value="tabela-b">Tabela B (7.5% a.m.)</SelectItem></SelectContent></Select>
+                                )} />
+                                {errors.tabelaComercial && <p className="text-red-500 text-sm mt-1">{errors.tabelaComercial.message}</p>}
                             </div>
                             <div className="flex items-center space-x-2">
                                 <Controller name="incluirTac" control={control} render={({ field }) => <Checkbox id="incluirTac" checked={field.value} onCheckedChange={field.onChange} />} />
