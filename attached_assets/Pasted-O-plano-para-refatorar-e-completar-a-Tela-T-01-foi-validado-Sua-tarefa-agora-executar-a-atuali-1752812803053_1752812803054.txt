@@ -1,3 +1,8 @@
+O plano para refatorar e completar a "Tela T-01" foi validado.
+
+Sua tarefa agora é executar a atualização. Por favor, substitua todo o conteúdo do arquivo `/client/src/pages/propostas/nova.tsx` pelo seguinte código exato:
+
+```typescript
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
@@ -153,3 +158,4 @@ const NovaProposta: React.FC = () => {
 };
 
 export default NovaProposta;
+Execute este plano.

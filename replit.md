@@ -42,6 +42,8 @@ This is a full-stack TypeScript application for credit management called "Simpix
 - **Credit Simulation API**: Implemented POST /api/simular with mathematical loan calculation and proper validation
 - **T-01 State Management Fix**: Refactored form architecture to centralize state management and prevent data loss between tabs
 - **Form Architecture Improvement**: Moved from separate form states to unified form state with prop drilling for better data persistence
+- **T-01 Complete Refactoring**: Enhanced Nova Proposta with real-time credit simulation, TAC checkbox, email validation, and improved UX
+- **Enhanced Credit Simulation**: Added debounced API calls with loading states and comprehensive error handling with toast notifications
 
 ## User Preferences
 

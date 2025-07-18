@@ -15,7 +15,11 @@ const DadosClienteForm: React.FC<{ register: any, errors: any }> = ({ register, 
         <Input id="clienteCpf" {...register("clienteCpf")} />
         {errors.clienteCpf && <p className="text-red-500 text-sm mt-1">{errors.clienteCpf.message}</p>}
       </div>
-      {/* Adicionar outros campos de dados do cliente aqui */}
+      <div>
+        <Label htmlFor="clienteEmail">Email</Label>
+        <Input id="clienteEmail" type="email" {...register("clienteEmail")} />
+        {errors.clienteEmail && <p className="text-red-500 text-sm mt-1">{errors.clienteEmail.message}</p>}
+      </div>
     </div>
   );
 };
