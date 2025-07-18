@@ -158,9 +158,20 @@ CET: ${resumoSimulacao.cet.toFixed(2)}% a.a.`
                     </TabsContent>
 
                     <TabsContent value="anexo-documentos">
-                         <div className="space-y-4 p-4 border rounded-md mt-4">
-                            <p>Funcionalidade de upload a ser implementada.</p>
-                         </div>
+                        <div className="space-y-4 p-4 border rounded-md mt-4">
+                          <div>
+                            <Label htmlFor="documento-identidade">Documento de Identidade (Frente e Verso)</Label>
+                            <Input id="documento-identidade" type="file" />
+                          </div>
+                          <div>
+                            <Label htmlFor="comprovante-residencia">Comprovante de Residência</Label>
+                            <Input id="comprovante-residencia" type="file" />
+                          </div>
+                          <div>
+                            <Label htmlFor="comprovante-renda">Comprovante de Renda</Label>
+                            <Input id="comprovante-renda" type="file" />
+                          </div>
+                        </div>
                     </TabsContent>
                 </Tabs>
                 <div className="flex justify-end pt-6 mt-4">
