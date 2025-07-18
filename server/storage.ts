@@ -15,11 +15,6 @@ export interface IStorage {
   createProposta(proposta: InsertProposta): Promise<Proposta>;
   updateProposta(id: number, proposta: UpdateProposta): Promise<Proposta>;
   deleteProposta(id: number): Promise<void>;
-  updatePropostaStatus(id: string, status: string): Promise<void>;
-  
-  // Logs
-  createLog(log: { proposta_id: string; user_id: string; status_novo: string; observacao?: string }): Promise<void>;
-  getPropostaLogs(propostaId: string): Promise<any[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -63,32 +58,6 @@ export class DatabaseStorage implements IStorage {
 
   async deleteProposta(id: number): Promise<void> {
     await db.delete(propostas).where(eq(propostas.id, id));
-  }
-
-  async updatePropostaStatus(id: string, status: string): Promise<void> {
-    // For now, we'll use a mock implementation since we don't have the exact database schema
-    // In a real implementation, this would update the status in the database
-    console.log(`Updating proposta ${id} status to ${status}`);
-  }
-
-  async createLog(log: { proposta_id: string; user_id: string; status_novo: string; observacao?: string }): Promise<void> {
-    // Mock implementation for creating logs
-    // In a real implementation, this would insert into a logs table
-    console.log(`Creating log for proposta ${log.proposta_id}:`, log);
-  }
-
-  async getPropostaLogs(propostaId: string): Promise<any[]> {
-    // Mock implementation returning sample logs
-    // In a real implementation, this would query a logs table
-    return [
-      {
-        id: 1,
-        status_novo: 'Em Análise',
-        observacao: 'Proposta recebida para análise',
-        user_id: 'user123',
-        created_at: new Date().toISOString()
-      }
-    ];
   }
 }
 

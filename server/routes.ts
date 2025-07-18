@@ -304,43 +304,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(mockPropostas);
   });
 
-  // ATUALIZAR status da proposta e criar log
-  app.put("/api/propostas/:id/status", authMiddleware, async (req, res) => {
-    try {
-      const id = req.params.id;
-      const { status, observacao } = req.body;
-      
-      // Supondo que 'req.user.id' é disponibilizado pelo authMiddleware
-      const userId = (req as any).user?.id; 
-      if (!userId) return res.status(401).json({ message: "Usuário não autenticado." });
-
-      await storage.updatePropostaStatus(id, status);
-      await storage.createLog({ proposta_id: id, user_id: userId, status_novo: status, observacao });
-
-      res.status(200).json({ message: "Status atualizado com sucesso" });
-    } catch (error) {
-      console.error("Erro ao atualizar status da proposta:", error);
-      res.status(500).json({ message: 'Erro ao atualizar status da proposta' });
-    }
-  });
-
-  // BUSCAR logs de uma proposta
-  app.get("/api/propostas/:id/logs", authMiddleware, async (req, res) => {
-    try {
-      const id = req.params.id;
-      const logs = await storage.getPropostaLogs(id);
-      
-      if (!logs) {
-        return res.status(404).json({ message: "Nenhum log encontrado para esta proposta." });
-      }
-      
-      res.status(200).json(logs);
-    } catch (error) {
-      console.error("Erro ao buscar logs da proposta:", error);
-      res.status(500).json({ message: 'Erro ao buscar histórico de decisões' });
-    }
-  });
-
   // Dashboard stats
   app.get("/api/dashboard/stats", authMiddleware, async (req, res) => {
     try {
