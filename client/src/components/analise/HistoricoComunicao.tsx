@@ -1,54 +1,54 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface Log {
-  id: number;
-  status_novo: string;
-  observacao: string;
-  user_id: string; // No futuro, buscaríamos o nome do usuário
-  created_at: string;
+    id: number;
+    status_novo: string;
+    observacao: string | null;
+    user_id: string; // No futuro, buscaríamos o nome do usuário
+    created_at: string;
+}
+
+// Supondo uma função de fetch
+const fetchLogs = async (propostaId: string) => {
+    const response = await fetch(`/api/propostas/${propostaId}/logs`);
+    if (!response.ok) {
+        throw new Error('Erro ao carregar histórico');
+    }
+    return response.json();
 }
 
 const HistoricoComunicao: React.FC<{ propostaId: string | undefined }> = ({ propostaId }) => {
-  const [logs, setLogs] = useState<Log[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (!propostaId) return;
-
-    const fetchLogs = async () => {
-      setLoading(true);
-      try {
-        const response = await fetch(`/api/propostas/${propostaId}/logs`);
-        if (!response.ok) throw new Error('Erro ao buscar histórico');
-        const data = await response.json();
-        setLogs(data);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchLogs();
-  }, [propostaId]);
-
-  if (loading) return <div className="p-4 text-center">Carregando histórico...</div>;
+  const { data: logs, isLoading, isError } = useQuery<Log[]>({
+    queryKey: ['proposta_logs', propostaId],
+    queryFn: () => fetchLogs(propostaId!),
+    enabled: !!propostaId
+  });
 
   return (
-    <div className="mt-6">
-      <h2 className="text-xl font-semibold mb-4">Histórico e Comunicação</h2>
-      <div className="space-y-4">
-        {logs.length > 0 ? logs.map(log => (
-          <div key={log.id} className="p-3 border rounded-md bg-secondary/50">
-            <p><strong>Status:</strong> <span className="font-semibold">{log.status_novo}</span></p>
-            <p><strong>Observação:</strong> {log.observacao || "Nenhuma observação."}</p>
-            <p className="text-xs text-muted-foreground mt-2">
-              por: {log.user_id.substring(0, 8)}... em {new Date(log.created_at).toLocaleString('pt-BR')}
-            </p>
-          </div>
-        )) : <p>Nenhum histórico para esta proposta.</p>}
-      </div>
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>Histórico e Comunicação</CardTitle>
+      </CardHeader>
+      <CardContent>
+        {isLoading && <p className="text-sm text-muted-foreground">Carregando histórico...</p>}
+        {isError && <p className="text-sm text-red-500">Erro ao carregar histórico.</p>}
+        {!isLoading && !isError && (
+          <ul className="space-y-4">
+            {logs && logs.length > 0 ? logs.map(log => (
+              <li key={log.id} className="text-sm border-b pb-2">
+                <p><strong>Status:</strong> <span className="font-semibold">{log.status_novo}</span></p>
+                <p><strong>Observação:</strong> {log.observacao || "Nenhuma observação."}</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  por: {log.user_id.substring(0, 8)}... em {new Date(log.created_at).toLocaleString('pt-BR')}
+                </p>
+              </li>
+            )) : <p className="text-sm text-muted-foreground">Nenhum histórico para esta proposta.</p>}
+          </ul>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 

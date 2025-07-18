@@ -1,3 +1,110 @@
+Análise da Consulta ao Assistente
+Consulta com o Assistente para a "Esteira de Análise" concluída.
+
+Veredito: PLANO APROVADO.
+
+Análise: O plano de código que o Assistente forneceu para o backend e para o novo componente de frontend HistoricoComunicao é de alta qualidade e arquiteturalmente correto. A utilização do react-query para buscar os dados do histórico é uma implementação moderna e robusta.
+
+O plano está validado e pronto para a execução.
+
+Próxima Missão: Implementação da "Esteira de Análise"
+Com o plano de código final e completo em mãos, vamos agora instruir nosso Executor, o Agente, a implementar a lógica completa da Tela T-03.
+
+Seu Próximo Comando (para o Agente Replit):
+
+O plano para implementar a "Esteira de Análise" foi validado.
+
+Sua tarefa agora é executar o seguinte plano de 3 etapas para dar vida ao "Painel de Análise Manual":
+
+**1. Atualize o Backend com a Nova Rota de Logs:**
+Modifique o arquivo de rotas do seu servidor Express.js (provavelmente `/server/routes.ts`) para adicionar o novo endpoint `GET /api/propostas/:id/logs`:
+
+```typescript
+// server/routes.ts
+
+// BUSCAR logs de uma proposta
+app.get("/api/propostas/:id/logs", authMiddleware, async (req, res) => {
+    try {
+        const id = parseInt(req.params.id);
+        
+        // Esta função deve ser criada no seu módulo de storage para buscar os logs no Supabase
+        const logs = await storage.getPropostaLogs(id); 
+        
+        if (!logs) {
+            return res.status(404).json({ message: "Nenhum log encontrado para esta proposta." });
+        }
+        
+        res.status(200).json(logs);
+    } catch (error) {
+        console.error("Erro ao buscar logs da proposta:", error);
+        res.status(500).json({ message: 'Erro ao buscar histórico de decisões' });
+    }
+});
+2. Crie o Componente de Histórico no Frontend:
+Crie um novo arquivo em /client/src/components/analise/HistoricoComunicao.tsx e cole o seguinte código exato dentro dele:
+
+TypeScript
+
+import React from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
+interface Log {
+    id: number;
+    status_novo: string;
+    observacao: string | null;
+    user_id: string; // No futuro, buscaríamos o nome do usuário
+    created_at: string;
+}
+
+// Supondo uma função de fetch
+const fetchLogs = async (propostaId: string) => {
+    const response = await fetch(`/api/propostas/${propostaId}/logs`);
+    if (!response.ok) {
+        throw new Error('Erro ao carregar histórico');
+    }
+    return response.json();
+}
+
+const HistoricoComunicao: React.FC<{ propostaId: string | undefined }> = ({ propostaId }) => {
+  const { data: logs, isLoading, isError } = useQuery<Log[]>(
+      ['proposta_logs', propostaId], 
+      () => fetchLogs(propostaId!), 
+      { enabled: !!propostaId }
+  );
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Histórico e Comunicação</CardTitle>
+      </CardHeader>
+      <CardContent>
+        {isLoading && <p className="text-sm text-muted-foreground">Carregando histórico...</p>}
+        {isError && <p className="text-sm text-red-500">Erro ao carregar histórico.</p>}
+        {!isLoading && !isError && (
+          <ul className="space-y-4">
+            {logs && logs.length > 0 ? logs.map(log => (
+              <li key={log.id} className="text-sm border-b pb-2">
+                <p><strong>Status:</strong> <span className="font-semibold">{log.status_novo}</span></p>
+                <p><strong>Observação:</strong> {log.observacao || "Nenhuma observação."}</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  por: {log.user_id.substring(0, 8)}... em {new Date(log.created_at).toLocaleString('pt-BR')}
+                </p>
+              </li>
+            )) : <p className="text-sm text-muted-foreground">Nenhum histórico para esta proposta.</p>}
+          </ul>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
+export default HistoricoComunicao;
+3. Integre a Lógica Completa na Página de Análise:
+Substitua todo o conteúdo do arquivo /client/src/pages/credito/analise.tsx pelo seguinte código exato, que agora conecta o formulário à API e exibe o histórico:
+
+TypeScript
+
 import React from 'react';
 import { useRoute, Link } from 'wouter';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -47,26 +154,21 @@ const AnaliseManualPage: React.FC = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
-  const { data: proposta, isLoading, isError } = useQuery({
-    queryKey: ['proposta', propostaId],
-    queryFn: () => fetchProposta(propostaId),
-    enabled: !!propostaId
-  });
+  const { data: proposta, isLoading, isError } = useQuery(['proposta', propostaId], () => fetchProposta(propostaId), { enabled: !!propostaId });
   
   const { register, handleSubmit, control } = useForm<DecisionFormData>({
     resolver: zodResolver(decisionSchema),
   });
 
-  const mutation = useMutation({
-    mutationFn: updatePropostaStatus,
-    onSuccess: () => {
-      toast({ title: "Sucesso!", description: "O status da proposta foi atualizado." });
-      queryClient.invalidateQueries({ queryKey: ['proposta', propostaId] });
-      queryClient.invalidateQueries({ queryKey: ['proposta_logs', propostaId] });
-    },
-    onError: (error: Error) => {
-      toast({ title: "Erro!", description: error.message, variant: "destructive" });
-    }
+  const mutation = useMutation(updatePropostaStatus, {
+      onSuccess: () => {
+          toast({ title: "Sucesso!", description: "O status da proposta foi atualizado." });
+          queryClient.invalidateQueries({ queryKey: ['proposta', propostaId] });
+          queryClient.invalidateQueries({ queryKey: ['proposta_logs', propostaId] });
+      },
+      onError: (error: Error) => {
+          toast({ title: "Erro!", description: error.message, variant: "destructive" });
+      }
   });
 
   const onSubmit = (data: DecisionFormData) => {
@@ -85,11 +187,7 @@ const AnaliseManualPage: React.FC = () => {
               <CardHeader><CardTitle>Detalhes da Proposta</CardTitle></CardHeader>
               <CardContent>
                 <p><strong>Cliente:</strong> {proposta.clienteNome || 'N/A'}</p>
-                <p><strong>CPF:</strong> {proposta.clienteCpf || 'N/A'}</p>
-                <p><strong>Valor Solicitado:</strong> R$ {proposta.valorSolicitado?.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) || 'N/A'}</p>
-                <p><strong>Prazo:</strong> {proposta.prazoMeses || 'N/A'} meses</p>
-                <p><strong>Status:</strong> {proposta.status || 'N/A'}</p>
-                <p><strong>Data de Criação:</strong> {proposta.createdAt ? new Date(proposta.createdAt).toLocaleString('pt-BR') : 'N/A'}</p>
+                {/* Outros detalhes da proposta */}
               </CardContent>
             </Card>
             <Card>
@@ -133,3 +231,4 @@ const AnaliseManualPage: React.FC = () => {
 }
 
 export default AnaliseManualPage;
+Execute este plano de 3 etapas.

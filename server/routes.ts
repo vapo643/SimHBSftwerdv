@@ -176,35 +176,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // BUSCAR logs de uma proposta (mock implementation)
+  // BUSCAR logs de uma proposta
   app.get("/api/propostas/:id/logs", authMiddleware, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       
-      // Mock logs data - in real implementation, this would come from database
-      const mockLogs = [
-        {
-          id: 1,
-          proposta_id: id,
-          status_novo: 'Em Análise',
-          observacao: 'Proposta recebida para análise',
-          user_id: 'user123',
-          created_at: new Date().toISOString()
-        },
-        {
-          id: 2,
-          proposta_id: id,
-          status_novo: 'Pendente',
-          observacao: 'Documentos adicionais necessários',
-          user_id: 'user456',
-          created_at: new Date(Date.now() - 86400000).toISOString() // 1 day ago
-        }
-      ];
+      // Esta função deve ser criada no seu módulo de storage para buscar os logs no Supabase
+      const logs = await storage.getPropostaLogs(id);
       
-      res.status(200).json(mockLogs);
+      if (!logs) {
+        return res.status(404).json({ message: "Nenhum log encontrado para esta proposta." });
+      }
+      
+      res.status(200).json(logs);
     } catch (error) {
-      console.error("Get proposta logs error:", error);
-      res.status(500).json({ message: 'Erro ao buscar histórico' });
+      console.error("Erro ao buscar logs da proposta:", error);
+      res.status(500).json({ message: 'Erro ao buscar histórico de decisões' });
     }
   });
 

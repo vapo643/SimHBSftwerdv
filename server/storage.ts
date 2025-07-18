@@ -15,6 +15,7 @@ export interface IStorage {
   createProposta(proposta: InsertProposta): Promise<Proposta>;
   updateProposta(id: number, proposta: UpdateProposta): Promise<Proposta>;
   deleteProposta(id: number): Promise<void>;
+  getPropostaLogs(id: number): Promise<any[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -58,6 +59,28 @@ export class DatabaseStorage implements IStorage {
 
   async deleteProposta(id: number): Promise<void> {
     await db.delete(propostas).where(eq(propostas.id, id));
+  }
+
+  async getPropostaLogs(id: number): Promise<any[]> {
+    // Mock implementation for now - in real implementation this would query a logs table
+    return [
+      {
+        id: 1,
+        proposta_id: id,
+        status_novo: 'Em Análise',
+        observacao: 'Proposta recebida para análise',
+        user_id: 'user123',
+        created_at: new Date().toISOString()
+      },
+      {
+        id: 2,
+        proposta_id: id,
+        status_novo: 'Pendente',
+        observacao: 'Documentos adicionais necessários',
+        user_id: 'user456',
+        created_at: new Date(Date.now() - 86400000).toISOString() // 1 day ago
+      }
+    ];
   }
 }
 
