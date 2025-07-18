@@ -7,8 +7,12 @@ async function fetchWithToken(url: string, options?: RequestInit) {
 
   const headers: Record<string, string> = {
     ...options?.headers,
-    Authorization: session?.access_token ? `Bearer ${session.access_token}` : '',
   };
+
+  // Add authorization header if we have a token
+  if (session?.access_token) {
+    headers.Authorization = `Bearer ${session.access_token}`;
+  }
 
   // Don't set Content-Type for FormData, let the browser set it
   if (!(options?.body instanceof FormData)) {
@@ -19,11 +23,6 @@ async function fetchWithToken(url: string, options?: RequestInit) {
     ...options,
     headers: headers,
   });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`API Error: ${response.status} ${errorText}`);
-  }
 
   return response;
 }

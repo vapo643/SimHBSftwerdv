@@ -67,6 +67,9 @@ This is a full-stack TypeScript application for credit management called "Simpix
 - **Integrated Analysis Page**: Enhanced T-03 analysis page with form-based decision making, status updates, and real-time history display
 - **Refined Analysis System**: Updated backend with proper storage interface methods and improved frontend with modern React Query patterns
 - **Enhanced Error Handling**: Added comprehensive error handling and loading states for better user experience in analysis workflow
+- **Critical Bug Fixes**: Fixed "Proposta não encontrada" error by updating proposal ID handling from number to string format
+- **Authentication Fix**: Resolved 401 unauthorized errors by ensuring proper Bearer token authentication in API calls
+- **String ID Support**: Enhanced storage interface and backend routes to handle both string and numeric proposal IDs
 
 ## User Preferences
 

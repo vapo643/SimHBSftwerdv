@@ -10,7 +10,7 @@ export interface IStorage {
   
   // Propostas
   getPropostas(): Promise<Proposta[]>;
-  getPropostaById(id: number): Promise<Proposta | undefined>;
+  getPropostaById(id: string | number): Promise<Proposta | undefined>;
   getPropostasByStatus(status: string): Promise<Proposta[]>;
   createProposta(proposta: InsertProposta): Promise<Proposta>;
   updateProposta(id: number, proposta: UpdateProposta): Promise<Proposta>;
@@ -38,8 +38,13 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(propostas).orderBy(desc(propostas.createdAt));
   }
 
-  async getPropostaById(id: number): Promise<Proposta | undefined> {
-    const result = await db.select().from(propostas).where(eq(propostas.id, id)).limit(1);
+  async getPropostaById(id: string | number): Promise<Proposta | undefined> {
+    // Handle both string and number IDs
+    const numericId = typeof id === 'string' ? parseInt(id) : id;
+    if (isNaN(numericId)) {
+      return undefined;
+    }
+    const result = await db.select().from(propostas).where(eq(propostas.id, numericId)).limit(1);
     return result[0];
   }
 

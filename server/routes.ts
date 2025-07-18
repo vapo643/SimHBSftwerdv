@@ -93,17 +93,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/propostas/:id", authMiddleware, async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = req.params.id; // Corrigido para tratar como string
+      
+      // A função de storage deve ser capaz de buscar por um ID string
       const proposta = await storage.getPropostaById(id);
       
       if (!proposta) {
-        return res.status(404).json({ message: "Proposta not found" });
+        return res.status(404).json({ message: "Proposta não encontrada" });
       }
       
       res.json(proposta);
     } catch (error) {
-      console.error("Get proposta error:", error);
-      res.status(500).json({ message: "Failed to fetch proposta" });
+      console.error("Erro ao buscar proposta:", error);
+      res.status(500).json({ message: "Falha ao buscar proposta" });
     }
   });
 
