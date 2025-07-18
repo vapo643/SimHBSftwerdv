@@ -69,6 +69,9 @@ This is a full-stack TypeScript application for credit management called "Simpix
 - **Server-Side Time Management**: Added GET /api/server-time endpoint for reliable timestamp source and server-based grace period calculations
 - **Enhanced Grace Period Validation**: Updated simulation API to use server-side date calculations for consistent 45-day validation across time zones
 - **TAC Parameter Bug Fix**: Corrected incluir_tac parameter handling in both frontend and backend to ensure proper boolean string conversion and interpretation
+- **T-01 Refinement and Dynamic Simulator**: Implemented comprehensive credit simulation with IOF, TAC, and detailed cost breakdown
+- **Enhanced Simulation API**: Added GET /api/simulacao endpoint with advanced calculations including IOF (0.38%), TAC, and accurate CET calculation
+- **Comprehensive Cost Display**: Enhanced simulation results to show installment value, interest rate, IOF, TAC, and annual CET in detailed format
 
 ## User Preferences
 
