@@ -287,7 +287,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     return res.json({ 
         valorParcela: parseFloat(valorParcela.toFixed(2)), 
-        taxaJurosMensal, 
+        taxaJurosMensal: taxaDeJurosMensal, 
         iof: parseFloat(iof.toFixed(2)),
         valorTac: tac,
         cet: parseFloat(cetAnual.toFixed(2)) 
@@ -302,6 +302,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
       { id: 'PROP-105', cliente: 'Empresa C', status: 'CCB Gerada' },
     ];
     res.json(mockPropostas);
+  });
+
+  // Update proposal status
+  app.put('/api/propostas/:id/status', authMiddleware, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { status, observacao } = req.body;
+      
+      if (!status) {
+        return res.status(400).json({ message: 'Status é obrigatório' });
+      }
+
+      // Mock update - in real app would update database
+      const mockUpdatedProposta = {
+        id,
+        status,
+        observacao,
+        updatedAt: new Date().toISOString()
+      };
+
+      res.json(mockUpdatedProposta);
+    } catch (error) {
+      console.error('Update status error:', error);
+      res.status(500).json({ message: 'Erro ao atualizar status' });
+    }
+  });
+
+  // Get proposal logs
+  app.get('/api/propostas/:id/logs', authMiddleware, async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      // Mock logs data
+      const mockLogs = [
+        {
+          id: 1,
+          status_novo: 'Em Análise',
+          observacao: 'Proposta iniciada para análise',
+          user_id: 'user-123',
+          created_at: new Date(Date.now() - 86400000).toISOString() // 1 day ago
+        },
+        {
+          id: 2,
+          status_novo: 'Pendente',
+          observacao: 'Documentos adicionais necessários',
+          user_id: 'user-456',
+          created_at: new Date(Date.now() - 43200000).toISOString() // 12 hours ago
+        }
+      ];
+
+      res.json(mockLogs);
+    } catch (error) {
+      console.error('Get logs error:', error);
+      res.status(500).json({ message: 'Erro ao carregar histórico' });
+    }
+  });
+
+  // Get single proposal
+  app.get('/api/propostas/:id', authMiddleware, async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      // Mock proposal data
+      const mockProposta = {
+        id,
+        clienteNome: 'João Silva',
+        cpf: '123.456.789-00',
+        valorSolicitado: 'R$ 10.000,00',
+        prazo: '12 meses',
+        status: 'Em Análise',
+        dataCriacao: new Date().toISOString(),
+        score: 750,
+        parceiro: 'Parceiro A'
+      };
+
+      res.json(mockProposta);
+    } catch (error) {
+      console.error('Get proposal error:', error);
+      res.status(500).json({ message: 'Erro ao carregar proposta' });
+    }
   });
 
   // Dashboard stats

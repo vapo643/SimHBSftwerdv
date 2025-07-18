@@ -1,3 +1,73 @@
+**MISSÃO:** Implementar a "Esteira de Análise" (v2.0)
+
+**CONTEXTO:** Estamos retomando a implementação da lógica de negócio na "Tela T-03". O plano foi previamente validado e agora está com a sintaxe corrigida para a versão 5 da biblioteca `react-query`.
+
+**AÇÃO:** Execute o seguinte plano de 3 etapas.
+
+**1. Atualize o Backend com as Rotas de API:**
+Modifique o arquivo `/server/routes.ts` para garantir que os endpoints `PUT /api/propostas/:id/status` e `GET /api/propostas/:id/logs` estejam implementados.
+
+**2. Crie o Componente de Histórico no Frontend:**
+Crie um novo arquivo em `/client/src/components/analise/HistoricoComunicao.tsx` e cole o seguinte código, com a sintaxe do `useQuery` corrigida:
+```typescript
+import React from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
+interface Log {
+    id: number;
+    status_novo: string;
+    observacao: string | null;
+    user_id: string;
+    created_at: string;
+}
+
+const fetchLogs = async (propostaId: string | undefined) => {
+    if (!propostaId) return [];
+    const response = await fetch(`/api/propostas/${propostaId}/logs`);
+    if (!response.ok) {
+        throw new Error('Erro ao carregar histórico');
+    }
+    return response.json();
+}
+
+const HistoricoComunicao: React.FC<{ propostaId: string | undefined }> = ({ propostaId }) => {
+  const { data: logs, isLoading, isError } = useQuery<Log[]>({
+      queryKey: ['proposta_logs', propostaId], 
+      queryFn: () => fetchLogs(propostaId), 
+      enabled: !!propostaId 
+  });
+
+  return (
+    <Card>
+      <CardHeader><CardTitle>Histórico e Comunicação</CardTitle></CardHeader>
+      <CardContent>
+        {isLoading && <p className="text-sm text-muted-foreground">Carregando histórico...</p>}
+        {isError && <p className="text-sm text-red-500">Erro ao carregar histórico.</p>}
+        {!isLoading && !isError && (
+          <ul className="space-y-4">
+            {logs && logs.length > 0 ? logs.map(log => (
+              <li key={log.id} className="text-sm border-b pb-2">
+                <p><strong>Status:</strong> <span className="font-semibold">{log.status_novo}</span></p>
+                <p><strong>Observação:</strong> {log.observacao || "Nenhuma observação."}</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  por: {log.user_id.substring(0, 8)}... em {new Date(log.created_at).toLocaleString('pt-BR')}
+                </p>
+              </li>
+            )) : <p className="text-sm text-muted-foreground">Nenhum histórico para esta proposta.</p>}
+          </ul>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
+export default HistoricoComunicao;
+3. Integre a Lógica Completa na Página de Análise:
+Substitua todo o conteúdo do arquivo /client/src/pages/credito/analise.tsx pelo seguinte código exato, com a sintaxe do useQuery corrigida:
+
+TypeScript
+
 import React from 'react';
 import { useRoute, Link } from 'wouter';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -84,12 +154,7 @@ const AnaliseManualPage: React.FC = () => {
               <CardHeader><CardTitle>Detalhes da Proposta</CardTitle></CardHeader>
               <CardContent>
                 <p><strong>Cliente:</strong> {proposta.clienteNome || 'N/A'}</p>
-                <p><strong>CPF:</strong> {proposta.cpf || 'N/A'}</p>
-                <p><strong>Valor Solicitado:</strong> {proposta.valorSolicitado || 'N/A'}</p>
-                <p><strong>Prazo:</strong> {proposta.prazo || 'N/A'}</p>
-                <p><strong>Score:</strong> {proposta.score || 'N/A'}</p>
-                <p><strong>Parceiro:</strong> {proposta.parceiro || 'N/A'}</p>
-                <p><strong>Status Atual:</strong> {proposta.status || 'N/A'}</p>
+                {/* Outros detalhes da proposta */}
               </CardContent>
             </Card>
             <Card>
