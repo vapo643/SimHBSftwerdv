@@ -6,6 +6,7 @@ import { authMiddleware, type AuthRequest } from "./lib/auth";
 import { insertPropostaSchema, updatePropostaSchema } from "@shared/schema";
 import { z } from "zod";
 import multer from "multer";
+import PDFDocument from "pdfkit";
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -387,6 +388,121 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Get proposal error:', error);
       res.status(500).json({ message: 'Erro ao carregar proposta' });
+    }
+  });
+
+  // Generate CCB document
+  app.post('/api/propostas/:id/gerar-ccb', authMiddleware, async (req: AuthRequest, res) => {
+    try {
+      const { id } = req.params;
+      const propostaId = parseInt(id);
+      
+      // Buscar dados completos da proposta
+      const proposta = await storage.getPropostaById(propostaId);
+      
+      if (!proposta) {
+        return res.status(404).json({ message: 'Proposta não encontrada' });
+      }
+
+      // Verificar se a proposta está aprovada
+      if (proposta.status !== 'aprovado') {
+        return res.status(400).json({ message: 'Proposta deve estar aprovada para gerar CCB' });
+      }
+
+      // Gerar PDF da CCB
+      const PDFDocument = require('pdfkit');
+      const doc = new PDFDocument();
+      
+      // Buffer para armazenar o PDF
+      const chunks: Buffer[] = [];
+      doc.on('data', (chunk) => chunks.push(chunk));
+      
+      const pdfPromise = new Promise<Buffer>((resolve) => {
+        doc.on('end', () => {
+          const pdfBuffer = Buffer.concat(chunks);
+          resolve(pdfBuffer);
+        });
+      });
+
+      // Cabeçalho do documento
+      doc.fontSize(16).text('CÉDULA DE CRÉDITO BANCÁRIO - CCB', 50, 50, { align: 'center' });
+      doc.moveDown(2);
+
+      // Dados do cliente
+      doc.fontSize(12).text('DADOS DO DEVEDOR:', 50, doc.y);
+      doc.moveDown();
+      doc.text(`Nome: ${proposta.clienteNome}`, 50, doc.y);
+      doc.text(`CPF: ${proposta.clienteCpf}`, 50, doc.y);
+      doc.text(`Email: ${proposta.clienteEmail}`, 50, doc.y);
+      doc.text(`Telefone: ${proposta.clienteTelefone}`, 50, doc.y);
+      doc.moveDown();
+
+      // Dados do empréstimo
+      doc.text('DADOS DO EMPRÉSTIMO:', 50, doc.y);
+      doc.moveDown();
+      doc.text(`Valor Aprovado: R$ ${proposta.valorAprovado}`, 50, doc.y);
+      doc.text(`Prazo: ${proposta.prazo} meses`, 50, doc.y);
+      doc.text(`Taxa de Juros: ${proposta.taxaJuros}% ao mês`, 50, doc.y);
+      doc.text(`Finalidade: ${proposta.finalidade}`, 50, doc.y);
+      doc.moveDown();
+
+      // Condições gerais
+      doc.text('CONDIÇÕES GERAIS:', 50, doc.y);
+      doc.moveDown();
+      doc.fontSize(10).text('1. O devedor se obriga a pagar o valor emprestado nas condições estabelecidas.', 50, doc.y);
+      doc.text('2. Em caso de inadimplência, serão aplicados juros de mora conforme legislação vigente.', 50, doc.y);
+      doc.text('3. Este contrato é regido pelas leis brasileiras.', 50, doc.y);
+      doc.moveDown(2);
+
+      // Data e assinatura
+      const dataAtual = new Date().toLocaleDateString('pt-BR');
+      doc.fontSize(12).text(`Data: ${dataAtual}`, 50, doc.y);
+      doc.moveDown(2);
+      doc.text('_______________________________', 50, doc.y);
+      doc.text('Assinatura do Devedor', 50, doc.y);
+
+      // Finalizar o documento
+      doc.end();
+
+      // Aguardar a geração do PDF
+      const pdfBuffer = await pdfPromise;
+
+      // Gerar nome único para o arquivo
+      const fileName = `ccb-${propostaId}-${Date.now()}.pdf`;
+      
+      // Salvar no Supabase Storage
+      const supabase = createServerSupabaseClient();
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('documents')
+        .upload(fileName, pdfBuffer, {
+          contentType: 'application/pdf',
+        });
+
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        return res.status(500).json({ message: 'Erro ao salvar documento' });
+      }
+
+      // Obter URL pública do documento
+      const { data: publicUrl } = supabase.storage
+        .from('documents')
+        .getPublicUrl(fileName);
+
+      // Atualizar a proposta com a URL da CCB
+      const propostaAtualizada = await storage.updateProposta(propostaId, {
+        ccb_documento_url: publicUrl.publicUrl,
+        status: 'documentos_enviados' as any
+      });
+
+      res.json({
+        message: 'CCB gerada com sucesso',
+        ccb_url: publicUrl.publicUrl,
+        proposta: propostaAtualizada
+      });
+
+    } catch (error) {
+      console.error('Generate CCB error:', error);
+      res.status(500).json({ message: 'Erro ao gerar CCB' });
     }
   });
 

@@ -58,6 +58,11 @@ export const propostas = pgTable("propostas", {
   dataPagamento: timestamp("data_pagamento"),
   observacoesFormalização: text("observacoes_formalizacao"),
   
+  // Campos do Capítulo 6 - CCB e Formalização
+  ccb_documento_url: text("ccb_documento_url"),
+  status_assinatura: text("status_assinatura").default("pendente"),
+  status_biometria: text("status_biometria").default("pendente"),
+  
   // Auditoria
   userId: integer("user_id").references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
