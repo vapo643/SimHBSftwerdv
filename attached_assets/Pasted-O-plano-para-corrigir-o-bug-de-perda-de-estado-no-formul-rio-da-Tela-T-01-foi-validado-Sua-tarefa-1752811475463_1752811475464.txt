@@ -1,3 +1,40 @@
+O plano para corrigir o bug de perda de estado no formulário da "Tela T-01" foi validado. Sua tarefa é executar uma refatoração arquitetural.
+
+Execute o seguinte plano de 2 etapas:
+
+**1. Refatore o Formulário Filho (`DadosClienteForm.tsx`):**
+Modifique o arquivo `/client/src/components/forms/DadosClienteForm.tsx`. Ele não deve mais gerenciar seu próprio estado. Altere-o para receber o método `register` via props. O código final deve ficar assim:
+
+```typescript
+import React from 'react';
+import { useForm, Controller } from 'react-hook-form';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+
+const DadosClienteForm: React.FC<{ register: any, errors: any }> = ({ register, errors }) => {
+  return (
+    <div className="space-y-4">
+      <div>
+        <Label htmlFor="clienteNome">Nome Completo</Label>
+        <Input id="clienteNome" {...register("clienteNome")} />
+        {errors.clienteNome && <p className="text-red-500 text-sm mt-1">{errors.clienteNome.message}</p>}
+      </div>
+      <div>
+        <Label htmlFor="clienteCpf">CPF</Label>
+        <Input id="clienteCpf" {...register("clienteCpf")} />
+        {errors.clienteCpf && <p className="text-red-500 text-sm mt-1">{errors.clienteCpf.message}</p>}
+      </div>
+      {/* Adicionar outros campos de dados do cliente aqui */}
+    </div>
+  );
+};
+
+export default DadosClienteForm;
+2. Refatore a Página Principal (nova.tsx):
+Agora, substitua todo o conteúdo do arquivo /client/src/pages/propostas/nova.tsx pelo código abaixo. Ele agora centraliza o estado do formulário, passando os métodos para as abas filhas.
+
+TypeScript
+
 import React from 'react';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -105,3 +142,4 @@ const NovaProposta: React.FC = () => {
 };
 
 export default NovaProposta;
+Execute este plano de refatoração.

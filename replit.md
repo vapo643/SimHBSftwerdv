@@ -40,6 +40,8 @@ This is a full-stack TypeScript application for credit management called "Simpix
 - **Product Form Integration**: Created ProdutoForm component with Zod validation and integrated into products page modal
 - **T-01 Dynamic Integration**: Connected Nova Proposta to backend with real-time credit simulation API using Tabela Price formula
 - **Credit Simulation API**: Implemented POST /api/simular with mathematical loan calculation and proper validation
+- **T-01 State Management Fix**: Refactored form architecture to centralize state management and prevent data loss between tabs
+- **Form Architecture Improvement**: Moved from separate form states to unified form state with prop drilling for better data persistence
 
 ## User Preferences
 
