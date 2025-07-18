@@ -55,6 +55,9 @@ This is a full-stack TypeScript application for credit management called "Simpix
 - **Comprehensive Cost Display**: Enhanced simulation results to show installment value, interest rate, IOF, TAC, and annual CET in detailed format
 - **Daily Interest Logic with Grace Period**: Implemented daily interest calculation with 45-day maximum grace period validation
 - **Enhanced Grace Period Calculation**: Added taxaJurosDiaria calculation and jurosCarencia integration for accurate loan scheduling
+- **T-02 Enhanced Dashboard**: Upgraded Fila de Análise de Crédito with comprehensive KPIs, advanced filtering, and improved UX
+- **Advanced KPI Metrics**: Added real-time metrics for daily proposals, monthly accumulation, and pending proposal counts
+- **Comprehensive Filtering System**: Implemented status and partner filters with dynamic data filtering capabilities
 
 ## User Preferences
 
