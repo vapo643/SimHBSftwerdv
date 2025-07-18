@@ -93,19 +93,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/propostas/:id", authMiddleware, async (req, res) => {
     try {
-      const id = req.params.id; // Corrigido para tratar como string
-      
-      // A função de storage deve ser capaz de buscar por um ID string
+      const id = parseInt(req.params.id);
       const proposta = await storage.getPropostaById(id);
       
       if (!proposta) {
-        return res.status(404).json({ message: "Proposta não encontrada" });
+        return res.status(404).json({ message: "Proposta not found" });
       }
       
       res.json(proposta);
     } catch (error) {
-      console.error("Erro ao buscar proposta:", error);
-      res.status(500).json({ message: "Falha ao buscar proposta" });
+      console.error("Get proposta error:", error);
+      res.status(500).json({ message: "Failed to fetch proposta" });
     }
   });
 
@@ -146,54 +144,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Get propostas by status error:", error);
       res.status(500).json({ message: "Failed to fetch propostas" });
-    }
-  });
-
-  // ATUALIZAR status da proposta e criar log
-  app.put("/api/propostas/:id/status", authMiddleware, async (req: AuthRequest, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const { status, observacao } = req.body;
-      
-      if (!req.user) {
-        return res.status(401).json({ error: "Não autorizado" });
-      }
-
-      const proposta = await storage.updateProposta(id, { status });
-      
-      // For now, we'll just return success without logging to a separate table
-      // In a real implementation, you'd create a logs table
-      const logEntry = {
-        proposta_id: id,
-        user_id: req.user.id,
-        status_novo: status,
-        observacao: observacao || null,
-        created_at: new Date().toISOString()
-      };
-
-      res.status(200).json({ message: 'Status atualizado com sucesso', proposta });
-    } catch (error) {
-      console.error("Update proposta status error:", error);
-      res.status(500).json({ message: 'Erro ao atualizar a proposta' });
-    }
-  });
-
-  // BUSCAR logs de uma proposta
-  app.get("/api/propostas/:id/logs", authMiddleware, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      
-      // Esta função deve ser criada no seu módulo de storage para buscar os logs no Supabase
-      const logs = await storage.getPropostaLogs(id);
-      
-      if (!logs) {
-        return res.status(404).json({ message: "Nenhum log encontrado para esta proposta." });
-      }
-      
-      res.status(200).json(logs);
-    } catch (error) {
-      console.error("Erro ao buscar logs da proposta:", error);
-      res.status(500).json({ message: 'Erro ao buscar histórico de decisões' });
     }
   });
 

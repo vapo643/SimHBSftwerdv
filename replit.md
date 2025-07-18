@@ -61,15 +61,6 @@ This is a full-stack TypeScript application for credit management called "Simpix
 - **Filter Bug Fix**: Corrected empty value bug in Select components by using "all" as default values with proper filtering logic
 - **Hierarchical Partner-Store Filtering**: Enhanced filtering with dynamic partner-store relationships and cascading filter reset functionality
 - **Enhanced Data Model**: Added separate partner and store columns with relational data structure for better organization
-- **Complete Analysis Pipeline**: Implemented comprehensive manual analysis system with status updates, decision logging, and communication history
-- **Analysis Backend Routes**: Added PUT /api/propostas/:id/status and GET /api/propostas/:id/logs endpoints for proposal status management
-- **History Component**: Created HistoricoComunicao component for displaying proposal status changes and analyst communications
-- **Integrated Analysis Page**: Enhanced T-03 analysis page with form-based decision making, status updates, and real-time history display
-- **Refined Analysis System**: Updated backend with proper storage interface methods and improved frontend with modern React Query patterns
-- **Enhanced Error Handling**: Added comprehensive error handling and loading states for better user experience in analysis workflow
-- **Critical Bug Fixes**: Fixed "Proposta não encontrada" error by updating proposal ID handling from number to string format
-- **Authentication Fix**: Resolved 401 unauthorized errors by ensuring proper Bearer token authentication in API calls
-- **String ID Support**: Enhanced storage interface and backend routes to handle both string and numeric proposal IDs
 
 ## User Preferences
 
