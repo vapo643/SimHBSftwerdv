@@ -69,6 +69,7 @@ This is a full-stack TypeScript application for credit management called "Simpix
 - **Server-Side Time Management**: Added GET /api/server-time endpoint for reliable timestamp source and server-based grace period calculations
 - **Enhanced Grace Period Validation**: Updated simulation API to use server-side date calculations for consistent 45-day validation across time zones
 - **TAC Parameter Bug Fix**: Corrected incluir_tac parameter handling in both frontend and backend to ensure proper boolean string conversion and interpretation
+- **Authentication Integration**: Updated analysis workflow components to use fetchWithToken API client for secure authenticated requests to proposal endpoints
 
 ## User Preferences
 
