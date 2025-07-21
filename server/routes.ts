@@ -11,12 +11,9 @@ import { Request, Response } from "express";
 import { db } from "./storage";
 import { userProfiles, propostas, lojas, parceiros, produtos, tabelasComerciais, propostasSchema, insertPropostaSchema } from "../shared/schema";
 import { eq, and, desc } from "drizzle-orm";
-import { createZodErrorMap } from "zod-validation-error";
+import { fromZodError } from "zod-validation-error";
 
-z.setErrorMap(createZodErrorMap({
-  invalidTypeErrorMessage: "Tipo inválido",
-  requiredErrorMessage: "Campo obrigatório",
-}));
+// Configuração de mensagens de erro será feita individualmente
 
 const upload = multer({ storage: multer.memoryStorage() });
 
