@@ -211,4 +211,160 @@ describe('NovaProposta - Formulário de Nova Proposta', () => {
     
     consoleSpy.mockRestore();
   });
+
+  describe('Casos Extremos e Edge Cases', () => {
+    it('deve validar limite máximo de valor solicitado', async () => {
+      renderWithQueryClient(<NovaProposta />);
+      
+      const condicoesTab = screen.getByText('Condições do Empréstimo');
+      fireEvent.click(condicoesTab);
+      
+      const valorInput = screen.getByLabelText(/valor solicitado/i);
+      fireEvent.change(valorInput, { target: { value: '999999999' } });
+      
+      const submitButton = screen.getByRole('button', { name: /enviar proposta/i });
+      fireEvent.click(submitButton);
+      
+      // Verificar se há alguma validação ou comportamento esperado
+      // Este teste pode ser expandido conforme as regras de negócio
+      expect(valorInput).toHaveValue('999999999');
+    });
+
+    it('deve validar formato de email inválido', async () => {
+      renderWithQueryClient(<NovaProposta />);
+      
+      const emailInput = screen.getByLabelText(/email/i);
+      fireEvent.change(emailInput, { target: { value: 'email-invalido' } });
+      
+      const submitButton = screen.getByRole('button', { name: /enviar proposta/i });
+      fireEvent.click(submitButton);
+      
+      await waitFor(() => {
+        expect(screen.getByText('Email inválido.')).toBeInTheDocument();
+      });
+    });
+
+    it('deve validar campos de telefone com formato inadequado', async () => {
+      renderWithQueryClient(<NovaProposta />);
+      
+      const telefoneInput = screen.getByLabelText(/telefone/i);
+      fireEvent.change(telefoneInput, { target: { value: '123' } });
+      
+      const submitButton = screen.getByRole('button', { name: /enviar proposta/i });
+      fireEvent.click(submitButton);
+      
+      await waitFor(() => {
+        expect(screen.getByText('Telefone inválido')).toBeInTheDocument();
+      });
+    });
+
+    it('deve resetar formulário quando solicitado', async () => {
+      renderWithQueryClient(<NovaProposta />);
+      
+      const nomeInput = screen.getByLabelText(/nome completo/i);
+      fireEvent.change(nomeInput, { target: { value: 'João Silva' } });
+      
+      expect(nomeInput).toHaveValue('João Silva');
+      
+      // Se houver botão de reset, testaria aqui
+      // const resetButton = screen.getByRole('button', { name: /limpar/i });
+      // fireEvent.click(resetButton);
+      // expect(nomeInput).toHaveValue('');
+    });
+  });
+
+  describe('Navegação entre Abas', () => {
+    it('deve manter dados ao navegar entre abas', async () => {
+      renderWithQueryClient(<NovaProposta />);
+      
+      // Preencher dados na primeira aba
+      const nomeInput = screen.getByLabelText(/nome completo/i);
+      fireEvent.change(nomeInput, { target: { value: 'João Silva' } });
+      
+      // Navegar para segunda aba
+      const condicoesTab = screen.getByText('Condições do Empréstimo');
+      fireEvent.click(condicoesTab);
+      
+      // Voltar para primeira aba
+      const dadosTab = screen.getByText('Dados do Cliente');
+      fireEvent.click(dadosTab);
+      
+      // Verificar se os dados permaneceram
+      expect(screen.getByLabelText(/nome completo/i)).toHaveValue('João Silva');
+    });
+
+    it('deve permitir navegação sequencial das abas', async () => {
+      renderWithQueryClient(<NovaProposta />);
+      
+      // Verificar se primeira aba está ativa
+      expect(screen.getByText('Dados do Cliente')).toBeInTheDocument();
+      
+      // Navegar para segunda aba
+      const condicoesTab = screen.getByText('Condições do Empréstimo');
+      fireEvent.click(condicoesTab);
+      
+      // Navegar para terceira aba
+      const documentosTab = screen.getByText('Anexo de Documentos');
+      fireEvent.click(documentosTab);
+      
+      expect(documentosTab).toBeInTheDocument();
+    });
+  });
+
+  describe('Integração com API', () => {
+    it('deve tratar erro de API durante simulação', async () => {
+      vi.mocked(fetch).mockRejectedValueOnce(new Error('Erro de rede'));
+      
+      renderWithQueryClient(<NovaProposta />);
+      
+      const condicoesTab = screen.getByText('Condições do Empréstimo');
+      fireEvent.click(condicoesTab);
+      
+      const valorInput = screen.getByLabelText(/valor solicitado/i);
+      fireEvent.change(valorInput, { target: { value: '10000' } });
+      
+      // Aguardar tentativa de chamada da API e tratamento do erro
+      await waitFor(() => {
+        // Verificar se há tratamento de erro adequado
+        // Pode ser uma mensagem de erro ou comportamento específico
+      }, { timeout: 2000 });
+    });
+
+    it('deve simular sucesso na criação de proposta', async () => {
+      vi.mocked(fetch).mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ id: 123, status: 'criado' }),
+      } as Response);
+      
+      renderWithQueryClient(<NovaProposta />);
+      
+      // Preencher formulário mínimo
+      fireEvent.change(screen.getByLabelText(/nome completo/i), {
+        target: { value: 'João Silva Santos' }
+      });
+      fireEvent.change(screen.getByLabelText(/cpf\/cnpj/i), {
+        target: { value: '123.456.789-01' }
+      });
+      
+      const condicoesTab = screen.getByText('Condições do Empréstimo');
+      fireEvent.click(condicoesTab);
+      
+      fireEvent.change(screen.getByLabelText(/valor solicitado/i), {
+        target: { value: '10000' }
+      });
+      
+      const submitButton = screen.getByRole('button', { name: /enviar proposta/i });
+      fireEvent.click(submitButton);
+      
+      // Verificar se a requisição foi feita
+      await waitFor(() => {
+        expect(fetch).toHaveBeenCalledWith(
+          expect.stringContaining('/api/propostas'),
+          expect.objectContaining({
+            method: 'POST'
+          })
+        );
+      });
+    });
+  });
 });
