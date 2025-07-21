@@ -1,4 +1,7 @@
 
+// Sistema de Configuração Resiliente - Pilar 10
+// Garante que a aplicação inicie mesmo com secrets ausentes
+
 import { log } from "../vite";
 
 // Tipagem para configurações centralizadas
@@ -54,37 +57,49 @@ function validateSecrets(): {
 
 // Configuração centralizada com fallbacks seguros
 export function loadConfig(): AppConfig {
-  const validation = validateSecrets();
+  try {
+    const validation = validateSecrets();
 
-  // Log de status de secrets (sem expor valores)
-  if (validation.missing.length > 0) {
-    log(`⚠️  Missing critical secrets: ${validation.missing.join(', ')}`);
-    log(`ℹ️  App will run in degraded mode`);
+    // Log de status de secrets (sem expor valores)
+    if (validation.missing.length > 0) {
+      log(`⚠️  Missing critical secrets: ${validation.missing.join(', ')}`);
+      log(`ℹ️  App will run in degraded mode`);
+    }
+
+    if (validation.warnings.length > 0) {
+      log(`⚠️  Missing optional secrets: ${validation.warnings.join(', ')}`);
+    }
+
+    if (validation.isValid && validation.warnings.length === 0) {
+      log(`✅ All secrets loaded successfully`);
+    }
+
+    return {
+      port: parseInt(process.env.PORT || "5000", 10),
+      nodeEnv: process.env.NODE_ENV || "development",
+      database: {
+        url: process.env.DATABASE_URL || null,
+      },
+      supabase: {
+        url: process.env.SUPABASE_URL || null,
+        anonKey: process.env.SUPABASE_ANON_KEY || null,
+      },
+      security: {
+        enableRateLimit: process.env.NODE_ENV === "production" || !!process.env.DATABASE_URL,
+        enableHelmet: process.env.NODE_ENV === "production",
+      },
+    };
+  } catch (error) {
+    log(`❌ Error loading config: ${error.message}`);
+    // Fallback seguro em caso de erro
+    return {
+      port: 5000,
+      nodeEnv: "development",
+      database: { url: null },
+      supabase: { url: null, anonKey: null },
+      security: { enableRateLimit: false, enableHelmet: false },
+    };
   }
-
-  if (validation.warnings.length > 0) {
-    log(`⚠️  Missing optional secrets: ${validation.warnings.join(', ')}`);
-  }
-
-  if (validation.isValid && validation.warnings.length === 0) {
-    log(`✅ All secrets loaded successfully`);
-  }
-
-  return {
-    port: parseInt(process.env.PORT || "5000", 10),
-    nodeEnv: process.env.NODE_ENV || "development",
-    database: {
-      url: process.env.DATABASE_URL || null,
-    },
-    supabase: {
-      url: process.env.SUPABASE_URL || null,
-      anonKey: process.env.SUPABASE_ANON_KEY || null,
-    },
-    security: {
-      enableRateLimit: process.env.NODE_ENV === "production" || !!process.env.DATABASE_URL,
-      enableHelmet: process.env.NODE_ENV === "production",
-    },
-  };
 }
 
 // Configuração global (carregada uma única vez)

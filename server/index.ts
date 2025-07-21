@@ -157,10 +157,10 @@ app.use((req, res, next) => {
   // Log status da configuração antes de iniciar
   logConfigStatus();
 
-  // Verificar se a aplicação pode operar
+  // Verificar se a aplicação pode operar (modo gracioso)
   if (!isAppOperational()) {
-    log("❌ App cannot start: Missing critical configuration");
-    process.exit(1);
+    log("⚠️  App starting in degraded mode: Some features may be limited");
+    log("ℹ️  Configure DATABASE_URL in Secrets to enable full functionality");
   }
 
   // ALWAYS serve the app on the port specified in the environment variable PORT
