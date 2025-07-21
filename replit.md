@@ -86,6 +86,10 @@ This is a full-stack TypeScript application for credit management called "Simpix
 - **RLS Policy Creation**: Complete set of security policies covering all CRUD operations with store-level data isolation
 - **Enhanced Authentication**: Multi-tenant middleware that establishes database session context for RLS enforcement
 - **Security Migration Files**: Comprehensive migration scripts with performance indexes and validation triggers
+- **API Security Layer (Pilar 2)**: Comprehensive API protection with Helmet and rate limiting against brute force attacks
+- **Helmet Security Headers**: Complete CSP, XSS protection, clickjacking prevention, and MIME sniffing protection
+- **Two-Tier Rate Limiting**: General API limit (100/15min) and restrictive auth protection (5/15min) with smart IP+email tracking
+- **Security Monitoring**: Comprehensive logging system for rate limit violations and security events
 - **Documentation**: Complete security implementation guide with compliance features and integration instructions
 
 ## User Preferences

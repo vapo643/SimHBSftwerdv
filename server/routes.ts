@@ -81,6 +81,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Health check endpoint para testar security headers
+  app.get("/api/health", (req, res) => {
+    res.json({
+      status: "ok",
+      timestamp: new Date().toISOString(),
+      security: "enabled",
+      rateLimit: "active"
+    });
+  });
+
   // Proposal routes
   app.get("/api/propostas", authMiddleware, async (req, res) => {
     try {
