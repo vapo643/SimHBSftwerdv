@@ -52,7 +52,7 @@ const decisionSchema = z.object({
 type DecisionForm = z.infer<typeof decisionSchema>;
 
 interface Proposta {
-  id: number;
+  id: string | number;
   clienteNome: string;
   clienteCpf: string;
   clienteEmail: string;
@@ -66,6 +66,9 @@ interface Proposta {
   status: string;
   documentos: string[] | null;
   createdAt: string;
+  score?: number;
+  parceiro?: string;
+  loja?: string;
 }
 
 export default function AnaliseManual() {
@@ -77,9 +80,24 @@ export default function AnaliseManual() {
   const [analysisStarted, setAnalysisStarted] = useState(false);
   const [analysisProgress, setAnalysisProgress] = useState(0);
 
-  const { data: proposta, isLoading } = useQuery<Proposta>({
+  const { data: proposta, isLoading, error, isError } = useQuery<Proposta>({
     queryKey: ["/api/propostas", propostaId],
     enabled: !!propostaId,
+    retry: (failureCount, error) => {
+      // Only retry on network errors, not on 404s
+      if (error instanceof Error && error.message.includes("404")) {
+        return false;
+      }
+      return failureCount < 2;
+    },
+    onError: (error: any) => {
+      console.error("Failed to fetch proposta:", error);
+      toast({
+        title: "Erro ao carregar proposta",
+        description: error.message || "Não foi possível carregar os dados da proposta.",
+        variant: "destructive",
+      });
+    },
   });
 
   const {
@@ -237,11 +255,47 @@ export default function AnaliseManual() {
     );
   }
 
+  if (isError) {
+    return (
+      <DashboardLayout title="Análise Manual">
+        <div className="py-12 text-center space-y-4">
+          <AlertCircle className="h-12 w-12 text-red-500 mx-auto" />
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900">Erro ao carregar proposta</h3>
+            <p className="text-gray-500 mt-2">
+              {error instanceof Error ? error.message : "Não foi possível carregar os dados da proposta"}
+            </p>
+          </div>
+          <Button 
+            variant="outline" 
+            onClick={() => setLocation("/credito/fila")}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Voltar para Fila
+          </Button>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   if (!proposta) {
     return (
       <DashboardLayout title="Análise Manual">
-        <div className="py-12 text-center">
-          <p className="text-gray-500">Proposta não encontrada</p>
+        <div className="py-12 text-center space-y-4">
+          <AlertTriangle className="h-12 w-12 text-yellow-500 mx-auto" />
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900">Proposta não encontrada</h3>
+            <p className="text-gray-500 mt-2">A proposta solicitada não existe ou não está mais disponível</p>
+          </div>
+          <Button 
+            variant="outline" 
+            onClick={() => setLocation("/credito/fila")}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Voltar para Fila
+          </Button>
         </div>
       </DashboardLayout>
     );

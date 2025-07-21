@@ -104,8 +104,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/propostas/:id", authMiddleware, async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
-      const proposta = await storage.getPropostaById(id);
+      const idParam = req.params.id;
+      let proposta;
+
+      // Handle both numeric and string IDs
+      if (idParam.startsWith("PRO-") || idParam.startsWith("PROP-")) {
+        // For string IDs like PRO-001, return mock data for development
+        proposta = {
+          id: idParam,
+          clienteNome: "João Silva",
+          clienteCpf: "123.456.789-00",
+          clienteEmail: "joao.silva@email.com",
+          clienteTelefone: "(11) 99999-9999",
+          clienteDataNascimento: "1990-01-01",
+          clienteRenda: "5000.00",
+          valor: "15000.00",
+          prazo: 12,
+          finalidade: "Capital de giro",
+          garantia: "Sem garantia",
+          status: "em_analise",
+          documentos: ["documento1.pdf", "documento2.pdf"],
+          createdAt: new Date().toISOString(),
+          score: 750,
+          parceiro: "Parceiro A",
+          loja: "Loja Central"
+        };
+      } else {
+        // For numeric IDs, use database
+        const id = parseInt(idParam);
+        if (isNaN(id)) {
+          return res.status(400).json({ message: "Invalid proposal ID format" });
+        }
+        proposta = await storage.getPropostaById(id);
+      }
 
       if (!proposta) {
         return res.status(404).json({ message: "Proposta not found" });
@@ -387,30 +418,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get single proposal
-  app.get("/api/propostas/:id", authMiddleware, async (req, res) => {
-    try {
-      const { id } = req.params;
 
-      // Mock proposal data
-      const mockProposta = {
-        id,
-        clienteNome: "João Silva",
-        cpf: "123.456.789-00",
-        valorSolicitado: "R$ 10.000,00",
-        prazo: "12 meses",
-        status: "Em Análise",
-        dataCriacao: new Date().toISOString(),
-        score: 750,
-        parceiro: "Parceiro A",
-      };
-
-      res.json(mockProposta);
-    } catch (error) {
-      console.error("Get proposal error:", error);
-      res.status(500).json({ message: "Erro ao carregar proposta" });
-    }
-  });
 
   // Dashboard stats
   app.get("/api/dashboard/stats", authMiddleware, async (req, res) => {
