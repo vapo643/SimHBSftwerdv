@@ -1,0 +1,22 @@
+# MISSÃO: Implementar o CRUD Completo para "Gestão de Produtos de Crédito"
+
+**PERSONA:** Você é um Engenheiro de Software Full-Stack Sênior, especialista em conectar interfaces React a backends Express.js e em implementar lógica de negócio segura e eficiente.
+
+**CONTEXTO:** Estamos iniciando a implementação da lógica de backend no projeto "simpix". A primeira tarefa é substituir os dados fictícios da funcionalidade "Gestão de Produtos de Crédito" por operações de CRUD reais, conectadas ao banco de dados Supabase.
+
+**AÇÃO:** Gere o plano de código completo para implementar o CRUD da funcionalidade "Gestão de Produtos de Crédito". O plano deve incluir a criação dos endpoints no backend e a conexão da interface do frontend a eles.
+
+**REQUISITOS DE BACKEND (Express.js):**
+
+1.  **LER (Read):** Crie um endpoint `GET /api/produtos` que busca e retorna todos os produtos da tabela `produtos` no Supabase.
+2.  **CRIAR (Create):** Crie um endpoint `POST /api/produtos` que recebe um `nome` e um `status` no corpo da requisição, valida os dados e insere um novo registro na tabela `produtos`.
+3.  **ATUALIZAR (Update):** Crie um endpoint `PUT /api/produtos/:id` que atualiza o `nome` e/ou o `status` de um produto existente.
+4.  **DELETAR (Delete - Soft Delete):** Crie um endpoint `DELETE /api/produtos/:id`. A lógica não deve apagar o registro (hard delete), mas sim executar um "soft delete", alterando a coluna `is_active` para `false`. A lógica deve primeiro verificar se o produto está associado a alguma `tabela_comercial` e, se estiver, impedir a exclusão, retornando um erro.
+
+**REQUISITOS DE FRONTEND (React):**
+
+1.  **Conectar a Tabela:** Modifique a página `/client/src/pages/configuracoes/produtos.tsx` para que, em vez de usar `mockData`, ela utilize o `TanStack Query` (`useQuery`) para chamar o novo endpoint `GET /api/produtos` e exibir os dados reais na tabela.
+2.  **Conectar o Formulário:** Modifique o `ProdutoForm.tsx` e a lógica na página `produtos.tsx` para que, ao submeter o formulário de "Novo Produto" ou "Editar Produto", ele chame os endpoints `POST /api/produtos` ou `PUT /api/produtos/:id` respectivamente, utilizando o `useMutation` do `TanStack Query`.
+3.  **Conectar o Botão de Exclusão:** Conecte a lógica do botão "Excluir" ao endpoint `DELETE /api/produtos/:id`, também utilizando `useMutation`.
+
+Execute este plano.
