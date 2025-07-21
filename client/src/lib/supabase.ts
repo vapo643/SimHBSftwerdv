@@ -28,5 +28,5 @@ export const createClientSupabaseClient = () => {
   }
 
   clientSupabaseInstance = createClient(supabaseUrl, supabaseAnonKey);
-  return clientSupabaseInstance;
+  return clientSupabaseInstance;ce;
 };

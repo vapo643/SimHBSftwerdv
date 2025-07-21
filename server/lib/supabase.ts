@@ -18,11 +18,8 @@ if (!supabaseServiceKey) {
 // Server-side Supabase client - properly isolated from client-side singleton
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// Supabase connection string for Drizzle (using service role key)
-const supabaseConnectionString = `postgresql://postgres.${supabaseUrl.split('//')[1].split('.')[0]}:[YOUR-PASSWORD]@aws-0-us-west-1.pooler.supabase.com:6543/postgres`;
-
-// Use Supabase database URL from environment or construct it
-const databaseUrl = process.env.SUPABASE_DATABASE_URL || supabaseConnectionString;
+// Use Supabase database URL from environment
+const databaseUrl = process.env.SUPABASE_DATABASE_URL || process.env.DATABASE_URL;
 
 // Database connection using Drizzle with Supabase
 const client = postgres(databaseUrl);
