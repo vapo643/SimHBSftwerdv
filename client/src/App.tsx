@@ -4,98 +4,29 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import ProtectedRoute from "@/components/ProtectedRoute";
-import Login from "@/pages/login";
-import Dashboard from "@/pages/dashboard";
-import NovaProposta from "@/pages/propostas/nova";
-import FilaAnalise from "@/pages/credito/fila";
-import AnaliseManual from "@/pages/credito/analise";
-import Pagamentos from "@/pages/financeiro/pagamentos";
-import Formalizacao from "@/pages/formalizacao";
-import FilaFormalizacao from "@/pages/formalizacao/fila";
-import AcompanhamentoFormalizacao from "@/pages/formalizacao/acompanhamento";
-import TabelasComerciais from "@/pages/configuracoes/tabelas";
-import UsuariosPage from "@/pages/admin/usuarios";
-import PartnersPage from "@/pages/parceiros/index";
-import PartnerDetailPage from "@/pages/parceiros/detalhe";
-import ProdutosPage from "@/pages/configuracoes/produtos";
-import NotFound from "@/pages/not-found";
 
 function Router() {
   return (
     <Switch>
-      <Route path="/login" component={Login} />
+      <Route path="/login">
+        <div style={{ padding: "20px" }}>
+          <h1>Login Page</h1>
+          <p>Login functionality will be implemented here.</p>
+        </div>
+      </Route>
       <Route path="/dashboard">
-        <ProtectedRoute>
-          <Dashboard />
-        </ProtectedRoute>
-      </Route>
-      <Route path="/propostas/nova">
-        <ProtectedRoute>
-          <NovaProposta />
-        </ProtectedRoute>
-      </Route>
-      <Route path="/credito/fila">
-        <ProtectedRoute>
-          <FilaAnalise />
-        </ProtectedRoute>
-      </Route>
-      <Route path="/credito/analise/:id">
-        <ProtectedRoute>
-          <AnaliseManual />
-        </ProtectedRoute>
-      </Route>
-      <Route path="/financeiro/pagamentos">
-        <ProtectedRoute>
-          <Pagamentos />
-        </ProtectedRoute>
-      </Route>
-      <Route path="/formalizacao">
-        <ProtectedRoute>
-          <Formalizacao />
-        </ProtectedRoute>
-      </Route>
-      <Route path="/formalizacao/fila">
-        <ProtectedRoute>
-          <FilaFormalizacao />
-        </ProtectedRoute>
-      </Route>
-      <Route path="/formalizacao/acompanhamento/:id">
-        <ProtectedRoute>
-          <AcompanhamentoFormalizacao />
-        </ProtectedRoute>
-      </Route>
-      <Route path="/configuracoes/tabelas">
-        <ProtectedRoute>
-          <TabelasComerciais />
-        </ProtectedRoute>
-      </Route>
-      <Route path="/admin/usuarios">
-        <ProtectedRoute>
-          <UsuariosPage />
-        </ProtectedRoute>
-      </Route>
-      <Route path="/parceiros">
-        <ProtectedRoute>
-          <PartnersPage />
-        </ProtectedRoute>
-      </Route>
-      <Route path="/parceiros/detalhe/:id">
-        <ProtectedRoute>
-          <PartnerDetailPage />
-        </ProtectedRoute>
-      </Route>
-      <Route path="/configuracoes/produtos">
-        <ProtectedRoute>
-          <ProdutosPage />
-        </ProtectedRoute>
+        <div style={{ padding: "20px" }}>
+          <h1>Dashboard</h1>
+          <p>Dashboard will be implemented here.</p>
+        </div>
       </Route>
       <Route path="/">
-        <ProtectedRoute>
-          <Dashboard />
-        </ProtectedRoute>
+        <div style={{ padding: "20px" }}>
+          <h1>Welcome to Simpix</h1>
+          <p>Application is loading correctly!</p>
+          <p>Navigate to <a href="/dashboard">/dashboard</a> or <a href="/login">/login</a></p>
+        </div>
       </Route>
-      <Route component={NotFound} />
     </Switch>
   );
 }
