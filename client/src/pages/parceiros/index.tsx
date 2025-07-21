@@ -1,11 +1,18 @@
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import PartnerForm from '@/components/parceiros/PartnerForm';
-import { mockPartners, Partner } from '@/data/partners';
-import DashboardLayout from '@/components/DashboardLayout';
-import { Link } from 'wouter';
+import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+} from "@/components/ui/table";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import PartnerForm from "@/components/parceiros/PartnerForm";
+import { mockPartners, Partner } from "@/data/partners";
+import DashboardLayout from "@/components/DashboardLayout";
+import { Link } from "wouter";
 
 const PartnersPage: React.FC = () => {
   const [partners, setPartners] = useState<Partner[]>(mockPartners);
@@ -16,7 +23,7 @@ const PartnersPage: React.FC = () => {
     // Lógica para criar ou editar parceiros
     setIsModalOpen(false);
   };
-  
+
   const openNewModal = () => {
     setSelectedPartner(null);
     setIsModalOpen(true);
@@ -24,7 +31,7 @@ const PartnersPage: React.FC = () => {
 
   return (
     <DashboardLayout title="Gestão de Parceiros">
-      <div className="flex justify-between items-center mb-4">
+      <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-bold">Parceiros</h1>
         <Button onClick={openNewModal}>Novo Parceiro</Button>
       </div>
@@ -45,7 +52,9 @@ const PartnersPage: React.FC = () => {
               <TableCell>{partner.lojas.length}</TableCell>
               <TableCell>
                 <Link to={`/parceiros/detalhe/${partner.id}`}>
-                  <Button variant="outline" size="sm">Ver Detalhes</Button>
+                  <Button variant="outline" size="sm">
+                    Ver Detalhes
+                  </Button>
                 </Link>
               </TableCell>
             </TableRow>
@@ -57,10 +66,13 @@ const PartnersPage: React.FC = () => {
           <DialogHeader>
             <DialogTitle>{selectedPartner ? "Editar Parceiro" : "Novo Parceiro"}</DialogTitle>
           </DialogHeader>
-          <PartnerForm 
+          <PartnerForm
             initialData={selectedPartner}
             onSubmit={handleCreateOrEdit}
-            onCancel={() => { setIsModalOpen(false); setSelectedPartner(null); }}
+            onCancel={() => {
+              setIsModalOpen(false);
+              setSelectedPartner(null);
+            }}
           />
         </DialogContent>
       </Dialog>

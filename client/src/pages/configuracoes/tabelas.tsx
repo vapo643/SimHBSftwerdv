@@ -1,12 +1,25 @@
 import React, { useState } from "react";
-import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Card, CardContent } from '@/components/ui/card';
-import { Edit, Trash2 } from 'lucide-react';
-import DashboardLayout from '@/components/DashboardLayout';
-import TabelaComercialForm from '@/components/tabelas-comerciais/TabelaComercialForm';
-import ConfirmDeleteModal from '@/components/tabelas-comerciais/ConfirmDeleteModal';
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Card, CardContent } from "@/components/ui/card";
+import { Edit, Trash2 } from "lucide-react";
+import DashboardLayout from "@/components/DashboardLayout";
+import TabelaComercialForm from "@/components/tabelas-comerciais/TabelaComercialForm";
+import ConfirmDeleteModal from "@/components/tabelas-comerciais/ConfirmDeleteModal";
 
 export interface TabelaComercial {
   id: string;
@@ -18,26 +31,26 @@ export interface TabelaComercial {
 
 const mockTabelas: TabelaComercial[] = [
   {
-    id: '1',
-    nomeTabela: 'Tabela A - Preferencial',
+    id: "1",
+    nomeTabela: "Tabela A - Preferencial",
     taxaJuros: 1.5,
     prazosPermitidos: [12, 24, 36],
-    emUso: true
+    emUso: true,
   },
   {
-    id: '2',
-    nomeTabela: 'Tabela B - Padrão',
+    id: "2",
+    nomeTabela: "Tabela B - Padrão",
     taxaJuros: 2.0,
     prazosPermitidos: [6, 12, 18, 24],
-    emUso: false
+    emUso: false,
   },
   {
-    id: '3',
-    nomeTabela: 'Tabela C - Especial',
+    id: "3",
+    nomeTabela: "Tabela C - Especial",
     taxaJuros: 1.8,
     prazosPermitidos: [24, 36, 48],
-    emUso: true
-  }
+    emUso: true,
+  },
 ];
 
 const TabelasComerciais: React.FC = () => {
@@ -47,23 +60,25 @@ const TabelasComerciais: React.FC = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedTabela, setSelectedTabela] = useState<TabelaComercial | null>(null);
 
-  const handleCreate = (novaTabela: Omit<TabelaComercial, 'id'>) => {
+  const handleCreate = (novaTabela: Omit<TabelaComercial, "id">) => {
     const tabela: TabelaComercial = {
       ...novaTabela,
       id: String(Date.now()),
-      emUso: false
+      emUso: false,
     };
     setTabelas([...tabelas, tabela]);
     setIsCreateModalOpen(false);
   };
 
-  const handleEdit = (tabelaAtualizada: Omit<TabelaComercial, 'id'>) => {
+  const handleEdit = (tabelaAtualizada: Omit<TabelaComercial, "id">) => {
     if (selectedTabela) {
-      setTabelas(tabelas.map(t => 
-        t.id === selectedTabela.id 
-          ? { ...tabelaAtualizada, id: selectedTabela.id, emUso: selectedTabela.emUso }
-          : t
-      ));
+      setTabelas(
+        tabelas.map(t =>
+          t.id === selectedTabela.id
+            ? { ...tabelaAtualizada, id: selectedTabela.id, emUso: selectedTabela.emUso }
+            : t
+        )
+      );
       setIsEditModalOpen(false);
       setSelectedTabela(null);
     }
@@ -90,11 +105,9 @@ const TabelasComerciais: React.FC = () => {
   return (
     <DashboardLayout title="Gestão de Tabelas Comerciais">
       <div className="space-y-6">
-        <div className="flex justify-between items-center">
+        <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold">Tabelas Comerciais</h1>
-          <Button onClick={() => setIsCreateModalOpen(true)}>
-            Nova Tabela Comercial
-          </Button>
+          <Button onClick={() => setIsCreateModalOpen(true)}>Nova Tabela Comercial</Button>
         </div>
 
         <Card>
@@ -114,15 +127,11 @@ const TabelasComerciais: React.FC = () => {
                     <TableCell className="font-medium">{tabela.nomeTabela}</TableCell>
                     <TableCell>{tabela.taxaJuros}%</TableCell>
                     <TableCell>
-                      {tabela.prazosPermitidos.map(prazo => `${prazo} meses`).join(', ')}
+                      {tabela.prazosPermitidos.map(prazo => `${prazo} meses`).join(", ")}
                     </TableCell>
                     <TableCell>
                       <div className="flex space-x-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => openEditModal(tabela)}
-                        >
+                        <Button variant="outline" size="sm" onClick={() => openEditModal(tabela)}>
                           <Edit className="h-4 w-4" />
                         </Button>
                         <Button
@@ -139,7 +148,7 @@ const TabelasComerciais: React.FC = () => {
                 ))}
                 {tabelas.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center py-8">
+                    <TableCell colSpan={4} className="py-8 text-center">
                       Nenhuma tabela comercial cadastrada
                     </TableCell>
                   </TableRow>
@@ -187,7 +196,7 @@ const TabelasComerciais: React.FC = () => {
             setSelectedTabela(null);
           }}
           onConfirm={handleDelete}
-          tabelaNome={selectedTabela?.nomeTabela || ''}
+          tabelaNome={selectedTabela?.nomeTabela || ""}
         />
       </div>
     </DashboardLayout>

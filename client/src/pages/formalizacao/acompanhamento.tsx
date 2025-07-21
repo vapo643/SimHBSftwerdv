@@ -1,12 +1,12 @@
-import React from 'react';
-import { useRoute } from 'wouter';
-import DashboardLayout from '@/components/DashboardLayout';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { CheckCircle, Clock } from 'lucide-react';
+import React from "react";
+import { useRoute } from "wouter";
+import DashboardLayout from "@/components/DashboardLayout";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CheckCircle, Clock } from "lucide-react";
 
 const ChecklistItem = ({ label, completed }: { label: string; completed: boolean }) => (
-  <div className="flex items-center space-x-3 p-3 bg-secondary/50 rounded-md">
+  <div className="bg-secondary/50 flex items-center space-x-3 rounded-md p-3">
     {completed ? (
       <CheckCircle className="h-5 w-5 text-green-500" />
     ) : (
@@ -18,13 +18,13 @@ const ChecklistItem = ({ label, completed }: { label: string; completed: boolean
 
 const AcompanhamentoFormalizacao: React.FC = () => {
   const [match, params] = useRoute("/formalizacao/acompanhamento/:id");
-  const id = params ? params.id : 'Carregando...';
+  const id = params ? params.id : "Carregando...";
 
   return (
     <DashboardLayout title={`Acompanhamento da Proposta: ${id}`}>
       <div className="space-y-6">
         <h1 className="text-2xl font-bold">Acompanhamento da Proposta: {id}</h1>
-        
+
         <Card>
           <CardHeader>
             <CardTitle>Checklist de Formalização</CardTitle>

@@ -13,7 +13,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { ArrowLeft, ArrowRight, Upload } from "lucide-react";
 
 const clienteSchema = z.object({
@@ -88,16 +94,16 @@ export default function NovaProposta() {
     mutationFn: async (file: File) => {
       const formData = new FormData();
       formData.append("file", file);
-      
+
       const response = await fetchWithToken("/api/upload", {
         method: "POST",
         body: formData,
         credentials: "include",
       });
-      
+
       return response.json();
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       const currentDocs = watch("documentos") || [];
       setValue("documentos", [...currentDocs, data.fileName]);
       toast({
@@ -145,27 +151,29 @@ export default function NovaProposta() {
 
   return (
     <DashboardLayout title="Nova Proposta de Crédito">
-      <div className="max-w-4xl mx-auto">
+      <div className="mx-auto max-w-4xl">
         {/* Step Indicator */}
         <div className="mb-8">
           <div className="flex items-center justify-center space-x-4">
             {steps.map((step, index) => (
               <div key={step.number} className="flex items-center">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                  currentStep >= step.number
-                    ? "bg-primary text-white"
-                    : "bg-gray-200 text-gray-500"
-                }`}>
+                <div
+                  className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium ${
+                    currentStep >= step.number
+                      ? "bg-primary text-white"
+                      : "bg-gray-200 text-gray-500"
+                  }`}
+                >
                   {step.number}
                 </div>
-                <span className={`ml-2 text-sm font-medium ${
-                  currentStep >= step.number ? "text-primary" : "text-gray-500"
-                }`}>
+                <span
+                  className={`ml-2 text-sm font-medium ${
+                    currentStep >= step.number ? "text-primary" : "text-gray-500"
+                  }`}
+                >
                   {step.title}
                 </span>
-                {index < steps.length - 1 && (
-                  <div className="w-16 h-px bg-gray-300 mx-4"></div>
-                )}
+                {index < steps.length - 1 && <div className="mx-4 h-px w-16 bg-gray-300"></div>}
               </div>
             ))}
           </div>
@@ -178,9 +186,9 @@ export default function NovaProposta() {
               {/* Step 1: Cliente Data */}
               {currentStep === 1 && (
                 <div className="space-y-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Dados do Cliente</h3>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <h3 className="mb-4 text-lg font-semibold text-gray-900">Dados do Cliente</h3>
+
+                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <div>
                       <Label htmlFor="clienteNome">Nome Completo</Label>
                       <Input
@@ -192,7 +200,7 @@ export default function NovaProposta() {
                         <p className="text-sm text-red-600">{errors.clienteNome.message}</p>
                       )}
                     </div>
-                    
+
                     <div>
                       <Label htmlFor="clienteCpf">CPF</Label>
                       <Input
@@ -204,7 +212,7 @@ export default function NovaProposta() {
                         <p className="text-sm text-red-600">{errors.clienteCpf.message}</p>
                       )}
                     </div>
-                    
+
                     <div>
                       <Label htmlFor="clienteEmail">Email</Label>
                       <Input
@@ -217,7 +225,7 @@ export default function NovaProposta() {
                         <p className="text-sm text-red-600">{errors.clienteEmail.message}</p>
                       )}
                     </div>
-                    
+
                     <div>
                       <Label htmlFor="clienteTelefone">Telefone</Label>
                       <Input
@@ -229,7 +237,7 @@ export default function NovaProposta() {
                         <p className="text-sm text-red-600">{errors.clienteTelefone.message}</p>
                       )}
                     </div>
-                    
+
                     <div>
                       <Label htmlFor="clienteDataNascimento">Data de Nascimento</Label>
                       <Input
@@ -238,10 +246,12 @@ export default function NovaProposta() {
                         {...register("clienteDataNascimento")}
                       />
                       {errors.clienteDataNascimento && (
-                        <p className="text-sm text-red-600">{errors.clienteDataNascimento.message}</p>
+                        <p className="text-sm text-red-600">
+                          {errors.clienteDataNascimento.message}
+                        </p>
                       )}
                     </div>
-                    
+
                     <div>
                       <Label htmlFor="clienteRenda">Renda Mensal</Label>
                       <Input
@@ -260,24 +270,22 @@ export default function NovaProposta() {
               {/* Step 2: Loan Conditions */}
               {currentStep === 2 && (
                 <div className="space-y-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Condições do Empréstimo</h3>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <h3 className="mb-4 text-lg font-semibold text-gray-900">
+                    Condições do Empréstimo
+                  </h3>
+
+                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <div>
                       <Label htmlFor="valor">Valor Solicitado</Label>
-                      <Input
-                        id="valor"
-                        placeholder="R$ 50.000,00"
-                        {...register("valor")}
-                      />
+                      <Input id="valor" placeholder="R$ 50.000,00" {...register("valor")} />
                       {errors.valor && (
                         <p className="text-sm text-red-600">{errors.valor.message}</p>
                       )}
                     </div>
-                    
+
                     <div>
                       <Label htmlFor="prazo">Prazo (meses)</Label>
-                      <Select onValueChange={(value) => setValue("prazo", value)}>
+                      <Select onValueChange={value => setValue("prazo", value)}>
                         <SelectTrigger>
                           <SelectValue placeholder="Selecione o prazo" />
                         </SelectTrigger>
@@ -293,10 +301,10 @@ export default function NovaProposta() {
                         <p className="text-sm text-red-600">{errors.prazo.message}</p>
                       )}
                     </div>
-                    
+
                     <div>
                       <Label htmlFor="finalidade">Finalidade</Label>
-                      <Select onValueChange={(value) => setValue("finalidade", value)}>
+                      <Select onValueChange={value => setValue("finalidade", value)}>
                         <SelectTrigger>
                           <SelectValue placeholder="Selecione a finalidade" />
                         </SelectTrigger>
@@ -312,10 +320,10 @@ export default function NovaProposta() {
                         <p className="text-sm text-red-600">{errors.finalidade.message}</p>
                       )}
                     </div>
-                    
+
                     <div>
                       <Label htmlFor="garantia">Tipo de Garantia</Label>
-                      <Select onValueChange={(value) => setValue("garantia", value)}>
+                      <Select onValueChange={value => setValue("garantia", value)}>
                         <SelectTrigger>
                           <SelectValue placeholder="Selecione a garantia" />
                         </SelectTrigger>
@@ -338,22 +346,22 @@ export default function NovaProposta() {
               {/* Step 3: Documents */}
               {currentStep === 3 && (
                 <div className="space-y-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Anexo de Documentos</h3>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <h3 className="mb-4 text-lg font-semibold text-gray-900">Anexo de Documentos</h3>
+
+                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                     {[
                       "Documento de Identidade",
                       "Comprovante de Renda",
                       "Comprovante de Residência",
-                      "Documentos Adicionais"
-                    ].map((docType) => (
+                      "Documentos Adicionais",
+                    ].map(docType => (
                       <div key={docType}>
-                        <Label className="block text-sm font-medium text-gray-700 mb-2">
+                        <Label className="mb-2 block text-sm font-medium text-gray-700">
                           {docType}
                         </Label>
-                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary transition-colors">
-                          <Upload className="text-gray-400 text-3xl mb-2 mx-auto" />
-                          <p className="text-gray-500 mb-2">
+                        <div className="rounded-lg border-2 border-dashed border-gray-300 p-6 text-center transition-colors hover:border-primary">
+                          <Upload className="mx-auto mb-2 text-3xl text-gray-400" />
+                          <p className="mb-2 text-gray-500">
                             Clique para enviar ou arraste o arquivo aqui
                           </p>
                           <Input
@@ -380,7 +388,7 @@ export default function NovaProposta() {
               )}
 
               {/* Form Actions */}
-              <div className="flex justify-between pt-6 border-t border-gray-200 mt-8">
+              <div className="mt-8 flex justify-between border-t border-gray-200 pt-6">
                 <Button
                   type="button"
                   variant="outline"
@@ -390,7 +398,7 @@ export default function NovaProposta() {
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Voltar
                 </Button>
-                
+
                 <div className="space-x-4">
                   <Button type="button" variant="outline">
                     Salvar Rascunho

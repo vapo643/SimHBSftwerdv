@@ -11,9 +11,9 @@ export interface AuthState {
 export async function signIn(email: string, password: string) {
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
-    password
+    password,
   });
-  
+
   if (error) throw error;
   return data;
 }
@@ -24,7 +24,10 @@ export async function signOut() {
 }
 
 export async function getSession() {
-  const { data: { session }, error } = await supabase.auth.getSession();
+  const {
+    data: { session },
+    error,
+  } = await supabase.auth.getSession();
   if (error) throw error;
   return session;
 }

@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   Dialog,
   DialogContent,
@@ -6,9 +6,9 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { AlertTriangle } from 'lucide-react';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { AlertTriangle } from "lucide-react";
 
 interface ConfirmDeleteModalProps {
   isOpen: boolean;
@@ -21,7 +21,7 @@ const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
   isOpen,
   onClose,
   onConfirm,
-  tabelaNome
+  tabelaNome,
 }) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -32,8 +32,8 @@ const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
             Confirmar Exclusão
           </DialogTitle>
           <DialogDescription>
-            Tem certeza que deseja excluir a tabela comercial "{tabelaNome}"?
-            Esta ação não pode ser desfeita.
+            Tem certeza que deseja excluir a tabela comercial "{tabelaNome}"? Esta ação não pode ser
+            desfeita.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>

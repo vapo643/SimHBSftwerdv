@@ -1,0 +1,10 @@
+dist/
+node_modules/
+.replit
+*.config.js
+*.config.ts
+vite.config.ts
+drizzle.config.ts
+postcss.config.js
+tailwind.config.ts
+.husky/

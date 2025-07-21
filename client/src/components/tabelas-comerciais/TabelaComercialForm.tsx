@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { X } from 'lucide-react';
-import { TabelaComercial } from '@/pages/configuracoes/tabelas';
+import React, { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { X } from "lucide-react";
+import { TabelaComercial } from "@/pages/configuracoes/tabelas";
 
 const tabelaSchema = z.object({
   nomeTabela: z.string().min(3, "Nome da Tabela deve ter pelo menos 3 caracteres."),
@@ -19,16 +19,16 @@ type TabelaFormData = z.infer<typeof tabelaSchema>;
 
 interface TabelaComercialFormProps {
   initialData?: TabelaComercial | null;
-  onSubmit: (data: Omit<TabelaComercial, 'id'>) => void;
+  onSubmit: (data: Omit<TabelaComercial, "id">) => void;
   onCancel: () => void;
 }
 
 const TabelaComercialForm: React.FC<TabelaComercialFormProps> = ({
   initialData,
   onSubmit,
-  onCancel
+  onCancel,
 }) => {
-  const [novoPrazo, setNovoPrazo] = useState('');
+  const [novoPrazo, setNovoPrazo] = useState("");
   const [prazos, setPrazos] = useState<number[]>(initialData?.prazosPermitidos || []);
 
   const {
@@ -36,14 +36,14 @@ const TabelaComercialForm: React.FC<TabelaComercialFormProps> = ({
     handleSubmit,
     formState: { errors },
     setValue,
-    watch
+    watch,
   } = useForm<TabelaFormData>({
     resolver: zodResolver(tabelaSchema),
     defaultValues: {
-      nomeTabela: initialData?.nomeTabela || '',
+      nomeTabela: initialData?.nomeTabela || "",
       taxaJuros: initialData?.taxaJuros || 0,
-      prazosPermitidos: initialData?.prazosPermitidos || []
-    }
+      prazosPermitidos: initialData?.prazosPermitidos || [],
+    },
   });
 
   const adicionarPrazo = () => {
@@ -51,27 +51,27 @@ const TabelaComercialForm: React.FC<TabelaComercialFormProps> = ({
     if (prazo > 0 && !prazos.includes(prazo)) {
       const novosPrazos = [...prazos, prazo].sort((a, b) => a - b);
       setPrazos(novosPrazos);
-      setValue('prazosPermitidos', novosPrazos);
-      setNovoPrazo('');
+      setValue("prazosPermitidos", novosPrazos);
+      setNovoPrazo("");
     }
   };
 
   const removerPrazo = (prazoRemover: number) => {
     const novosPrazos = prazos.filter(p => p !== prazoRemover);
     setPrazos(novosPrazos);
-    setValue('prazosPermitidos', novosPrazos);
+    setValue("prazosPermitidos", novosPrazos);
   };
 
   const handleFormSubmit = (data: TabelaFormData) => {
     onSubmit({
       nomeTabela: data.nomeTabela,
       taxaJuros: data.taxaJuros,
-      prazosPermitidos: prazos
+      prazosPermitidos: prazos,
     });
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       e.preventDefault();
       adicionarPrazo();
     }
@@ -83,7 +83,7 @@ const TabelaComercialForm: React.FC<TabelaComercialFormProps> = ({
         <Label htmlFor="nomeTabela">Nome da Tabela</Label>
         <Input
           id="nomeTabela"
-          {...register('nomeTabela')}
+          {...register("nomeTabela")}
           placeholder="Ex: Tabela A - Preferencial"
         />
         {errors.nomeTabela && (
@@ -100,7 +100,7 @@ const TabelaComercialForm: React.FC<TabelaComercialFormProps> = ({
           type="number"
           step="0.01"
           min="0"
-          {...register('taxaJuros', { valueAsNumber: true })}
+          {...register("taxaJuros", { valueAsNumber: true })}
           placeholder="Ex: 1.5"
         />
         {errors.taxaJuros && (
@@ -112,13 +112,13 @@ const TabelaComercialForm: React.FC<TabelaComercialFormProps> = ({
 
       <div>
         <Label htmlFor="prazos">Prazos Permitidos (meses)</Label>
-        <div className="flex space-x-2 mb-2">
+        <div className="mb-2 flex space-x-2">
           <Input
             id="prazos"
             type="number"
             min="1"
             value={novoPrazo}
-            onChange={(e) => setNovoPrazo(e.target.value)}
+            onChange={e => setNovoPrazo(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Ex: 12"
           />
@@ -130,7 +130,7 @@ const TabelaComercialForm: React.FC<TabelaComercialFormProps> = ({
             Adicionar
           </Button>
         </div>
-        
+
         <div className="flex flex-wrap gap-2">
           {prazos.map(prazo => (
             <Badge key={prazo} variant="secondary" className="flex items-center gap-1">
@@ -147,7 +147,7 @@ const TabelaComercialForm: React.FC<TabelaComercialFormProps> = ({
             </Badge>
           ))}
         </div>
-        
+
         {errors.prazosPermitidos && (
           <span className="text-sm text-red-500" role="alert">
             {errors.prazosPermitidos.message}
@@ -159,9 +159,7 @@ const TabelaComercialForm: React.FC<TabelaComercialFormProps> = ({
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancelar
         </Button>
-        <Button type="submit">
-          Salvar
-        </Button>
+        <Button type="submit">Salvar</Button>
       </div>
     </form>
   );

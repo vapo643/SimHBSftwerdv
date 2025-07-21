@@ -1,15 +1,23 @@
-import React from 'react';
-import { useForm, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import React from "react";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const clienteSchema = z.object({
   nomeCompleto: z.string().min(3, "Nome completo é obrigatório."),
-  cpfCnpj: z.string().refine(value => value.length === 14 || value.length === 18, "CPF/CNPJ inválido."),
+  cpfCnpj: z
+    .string()
+    .refine(value => value.length === 14 || value.length === 18, "CPF/CNPJ inválido."),
   rg: z.string().min(5, "RG é obrigatório.").optional(),
   orgaoEmissor: z.string().min(2, "Órgão Emissor é obrigatório.").optional(),
   estadoCivil: z.string().nonempty("Estado Civil é obrigatório."),
@@ -25,32 +33,40 @@ const clienteSchema = z.object({
 
 type ClienteFormData = z.infer<typeof clienteSchema>;
 
-const DadosClienteForm: React.FC<{ register: any; control: any; errors: any }> = ({ register, control, errors }) => {
+const DadosClienteForm: React.FC<{ register: any; control: any; errors: any }> = ({
+  register,
+  control,
+  errors,
+}) => {
   // O handleSubmit é gerenciado pelo componente pai
   return (
-    <div className="space-y-4 max-h-[70vh] overflow-y-auto p-1">
-       <div>
+    <div className="max-h-[70vh] space-y-4 overflow-y-auto p-1">
+      <div>
         <Label htmlFor="nomeCompleto">Nome completo / Razão Social</Label>
         <Input id="nomeCompleto" {...register("nomeCompleto")} />
-        {errors.nomeCompleto && <p className="text-red-500 text-sm mt-1">{errors.nomeCompleto.message}</p>}
+        {errors.nomeCompleto && (
+          <p className="mt-1 text-sm text-red-500">{errors.nomeCompleto.message}</p>
+        )}
       </div>
 
       <div>
         <Label htmlFor="cpfCnpj">CPF / CNPJ</Label>
         <Input id="cpfCnpj" {...register("cpfCnpj")} />
-        {errors.cpfCnpj && <p className="text-red-500 text-sm mt-1">{errors.cpfCnpj.message}</p>}
+        {errors.cpfCnpj && <p className="mt-1 text-sm text-red-500">{errors.cpfCnpj.message}</p>}
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
           <Label htmlFor="rg">RG</Label>
           <Input id="rg" {...register("rg")} />
-          {errors.rg && <p className="text-red-500 text-sm mt-1">{errors.rg.message}</p>}
+          {errors.rg && <p className="mt-1 text-sm text-red-500">{errors.rg.message}</p>}
         </div>
         <div>
           <Label htmlFor="orgaoEmissor">Órgão Emissor</Label>
           <Input id="orgaoEmissor" {...register("orgaoEmissor")} />
-          {errors.orgaoEmissor && <p className="text-red-500 text-sm mt-1">{errors.orgaoEmissor.message}</p>}
+          {errors.orgaoEmissor && (
+            <p className="mt-1 text-sm text-red-500">{errors.orgaoEmissor.message}</p>
+          )}
         </div>
       </div>
 
@@ -62,7 +78,9 @@ const DadosClienteForm: React.FC<{ register: any; control: any; errors: any }> =
             control={control}
             render={({ field }) => (
               <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione..." />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="solteiro">Solteiro(a)</SelectItem>
                   <SelectItem value="casado">Casado(a)</SelectItem>
@@ -73,56 +91,73 @@ const DadosClienteForm: React.FC<{ register: any; control: any; errors: any }> =
               </Select>
             )}
           />
-          {errors.estadoCivil && <p className="text-red-500 text-sm mt-1">{errors.estadoCivil.message}</p>}
+          {errors.estadoCivil && (
+            <p className="mt-1 text-sm text-red-500">{errors.estadoCivil.message}</p>
+          )}
         </div>
         <div>
           <Label htmlFor="dataNascimento">Data de Nascimento</Label>
           <Input type="date" id="dataNascimento" {...register("dataNascimento")} />
-          {errors.dataNascimento && <p className="text-red-500 text-sm mt-1">{errors.dataNascimento.message}</p>}
+          {errors.dataNascimento && (
+            <p className="mt-1 text-sm text-red-500">{errors.dataNascimento.message}</p>
+          )}
         </div>
       </div>
 
-       <div>
+      <div>
         <Label htmlFor="nacionalidade">Nacionalidade</Label>
         <Input id="nacionalidade" {...register("nacionalidade")} />
-        {errors.nacionalidade && <p className="text-red-500 text-sm mt-1">{errors.nacionalidade.message}</p>}
+        {errors.nacionalidade && (
+          <p className="mt-1 text-sm text-red-500">{errors.nacionalidade.message}</p>
+        )}
       </div>
 
-       <div>
+      <div>
         <Label htmlFor="cep">CEP</Label>
         <Input id="cep" {...register("cep")} />
-        {errors.cep && <p className="text-red-500 text-sm mt-1">{errors.cep.message}</p>}
+        {errors.cep && <p className="mt-1 text-sm text-red-500">{errors.cep.message}</p>}
       </div>
 
       <div>
         <Label htmlFor="endereco">Endereço Completo (Rua, Nº, Bairro, Cidade, Estado)</Label>
         <Input id="endereco" {...register("endereco")} />
-        {errors.endereco && <p className="text-red-500 text-sm mt-1">{errors.endereco.message}</p>}
+        {errors.endereco && <p className="mt-1 text-sm text-red-500">{errors.endereco.message}</p>}
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-         <div>
-            <Label htmlFor="telefone">Telefone / WhatsApp</Label>
-            <Input id="telefone" {...register("telefone")} />
-            {errors.telefone && <p className="text-red-500 text-sm mt-1">{errors.telefone.message}</p>}
-          </div>
-          <div>
-            <Label htmlFor="email">E-mail</Label>
-            <Input id="email" type="email" {...register("email")} />
-            {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>}
-          </div>
+        <div>
+          <Label htmlFor="telefone">Telefone / WhatsApp</Label>
+          <Input id="telefone" {...register("telefone")} />
+          {errors.telefone && (
+            <p className="mt-1 text-sm text-red-500">{errors.telefone.message}</p>
+          )}
+        </div>
+        <div>
+          <Label htmlFor="email">E-mail</Label>
+          <Input id="email" type="email" {...register("email")} />
+          {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>}
+        </div>
       </div>
-      
+
       <div className="grid grid-cols-2 gap-4">
         <div>
           <Label htmlFor="ocupacao">Ocupação / Profissão</Label>
           <Input id="ocupacao" {...register("ocupacao")} />
-          {errors.ocupacao && <p className="text-red-500 text-sm mt-1">{errors.ocupacao.message}</p>}
+          {errors.ocupacao && (
+            <p className="mt-1 text-sm text-red-500">{errors.ocupacao.message}</p>
+          )}
         </div>
-         <div>
+        <div>
           <Label htmlFor="rendaMensal">Renda / Faturamento Mensal</Label>
-          <Input type="number" id="rendaMensal" {...register("rendaMensal")} placeholder="R$ 0,00"/>
-          {errors.rendaMensal && <p className="text-red-500 text-sm mt-1">{errors.rendaMensal.message}</p>}
+          <Input
+            type="number"
+            id="rendaMensal"
+            {...register("rendaMensal")}
+            placeholder="R$ 0,00"
+          />
+          {errors.rendaMensal && (
+            <p className="mt-1 text-sm text-red-500">{errors.rendaMensal.message}</p>
+          )}
         </div>
       </div>
     </div>

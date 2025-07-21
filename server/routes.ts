@@ -14,20 +14,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/auth/login", async (req, res) => {
     try {
       const { email, password } = req.body;
-      
+
       const supabase = createServerSupabaseClient();
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
-        password
+        password,
       });
-      
+
       if (error) {
         return res.status(401).json({ message: error.message });
       }
-      
-      res.json({ 
-        user: data.user, 
-        session: data.session 
+
+      res.json({
+        user: data.user,
+        session: data.session,
       });
     } catch (error) {
       console.error("Login error:", error);
@@ -38,25 +38,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/auth/register", async (req, res) => {
     try {
       const { email, password, name } = req.body;
-      
+
       const supabase = createServerSupabaseClient();
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: {
-            name
-          }
-        }
+            name,
+          },
+        },
       });
-      
+
       if (error) {
         return res.status(400).json({ message: error.message });
       }
-      
-      res.json({ 
-        user: data.user, 
-        session: data.session 
+
+      res.json({
+        user: data.user,
+        session: data.session,
       });
     } catch (error) {
       console.error("Register error:", error);
@@ -68,11 +68,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const supabase = createServerSupabaseClient();
       const { error } = await supabase.auth.signOut();
-      
+
       if (error) {
         return res.status(400).json({ message: error.message });
       }
-      
+
       res.json({ message: "Logged out successfully" });
     } catch (error) {
       console.error("Logout error:", error);
@@ -95,11 +95,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const id = parseInt(req.params.id);
       const proposta = await storage.getPropostaById(id);
-      
+
       if (!proposta) {
         return res.status(404).json({ message: "Proposta not found" });
       }
-      
+
       res.json(proposta);
     } catch (error) {
       console.error("Get proposta error:", error);
@@ -155,7 +155,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const fileName = `${Date.now()}-${req.file.originalname}`;
-      
+
       const supabase = createServerSupabaseClient();
       const { data, error } = await supabase.storage
         .from("documents")
@@ -168,13 +168,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Get public URL
-      const { data: publicUrl } = supabase.storage
-        .from("documents")
-        .getPublicUrl(fileName);
+      const { data: publicUrl } = supabase.storage.from("documents").getPublicUrl(fileName);
 
-      res.json({ 
+      res.json({
         fileName: data.path,
-        url: publicUrl.publicUrl
+        url: publicUrl.publicUrl,
       });
     } catch (error) {
       console.error("Upload error:", error);
@@ -184,41 +182,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Mock data para produtos e prazos
   const produtos = [
-    { id: 1, nome: 'Crédito Pessoal' },
-    { id: 2, nome: 'Crédito Imobiliário' },
-    { id: 3, nome: 'Crédito Consignado' },
+    { id: 1, nome: "Crédito Pessoal" },
+    { id: 2, nome: "Crédito Imobiliário" },
+    { id: 3, nome: "Crédito Consignado" },
   ];
 
   const prazos = [
-    { id: 1, valor: '12 meses' },
-    { id: 2, valor: '24 meses' },
-    { id: 3, valor: '36 meses' },
+    { id: 1, valor: "12 meses" },
+    { id: 2, valor: "24 meses" },
+    { id: 3, valor: "36 meses" },
   ];
 
   // Rota para buscar produtos
-  app.get('/api/produtos', (req, res) => {
+  app.get("/api/produtos", (req, res) => {
     res.json(produtos);
   });
 
   // Rota para buscar prazos
-  app.get('/api/prazos', (req, res) => {
+  app.get("/api/prazos", (req, res) => {
     res.json(prazos);
   });
 
   // Função para calcular o valor da parcela usando a fórmula da Tabela Price
-  const calcularParcela = (valorSolicitado: number, prazoEmMeses: number, taxaDeJurosMensal: number): number => {
+  const calcularParcela = (
+    valorSolicitado: number,
+    prazoEmMeses: number,
+    taxaDeJurosMensal: number
+  ): number => {
     if (taxaDeJurosMensal <= 0) {
       return valorSolicitado / prazoEmMeses;
     }
     const i = taxaDeJurosMensal / 100; // Convertendo a taxa percentual para decimal
-    const pmt = valorSolicitado * (i * Math.pow(1 + i, prazoEmMeses)) / (Math.pow(1 + i, prazoEmMeses) - 1);
+    const pmt =
+      (valorSolicitado * (i * Math.pow(1 + i, prazoEmMeses))) / (Math.pow(1 + i, prazoEmMeses) - 1);
     return parseFloat(pmt.toFixed(2));
   };
 
   // Mock de tabelas comerciais para simulação
   const tabelasComerciais: { [key: string]: number } = {
-    'tabela-a': 5.0, // Tabela A, 5% de taxa de juros
-    'tabela-b': 7.5, // Tabela B, 7.5% de taxa de juros
+    "tabela-a": 5.0, // Tabela A, 5% de taxa de juros
+    "tabela-b": 7.5, // Tabela B, 7.5% de taxa de juros
   };
 
   // Função para obter a taxa de juros (substituirá a lógica real do DB)
@@ -227,11 +230,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   };
 
   // Rota para simular crédito ATUALIZADA
-  app.post('/api/simular', (req, res) => {
+  app.post("/api/simular", (req, res) => {
     const { valorSolicitado, prazoEmMeses, tabelaComercialId } = req.body;
 
-    if (typeof valorSolicitado !== 'number' || typeof prazoEmMeses !== 'number' || typeof tabelaComercialId !== 'string') {
-      return res.status(400).json({ error: 'Entrada inválida.' });
+    if (
+      typeof valorSolicitado !== "number" ||
+      typeof prazoEmMeses !== "number" ||
+      typeof tabelaComercialId !== "string"
+    ) {
+      return res.status(400).json({ error: "Entrada inválida." });
     }
 
     const taxaDeJurosMensal = obterTaxaJurosPorTabela(tabelaComercialId);
@@ -248,7 +255,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   };
 
   const calcularIOF = (valor: number) => {
-      return valor * 0.0038; // Exemplo de alíquota
+    return valor * 0.0038; // Exemplo de alíquota
   };
 
   // Endpoint GET para simulação de crédito
@@ -257,67 +264,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ now: new Date().toISOString() });
   });
 
-  app.get('/api/simulacao', (req, res) => {
+  app.get("/api/simulacao", (req, res) => {
     const { valor, prazo, produto_id, incluir_tac, dataVencimento } = req.query;
 
     const valorSolicitado = parseFloat(valor as string);
     const prazoEmMeses = parseInt(prazo as string);
-    
+
     if (isNaN(valorSolicitado) || isNaN(prazoEmMeses) || !produto_id || !dataVencimento) {
-      return res.status(400).json({ error: 'Parâmetros inválidos.' });
+      return res.status(400).json({ error: "Parâmetros inválidos." });
     }
 
     // Correção Crítica: Usa a data do servidor como a "verdade"
-    const dataAtual = new Date(); 
+    const dataAtual = new Date();
     const primeiroVencimento = new Date(dataVencimento as string);
-    const diasDiferenca = Math.ceil((primeiroVencimento.getTime() - dataAtual.getTime()) / (1000 * 3600 * 24));
+    const diasDiferenca = Math.ceil(
+      (primeiroVencimento.getTime() - dataAtual.getTime()) / (1000 * 3600 * 24)
+    );
 
     if (diasDiferenca > 45) {
-      return res.status(400).json({ error: "A data do primeiro vencimento não pode ser superior a 45 dias." });
+      return res
+        .status(400)
+        .json({ error: "A data do primeiro vencimento não pode ser superior a 45 dias." });
     }
 
     const { taxaDeJurosMensal, valorTac } = buscarTaxas(produto_id as string);
-    
-    const taxaJurosDiaria = taxaDeJurosMensal / 30; 
+
+    const taxaJurosDiaria = taxaDeJurosMensal / 30;
     const jurosCarencia = valorSolicitado * (taxaJurosDiaria / 100) * diasDiferenca;
 
     const iof = calcularIOF(valorSolicitado);
-    const tac = incluir_tac === 'true' ? valorTac : 0;
-    
+    const tac = incluir_tac === "true" ? valorTac : 0;
+
     const valorTotalFinanciado = valorSolicitado + iof + tac + jurosCarencia;
 
     const valorParcela = calcularParcela(valorTotalFinanciado, prazoEmMeses, taxaDeJurosMensal);
-    
-    const custoTotal = (valorParcela * prazoEmMeses);
-    const cetAnual = (((custoTotal / valorSolicitado) - 1) / (prazoEmMeses / 12)) * 100;
 
-    return res.json({ 
-        valorParcela: parseFloat(valorParcela.toFixed(2)), 
-        taxaJurosMensal: taxaDeJurosMensal, 
-        iof: parseFloat(iof.toFixed(2)),
-        valorTac: tac,
-        cet: parseFloat(cetAnual.toFixed(2)) 
+    const custoTotal = valorParcela * prazoEmMeses;
+    const cetAnual = ((custoTotal / valorSolicitado - 1) / (prazoEmMeses / 12)) * 100;
+
+    return res.json({
+      valorParcela: parseFloat(valorParcela.toFixed(2)),
+      taxaJurosMensal: taxaDeJurosMensal,
+      iof: parseFloat(iof.toFixed(2)),
+      valorTac: tac,
+      cet: parseFloat(cetAnual.toFixed(2)),
     });
   });
 
   // Rota para fila de formalização
-  app.get('/api/formalizacao/propostas', (req, res) => {
+  app.get("/api/formalizacao/propostas", (req, res) => {
     const mockPropostas = [
-      { id: 'PROP-098', cliente: 'Empresa A', status: 'Assinatura Pendente' },
-      { id: 'PROP-101', cliente: 'Empresa B', status: 'Biometria Concluída' },
-      { id: 'PROP-105', cliente: 'Empresa C', status: 'CCB Gerada' },
+      { id: "PROP-098", cliente: "Empresa A", status: "Assinatura Pendente" },
+      { id: "PROP-101", cliente: "Empresa B", status: "Biometria Concluída" },
+      { id: "PROP-105", cliente: "Empresa C", status: "CCB Gerada" },
     ];
     res.json(mockPropostas);
   });
 
   // Update proposal status
-  app.put('/api/propostas/:id/status', authMiddleware, async (req, res) => {
+  app.put("/api/propostas/:id/status", authMiddleware, async (req, res) => {
     try {
       const { id } = req.params;
       const { status, observacao } = req.body;
-      
+
       if (!status) {
-        return res.status(400).json({ message: 'Status é obrigatório' });
+        return res.status(400).json({ message: "Status é obrigatório" });
       }
 
       // Mock update - in real app would update database
@@ -325,68 +336,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
         id,
         status,
         observacao,
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       };
 
       res.json(mockUpdatedProposta);
     } catch (error) {
-      console.error('Update status error:', error);
-      res.status(500).json({ message: 'Erro ao atualizar status' });
+      console.error("Update status error:", error);
+      res.status(500).json({ message: "Erro ao atualizar status" });
     }
   });
 
   // Get proposal logs
-  app.get('/api/propostas/:id/logs', authMiddleware, async (req, res) => {
+  app.get("/api/propostas/:id/logs", authMiddleware, async (req, res) => {
     try {
       const { id } = req.params;
-      
+
       // Mock logs data
       const mockLogs = [
         {
           id: 1,
-          status_novo: 'Em Análise',
-          observacao: 'Proposta iniciada para análise',
-          user_id: 'user-123',
-          created_at: new Date(Date.now() - 86400000).toISOString() // 1 day ago
+          status_novo: "Em Análise",
+          observacao: "Proposta iniciada para análise",
+          user_id: "user-123",
+          created_at: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
         },
         {
           id: 2,
-          status_novo: 'Pendente',
-          observacao: 'Documentos adicionais necessários',
-          user_id: 'user-456',
-          created_at: new Date(Date.now() - 43200000).toISOString() // 12 hours ago
-        }
+          status_novo: "Pendente",
+          observacao: "Documentos adicionais necessários",
+          user_id: "user-456",
+          created_at: new Date(Date.now() - 43200000).toISOString(), // 12 hours ago
+        },
       ];
 
       res.json(mockLogs);
     } catch (error) {
-      console.error('Get logs error:', error);
-      res.status(500).json({ message: 'Erro ao carregar histórico' });
+      console.error("Get logs error:", error);
+      res.status(500).json({ message: "Erro ao carregar histórico" });
     }
   });
 
   // Get single proposal
-  app.get('/api/propostas/:id', authMiddleware, async (req, res) => {
+  app.get("/api/propostas/:id", authMiddleware, async (req, res) => {
     try {
       const { id } = req.params;
-      
+
       // Mock proposal data
       const mockProposta = {
         id,
-        clienteNome: 'João Silva',
-        cpf: '123.456.789-00',
-        valorSolicitado: 'R$ 10.000,00',
-        prazo: '12 meses',
-        status: 'Em Análise',
+        clienteNome: "João Silva",
+        cpf: "123.456.789-00",
+        valorSolicitado: "R$ 10.000,00",
+        prazo: "12 meses",
+        status: "Em Análise",
         dataCriacao: new Date().toISOString(),
         score: 750,
-        parceiro: 'Parceiro A'
+        parceiro: "Parceiro A",
       };
 
       res.json(mockProposta);
     } catch (error) {
-      console.error('Get proposal error:', error);
-      res.status(500).json({ message: 'Erro ao carregar proposta' });
+      console.error("Get proposal error:", error);
+      res.status(500).json({ message: "Erro ao carregar proposta" });
     }
   });
 
@@ -394,14 +405,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/dashboard/stats", authMiddleware, async (req, res) => {
     try {
       const allPropostas = await storage.getPropostas();
-      
+
       const stats = {
         totalPropostas: allPropostas.length,
         aguardandoAnalise: allPropostas.filter(p => p.status === "aguardando_analise").length,
         aprovadas: allPropostas.filter(p => p.status === "aprovado").length,
-        valorTotal: allPropostas.reduce((sum, p) => sum + parseFloat(p.valor), 0)
+        valorTotal: allPropostas.reduce((sum, p) => sum + parseFloat(p.valor), 0),
       };
-      
+
       res.json(stats);
     } catch (error) {
       console.error("Get stats error:", error);

@@ -3,11 +3,11 @@ import { Link, useLocation } from "wouter";
 import { signOut } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { 
-  LayoutDashboard, 
-  PlusCircle, 
-  List, 
-  CreditCard, 
+import {
+  LayoutDashboard,
+  PlusCircle,
+  List,
+  CreditCard,
   Bell,
   User,
   LogOut,
@@ -15,7 +15,7 @@ import {
   Settings, // Adicionando o ícone para configurações
   Users, // Adicionando o ícone para usuários
   Building2, // Adicionando o ícone para parceiros
-  Package // Adicionando o ícone para produtos
+  Package, // Adicionando o ícone para produtos
 } from "lucide-react";
 
 interface DashboardLayoutProps {
@@ -70,7 +70,7 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
           </div>
           <div className="flex-1 overflow-auto py-2">
             <nav className="grid items-start px-4 text-sm font-medium">
-              {navigation.map((item) => {
+              {navigation.map(item => {
                 const Icon = item.icon;
                 const isActive = location === item.href;
                 return (
@@ -93,18 +93,16 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
         </div>
       </div>
       <div className="flex flex-col">
-        <header className="flex h-14 lg:h-[60px] items-center gap-4 border-b bg-muted/40 px-6">
+        <header className="bg-muted/40 flex h-14 items-center gap-4 border-b px-6 lg:h-[60px]">
           {/* Lógica do cabeçalho, como busca ou menu de usuário, pode vir aqui */}
           <div className="flex-1">
-            <h1 className="font-semibold text-lg">{title}</h1>
+            <h1 className="text-lg font-semibold">{title}</h1>
           </div>
           <Button onClick={handleSignOut} variant="outline" size="icon">
             <LogOut className="h-5 w-5" />
           </Button>
         </header>
-        <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6">
-          {children}
-        </main>
+        <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6">{children}</main>
       </div>
     </div>
   );

@@ -1,16 +1,22 @@
-import React from 'react';
-import { useForm, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import React from "react";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const produtoSchema = z.object({
   nome: z.string().min(3, "Nome do Produto é obrigatório."),
   status: z.enum(["Ativo", "Inativo"], {
-    errorMap: () => ({ message: "Status é obrigatório." })
+    errorMap: () => ({ message: "Status é obrigatório." }),
   }),
 });
 
@@ -23,7 +29,12 @@ interface ProdutoFormProps {
 }
 
 const ProdutoForm: React.FC<ProdutoFormProps> = ({ onSubmit, onCancel, initialData }) => {
-  const { control, register, handleSubmit, formState: { errors } } = useForm<ProdutoFormData>({
+  const {
+    control,
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<ProdutoFormData>({
     resolver: zodResolver(produtoSchema),
     defaultValues: initialData || { status: "Ativo" },
   });
@@ -33,7 +44,7 @@ const ProdutoForm: React.FC<ProdutoFormProps> = ({ onSubmit, onCancel, initialDa
       <div>
         <Label htmlFor="nome">Nome do Produto</Label>
         <Input id="nome" {...register("nome")} />
-        {errors.nome && <p className="text-red-500 text-sm mt-1">{errors.nome.message}</p>}
+        {errors.nome && <p className="mt-1 text-sm text-red-500">{errors.nome.message}</p>}
       </div>
 
       <div>
@@ -53,11 +64,13 @@ const ProdutoForm: React.FC<ProdutoFormProps> = ({ onSubmit, onCancel, initialDa
             </Select>
           )}
         />
-        {errors.status && <p className="text-red-500 text-sm mt-1">{errors.status.message}</p>}
+        {errors.status && <p className="mt-1 text-sm text-red-500">{errors.status.message}</p>}
       </div>
 
       <div className="flex justify-end gap-2 pt-4">
-        <Button type="button" variant="ghost" onClick={onCancel}>Cancelar</Button>
+        <Button type="button" variant="ghost" onClick={onCancel}>
+          Cancelar
+        </Button>
         <Button type="submit">Salvar</Button>
       </div>
     </form>

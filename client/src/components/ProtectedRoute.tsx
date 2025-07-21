@@ -13,10 +13,12 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   const [, setLocation] = useLocation();
 
   useEffect(() => {
-    const { data: { subscription } } = onAuthStateChange((user) => {
+    const {
+      data: { subscription },
+    } = onAuthStateChange(user => {
       setUser(user);
       setLoading(false);
-      
+
       if (!user) {
         setLocation("/login");
       }
@@ -27,8 +29,8 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
       </div>
     );
   }

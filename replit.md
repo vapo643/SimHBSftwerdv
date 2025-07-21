@@ -7,6 +7,7 @@ This is a full-stack TypeScript application for credit management called "Simpix
 ## Recent Changes
 
 ### December 2024
+
 - **401 Unauthorized Error Fix**: Implemented fetchWithToken API client for secure authenticated requests
 - Created centralized API client with automatic JWT token inclusion
 - Refactored all fetch calls to use new authenticated request system
@@ -72,6 +73,12 @@ This is a full-stack TypeScript application for credit management called "Simpix
 - **T-01 Refinement and Dynamic Simulator**: Implemented comprehensive credit simulation with IOF, TAC, and detailed cost breakdown
 - **Enhanced Simulation API**: Added GET /api/simulacao endpoint with advanced calculations including IOF (0.38%), TAC, and accurate CET calculation
 - **Comprehensive Cost Display**: Enhanced simulation results to show installment value, interest rate, IOF, TAC, and annual CET in detailed format
+- **Code Quality Foundation Implementation**: Established comprehensive code quality and governance framework with ESLint, Prettier, Husky, and Commitlint
+- **ESLint Configuration**: TypeScript + React rules with accessibility checks and Prettier integration for consistent code style
+- **Prettier Setup**: Code formatting with Tailwind CSS class sorting and comprehensive file type support
+- **Git Hooks Implementation**: Pre-commit linting and formatting, commit message validation via Husky
+- **Conventional Commits**: Enforced commit message standards with detailed type definitions and validation rules
+- **Git Flow Documentation**: Complete branching strategy documentation with examples and workflow guidelines
 
 ## User Preferences
 
@@ -80,6 +87,7 @@ Preferred communication style: Simple, everyday language.
 ## System Architecture
 
 ### Frontend Architecture
+
 - **Framework**: React 18 with TypeScript
 - **Routing**: Wouter (lightweight React router)
 - **Styling**: Tailwind CSS with shadcn/ui components
@@ -88,6 +96,7 @@ Preferred communication style: Simple, everyday language.
 - **Build Tool**: Vite for development and production builds
 
 ### Backend Architecture
+
 - **Framework**: Express.js with TypeScript
 - **API Pattern**: RESTful API with `/api` prefix
 - **Database**: PostgreSQL with Drizzle ORM
@@ -96,7 +105,9 @@ Preferred communication style: Simple, everyday language.
 - **Database Client**: Neon Database (@neondatabase/serverless)
 
 ### Database Schema
+
 The application uses PostgreSQL with the following main tables:
+
 - `users`: User authentication and profile data
 - `propostas`: Credit proposals with client information, loan details, and status tracking
 - Status enum for proposal workflow: rascunho, aguardando_analise, em_analise, aprovado, rejeitado, pronto_pagamento, pago, cancelado
@@ -104,29 +115,34 @@ The application uses PostgreSQL with the following main tables:
 ## Key Components
 
 ### Authentication System
+
 - Supabase-based authentication with email/password
 - Protected routes using `ProtectedRoute` component
 - Session management with automatic redirects
 - JWT token-based API authentication
 
 ### Dashboard Layout
+
 - Centralized `DashboardLayout` component with sidebar navigation
 - Responsive design with mobile support
 - Navigation links for all main application sections
 
 ### Proposal Management
+
 - Multi-step form for creating new proposals (client data, loan conditions, documents)
 - File upload functionality for supporting documents
 - Status tracking throughout the proposal lifecycle
 - CRUD operations for proposal management
 
 ### Credit Analysis Workflow
+
 - Queue system for proposals awaiting analysis
 - Manual analysis interface with decision capabilities
 - Status updates and approval/rejection workflow
 - Priority-based filtering and search functionality
 
 ### Payment Processing
+
 - Payment tracking and batch processing
 - Integration with formalization workflow
 - Status monitoring for approved proposals
@@ -134,6 +150,7 @@ The application uses PostgreSQL with the following main tables:
 ## Data Flow
 
 ### Proposal Creation Flow
+
 1. User creates new proposal through multi-step form
 2. Client data, loan conditions, and documents are collected
 3. Files uploaded to Supabase Storage
@@ -141,6 +158,7 @@ The application uses PostgreSQL with the following main tables:
 5. Proposal moves to "aguardando_analise" when submitted
 
 ### Analysis Flow
+
 1. Proposals appear in credit analysis queue
 2. Analysts can filter and search proposals
 3. Individual proposal analysis with decision interface
@@ -148,6 +166,7 @@ The application uses PostgreSQL with the following main tables:
 5. Approved proposals move to formalization
 
 ### Payment Flow
+
 1. Approved proposals become available for payment processing
 2. Batch selection and processing capabilities
 3. Status tracking through payment completion
@@ -156,6 +175,7 @@ The application uses PostgreSQL with the following main tables:
 ## External Dependencies
 
 ### Core Dependencies
+
 - **Supabase**: Authentication, database, and file storage
 - **Drizzle ORM**: Type-safe database operations
 - **TanStack Query**: Server state management and caching
@@ -165,6 +185,7 @@ The application uses PostgreSQL with the following main tables:
 - **shadcn/ui**: Pre-built React components
 
 ### Development Dependencies
+
 - **Vite**: Build tool and development server
 - **TypeScript**: Type safety and development experience
 - **ESBuild**: Production bundling
@@ -173,24 +194,28 @@ The application uses PostgreSQL with the following main tables:
 ## Deployment Strategy
 
 ### Development Environment
+
 - Vite development server with HMR
 - Express.js backend with live reloading
 - Environment variables for Supabase and database configuration
 - Replit-specific development tooling integration
 
 ### Production Build
+
 - Vite builds frontend to `dist/public`
 - ESBuild bundles backend to `dist/index.js`
 - Single Express server serves both API and static files
 - Environment-based configuration management
 
 ### Database Management
+
 - Drizzle Kit for schema management and migrations
 - PostgreSQL as primary database
 - Supabase for authentication and file storage
 - Connection pooling with postgres-js
 
 ### Key Environment Variables
+
 - `DATABASE_URL`: PostgreSQL connection string
 - `SUPABASE_URL`: Supabase project URL
 - `SUPABASE_ANON_KEY`: Supabase anonymous key

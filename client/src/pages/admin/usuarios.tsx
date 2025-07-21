@@ -1,10 +1,17 @@
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import UserForm from '@/components/usuarios/UserForm';
-import { mockUsers, User } from '@/data/users';
-import DashboardLayout from '@/components/DashboardLayout';
+import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+} from "@/components/ui/table";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import UserForm from "@/components/usuarios/UserForm";
+import { mockUsers, User } from "@/data/users";
+import DashboardLayout from "@/components/DashboardLayout";
 
 const UsuariosPage: React.FC = () => {
   const [users, setUsers] = useState<User[]>(mockUsers);
@@ -15,7 +22,7 @@ const UsuariosPage: React.FC = () => {
     if (selectedUser) {
       setUsers(users.map(u => (u.id === selectedUser.id ? { ...u, ...user } : u)));
     } else {
-      setUsers([...users, { ...user, id: String(Date.now()), status: 'Ativo' }]);
+      setUsers([...users, { ...user, id: String(Date.now()), status: "Ativo" }]);
     }
     setIsModalOpen(false);
     setSelectedUser(null);
@@ -25,21 +32,25 @@ const UsuariosPage: React.FC = () => {
     setSelectedUser(user);
     setIsModalOpen(true);
   };
-  
+
   const openNewModal = () => {
     setSelectedUser(null);
     setIsModalOpen(true);
   };
 
   const toggleUserStatus = (userId: string) => {
-    setUsers(users.map(user =>
-      user.id === userId ? { ...user, status: user.status === 'Ativo' ? 'Inativo' : 'Ativo' } : user
-    ));
+    setUsers(
+      users.map(user =>
+        user.id === userId
+          ? { ...user, status: user.status === "Ativo" ? "Inativo" : "Ativo" }
+          : user
+      )
+    );
   };
 
   return (
     <DashboardLayout title="Gestão de Usuários e Perfis">
-      <div className="flex justify-between items-center mb-4">
+      <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-bold">Usuários</h1>
         <Button onClick={openNewModal}>Novo Usuário</Button>
       </div>
@@ -63,9 +74,11 @@ const UsuariosPage: React.FC = () => {
               <TableCell>{user.loja}</TableCell>
               <TableCell>{user.status}</TableCell>
               <TableCell className="space-x-2">
-                <Button variant="outline" size="sm" onClick={() => openEditModal(user)}>Editar</Button>
+                <Button variant="outline" size="sm" onClick={() => openEditModal(user)}>
+                  Editar
+                </Button>
                 <Button variant="outline" size="sm" onClick={() => toggleUserStatus(user.id)}>
-                  {user.status === 'Ativo' ? 'Desativar' : 'Ativar'}
+                  {user.status === "Ativo" ? "Desativar" : "Ativar"}
                 </Button>
               </TableCell>
             </TableRow>
@@ -78,10 +91,13 @@ const UsuariosPage: React.FC = () => {
           <DialogHeader>
             <DialogTitle>{selectedUser ? "Editar Usuário" : "Novo Usuário"}</DialogTitle>
           </DialogHeader>
-          <UserForm 
+          <UserForm
             initialData={selectedUser}
             onSubmit={handleCreateOrEdit}
-            onCancel={() => { setIsModalOpen(false); setSelectedUser(null); }}
+            onCancel={() => {
+              setIsModalOpen(false);
+              setSelectedUser(null);
+            }}
           />
         </DialogContent>
       </Dialog>

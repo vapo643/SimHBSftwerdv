@@ -1,4 +1,13 @@
-import { pgTable, text, serial, integer, boolean, timestamp, decimal, pgEnum } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  serial,
+  integer,
+  boolean,
+  timestamp,
+  decimal,
+  pgEnum,
+} from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -12,7 +21,7 @@ export const users = pgTable("users", {
 
 export const statusEnum = pgEnum("status", [
   "rascunho",
-  "aguardando_analise", 
+  "aguardando_analise",
   "em_analise",
   "aprovado",
   "rejeitado",
@@ -21,7 +30,7 @@ export const statusEnum = pgEnum("status", [
   "contratos_assinados",
   "pronto_pagamento",
   "pago",
-  "cancelado"
+  "cancelado",
 ]);
 
 export const propostas = pgTable("propostas", {
@@ -33,22 +42,22 @@ export const propostas = pgTable("propostas", {
   clienteTelefone: text("cliente_telefone").notNull(),
   clienteDataNascimento: text("cliente_data_nascimento").notNull(),
   clienteRenda: text("cliente_renda").notNull(),
-  
+
   // Empréstimo dados
   valor: decimal("valor", { precision: 15, scale: 2 }).notNull(),
   prazo: integer("prazo").notNull(),
   finalidade: text("finalidade").notNull(),
   garantia: text("garantia").notNull(),
-  
+
   // Status e análise
   status: statusEnum("status").notNull().default("rascunho"),
   valorAprovado: decimal("valor_aprovado", { precision: 15, scale: 2 }),
   taxaJuros: decimal("taxa_juros", { precision: 5, scale: 2 }),
   observacoes: text("observacoes"),
-  
+
   // Documentos
   documentos: text("documentos").array(),
-  
+
   // Formalização
   dataAprovacao: timestamp("data_aprovacao"),
   documentosAdicionais: text("documentos_adicionais").array(),
@@ -57,7 +66,7 @@ export const propostas = pgTable("propostas", {
   dataAssinatura: timestamp("data_assinatura"),
   dataPagamento: timestamp("data_pagamento"),
   observacoesFormalização: text("observacoes_formalizacao"),
-  
+
   // Auditoria
   userId: integer("user_id").references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),

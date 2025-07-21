@@ -1,4 +1,12 @@
-import { users, propostas, type User, type InsertUser, type Proposta, type InsertProposta, type UpdateProposta } from "@shared/schema";
+import {
+  users,
+  propostas,
+  type User,
+  type InsertUser,
+  type Proposta,
+  type InsertProposta,
+  type UpdateProposta,
+} from "@shared/schema";
 import { db } from "./lib/supabase";
 import { eq, desc } from "drizzle-orm";
 
@@ -7,7 +15,7 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
-  
+
   // Propostas
   getPropostas(): Promise<Proposta[]>;
   getPropostaById(id: number): Promise<Proposta | undefined>;
@@ -43,7 +51,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getPropostasByStatus(status: string): Promise<Proposta[]> {
-    return await db.select().from(propostas).where(eq(propostas.status, status as any)).orderBy(desc(propostas.createdAt));
+    return await db
+      .select()
+      .from(propostas)
+      .where(eq(propostas.status, status as any))
+      .orderBy(desc(propostas.createdAt));
   }
 
   async createProposta(proposta: InsertProposta): Promise<Proposta> {
@@ -52,7 +64,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateProposta(id: number, proposta: UpdateProposta): Promise<Proposta> {
-    const result = await db.update(propostas).set({ ...proposta, updatedAt: new Date() }).where(eq(propostas.id, id)).returning();
+    const result = await db
+      .update(propostas)
+      .set({ ...proposta, updatedAt: new Date() })
+      .where(eq(propostas.id, id))
+      .returning();
     return result[0];
   }
 
