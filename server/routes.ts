@@ -8,7 +8,7 @@ import { z } from "zod";
 import multer from "multer";
 import PDFDocument from "pdfkit";
 import { Request, Response } from "express";
-import { db } from "./storage";
+import { db } from "./lib/supabase";
 import { userProfiles, propostas, lojas, parceiros, produtos, tabelasComerciais, propostasSchema, insertPropostaSchema } from "../shared/schema";
 import { eq, and, desc } from "drizzle-orm";
 import { fromZodError } from "zod-validation-error";
