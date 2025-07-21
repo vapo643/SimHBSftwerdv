@@ -27,32 +27,76 @@ app.use(helmet({
   crossOriginEmbedderPolicy: false,
 }));
 
-// Rate limiting - General API
+// Rate limiting - General API with enhanced security
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // limit each IP to 100 requests per windowMs
   message: {
     error: 'Too many requests from this IP, please try again later.',
-    retryAfter: 15 * 60
+    retryAfter: 15 * 60,
+    code: 'RATE_LIMIT_EXCEEDED'
   },
   standardHeaders: true,
   legacyHeaders: false,
+  skipFailedRequests: false,
+  skipSuccessfulRequests: false,
+  handler: (req, res) => {
+    log(`Rate limit exceeded for IP: ${req.ip} on ${req.originalUrl}`);
+    res.status(429).json({
+      error: 'Too many requests from this IP, please try again later.',
+      retryAfter: Math.round(req.rateLimit?.resetTime ? (req.rateLimit.resetTime - Date.now()) / 1000 : 900),
+      code: 'RATE_LIMIT_EXCEEDED'
+    });
+  }
 });
 app.use('/api', apiLimiter);
 
-// Stricter rate limiting for auth endpoints
+// Stricter rate limiting for auth endpoints - Enhanced security against brute force
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 5, // limit each IP to 5 authentication attempts per windowMs
   message: {
     error: 'Too many authentication attempts, please try again later.',
-    retryAfter: 15 * 60
+    retryAfter: 15 * 60,
+    code: 'AUTH_RATE_LIMIT_EXCEEDED'
   },
   standardHeaders: true,
   legacyHeaders: false,
   skipSuccessfulRequests: true, // Don't count successful requests
+  skipFailedRequests: false,
+  handler: (req, res) => {
+    log(`Auth rate limit exceeded for IP: ${req.ip} on ${req.originalUrl}`);
+    res.status(429).json({
+      error: 'Too many authentication attempts from this IP. Please try again later.',
+      retryAfter: Math.round(req.rateLimit?.resetTime ? (req.rateLimit.resetTime - Date.now()) / 1000 : 900),
+      code: 'AUTH_RATE_LIMIT_EXCEEDED'
+    });
+  }
 });
 app.use('/api/auth', authLimiter);
+
+// Additional rate limiting for sensitive operations
+const sensitiveOperationsLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 10, // limit sensitive operations to 10 per hour
+  message: {
+    error: 'Too many sensitive operations from this IP, please try again later.',
+    retryAfter: 60 * 60,
+    code: 'SENSITIVE_RATE_LIMIT_EXCEEDED'
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) => {
+    log(`Sensitive operations rate limit exceeded for IP: ${req.ip} on ${req.originalUrl}`);
+    res.status(429).json({
+      error: 'Too many sensitive operations from this IP, please try again later.',
+      retryAfter: Math.round(req.rateLimit?.resetTime ? (req.rateLimit.resetTime - Date.now()) / 1000 : 3600),
+      code: 'SENSITIVE_RATE_LIMIT_EXCEEDED'
+    });
+  }
+});
+app.use('/api/propostas/*/gerar-ccb', sensitiveOperationsLimiter);
+app.use('/api/upload', sensitiveOperationsLimiter);
 
 app.use(cors({
   origin: config.server.nodeEnv === 'production' 
