@@ -1,73 +1,38 @@
-/**
- * CONFIGURAÇÃO DE TESTES (Pilar 17)
- * 
- * Setup global para todos os testes do projeto
- */
-
-import { beforeAll, afterEach, afterAll } from 'vitest';
-import { cleanup } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { cleanup } from '@testing-library/react';
+import { afterEach, vi } from 'vitest';
 
-// Configurar environment variables para testes
-beforeAll(() => {
-  process.env.NODE_ENV = 'test';
-  process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test_db';
-  process.env.SUPABASE_URL = 'https://test-project.supabase.co';
-  process.env.SUPABASE_ANON_KEY = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTYwMzI2ODgwMCwiZXhwIjoxOTE4ODQ0ODAwfQ.test-key-for-testing-purposes-only-very-long-key-string';
+// Mock do DOM
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: vi.fn().mockImplementation(query => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: vi.fn(), // deprecated
+    removeListener: vi.fn(), // deprecated
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    dispatchEvent: vi.fn(),
+  })),
 });
 
-// Limpar após cada teste
+// Mock do ResizeObserver
+global.ResizeObserver = vi.fn().mockImplementation(() => ({
+  observe: vi.fn(),
+  unobserve: vi.fn(),
+  disconnect: vi.fn(),
+}));
+
+// Cleanup após cada teste
 afterEach(() => {
   cleanup();
 });
 
-// Global teardown
-afterAll(() => {
-  // Cleanup global mocks or resources if needed
-});
-
-// Mock do localStorage para testes
-Object.defineProperty(window, 'localStorage', {
-  value: {
-    getItem: () => null,
-    setItem: () => {},
-    removeItem: () => {},
-    clear: () => {},
-  },
-  writable: true,
-});
-
-// Mock do matchMedia para testes
-Object.defineProperty(window, 'matchMedia', {
-  writable: true,
-  value: (query: string) => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: () => {},
-    removeListener: () => {},
-    addEventListener: () => {},
-    removeEventListener: () => {},
-    dispatchEvent: () => {},
+// Mock de variáveis de ambiente
+vi.mock('../server/lib/config', () => ({
+  getConfig: () => ({
+    SUPABASE_URL: 'http://localhost:54321',
+    SUPABASE_ANON_KEY: 'mock-anon-key',
   }),
-});
-
-// Mock do ResizeObserver
-global.ResizeObserver = class ResizeObserver {
-  observe() {}
-  unobserve() {}
-  disconnect() {}
-};
-
-// Mock do IntersectionObserver
-global.IntersectionObserver = class IntersectionObserver {
-  root = null;
-  rootMargin = '0px';
-  thresholds = [0];
-  
-  constructor() {}
-  observe() {}
-  unobserve() {}
-  disconnect() {}
-  takeRecords() { return []; }
-};
+}));

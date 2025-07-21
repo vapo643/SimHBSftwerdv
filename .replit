@@ -34,6 +34,15 @@ task = "shell.exec"
 args = "npm run dev"
 waitForPort = 5000
 
+[[workflows.workflow]]
+name = "Run Tests"
+author = 44603236
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npx vitest run"
+
 [[ports]]
 localPort = 5000
 externalPort = 80
