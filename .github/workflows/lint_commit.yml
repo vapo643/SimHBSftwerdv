@@ -1,11 +1,28 @@
 
-name: Lint Commit Message
+name: CI/CD Pipeline
 on: [pull_request]
 jobs:
-  commitlint:
+  ci-cd:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - uses: wagoid/commitlint-github-action@v5
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Lint Commit Message
+        uses: wagoid/commitlint-github-action@v5
+      
+      - name: Install Dependencies
+        run: npm ci
+      
+      - name: Run Tests
+        run: npm run test:run
+      
+      - name: Build Project
+        run: npm run build
