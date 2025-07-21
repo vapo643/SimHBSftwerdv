@@ -1,7 +1,7 @@
 
 import { Switch, Route } from "wouter";
 
-export default function App() {
+function App() {
   return (
     <div style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
       <h1>Simpix - Sistema de Crédito</h1>
@@ -45,3 +45,5 @@ export default function App() {
     </div>
   );
 }
+
+export default App;
