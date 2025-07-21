@@ -174,12 +174,9 @@ app.use((req, res, next) => {
   // Other ports are firewalled. Default to 5000 if not specified.
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
-  server.listen({
-    port: config.server.port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
-    log(`✅ Server started successfully on port ${config.server.port}`);
+  const PORT = process.env.PORT || 5000;
+  server.listen(PORT, "0.0.0.0", () => {
+    log(`✅ Server started successfully on port ${PORT}`);
     log(`🌍 Environment: ${config.server.nodeEnv}`);
     log(`🔗 Supabase URL: ${config.supabase.url}`);
   });
