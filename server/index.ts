@@ -5,6 +5,7 @@ import cors from "cors";
 import rateLimit from "express-rate-limit";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { config } from "./lib/config";
 
 const app = express();
 
@@ -54,8 +55,8 @@ const authLimiter = rateLimit({
 app.use('/api/auth', authLimiter);
 
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? process.env.FRONTEND_URL || false 
+  origin: config.server.nodeEnv === 'production' 
+    ? config.server.frontendUrl || false 
     : true,
   credentials: true,
 }));
@@ -107,7 +108,7 @@ app.use((req, res, next) => {
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes
-  if (app.get("env") === "development") {
+  if (config.server.nodeEnv === "development") {
     await setupVite(app, server);
   } else {
     serveStatic(app);
@@ -117,12 +118,13 @@ app.use((req, res, next) => {
   // Other ports are firewalled. Default to 5000 if not specified.
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
-  const port = parseInt(process.env.PORT || '5000', 10);
   server.listen({
-    port,
+    port: config.server.port,
     host: "0.0.0.0",
     reusePort: true,
   }, () => {
-    log(`serving on port ${port}`);
+    log(`✅ Server started successfully on port ${config.server.port}`);
+    log(`🌍 Environment: ${config.server.nodeEnv}`);
+    log(`🔗 Supabase URL: ${config.supabase.url}`);
   });
 })();
