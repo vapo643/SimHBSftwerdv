@@ -1,8 +1,7 @@
 
-import React from "react";
 import { Switch, Route } from "wouter";
 
-function App() {
+export default function App() {
   return (
     <div style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
       <h1>Simpix - Sistema de Crédito</h1>
