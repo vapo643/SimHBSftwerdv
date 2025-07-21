@@ -81,24 +81,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Health check endpoint para testar security headers e configurações
+  // Health check endpoint para testar security headers
   app.get("/api/health", (req, res) => {
-    try {
-      res.json({
-        status: "ok",
-        timestamp: new Date().toISOString(),
-        security: "enabled",
-        rateLimit: "active",
-        secretsValidation: "passed",
-        environment: process.env.NODE_ENV
-      });
-    } catch (error) {
-      res.status(500).json({
-        status: "error",
-        message: "Health check failed",
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
+    res.json({
+      status: "ok",
+      timestamp: new Date().toISOString(),
+      security: "enabled",
+      rateLimit: "active"
+    });
   });
 
   // Proposal routes

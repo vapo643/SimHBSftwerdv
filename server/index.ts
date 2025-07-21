@@ -3,15 +3,6 @@ import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
-import { initializeAndValidateConfig, setConfig, getPort, isDevelopment } from "./lib/config";
-
-// ====================================
-// VALIDAÇÃO DE SECRETS (Pilar 10)
-// ====================================
-
-// Validar todas as configurações obrigatórias antes de inicializar o servidor
-const appConfig = initializeAndValidateConfig();
-setConfig(appConfig);
 
 const app = express();
 
@@ -22,7 +13,7 @@ const app = express();
 // 1. HELMET - Headers de Segurança Essenciais
 app.use(helmet({
   // Content Security Policy - Configuração compatível com Vite
-  contentSecurityPolicy: isDevelopment() ? false : {
+  contentSecurityPolicy: process.env.NODE_ENV === "development" ? false : {
     directives: {
       defaultSrc: ["'self'"],
       styleSrc: ["'self'", "'unsafe-inline'", "https:"],
@@ -146,14 +137,17 @@ app.use((req, res, next) => {
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes
-  if (isDevelopment()) {
+  if (app.get("env") === "development") {
     await setupVite(app, server);
   } else {
     serveStatic(app);
   }
 
-  // Usar porta validada pela configuração
-  const port = getPort();
+  // ALWAYS serve the app on the port specified in the environment variable PORT
+  // Other ports are firewalled. Default to 5000 if not specified.
+  // this serves both the API and the client.
+  // It is the only port that is not firewalled.
+  const port = parseInt(process.env.PORT || "5000", 10);
   server.listen(
     {
       port,
