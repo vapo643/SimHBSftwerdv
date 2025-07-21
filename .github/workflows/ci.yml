@@ -1,0 +1,171 @@
+name: 'CI/CD Pipeline - Simpix Credit Management'
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  # ====================================
+  # PIPELINE COMPLETO DE CI/CD (Pilar 18)
+  # ====================================
+  ci:
+    name: 'Continuous Integration'
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [20.x]
+    
+    steps:
+      # Etapa 1: Checkout do código
+      - name: 'Checkout Repository'
+        uses: actions/checkout@v4
+        with:
+          # Necessário para validação de commit messages
+          fetch-depth: 0
+      
+      # Etapa 2: Setup do Node.js
+      - name: 'Setup Node.js ${{ matrix.node-version }}'
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+      
+      # Etapa 3: Validação das mensagens de commit
+      - name: 'Validate Commit Messages'
+        run: |
+          npm install --global @commitlint/cli @commitlint/config-conventional
+          # Valida commits do PR ou último commit se for push direto
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            npx commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --verbose
+          else
+            npx commitlint --from HEAD~1 --to HEAD --verbose
+          fi
+      
+      # Etapa 4: Install Dependencies
+      - name: 'Install Dependencies'
+        run: npm ci
+      
+      # Etapa 5: Verificação de tipos TypeScript
+      - name: 'TypeScript Type Check'
+        run: npm run check
+      
+      # Etapa 6: Linting do código
+      - name: 'Code Linting'
+        run: |
+          if grep -q '"lint"' package.json; then
+            npm run lint
+          else
+            echo "Lint script not found, skipping..."
+          fi
+      
+      # Etapa 7: Run Tests
+      - name: 'Run Tests'
+        run: npx vitest run
+        env:
+          NODE_ENV: test
+      
+      # Etapa 8: Test Coverage
+      - name: 'Generate Test Coverage'
+        run: npx vitest run --coverage
+        env:
+          NODE_ENV: test
+      
+      # Etapa 9: Upload Coverage Reports
+      - name: 'Upload Coverage to Codecov'
+        if: success()
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./coverage/coverage-final.json
+          flags: unittests
+          name: simpix-coverage
+          fail_ci_if_error: false
+      
+      # Etapa 10: Build Project
+      - name: 'Build Project'
+        run: npm run build
+        env:
+          NODE_ENV: production
+      
+      # Etapa 11: Verificação de vulnerabilidades
+      - name: 'Security Audit'
+        run: |
+          npm audit --audit-level=high
+        continue-on-error: true
+      
+      # Etapa 12: Cache dos artefatos de build
+      - name: 'Cache Build Artifacts'
+        if: success()
+        uses: actions/cache@v4
+        with:
+          path: |
+            dist/
+            coverage/
+          key: ${{ runner.os }}-build-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-build-
+
+  # ====================================
+  # DEPLOYMENT (Condicional)
+  # ====================================
+  deploy:
+    name: 'Deploy to Production'
+    needs: ci
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+      - name: 'Checkout Repository'
+        uses: actions/checkout@v4
+      
+      - name: 'Setup Node.js'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: 'npm'
+      
+      - name: 'Restore Build Cache'
+        uses: actions/cache@v4
+        with:
+          path: |
+            dist/
+            coverage/
+          key: ${{ runner.os }}-build-${{ github.sha }}
+      
+      - name: 'Deploy Notification'
+        run: |
+          echo "🚀 Ready for deployment to production environment"
+          echo "📊 All tests passed and build successful"
+          echo "🔒 Security audit completed"
+          echo "📈 Coverage reports generated"
+      
+      # Aqui você pode adicionar steps específicos de deployment
+      # Por exemplo: deploy para Replit, Vercel, AWS, etc.
+      
+  # ====================================
+  # NOTIFICAÇÕES DE STATUS
+  # ====================================
+  notify:
+    name: 'Notification'
+    needs: [ci]
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+      - name: 'Success Notification'
+        if: needs.ci.result == 'success'
+        run: |
+          echo "✅ Pipeline executado com sucesso!"
+          echo "🧪 Todos os testes passaram"
+          echo "🏗️ Build de produção concluído"
+          echo "🔍 Validações de qualidade aprovadas"
+      
+      - name: 'Failure Notification'
+        if: needs.ci.result == 'failure'
+        run: |
+          echo "❌ Pipeline falhou!"
+          echo "🚨 Verifique os logs para mais detalhes"
+          echo "🔧 Corrija os problemas antes do merge"
+          exit 1

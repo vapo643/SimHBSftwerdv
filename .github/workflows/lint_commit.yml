@@ -1,0 +1,80 @@
+name: 'Complete CI/CD Pipeline'
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  # ====================================
+  # PIPELINE COMPLETO DE CI/CD (Pilar 18)
+  # ====================================
+  complete_pipeline:
+    name: 'Complete CI/CD Pipeline'
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Etapa 1: Checkout do código
+      - name: 'Checkout code'
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Etapa 2: Setup Node.js
+      - name: 'Setup Node.js'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      # Etapa 3: Validação de mensagens de commit (original)
+      - name: 'Validate commit messages'
+        run: |
+          npm install --global @commitlint/cli @commitlint/config-conventional
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            npx commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --verbose
+          else
+            npx commitlint --from HEAD~1 --to HEAD --verbose
+          fi
+
+      # Etapa 4: Install Dependencies
+      - name: 'Install Dependencies'
+        run: npm ci
+
+      # Etapa 5: TypeScript check
+      - name: 'TypeScript Type Check'
+        run: npm run check
+
+      # Etapa 6: Run Tests
+      - name: 'Run Tests'
+        run: npx vitest run
+        env:
+          NODE_ENV: test
+
+      # Etapa 7: Build Project
+      - name: 'Build Project'
+        run: npm run build
+        env:
+          NODE_ENV: production
+
+      # Etapa 8: Test Coverage (adicional)
+      - name: 'Generate Test Coverage'
+        run: npx vitest run --coverage
+        env:
+          NODE_ENV: test
+
+      # Etapa 9: Security Audit
+      - name: 'Security Audit'
+        run: npm audit --audit-level=moderate
+        continue-on-error: true
+
+      # Etapa 10: Success notification
+      - name: 'Pipeline Success'
+        run: |
+          echo "✅ Pipeline completo executado com sucesso!"
+          echo "📝 Mensagens de commit válidas"
+          echo "📦 Dependências instaladas"
+          echo "🧪 Todos os testes passaram"
+          echo "🏗️ Build de produção concluído"
+          echo "🔒 Auditoria de segurança executada"
