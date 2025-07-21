@@ -6,14 +6,6 @@ import { authMiddleware, type AuthRequest } from "./lib/auth";
 import { insertPropostaSchema, updatePropostaSchema } from "@shared/schema";
 import { z } from "zod";
 import multer from "multer";
-import PDFDocument from "pdfkit";
-import { Request, Response } from "express";
-import { db } from "./lib/supabase";
-import { userProfiles, propostas, lojas, parceiros, produtos, tabelasComerciais, propostasSchema, insertPropostaSchema } from "../shared/schema";
-import { eq, and, desc } from "drizzle-orm";
-import { fromZodError } from "zod-validation-error";
-
-// Configuração de mensagens de erro será feita individualmente
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -22,17 +14,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/auth/login", async (req, res) => {
     try {
       const { email, password } = req.body;
-
+      
       const supabase = createServerSupabaseClient();
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
       });
-
+      
       if (error) {
         return res.status(401).json({ message: error.message });
       }
-
+      
       res.json({ 
         user: data.user, 
         session: data.session 
@@ -46,7 +38,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/auth/register", async (req, res) => {
     try {
       const { email, password, name } = req.body;
-
+      
       const supabase = createServerSupabaseClient();
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -57,11 +49,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         }
       });
-
+      
       if (error) {
         return res.status(400).json({ message: error.message });
       }
-
+      
       res.json({ 
         user: data.user, 
         session: data.session 
@@ -76,11 +68,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const supabase = createServerSupabaseClient();
       const { error } = await supabase.auth.signOut();
-
+      
       if (error) {
         return res.status(400).json({ message: error.message });
       }
-
+      
       res.json({ message: "Logged out successfully" });
     } catch (error) {
       console.error("Logout error:", error);
@@ -103,11 +95,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const id = parseInt(req.params.id);
       const proposta = await storage.getPropostaById(id);
-
+      
       if (!proposta) {
         return res.status(404).json({ message: "Proposta not found" });
       }
-
+      
       res.json(proposta);
     } catch (error) {
       console.error("Get proposta error:", error);
@@ -163,7 +155,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const fileName = `${Date.now()}-${req.file.originalname}`;
-
+      
       const supabase = createServerSupabaseClient();
       const { data, error } = await supabase.storage
         .from("documents")
@@ -191,7 +183,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Mock data para produtos e prazos
-  const produtosMock = [
+  const produtos = [
     { id: 1, nome: 'Crédito Pessoal' },
     { id: 2, nome: 'Crédito Imobiliário' },
     { id: 3, nome: 'Crédito Consignado' },
@@ -205,7 +197,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Rota para buscar produtos
   app.get('/api/produtos', (req, res) => {
-    res.json(produtosMock);
+    res.json(produtos);
   });
 
   // Rota para buscar prazos
@@ -224,14 +216,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   };
 
   // Mock de tabelas comerciais para simulação
-  const tabelasComerciaisMock: { [key: string]: number } = {
+  const tabelasComerciais: { [key: string]: number } = {
     'tabela-a': 5.0, // Tabela A, 5% de taxa de juros
     'tabela-b': 7.5, // Tabela B, 7.5% de taxa de juros
   };
 
   // Função para obter a taxa de juros (substituirá a lógica real do DB)
   const obterTaxaJurosPorTabela = (tabelaId: string): number => {
-    return tabelasComerciaisMock[tabelaId] || 5.0; // Retorna 5% como padrão
+    return tabelasComerciais[tabelaId] || 5.0; // Retorna 5% como padrão
   };
 
   // Rota para simular crédito ATUALIZADA
@@ -270,7 +262,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     const valorSolicitado = parseFloat(valor as string);
     const prazoEmMeses = parseInt(prazo as string);
-
+    
     if (isNaN(valorSolicitado) || isNaN(prazoEmMeses) || !produto_id || !dataVencimento) {
       return res.status(400).json({ error: 'Parâmetros inválidos.' });
     }
@@ -285,17 +277,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     const { taxaDeJurosMensal, valorTac } = buscarTaxas(produto_id as string);
-
+    
     const taxaJurosDiaria = taxaDeJurosMensal / 30; 
     const jurosCarencia = valorSolicitado * (taxaJurosDiaria / 100) * diasDiferenca;
 
     const iof = calcularIOF(valorSolicitado);
     const tac = incluir_tac === 'true' ? valorTac : 0;
-
+    
     const valorTotalFinanciado = valorSolicitado + iof + tac + jurosCarencia;
 
     const valorParcela = calcularParcela(valorTotalFinanciado, prazoEmMeses, taxaDeJurosMensal);
-
+    
     const custoTotal = (valorParcela * prazoEmMeses);
     const cetAnual = (((custoTotal / valorSolicitado) - 1) / (prazoEmMeses / 12)) * 100;
 
@@ -323,7 +315,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const { status, observacao } = req.body;
-
+      
       if (!status) {
         return res.status(400).json({ message: 'Status é obrigatório' });
       }
@@ -347,7 +339,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/propostas/:id/logs', authMiddleware, async (req, res) => {
     try {
       const { id } = req.params;
-
+      
       // Mock logs data
       const mockLogs = [
         {
@@ -377,7 +369,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/propostas/:id', authMiddleware, async (req, res) => {
     try {
       const { id } = req.params;
-
+      
       // Mock proposal data
       const mockProposta = {
         id,
@@ -398,355 +390,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Generate CCB document
-  app.post('/api/propostas/:id/gerar-ccb', authMiddleware, async (req: AuthRequest, res) => {
-    try {
-      const { id } = req.params;
-      const propostaId = parseInt(id);
-
-      // Buscar dados completos da proposta
-      const proposta = await storage.getPropostaById(propostaId);
-
-      if (!proposta) {
-        return res.status(404).json({ message: 'Proposta não encontrada' });
-      }
-
-      // Verificar se a proposta está aprovada
-      if (proposta.status !== 'aprovado') {
-        return res.status(400).json({ message: 'Proposta deve estar aprovada para gerar CCB' });
-      }
-
-      // Gerar PDF da CCB
-      const PDFDocument = require('pdfkit');
-      const doc = new PDFDocument();
-
-      // Buffer para armazenar o PDF
-      const chunks: Buffer[] = [];
-      doc.on('data', (chunk) => chunks.push(chunk));
-
-      const pdfPromise = new Promise<Buffer>((resolve) => {
-        doc.on('end', () => {
-          const pdfBuffer = Buffer.concat(chunks);
-          resolve(pdfBuffer);
-        });
-      });
-
-      // Cabeçalho do documento
-      doc.fontSize(16).text('CÉDULA DE CRÉDITO BANCÁRIO - CCB', 50, 50, { align: 'center' });
-      doc.moveDown(2);
-
-      // Dados do cliente
-      doc.fontSize(12).text('DADOS DO DEVEDOR:', 50, doc.y);
-      doc.moveDown();
-      doc.text(`Nome: ${proposta.clienteNome}`, 50, doc.y);
-      doc.text(`CPF: ${proposta.clienteCpf}`, 50, doc.y);
-      doc.text(`Email: ${proposta.clienteEmail}`, 50, doc.y);
-      doc.text(`Telefone: ${proposta.clienteTelefone}`, 50, doc.y);
-      doc.moveDown();
-
-      // Dados do empréstimo
-      doc.text('DADOS DO EMPRÉSTIMO:', 50, doc.y);
-      doc.moveDown();
-      doc.text(`Valor Aprovado: R$ ${proposta.valorAprovado}`, 50, doc.y);
-      doc.text(`Prazo: ${proposta.prazo} meses`, 50, doc.y);
-      doc.text(`Taxa de Juros: ${proposta.taxaJuros}% ao mês`, 50, doc.y);
-      doc.text(`Finalidade: ${proposta.finalidade}`, 50, doc.y);
-      doc.moveDown();
-
-      // Condições gerais
-      doc.text('CONDIÇÕES GERAIS:', 50, doc.y);
-      doc.moveDown();
-      doc.fontSize(10).text('1. O devedor se obriga a pagar o valor emprestado nas condições estabelecidas.', 50, doc.y);
-      doc.text('2. Em caso de inadimplência, serão aplicados juros de mora conforme legislação vigente.', 50, doc.y);
-      doc.text('3. Este contrato é regido pelas leis brasileiras.', 50, doc.y);
-      doc.moveDown(2);
-
-      // Data e assinatura
-      const dataAtual = new Date().toLocaleDateString('pt-BR');
-      doc.fontSize(12).text(`Data: ${dataAtual}`, 50, doc.y);
-      doc.moveDown(2);
-      doc.text('_______________________________', 50, doc.y);
-      doc.text('Assinatura do Devedor', 50, doc.y);
-
-      // Finalizar o documento
-      doc.end();
-
-      // Aguardar a geração do PDF
-      const pdfBuffer = await pdfPromise;
-
-      // Gerar nome único para o arquivo
-      const fileName = `ccb-${propostaId}-${Date.now()}.pdf`;
-
-      // Salvar no Supabase Storage
-      const supabase = createServerSupabaseClient();
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('documents')
-        .upload(fileName, pdfBuffer, {
-          contentType: 'application/pdf',
-        });
-
-      if (uploadError) {
-        console.error('Upload error:', uploadError);
-        return res.status(500).json({ message: 'Erro ao salvar documento' });
-      }
-
-      // Obter URL pública do documento
-      const { data: publicUrl } = supabase.storage
-        .from('documents')
-        .getPublicUrl(fileName);
-
-      // Atualizar a proposta com a URL da CCB
-      const propostaAtualizada = await storage.updateProposta(propostaId, {
-        ccb_documento_url: publicUrl.publicUrl,
-        status: 'documentos_enviados' as any
-      });
-
-      res.json({
-        message: 'CCB gerada com sucesso',
-        ccb_url: publicUrl.publicUrl,
-        proposta: propostaAtualizada
-      });
-
-    } catch (error) {
-      console.error('Generate CCB error:', error);
-      res.status(500).json({ message: 'Erro ao gerar CCB' });
-    }
-  });
-
   // Dashboard stats
   app.get("/api/dashboard/stats", authMiddleware, async (req, res) => {
     try {
       const allPropostas = await storage.getPropostas();
-
+      
       const stats = {
         totalPropostas: allPropostas.length,
         aguardandoAnalise: allPropostas.filter(p => p.status === "aguardando_analise").length,
         aprovadas: allPropostas.filter(p => p.status === "aprovado").length,
         valorTotal: allPropostas.reduce((sum, p) => sum + parseFloat(p.valor), 0)
       };
-
+      
       res.json(stats);
     } catch (error) {
       console.error("Get stats error:", error);
       res.status(500).json({ message: "Failed to fetch stats" });
-    }
-  });
-
-  const simuladorSchema = z.object({
-    valor: z.number().min(100, "Valor mínimo de R$ 100"),
-    prazo: z.number().min(1, "Prazo mínimo de 1 mês").max(60, "Prazo máximo de 60 meses"),
-    carencia: z.number().min(0, "Carência não pode ser negativa").max(12, "Carência máxima de 12 meses"),
-    incluirTac: z.boolean().default(false)
-  });
-  
-  const produtoSchema = z.object({
-    nome: z.string().min(1, "Nome é obrigatório").max(100, "Nome muito longo"),
-    status: z.enum(["ativo", "inativo"], { 
-      errorMap: () => ({ message: "Status deve ser 'ativo' ou 'inativo'" })
-    })
-  });
-  
-  const updateProdutoSchema = produtoSchema.partial();
-
-  // Simulador de crédito
-  app.post("/api/simular", async (req: Request, res: Response) => {
-    try {
-      const { valor, prazo, carencia = 0, incluirTac = false } = simuladorSchema.parse(req.body);
-
-      // Taxa de juros mensal (exemplo: 2.5% ao mês)
-      const taxaJurosMensal = 0.025;
-
-      // TAC (Taxa de Abertura de Crédito) - 3% do valor
-      const tac = incluirTac ? valor * 0.03 : 0;
-
-      // Valor financiado (valor + TAC)
-      const valorFinanciado = valor + tac;
-
-      // Para período de carência, calculamos juros compostos
-      let saldoDevedor = valorFinanciado;
-
-      // Durante a carência, apenas juros são capitalizados
-      for (let i = 0; i < carencia; i++) {
-        saldoDevedor = saldoDevedor * (1 + taxaJurosMensal);
-      }
-
-      // Cálculo da prestação (Sistema Price) após carência
-      const taxaEfetiva = Math.pow(1 + taxaJurosMensal, prazo) - 1;
-      const fatorPrice = (taxaJurosMensal * Math.pow(1 + taxaJurosMensal, prazo)) / 
-                        (Math.pow(1 + taxaJurosMensal, prazo) - 1);
-
-      const valorParcela = saldoDevedor * fatorPrice;
-      const valorTotal = valorParcela * prazo;
-      const jurosTotal = valorTotal - valorFinanciado;
-
-      // Data de vencimento da primeira parcela
-      const hoje = new Date();
-      const dataVencimento = new Date(hoje);
-      dataVencimento.setMonth(dataVencimento.getMonth() + carencia + 1);
-
-      res.json({
-        valor: Number(valor.toFixed(2)),
-        valorFinanciado: Number(valorFinanciado.toFixed(2)),
-        tac: Number(tac.toFixed(2)),
-        prazo,
-        carencia,
-        valorParcela: Number(valorParcela.toFixed(2)),
-        valorTotal: Number(valorTotal.toFixed(2)),
-        jurosTotal: Number(jurosTotal.toFixed(2)),
-        taxaJurosMensal: Number((taxaJurosMensal * 100).toFixed(2)),
-        dataVencimento: dataVencimento.toISOString().split('T')[0]
-      });
-
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ 
-          error: "Dados inválidos", 
-          details: error.errors.map(e => e.message)
-        });
-      }
-
-      console.error("Erro no simulador:", error);
-      res.status(500).json({ error: "Erro interno do servidor" });
-    }
-  });
-
-  // CRUD de Produtos
-
-  // GET /api/produtos - Listar todos os produtos ativos
-  app.get("/api/produtos", async (req: Request, res: Response) => {
-    try {
-      const produtosList = await db
-        .select({
-          id: produtos.id,
-          nome: produtos.nome,
-          status: produtos.status,
-          createdAt: produtos.createdAt,
-          updatedAt: produtos.updatedAt
-        })
-        .from(produtos)
-        .where(eq(produtos.isActive, true))
-        .orderBy(desc(produtos.createdAt));
-
-      res.json(produtosList);
-    } catch (error) {
-      console.error("Erro ao buscar produtos:", error);
-      res.status(500).json({ error: "Erro interno do servidor" });
-    }
-  });
-
-  // POST /api/produtos - Criar novo produto
-  app.post("/api/produtos", async (req: Request, res: Response) => {
-    try {
-      const { nome, status } = produtoSchema.parse(req.body);
-
-      const [novoProduto] = await db
-        .insert(produtos)
-        .values({
-          nome,
-          status,
-          isActive: true
-        })
-        .returning();
-
-      res.status(201).json(novoProduto);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ 
-          error: "Dados inválidos", 
-          details: error.errors.map(e => e.message)
-        });
-      }
-
-      console.error("Erro ao criar produto:", error);
-      res.status(500).json({ error: "Erro interno do servidor" });
-    }
-  });
-
-  // PUT /api/produtos/:id - Atualizar produto
-  app.put("/api/produtos/:id", async (req: Request, res: Response) => {
-    try {
-      const id = parseInt(req.params.id);
-      if (isNaN(id)) {
-        return res.status(400).json({ error: "ID inválido" });
-      }
-
-      const updateData = updateProdutoSchema.parse(req.body);
-
-      if (Object.keys(updateData).length === 0) {
-        return res.status(400).json({ error: "Nenhum campo para atualizar" });
-      }
-
-      const [produtoAtualizado] = await db
-        .update(produtos)
-        .set({
-          ...updateData,
-          updatedAt: new Date()
-        })
-        .where(and(eq(produtos.id, id), eq(produtos.isActive, true)))
-        .returning();
-
-      if (!produtoAtualizado) {
-        return res.status(404).json({ error: "Produto não encontrado" });
-      }
-
-      res.json(produtoAtualizado);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ 
-          error: "Dados inválidos", 
-          details: error.errors.map(e => e.message)
-        });
-      }
-
-      console.error("Erro ao atualizar produto:", error);
-      res.status(500).json({ error: "Erro interno do servidor" });
-    }
-  });
-
-  // DELETE /api/produtos/:id - Soft delete do produto
-  app.delete("/api/produtos/:id", async (req: Request, res: Response) => {
-    try {
-      const id = parseInt(req.params.id);
-      if (isNaN(id)) {
-        return res.status(400).json({ error: "ID inválido" });
-      }
-
-      // Verificar se o produto está associado a alguma tabela comercial
-      const tabelasAssociadas = await db
-        .select({ id: tabelasComerciais.id })
-        .from(tabelasComerciais)
-        .where(and(
-          eq(tabelasComerciais.produtoId, id),
-          eq(tabelasComerciais.isActive, true)
-        ))
-        .limit(1);
-
-      if (tabelasAssociadas.length > 0) {
-        return res.status(400).json({ 
-          error: "Não é possível excluir este produto pois ele está associado a tabelas comerciais ativas" 
-        });
-      }
-
-      const [produtoExcluido] = await db
-        .update(produtos)
-        .set({
-          isActive: false,
-          updatedAt: new Date()
-        })
-        .where(and(eq(produtos.id, id), eq(produtos.isActive, true)))
-        .returning({ id: produtos.id, nome: produtos.nome });
-
-      if (!produtoExcluido) {
-        return res.status(404).json({ error: "Produto não encontrado" });
-      }
-
-      res.json({ 
-        message: "Produto excluído com sucesso",
-        produto: produtoExcluido 
-      });
-    } catch (error) {
-      console.error("Erro ao excluir produto:", error);
-      res.status(500).json({ error: "Erro interno do servidor" });
     }
   });
 
