@@ -3,6 +3,7 @@ import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { config, logConfigStatus, isAppOperational } from "./lib/config";
 
 const app = express();
 
@@ -10,8 +11,9 @@ const app = express();
 // BLINDAGEM DE SEGURANÇA DA API (Pilar 2)
 // ====================================
 
-// 1. HELMET - Headers de Segurança Essenciais
-app.use(helmet({
+// 1. HELMET - Headers de Segurança Essenciais (Condicional)
+if (config.security.enableHelmet) {
+  app.use(helmet({
   // Content Security Policy - Configuração compatível com Vite
   contentSecurityPolicy: process.env.NODE_ENV === "development" ? false : {
     directives: {
@@ -36,7 +38,11 @@ app.use(helmet({
   referrerPolicy: { policy: "same-origin" },
   // X-XSS-Protection - Ativa proteção XSS do navegador
   xssFilter: true,
-}));
+  }));
+  log("🛡️  Helmet security headers enabled");
+} else {
+  log("⚠️  Helmet disabled (development mode)");
+}
 
 // 2. RATE LIMITING - Proteção contra Ataques de Força Bruta
 
@@ -85,9 +91,14 @@ const authApiLimiter = rateLimit({
   }
 });
 
-// Aplicar rate limiters
-app.use('/api/auth', authApiLimiter); // Rate limit restritivo para auth
-app.use('/api', generalApiLimiter); // Rate limit geral para toda a API
+// Aplicar rate limiters condicionalmente
+if (config.security.enableRateLimit) {
+  app.use('/api/auth', authApiLimiter); // Rate limit restritivo para auth
+  app.use('/api', generalApiLimiter); // Rate limit geral para toda a API
+  log("🛡️  Rate limiting enabled");
+} else {
+  log("⚠️  Rate limiting disabled (development mode)");
+}
 
 // 3. MIDDLEWARES BÁSICOS
 app.use(express.json({ limit: '10mb' })); // Limite de payload para prevenir ataques de DoS
@@ -143,19 +154,28 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
+  // Log status da configuração antes de iniciar
+  logConfigStatus();
+
+  // Verificar se a aplicação pode operar
+  if (!isAppOperational()) {
+    log("❌ App cannot start: Missing critical configuration");
+    process.exit(1);
+  }
+
   // ALWAYS serve the app on the port specified in the environment variable PORT
   // Other ports are firewalled. Default to 5000 if not specified.
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
-  const port = parseInt(process.env.PORT || "5000", 10);
   server.listen(
     {
-      port,
+      port: config.port,
       host: "0.0.0.0",
       reusePort: true,
     },
     () => {
-      log(`serving on port ${port}`);
+      log(`🚀 Server running on port ${config.port}`);
+      log(`🌍 Environment: ${config.nodeEnv}`);
     }
   );
 })();
