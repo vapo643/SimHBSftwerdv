@@ -1,0 +1,109 @@
+/**
+ * Pilar 5 - Padrão Aberto
+ * Implementação específica do Supabase isolada em provider
+ */
+
+import { createClientSupabaseClient } from "../supabase";
+import {
+  AuthProvider,
+  User,
+  Session,
+  SignInCredentials,
+  SignInResult,
+  AuthStateChangeCallback,
+  AuthSubscription,
+} from "../auth-types";
+import { User as SupabaseUser } from "@supabase/supabase-js";
+
+export class SupabaseAuthProvider implements AuthProvider {
+  private supabase = createClientSupabaseClient();
+
+  /**
+   * Converte usuário do Supabase para nossa interface padronizada
+   */
+  private mapSupabaseUser(supabaseUser: SupabaseUser): User {
+    return {
+      id: supabaseUser.id,
+      email: supabaseUser.email || "",
+      name: supabaseUser.user_metadata?.name,
+      avatar: supabaseUser.user_metadata?.avatar_url,
+      createdAt: supabaseUser.created_at ? new Date(supabaseUser.created_at) : undefined,
+    };
+  }
+
+  /**
+   * Converte sessão do Supabase para nossa interface padronizada
+   */
+  private mapSupabaseSession(supabaseSession: any): Session {
+    return {
+      user: this.mapSupabaseUser(supabaseSession.user),
+      accessToken: supabaseSession.access_token,
+      refreshToken: supabaseSession.refresh_token,
+      expiresAt: supabaseSession.expires_at ? new Date(supabaseSession.expires_at * 1000) : undefined,
+    };
+  }
+
+  async signIn(credentials: SignInCredentials): Promise<SignInResult> {
+    const { data, error } = await this.supabase.auth.signInWithPassword({
+      email: credentials.email,
+      password: credentials.password,
+    });
+
+    if (error) throw error;
+    if (!data.user || !data.session) {
+      throw new Error("Falha na autenticação");
+    }
+
+    const user = this.mapSupabaseUser(data.user);
+    const session = this.mapSupabaseSession(data.session);
+
+    return { user, session };
+  }
+
+  async signOut(): Promise<void> {
+    const { error } = await this.supabase.auth.signOut();
+    if (error) throw error;
+  }
+
+  async getSession(): Promise<Session | null> {
+    const {
+      data: { session },
+      error,
+    } = await this.supabase.auth.getSession();
+    
+    if (error) throw error;
+    if (!session) return null;
+
+    return this.mapSupabaseSession(session);
+  }
+
+  async getCurrentUser(): Promise<User | null> {
+    const {
+      data: { user },
+      error,
+    } = await this.supabase.auth.getUser();
+
+    if (error) throw error;
+    if (!user) return null;
+
+    return this.mapSupabaseUser(user);
+  }
+
+  onAuthStateChange(callback: AuthStateChangeCallback): AuthSubscription {
+    const { data: subscription } = this.supabase.auth.onAuthStateChange(
+      (event: any, session: any) => {
+        const user = session?.user ? this.mapSupabaseUser(session.user) : null;
+        callback(user);
+      }
+    );
+
+    return {
+      unsubscribe: () => subscription?.subscription?.unsubscribe(),
+    };
+  }
+
+  async getAccessToken(): Promise<string | null> {
+    const session = await this.getSession();
+    return session?.accessToken || null;
+  }
+}
