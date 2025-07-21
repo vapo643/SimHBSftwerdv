@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { createServerSupabaseClient } from "../client/src/lib/supabase";
 import { authMiddleware, type AuthRequest } from "./lib/auth";
+import { rlsAuthMiddleware, validateLojaAccess, type EnhancedAuthRequest } from "./lib/rls-setup";
 import { insertPropostaSchema, updatePropostaSchema } from "@shared/schema";
 import { z } from "zod";
 import multer from "multer";
