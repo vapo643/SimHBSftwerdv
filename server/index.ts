@@ -7,6 +7,18 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { config } from "./lib/config";
 
+// Validação explícita de configuração na inicialização
+console.log('🔍 Validando configuração do ambiente...');
+try {
+  console.log('✅ Configuração validada com sucesso');
+  console.log(`📊 Ambiente: ${config.server.nodeEnv}`);
+  console.log(`🔗 Supabase: ${config.supabase.url}`);
+  console.log(`💾 Banco: ${config.database.url ? 'Configurado' : 'Usando Supabase'}`);
+} catch (error) {
+  console.error('❌ Falha na validação de configuração:', error);
+  process.exit(1);
+}
+
 const app = express();
 
 // Security middlewares

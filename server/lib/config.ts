@@ -79,26 +79,37 @@ function validateEnvironmentVariables(): ValidatedConfig {
   // If there are errors, throw them
   if (errors.length > 0) {
     const errorMessage = [
-      '❌ Environment Configuration Error:',
+      '❌ FALHA CRÍTICA NA VALIDAÇÃO DE SECRETS:',
+      '',
+      '🚨 As seguintes variáveis de ambiente obrigatórias estão faltando:',
       '',
       ...errors.map(error => `  • ${error}`),
       '',
-      '🔧 Please check your environment variables and try again.',
+      '🔧 AÇÃO NECESSÁRIA:',
+      '  1. Configure as variáveis de ambiente no painel Secrets do Replit',
+      '  2. Ou defina-as no arquivo .env (apenas desenvolvimento)',
+      '  3. Reinicie o servidor após a configuração',
       '',
-      'Required variables:',
-      '  • SUPABASE_URL (or VITE_SUPABASE_URL)',
-      '  • SUPABASE_ANON_KEY (or VITE_SUPABASE_ANON_KEY)',
+      '📋 VARIÁVEIS OBRIGATÓRIAS:',
+      '  • SUPABASE_URL (ou VITE_SUPABASE_URL)',
+      '  • SUPABASE_ANON_KEY (ou VITE_SUPABASE_ANON_KEY)', 
       '  • SUPABASE_SERVICE_ROLE_KEY',
-      '  • PORT (default: 5000)',
-      '  • NODE_ENV (development, production, or test)',
+      '  • PORT (padrão: 5000)',
+      '  • NODE_ENV (development, production, ou test)',
       '',
-      'Optional variables:',
-      '  • DATABASE_URL or SUPABASE_DATABASE_URL',
-      '  • FRONTEND_URL (for production CORS)',
+      '📋 VARIÁVEIS OPCIONAIS:',
+      '  • DATABASE_URL ou SUPABASE_DATABASE_URL',
+      '  • FRONTEND_URL (para CORS em produção)',
+      '',
+      '⚠️  O servidor foi interrompido por motivos de segurança.',
     ].join('\n');
     
-    throw new Error(errorMessage);
+    console.error('\n' + errorMessage + '\n');
+    throw new Error('CONFIGURAÇÃO DE AMBIENTE INVÁLIDA - Verifique as variáveis de ambiente');
   }
+  
+  // Log de validação bem-sucedida
+  console.log('🔐 Validação de secrets concluída com sucesso');
   
   // Return validated configuration
   return {
