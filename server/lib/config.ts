@@ -1,21 +1,20 @@
-
 interface EnvironmentConfig {
   // Database
   DATABASE_URL?: string;
   SUPABASE_DATABASE_URL?: string;
-  
+
   // Supabase
   SUPABASE_URL: string;
   SUPABASE_ANON_KEY: string;
   SUPABASE_SERVICE_ROLE_KEY: string;
-  
+
   // Server
   PORT: string;
   NODE_ENV: string;
-  
+
   // Frontend (optional in production)
   FRONTEND_URL?: string;
-  
+
   // Vite (development only)
   VITE_SUPABASE_URL?: string;
   VITE_SUPABASE_ANON_KEY?: string;
@@ -38,36 +37,10 @@ interface ValidatedConfig {
   };
 }
 
-// Validação e configuração
-const validateConfig = (): ValidatedConfig => {
-  const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || "";
-  const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || "";
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
-  
-  return {
-    database: {
-      url: process.env.DATABASE_URL || process.env.SUPABASE_DATABASE_URL || "",
-      supabaseUrl
-    },
-    supabase: {
-      url: supabaseUrl,
-      anonKey: supabaseAnonKey,
-      serviceRoleKey: supabaseServiceKey
-    },
-    server: {
-      port: Number(process.env.PORT) || 5000,
-      nodeEnv: process.env.NODE_ENV || "development",
-      frontendUrl: process.env.FRONTEND_URL
-    }
-  };
-};
-
-export const config = validateConfig();
-
 function validateEnvironmentVariables(): ValidatedConfig {
   const env = process.env as EnvironmentConfig;
   const errors: string[] = [];
-  
+
   // Required variables
   const requiredVars = {
     SUPABASE_URL: env.SUPABASE_URL || env.VITE_SUPABASE_URL,
@@ -76,32 +49,32 @@ function validateEnvironmentVariables(): ValidatedConfig {
     PORT: env.PORT,
     NODE_ENV: env.NODE_ENV,
   };
-  
+
   // Check for missing required variables
   Object.entries(requiredVars).forEach(([key, value]) => {
     if (!value || value.trim() === '') {
       errors.push(`Missing required environment variable: ${key}`);
     }
   });
-  
+
   // Validate database URL (either direct or constructed from Supabase)
   const databaseUrl = env.DATABASE_URL || env.SUPABASE_DATABASE_URL;
   if (!databaseUrl && !requiredVars.SUPABASE_URL) {
     errors.push('Missing database configuration: DATABASE_URL or SUPABASE_DATABASE_URL required');
   }
-  
+
   // Validate port is a number
   const port = parseInt(requiredVars.PORT || '5000', 10);
   if (isNaN(port) || port < 1 || port > 65535) {
     errors.push('PORT must be a valid number between 1 and 65535');
   }
-  
+
   // Validate NODE_ENV
   const validEnvironments = ['development', 'production', 'test'];
   if (!validEnvironments.includes(requiredVars.NODE_ENV || '')) {
     errors.push(`NODE_ENV must be one of: ${validEnvironments.join(', ')}`);
   }
-  
+
   // If there are errors, throw them
   if (errors.length > 0) {
     const errorMessage = [
@@ -129,14 +102,14 @@ function validateEnvironmentVariables(): ValidatedConfig {
       '',
       '⚠️  O servidor foi interrompido por motivos de segurança.',
     ].join('\n');
-    
+
     console.error('\n' + errorMessage + '\n');
     throw new Error('CONFIGURAÇÃO DE AMBIENTE INVÁLIDA - Verifique as variáveis de ambiente');
   }
-  
+
   // Log de validação bem-sucedida
   console.log('🔐 Validação de secrets concluída com sucesso');
-  
+
   // Return validated configuration
   return {
     database: {
