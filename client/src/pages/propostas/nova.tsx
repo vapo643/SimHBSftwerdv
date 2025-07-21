@@ -118,16 +118,16 @@ const NovaProposta: React.FC = () => {
           </TabsList>
 
           <TabsContent value="dados-cliente">
-            <div className="mt-4 rounded-md border p-4">
+            <div className="mt-4 rounded-md border p-4 card-simpix">
               <DadosClienteForm register={register} control={control} errors={errors} />
             </div>
           </TabsContent>
 
           <TabsContent value="condicoes-emprestimo">
-            <div className="mt-4 space-y-4 rounded-md border p-4">
+            <div className="mt-4 space-y-4 rounded-md border p-4 card-simpix">
               <div>
                 <Label htmlFor="valorSolicitado">Valor Solicitado</Label>
-                <Input id="valorSolicitado" type="number" {...register("valorSolicitado")} />
+                <Input id="valorSolicitado" type="number" className="input-simpix" {...register("valorSolicitado")} />
                 {errors.valorSolicitado && (
                   <p className="mt-1 text-sm text-red-500">{errors.valorSolicitado.message}</p>
                 )}
@@ -183,6 +183,7 @@ const NovaProposta: React.FC = () => {
                 <Input
                   id="dataPrimeiroVencimento"
                   type="date"
+                  className="input-simpix"
                   {...register("dataPrimeiroVencimento")}
                 />
                 {errors.dataPrimeiroVencimento && (
@@ -227,30 +228,30 @@ CET: ${resumoSimulacao.cet.toFixed(2)}% a.a.`
           </TabsContent>
 
           <TabsContent value="anexo-documentos">
-            <div className="mt-4 space-y-4 rounded-md border p-4">
+            <div className="mt-4 space-y-4 rounded-md border p-4 card-simpix">
               <div>
                 <Label htmlFor="documento-identidade">
                   Documento de Identidade (Frente e Verso)
                 </Label>
-                <Input id="documento-identidade" type="file" accept=".pdf,.jpg,.jpeg,.png" />
+                <Input id="documento-identidade" type="file" className="input-simpix" accept=".pdf,.jpg,.jpeg,.png" />
               </div>
               <div>
                 <Label htmlFor="comprovante-residencia">Comprovante de Residência</Label>
-                <Input id="comprovante-residencia" type="file" accept=".pdf,.jpg,.jpeg,.png" />
+                <Input id="comprovante-residencia" type="file" className="input-simpix" accept=".pdf,.jpg,.jpeg,.png" />
               </div>
               <div>
                 <Label htmlFor="comprovante-renda">Comprovante de Renda</Label>
-                <Input id="comprovante-renda" type="file" accept=".pdf,.jpg,.jpeg,.png" />
+                <Input id="comprovante-renda" type="file" className="input-simpix" accept=".pdf,.jpg,.jpeg,.png" />
               </div>
               <div>
                 <Label htmlFor="documento-adicional">Documento Adicional (Opcional)</Label>
-                <Input id="documento-adicional" type="file" accept=".pdf,.jpg,.jpeg,.png" />
+                <Input id="documento-adicional" type="file" className="input-simpix" accept=".pdf,.jpg,.jpeg,.png" />
               </div>
             </div>
           </TabsContent>
         </Tabs>
         <div className="mt-4 flex justify-end pt-6">
-          <Button type="submit">Enviar Proposta</Button>
+          <Button type="submit" className="btn-simpix-accent">Enviar Proposta</Button>
         </div>
       </form>
     </DashboardLayout>

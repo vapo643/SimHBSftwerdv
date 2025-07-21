@@ -54,11 +54,11 @@ export default function Login() {
           <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-white">
             <TrendingUp className="text-2xl text-primary" />
           </div>
-          <h2 className="mb-2 text-3xl font-bold text-white">Simpix</h2>
+          <h2 className="mb-2 text-3xl font-bold text-white text-gradient-simpix">Simpix</h2>
           <p className="text-blue-100">Sistema de Gestão de Crédito</p>
         </div>
 
-        <Card className="shadow-xl">
+        <Card className="card-simpix shadow-xl">
           <CardContent className="p-8">
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               <div>
@@ -70,7 +70,7 @@ export default function Login() {
                   type="email"
                   placeholder="Digite seu email"
                   {...register("email")}
-                  className="w-full"
+                  className="input-simpix w-full"
                 />
                 {errors.email && (
                   <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
@@ -86,14 +86,14 @@ export default function Login() {
                   type="password"
                   placeholder="Digite sua senha"
                   {...register("password")}
-                  className="w-full"
+                  className="input-simpix w-full"
                 />
                 {errors.password && (
                   <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
                 )}
               </div>
 
-              <Button type="submit" disabled={loading} className="w-full">
+              <Button type="submit" disabled={loading} className="btn-simpix-primary w-full">
                 {loading ? "Entrando..." : "Entrar"}
               </Button>
             </form>

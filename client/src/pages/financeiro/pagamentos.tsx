@@ -43,10 +43,10 @@ const Pagamentos: React.FC = () => {
     <DashboardLayout title="Fila de Pagamento">
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Fila de Pagamento</h1>
-          <Button>Processar Pagamentos Selecionados</Button>
+          <h1 className="text-2xl text-gradient-simpix">Fila de Pagamento</h1>
+          <Button className="btn-simpix-accent">Processar Pagamentos Selecionados</Button>
         </div>
-        <Card>
+        <Card className="card-simpix">
           <CardContent className="p-0">
             <Table>
               <TableHeader>

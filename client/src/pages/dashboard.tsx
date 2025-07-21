@@ -18,17 +18,30 @@ const mockData = [
   { id: 3, cliente: "Cliente C", valor: "R$ 15.000", status: "Rejeitado" },
 ];
 
+const getStatusClass = (status: string) => {
+  switch (status) {
+    case "Aprovado":
+      return "status-approved";
+    case "Em Análise":
+      return "status-pending";
+    case "Rejeitado":
+      return "status-rejected";
+    default:
+      return "status-pending";
+  }
+};
+
 const Dashboard: React.FC = () => {
   return (
     <DashboardLayout title="Dashboard de Propostas">
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Propostas</h1>
+          <h1 className="text-2xl text-gradient-simpix">Propostas</h1>
           <Link to="/propostas/nova">
-            <Button>Criar Nova Proposta</Button>
+            <Button className="btn-simpix-accent">Criar Nova Proposta</Button>
           </Link>
         </div>
-        <Card>
+        <Card className="card-simpix">
           <CardContent className="p-6">
             <Table>
               <TableHeader>
@@ -45,7 +58,11 @@ const Dashboard: React.FC = () => {
                     <TableCell>{proposta.id}</TableCell>
                     <TableCell>{proposta.cliente}</TableCell>
                     <TableCell>{proposta.valor}</TableCell>
-                    <TableCell>{proposta.status}</TableCell>
+                    <TableCell>
+                      <span className={getStatusClass(proposta.status)}>
+                        {proposta.status}
+                      </span>
+                    </TableCell>
                   </TableRow>
                 ))}
                 {mockData.length === 0 && (

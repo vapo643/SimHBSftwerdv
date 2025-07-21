@@ -43,7 +43,7 @@ const DadosClienteForm: React.FC<{ register: any; control: any; errors: any }> =
     <div className="max-h-[70vh] space-y-4 overflow-y-auto p-1">
       <div>
         <Label htmlFor="nomeCompleto">Nome completo / Razão Social</Label>
-        <Input id="nomeCompleto" {...register("nomeCompleto")} />
+        <Input id="nomeCompleto" className="input-simpix" {...register("nomeCompleto")} />
         {errors.nomeCompleto && (
           <p className="mt-1 text-sm text-red-500">{errors.nomeCompleto.message}</p>
         )}
@@ -51,19 +51,19 @@ const DadosClienteForm: React.FC<{ register: any; control: any; errors: any }> =
 
       <div>
         <Label htmlFor="cpfCnpj">CPF / CNPJ</Label>
-        <Input id="cpfCnpj" {...register("cpfCnpj")} />
+        <Input id="cpfCnpj" className="input-simpix" {...register("cpfCnpj")} />
         {errors.cpfCnpj && <p className="mt-1 text-sm text-red-500">{errors.cpfCnpj.message}</p>}
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
           <Label htmlFor="rg">RG</Label>
-          <Input id="rg" {...register("rg")} />
+          <Input id="rg" className="input-simpix" {...register("rg")} />
           {errors.rg && <p className="mt-1 text-sm text-red-500">{errors.rg.message}</p>}
         </div>
         <div>
           <Label htmlFor="orgaoEmissor">Órgão Emissor</Label>
-          <Input id="orgaoEmissor" {...register("orgaoEmissor")} />
+          <Input id="orgaoEmissor" className="input-simpix" {...register("orgaoEmissor")} />
           {errors.orgaoEmissor && (
             <p className="mt-1 text-sm text-red-500">{errors.orgaoEmissor.message}</p>
           )}
@@ -97,7 +97,7 @@ const DadosClienteForm: React.FC<{ register: any; control: any; errors: any }> =
         </div>
         <div>
           <Label htmlFor="dataNascimento">Data de Nascimento</Label>
-          <Input type="date" id="dataNascimento" {...register("dataNascimento")} />
+          <Input type="date" id="dataNascimento" className="input-simpix" {...register("dataNascimento")} />
           {errors.dataNascimento && (
             <p className="mt-1 text-sm text-red-500">{errors.dataNascimento.message}</p>
           )}
@@ -106,7 +106,7 @@ const DadosClienteForm: React.FC<{ register: any; control: any; errors: any }> =
 
       <div>
         <Label htmlFor="nacionalidade">Nacionalidade</Label>
-        <Input id="nacionalidade" {...register("nacionalidade")} />
+        <Input id="nacionalidade" className="input-simpix" {...register("nacionalidade")} />
         {errors.nacionalidade && (
           <p className="mt-1 text-sm text-red-500">{errors.nacionalidade.message}</p>
         )}
@@ -114,27 +114,27 @@ const DadosClienteForm: React.FC<{ register: any; control: any; errors: any }> =
 
       <div>
         <Label htmlFor="cep">CEP</Label>
-        <Input id="cep" {...register("cep")} />
+        <Input id="cep" className="input-simpix" {...register("cep")} />
         {errors.cep && <p className="mt-1 text-sm text-red-500">{errors.cep.message}</p>}
       </div>
 
       <div>
         <Label htmlFor="endereco">Endereço Completo (Rua, Nº, Bairro, Cidade, Estado)</Label>
-        <Input id="endereco" {...register("endereco")} />
+        <Input id="endereco" className="input-simpix" {...register("endereco")} />
         {errors.endereco && <p className="mt-1 text-sm text-red-500">{errors.endereco.message}</p>}
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
           <Label htmlFor="telefone">Telefone / WhatsApp</Label>
-          <Input id="telefone" {...register("telefone")} />
+          <Input id="telefone" className="input-simpix" {...register("telefone")} />
           {errors.telefone && (
             <p className="mt-1 text-sm text-red-500">{errors.telefone.message}</p>
           )}
         </div>
         <div>
           <Label htmlFor="email">E-mail</Label>
-          <Input id="email" type="email" {...register("email")} />
+          <Input id="email" type="email" className="input-simpix" {...register("email")} />
           {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>}
         </div>
       </div>
@@ -142,7 +142,7 @@ const DadosClienteForm: React.FC<{ register: any; control: any; errors: any }> =
       <div className="grid grid-cols-2 gap-4">
         <div>
           <Label htmlFor="ocupacao">Ocupação / Profissão</Label>
-          <Input id="ocupacao" {...register("ocupacao")} />
+          <Input id="ocupacao" className="input-simpix" {...register("ocupacao")} />
           {errors.ocupacao && (
             <p className="mt-1 text-sm text-red-500">{errors.ocupacao.message}</p>
           )}
@@ -152,6 +152,7 @@ const DadosClienteForm: React.FC<{ register: any; control: any; errors: any }> =
           <Input
             type="number"
             id="rendaMensal"
+            className="input-simpix"
             {...register("rendaMensal")}
             placeholder="R$ 0,00"
           />

@@ -51,8 +51,8 @@ const UsuariosPage: React.FC = () => {
   return (
     <DashboardLayout title="Gestão de Usuários e Perfis">
       <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Usuários</h1>
-        <Button onClick={openNewModal}>Novo Usuário</Button>
+        <h1 className="text-2xl text-gradient-simpix">Usuários</h1>
+        <Button className="btn-simpix-accent" onClick={openNewModal}>Novo Usuário</Button>
       </div>
       <Table>
         <TableHeader>
@@ -74,7 +74,7 @@ const UsuariosPage: React.FC = () => {
               <TableCell>{user.loja}</TableCell>
               <TableCell>{user.status}</TableCell>
               <TableCell className="space-x-2">
-                <Button variant="outline" size="sm" onClick={() => openEditModal(user)}>
+                <Button className="btn-simpix-primary" size="sm" onClick={() => openEditModal(user)}>
                   Editar
                 </Button>
                 <Button variant="outline" size="sm" onClick={() => toggleUserStatus(user.id)}>

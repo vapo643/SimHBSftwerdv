@@ -110,19 +110,19 @@ const FilaAnalise: React.FC = () => {
       <div className="space-y-6">
         {/* KPIs Section */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          <Card>
+          <Card className="card-simpix">
             <CardHeader>
               <CardTitle>Propostas no Dia</CardTitle>
             </CardHeader>
             <CardContent className="text-2xl font-bold">{propostasHoje}</CardContent>
           </Card>
-          <Card>
+          <Card className="card-simpix">
             <CardHeader>
               <CardTitle>Acumulado no Mês</CardTitle>
             </CardHeader>
             <CardContent className="text-2xl font-bold">{acumuladoMes}</CardContent>
           </Card>
-          <Card>
+          <Card className="card-simpix">
             <CardHeader>
               <CardTitle>Propostas Pendentes</CardTitle>
             </CardHeader>
@@ -179,7 +179,7 @@ const FilaAnalise: React.FC = () => {
         </div>
 
         {/* Table Section */}
-        <Card>
+        <Card className="card-simpix">
           <CardContent className="p-0">
             <Table>
               <TableHeader>
@@ -201,10 +201,18 @@ const FilaAnalise: React.FC = () => {
                     <TableCell>{proposta.cliente}</TableCell>
                     <TableCell>{proposta.parceiro}</TableCell>
                     <TableCell>{proposta.loja}</TableCell>
-                    <TableCell>{proposta.status}</TableCell>
+                    <TableCell>
+                      <span className={
+                        proposta.status === "Aprovado" ? "status-approved" :
+                        proposta.status === "Rejeitado" ? "status-rejected" :
+                        "status-pending"
+                      }>
+                        {proposta.status}
+                      </span>
+                    </TableCell>
                     <TableCell className="text-right">
                       <Link to={`/credito/analise/${proposta.id}`}>
-                        <Button variant="outline" size="sm">
+                        <Button className="btn-simpix-primary" size="sm">
                           Analisar
                         </Button>
                       </Link>

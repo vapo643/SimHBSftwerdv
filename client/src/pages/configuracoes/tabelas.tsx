@@ -106,11 +106,11 @@ const TabelasComerciais: React.FC = () => {
     <DashboardLayout title="Gestão de Tabelas Comerciais">
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Tabelas Comerciais</h1>
-          <Button onClick={() => setIsCreateModalOpen(true)}>Nova Tabela Comercial</Button>
+          <h1 className="text-2xl text-gradient-simpix">Tabelas Comerciais</h1>
+          <Button className="btn-simpix-accent" onClick={() => setIsCreateModalOpen(true)}>Nova Tabela Comercial</Button>
         </div>
 
-        <Card>
+        <Card className="card-simpix">
           <CardContent className="p-0">
             <Table>
               <TableHeader>

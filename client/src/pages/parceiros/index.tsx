@@ -32,8 +32,8 @@ const PartnersPage: React.FC = () => {
   return (
     <DashboardLayout title="Gestão de Parceiros">
       <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Parceiros</h1>
-        <Button onClick={openNewModal}>Novo Parceiro</Button>
+        <h1 className="text-2xl text-gradient-simpix">Parceiros</h1>
+        <Button className="btn-simpix-accent" onClick={openNewModal}>Novo Parceiro</Button>
       </div>
       <Table>
         <TableHeader>
@@ -52,7 +52,7 @@ const PartnersPage: React.FC = () => {
               <TableCell>{partner.lojas.length}</TableCell>
               <TableCell>
                 <Link to={`/parceiros/detalhe/${partner.id}`}>
-                  <Button variant="outline" size="sm">
+                  <Button className="btn-simpix-primary" size="sm">
                     Ver Detalhes
                   </Button>
                 </Link>

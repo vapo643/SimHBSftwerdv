@@ -67,7 +67,7 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
             <Link to="/dashboard">
               <a className="flex items-center gap-2 font-semibold">
                 {/* Ícone da Simpix aqui, se houver */}
-                <span className="">Simpix</span>
+                <span className="text-gradient-simpix text-xl">Simpix</span>
               </a>
             </Link>
           </div>
