@@ -8,6 +8,7 @@ import { apiRequest } from "@/lib/queryClient";
 import fetchWithToken from "@/lib/apiClient";
 import { useToast } from "@/hooks/use-toast";
 import DashboardLayout from "@/components/DashboardLayout";
+import OfflineIndicator from "@/components/OfflineIndicator";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -182,7 +183,16 @@ export default function NovaProposta() {
         {/* Form Card */}
         <Card>
           <CardContent className="p-6">
-            <form onSubmit={handleSubmit(onSubmit)}>
+            {/* Pilar 12 - Progressive Enhancement: Offline status for critical forms */}
+            <OfflineIndicator variant="compact" className="mb-4" />
+            
+            {/* Progressive Enhancement: Form with fallback attributes */}
+            <form 
+              onSubmit={handleSubmit(onSubmit)}
+              action="/nova-proposta" 
+              method="POST"
+              className="progressive-enhancement-form"
+            >
               {/* Step 1: Cliente Data */}
               {currentStep === 1 && (
                 <div className="space-y-6">
@@ -193,6 +203,7 @@ export default function NovaProposta() {
                       <Label htmlFor="clienteNome">Nome Completo</Label>
                       <Input
                         id="clienteNome"
+                        name="clienteNome"
                         placeholder="Digite o nome completo"
                         {...register("clienteNome")}
                       />
@@ -205,6 +216,7 @@ export default function NovaProposta() {
                       <Label htmlFor="clienteCpf">CPF</Label>
                       <Input
                         id="clienteCpf"
+                        name="clienteCpf"
                         placeholder="000.000.000-00"
                         {...register("clienteCpf")}
                       />
@@ -217,6 +229,7 @@ export default function NovaProposta() {
                       <Label htmlFor="clienteEmail">Email</Label>
                       <Input
                         id="clienteEmail"
+                        name="clienteEmail"
                         type="email"
                         placeholder="email@exemplo.com"
                         {...register("clienteEmail")}
@@ -230,6 +243,7 @@ export default function NovaProposta() {
                       <Label htmlFor="clienteTelefone">Telefone</Label>
                       <Input
                         id="clienteTelefone"
+                        name="clienteTelefone"
                         placeholder="(11) 99999-9999"
                         {...register("clienteTelefone")}
                       />
@@ -242,6 +256,7 @@ export default function NovaProposta() {
                       <Label htmlFor="clienteDataNascimento">Data de Nascimento</Label>
                       <Input
                         id="clienteDataNascimento"
+                        name="clienteDataNascimento"
                         type="date"
                         {...register("clienteDataNascimento")}
                       />
@@ -256,6 +271,7 @@ export default function NovaProposta() {
                       <Label htmlFor="clienteRenda">Renda Mensal</Label>
                       <Input
                         id="clienteRenda"
+                        name="clienteRenda"
                         placeholder="R$ 5.000,00"
                         {...register("clienteRenda")}
                       />
@@ -277,7 +293,7 @@ export default function NovaProposta() {
                   <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <div>
                       <Label htmlFor="valor">Valor Solicitado</Label>
-                      <Input id="valor" placeholder="R$ 50.000,00" {...register("valor")} />
+                      <Input id="valor" name="valor" placeholder="R$ 50.000,00" {...register("valor")} />
                       {errors.valor && (
                         <p className="text-sm text-red-600">{errors.valor.message}</p>
                       )}
@@ -285,6 +301,8 @@ export default function NovaProposta() {
 
                     <div>
                       <Label htmlFor="prazo">Prazo (meses)</Label>
+                      {/* Hidden input for progressive enhancement */}
+                      <input type="hidden" name="prazo" value={watch("prazo") || ""} />
                       <Select onValueChange={value => setValue("prazo", value)}>
                         <SelectTrigger>
                           <SelectValue placeholder="Selecione o prazo" />
@@ -304,6 +322,8 @@ export default function NovaProposta() {
 
                     <div>
                       <Label htmlFor="finalidade">Finalidade</Label>
+                      {/* Hidden input for progressive enhancement */}
+                      <input type="hidden" name="finalidade" value={watch("finalidade") || ""} />
                       <Select onValueChange={value => setValue("finalidade", value)}>
                         <SelectTrigger>
                           <SelectValue placeholder="Selecione a finalidade" />
@@ -323,6 +343,8 @@ export default function NovaProposta() {
 
                     <div>
                       <Label htmlFor="garantia">Tipo de Garantia</Label>
+                      {/* Hidden input for progressive enhancement */}
+                      <input type="hidden" name="garantia" value={watch("garantia") || ""} />
                       <Select onValueChange={value => setValue("garantia", value)}>
                         <SelectTrigger>
                           <SelectValue placeholder="Selecione a garantia" />

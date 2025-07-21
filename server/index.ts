@@ -8,6 +8,13 @@ import { config, logConfigStatus, isAppOperational } from "./lib/config";
 const app = express();
 
 // ====================================
+// PILAR 12 - PROGRESSIVE ENHANCEMENT
+// ====================================
+
+// Form-encoded middleware for traditional form submissions
+app.use(express.urlencoded({ extended: true }));
+
+// ====================================
 // BLINDAGEM DE SEGURANÇA DA API (Pilar 2)
 // ====================================
 

@@ -163,6 +163,123 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ====================================
+  // PILAR 12 - PROGRESSIVE ENHANCEMENT
+  // Rota para submissão de formulário tradicional (fallback)
+  // ====================================
+  app.post("/nova-proposta", authMiddleware, async (req: AuthRequest, res) => {
+    try {
+      console.log("📝 Progressive Enhancement: Form submission received");
+      
+      // Parse form data
+      const formData = {
+        clienteNome: req.body.clienteNome,
+        clienteCpf: req.body.clienteCpf,
+        clienteEmail: req.body.clienteEmail,
+        clienteTelefone: req.body.clienteTelefone,
+        clienteDataNascimento: req.body.clienteDataNascimento,
+        clienteRenda: req.body.clienteRenda,
+        valor: req.body.valor,
+        prazo: parseInt(req.body.prazo),
+        finalidade: req.body.finalidade,
+        garantia: req.body.garantia,
+        status: "rascunho",
+      };
+
+      // Validate and create proposal
+      const validatedData = insertPropostaSchema.parse(formData);
+      const proposta = await storage.createProposta(validatedData);
+      
+      // For traditional form submission, redirect with success message
+      const successPage = `
+        <!DOCTYPE html>
+        <html lang="pt-BR">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Proposta Enviada - Simpix</title>
+            <style>
+                body { font-family: Arial, sans-serif; padding: 2rem; background: #f9fafb; }
+                .container { max-width: 600px; margin: 0 auto; background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+                .success { color: #16a34a; text-align: center; }
+                .button { display: inline-block; padding: 0.75rem 1.5rem; background: #2563eb; color: white; text-decoration: none; border-radius: 6px; margin-top: 1rem; }
+                .details { background: #f3f4f6; padding: 1rem; border-radius: 6px; margin-top: 1rem; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="success">
+                    <h1>✅ Proposta Enviada com Sucesso!</h1>
+                    <p>Sua proposta foi registrada no sistema e está aguardando análise.</p>
+                </div>
+                <div class="details">
+                    <h3>Dados da Proposta:</h3>
+                    <p><strong>ID:</strong> ${proposta.id}</p>
+                    <p><strong>Cliente:</strong> ${formData.clienteNome}</p>
+                    <p><strong>Valor:</strong> R$ ${formData.valor}</p>
+                    <p><strong>Prazo:</strong> ${formData.prazo} meses</p>
+                    <p><strong>Status:</strong> ${formData.status}</p>
+                </div>
+                <div style="text-align: center;">
+                    <a href="/dashboard" class="button">Voltar ao Dashboard</a>
+                    <a href="/propostas/nova" class="button" style="background: #6b7280;">Nova Proposta</a>
+                </div>
+            </div>
+            <script>
+                // Se JavaScript estiver disponível, redirecionar automaticamente
+                setTimeout(() => window.location.href = '/dashboard', 3000);
+            </script>
+        </body>
+        </html>
+      `;
+      
+      res.send(successPage);
+      
+    } catch (error) {
+      console.error("Progressive Enhancement form error:", error);
+      
+      // Error page for traditional form submission
+      const errorPage = `
+        <!DOCTYPE html>
+        <html lang="pt-BR">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Erro - Simpix</title>
+            <style>
+                body { font-family: Arial, sans-serif; padding: 2rem; background: #f9fafb; }
+                .container { max-width: 600px; margin: 0 auto; background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+                .error { color: #dc2626; text-align: center; }
+                .button { display: inline-block; padding: 0.75rem 1.5rem; background: #2563eb; color: white; text-decoration: none; border-radius: 6px; margin-top: 1rem; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="error">
+                    <h1>❌ Erro ao Enviar Proposta</h1>
+                    <p>Ocorreu um erro ao processar sua solicitação. Por favor, verifique os dados e tente novamente.</p>
+                    ${error instanceof z.ZodError ? 
+                      `<div style="background: #fef2f2; padding: 1rem; border-radius: 6px; margin-top: 1rem;">
+                         <h3>Campos com erro:</h3>
+                         <ul style="text-align: left;">
+                           ${error.errors.map(e => `<li>${e.path.join('.')}: ${e.message}</li>`).join('')}
+                         </ul>
+                       </div>` : ''
+                    }
+                </div>
+                <div style="text-align: center;">
+                    <a href="/propostas/nova" class="button">Tentar Novamente</a>
+                    <a href="/dashboard" class="button" style="background: #6b7280;">Voltar ao Dashboard</a>
+                </div>
+            </div>
+        </body>
+        </html>
+      `;
+      
+      res.status(400).send(errorPage);
+    }
+  });
+
   app.patch("/api/propostas/:id", authMiddleware, async (req, res) => {
     try {
       const id = parseInt(req.params.id);

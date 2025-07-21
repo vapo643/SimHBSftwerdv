@@ -3,6 +3,7 @@ import { Link, useLocation } from "wouter";
 import { signOut } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
+import OfflineIndicator from "./OfflineIndicator";
 import {
   LayoutDashboard,
   PlusCircle,
@@ -58,6 +59,8 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
 
   return (
     <div className="grid min-h-screen w-full lg:grid-cols-[280px_1fr]">
+      {/* Pilar 12 - Progressive Enhancement: Offline Status Banner */}
+      <OfflineIndicator variant="banner" />
       <div className="hidden border-r bg-card text-card-foreground lg:block">
         <div className="flex h-full max-h-screen flex-col gap-2">
           <div className="flex h-16 items-center border-b px-6">
@@ -98,6 +101,8 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
           <div className="flex-1">
             <h1 className="text-lg font-semibold">{title}</h1>
           </div>
+          {/* Pilar 12 - Progressive Enhancement: Offline indicator in header */}
+          <OfflineIndicator variant="icon-only" />
           <Button onClick={handleSignOut} variant="outline" size="icon">
             <LogOut className="h-5 w-5" />
           </Button>
