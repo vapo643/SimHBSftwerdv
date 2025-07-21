@@ -1,0 +1,83 @@
+PARTE I: FUNDAÇÕES E PRINCÍPIOS ESTRUTURAIS
+
+
+
+Arquitetura "Tudo como Código" (Everything as Code): Todo o sistema, incluindo a configuração de ambiente (replit.nix), as regras de qualidade de código (.eslintrc.js, .prettierrc) e as migrações de banco de dados (Drizzle Kit), é gerenciado como código versionado no Git.
+
+Segurança "Confiança Zero" (Zero Trust Security): Nenhuma parte do sistema confia implicitamente em outra. Cada requisição de API é validada por um middleware de segurança, e o acesso a dados é governado por políticas explícitas.
+
+Arquitetura Multi-Tenant com Isolamento de Dados: A fundação da segurança do projeto. Os dados de cada parceiro são isolados via 
+
+Row Level Security (RLS) no PostgreSQL, tornando tecnicamente impossível que uma loja acesse dados de outra.
+
+
+
+Modularidade e Monorepo Organizado: A aplicação é estruturada em um monorepo com separação clara de responsabilidades: client/ para o frontend, server/ para o backend e shared/ para código comum (schemas Zod), promovendo a construção de "peças pequenas e simples".
+
+
+
+Padrão Aberto para Evitar "Vendor Lock-in": A escolha de PostgreSQL como tecnologia de banco de dados subjacente (seja via Supabase ou Neon) garante a portabilidade dos dados e da lógica de negócio, evitando o aprisionamento tecnológico a um único fornecedor.
+
+PARTE II: ESTRUTURA DO BACKEND E DADOS
+
+
+
+Banco de Dados Relacional (PostgreSQL): Utiliza PostgreSQL para garantir a integridade relacional dos dados e a consistência transacional (ACID), essencial para operações financeiras.
+
+
+
+Migrações de Banco de Dados Versionadas (Drizzle Kit): Todas as alterações na estrutura do banco de dados são gerenciadas através de arquivos de migração gerados pelo Drizzle Kit, permitindo um processo de atualização seguro e automatizado.
+
+
+
+Backend Orientado a Serviços (API-First com Express.js): O backend é construído em Express.js e expõe uma API RESTful clara que serve como contrato para o frontend.
+
+Autenticação e Autorização Centralizadas (Supabase Auth): Utiliza Supabase Auth para gerenciar a identidade dos usuários (autenticação baseada em JWT). A autorização é integrada diretamente com as políticas de RLS no banco de dados.
+
+
+
+Gerenciamento de "Secrets" Centralizado (Replit Secrets): Todas as credenciais sensíveis (DATABASE_URL, SUPABASE_URL, SUPABASE_ANON_KEY) são gerenciadas exclusivamente através do Replit Secrets, garantindo que nunca sejam expostas no código-fonte.
+
+PARTE III: ESTRUTURA DO FRONTEND E EXPERIÊNCIA DO USUÁRIO
+
+
+
+Renderização Otimizada com Vite: O frontend em React utiliza Vite como ferramenta de build, garantindo um ambiente de desenvolvimento rápido (Hot Reload) e um build de produção otimizado com compressão e tree-shaking.
+
+
+
+Aprimoramento Progressivo (Progressive Enhancement): A arquitetura do Remix (mencionada como parte da "Golden Stack") estabelece o princípio de que a aplicação deve ser funcional em um nível básico, com a interatividade do JavaScript adicionada como uma camada de aprimoramento.
+
+
+
+Arquitetura de Componentes Reutilizáveis (shadcn/ui): A interface é construída a partir de uma biblioteca de componentes de UI pragmáticos e reutilizáveis, como os fornecidos pelo shadcn/ui, garantindo consistência visual e aceleração do desenvolvimento.
+
+Gerenciamento de Estado Otimizado (TanStack Query): O estado do servidor (dados vindos da API) é gerenciado pelo TanStack Query, que lida de forma eficiente com busca, cache, e sincronização, minimizando re-renders. O estado de formulários é gerenciado pelo 
+
+React Hook Form + Zod para máxima performance e validação.
+
+PARTE IV: PROCESSOS, QUALIDADE E DEPLOYMENT
+
+
+
+Qualidade de Código Automatizada (ESLint + Prettier): A base de código possui um padrão de qualidade rigoroso garantido pela integração do ESLint (detecção de erros) e Prettier (formatação consistente), incluindo o plugin para ordenação automática de classes do Tailwind CSS.
+
+
+
+Tipagem Estática Obrigatória (TypeScript): Todo o ecossistema (frontend, backend, schemas compartilhados) é escrito em TypeScript com o modo strict ativado, o que comprovadamente reduz bugs e melhora a manutenibilidade do código.
+
+
+
+Testes Automatizados (Pirâmide de Testes): A qualidade será garantida por uma suíte de testes automatizados, seguindo o padrão AAA (Arrange-Act-Assert) e utilizando Vitest para testes unitários e de integração, e Playwright para testes ponta a ponta (E2E).
+
+
+
+Integração e Entrega Contínua (CI/CD): Um pipeline automatizado no Replit (via workflows ou configurações no .replit) será responsável por executar os testes, verificar a qualidade e fazer o deploy da aplicação em produção de forma segura.
+
+
+
+Versionamento Estratégico (Git Flow): O desenvolvimento segue um modelo de ramificação estruturado como o Git Flow, com branches main, develop, feature, release e hotfix, para um gerenciamento de versões organizado.
+
+
+
+Comunicação Estruturada (Conventional Commits): Todas as alterações no código são registradas com mensagens de commit padronizadas seguindo a especificação Conventional Commits, permitindo a geração automática de históricos de mudança (changelogs) e uma comunicação clara
