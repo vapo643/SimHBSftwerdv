@@ -81,17 +81,12 @@ This is a full-stack TypeScript application for credit management called "Simpix
 - **Git Flow Documentation**: Complete branching strategy documentation with examples and workflow guidelines
 
 ### January 2025
-- **SSL Database Connection Fix**: Resolved persistent SSL connection error blocking database migrations using NODE_TLS_REJECT_UNAUTHORIZED=0 environment variable
-- **Database Migration Success**: Successfully created missing database structures including status enum, users table, gerente_lojas junction table, and comunicacao_logs table
-- **Migration Workflow Established**: Confirmed npm run db:push works with proper SSL configuration for future schema changes
 - **UI Refinement - Blackout Theme Implementation**: Complete "Blackout" theme with black backgrounds, dark gray cards, and comprehensive iconography
 - **New CurrencyInput Component**: Created reusable currency input component with R$ prefix for monetary fields
 - **Login Page Redesign**: Modern two-column layout with logo panel and clean form design using Blackout theme
 - **Enhanced Iconography**: Comprehensive integration of lucide-react icons across KPIs, filters, table headers, and navigation elements
 - **Improved Responsiveness**: Added horizontal scrolling for tables and mobile-friendly layouts throughout the application
 - **Watermark Removal**: Removed S logo watermark from background per user preference for cleaner aesthetic
-- **Logo Integration**: Replaced text "Simpix" with official logo image in DashboardLayout header navigation
-- **Gerente-Lojas Many-to-Many Relationship**: Implemented junction table migration and updated schema for flexible manager-store associations
 - **Multi-Tenant Security Implementation**: Comprehensive Row Level Security (RLS) system for complete data isolation by loja_id
 - **Database Schema Enhancement**: Added parceiros, lojas, tabelasComerciais, produtos, and comunicacaoLogs tables with multi-tenant structure
 - **RLS Policy Creation**: Complete set of security policies covering all CRUD operations with store-level data isolation
