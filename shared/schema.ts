@@ -1,3 +1,4 @@
+
 import {
   pgTable,
   text,
@@ -12,7 +13,7 @@ import {
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-// Parceiros e Lojas
+// Parceiros e Lojas - Base da hierarquia multi-tenant
 export const parceiros = pgTable("parceiros", {
   id: serial("id").primaryKey(),
   nome: text("nome").notNull(),
@@ -37,20 +38,20 @@ export const lojas = pgTable("lojas", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Usuários e Perfis
+// Users table without loja_id (removed for many-to-many relationship)
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   email: text("email").notNull().unique(),
   name: text("name").notNull(),
   password: text("password").notNull(),
-  role: text("role").notNull().default("user"), // admin, analyst, user
+  role: text("role").notNull().default("user"), // admin, analyst, user, gerente
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// Tabela de junção para relacionamento muitos-para-muitos Gerentes x Lojas
+// Junction table for many-to-many relationship between gerentes and lojas
 export const gerenteLojas = pgTable("gerente_lojas", {
-  gerenteId: integer("gerente_id").references(() => users.id).notNull(),
-  lojaId: integer("loja_id").references(() => lojas.id).notNull(),
+  gerenteId: integer("gerente_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+  lojaId: integer("loja_id").references(() => lojas.id, { onDelete: "cascade" }).notNull(),
   createdAt: timestamp("created_at").defaultNow(),
 }, (table) => ({
   pk: primaryKey({ columns: [table.gerenteId, table.lojaId] }),
@@ -174,6 +175,10 @@ export const insertUserSchema = createInsertSchema(users).omit({
   createdAt: true,
 });
 
+export const insertGerenteLojaSchema = createInsertSchema(gerenteLojas).omit({
+  createdAt: true,
+});
+
 export const insertPropostaSchema = createInsertSchema(propostas).omit({
   id: true,
   createdAt: true,
@@ -204,10 +209,6 @@ export const insertComunicacaoLogSchema = createInsertSchema(comunicacaoLogs).om
   createdAt: true,
 });
 
-export const insertGerenteLojaSchema = createInsertSchema(gerenteLojas).omit({
-  createdAt: true,
-});
-
 // TypeScript Types
 export type InsertParceiro = z.infer<typeof insertParceiroSchema>;
 export type Parceiro = typeof parceiros.$inferSelect;
@@ -215,6 +216,8 @@ export type InsertLoja = z.infer<typeof insertLojaSchema>;
 export type Loja = typeof lojas.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
+export type InsertGerenteLojas = z.infer<typeof insertGerenteLojaSchema>;
+export type GerenteLojas = typeof gerenteLojas.$inferSelect;
 export type InsertProposta = z.infer<typeof insertPropostaSchema>;
 export type UpdateProposta = z.infer<typeof updatePropostaSchema>;
 export type Proposta = typeof propostas.$inferSelect;
@@ -224,5 +227,3 @@ export type InsertProduto = z.infer<typeof insertProdutoSchema>;
 export type Produto = typeof produtos.$inferSelect;
 export type InsertComunicacaoLog = z.infer<typeof insertComunicacaoLogSchema>;
 export type ComunicacaoLog = typeof comunicacaoLogs.$inferSelect;
-export type InsertGerenteLojas = z.infer<typeof insertGerenteLojaSchema>;
-export type GerenteLojas = typeof gerenteLojas.$inferSelect;

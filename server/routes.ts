@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import { createServerSupabaseClient } from "../client/src/lib/supabase";
 import { authMiddleware, type AuthRequest } from "./lib/auth";
 import { rlsAuthMiddleware, validateLojaAccess, type EnhancedAuthRequest } from "./lib/rls-setup";
-import { insertPropostaSchema, updatePropostaSchema, insertGerenteLojaSchema } from "@shared/schema";
+import { insertPropostaSchema, updatePropostaSchema } from "@shared/schema";
 import { z } from "zod";
 import multer from "multer";
 
@@ -553,71 +553,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Get stats error:", error);
       res.status(500).json({ message: "Failed to fetch stats" });
-    }
-  });
-
-  // Gerente-Lojas Relationship Routes
-  // Get all stores managed by a specific manager
-  app.get("/api/gerentes/:gerenteId/lojas", authMiddleware, async (req, res) => {
-    try {
-      const gerenteId = parseInt(req.params.gerenteId);
-      const lojaIds = await storage.getLojasForGerente(gerenteId);
-      res.json(lojaIds);
-    } catch (error) {
-      console.error("Get lojas for gerente error:", error);
-      res.status(500).json({ message: "Failed to fetch stores for manager" });
-    }
-  });
-
-  // Get all managers for a specific store
-  app.get("/api/lojas/:lojaId/gerentes", authMiddleware, async (req, res) => {
-    try {
-      const lojaId = parseInt(req.params.lojaId);
-      const gerenteIds = await storage.getGerentesForLoja(lojaId);
-      res.json(gerenteIds);
-    } catch (error) {
-      console.error("Get gerentes for loja error:", error);
-      res.status(500).json({ message: "Failed to fetch managers for store" });
-    }
-  });
-
-  // Add a manager to a store
-  app.post("/api/gerente-lojas", authMiddleware, async (req, res) => {
-    try {
-      const validatedData = insertGerenteLojaSchema.parse(req.body);
-      const relationship = await storage.addGerenteToLoja(validatedData);
-      res.json(relationship);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid data", errors: error.errors });
-      }
-      console.error("Add gerente to loja error:", error);
-      res.status(500).json({ message: "Failed to add manager to store" });
-    }
-  });
-
-  // Remove a manager from a store
-  app.delete("/api/gerente-lojas/:gerenteId/:lojaId", authMiddleware, async (req, res) => {
-    try {
-      const gerenteId = parseInt(req.params.gerenteId);
-      const lojaId = parseInt(req.params.lojaId);
-      await storage.removeGerenteFromLoja(gerenteId, lojaId);
-      res.json({ message: "Manager removed from store successfully" });
-    } catch (error) {
-      console.error("Remove gerente from loja error:", error);
-      res.status(500).json({ message: "Failed to remove manager from store" });
-    }
-  });
-
-  // Get all relationships for a specific manager
-  app.get("/api/gerentes/:gerenteId/relationships", authMiddleware, async (req, res) => {
-    try {
-      const gerenteId = parseInt(req.params.gerenteId);
-      const relationships = await storage.getGerenteLojas(gerenteId);
-      res.json(relationships);
-    } catch (error) {
-      console.error("Get gerente relationships error:", error);
-      res.status(500).json({ message: "Failed to fetch manager relationships" });
     }
   });
 

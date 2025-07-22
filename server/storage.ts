@@ -1,17 +1,14 @@
 import {
   users,
   propostas,
-  gerenteLojas,
   type User,
   type InsertUser,
   type Proposta,
   type InsertProposta,
   type UpdateProposta,
-  type GerenteLojas,
-  type InsertGerenteLojas,
 } from "@shared/schema";
 import { db } from "./lib/supabase";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 
 export interface IStorage {
   // Users
@@ -26,13 +23,6 @@ export interface IStorage {
   createProposta(proposta: InsertProposta): Promise<Proposta>;
   updateProposta(id: number, proposta: UpdateProposta): Promise<Proposta>;
   deleteProposta(id: number): Promise<void>;
-
-  // Gerente-Lojas Relationships
-  getGerenteLojas(gerenteId: number): Promise<GerenteLojas[]>;
-  getLojasForGerente(gerenteId: number): Promise<number[]>;
-  getGerentesForLoja(lojaId: number): Promise<number[]>;
-  addGerenteToLoja(relationship: InsertGerenteLojas): Promise<GerenteLojas>;
-  removeGerenteFromLoja(gerenteId: number, lojaId: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -84,44 +74,6 @@ export class DatabaseStorage implements IStorage {
 
   async deleteProposta(id: number): Promise<void> {
     await db.delete(propostas).where(eq(propostas.id, id));
-  }
-
-  // Gerente-Lojas Relationships
-  async getGerenteLojas(gerenteId: number): Promise<GerenteLojas[]> {
-    return await db
-      .select()
-      .from(gerenteLojas)
-      .where(eq(gerenteLojas.gerenteId, gerenteId));
-  }
-
-  async getLojasForGerente(gerenteId: number): Promise<number[]> {
-    const result = await db
-      .select({ lojaId: gerenteLojas.lojaId })
-      .from(gerenteLojas)
-      .where(eq(gerenteLojas.gerenteId, gerenteId));
-    return result.map(r => r.lojaId);
-  }
-
-  async getGerentesForLoja(lojaId: number): Promise<number[]> {
-    const result = await db
-      .select({ gerenteId: gerenteLojas.gerenteId })
-      .from(gerenteLojas)
-      .where(eq(gerenteLojas.lojaId, lojaId));
-    return result.map(r => r.gerenteId);
-  }
-
-  async addGerenteToLoja(relationship: InsertGerenteLojas): Promise<GerenteLojas> {
-    const result = await db.insert(gerenteLojas).values(relationship).returning();
-    return result[0];
-  }
-
-  async removeGerenteFromLoja(gerenteId: number, lojaId: number): Promise<void> {
-    await db
-      .delete(gerenteLojas)
-      .where(and(
-        eq(gerenteLojas.gerenteId, gerenteId),
-        eq(gerenteLojas.lojaId, lojaId)
-      ));
   }
 }
 
