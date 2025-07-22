@@ -64,14 +64,12 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
       <div className="hidden border-r bg-card text-card-foreground lg:block">
         <div className="flex h-full max-h-screen flex-col gap-2">
           <div className="flex h-16 items-center border-b px-6">
-            <Link to="/dashboard">
-              <a className="flex items-center gap-2 font-semibold">
-                <img 
-                  src="https://dvglgxrvhmtsixaabxha.supabase.co/storage/v1/object/public/logosimpixblack//simpix-logo-png.png.png" 
-                  alt="Simpix Logo" 
-                  className="h-32 w-auto"
-                />
-              </a>
+            <Link to="/dashboard" className="flex items-center gap-2 font-semibold">
+              <img 
+                src="https://dvglgxrvhmtsixaabxha.supabase.co/storage/v1/object/public/logosimpixblack//simpix-logo-png.png.png" 
+                alt="Simpix Logo" 
+                className="h-32 w-auto"
+              />
             </Link>
           </div>
           <div className="flex-1 overflow-auto py-2">
@@ -80,17 +78,17 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
                 const Icon = item.icon;
                 const isActive = location === item.href;
                 return (
-                  <Link key={item.name} href={item.href}>
-                    <a
-                      className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all ${
-                        isActive
-                          ? "bg-primary text-primary-foreground"
-                          : "text-muted-foreground hover:text-primary"
-                      }`}
-                    >
-                      <Icon className="h-4 w-4" />
-                      {item.name}
-                    </a>
+                  <Link 
+                    key={item.name} 
+                    href={item.href}
+                    className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all ${
+                      isActive
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:text-primary"
+                    }`}
+                  >
+                    <Icon className="h-4 w-4" />
+                    {item.name}
                   </Link>
                 );
               })}
