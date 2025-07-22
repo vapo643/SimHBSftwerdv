@@ -4,7 +4,6 @@ import { signOut } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import OfflineIndicator from "./OfflineIndicator";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
 import {
   LayoutDashboard,
   PlusCircle,
@@ -59,9 +58,7 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
   };
 
   return (
-    <div className="grid min-h-screen w-full lg:grid-cols-[280px_1fr] relative">
-      {/* Marca d'água da logo */}
-      <div className="watermark-container"></div>
+    <div className="grid min-h-screen w-full lg:grid-cols-[280px_1fr]">
       {/* Pilar 12 - Progressive Enhancement: Offline Status Banner */}
       <OfflineIndicator variant="banner" />
       <div className="hidden border-r bg-card text-card-foreground lg:block">
@@ -106,7 +103,6 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
           </div>
           {/* Pilar 12 - Progressive Enhancement: Offline indicator in header */}
           <OfflineIndicator variant="icon-only" />
-          <ThemeToggle />
           <Button onClick={handleSignOut} variant="outline" size="icon">
             <LogOut className="h-5 w-5" />
           </Button>
