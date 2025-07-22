@@ -346,7 +346,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     atualizarProduto, 
     verificarProdutoEmUso, 
     deletarProduto 
-  } = require("./controllers/produtoController");
+  } = await import("./controllers/produtoController");
 
   // Mock data para prazos
   const prazos = [
