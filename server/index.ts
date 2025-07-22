@@ -7,6 +7,9 @@ import { config, logConfigStatus, isAppOperational } from "./lib/config";
 
 const app = express();
 
+// Configure trust proxy for rate limiting with X-Forwarded-For headers
+app.set('trust proxy', true);
+
 // ====================================
 // PILAR 12 - PROGRESSIVE ENHANCEMENT
 // ====================================

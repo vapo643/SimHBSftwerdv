@@ -87,6 +87,10 @@ This is a full-stack TypeScript application for credit management called "Simpix
 - **Enhanced Iconography**: Comprehensive integration of lucide-react icons across KPIs, filters, table headers, and navigation elements
 - **Improved Responsiveness**: Added horizontal scrolling for tables and mobile-friendly layouts throughout the application
 - **Watermark Removal**: Removed S logo watermark from background per user preference for cleaner aesthetic
+- **User Form Refinement**: Enhanced user management form with conditional fields for Partner and Store selection
+- **Conditional Field Logic**: Partner and Store selection fields only appear for GERENTE and ATENDENTE profiles
+- **Form Validation Enhancement**: Added Zod validation requiring Store selection for specific user profiles
+- **Express Rate Limiting Fix**: Added trust proxy configuration to resolve X-Forwarded-For header validation errors
 - **Multi-Tenant Security Implementation**: Comprehensive Row Level Security (RLS) system for complete data isolation by loja_id
 - **Database Schema Enhancement**: Added parceiros, lojas, tabelasComerciais, produtos, and comunicacaoLogs tables with multi-tenant structure
 - **RLS Policy Creation**: Complete set of security policies covering all CRUD operations with store-level data isolation
