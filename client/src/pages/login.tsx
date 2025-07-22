@@ -51,7 +51,7 @@ const LoginPage: React.FC = () => {
       <div className="hidden bg-gray-900 lg:flex items-center justify-center relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-black opacity-60"></div>
         <img 
-          src="https://fkfmirnnredvhocnhost.supabase.co/storage/v1/object/public/logo//simpix-logo-png.png.png" 
+          src="https://dvglgxrvhmtsixaabxha.supabase.co/storage/v1/object/public/logosimpixblack//Logotipo_Achadinhos_de_Beleza_Colorido_Moderno_Rosa_e_Preto-removebg-preview.png" 
           alt="Simpix Logo"
           className="relative z-10 w-1/2 opacity-75"
         />
