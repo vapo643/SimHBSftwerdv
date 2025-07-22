@@ -7,7 +7,6 @@ import {
   timestamp,
   decimal,
   pgEnum,
-  primaryKey,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -37,24 +36,15 @@ export const lojas = pgTable("lojas", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Usuários e Perfis
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   email: text("email").notNull().unique(),
   name: text("name").notNull(),
   password: text("password").notNull(),
+  lojaId: integer("loja_id").references(() => lojas.id).notNull(), // Multi-tenant key
   role: text("role").notNull().default("user"), // admin, analyst, user
   createdAt: timestamp("created_at").defaultNow(),
 });
-
-// Tabela de junção para relacionamento muitos-para-muitos Gerentes x Lojas
-export const gerenteLojas = pgTable("gerente_lojas", {
-  gerenteId: integer("gerente_id").references(() => users.id).notNull(),
-  lojaId: integer("loja_id").references(() => lojas.id).notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
-}, (table) => ({
-  pk: primaryKey({ columns: [table.gerenteId, table.lojaId] }),
-}));
 
 export const statusEnum = pgEnum("status", [
   "rascunho",
@@ -204,10 +194,6 @@ export const insertComunicacaoLogSchema = createInsertSchema(comunicacaoLogs).om
   createdAt: true,
 });
 
-export const insertGerenteLojaSchema = createInsertSchema(gerenteLojas).omit({
-  createdAt: true,
-});
-
 // TypeScript Types
 export type InsertParceiro = z.infer<typeof insertParceiroSchema>;
 export type Parceiro = typeof parceiros.$inferSelect;
@@ -224,5 +210,3 @@ export type InsertProduto = z.infer<typeof insertProdutoSchema>;
 export type Produto = typeof produtos.$inferSelect;
 export type InsertComunicacaoLog = z.infer<typeof insertComunicacaoLogSchema>;
 export type ComunicacaoLog = typeof comunicacaoLogs.$inferSelect;
-export type InsertGerenteLojas = z.infer<typeof insertGerenteLojaSchema>;
-export type GerenteLojas = typeof gerenteLojas.$inferSelect;
