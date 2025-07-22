@@ -1,4 +1,3 @@
-
 import {
   pgTable,
   text,
@@ -38,20 +37,20 @@ export const lojas = pgTable("lojas", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Users table without loja_id (removed for many-to-many relationship)
+// Usuários e Perfis
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   email: text("email").notNull().unique(),
   name: text("name").notNull(),
   password: text("password").notNull(),
-  role: text("role").notNull().default("user"), // admin, analyst, user, gerente
+  role: text("role").notNull().default("user"), // admin, analyst, user
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// Junction table for many-to-many relationship between gerentes and lojas
+// Tabela de junção para relacionamento muitos-para-muitos Gerentes x Lojas
 export const gerenteLojas = pgTable("gerente_lojas", {
-  gerenteId: integer("gerente_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
-  lojaId: integer("loja_id").references(() => lojas.id, { onDelete: "cascade" }).notNull(),
+  gerenteId: integer("gerente_id").references(() => users.id).notNull(),
+  lojaId: integer("loja_id").references(() => lojas.id).notNull(),
   createdAt: timestamp("created_at").defaultNow(),
 }, (table) => ({
   pk: primaryKey({ columns: [table.gerenteId, table.lojaId] }),
@@ -175,10 +174,6 @@ export const insertUserSchema = createInsertSchema(users).omit({
   createdAt: true,
 });
 
-export const insertGerenteLojaSchema = createInsertSchema(gerenteLojas).omit({
-  createdAt: true,
-});
-
 export const insertPropostaSchema = createInsertSchema(propostas).omit({
   id: true,
   createdAt: true,
@@ -209,6 +204,10 @@ export const insertComunicacaoLogSchema = createInsertSchema(comunicacaoLogs).om
   createdAt: true,
 });
 
+export const insertGerenteLojaSchema = createInsertSchema(gerenteLojas).omit({
+  createdAt: true,
+});
+
 // TypeScript Types
 export type InsertParceiro = z.infer<typeof insertParceiroSchema>;
 export type Parceiro = typeof parceiros.$inferSelect;
@@ -216,8 +215,6 @@ export type InsertLoja = z.infer<typeof insertLojaSchema>;
 export type Loja = typeof lojas.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
-export type InsertGerenteLojas = z.infer<typeof insertGerenteLojaSchema>;
-export type GerenteLojas = typeof gerenteLojas.$inferSelect;
 export type InsertProposta = z.infer<typeof insertPropostaSchema>;
 export type UpdateProposta = z.infer<typeof updatePropostaSchema>;
 export type Proposta = typeof propostas.$inferSelect;
@@ -227,3 +224,5 @@ export type InsertProduto = z.infer<typeof insertProdutoSchema>;
 export type Produto = typeof produtos.$inferSelect;
 export type InsertComunicacaoLog = z.infer<typeof insertComunicacaoLogSchema>;
 export type ComunicacaoLog = typeof comunicacaoLogs.$inferSelect;
+export type InsertGerenteLojas = z.infer<typeof insertGerenteLojaSchema>;
+export type GerenteLojas = typeof gerenteLojas.$inferSelect;
