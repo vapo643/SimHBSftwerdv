@@ -339,84 +339,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Import do controller de produtos
-  const { 
-    buscarTodosProdutos, 
-    criarProduto, 
-    atualizarProduto, 
-    verificarProdutoEmUso, 
-    deletarProduto 
-  } = await import("./controllers/produtoController");
+  // Mock data para produtos e prazos
+  const produtos = [
+    { id: 1, nome: "Crédito Pessoal" },
+    { id: 2, nome: "Crédito Imobiliário" },
+    { id: 3, nome: "Crédito Consignado" },
+  ];
 
-  // Mock data para prazos
   const prazos = [
     { id: 1, valor: "12 meses" },
     { id: 2, valor: "24 meses" },
     { id: 3, valor: "36 meses" },
   ];
 
-  // Rotas CRUD para produtos
-  app.get("/api/produtos", async (req, res) => {
-    try {
-      const produtos = await buscarTodosProdutos();
-      res.json(produtos);
-    } catch (error) {
-      console.error("Erro ao buscar produtos:", error);
-      res.status(500).json({ message: "Erro ao buscar produtos" });
-    }
-  });
-
-  app.post("/api/produtos", async (req, res) => {
-    try {
-      const { nome, status } = req.body;
-      
-      if (!nome || !status) {
-        return res.status(400).json({ message: "Nome e status são obrigatórios" });
-      }
-
-      const novoProduto = await criarProduto({ nome, status });
-      res.status(201).json(novoProduto);
-    } catch (error) {
-      console.error("Erro ao criar produto:", error);
-      res.status(500).json({ message: "Erro ao criar produto" });
-    }
-  });
-
-  app.put("/api/produtos/:id", async (req, res) => {
-    try {
-      const { id } = req.params;
-      const { nome, status } = req.body;
-      
-      if (!nome || !status) {
-        return res.status(400).json({ message: "Nome e status são obrigatórios" });
-      }
-
-      const produtoAtualizado = await atualizarProduto(id, { nome, status });
-      res.json(produtoAtualizado);
-    } catch (error) {
-      console.error("Erro ao atualizar produto:", error);
-      res.status(500).json({ message: "Erro ao atualizar produto" });
-    }
-  });
-
-  app.delete("/api/produtos/:id", async (req, res) => {
-    try {
-      const { id } = req.params;
-      
-      // Verificar se o produto está em uso
-      const emUso = await verificarProdutoEmUso(id);
-      if (emUso) {
-        return res.status(400).json({ 
-          message: "Não é possível excluir este produto pois ele está sendo utilizado em tabelas comerciais" 
-        });
-      }
-
-      await deletarProduto(id);
-      res.json({ message: "Produto excluído com sucesso" });
-    } catch (error) {
-      console.error("Erro ao excluir produto:", error);
-      res.status(500).json({ message: "Erro ao excluir produto" });
-    }
+  // Rota para buscar produtos
+  app.get("/api/produtos", (req, res) => {
+    res.json(produtos);
   });
 
   // Rota para buscar prazos

@@ -15,7 +15,7 @@ async function fetchWithToken(url: string, options?: RequestInit) {
   });
 
   const headers: Record<string, string> = {
-    ...(options?.headers as Record<string, string> || {}),
+    ...options?.headers,
   };
 
   // Add authorization header if we have a token
@@ -65,5 +65,4 @@ async function fetchWithToken(url: string, options?: RequestInit) {
   }
 }
 
-export { fetchWithToken };
 export default fetchWithToken;
