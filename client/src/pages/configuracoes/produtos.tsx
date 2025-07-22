@@ -40,10 +40,8 @@ const ProdutosPage: React.FC = () => {
   const { data: produtos = [], isLoading } = useQuery({
     queryKey: ["/api/produtos"],
     queryFn: async () => {
-      const response = await apiRequest("/api/produtos", {
-        method: "GET",
-      });
-      return (response as any[]).map((produto: any) => ({
+      const response = await apiRequest("GET", "/api/produtos");
+      return (response as unknown as any[]).map((produto: any) => ({
         ...produto,
         status: produto.ativo ? "Ativo" : "Inativo",
         emUso: false, // This would be determined by actual usage check
@@ -54,17 +52,14 @@ const ProdutosPage: React.FC = () => {
   // Create product mutation
   const createMutation = useMutation({
     mutationFn: async (data: any) => {
-      return await apiRequest("/api/produtos", {
-        method: "POST",
-        body: {
-          ...data,
-          lojaId: 1, // This should come from user context/auth
-          taxaJuros: "5.00", // Default values, should come from form
-          prazoMinimo: 12,
-          prazoMaximo: 60,
-          valorMinimo: "1000.00",
-          valorMaximo: "50000.00",
-        },
+      return await apiRequest("POST", "/api/produtos", {
+        ...data,
+        lojaId: 1, // This should come from user context/auth
+        taxaJuros: "5.00", // Default values, should come from form
+        prazoMinimo: 12,
+        prazoMaximo: 60,
+        valorMinimo: "1000.00",
+        valorMaximo: "50000.00",
       });
     },
     onSuccess: () => {
@@ -88,17 +83,14 @@ const ProdutosPage: React.FC = () => {
   // Update product mutation
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: any }) => {
-      return await apiRequest(`/api/produtos/${id}`, {
-        method: "PUT",
-        body: {
-          ...data,
-          lojaId: 1, // This should come from user context/auth
-          taxaJuros: "5.00", // Default values, should come from form
-          prazoMinimo: 12,
-          prazoMaximo: 60,
-          valorMinimo: "1000.00",
-          valorMaximo: "50000.00",
-        },
+      return await apiRequest("PUT", `/api/produtos/${id}`, {
+        ...data,
+        lojaId: 1, // This should come from user context/auth
+        taxaJuros: "5.00", // Default values, should come from form
+        prazoMinimo: 12,
+        prazoMaximo: 60,
+        valorMinimo: "1000.00",
+        valorMaximo: "50000.00",
       });
     },
     onSuccess: () => {
@@ -122,9 +114,7 @@ const ProdutosPage: React.FC = () => {
   // Delete product mutation
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      return await apiRequest(`/api/produtos/${id}`, {
-        method: "DELETE",
-      });
+      return await apiRequest("DELETE", `/api/produtos/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/produtos"] });
