@@ -621,6 +621,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ===== PRODUTOS DE CRÉDITO ROUTES =====
+  // Import the controller functions
+  const { buscarTodosProdutos, criarProduto, atualizarProduto, verificarProdutoEmUso, deletarProduto } = await import('./controllers/produtoController');
+  
+  // Get all products
+  app.get("/api/produtos", authMiddleware, async (req, res) => {
+    try {
+      const produtos = await buscarTodosProdutos();
+      res.json(produtos);
+    } catch (error) {
+      console.error("Get produtos error:", error);
+      res.status(500).json({ message: "Erro ao buscar produtos" });
+    }
+  });
+
+  // Create new product
+  app.post("/api/produtos", authMiddleware, async (req, res) => {
+    try {
+      const novoProduto = await criarProduto(req.body);
+      res.json(novoProduto);
+    } catch (error) {
+      console.error("Create produto error:", error);
+      res.status(500).json({ message: "Erro ao criar produto" });
+    }
+  });
+
+  // Update existing product
+  app.put("/api/produtos/:id", authMiddleware, async (req, res) => {
+    try {
+      const produtoAtualizado = await atualizarProduto(req.params.id, req.body);
+      res.json(produtoAtualizado);
+    } catch (error) {
+      console.error("Update produto error:", error);
+      res.status(500).json({ message: "Erro ao atualizar produto" });
+    }
+  });
+
+  // Delete product (soft delete)
+  app.delete("/api/produtos/:id", authMiddleware, async (req, res) => {
+    try {
+      const emUso = await verificarProdutoEmUso(req.params.id);
+      if (emUso) {
+        return res.status(400).json({ 
+          message: "Produto não pode ser excluído pois está em uso" 
+        });
+      }
+      
+      await deletarProduto(req.params.id);
+      res.json({ message: "Produto excluído com sucesso" });
+    } catch (error) {
+      console.error("Delete produto error:", error);
+      res.status(500).json({ message: "Erro ao excluir produto" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
