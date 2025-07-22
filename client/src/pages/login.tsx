@@ -1,15 +1,14 @@
+import React from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useForm } from 'react-hook-form';
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { signIn } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
-import { TrendingUp } from "lucide-react";
 
 const loginSchema = z.object({
   email: z.string().email("Email inválido"),
@@ -18,7 +17,7 @@ const loginSchema = z.object({
 
 type LoginForm = z.infer<typeof loginSchema>;
 
-export default function Login() {
+const LoginPage: React.FC = () => {
   const [, setLocation] = useLocation();
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
@@ -48,58 +47,61 @@ export default function Login() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-primary to-blue-700 px-4">
-      <div className="w-full max-w-md space-y-8">
-        <div className="text-center">
-          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-white">
-            <TrendingUp className="text-2xl text-primary" />
+    <div className="w-full lg:grid lg:min-h-screen lg:grid-cols-2">
+      <div className="hidden bg-gray-900 lg:flex items-center justify-center relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-black opacity-60"></div>
+        <img 
+          src="https://fkfmirnnredvhocnhost.supabase.co/storage/v1/object/public/logo//simpix-logo-png.png.png" 
+          alt="Simpix Logo"
+          className="relative z-10 w-1/2 opacity-75"
+        />
+      </div>
+      <div className="flex items-center justify-center py-12 bg-black min-h-screen lg:min-h-auto">
+        <div className="mx-auto grid w-[350px] gap-6">
+          <div className="grid gap-2 text-center">
+            <h1 className="text-3xl font-bold text-white">Login</h1>
+            <p className="text-balance text-gray-400">
+              Acesse sua conta para continuar
+            </p>
           </div>
-          <h2 className="mb-2 text-3xl font-bold text-white text-gradient-simpix">Simpix</h2>
-          <p className="text-blue-100">Sistema de Gestão de Crédito</p>
+          <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="email" className="text-white">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="seu@email.com"
+                required
+                className="bg-gray-800 border-gray-600 text-white placeholder:text-gray-400"
+                {...register("email")}
+              />
+              {errors.email && (
+                <p className="text-sm text-red-400">{errors.email.message}</p>
+              )}
+            </div>
+            <div className="grid gap-2">
+              <div className="flex items-center">
+                <Label htmlFor="password" className="text-white">Senha</Label>
+              </div>
+              <Input 
+                id="password" 
+                type="password" 
+                required 
+                className="bg-gray-800 border-gray-600 text-white placeholder:text-gray-400"
+                {...register("password")}
+              />
+              {errors.password && (
+                <p className="text-sm text-red-400">{errors.password.message}</p>
+              )}
+            </div>
+            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white" disabled={loading}>
+              {loading ? "Entrando..." : "Entrar"}
+            </Button>
+          </form>
         </div>
-
-        <Card className="card-simpix shadow-xl">
-          <CardContent className="p-8">
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              <div>
-                <Label htmlFor="email" className="mb-2 block text-sm font-medium text-gray-700">
-                  Email
-                </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="Digite seu email"
-                  {...register("email")}
-                  className="input-simpix w-full"
-                />
-                {errors.email && (
-                  <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
-                )}
-              </div>
-
-              <div>
-                <Label htmlFor="password" className="mb-2 block text-sm font-medium text-gray-700">
-                  Senha
-                </Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Digite sua senha"
-                  {...register("password")}
-                  className="input-simpix w-full"
-                />
-                {errors.password && (
-                  <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
-                )}
-              </div>
-
-              <Button type="submit" disabled={loading} className="btn-simpix-primary w-full">
-                {loading ? "Entrando..." : "Entrar"}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );
-}
+};
+
+export default LoginPage;

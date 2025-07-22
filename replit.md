@@ -81,6 +81,12 @@ This is a full-stack TypeScript application for credit management called "Simpix
 - **Git Flow Documentation**: Complete branching strategy documentation with examples and workflow guidelines
 
 ### January 2025
+- **UI Refinement - Blackout Theme Implementation**: Complete "Blackout" theme with black backgrounds, dark gray cards, and comprehensive iconography
+- **New CurrencyInput Component**: Created reusable currency input component with R$ prefix for monetary fields
+- **Login Page Redesign**: Modern two-column layout with logo panel and clean form design using Blackout theme
+- **Enhanced Iconography**: Comprehensive integration of lucide-react icons across KPIs, filters, table headers, and navigation elements
+- **Improved Responsiveness**: Added horizontal scrolling for tables and mobile-friendly layouts throughout the application
+- **Watermark Removal**: Removed S logo watermark from background per user preference for cleaner aesthetic
 - **Multi-Tenant Security Implementation**: Comprehensive Row Level Security (RLS) system for complete data isolation by loja_id
 - **Database Schema Enhancement**: Added parceiros, lojas, tabelasComerciais, produtos, and comunicacaoLogs tables with multi-tenant structure
 - **RLS Policy Creation**: Complete set of security policies covering all CRUD operations with store-level data isolation

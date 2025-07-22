@@ -1,0 +1,109 @@
+# MISSÃO: Refinamento Final da UI - Input de Moeda e Nova Tela de Login
+
+**CONTEXTO:** O plano para aprimorar a UI do `simpix` foi validado. Sua tarefa é implementar um novo componente de input de moeda e redesenhar completamente a tela de login.
+
+**AÇÃO:** Execute o seguinte plano de 2 etapas:
+
+---
+**ETAPA 1: Crie o Componente `CurrencyInput`**
+
+Crie um novo arquivo no caminho `/client/src/components/ui/currency-input.tsx` e cole o seguinte código exato dentro dele. Este componente adicionará o prefixo "R$" aos campos de valor.
+
+```typescript
+import * as React from "react"
+import { Input, InputProps } from "@/components/ui/input"
+import { cn } from "@/lib/utils"
+
+const CurrencyInput = React.forwardRef<HTMLInputElement, InputProps>(
+  ({ className, ...props }, ref) => {
+    return (
+      <div className="relative">
+        <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">
+          R$
+        </span>
+        <Input
+          ref={ref}
+          className={cn("pl-9", className)}
+          {...props}
+        />
+      </div>
+    )
+  }
+)
+CurrencyInput.displayName = "CurrencyInput"
+
+export { CurrencyInput }
+ETAPA 2: Implemente a Nova Tela de Login
+
+Substitua todo o conteúdo do arquivo /client/src/pages/login.tsx pelo seguinte código, que implementa o novo design moderno com layout de duas colunas:
+
+TypeScript
+
+import React from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useForm } from 'react-hook-form';
+// Lembre-se de adicionar a lógica de autenticação aqui depois
+
+const LoginPage: React.FC = () => {
+  const { register, handleSubmit } = useForm();
+
+  const onSubmit = (data: any) => {
+    console.log("Login data:", data);
+    // Adicionar chamada para a função de signIn aqui
+  };
+
+  return (
+    <div className="w-full lg:grid lg:min-h-screen lg:grid-cols-2">
+      <div className="hidden bg-gray-100 lg:flex items-center justify-center relative overflow-hidden dark:bg-gray-800">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-900 to-gray-900 opacity-80"></div>
+        <img 
+          src="[https://fkfmirnnredvhocnhost.supabase.co/storage/v1/object/public/logo//simpix-logo-png.png.png](https://fkfmirnnredvhocnhost.supabase.co/storage/v1/object/public/logo//simpix-logo-png.png.png)" 
+          alt="Simpix Logo"
+          className="relative z-10 w-1/2 opacity-75"
+        />
+      </div>
+      <div className="flex items-center justify-center py-12">
+        <div className="mx-auto grid w-[350px] gap-6">
+          <div className="grid gap-2 text-center">
+            <h1 className="text-3xl font-bold">Login</h1>
+            <p className="text-balance text-muted-foreground">
+              Acesse sua conta para continuar
+            </p>
+          </div>
+          <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="seu@email.com"
+                required
+                {...register("email")}
+              />
+            </div>
+            <div className="grid gap-2">
+              <div className="flex items-center">
+                <Label htmlFor="password">Senha</Label>
+              </div>
+              <Input 
+                id="password" 
+                type="password" 
+                required 
+                {...register("password")}
+              />
+            </div>
+            <Button type="submit" className="w-full">
+              Entrar
+            </Button>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default LoginPage;
+
+Execute este plano de refinamento de UI.
