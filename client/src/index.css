@@ -5,61 +5,64 @@
 @tailwind utilities;
 
 :root {
-  --background: hsl(0, 0%, 100%);
-  --foreground: hsl(20, 14.3%, 4.1%);
-  --muted: hsl(220, 13%, 94%);
-  --muted-foreground: hsl(220, 9%, 46%);
-  --popover: hsl(0, 0%, 100%);
-  --popover-foreground: hsl(20, 14.3%, 4.1%);
-  --card: hsl(0, 0%, 100%);
-  --card-foreground: hsl(20, 14.3%, 4.1%);
-  --border: hsl(220, 13%, 91%);
-  --input: hsl(220, 13%, 91%);
-  --primary: hsl(220, 100%, 20%);
+  /* Tema Blackout - Fundo principal preto */
+  --background: hsl(0, 0%, 0%);
+  --foreground: hsl(0, 0%, 98%);
+  --muted: hsl(0, 0%, 8%);
+  --muted-foreground: hsl(0, 0%, 64%);
+  --popover: hsl(0, 0%, 8%);
+  --popover-foreground: hsl(0, 0%, 98%);
+  --card: hsl(0, 0%, 8%);
+  --card-foreground: hsl(0, 0%, 98%);
+  --border: hsl(0, 0%, 15%);
+  --input: hsl(0, 0%, 12%);
+  --primary: hsl(220, 100%, 45%);
   --primary-foreground: hsl(0, 0%, 100%);
-  --secondary: hsl(220, 13%, 94%);
-  --secondary-foreground: hsl(220, 100%, 20%);
-  --accent: hsl(120, 100%, 50%);
-  --accent-foreground: hsl(220, 100%, 20%);
+  --secondary: hsl(0, 0%, 12%);
+  --secondary-foreground: hsl(0, 0%, 98%);
+  --accent: hsl(120, 100%, 45%);
+  --accent-foreground: hsl(0, 0%, 100%);
   --destructive: hsl(0, 84.2%, 60.2%);
-  --destructive-foreground: hsl(60, 9.1%, 97.8%);
-  --ring: hsl(220, 100%, 20%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --ring: hsl(220, 100%, 45%);
   --radius: 0.5rem;
   --warning: hsl(38, 92%, 50%);
   --success: hsl(142, 76%, 36%);
-  --simpix-navy: hsl(220, 100%, 20%);
-  --simpix-fluorescent: hsl(120, 100%, 50%);
-  --simpix-navy-light: hsl(220, 100%, 25%);
-  --simpix-fluorescent-dark: hsl(120, 100%, 40%);
+  /* Cores Simpix para o tema Blackout */
+  --simpix-blue: hsl(220, 100%, 45%);
+  --simpix-green: hsl(120, 100%, 45%);
+  --simpix-blue-light: hsl(220, 100%, 55%);
+  --simpix-green-dark: hsl(120, 100%, 35%);
 }
 
 .dark {
-  --background: hsl(220, 39%, 11%);
+  /* Mantém o mesmo esquema do tema Blackout */
+  --background: hsl(0, 0%, 0%);
   --foreground: hsl(0, 0%, 98%);
-  --muted: hsl(220, 39%, 18%);
-  --muted-foreground: hsl(220, 9%, 64%);
-  --popover: hsl(220, 39%, 11%);
+  --muted: hsl(0, 0%, 8%);
+  --muted-foreground: hsl(0, 0%, 64%);
+  --popover: hsl(0, 0%, 8%);
   --popover-foreground: hsl(0, 0%, 98%);
-  --card: hsl(220, 39%, 11%);
+  --card: hsl(0, 0%, 8%);
   --card-foreground: hsl(0, 0%, 98%);
-  --border: hsl(220, 39%, 18%);
-  --input: hsl(220, 39%, 18%);
-  --primary: hsl(220, 100%, 35%);
+  --border: hsl(0, 0%, 15%);
+  --input: hsl(0, 0%, 12%);
+  --primary: hsl(220, 100%, 45%);
   --primary-foreground: hsl(0, 0%, 100%);
-  --secondary: hsl(220, 39%, 18%);
+  --secondary: hsl(0, 0%, 12%);
   --secondary-foreground: hsl(0, 0%, 98%);
-  --accent: hsl(120, 100%, 40%);
+  --accent: hsl(120, 100%, 45%);
   --accent-foreground: hsl(0, 0%, 100%);
   --destructive: hsl(0, 62.8%, 30.6%);
   --destructive-foreground: hsl(0, 0%, 98%);
-  --ring: hsl(220, 100%, 35%);
+  --ring: hsl(220, 100%, 45%);
   --radius: 0.5rem;
   --warning: hsl(38, 92%, 50%);
   --success: hsl(142, 76%, 36%);
-  --simpix-navy: hsl(220, 100%, 35%);
-  --simpix-fluorescent: hsl(120, 100%, 40%);
-  --simpix-navy-light: hsl(220, 100%, 40%);
-  --simpix-fluorescent-dark: hsl(120, 100%, 30%);
+  --simpix-blue: hsl(220, 100%, 45%);
+  --simpix-green: hsl(120, 100%, 45%);
+  --simpix-blue-light: hsl(220, 100%, 55%);
+  --simpix-green-dark: hsl(120, 100%, 35%);
 }
 
 @layer base {
@@ -73,63 +76,99 @@
   }
 }
 
-@layer components {
-  .btn-simpix-primary {
-    @apply bg-primary text-primary-foreground font-medium px-4 py-2 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
-    background-color: hsl(var(--primary));
-    color: hsl(var(--primary-foreground));
+/* Estilo da logo de fundo - Marca d'água */
+.watermark-bg {
+  position: relative;
+}
+
+.watermark-bg::before {
+  content: '';
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 400px;
+  height: 400px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90' fill='%23ffffff'%3ES%3C/text%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  opacity: 0.25;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Classes customizadas do Simpix para o tema Blackout */
+.text-gradient-simpix {
+  background: linear-gradient(135deg, var(--simpix-blue), var(--simpix-green));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 600;
+}
+
+.btn-simpix-primary {
+  @apply bg-[hsl(var(--simpix-blue))] text-white hover:bg-[hsl(var(--simpix-blue-light))] transition-colors;
+}
+
+.btn-simpix-accent {
+  @apply bg-[hsl(var(--simpix-green))] text-white hover:bg-[hsl(var(--simpix-green-dark))] transition-colors;
+}
+
+.card-simpix {
+  @apply bg-card border-border;
+  background: linear-gradient(135deg, hsl(0, 0%, 8%) 0%, hsl(0, 0%, 12%) 100%);
+  border: 1px solid hsl(0, 0%, 15%);
+}
+
+.input-simpix {
+  @apply bg-input border-border text-foreground placeholder:text-muted-foreground;
+  background: hsl(0, 0%, 12%);
+  border: 1px solid hsl(0, 0%, 15%);
+}
+
+.input-simpix:focus {
+  @apply ring-2 ring-[hsl(var(--simpix-blue))] border-[hsl(var(--simpix-blue))];
+}
+
+/* Status badges */
+.status-approved {
+  @apply inline-flex items-center rounded-full px-2 py-1 text-xs font-medium;
+  background: hsl(142, 76%, 36%);
+  color: white;
+}
+
+.status-rejected {
+  @apply inline-flex items-center rounded-full px-2 py-1 text-xs font-medium;
+  background: hsl(0, 84.2%, 60.2%);
+  color: white;
+}
+
+.status-pending {
+  @apply inline-flex items-center rounded-full px-2 py-1 text-xs font-medium;
+  background: hsl(38, 92%, 50%);
+  color: white;
+}
+
+@layer utilities {
+  .text-warning {
+    color: hsl(var(--warning));
   }
   
-  .btn-simpix-primary:hover {
-    background-color: hsl(var(--simpix-navy-light));
+  .text-success {
+    color: hsl(var(--success));
   }
   
-  .btn-simpix-accent {
-    @apply text-accent-foreground font-medium px-4 py-2 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2;
-    background-color: hsl(var(--accent));
-    color: hsl(var(--accent-foreground));
+  .bg-warning {
+    background-color: hsl(var(--warning));
   }
   
-  .btn-simpix-accent:hover {
-    background-color: hsl(var(--simpix-fluorescent-dark));
-  }
-  
-  .card-simpix {
-    @apply bg-card text-card-foreground rounded-lg border shadow-lg transition-shadow duration-300;
-  }
-  
-  .card-simpix:hover {
-    @apply shadow-xl;
-  }
-  
-  .input-simpix {
-    @apply border border-input bg-background px-3 py-2 rounded-md text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors duration-200;
-  }
-  
-  .input-simpix:hover {
-    @apply bg-muted;
-  }
-  
-  .input-simpix:focus {
-    @apply bg-background;
-  }
-  
-  .text-gradient-simpix {
-    @apply bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent font-bold;
-  }
-  
-  .status-approved {
-    @apply bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 px-2 py-1 rounded-full text-xs font-medium;
-  }
-  
-  .status-pending {
-    @apply bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 px-2 py-1 rounded-full text-xs font-medium;
-  }
-  
-  .status-rejected {
-    @apply bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 px-2 py-1 rounded-full text-xs font-medium;
+  .bg-success {
+    background-color: hsl(var(--success));
   }
 }
+
+
 
 @layer utilities {
   .text-warning {
