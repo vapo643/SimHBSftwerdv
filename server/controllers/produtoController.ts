@@ -1,0 +1,39 @@
+
+import { db } from '../lib/supabase';
+import { produtos, tabelasComerciais } from '../../shared/schema';
+import { eq, desc } from 'drizzle-orm';
+
+export const buscarTodosProdutos = async () => {
+  return await db.query.produtos.findMany({
+    where: eq(produtos.isActive, true),
+    orderBy: [desc(produtos.id)],
+  });
+};
+
+export const criarProduto = async (data: { nome: string; status: 'Ativo' | 'Inativo' }) => {
+  const [novoProduto] = await db.insert(produtos).values({
+    nomeProduto: data.nome,
+    isActive: data.status === 'Ativo',
+  }).returning();
+  return novoProduto;
+};
+
+export const atualizarProduto = async (id: string, data: { nome: string; status: 'Ativo' | 'Inativo' }) => {
+  const [produtoAtualizado] = await db.update(produtos).set({
+    nomeProduto: data.nome,
+    isActive: data.status === 'Ativo',
+  }).where(eq(produtos.id, parseInt(id))).returning();
+  return produtoAtualizado;
+};
+
+export const verificarProdutoEmUso = async (id: string) => {
+    const tabelas = await db.query.tabelasComerciais.findFirst({
+        where: eq(tabelasComerciais.produtoId, parseInt(id))
+    });
+    return !!tabelas;
+};
+
+export const deletarProduto = async (id: string) => {
+    // Soft delete
+    await db.update(produtos).set({ isActive: false }).where(eq(produtos.id, parseInt(id)));
+};

@@ -1,156 +1,353 @@
+
 import React, { useState } from "react";
-import DashboardLayout from "@/components/DashboardLayout";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableHeader,
-  TableRow,
-  TableCell,
-  TableHead,
-} from "@/components/ui/table";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import ProdutoForm from "@/components/produtos/ProdutoForm";
+import { Pencil, Trash2, Plus } from "lucide-react";
+import { fetchWithToken } from "@/lib/apiClient";
 
 interface Produto {
   id: number;
-  nome: string;
-  status: "Ativo" | "Inativo";
-  emUso: boolean;
+  nomeProduto: string;
+  isActive: boolean;
 }
 
-const mockProdutos: Produto[] = [
-  { id: 1, nome: "Crédito Pessoal", status: "Ativo", emUso: true },
-  { id: 2, nome: "Crédito Imobiliário", status: "Inativo", emUso: false },
-  { id: 3, nome: "Crédito Consignado", status: "Ativo", emUso: false },
-];
+interface ProdutoFormData {
+  nome: string;
+  status: "Ativo" | "Inativo";
+}
 
-const ProdutosPage: React.FC = () => {
+export default function GestãoProdutos() {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Produto | null>(null);
+  const [formData, setFormData] = useState<ProdutoFormData>({
+    nome: "",
+    status: "Ativo",
+  });
+
   const { toast } = useToast();
-  const [produtos, setProdutos] = useState<Produto[]>(mockProdutos);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedProduto, setSelectedProduto] = useState<Produto | null>(null);
+  const queryClient = useQueryClient();
 
-  const handleDelete = (id: number) => {
-    const produto = produtos.find(p => p.id === id);
-    if (produto?.emUso) {
-      toast({
-        title: "Ação Bloqueada",
-        description: "Este produto não pode ser excluído pois está vinculado a propostas.",
-        variant: "destructive",
-      });
-    } else {
-      setProdutos(produtos.filter(p => p.id !== id));
-      toast({
-        title: "Sucesso",
-        description: "Produto excluído com sucesso.",
-      });
-    }
-  };
+  // Query para buscar produtos
+  const { data: produtos = [], isLoading } = useQuery({
+    queryKey: ["produtos"],
+    queryFn: async () => {
+      const response = await fetchWithToken("/api/produtos");
+      if (!response.ok) {
+        throw new Error("Erro ao buscar produtos");
+      }
+      return response.json();
+    },
+  });
 
-  const handleSubmit = (data: any) => {
-    if (selectedProduto) {
-      // Editar produto existente
-      setProdutos(produtos.map(p => (p.id === selectedProduto.id ? { ...p, ...data } : p)));
-      toast({
-        title: "Sucesso",
-        description: "Produto atualizado com sucesso.",
+  // Mutation para criar produto
+  const createMutation = useMutation({
+    mutationFn: async (data: ProdutoFormData) => {
+      const response = await fetchWithToken("/api/produtos", {
+        method: "POST",
+        body: JSON.stringify(data),
       });
-    } else {
-      // Criar novo produto
-      const newProduto = {
-        id: Math.max(...produtos.map(p => p.id)) + 1,
-        ...data,
-        emUso: false,
-      };
-      setProdutos([...produtos, newProduto]);
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Erro ao criar produto");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["produtos"] });
       toast({
-        title: "Sucesso",
+        title: "Sucesso!",
         description: "Produto criado com sucesso.",
       });
+      handleCloseDialog();
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erro",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Mutation para atualizar produto
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: ProdutoFormData }) => {
+      const response = await fetchWithToken(`/api/produtos/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Erro ao atualizar produto");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["produtos"] });
+      toast({
+        title: "Sucesso!",
+        description: "Produto atualizado com sucesso.",
+      });
+      handleCloseDialog();
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erro",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Mutation para deletar produto
+  const deleteMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await fetchWithToken(`/api/produtos/${id}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Erro ao excluir produto");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["produtos"] });
+      toast({
+        title: "Sucesso!",
+        description: "Produto excluído com sucesso.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erro",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.nome.trim()) {
+      toast({
+        title: "Erro",
+        description: "Nome do produto é obrigatório.",
+        variant: "destructive",
+      });
+      return;
     }
-    setIsModalOpen(false);
-    setSelectedProduto(null);
+
+    if (editingProduct) {
+      updateMutation.mutate({ id: editingProduct.id, data: formData });
+    } else {
+      createMutation.mutate(formData);
+    }
   };
 
   const handleEdit = (produto: Produto) => {
-    setSelectedProduto(produto);
-    setIsModalOpen(true);
+    setEditingProduct(produto);
+    setFormData({
+      nome: produto.nomeProduto,
+      status: produto.isActive ? "Ativo" : "Inativo",
+    });
+    setIsDialogOpen(true);
   };
 
-  const handleCancel = () => {
-    setIsModalOpen(false);
-    setSelectedProduto(null);
+  const handleDelete = (id: number) => {
+    deleteMutation.mutate(id);
   };
 
-  const openNewModal = () => {
-    setSelectedProduto(null);
-    setIsModalOpen(true);
+  const handleCloseDialog = () => {
+    setIsDialogOpen(false);
+    setEditingProduct(null);
+    setFormData({ nome: "", status: "Ativo" });
   };
+
+  const handleOpenDialog = () => {
+    setEditingProduct(null);
+    setFormData({ nome: "", status: "Ativo" });
+    setIsDialogOpen(true);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+          <p className="mt-2 text-sm text-gray-600">Carregando produtos...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <DashboardLayout title="Gestão de Produtos de Crédito">
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Produtos de Crédito</h1>
-          <Button onClick={openNewModal}>Novo Produto</Button>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Gestão de Produtos</h1>
+          <p className="text-muted-foreground">
+            Gerencie os produtos de crédito disponíveis no sistema
+          </p>
         </div>
-        <Card>
-          <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nome do Produto</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {produtos.map(produto => (
-                  <TableRow key={produto.id}>
-                    <TableCell className="font-medium">{produto.nome}</TableCell>
-                    <TableCell>{produto.status}</TableCell>
-                    <TableCell className="space-x-2 text-right">
-                      <Button variant="outline" size="sm" onClick={() => handleEdit(produto)}>
-                        Editar
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => handleDelete(produto.id)}
-                        disabled={produto.emUso}
-                      >
-                        Excluir
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button onClick={handleOpenDialog}>
+              <Plus className="h-4 w-4 mr-2" />
+              Novo Produto
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>
+                {editingProduct ? "Editar Produto" : "Novo Produto"}
+              </DialogTitle>
+              <DialogDescription>
+                {editingProduct
+                  ? "Atualize as informações do produto"
+                  : "Adicione um novo produto de crédito"}
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="nome">Nome do Produto</Label>
+                <Input
+                  id="nome"
+                  value={formData.nome}
+                  onChange={(e) =>
+                    setFormData({ ...formData, nome: e.target.value })
+                  }
+                  placeholder="Ex: Crédito Pessoal"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="status">Status</Label>
+                <Select
+                  value={formData.status}
+                  onValueChange={(value: "Ativo" | "Inativo") =>
+                    setFormData({ ...formData, status: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Ativo">Ativo</SelectItem>
+                    <SelectItem value="Inativo">Inativo</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex justify-end space-x-2">
+                <Button type="button" variant="outline" onClick={handleCloseDialog}>
+                  Cancelar
+                </Button>
+                <Button 
+                  type="submit" 
+                  disabled={createMutation.isPending || updateMutation.isPending}
+                >
+                  {createMutation.isPending || updateMutation.isPending
+                    ? "Salvando..."
+                    : editingProduct
+                    ? "Atualizar"
+                    : "Criar"}
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
 
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{selectedProduto ? "Editar Produto" : "Novo Produto"}</DialogTitle>
-          </DialogHeader>
-          <ProdutoForm
-            onSubmit={handleSubmit}
-            onCancel={handleCancel}
-            initialData={
-              selectedProduto
-                ? { nome: selectedProduto.nome, status: selectedProduto.status }
-                : undefined
-            }
-          />
-        </DialogContent>
-      </Dialog>
-    </DashboardLayout>
+      <Card>
+        <CardHeader>
+          <CardTitle>Produtos Cadastrados</CardTitle>
+          <CardDescription>
+            Lista de todos os produtos de crédito no sistema
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Nome do Produto</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Ações</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {produtos.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={3} className="text-center py-8">
+                    <div className="text-muted-foreground">
+                      <p>Nenhum produto encontrado</p>
+                      <p className="text-sm">Clique em "Novo Produto" para começar</p>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                produtos.map((produto: Produto) => (
+                  <TableRow key={produto.id}>
+                    <TableCell className="font-medium">
+                      {produto.nomeProduto}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={produto.isActive ? "default" : "secondary"}>
+                        {produto.isActive ? "Ativo" : "Inativo"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEdit(produto)}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="outline" size="sm">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Tem certeza que deseja excluir o produto "{produto.nomeProduto}"?
+                                Esta ação não pode ser desfeita.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDelete(produto.id)}
+                                disabled={deleteMutation.isPending}
+                              >
+                                {deleteMutation.isPending ? "Excluindo..." : "Excluir"}
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+    </div>
   );
-};
-
-export default ProdutosPage;
+}
