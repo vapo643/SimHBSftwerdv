@@ -1,3 +1,4 @@
+
 import {
   pgTable,
   text,
@@ -7,6 +8,7 @@ import {
   timestamp,
   decimal,
   pgEnum,
+  primaryKey,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -36,15 +38,24 @@ export const lojas = pgTable("lojas", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Users table without loja_id (removed for many-to-many relationship)
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   email: text("email").notNull().unique(),
   name: text("name").notNull(),
   password: text("password").notNull(),
-  lojaId: integer("loja_id").references(() => lojas.id).notNull(), // Multi-tenant key
-  role: text("role").notNull().default("user"), // admin, analyst, user
+  role: text("role").notNull().default("user"), // admin, analyst, user, gerente
   createdAt: timestamp("created_at").defaultNow(),
 });
+
+// Junction table for many-to-many relationship between gerentes and lojas
+export const gerenteLojas = pgTable("gerente_lojas", {
+  gerenteId: integer("gerente_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+  lojaId: integer("loja_id").references(() => lojas.id, { onDelete: "cascade" }).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  pk: primaryKey({ columns: [table.gerenteId, table.lojaId] }),
+}));
 
 export const statusEnum = pgEnum("status", [
   "rascunho",
@@ -164,6 +175,10 @@ export const insertUserSchema = createInsertSchema(users).omit({
   createdAt: true,
 });
 
+export const insertGerenteLojaSchema = createInsertSchema(gerenteLojas).omit({
+  createdAt: true,
+});
+
 export const insertPropostaSchema = createInsertSchema(propostas).omit({
   id: true,
   createdAt: true,
@@ -201,6 +216,8 @@ export type InsertLoja = z.infer<typeof insertLojaSchema>;
 export type Loja = typeof lojas.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
+export type InsertGerenteLojas = z.infer<typeof insertGerenteLojaSchema>;
+export type GerenteLojas = typeof gerenteLojas.$inferSelect;
 export type InsertProposta = z.infer<typeof insertPropostaSchema>;
 export type UpdateProposta = z.infer<typeof updatePropostaSchema>;
 export type Proposta = typeof propostas.$inferSelect;
