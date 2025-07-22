@@ -69,7 +69,7 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
                 <img 
                   src="https://dvglgxrvhmtsixaabxha.supabase.co/storage/v1/object/public/logosimpixblack//Logotipo_Achadinhos_de_Beleza_Colorido_Moderno_Rosa_e_Preto-removebg-preview.png" 
                   alt="Simpix Logo" 
-                  className="h-24 w-auto"
+                  className="h-32 w-auto"
                 />
               </a>
             </Link>
