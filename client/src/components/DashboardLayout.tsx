@@ -107,7 +107,7 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
             <LogOut className="h-5 w-5" />
           </Button>
         </header>
-        <main className="watermark-bg flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6">{children}</main>
+        <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6">{children}</main>
       </div>
     </div>
   );
