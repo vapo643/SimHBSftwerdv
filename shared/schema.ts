@@ -12,7 +12,7 @@ import {
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-// Parceiros e Lojas - Base da hierarquia multi-tenant
+// Parceiros e Lojas
 export const parceiros = pgTable("parceiros", {
   id: serial("id").primaryKey(),
   nome: text("nome").notNull(),
