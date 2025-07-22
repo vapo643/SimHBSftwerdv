@@ -67,7 +67,7 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
             <Link to="/dashboard">
               <a className="flex items-center gap-2 font-semibold">
                 <img 
-                  src="https://dvglgxrvhmtsixaabxha.supabase.co/storage/v1/object/public/logosimpixblack//Logotipo_Achadinhos_de_Beleza_Colorido_Moderno_Rosa_e_Preto-removebg-preview.png" 
+                  src="https://dvglgxrvhmtsixaabxha.supabase.co/storage/v1/object/public/logosimpixblack//simpix-logo-png.png.png" 
                   alt="Simpix Logo" 
                   className="h-32 w-auto"
                 />
