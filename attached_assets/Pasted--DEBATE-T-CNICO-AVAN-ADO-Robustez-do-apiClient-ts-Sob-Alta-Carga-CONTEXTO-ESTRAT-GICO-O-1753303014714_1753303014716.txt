@@ -1,0 +1,22 @@
+# DEBATE TÉCNICO AVANÇADO: Robustez do `apiClient.ts` Sob Alta Carga
+
+**CONTEXTO ESTRATÉGICO:**
+O Orquestrador (GEM 02) validou que o código do `apiClient.ts` implementa a arquitetura que planejamos. No entanto, um novo requisito de alta performance (10k-50k requisições/dia) exige uma análise de robustez mais profunda, especificamente em cenários de alta concorrência. A sua tarefa é debater e propor soluções para o seguinte ponto crítico de falha.
+
+**CÓDIGO SOB ANÁLISE:**
+(O código do ficheiro `/client/src/lib/apiClient.ts` que foi fornecido)
+
+---
+### **Interação 1: Proposta de Refinamento Arquitetural para Alta Concorrência**
+
+**Ponto de Debate Crítico: Risco de "Thundering Herd" (Corrida de Revalidação) no Token Refresh**
+
+* **Análise Requerida:** Analise o fluxo de revalidação de token no bloco `if (response.status === 401)` da função `apiClient`. Considere um cenário de alta concorrência onde 10 chamadas de API simultâneas (ex: múltiplos componentes a carregar dados ao mesmo tempo) recebem uma resposta `401 Unauthorized` porque o token expirou. A implementação atual com `refreshPromise` dentro do `TokenManager` é suficiente para prevenir 10 tentativas de refresh paralelas? Qual é o risco de múltiplas chamadas `apiClient` invalidarem o token (`tokenManager.invalidateToken()`) e tentarem revalidar em uma condição de corrida (`race condition`)?
+
+* **Ação Proposta:** Proponha uma arquitetura de revalidação de token que seja **atomicamente segura** para um ambiente de alta concorrência. A solução deve garantir que, independentemente de quantas chamadas falhem com `401` simultaneamente:
+    1.  **Apenas UMA** tentativa de refresh seja disparada.
+    2.  Todas as outras chamadas que falharam devem "pausar" e "esperar" pela conclusão desta única tentativa de refresh.
+    3.  Após a conclusão do refresh, todas as chamadas pausadas devem re-tentar a sua requisição original automaticamente com o novo token.
+    4.  Se a tentativa de refresh falhar, todas as chamadas pausadas devem falhar de forma controlada (ex: deslogando o usuário).
+
+Por favor, proponha as modificações de código necessárias no `TokenManager` e/ou no `apiClient` para implementar este fluxo de revalidação concorrente-seguro.
