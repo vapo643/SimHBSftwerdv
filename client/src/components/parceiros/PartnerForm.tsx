@@ -29,13 +29,9 @@ const PartnerForm: React.FC<PartnerFormProps> = ({
     defaultValues: initialData ? {
       razaoSocial: initialData.razaoSocial,
       cnpj: initialData.cnpj,
-      comissaoPadrao: initialData.comissaoPadrao,
-      tabelaComercialPadraoId: initialData.tabelaComercialPadraoId,
     } : {
       razaoSocial: "",
       cnpj: "",
-      comissaoPadrao: null,
-      tabelaComercialPadraoId: null,
     },
   });
 
@@ -74,45 +70,9 @@ const PartnerForm: React.FC<PartnerFormProps> = ({
           )}
         </div>
 
-        <div>
-          <Label htmlFor="comissaoPadrao" className="text-sm font-medium">
-            Comissão Padrão (%)
-          </Label>
-          <Input 
-            id="comissaoPadrao" 
-            {...register("comissaoPadrao")} 
-            placeholder="5.0"
-            type="number"
-            step="0.01"
-            min="0"
-            max="100"
-            disabled={isLoading}
-            className="mt-1"
-          />
-          {errors.comissaoPadrao && (
-            <p className="mt-1 text-sm text-red-500">{errors.comissaoPadrao.message}</p>
-          )}
-        </div>
+        
 
-        <div>
-          <Label htmlFor="tabelaComercialPadraoId" className="text-sm font-medium">
-            Tabela Comercial Padrão (ID)
-          </Label>
-          <Input 
-            id="tabelaComercialPadraoId" 
-            {...register("tabelaComercialPadraoId", { 
-              setValueAs: (value) => value === "" ? null : parseInt(value, 10) 
-            })} 
-            placeholder="1"
-            type="number"
-            min="1"
-            disabled={isLoading}
-            className="mt-1"
-          />
-          {errors.tabelaComercialPadraoId && (
-            <p className="mt-1 text-sm text-red-500">{errors.tabelaComercialPadraoId.message}</p>
-          )}
-        </div>
+        
       </div>
 
       <div className="flex justify-end gap-3 pt-6 border-t">
