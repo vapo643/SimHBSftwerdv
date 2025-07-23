@@ -460,7 +460,7 @@ app.get("/api/tabelas-comerciais-disponiveis", authMiddleware, async (req, res) 
     { id: 3, valor: "36 meses" },
   ];
 
-  // API endpoint for partners
+  // API endpoint for partners - GET all
   app.get("/api/parceiros", async (req, res) => {
     try {
       const { db } = await import("../server/lib/supabase");
@@ -474,36 +474,27 @@ app.get("/api/tabelas-comerciais-disponiveis", authMiddleware, async (req, res) 
     }
   });
 
-  // Create partner endpoint
+  // API endpoint for partners - POST create
   app.post("/api/admin/parceiros", authMiddleware, async (req, res) => {
     try {
       const { db } = await import("../server/lib/supabase");
       const { parceiros, insertParceiroSchema } = await import("../shared/schema");
       const { z } = await import("zod");
       
-      // Validate request body
       const validatedData = insertParceiroSchema.parse(req.body);
+      const [newParceiro] = await db.insert(parceiros).values(validatedData).returning();
       
-      // Create the partner in database
-      const newParceiros = await db
-        .insert(parceiros)
-        .values(validatedData)
-        .returning();
-
-      res.status(201).json(newParceiros[0]);
+      res.status(201).json(newParceiro);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ 
-          message: "Dados inválidos", 
-          errors: error.errors 
-        });
+        return res.status(400).json({ message: "Dados inválidos", errors: error.errors });
       }
       console.error("Erro ao criar parceiro:", error);
-      res.status(500).json({ message: "Erro interno do servidor" });
+      res.status(500).json({ message: "Erro ao criar parceiro" });
     }
   });
 
-  // Update partner endpoint
+  // API endpoint for partners - PUT update
   app.put("/api/admin/parceiros/:id", authMiddleware, async (req, res) => {
     try {
       const { db } = await import("../server/lib/supabase");
@@ -513,37 +504,31 @@ app.get("/api/tabelas-comerciais-disponiveis", authMiddleware, async (req, res) 
       
       const parceiroId = parseInt(req.params.id);
       if (isNaN(parceiroId)) {
-        return res.status(400).json({ message: "ID de parceiro inválido" });
+        return res.status(400).json({ message: "ID do parceiro inválido" });
       }
-
-      // Validate request body
-      const validatedData = updateParceiroSchema.parse(req.body);
       
-      // Update the partner in database
-      const updatedParceiros = await db
+      const validatedData = updateParceiroSchema.parse(req.body);
+      const [updatedParceiro] = await db
         .update(parceiros)
         .set(validatedData)
         .where(eq(parceiros.id, parceiroId))
         .returning();
-
-      if (updatedParceiros.length === 0) {
+      
+      if (!updatedParceiro) {
         return res.status(404).json({ message: "Parceiro não encontrado" });
       }
-
-      res.json(updatedParceiros[0]);
+      
+      res.json(updatedParceiro);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ 
-          message: "Dados inválidos", 
-          errors: error.errors 
-        });
+        return res.status(400).json({ message: "Dados inválidos", errors: error.errors });
       }
       console.error("Erro ao atualizar parceiro:", error);
-      res.status(500).json({ message: "Erro interno do servidor" });
+      res.status(500).json({ message: "Erro ao atualizar parceiro" });
     }
   });
 
-  // Delete partner endpoint
+  // API endpoint for partners - DELETE 
   app.delete("/api/admin/parceiros/:id", authMiddleware, async (req, res) => {
     try {
       const { db } = await import("../server/lib/supabase");
@@ -552,35 +537,38 @@ app.get("/api/tabelas-comerciais-disponiveis", authMiddleware, async (req, res) 
       
       const parceiroId = parseInt(req.params.id);
       if (isNaN(parceiroId)) {
-        return res.status(400).json({ message: "ID de parceiro inválido" });
+        return res.status(400).json({ message: "ID do parceiro inválido" });
       }
-
-      // Check if partner has associated stores
-      const associatedLojas = await db
+      
+      // Regra de negócio crítica: verificar se existem lojas associadas
+      const lojasAssociadas = await db
         .select()
         .from(lojas)
         .where(eq(lojas.parceiroId, parceiroId));
-
-      if (associatedLojas.length > 0) {
+      
+      if (lojasAssociadas.length > 0) {
         return res.status(409).json({ 
           message: "Não é possível excluir um parceiro que possui lojas cadastradas." 
         });
       }
-
-      // Delete the partner
-      const deletedParceiros = await db
-        .delete(parceiros)
-        .where(eq(parceiros.id, parceiroId))
-        .returning();
-
-      if (deletedParceiros.length === 0) {
+      
+      // Verificar se o parceiro existe antes de excluir
+      const [parceiroExistente] = await db
+        .select()
+        .from(parceiros)
+        .where(eq(parceiros.id, parceiroId));
+      
+      if (!parceiroExistente) {
         return res.status(404).json({ message: "Parceiro não encontrado" });
       }
-
+      
+      // Proceder com a exclusão
+      await db.delete(parceiros).where(eq(parceiros.id, parceiroId));
+      
       res.status(204).send();
     } catch (error) {
       console.error("Erro ao excluir parceiro:", error);
-      res.status(500).json({ message: "Erro interno do servidor" });
+      res.status(500).json({ message: "Erro ao excluir parceiro" });
     }
   });
 

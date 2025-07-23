@@ -190,7 +190,6 @@ export const insertGerenteLojaSchema = createInsertSchema(gerenteLojas).omit({
 
 // TypeScript Types
 export type InsertParceiro = z.infer<typeof insertParceiroSchema>;
-export type UpdateParceiro = z.infer<typeof updateParceiroSchema>;
 export type Parceiro = typeof parceiros.$inferSelect;
 export type InsertLoja = z.infer<typeof insertLojaSchema>;
 export type Loja = typeof lojas.$inferSelect;
