@@ -34,6 +34,11 @@ function Router() {
           <NovaProposta />
         </ProtectedRoute>
       </Route>
+      <Route path="/nova-proposta">
+        <ProtectedRoute>
+          <NovaProposta />
+        </ProtectedRoute>
+      </Route>
       <Route path="/credito/fila">
         <ProtectedRoute>
           <FilaAnalise />

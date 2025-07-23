@@ -403,21 +403,22 @@ app.get("/api/tabelas-comerciais-disponiveis", authMiddleware, async (req, res) 
 
     console.log(`[${new Date().toISOString()}] Buscando tabelas comerciais para produto ${produtoIdNum} e parceiro ${parceiroIdNum}`);
 
-    // STEP 1: Busca Prioritária - Tabelas Personalizadas (produto + parceiro)
-    const { data: tabelasPersonalizadas, error: errorPersonalizadas } = await supabase
-      .from("tabelas_comerciais")
-      .select("*")
-      .eq("produto_id", produtoIdNum)
-      .eq("parceiro_id", parceiroIdNum)
-      .eq("ativo", true)
-      .order("created_at", { ascending: false });
+    // Import database connection
+    const { db } = await import("../server/lib/supabase");
+    const { eq, and, isNull, desc } = await import("drizzle-orm");
+    const { tabelasComerciais } = await import("../shared/schema");
 
-    if (errorPersonalizadas) {
-      console.error("Erro ao buscar tabelas personalizadas:", errorPersonalizadas);
-      return res.status(500).json({ 
-        message: "Erro interno do servidor ao buscar tabelas personalizadas" 
-      });
-    }
+    // STEP 1: Busca Prioritária - Tabelas Personalizadas (produto + parceiro)
+    const tabelasPersonalizadas = await db
+      .select()
+      .from(tabelasComerciais)
+      .where(
+        and(
+          eq(tabelasComerciais.produtoId, produtoIdNum),
+          eq(tabelasComerciais.parceiroId, parceiroIdNum)
+        )
+      )
+      .orderBy(desc(tabelasComerciais.createdAt));
 
     // STEP 2: Validação - Se encontrou tabelas personalizadas, retorna apenas elas
     if (tabelasPersonalizadas && tabelasPersonalizadas.length > 0) {
@@ -428,20 +429,16 @@ app.get("/api/tabelas-comerciais-disponiveis", authMiddleware, async (req, res) 
     console.log(`[${new Date().toISOString()}] Nenhuma tabela personalizada encontrada, buscando tabelas gerais`);
 
     // STEP 3: Busca Secundária - Tabelas Gerais (produto + parceiro nulo)
-    const { data: tabelasGerais, error: errorGerais } = await supabase
-      .from("tabelas_comerciais")
-      .select("*")
-      .eq("produto_id", produtoIdNum)
-      .is("parceiro_id", null)
-      .eq("ativo", true)
-      .order("created_at", { ascending: false });
-
-    if (errorGerais) {
-      console.error("Erro ao buscar tabelas gerais:", errorGerais);
-      return res.status(500).json({ 
-        message: "Erro interno do servidor ao buscar tabelas gerais" 
-      });
-    }
+    const tabelasGerais = await db
+      .select()
+      .from(tabelasComerciais)
+      .where(
+        and(
+          eq(tabelasComerciais.produtoId, produtoIdNum),
+          isNull(tabelasComerciais.parceiroId)
+        )
+      )
+      .orderBy(desc(tabelasComerciais.createdAt));
 
     // STEP 4: Resultado Final
     const resultado = tabelasGerais || [];
@@ -462,6 +459,20 @@ app.get("/api/tabelas-comerciais-disponiveis", authMiddleware, async (req, res) 
     { id: 2, valor: "24 meses" },
     { id: 3, valor: "36 meses" },
   ];
+
+  // API endpoint for partners
+  app.get("/api/parceiros", async (req, res) => {
+    try {
+      const { db } = await import("../server/lib/supabase");
+      const { parceiros } = await import("../shared/schema");
+      
+      const allParceiros = await db.select().from(parceiros);
+      res.json(allParceiros);
+    } catch (error) {
+      console.error("Erro ao buscar parceiros:", error);
+      res.status(500).json({ message: "Erro ao buscar parceiros" });
+    }
+  });
 
   // Rotas CRUD para produtos
   app.get("/api/produtos", async (req, res) => {

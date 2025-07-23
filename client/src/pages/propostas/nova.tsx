@@ -3,6 +3,7 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { useForm, Controller, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,6 +19,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import DadosClienteForm from "@/components/forms/DadosClienteForm";
 import { useToast } from "@/hooks/use-toast";
+import fetchWithToken from "@/lib/apiClient";
 
 // Schema Unificado
 const fullProposalSchema = z.object({
@@ -40,6 +42,7 @@ const fullProposalSchema = z.object({
   // Campos de crédito
   valorSolicitado: z.coerce.number().positive("Valor deve ser positivo"),
   produto: z.string().nonempty("Produto é obrigatório."),
+  tabelaComercial: z.string().nonempty("Tabela comercial é obrigatória."),
   prazo: z.string().nonempty("Prazo é obrigatório."),
   dataPrimeiroVencimento: z.string().nonempty("Data de vencimento é obrigatória."),
   incluirTac: z.boolean().default(false),
@@ -53,6 +56,7 @@ const NovaProposta: React.FC = () => {
     handleSubmit,
     control,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<FullFormData>({
     resolver: zodResolver(fullProposalSchema),
@@ -65,18 +69,60 @@ const NovaProposta: React.FC = () => {
   const valorSolicitado = watch("valorSolicitado");
   const prazo = watch("prazo");
   const produto = watch("produto");
+  const tabelaComercial = watch("tabelaComercial");
   const incluirTac = watch("incluirTac");
   const dataPrimeiroVencimento = watch("dataPrimeiroVencimento");
 
+  // Load available products
+  const { data: produtos = [] } = useQuery({
+    queryKey: ["produtos"],
+    queryFn: async () => {
+      const response = await fetchWithToken("/api/produtos");
+      if (!response.ok) {
+        throw new Error("Erro ao buscar produtos");
+      }
+      return response.json();
+    },
+  });
+
+  // Load commercial tables based on selected product
+  const { data: tabelasComerciais = [], isLoading: loadingTabelas } = useQuery({
+    queryKey: ["tabelas-comerciais-disponiveis", produto],
+    queryFn: async () => {
+      if (!produto) return [];
+      
+      // For now, using a fixed partner ID (1) - in a real app, this would come from user context
+      const parceiroId = 1;
+      
+      const response = await fetchWithToken(
+        `/api/tabelas-comerciais-disponiveis?produtoId=${produto}&parceiroId=${parceiroId}`
+      );
+      if (!response.ok) {
+        throw new Error("Erro ao buscar tabelas comerciais");
+      }
+      return response.json();
+    },
+    enabled: !!produto, // Only run query when product is selected
+  });
+
+  // Reset commercial table selection when product changes
+  useEffect(() => {
+    if (produto) {
+      // Clear the commercial table selection when product changes
+      setValue("tabelaComercial", "");
+    }
+  }, [produto, setValue]);
+
   useEffect(() => {
     const handleSimulacao = async () => {
-      if (valorSolicitado > 0 && prazo && produto && dataPrimeiroVencimento) {
+      if (valorSolicitado > 0 && prazo && produto && tabelaComercial && dataPrimeiroVencimento) {
         setLoadingSimulacao(true);
         try {
           const params = new URLSearchParams({
             valor: String(valorSolicitado),
             prazo: prazo,
             produto_id: produto,
+            tabela_comercial_id: tabelaComercial,
             incluir_tac: String(incluirTac || false), // Garante "true" ou "false"
             dataVencimento: dataPrimeiroVencimento,
           });
@@ -97,7 +143,7 @@ const NovaProposta: React.FC = () => {
     };
     const debounce = setTimeout(() => handleSimulacao(), 800);
     return () => clearTimeout(debounce);
-  }, [valorSolicitado, prazo, produto, incluirTac, dataPrimeiroVencimento, toast]);
+  }, [valorSolicitado, prazo, produto, tabelaComercial, incluirTac, dataPrimeiroVencimento, toast]);
 
   const onSubmit: SubmitHandler<FullFormData> = data => {
     console.log("DADOS COMPLETOS DA PROPOSTA:", data);
@@ -143,15 +189,53 @@ const NovaProposta: React.FC = () => {
                         <SelectValue placeholder="Selecione..." />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="produto_a">Crédito Pessoal</SelectItem>
-                        <SelectItem value="produto_b">Crédito Consignado</SelectItem>
-                        <SelectItem value="produto_c">Crédito Empresarial</SelectItem>
+                        {produtos.map((produto: any) => (
+                          <SelectItem key={produto.id} value={produto.id.toString()}>
+                            {produto.nomeProduto}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   )}
                 />
                 {errors.produto && (
                   <p className="mt-1 text-sm text-red-500">{errors.produto.message}</p>
+                )}
+              </div>
+              <div>
+                <Label>Tabela Comercial</Label>
+                <Controller
+                  name="tabelaComercial"
+                  control={control}
+                  render={({ field }) => (
+                    <Select 
+                      onValueChange={field.onChange} 
+                      defaultValue={field.value}
+                      disabled={!produto || loadingTabelas}
+                    >
+                      <SelectTrigger>
+                        <SelectValue 
+                          placeholder={
+                            !produto 
+                              ? "Primeiro selecione um produto"
+                              : loadingTabelas 
+                                ? "Carregando tabelas..."
+                                : "Selecione uma tabela comercial..."
+                          } 
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {tabelasComerciais.map((tabela: any) => (
+                          <SelectItem key={tabela.id} value={tabela.id.toString()}>
+                            {tabela.nome} - {tabela.taxaJuros}% a.m.
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+                {errors.tabelaComercial && (
+                  <p className="mt-1 text-sm text-red-500">{errors.tabelaComercial.message}</p>
                 )}
               </div>
               <div>

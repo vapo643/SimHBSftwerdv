@@ -15,14 +15,11 @@ import { z } from "zod";
 // Parceiros e Lojas
 export const parceiros = pgTable("parceiros", {
   id: serial("id").primaryKey(),
-  nome: text("nome").notNull(),
+  razaoSocial: text("razao_social").notNull(),
   cnpj: text("cnpj").notNull().unique(),
-  email: text("email").notNull(),
-  telefone: text("telefone").notNull(),
-  endereco: text("endereco").notNull(),
-  status: boolean("status").notNull().default(true),
+  comissaoPadrao: decimal("comissao_padrao"),
+  tabelaComercialPadraoId: integer("tabela_comercial_padrao_id"),
   createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 export const lojas = pgTable("lojas", {
@@ -112,21 +109,15 @@ export const propostas = pgTable("propostas", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Tabelas Comerciais - Multi-tenant
+// Tabelas Comerciais
 export const tabelasComerciais = pgTable("tabelas_comerciais", {
   id: serial("id").primaryKey(),
-  lojaId: integer("loja_id").references(() => lojas.id).notNull(), // Multi-tenant key
-  nome: text("nome").notNull(),
+  nomeTabela: text("nome_tabela").notNull(),
   taxaJuros: decimal("taxa_juros", { precision: 5, scale: 2 }).notNull(),
-  taxaIof: decimal("taxa_iof", { precision: 5, scale: 2 }).notNull().default("0.38"),
-  taxaTac: decimal("taxa_tac", { precision: 15, scale: 2 }).notNull(),
-  prazoMinimo: integer("prazo_minimo").notNull(),
-  prazoMaximo: integer("prazo_maximo").notNull(),
-  valorMinimo: decimal("valor_minimo", { precision: 15, scale: 2 }).notNull(),
-  valorMaximo: decimal("valor_maximo", { precision: 15, scale: 2 }).notNull(),
-  ativo: boolean("ativo").notNull().default(true),
+  prazos: integer("prazos").array().notNull(),
+  produtoId: integer("produto_id").notNull(),
+  parceiroId: integer("parceiro_id").references(() => parceiros.id),
   createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 // Produtos de Crédito
