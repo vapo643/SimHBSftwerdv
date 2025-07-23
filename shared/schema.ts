@@ -25,9 +25,13 @@ export const parceiros = pgTable("parceiros", {
 export const lojas = pgTable("lojas", {
   id: serial("id").primaryKey(),
   parceiroId: integer("parceiro_id").references(() => parceiros.id).notNull(),
-  nomeLoja: text("nome_loja").notNull(),
+  nome: text("nome").notNull(),
   endereco: text("endereco").notNull(),
+  telefone: text("telefone").notNull(),
+  gerente: text("gerente"),
+  status: boolean("status").notNull().default(true),
   createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 // Usuários e Perfis
@@ -139,16 +143,13 @@ export const comunicacaoLogs = pgTable("comunicacao_logs", {
 export const insertParceiroSchema = createInsertSchema(parceiros).omit({
   id: true,
   createdAt: true,
-});
-
-export const updateParceiroSchema = createInsertSchema(parceiros).partial().omit({
-  id: true,
-  createdAt: true,
+  updatedAt: true,
 });
 
 export const insertLojaSchema = createInsertSchema(lojas).omit({
   id: true,
   createdAt: true,
+  updatedAt: true,
 });
 
 export const insertUserSchema = createInsertSchema(users).omit({
@@ -172,11 +173,13 @@ export const updatePropostaSchema = createInsertSchema(propostas).partial().omit
 export const insertTabelaComercialSchema = createInsertSchema(tabelasComerciais).omit({
   id: true,
   createdAt: true,
+  updatedAt: true,
 });
 
 export const insertProdutoSchema = createInsertSchema(produtos).omit({
   id: true,
   createdAt: true,
+  updatedAt: true,
 });
 
 export const insertComunicacaoLogSchema = createInsertSchema(comunicacaoLogs).omit({

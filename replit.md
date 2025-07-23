@@ -81,10 +81,6 @@ This is a full-stack TypeScript application for credit management called "Simpix
 - **Git Flow Documentation**: Complete branching strategy documentation with examples and workflow guidelines
 
 ### January 2025
-- **Complete Partners CRUD API Implementation**: Full create, read, update, delete operations for partners management with business rule validation
-- **Business Logic Enforcement**: DELETE endpoint prevents deletion of partners with associated stores (409 Conflict response)
-- **Schema Alignment**: Updated partners and stores schemas to match actual database structure (razao_social, nome_loja fields)
-- **API Security**: All admin endpoints protected with authMiddleware and comprehensive error handling
 - **Comprehensive User Management Testing**: Complete test suite implementation for user creation API with 8 test scenarios covering success cases (ATENDENTE/GERENTE), failure scenarios (duplicate email, invalid data), and rollback mechanisms
 - **Test Infrastructure Enhancement**: Advanced Vitest testing setup with comprehensive Supabase client mocking, crypto module mocking, and multi-scenario validation
 - **Service Layer Enhancement**: Updated userService.ts to return structured success responses with user data and temporary password information

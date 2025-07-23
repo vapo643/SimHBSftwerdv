@@ -460,7 +460,7 @@ app.get("/api/tabelas-comerciais-disponiveis", authMiddleware, async (req, res) 
     { id: 3, valor: "36 meses" },
   ];
 
-  // API endpoint for partners - GET all
+  // API endpoint for partners
   app.get("/api/parceiros", async (req, res) => {
     try {
       const { db } = await import("../server/lib/supabase");
@@ -471,104 +471,6 @@ app.get("/api/tabelas-comerciais-disponiveis", authMiddleware, async (req, res) 
     } catch (error) {
       console.error("Erro ao buscar parceiros:", error);
       res.status(500).json({ message: "Erro ao buscar parceiros" });
-    }
-  });
-
-  // API endpoint for partners - POST create
-  app.post("/api/admin/parceiros", authMiddleware, async (req, res) => {
-    try {
-      const { db } = await import("../server/lib/supabase");
-      const { parceiros, insertParceiroSchema } = await import("../shared/schema");
-      const { z } = await import("zod");
-      
-      const validatedData = insertParceiroSchema.parse(req.body);
-      const [newParceiro] = await db.insert(parceiros).values(validatedData).returning();
-      
-      res.status(201).json(newParceiro);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Dados inválidos", errors: error.errors });
-      }
-      console.error("Erro ao criar parceiro:", error);
-      res.status(500).json({ message: "Erro ao criar parceiro" });
-    }
-  });
-
-  // API endpoint for partners - PUT update
-  app.put("/api/admin/parceiros/:id", authMiddleware, async (req, res) => {
-    try {
-      const { db } = await import("../server/lib/supabase");
-      const { parceiros, updateParceiroSchema } = await import("../shared/schema");
-      const { eq } = await import("drizzle-orm");
-      const { z } = await import("zod");
-      
-      const parceiroId = parseInt(req.params.id);
-      if (isNaN(parceiroId)) {
-        return res.status(400).json({ message: "ID do parceiro inválido" });
-      }
-      
-      const validatedData = updateParceiroSchema.parse(req.body);
-      const [updatedParceiro] = await db
-        .update(parceiros)
-        .set(validatedData)
-        .where(eq(parceiros.id, parceiroId))
-        .returning();
-      
-      if (!updatedParceiro) {
-        return res.status(404).json({ message: "Parceiro não encontrado" });
-      }
-      
-      res.json(updatedParceiro);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Dados inválidos", errors: error.errors });
-      }
-      console.error("Erro ao atualizar parceiro:", error);
-      res.status(500).json({ message: "Erro ao atualizar parceiro" });
-    }
-  });
-
-  // API endpoint for partners - DELETE 
-  app.delete("/api/admin/parceiros/:id", authMiddleware, async (req, res) => {
-    try {
-      const { db } = await import("../server/lib/supabase");
-      const { parceiros, lojas } = await import("../shared/schema");
-      const { eq } = await import("drizzle-orm");
-      
-      const parceiroId = parseInt(req.params.id);
-      if (isNaN(parceiroId)) {
-        return res.status(400).json({ message: "ID do parceiro inválido" });
-      }
-      
-      // Regra de negócio crítica: verificar se existem lojas associadas
-      const lojasAssociadas = await db
-        .select()
-        .from(lojas)
-        .where(eq(lojas.parceiroId, parceiroId));
-      
-      if (lojasAssociadas.length > 0) {
-        return res.status(409).json({ 
-          message: "Não é possível excluir um parceiro que possui lojas cadastradas." 
-        });
-      }
-      
-      // Verificar se o parceiro existe antes de excluir
-      const [parceiroExistente] = await db
-        .select()
-        .from(parceiros)
-        .where(eq(parceiros.id, parceiroId));
-      
-      if (!parceiroExistente) {
-        return res.status(404).json({ message: "Parceiro não encontrado" });
-      }
-      
-      // Proceder com a exclusão
-      await db.delete(parceiros).where(eq(parceiros.id, parceiroId));
-      
-      res.status(204).send();
-    } catch (error) {
-      console.error("Erro ao excluir parceiro:", error);
-      res.status(500).json({ message: "Erro ao excluir parceiro" });
     }
   });
 
