@@ -31,8 +31,10 @@ const UsuariosPage: React.FC = () => {
         fullName: userData.nome,
         email: userData.email,
         role: userData.perfil,
-        lojaId: userData.lojaId ? parseInt(userData.lojaId) : null,
-        lojaIds: userData.perfil === 'GERENTE' && userData.lojaId ? [parseInt(userData.lojaId)] : null,
+        // For ATENDENTE: single store selection (lojaId)
+        lojaId: userData.perfil === 'ATENDENTE' && userData.lojaId ? parseInt(userData.lojaId) : null,
+        // For GERENTE: multiple store selection (lojaIds array)
+        lojaIds: userData.perfil === 'GERENTE' && userData.lojaIds ? userData.lojaIds.map((id: string) => parseInt(id)) : null,
       };
 
       const response = await fetchWithToken('/api/admin/users', {

@@ -19,12 +19,14 @@ export async function createUser(userData: UserData) {
   let createdProfile: any = null;
 
   try {
-    // Check if user already exists by trying to get user by email
-    const { data: existingUserResponse, error: checkError } = await supabase.auth.admin.getUserByEmail(userData.email);
-    if (checkError && !checkError.message.includes('User not found')) {
+    // Check if user already exists by listing all users and finding by email
+    const { data: existingUsers, error: checkError } = await supabase.auth.admin.listUsers();
+    if (checkError) {
       throw new Error(`Erro ao verificar email: ${checkError.message}`);
     }
-    if (existingUserResponse?.user) {
+    
+    const existingUser = existingUsers.users.find(user => user.email === userData.email);
+    if (existingUser) {
       const conflictError = new Error(`Usuário com email ${userData.email} já existe.`);
       conflictError.name = 'ConflictError';
       throw conflictError;
