@@ -9,25 +9,177 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import PartnerForm from "@/components/parceiros/PartnerForm";
-import { mockPartners, Partner } from "@/data/partners";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Link } from "wouter";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { Edit2, Trash2 } from "lucide-react";
+
+interface Parceiro {
+  id: number;
+  razaoSocial: string;
+  cnpj: string;
+  comissaoPadrao?: string;
+  tabelaComercialPadraoId?: number;
+  createdAt: string;
+}
 
 const PartnersPage: React.FC = () => {
-  const [partners, setPartners] = useState<Partner[]>(mockPartners);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedPartner, setSelectedPartner] = useState<Partner | null>(null);
+  const [selectedPartner, setSelectedPartner] = useState<Parceiro | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [partnerToDelete, setPartnerToDelete] = useState<Parceiro | null>(null);
+  
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
 
-  const handleCreateOrEdit = (partner: any) => {
-    // Lógica para criar ou editar parceiros
-    setIsModalOpen(false);
+  // Fetch partners
+  const { data: partners = [], isLoading } = useQuery({
+    queryKey: ["/api/parceiros"],
+  });
+
+  // Create partner mutation
+  const createPartnerMutation = useMutation({
+    mutationFn: async (data: any) => {
+      return apiRequest("/api/admin/parceiros", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/parceiros"] });
+      setIsModalOpen(false);
+      setSelectedPartner(null);
+      toast({
+        title: "Sucesso",
+        description: "Parceiro criado com sucesso.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro",
+        description: error.message || "Erro ao criar parceiro.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Update partner mutation
+  const updatePartnerMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: any }) => {
+      return apiRequest(`/api/admin/parceiros/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/parceiros"] });
+      setIsModalOpen(false);
+      setSelectedPartner(null);
+      toast({
+        title: "Sucesso",
+        description: "Parceiro atualizado com sucesso.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro",
+        description: error.message || "Erro ao atualizar parceiro.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Delete partner mutation
+  const deletePartnerMutation = useMutation({
+    mutationFn: async (partnerId: number) => {
+      return apiRequest(`/api/admin/parceiros/${partnerId}`, {
+        method: "DELETE",
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/parceiros"] });
+      setIsDeleteDialogOpen(false);
+      setPartnerToDelete(null);
+      toast({
+        title: "Sucesso", 
+        description: "Parceiro excluído com sucesso.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro",
+        description: error.message || "Não é possível excluir um parceiro que possui lojas cadastradas.",
+        variant: "destructive",
+      });
+      setIsDeleteDialogOpen(false);
+      setPartnerToDelete(null);
+    },
+  });
+
+  const handleCreateOrEdit = (data: any) => {
+    if (selectedPartner) {
+      // Update existing partner
+      updatePartnerMutation.mutate({
+        id: selectedPartner.id,
+        data: {
+          razaoSocial: data.razaoSocial,
+          cnpj: data.cnpj,
+          comissaoPadrao: data.comissaoPadrao,
+        },
+      });
+    } else {
+      // Create new partner
+      createPartnerMutation.mutate({
+        razaoSocial: data.razaoSocial,
+        cnpj: data.cnpj,
+        comissaoPadrao: data.comissaoPadrao,
+      });
+    }
   };
 
   const openNewModal = () => {
     setSelectedPartner(null);
     setIsModalOpen(true);
   };
+
+  const openEditModal = (partner: Parceiro) => {
+    setSelectedPartner(partner);
+    setIsModalOpen(true);
+  };
+
+  const openDeleteDialog = (partner: Parceiro) => {
+    setPartnerToDelete(partner);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleDelete = () => {
+    if (partnerToDelete) {
+      deletePartnerMutation.mutate(partnerToDelete.id);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <DashboardLayout title="Gestão de Parceiros">
+        <div className="flex items-center justify-center h-64">
+          <p>Carregando parceiros...</p>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout title="Gestão de Parceiros">
@@ -40,22 +192,40 @@ const PartnersPage: React.FC = () => {
           <TableRow>
             <TableHead>Razão Social</TableHead>
             <TableHead>CNPJ</TableHead>
-            <TableHead>Lojas</TableHead>
             <TableHead>Ações</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {partners.map(partner => (
+          {partners.map((partner: Parceiro) => (
             <TableRow key={partner.id}>
               <TableCell>{partner.razaoSocial}</TableCell>
               <TableCell>{partner.cnpj}</TableCell>
-              <TableCell>{partner.lojas.length}</TableCell>
               <TableCell>
-                <Link to={`/parceiros/detalhe/${partner.id}`}>
-                  <Button className="btn-simpix-primary" size="sm">
-                    Ver Detalhes
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => openEditModal(partner)}
+                    className="flex items-center gap-1"
+                  >
+                    <Edit2 className="h-4 w-4" />
+                    Editar
                   </Button>
-                </Link>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => openDeleteDialog(partner)}
+                    className="flex items-center gap-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Excluir
+                  </Button>
+                  <Link to={`/parceiros/detalhe/${partner.id}`}>
+                    <Button className="btn-simpix-primary" size="sm">
+                      Ver Detalhes
+                    </Button>
+                  </Link>
+                </div>
               </TableCell>
             </TableRow>
           ))}
@@ -76,6 +246,30 @@ const PartnersPage: React.FC = () => {
           />
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza de que deseja excluir o parceiro "{partnerToDelete?.razaoSocial}"?
+              {" "}Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setIsDeleteDialogOpen(false)}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDelete}
+              className="bg-red-600 hover:bg-red-700"
+              disabled={deletePartnerMutation.isPending}
+            >
+              {deletePartnerMutation.isPending ? "Excluindo..." : "Excluir"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </DashboardLayout>
   );
 };

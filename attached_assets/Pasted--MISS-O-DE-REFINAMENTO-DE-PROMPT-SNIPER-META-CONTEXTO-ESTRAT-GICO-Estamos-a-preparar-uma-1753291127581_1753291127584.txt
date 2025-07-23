@@ -1,0 +1,57 @@
+# MISSÃO DE REFINAMENTO DE PROMPT (SNIPER-META)
+
+**CONTEXTO ESTRATÉGICO:**
+Estamos a preparar uma missão de "bazuca" para o **Agente**. O objetivo é implementar a funcionalidade full-stack de **Update e Delete para a Gestão de Parceiros**. O Agente receberá um prompt detalhado com um roadmap de backend e frontend.
+
+**SUA TAREFA (ASSISTENTE):**
+A sua tarefa como "Sniper" é analisar e refinar o prompt que preparamos para o Agente. O seu objetivo é garantir que o prompt seja o mais claro, preciso e livre de ambiguidades possível, para maximizar a chance de sucesso do Agente e minimizar o risco de "danos colaterais" ou alucinações.
+
+---
+**[INÍCIO DO PROMPT A SER ANALISADO]**
+
+# MISSÃO DE IMPLEMENTAÇÃO (FULL-STACK): Funcionalidade Completa de Update e Delete para Parceiros
+
+**CONTEXTO:** A nossa implementação anterior dos endpoints `PUT` e `DELETE` para Parceiros foi incompleta, pois não incluiu as modificações necessárias no frontend. Estamos a recomeçar para implementar a funcionalidade de ponta a ponta.
+
+**AÇÃO:** Sua missão é implementar a funcionalidade completa de atualização e exclusão para a "Gestão de Parceiros", o que envolve trabalho tanto no backend quanto no frontend.
+
+**ROADMAP DE EXECUÇÃO:**
+
+**FASE 1: BACKEND (GARANTIR A FUNDAÇÃO)**
+* **Verifique e Implemente o Endpoint `PUT /api/admin/parceiros/:id`:**
+    * **Lógica:** Deve receber um `id`, validar o corpo da requisição com Zod e atualizar o parceiro no banco de dados.
+* **Verifique e Implemente o Endpoint `DELETE /api/admin/parceiros/:id`:**
+    * **Lógica:** Deve receber um `id`.
+    * **Regra de Negócio Crítica:** Antes de excluir, deve verificar se o parceiro possui `Lojas` associadas. Se sim, deve retornar um erro `409 Conflict` com uma mensagem clara. Se não, deve excluir o parceiro.
+
+**FASE 2: FRONTEND (CONECTAR A INTERFACE)**
+* **Ficheiro Alvo:** `/client/src/pages/admin/parceiros.tsx` (ou similar).
+* **Ação 1: Adicionar a Ação de Excluir na Tabela:**
+    * Em cada linha da tabela de parceiros, adicione um botão ou ícone de "Excluir".
+* **Ação 2: Conectar o Botão de Excluir:**
+    * Ao clicar no botão "Excluir", um modal de confirmação deve aparecer.
+    * Ao confirmar, o frontend deve chamar o endpoint `DELETE /api/admin/parceiros/:id`.
+    * Se a API retornar sucesso, o parceiro deve ser removido da lista na interface.
+    * Se a API retornar um erro (como o 409), uma notificação de erro deve ser exibida ao usuário com a mensagem recebida.
+* **Ação 3: Conectar a Funcionalidade de Edição:**
+    * Garanta que o botão "Ver Detalhes" ou um novo botão "Editar" abra o modal de formulário.
+    * O formulário deve ser pré-preenchido com os dados do parceiro selecionado.
+    * A submissão do formulário neste modo de "edição" deve chamar o endpoint `PUT /api/admin/parceiros/:id`.
+    * Após o sucesso, a lista na tabela deve ser atualizada para refletir os novos dados.
+
+**[FIM DO PROMPT A SER ANALISADO]**
+---
+
+**DIRETRIZES PARA A SUA ANÁLISE:**
+
+Avalie o prompt acima com base nos seguintes critérios:
+
+1.  **Clareza e Ambiguidade:** As instruções são diretas? Existe alguma frase que possa ser mal interpretada pelo Agente?
+2.  **Completude Técnica:** Faltou algum detalhe técnico importante (nomes de ficheiros, funções a serem chamadas, regras de negócio específicas) que poderia ajudar o Agente?
+3.  **Sequenciamento Lógico:** O roadmap de execução (Fase 1: Backend, Fase 2: Frontend) está na ordem correta e lógica?
+4.  **Potencial de Risco:** Você identifica algum ponto no prompt que possa levar o Agente a causar regressões ou bugs colaterais, com base no comportamento histórico de IAs?
+
+**FORMATO DO SEU RELATÓRIO:**
+Forneça o seu feedback em duas seções:
+1) **Pontos Fortes do Prompt**
+2) **Sugestões de Refinamento** (Liste pontos específicos onde o prompt pode ser melhorado para maior precisão).

@@ -474,6 +474,116 @@ app.get("/api/tabelas-comerciais-disponiveis", authMiddleware, async (req, res) 
     }
   });
 
+  // Create partner endpoint
+  app.post("/api/admin/parceiros", authMiddleware, async (req, res) => {
+    try {
+      const { db } = await import("../server/lib/supabase");
+      const { parceiros, insertParceiroSchema } = await import("../shared/schema");
+      const { z } = await import("zod");
+      
+      // Validate request body
+      const validatedData = insertParceiroSchema.parse(req.body);
+      
+      // Create the partner in database
+      const newParceiros = await db
+        .insert(parceiros)
+        .values(validatedData)
+        .returning();
+
+      res.status(201).json(newParceiros[0]);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          message: "Dados inválidos", 
+          errors: error.errors 
+        });
+      }
+      console.error("Erro ao criar parceiro:", error);
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
+  // Update partner endpoint
+  app.put("/api/admin/parceiros/:id", authMiddleware, async (req, res) => {
+    try {
+      const { db } = await import("../server/lib/supabase");
+      const { parceiros, updateParceiroSchema } = await import("../shared/schema");
+      const { eq } = await import("drizzle-orm");
+      const { z } = await import("zod");
+      
+      const parceiroId = parseInt(req.params.id);
+      if (isNaN(parceiroId)) {
+        return res.status(400).json({ message: "ID de parceiro inválido" });
+      }
+
+      // Validate request body
+      const validatedData = updateParceiroSchema.parse(req.body);
+      
+      // Update the partner in database
+      const updatedParceiros = await db
+        .update(parceiros)
+        .set(validatedData)
+        .where(eq(parceiros.id, parceiroId))
+        .returning();
+
+      if (updatedParceiros.length === 0) {
+        return res.status(404).json({ message: "Parceiro não encontrado" });
+      }
+
+      res.json(updatedParceiros[0]);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          message: "Dados inválidos", 
+          errors: error.errors 
+        });
+      }
+      console.error("Erro ao atualizar parceiro:", error);
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
+  // Delete partner endpoint
+  app.delete("/api/admin/parceiros/:id", authMiddleware, async (req, res) => {
+    try {
+      const { db } = await import("../server/lib/supabase");
+      const { parceiros, lojas } = await import("../shared/schema");
+      const { eq } = await import("drizzle-orm");
+      
+      const parceiroId = parseInt(req.params.id);
+      if (isNaN(parceiroId)) {
+        return res.status(400).json({ message: "ID de parceiro inválido" });
+      }
+
+      // Check if partner has associated stores
+      const associatedLojas = await db
+        .select()
+        .from(lojas)
+        .where(eq(lojas.parceiroId, parceiroId));
+
+      if (associatedLojas.length > 0) {
+        return res.status(409).json({ 
+          message: "Não é possível excluir um parceiro que possui lojas cadastradas." 
+        });
+      }
+
+      // Delete the partner
+      const deletedParceiros = await db
+        .delete(parceiros)
+        .where(eq(parceiros.id, parceiroId))
+        .returning();
+
+      if (deletedParceiros.length === 0) {
+        return res.status(404).json({ message: "Parceiro não encontrado" });
+      }
+
+      res.status(204).send();
+    } catch (error) {
+      console.error("Erro ao excluir parceiro:", error);
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
   // Rotas CRUD para produtos
   app.get("/api/produtos", async (req, res) => {
     try {
