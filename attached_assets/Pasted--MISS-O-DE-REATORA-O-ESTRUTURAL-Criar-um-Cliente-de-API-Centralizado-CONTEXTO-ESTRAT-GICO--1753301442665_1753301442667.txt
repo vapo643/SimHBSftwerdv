@@ -1,0 +1,45 @@
+# MISSÃO DE REATORAÇÃO ESTRUTURAL: Criar um Cliente de API Centralizado
+
+**CONTEXTO ESTRATÉGICO:**
+Identificámos uma falha recorrente em nosso código de frontend: as chamadas de API para mutações (`POST`, `PUT`, `DELETE`) estão a ser feitas sem os métodos HTTP corretos, causando erros. Para resolver isto de forma definitiva e seguir o princípio DRY (Don't Repeat Yourself), vamos criar uma camada de abstração.
+
+**AÇÃO:** Sua missão é criar um novo "API Client" centralizado e refatorar as nossas páginas de CRUD para utilizá-lo.
+
+**ROADMAP DE EXECUÇÃO:**
+
+**FASE 1: CRIAR O CLIENTE DE API CENTRALIZADO**
+* **Ação:** No diretório `/client/src/lib/`, crie um novo ficheiro `apiClient.ts`.
+* **Lógica:** Dentro deste ficheiro, implemente uma função `api` (ou similar) que abstrai a chamada `fetch`. Esta função deve receber a rota (`endpoint`), o método (`method`), e o corpo da requisição (`body`), e deve incluir automaticamente os headers padrão como `Content-Type: application/json` e o token de autenticação.
+
+    **Exemplo da Estrutura da Função:**
+    ```typescript
+    export const apiClient = async (endpoint: string, method: string, body?: any) => {
+      const token = //... lógica para obter o token de autenticação
+      const response = await fetch(`/api${endpoint}`, {
+        method: method,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: body ? JSON.stringify(body) : null,
+      });
+
+      if (!response.ok) {
+        if (response.status === 204) return null; // Handle No Content success
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Ocorreu um erro na API');
+      }
+      if (response.status === 204) return null;
+      return response.json();
+    };
+    ```
+
+**FASE 2: REATORAR O CRUD DE PARCEIROS PARA USAR O NOVO CLIENTE**
+* **Ficheiro Alvo:** `/client/src/pages/parceiros/index.tsx` (ou similar).
+* **Ação:** Substitua todas as chamadas `fetch` diretas nas `mutations` de Criar (`POST`), Editar (`PUT`) e Excluir (`DELETE`) por chamadas à nossa nova função `apiClient`.
+
+**FASE 3: REATORAR O CRUD DE LOJAS PARA USAR O NOVO CLIENTE**
+* **Ficheiro Alvo:** `/client/src/pages/admin/lojas/index.tsx`.
+* **Ação:** Da mesma forma, substitua todas as chamadas `fetch` diretas nas `mutations` por chamadas à nova função `apiClient`.
+
+Execute este plano para corrigir o bug atual e fortalecer a nossa arquitetura de frontend.

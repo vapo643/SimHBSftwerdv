@@ -1,69 +1,73 @@
-import { createClientSupabaseClient } from "./supabase";
+import { getSession } from "@/lib/auth";
 
-async function fetchWithToken(url: string, options?: RequestInit) {
-  const supabase = createClientSupabaseClient();
-
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-
-  console.log("🔐 API Client - Making request:", {
-    url,
-    method: options?.method || "GET",
-    hasToken: !!session?.access_token,
-    tokenLength: session?.access_token?.length || 0
-  });
-
-  const headers: Record<string, string> = {
-    ...(options?.headers as Record<string, string> || {}),
-  };
-
-  // Add authorization header if we have a token
-  if (session?.access_token) {
-    headers.Authorization = `Bearer ${session.access_token}`;
-  } else {
-    console.warn("⚠️ API Client - No access token available");
-  }
-
-  // Don't set Content-Type for FormData, let the browser set it
-  if (!(options?.body instanceof FormData)) {
-    headers["Content-Type"] = "application/json";
-  }
-
+/**
+ * Centralized API Client for consistent HTTP requests
+ * Handles authentication, headers, and error responses automatically
+ */
+export const apiClient = async (endpoint: string, method: string = 'GET', body?: any) => {
   try {
-    const response = await fetch(url, {
-      ...options,
-      headers: headers,
-    });
+    // Get authentication token from session
+    const session = await getSession();
+    const token = session?.accessToken;
 
-    console.log("📡 API Response:", {
-      url,
-      status: response.status,
-      statusText: response.statusText,
-      ok: response.ok
-    });
+    // Prepare headers
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+    };
 
-    if (!response.ok) {
-      let errorMessage = `HTTP ${response.status}`;
-      try {
-        const errorData = await response.clone().json();
-        errorMessage = errorData.message || errorMessage;
-        console.error("❌ API Error (JSON):", errorData);
-      } catch {
-        const errorText = await response.clone().text();
-        errorMessage = errorText || errorMessage;
-        console.error("❌ API Error (Text):", errorText);
-      }
-      
-      throw new Error(`API Error: ${response.status} ${errorMessage}`);
+    // Add authentication header if token exists
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
     }
 
-    return response;
-  } catch (error) {
-    console.error("❌ Fetch Error:", error);
-    throw error;
-  }
-}
+    // Make the API request
+    const response = await fetch(`/api${endpoint}`, {
+      method: method.toUpperCase(),
+      headers,
+      body: body ? JSON.stringify(body) : null,
+    });
 
-export { fetchWithToken };
-export default fetchWithToken;
+    // Handle successful responses with no content
+    if (response.status === 204) {
+      return null;
+    }
+
+    // Handle error responses
+    if (!response.ok) {
+      let errorMessage = 'Ocorreu um erro na API';
+      
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.message || errorData.details || errorMessage;
+      } catch {
+        // If response isn't JSON, use status text
+        errorMessage = response.statusText || errorMessage;
+      }
+      
+      throw new Error(errorMessage);
+    }
+
+    // Parse and return successful response
+    return await response.json();
+  } catch (error) {
+    // Re-throw errors to be handled by the calling code
+    if (error instanceof Error) {
+      throw error;
+    }
+    
+    throw new Error('Falha na comunicação com o servidor');
+  }
+};
+
+/**
+ * Convenience methods for common HTTP operations
+ */
+export const api = {
+  get: (endpoint: string) => apiClient(endpoint, 'GET'),
+  post: (endpoint: string, data?: any) => apiClient(endpoint, 'POST', data),
+  put: (endpoint: string, data?: any) => apiClient(endpoint, 'PUT', data),
+  patch: (endpoint: string, data?: any) => apiClient(endpoint, 'PATCH', data),
+  delete: (endpoint: string) => apiClient(endpoint, 'DELETE'),
+};
+
+export default apiClient;

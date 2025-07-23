@@ -13,7 +13,7 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Store, Eye, Edit, Trash2, Plus } from "lucide-react";
-import { apiRequest } from "@/lib/queryClient";
+import { api } from "@/lib/apiClient";
 import { LojaForm } from "@/components/lojas/LojaForm";
 import type { Loja, InsertLoja, UpdateLoja } from "@shared/schema";
 
@@ -31,7 +31,7 @@ export default function LojasPage() {
 
   // Create mutation
   const createMutation = useMutation({
-    mutationFn: (data: InsertLoja) => apiRequest('/api/admin/lojas', 'POST', data),
+    mutationFn: (data: InsertLoja) => api.post('/admin/lojas', data),
     onSuccess: () => {
       toast({
         title: "Sucesso",
@@ -53,7 +53,7 @@ export default function LojasPage() {
   // Update mutation
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: UpdateLoja }) => 
-      apiRequest(`/api/admin/lojas/${id}`, 'PUT', data),
+      api.put(`/admin/lojas/${id}`, data),
     onSuccess: () => {
       toast({
         title: "Sucesso",
@@ -74,7 +74,7 @@ export default function LojasPage() {
 
   // Delete mutation
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => apiRequest(`/api/admin/lojas/${id}`, 'DELETE'),
+    mutationFn: (id: number) => api.delete(`/admin/lojas/${id}`),
     onSuccess: () => {
       toast({
         title: "Sucesso",

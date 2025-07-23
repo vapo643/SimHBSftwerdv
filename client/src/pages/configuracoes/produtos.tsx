@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Pencil, Trash2, Plus } from "lucide-react";
-import { fetchWithToken } from "@/lib/apiClient";
+import { api } from "@/lib/apiClient";
 import DashboardLayout from "@/components/DashboardLayout";
 
 interface Produto {
@@ -40,28 +40,12 @@ export default function GestãoProdutos() {
   // Query para buscar produtos
   const { data: produtos = [], isLoading } = useQuery({
     queryKey: ["produtos"],
-    queryFn: async () => {
-      const response = await fetchWithToken("/api/produtos");
-      if (!response.ok) {
-        throw new Error("Erro ao buscar produtos");
-      }
-      return response.json();
-    },
+    queryFn: () => api.get("/produtos"),
   });
 
   // Mutation para criar produto
   const createMutation = useMutation({
-    mutationFn: async (data: ProdutoFormData) => {
-      const response = await fetchWithToken("/api/produtos", {
-        method: "POST",
-        body: JSON.stringify(data),
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Erro ao criar produto");
-      }
-      return response.json();
-    },
+    mutationFn: (data: ProdutoFormData) => api.post("/produtos", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["produtos"] });
       toast({
@@ -81,17 +65,8 @@ export default function GestãoProdutos() {
 
   // Mutation para atualizar produto
   const updateMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: number; data: ProdutoFormData }) => {
-      const response = await fetchWithToken(`/api/produtos/${id}`, {
-        method: "PUT",
-        body: JSON.stringify(data),
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Erro ao atualizar produto");
-      }
-      return response.json();
-    },
+    mutationFn: ({ id, data }: { id: number; data: ProdutoFormData }) => 
+      api.put(`/produtos/${id}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["produtos"] });
       toast({
@@ -111,16 +86,7 @@ export default function GestãoProdutos() {
 
   // Mutation para deletar produto
   const deleteMutation = useMutation({
-    mutationFn: async (id: number) => {
-      const response = await fetchWithToken(`/api/produtos/${id}`, {
-        method: "DELETE",
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Erro ao excluir produto");
-      }
-      return response.json();
-    },
+    mutationFn: (id: number) => api.delete(`/produtos/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["produtos"] });
       toast({
@@ -193,7 +159,7 @@ export default function GestãoProdutos() {
   }
 
   return (
-    <DashboardLayout>
+    <DashboardLayout title="Gestão de Produtos">
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
