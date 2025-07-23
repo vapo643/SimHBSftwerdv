@@ -201,7 +201,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/nova-proposta", authMiddleware, async (req: AuthRequest, res) => {
     try {
       console.log("📝 Progressive Enhancement: Form submission received");
-      
+
       // Parse form data
       const formData = {
         clienteNome: req.body.clienteNome,
@@ -220,7 +220,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Validate and create proposal
       const validatedData = insertPropostaSchema.parse(formData);
       const proposta = await storage.createProposta(validatedData);
-      
+
       // For traditional form submission, redirect with success message
       const successPage = `
         <!DOCTYPE html>
@@ -263,12 +263,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         </body>
         </html>
       `;
-      
+
       res.send(successPage);
-      
+
     } catch (error) {
       console.error("Progressive Enhancement form error:", error);
-      
+
       // Error page for traditional form submission
       const errorPage = `
         <!DOCTYPE html>
@@ -306,7 +306,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         </body>
         </html>
       `;
-      
+
       res.status(400).send(errorPage);
     }
   });
@@ -379,68 +379,82 @@ export async function registerRoutes(app: Express): Promise<Server> {
     deletarProduto 
   } = await import("./controllers/produtoController");
 
-  // Endpoint para busca hierárquica de tabelas comerciais
-  app.get("/api/tabelas-comerciais-disponiveis", authMiddleware, async (req, res) => {
-    try {
-      const { produtoId, parceiroId } = req.query;
+  // Buscar tabelas comerciais disponíveis com lógica hierárquica
+app.get("/api/tabelas-comerciais-disponiveis", authMiddleware, async (req, res) => {
+  try {
+    const { produtoId, parceiroId } = req.query;
 
-      // Validação dos parâmetros obrigatórios
-      if (!produtoId || !parceiroId) {
-        return res.status(400).json({ 
-          message: "Os parâmetros 'produtoId' e 'parceiroId' são obrigatórios" 
-        });
-      }
-
-      const produtoIdNum = parseInt(produtoId as string);
-      const parceiroIdNum = parseInt(parceiroId as string);
-
-      if (isNaN(produtoIdNum) || isNaN(parceiroIdNum)) {
-        return res.status(400).json({ 
-          message: "Os parâmetros 'produtoId' e 'parceiroId' devem ser números válidos" 
-        });
-      }
-
-      const supabase = createServerSupabaseClient();
-
-      // 1. Busca Prioritária: Tabelas personalizadas (produto + parceiro específico)
-      const { data: tabelasPersonalizadas, error: errorPersonalizadas } = await supabase
-        .from('tabelas_comerciais')
-        .select('*')
-        .eq('produto_id', produtoIdNum)
-        .eq('parceiro_id', parceiroIdNum)
-        .eq('ativo', true);
-
-      if (errorPersonalizadas) {
-        console.error("Erro ao buscar tabelas personalizadas:", errorPersonalizadas);
-        return res.status(500).json({ message: "Erro ao buscar tabelas comerciais" });
-      }
-
-      // Se encontrou tabelas personalizadas, retorna apenas essas
-      if (tabelasPersonalizadas && tabelasPersonalizadas.length > 0) {
-        return res.json(tabelasPersonalizadas);
-      }
-
-      // 2. Busca Secundária: Tabelas gerais (apenas produto, parceiro_id nulo)
-      const { data: tabelasGerais, error: errorGerais } = await supabase
-        .from('tabelas_comerciais')
-        .select('*')
-        .eq('produto_id', produtoIdNum)
-        .is('parceiro_id', null)
-        .eq('ativo', true);
-
-      if (errorGerais) {
-        console.error("Erro ao buscar tabelas gerais:", errorGerais);
-        return res.status(500).json({ message: "Erro ao buscar tabelas comerciais" });
-      }
-
-      // Retorna tabelas gerais (ou array vazio se não encontrar nenhuma)
-      res.json(tabelasGerais || []);
-
-    } catch (error) {
-      console.error("Erro no endpoint tabelas-comerciais-disponiveis:", error);
-      res.status(500).json({ message: "Erro interno do servidor" });
+    // Validação de parâmetros obrigatórios
+    if (!produtoId || !parceiroId) {
+      return res.status(400).json({ 
+        message: "produtoId e parceiroId são obrigatórios" 
+      });
     }
-  });
+
+    // Validação de tipos
+    const produtoIdNum = parseInt(produtoId as string);
+    const parceiroIdNum = parseInt(parceiroId as string);
+
+    if (isNaN(produtoIdNum) || isNaN(parceiroIdNum)) {
+      return res.status(400).json({ 
+        message: "produtoId e parceiroId devem ser números válidos" 
+      });
+    }
+
+    console.log(`[${new Date().toISOString()}] Buscando tabelas comerciais para produto ${produtoIdNum} e parceiro ${parceiroIdNum}`);
+
+    // STEP 1: Busca Prioritária - Tabelas Personalizadas (produto + parceiro)
+    const { data: tabelasPersonalizadas, error: errorPersonalizadas } = await supabase
+      .from("tabelas_comerciais")
+      .select("*")
+      .eq("produto_id", produtoIdNum)
+      .eq("parceiro_id", parceiroIdNum)
+      .eq("ativo", true)
+      .order("created_at", { ascending: false });
+
+    if (errorPersonalizadas) {
+      console.error("Erro ao buscar tabelas personalizadas:", errorPersonalizadas);
+      return res.status(500).json({ 
+        message: "Erro interno do servidor ao buscar tabelas personalizadas" 
+      });
+    }
+
+    // STEP 2: Validação - Se encontrou tabelas personalizadas, retorna apenas elas
+    if (tabelasPersonalizadas && tabelasPersonalizadas.length > 0) {
+      console.log(`[${new Date().toISOString()}] Encontradas ${tabelasPersonalizadas.length} tabelas personalizadas`);
+      return res.json(tabelasPersonalizadas);
+    }
+
+    console.log(`[${new Date().toISOString()}] Nenhuma tabela personalizada encontrada, buscando tabelas gerais`);
+
+    // STEP 3: Busca Secundária - Tabelas Gerais (produto + parceiro nulo)
+    const { data: tabelasGerais, error: errorGerais } = await supabase
+      .from("tabelas_comerciais")
+      .select("*")
+      .eq("produto_id", produtoIdNum)
+      .is("parceiro_id", null)
+      .eq("ativo", true)
+      .order("created_at", { ascending: false });
+
+    if (errorGerais) {
+      console.error("Erro ao buscar tabelas gerais:", errorGerais);
+      return res.status(500).json({ 
+        message: "Erro interno do servidor ao buscar tabelas gerais" 
+      });
+    }
+
+    // STEP 4: Resultado Final
+    const resultado = tabelasGerais || [];
+    console.log(`[${new Date().toISOString()}] Encontradas ${resultado.length} tabelas gerais`);
+
+    res.json(resultado);
+  } catch (error) {
+    console.error("Erro no endpoint de tabelas comerciais hierárquicas:", error);
+    res.status(500).json({ 
+      message: "Erro interno do servidor" 
+    });
+  }
+});
 
   // Mock data para prazos
   const prazos = [
@@ -463,7 +477,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/produtos", async (req, res) => {
     try {
       const { nome, status } = req.body;
-      
+
       if (!nome || !status) {
         return res.status(400).json({ message: "Nome e status são obrigatórios" });
       }
@@ -480,7 +494,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const { nome, status } = req.body;
-      
+
       if (!nome || !status) {
         return res.status(400).json({ message: "Nome e status são obrigatórios" });
       }
@@ -496,7 +510,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/produtos/:id", async (req, res) => {
     try {
       const { id } = req.params;
-      
+
       // Verificar se o produto está em uso
       const emUso = await verificarProdutoEmUso(id);
       if (emUso) {
