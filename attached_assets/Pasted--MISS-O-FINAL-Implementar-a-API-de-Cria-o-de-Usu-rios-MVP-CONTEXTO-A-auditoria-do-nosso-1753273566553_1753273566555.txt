@@ -1,0 +1,33 @@
+# MISSÃO FINAL: Implementar a API de Criação de Usuários (MVP)
+
+**CONTEXTO:** A auditoria do nosso schema no Supabase foi concluída. A tabela `profiles` possui uma coluna `loja_id` que será usada para associar usuários com os perfis 'GERENTE' e 'ATENDENTE' a uma loja específica. Nossa stack é Express, Zod e supabase-js. O escopo do MVP é para os perfis 'ADMINISTRADOR', 'GERENTE' e 'ATENDENTE'.
+
+**AÇÃO:** Gere o código backend necessário para criar novos usuários, com uma clara separação entre a lógica de negócio (serviço) e o tratamento da requisição (rota).
+
+**ETAPAS:**
+
+**1. Lógica de Serviço (Ficheiro: `/server/services/userService.ts`):**
+Crie e exporte uma função de serviço assíncrona chamada `createUser`.
+- **Assinatura da Função:** `createUser(userData: UserData)` onde `UserData` é um tipo/interface com os dados do formulário.
+- **Lógica:**
+    a. Verifique se o email já existe em `auth.users`. Se sim, lance um erro.
+    b. Gere uma senha provisória segura e aleatória.
+    c. Use `supabase.auth.admin.createUser()` para criar o usuário no Supabase Auth.
+    d. Insira os dados relevantes (`id` do Auth, `role`, `full_name`, `loja_id`) na nossa tabela `profiles`.
+    e. **Implemente "rollback":** Se a inserção em `profiles` falhar, delete o usuário recém-criado do Auth para manter a consistência.
+    f. Chame uma função `sendWelcomeEmail` mockada que apenas loga a senha no console.
+    g. Retorne o usuário criado (sem a senha).
+
+**2. Endpoint da Rota (Ficheiro: `/server/routes.ts`):**
+Crie o endpoint `POST /api/admin/users`.
+- **Middleware:** Proteja a rota para que apenas usuários com a `role` de 'ADMINISTRADOR' possam acessá-la.
+- **Validação com Zod:** Crie um schema Zod que:
+    a. Valide os campos `fullName` (string), `email` (string de email), e `role` (enum com os valores 'ADMINISTRADOR', 'GERENTE', 'ATENDENTE').
+    b. **Use `.refine()` no schema** para adicionar uma regra condicional: se o `role` for 'GERENTE' ou 'ATENDENTE', o campo `loja_id` deve ser um número inteiro válido. Para o `role` 'ADMINISTRADOR', `loja_id` não é necessário.
+- **Controlador da Rota:**
+    a. Valide o `body` da requisição com o schema Zod.
+    b. Chame a função `createUser` do serviço dentro de um bloco `try...catch`.
+    c. Retorne `201 Created` em caso de sucesso.
+    d. Retorne os status codes de erro apropriados (`400`, `409`, `500`) com mensagens claras em JSON.
+
+Por favor, forneça o código completo para o ficheiro `userService.ts` e o código a ser adicionado em `routes.ts`.

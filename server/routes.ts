@@ -5,6 +5,7 @@ import { createServerSupabaseClient } from "../client/src/lib/supabase";
 import { authMiddleware, type AuthRequest } from "./lib/auth";
 import { rlsAuthMiddleware, validateLojaAccess, type EnhancedAuthRequest } from "./lib/rls-setup";
 import { insertPropostaSchema, updatePropostaSchema, insertGerenteLojaSchema } from "@shared/schema";
+import { createUser, createUserSchema } from "./services/userService";
 import { z } from "zod";
 import multer from "multer";
 
@@ -78,6 +79,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Logout error:", error);
       res.status(500).json({ message: "Logout failed" });
+    }
+  });
+
+  // Admin middleware
+  const adminMiddleware = async (req: EnhancedAuthRequest, res: any, next: any) => {
+    try {
+      if (!req.user?.id) {
+        return res.status(401).json({ message: "Usuário não autenticado" });
+      }
+
+      // Get user role from Supabase profiles table
+      const supabase = createServerSupabaseClient();
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', req.user.id)
+        .single();
+
+      if (error || !profile) {
+        console.error("Error fetching user profile:", error);
+        return res.status(500).json({ message: "Erro ao verificar permissões do usuário" });
+      }
+
+      if (profile.role !== 'ADMINISTRADOR') {
+        return res.status(403).json({ 
+          message: "Acesso negado. Apenas administradores podem acessar este recurso." 
+        });
+      }
+
+      // Add role to request user object for subsequent use
+      req.user.role = profile.role;
+      next();
+    } catch (error) {
+      console.error("Admin middleware error:", error);
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  };
+
+  // Admin user creation endpoint
+  app.post("/api/admin/users", authMiddleware, adminMiddleware, async (req: EnhancedAuthRequest, res) => {
+    try {
+      const validatedData = createUserSchema.parse(req.body);
+      const newUser = await createUser(validatedData);
+      res.status(201).json({
+        message: "Usuário criado com sucesso",
+        user: newUser
+      });
+      
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: "Dados inválidos",
+          errors: error.errors
+        });
+      }
+
+      if (error.message.includes('já existe')) {
+        return res.status(409).json({
+          message: error.message
+        });
+      }
+
+      console.error("Create user error:", error);
+      res.status(500).json({
+        message: error.message || "Erro interno do servidor"
+      });
     }
   });
 
