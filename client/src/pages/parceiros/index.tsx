@@ -55,6 +55,9 @@ const PartnersPage: React.FC = () => {
     mutationFn: async (data: any) => {
       return apiRequest("/api/admin/parceiros", {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(data),
       });
     },
@@ -81,6 +84,9 @@ const PartnersPage: React.FC = () => {
     mutationFn: async ({ id, data }: { id: number; data: any }) => {
       return apiRequest(`/api/admin/parceiros/${id}`, {
         method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(data),
       });
     },
@@ -107,6 +113,9 @@ const PartnersPage: React.FC = () => {
     mutationFn: async (partnerId: number) => {
       return apiRequest(`/api/admin/parceiros/${partnerId}`, {
         method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
     },
     onSuccess: () => {
@@ -137,7 +146,6 @@ const PartnersPage: React.FC = () => {
         data: {
           razaoSocial: data.razaoSocial,
           cnpj: data.cnpj,
-          comissaoPadrao: data.comissaoPadrao,
         },
       });
     } else {
@@ -145,7 +153,6 @@ const PartnersPage: React.FC = () => {
       createPartnerMutation.mutate({
         razaoSocial: data.razaoSocial,
         cnpj: data.cnpj,
-        comissaoPadrao: data.comissaoPadrao,
       });
     }
   };

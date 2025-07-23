@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,7 +10,6 @@ import { Label } from "@/components/ui/label";
 const partnerSchema = z.object({
   razaoSocial: z.string().min(3, "Razão Social é obrigatória."),
   cnpj: z.string().min(14, "CNPJ é obrigatório."),
-  comissaoPadrao: z.string().optional(),
 });
 
 type PartnerFormData = z.infer<typeof partnerSchema>;
@@ -43,13 +43,6 @@ const PartnerForm: React.FC<PartnerFormProps> = ({ initialData, onSubmit, onCanc
         <Label htmlFor="cnpj">CNPJ</Label>
         <Input id="cnpj" {...register("cnpj")} placeholder="00.000.000/0001-00" />
         {errors.cnpj && <p className="mt-1 text-sm text-red-500">{errors.cnpj.message}</p>}
-      </div>
-      <div>
-        <Label htmlFor="comissaoPadrao">Comissão Padrão (%)</Label>
-        <Input id="comissaoPadrao" {...register("comissaoPadrao")} placeholder="Ex: 5.5" />
-        {errors.comissaoPadrao && (
-          <p className="mt-1 text-sm text-red-500">{errors.comissaoPadrao.message}</p>
-        )}
       </div>
       <div className="flex justify-end gap-2 pt-4">
         <Button type="button" variant="ghost" onClick={onCancel}>
