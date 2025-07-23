@@ -129,20 +129,12 @@ export const tabelasComerciais = pgTable("tabelas_comerciais", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Produtos de Crédito - Multi-tenant
+// Produtos de Crédito
 export const produtos = pgTable("produtos", {
   id: serial("id").primaryKey(),
-  lojaId: integer("loja_id").references(() => lojas.id).notNull(), // Multi-tenant key
-  nome: text("nome").notNull(),
-  descricao: text("descricao"),
-  taxaJuros: decimal("taxa_juros", { precision: 5, scale: 2 }).notNull(),
-  prazoMinimo: integer("prazo_minimo").notNull(),
-  prazoMaximo: integer("prazo_maximo").notNull(),
-  valorMinimo: decimal("valor_minimo", { precision: 15, scale: 2 }).notNull(),
-  valorMaximo: decimal("valor_maximo", { precision: 15, scale: 2 }).notNull(),
-  ativo: boolean("ativo").notNull().default(true),
+  nomeProduto: text("nome_produto").notNull(),
+  isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 // Logs de Comunicação - Multi-tenant  

@@ -85,6 +85,10 @@ This is a full-stack TypeScript application for credit management called "Simpix
 - **Test Infrastructure Enhancement**: Advanced Vitest testing setup with comprehensive Supabase client mocking, crypto module mocking, and multi-scenario validation
 - **Service Layer Enhancement**: Updated userService.ts to return structured success responses with user data and temporary password information
 - **N:N Relationship Testing**: Comprehensive validation of GERENTE-to-multiple-stores associations with proper rollback testing on failure
+- **Products System Stabilization**: Complete architectural fix removing loja_id references from products schema and controller to match actual database structure
+- **Database Schema Alignment**: Updated produtos table schema to match actual database columns (nome_produto, is_active) and removed multi-tenant loja_id dependency
+- **Rate Limiting Configuration Fix**: Enhanced trust proxy configuration to resolve Express rate limiting validation warnings in development environment
+- **Products CRUD Functionality**: Restored full create, read, update, delete operations for products management with proper error handling and data validation
 - **UI Refinement - Blackout Theme Implementation**: Complete "Blackout" theme with black backgrounds, dark gray cards, and comprehensive iconography
 - **New CurrencyInput Component**: Created reusable currency input component with R$ prefix for monetary fields
 - **Login Page Redesign**: Modern two-column layout with logo panel and clean form design using Blackout theme
