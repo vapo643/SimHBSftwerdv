@@ -177,19 +177,20 @@ const PartnersPage: React.FC = () => {
           </div>
         </div>
       ) : (
-        <div className="rounded-md border overflow-hidden"></div>
+        <div className="rounded-md border bg-white dark:bg-gray-900 overflow-hidden">
           <Table>
             <TableHeader>
               <TableRow className="bg-gray-50 dark:bg-gray-800">
                 <TableHead className="font-semibold">Razão Social</TableHead>
                 <TableHead className="font-semibold">CNPJ</TableHead>
+                <TableHead className="font-semibold text-center">Comissão</TableHead>
                 <TableHead className="font-semibold text-center">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {partners.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={3} className="text-center py-8">
+                  <TableCell colSpan={4} className="text-center py-8">
                     <div className="flex flex-col items-center gap-2">
                       <Building2 className="h-8 w-8 text-muted-foreground" />
                       <p className="text-muted-foreground">Nenhum parceiro encontrado</p>
@@ -204,6 +205,9 @@ const PartnersPage: React.FC = () => {
                   <TableRow key={partner.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                     <TableCell className="font-medium">{partner.razaoSocial}</TableCell>
                     <TableCell className="font-mono text-sm">{partner.cnpj}</TableCell>
+                    <TableCell className="text-center">
+                      {partner.comissaoPadrao ? `${partner.comissaoPadrao}%` : "N/A"}
+                    </TableCell>
                     <TableCell className="text-center">
                       <div className="flex items-center justify-center gap-2">
                         <Link to={`/parceiros/detalhe/${partner.id}`}>
