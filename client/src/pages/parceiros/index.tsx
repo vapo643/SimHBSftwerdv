@@ -23,7 +23,8 @@ import {
 import PartnerForm from "@/components/parceiros/PartnerForm";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Link } from "wouter";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { api } from "@/lib/apiClient";
+import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Parceiro, InsertParceiro } from "@shared/schema";
 import { Edit, Trash2, Eye, Building2, Users } from "lucide-react";
@@ -35,15 +36,21 @@ const PartnersPage: React.FC = () => {
   const [partnerToDelete, setPartnerToDelete] = useState<Parceiro | null>(null);
   const { toast } = useToast();
 
-  // Fetch partners data
+  // Fetch partners data using new apiClient
   const { data: partners = [], isLoading, error } = useQuery<Parceiro[]>({
     queryKey: ["/api/parceiros"],
+    queryFn: async () => {
+      const response = await api.get<Parceiro[]>("/api/parceiros");
+      return response.data;
+    },
   });
 
-  // Create partner mutation
+  // Create partner mutation using new apiClient
   const createMutation = useMutation({
-    mutationFn: (data: InsertParceiro) => 
-      apiRequest("POST", "/api/admin/parceiros", data),
+    mutationFn: async (data: InsertParceiro) => {
+      const response = await api.post<Parceiro>("/api/admin/parceiros", data);
+      return response.data;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/parceiros"] });
       setIsModalOpen(false);
@@ -62,10 +69,12 @@ const PartnersPage: React.FC = () => {
     },
   });
 
-  // Update partner mutation
+  // Update partner mutation using new apiClient
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<InsertParceiro> }) =>
-      apiRequest("PUT", `/api/admin/parceiros/${id}`, data),
+    mutationFn: async ({ id, data }: { id: number; data: Partial<InsertParceiro> }) => {
+      const response = await api.put<Parceiro>(`/api/admin/parceiros/${id}`, data);
+      return response.data;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/parceiros"] });
       setIsModalOpen(false);
@@ -84,10 +93,12 @@ const PartnersPage: React.FC = () => {
     },
   });
 
-  // Delete partner mutation
+  // Delete partner mutation using new apiClient
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => 
-      apiRequest("DELETE", `/api/admin/parceiros/${id}`),
+    mutationFn: async (id: number) => {
+      const response = await api.delete(`/api/admin/parceiros/${id}`);
+      return response.data;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/parceiros"] });
       setDeleteDialogOpen(false);

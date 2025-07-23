@@ -468,3 +468,9 @@ export const api = {
 };
 
 export default apiClient;
+
+/**
+ * Backward compatibility export for files that haven't been migrated yet
+ * @deprecated Use api.get, api.post, etc. instead
+ */
+export const fetchWithToken = apiClient;
