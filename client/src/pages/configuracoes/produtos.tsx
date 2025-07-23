@@ -13,6 +13,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useToast } from "@/hooks/use-toast";
 import { Pencil, Trash2, Plus } from "lucide-react";
 import { fetchWithToken } from "@/lib/apiClient";
+import DashboardLayout from "@/components/DashboardLayout";
 
 interface Produto {
   id: number;
@@ -192,14 +193,15 @@ export default function GestãoProdutos() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Gestão de Produtos</h1>
-          <p className="text-muted-foreground">
-            Gerencie os produtos de crédito disponíveis no sistema
-          </p>
-        </div>
+    <DashboardLayout>
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Gestão de Produtos</h1>
+            <p className="text-muted-foreground">
+              Gerencie os produtos de crédito disponíveis no sistema
+            </p>
+          </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button onClick={handleOpenDialog}>
@@ -348,6 +350,7 @@ export default function GestãoProdutos() {
           </Table>
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 }
