@@ -65,7 +65,12 @@ export async function createUser(userData: UserData) {
 
     sendWelcomeEmail(userData.email, temporaryPassword);
     
-    return createdProfile;
+    return {
+      success: true,
+      message: 'Usuário criado com sucesso.',
+      user: createdProfile,
+      temporaryPassword,
+    };
 
   } catch (error) {
     if (createdAuthUser) {
