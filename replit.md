@@ -82,6 +82,7 @@ This is a full-stack TypeScript application for credit management called "Simpix
 
 ### January 2025
 - **API Client Foundation (Phase 1)**: Created centralized API client foundation in `/client/src/lib/apiClient.ts` with comprehensive HTTP wrapper, authentication headers, JSON parsing, and error handling. Includes TypeScript interfaces and convenience methods for all HTTP operations.
+- **API Client v2.0 Architectural Refactoring**: Complete refactoring with specialized management classes: TokenManager (singleton with JWT caching and auto-refresh), ApiConfig (environment-aware URL building), RequestManager (timeout and retry logic), enhanced ApiError (standardized error codes and retry determination), and orchestrated integration with automatic token refresh on 401 errors.
 - **Complete Partners CRUD Refinement**: Finalized partners management system with blackout theme restoration and streamlined form
 - **Blackout Theme Fix**: Removed white background elements to maintain consistent dark theme throughout partners interface
 - **Form Simplification**: Removed obsolete "Comissão Padrão" and "Tabela Comercial Padrão" fields per business requirements

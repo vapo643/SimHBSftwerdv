@@ -1,0 +1,30 @@
+# DEBATE TÉCNICO: Refinamento do `apiClient.ts`
+
+**CONTEXTO ESTRATÉGICO:**
+O Orquestrador (GEM 02) já realizou uma auditoria inicial do código do `apiClient.ts` que você gerou e o considerou uma base excelente. A sua tarefa agora, como Arquiteto de Soluções, é debater e propor soluções para os seguintes pontos de refinamento, visando transformar este bom cliente de API em um cliente à prova de falhas para um ambiente de produção.
+
+**CÓDIGO SOB ANÁLISE:**
+(O código do ficheiro `/client/src/lib/apiClient.ts` que foi fornecido anteriormente)
+
+---
+### **Interação 1: Proposta de Refinamento Arquitetural**
+
+Por favor, responda a cada um destes quatro pontos com uma análise técnica e uma proposta de implementação ou bloco de código de exemplo.
+
+**1. Ponto de Debate: Otimização de Autenticação e Token Refresh**
+* **Análise Requerida:** A função `getSession()` é chamada em cada requisição autenticada. Qual é o risco de performance e de UX desta abordagem? E se o `accessToken` expirar? O cliente atual não lida com a renovação de tokens (`token refresh`).
+* **Ação Proposta:** Proponha uma estratégia mais robusta. Como poderíamos modificar o `apiClient` para:
+    a) Utilizar um token já em memória/cache em vez de chamar `getSession()` a cada vez?
+    b) Interceptar um erro de `401 Unauthorized`, tentar renovar o token silenciosamente e reenviar a requisição original de forma transparente para o usuário?
+
+**2. Ponto de Debate: Gestão de Ambientes (Base URL)**
+* **Análise Requerida:** O cliente atualmente depende de URLs relativas (ex: `/api/admin/lojas`). Isso funciona, mas acopla o nosso código à estrutura de rotas do Replit.
+* **Ação Proposta:** Proponha uma modificação para que o `apiClient` utilize uma URL base a partir de variáveis de ambiente (ex: `VITE_API_BASE_URL`), tornando-o mais portável entre diferentes ambientes (desenvolvimento, staging, produção) e desacoplando o frontend do backend.
+
+**3. Ponto de Debate: Robustez contra Timeouts de Rede**
+* **Análise Requerida:** O `fetch` nativo não possui um timeout padrão. Uma requisição para uma API lenta pode deixar a nossa interface "pendurada" indefinidamente, criando uma péssima experiência para o usuário.
+* **Ação Proposta:** Proponha uma implementação utilizando `AbortController` para adicionar um timeout configurável e agressivo (ex: 15 segundos) às nossas requisições. Se o timeout for atingido, o cliente deve lançar um `ApiError` específico.
+
+**4. Ponto de Debate: Padronização do Tratamento de Erros da API**
+* **Análise Requerida:** A extração da mensagem de erro atual é boa, mas reativa. Podemos ser mais proativos.
+* **Ação Proposta:** Proponha um "contrato" de erro padrão para **toda** a nossa API Express.js (ex: `{ "error": { "code": "UNIQUE_CODE", "message": "Descrição do erro" } }`). Em seguida, proponha como a nossa classe `ApiError` no frontend pode ser aprimorada para sempre esperar e extrair os dados deste formato padronizado.
