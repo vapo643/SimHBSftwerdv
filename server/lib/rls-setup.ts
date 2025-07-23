@@ -34,7 +34,6 @@ export interface EnhancedAuthRequest extends Request {
     id: string;
     email: string;
     lojaId: number;
-    role?: string;
   };
 }
 
@@ -63,28 +62,32 @@ export async function rlsAuthMiddleware(
       return res.status(401).json({ message: "Invalid token" });
     }
 
-    // Get user's profile data from Supabase profiles table (which has loja_id)
-    const { data: profileData, error: profileError } = await supabase
-      .from('profiles')
-      .select('id, full_name, role, loja_id')
-      .eq('id', user.id)
-      .single();
+    // Get user's loja_id from database
+    const userRecord = await db
+      .select({
+        id: users.id,
+        email: users.email,
+        name: users.name,
+        lojaId: users.lojaId,
+      })
+      .from(users)
+      .where(eq(users.email, user.email || ""))
+      .limit(1);
 
-    if (profileError || !profileData) {
-      console.error("Error fetching user profile:", profileError);
-      return res.status(401).json({ message: "User profile not found in system" });
+    if (!userRecord.length) {
+      return res.status(401).json({ message: "User not found in system" });
     }
 
-    // Set RLS context for this request (use loja_id from profile, default to 1 if null)
-    const lojaId = profileData.loja_id || 1;
-    await setRLSContext(user.id, lojaId);
+    const userData = userRecord[0];
+
+    // Set RLS context for this request
+    await setRLSContext(user.id, userData.lojaId);
 
     // Attach enhanced user data to request
     req.user = {
       id: user.id,
       email: user.email || "",
-      lojaId: lojaId,
-      role: profileData.role,
+      lojaId: userData.lojaId,
     };
 
     next();

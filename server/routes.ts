@@ -5,7 +5,6 @@ import { createServerSupabaseClient } from "../client/src/lib/supabase";
 import { authMiddleware, type AuthRequest } from "./lib/auth";
 import { rlsAuthMiddleware, validateLojaAccess, type EnhancedAuthRequest } from "./lib/rls-setup";
 import { insertPropostaSchema, updatePropostaSchema, insertGerenteLojaSchema } from "@shared/schema";
-import { createUser, createUserSchema } from "./services/userService";
 import { z } from "zod";
 import multer from "multer";
 
@@ -79,72 +78,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Logout error:", error);
       res.status(500).json({ message: "Logout failed" });
-    }
-  });
-
-  // Admin middleware
-  const adminMiddleware = async (req: EnhancedAuthRequest, res: any, next: any) => {
-    try {
-      if (!req.user?.id) {
-        return res.status(401).json({ message: "Usuário não autenticado" });
-      }
-
-      // Get user role from Supabase profiles table
-      const supabase = createServerSupabaseClient();
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', req.user.id)
-        .single();
-
-      if (error || !profile) {
-        console.error("Error fetching user profile:", error);
-        return res.status(500).json({ message: "Erro ao verificar permissões do usuário" });
-      }
-
-      if (profile.role !== 'ADMINISTRADOR') {
-        return res.status(403).json({ 
-          message: "Acesso negado. Apenas administradores podem acessar este recurso." 
-        });
-      }
-
-      // Add role to request user object for subsequent use
-      req.user.role = profile.role;
-      next();
-    } catch (error) {
-      console.error("Admin middleware error:", error);
-      res.status(500).json({ message: "Erro interno do servidor" });
-    }
-  };
-
-  // Admin user creation endpoint
-  app.post("/api/admin/users", authMiddleware, adminMiddleware, async (req: EnhancedAuthRequest, res) => {
-    try {
-      const validatedData = createUserSchema.parse(req.body);
-      const newUser = await createUser(validatedData);
-      res.status(201).json({
-        message: "Usuário criado com sucesso",
-        user: newUser
-      });
-      
-    } catch (error: any) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({
-          message: "Dados inválidos",
-          errors: error.errors
-        });
-      }
-
-      if (error.message.includes('já existe')) {
-        return res.status(409).json({
-          message: error.message
-        });
-      }
-
-      console.error("Create user error:", error);
-      res.status(500).json({
-        message: error.message || "Erro interno do servidor"
-      });
     }
   });
 
@@ -406,22 +339,84 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Mock data para produtos e prazos
-  const produtos = [
-    { id: 1, nome: "Crédito Pessoal" },
-    { id: 2, nome: "Crédito Imobiliário" },
-    { id: 3, nome: "Crédito Consignado" },
-  ];
+  // Import do controller de produtos
+  const { 
+    buscarTodosProdutos, 
+    criarProduto, 
+    atualizarProduto, 
+    verificarProdutoEmUso, 
+    deletarProduto 
+  } = await import("./controllers/produtoController");
 
+  // Mock data para prazos
   const prazos = [
     { id: 1, valor: "12 meses" },
     { id: 2, valor: "24 meses" },
     { id: 3, valor: "36 meses" },
   ];
 
-  // Rota para buscar produtos
-  app.get("/api/produtos", (req, res) => {
-    res.json(produtos);
+  // Rotas CRUD para produtos
+  app.get("/api/produtos", async (req, res) => {
+    try {
+      const produtos = await buscarTodosProdutos();
+      res.json(produtos);
+    } catch (error) {
+      console.error("Erro ao buscar produtos:", error);
+      res.status(500).json({ message: "Erro ao buscar produtos" });
+    }
+  });
+
+  app.post("/api/produtos", async (req, res) => {
+    try {
+      const { nome, status } = req.body;
+      
+      if (!nome || !status) {
+        return res.status(400).json({ message: "Nome e status são obrigatórios" });
+      }
+
+      const novoProduto = await criarProduto({ nome, status });
+      res.status(201).json(novoProduto);
+    } catch (error) {
+      console.error("Erro ao criar produto:", error);
+      res.status(500).json({ message: "Erro ao criar produto" });
+    }
+  });
+
+  app.put("/api/produtos/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { nome, status } = req.body;
+      
+      if (!nome || !status) {
+        return res.status(400).json({ message: "Nome e status são obrigatórios" });
+      }
+
+      const produtoAtualizado = await atualizarProduto(id, { nome, status });
+      res.json(produtoAtualizado);
+    } catch (error) {
+      console.error("Erro ao atualizar produto:", error);
+      res.status(500).json({ message: "Erro ao atualizar produto" });
+    }
+  });
+
+  app.delete("/api/produtos/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      // Verificar se o produto está em uso
+      const emUso = await verificarProdutoEmUso(id);
+      if (emUso) {
+        return res.status(400).json({ 
+          message: "Não é possível excluir este produto pois ele está sendo utilizado em tabelas comerciais" 
+        });
+      }
+
+      await deletarProduto(id);
+      res.json({ message: "Produto excluído com sucesso" });
+    } catch (error) {
+      console.error("Erro ao excluir produto:", error);
+      res.status(500).json({ message: "Erro ao excluir produto" });
+    }
   });
 
   // Rota para buscar prazos
