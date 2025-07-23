@@ -12,20 +12,81 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import UserForm from "@/components/usuarios/UserForm";
 import { mockUsers, User } from "@/data/users";
 import DashboardLayout from "@/components/DashboardLayout";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
+import { fetchWithToken } from "@/lib/apiClient";
 
 const UsuariosPage: React.FC = () => {
   const [users, setUsers] = useState<User[]>(mockUsers);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // Mutation for creating new users
+  const createUserMutation = useMutation({
+    mutationFn: async (userData: any) => {
+      // Transform form data to match API schema
+      const apiData = {
+        fullName: userData.nome,
+        email: userData.email,
+        role: userData.perfil,
+        lojaId: userData.lojaId ? parseInt(userData.lojaId) : null,
+        lojaIds: userData.perfil === 'GERENTE' && userData.lojaId ? [parseInt(userData.lojaId)] : null,
+      };
+
+      const response = await fetchWithToken('/api/admin/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(apiData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Erro ao criar usuário');
+      }
+
+      return response.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Sucesso",
+        description: "Usuário criado com sucesso!",
+      });
+      // Add the new user to the local state (for now, until we implement listing API)
+      const newUser: User = {
+        id: data.id,
+        nome: data.full_name,
+        email: data.user?.email || 'N/A',
+        perfil: data.role,
+        loja: data.loja_id ? `Loja ${data.loja_id}` : 'N/A',
+        status: 'Ativo'
+      };
+      setUsers(prev => [...prev, newUser]);
+      setIsModalOpen(false);
+      setSelectedUser(null);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro",
+        description: error.message || "Erro ao criar usuário",
+        variant: "destructive",
+      });
+    },
+  });
 
   const handleCreateOrEdit = (user: any) => {
     if (selectedUser) {
+      // For editing, keep the old logic for now
       setUsers(users.map(u => (u.id === selectedUser.id ? { ...u, ...user } : u)));
+      setIsModalOpen(false);
+      setSelectedUser(null);
     } else {
-      setUsers([...users, { ...user, id: String(Date.now()), status: "Ativo" }]);
+      // For creating new users, use the API
+      createUserMutation.mutate(user);
     }
-    setIsModalOpen(false);
-    setSelectedUser(null);
   };
 
   const openEditModal = (user: User) => {
@@ -98,6 +159,7 @@ const UsuariosPage: React.FC = () => {
               setIsModalOpen(false);
               setSelectedUser(null);
             }}
+            isLoading={createUserMutation.isPending}
           />
         </DialogContent>
       </Dialog>

@@ -54,9 +54,10 @@ interface UserFormProps {
   initialData?: any;
   onSubmit: (data: UserFormData) => void;
   onCancel: () => void;
+  isLoading?: boolean;
 }
 
-const UserForm: React.FC<UserFormProps> = ({ initialData, onSubmit, onCancel }) => {
+const UserForm: React.FC<UserFormProps> = ({ initialData, onSubmit, onCancel, isLoading = false }) => {
   const {
     register,
     handleSubmit,
@@ -166,10 +167,12 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, onSubmit, onCancel }) 
       )}
 
       <div className="flex justify-end gap-2 pt-4">
-        <Button type="button" variant="ghost" onClick={onCancel}>
+        <Button type="button" variant="ghost" onClick={onCancel} disabled={isLoading}>
           Cancelar
         </Button>
-        <Button type="submit">Salvar</Button>
+        <Button type="submit" disabled={isLoading}>
+          {isLoading ? "Salvando..." : "Salvar"}
+        </Button>
       </div>
     </form>
   );

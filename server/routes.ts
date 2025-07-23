@@ -10,6 +10,37 @@ import multer from "multer";
 
 const upload = multer({ storage: multer.memoryStorage() });
 
+// User Management Schema
+export const UserDataSchema = z.object({
+  fullName: z.string().min(3, "Nome completo é obrigatório"),
+  email: z.string().email("Formato de email inválido"),
+  role: z.enum(['ADMINISTRADOR', 'GERENTE', 'ATENDENTE']),
+  lojaId: z.number().int().nullable().optional(),
+  lojaIds: z.array(z.number().int()).nullable().optional(),
+}).superRefine((data, ctx) => {
+  if (data.role === 'ATENDENTE' && (data.lojaId === null || data.lojaId === undefined)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "O campo 'lojaId' é obrigatório para o perfil ATENDENTE.",
+      path: ["lojaId"],
+    });
+  }
+  if (data.role === 'GERENTE' && (!data.lojaIds || data.lojaIds.length === 0)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "O campo 'lojaIds' deve conter ao menos uma loja para o perfil GERENTE.",
+      path: ["lojaIds"],
+    });
+  }
+});
+
+const adminMiddleware = (req: any, res: any, next: any) => {
+  if (req.user?.role !== 'ADMINISTRADOR') {
+    return res.status(403).json({ message: "Acesso negado. Permissão de administrador necessária." });
+  }
+  next();
+};
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Authentication routes
   app.post("/api/auth/login", async (req, res) => {
@@ -680,6 +711,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Get gerente relationships error:", error);
       res.status(500).json({ message: "Failed to fetch manager relationships" });
+    }
+  });
+
+  // User Management API - Import the service
+  const { createUser } = await import("./services/userService");
+
+  app.post("/api/admin/users", authMiddleware, rlsAuthMiddleware, adminMiddleware, async (req: any, res: any) => {
+    try {
+      const validatedData = UserDataSchema.parse(req.body);
+      const newUser = await createUser(validatedData);
+      return res.status(201).json(newUser);
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Dados de entrada inválidos", errors: error.flatten() });
+      }
+      if (error.name === 'ConflictError') {
+        return res.status(409).json({ message: error.message });
+      }
+      console.error("Erro ao criar usuário:", error.message);
+      return res.status(500).json({ message: "Erro interno do servidor." });
     }
   });
 

@@ -1,0 +1,157 @@
+# MISSÃO: Implementar 100% da Lógica de Usuários (Roadmap Completo)
+
+**CONTEXTO ESTRATÉGICO:**
+Você está a trabalhar num sistema de gestão de crédito chamado Simpix. A sua missão é implementar a funcionalidade completa de Gestão de Usuários (CRUD). O estado atual do projeto é um protótipo com a UI pré-construída, mas sem a lógica de backend correspondente. A stack é Express.js e React.
+
+**OBJETIVO FINAL:**
+Ao final desta missão, a tela de "Gestão de Usuários" deve ser 100% funcional, permitindo que um Administrador crie, liste, edite e exclua outros usuários, com as regras de negócio e permissões devidamente aplicadas no backend.
+
+**ROADMAP DE EXECUÇÃO (Execute na ordem):**
+
+**FASE 1: IMPLEMENTAÇÃO DO BACKEND**
+
+* **Passo 1.1: Criar o Serviço de Usuário.**
+    * Crie o ficheiro `/server/services/userService.ts`.
+    * Cole o seguinte código **EXATO** neste ficheiro. Este código já foi validado e contém a lógica correta para criação de usuário, incluindo a geração de senha segura e o mecanismo de rollback.
+
+    ```typescript
+    import { createServerSupabaseClient } from '../lib/supabase';
+    import { z } from 'zod';
+    import crypto from 'crypto';
+    import { UserDataSchema } from '../routes';
+
+    export type UserData = z.infer<typeof UserDataSchema>;
+
+    function sendWelcomeEmail(email: string, temporaryPassword: string): void {
+      console.log(`[MOCK EMAIL] Para: ${email} | Senha Provisória: ${temporaryPassword}`);
+    }
+
+    function generateTemporaryPassword(): string {
+      return crypto.randomBytes(12).toString('base64').replace(/[/+=]/g, '').substring(0, 12);
+    }
+
+    export async function createUser(userData: UserData) {
+      const supabase = createServerSupabaseClient();
+      let createdAuthUser: any = null;
+      let createdProfile: any = null;
+
+      try {
+        const { data: existingUser, error: checkError } = await supabase.auth.admin.getUserByEmail(userData.email);
+        if (checkError && !checkError.message.includes('User not found')) {
+          throw new Error(`Erro ao verificar email: ${checkError.message}`);
+        }
+        if (existingUser?.user) {
+          const conflictError = new Error(`Usuário com email ${userData.email} já existe.`);
+          conflictError.name = 'ConflictError';
+          throw conflictError;
+        }
+
+        const temporaryPassword = generateTemporaryPassword();
+        const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+          email: userData.email,
+          password: temporaryPassword,
+          email_confirm: true,
+        });
+
+        if (authError) throw new Error(`Erro no Supabase Auth: ${authError.message}`);
+        if (!authData.user) throw new Error("Falha crítica ao criar usuário no Auth.");
+        createdAuthUser = authData.user;
+
+        const profilePayload = {
+          id: createdAuthUser.id,
+          role: userData.role,
+          full_name: userData.fullName,
+          loja_id: userData.role === 'ATENDENTE' ? userData.lojaId : null,
+        };
+
+        const { data: profileResult, error: profileError } = await supabase.from('profiles').insert(profilePayload).select().single();
+        if (profileError) throw new Error(`Erro ao criar perfil: ${profileError.message}`);
+        createdProfile = profileResult;
+
+        if (userData.role === 'GERENTE' && userData.lojaIds && userData.lojaIds.length > 0) {
+          const gerenteLojaInserts = userData.lojaIds.map(lojaId => ({
+            gerente_id: createdAuthUser.id,
+            loja_id: lojaId,
+          }));
+          const { error: gerenteLojaError } = await supabase.from('gerente_lojas').insert(gerenteLojaInserts);
+          if (gerenteLojaError) throw new Error(`Erro ao associar gerente a lojas: ${gerenteLojaError.message}`);
+        }
+
+        sendWelcomeEmail(userData.email, temporaryPassword);
+        
+        return createdProfile;
+
+      } catch (error) {
+        if (createdAuthUser) {
+          console.error("ERRO DETECTADO. Iniciando rollback completo...");
+          await supabase.auth.admin.deleteUser(createdAuthUser.id);
+          console.log(`ROLLBACK: Usuário ${createdAuthUser.id} removido do Auth.`);
+        }
+        throw error;
+      }
+    }
+    ```
+
+* **Passo 1.2: Adicionar o Endpoint de Criação de Usuário.**
+    * Abra o ficheiro `/server/routes.ts`.
+    * Adicione o seguinte bloco de código **EXATO** ao ficheiro. Ele contém o Zod Schema correto, o middleware de admin e o endpoint `POST /api/admin/users`.
+
+    ```typescript
+    import { z } from "zod";
+    import { createUser } from "./services/userService";
+    import { authMiddleware, rlsAuthMiddleware } from "./lib/auth";
+
+    export const UserDataSchema = z.object({
+      fullName: z.string().min(3, "Nome completo é obrigatório"),
+      email: z.string().email("Formato de email inválido"),
+      role: z.enum(['ADMINISTRADOR', 'GERENTE', 'ATENDENTE']),
+      lojaId: z.number().int().nullable().optional(),
+      lojaIds: z.array(z.number().int()).nullable().optional(),
+    }).superRefine((data, ctx) => {
+      if (data.role === 'ATENDENTE' && (data.lojaId === null || data.lojaId === undefined)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "O campo 'lojaId' é obrigatório para o perfil ATENDENTE.",
+          path: ["lojaId"],
+        });
+      }
+      if (data.role === 'GERENTE' && (!data.lojaIds || data.lojaIds.length === 0)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "O campo 'lojaIds' deve conter ao menos uma loja para o perfil GERENTE.",
+          path: ["lojaIds"],
+        });
+      }
+    });
+
+    const adminMiddleware = (req: any, res: any, next: any) => {
+      if (req.user?.role !== 'ADMINISTRADOR') {
+        return res.status(403).json({ message: "Acesso negado. Permissão de administrador necessária." });
+      }
+      next();
+    };
+
+    app.post("/api/admin/users", authMiddleware, rlsAuthMiddleware, adminMiddleware, async (req: any, res: any) => {
+      try {
+        const validatedData = UserDataSchema.parse(req.body);
+        const newUser = await createUser(validatedData);
+        return res.status(201).json(newUser);
+      } catch (error: any) {
+        if (error instanceof z.ZodError) {
+          return res.status(400).json({ message: "Dados de entrada inválidos", errors: error.flatten() });
+        }
+        if (error.name === 'ConflictError') {
+          return res.status(409).json({ message: error.message });
+        }
+        console.error("Erro ao criar usuário:", error.message);
+        return res.status(500).json({ message: "Erro interno do servidor." });
+      }
+    });
+    ```
+
+**FASE 2: INTEGRAÇÃO DO FRONTEND**
+
+* **Passo 2.1:** Modifique o ficheiro `client/src/pages/admin/usuarios.tsx`. Conecte o formulário de criação de usuário para que ele faça uma requisição `POST` para o endpoint `/api/admin/users` ao ser submetido, utilizando o hook `useMutation` do TanStack Query.
+
+**INSTRUÇÃO FINAL:**
+Execute este roadmap passo a passo. Comece pela FASE 1. Confirme a aplicação bem-sucedida de cada passo antes de prosseguir.
