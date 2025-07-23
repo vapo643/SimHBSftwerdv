@@ -1,110 +1,148 @@
 import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
-const partnerSchema = z.object({
-  razaoSocial: z.string().min(3, "Razão Social é obrigatória."),
-  nomeFantasia: z.string().min(3, "Nome Fantasia é obrigatório."),
-  cnpj: z.string().length(18, "CNPJ deve ter 18 caracteres (incluindo máscara)."),
-  inscricaoEstadual: z.string().min(2, "Inscrição Estadual é obrigatória."),
-  cep: z.string().length(9, "CEP deve ter 8 caracteres (incluindo o traço)."),
-  endereco: z.string().min(3, "Endereço é obrigatório."),
-  numero: z.string().min(1, "Número é obrigatório."),
-  complemento: z.string().optional(),
-  bairro: z.string().min(3, "Bairro é obrigatório."),
-  cidade: z.string().min(3, "Cidade é obrigatória."),
-  estado: z.string().length(2, "Estado (UF) deve ter 2 caracteres."),
-});
-
-type PartnerFormData = z.infer<typeof partnerSchema>;
+import { insertParceiroSchema, InsertParceiro, Parceiro } from "@shared/schema";
+import { Save, X, Loader2 } from "lucide-react";
 
 interface PartnerFormProps {
-  initialData?: any;
-  onSubmit: (data: PartnerFormData) => void;
+  initialData?: Parceiro | null;
+  onSubmit: (data: InsertParceiro) => void;
   onCancel: () => void;
+  isLoading?: boolean;
 }
 
-const PartnerForm: React.FC<PartnerFormProps> = ({ initialData, onSubmit, onCancel }) => {
+const PartnerForm: React.FC<PartnerFormProps> = ({ 
+  initialData, 
+  onSubmit, 
+  onCancel, 
+  isLoading = false 
+}) => {
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<PartnerFormData>({
-    resolver: zodResolver(partnerSchema),
-    defaultValues: initialData || {},
+  } = useForm<InsertParceiro>({
+    resolver: zodResolver(insertParceiroSchema),
+    defaultValues: initialData ? {
+      razaoSocial: initialData.razaoSocial,
+      cnpj: initialData.cnpj,
+      comissaoPadrao: initialData.comissaoPadrao,
+      tabelaComercialPadraoId: initialData.tabelaComercialPadraoId,
+    } : {
+      razaoSocial: "",
+      cnpj: "",
+      comissaoPadrao: null,
+      tabelaComercialPadraoId: null,
+    },
   });
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <div>
-        <Label htmlFor="cnpj">CNPJ</Label>
-        <Input id="cnpj" {...register("cnpj")} placeholder="00.000.000/0001-00" />
-        {errors.cnpj && <p className="mt-1 text-sm text-red-500">{errors.cnpj.message}</p>}
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <div className="grid gap-4">
+        <div>
+          <Label htmlFor="razaoSocial" className="text-sm font-medium">
+            Razão Social *
+          </Label>
+          <Input 
+            id="razaoSocial" 
+            {...register("razaoSocial")} 
+            placeholder="Nome oficial da empresa"
+            disabled={isLoading}
+            className="mt-1"
+          />
+          {errors.razaoSocial && (
+            <p className="mt-1 text-sm text-red-500">{errors.razaoSocial.message}</p>
+          )}
+        </div>
+
+        <div>
+          <Label htmlFor="cnpj" className="text-sm font-medium">
+            CNPJ *
+          </Label>
+          <Input 
+            id="cnpj" 
+            {...register("cnpj")} 
+            placeholder="00.000.000/0001-00"
+            disabled={isLoading}
+            className="mt-1"
+          />
+          {errors.cnpj && (
+            <p className="mt-1 text-sm text-red-500">{errors.cnpj.message}</p>
+          )}
+        </div>
+
+        <div>
+          <Label htmlFor="comissaoPadrao" className="text-sm font-medium">
+            Comissão Padrão (%)
+          </Label>
+          <Input 
+            id="comissaoPadrao" 
+            {...register("comissaoPadrao")} 
+            placeholder="5.0"
+            type="number"
+            step="0.01"
+            min="0"
+            max="100"
+            disabled={isLoading}
+            className="mt-1"
+          />
+          {errors.comissaoPadrao && (
+            <p className="mt-1 text-sm text-red-500">{errors.comissaoPadrao.message}</p>
+          )}
+        </div>
+
+        <div>
+          <Label htmlFor="tabelaComercialPadraoId" className="text-sm font-medium">
+            Tabela Comercial Padrão (ID)
+          </Label>
+          <Input 
+            id="tabelaComercialPadraoId" 
+            {...register("tabelaComercialPadraoId", { 
+              setValueAs: (value) => value === "" ? null : parseInt(value, 10) 
+            })} 
+            placeholder="1"
+            type="number"
+            min="1"
+            disabled={isLoading}
+            className="mt-1"
+          />
+          {errors.tabelaComercialPadraoId && (
+            <p className="mt-1 text-sm text-red-500">{errors.tabelaComercialPadraoId.message}</p>
+          )}
+        </div>
       </div>
-      <div>
-        <Label htmlFor="razaoSocial">Razão Social</Label>
-        <Input id="razaoSocial" {...register("razaoSocial")} />
-        {errors.razaoSocial && (
-          <p className="mt-1 text-sm text-red-500">{errors.razaoSocial.message}</p>
-        )}
-      </div>
-      <div>
-        <Label htmlFor="nomeFantasia">Nome Fantasia</Label>
-        <Input id="nomeFantasia" {...register("nomeFantasia")} />
-        {errors.nomeFantasia && (
-          <p className="mt-1 text-sm text-red-500">{errors.nomeFantasia.message}</p>
-        )}
-      </div>
-      <div>
-        <Label htmlFor="inscricaoEstadual">Inscrição Estadual</Label>
-        <Input id="inscricaoEstadual" {...register("inscricaoEstadual")} />
-        {errors.inscricaoEstadual && (
-          <p className="mt-1 text-sm text-red-500">{errors.inscricaoEstadual.message}</p>
-        )}
-      </div>
-      <div>
-        <Label htmlFor="cep">CEP</Label>
-        <Input id="cep" {...register("cep")} placeholder="00000-000" />
-        {errors.cep && <p className="mt-1 text-sm text-red-500">{errors.cep.message}</p>}
-      </div>
-      <div>
-        <Label htmlFor="endereco">Endereço</Label>
-        <Input id="endereco" {...register("endereco")} />
-        {errors.endereco && <p className="mt-1 text-sm text-red-500">{errors.endereco.message}</p>}
-      </div>
-      <div>
-        <Label htmlFor="numero">Número</Label>
-        <Input id="numero" {...register("numero")} />
-        {errors.numero && <p className="mt-1 text-sm text-red-500">{errors.numero.message}</p>}
-      </div>
-      <div>
-        <Label htmlFor="complemento">Complemento</Label>
-        <Input id="complemento" {...register("complemento")} />
-      </div>
-      <div>
-        <Label htmlFor="bairro">Bairro</Label>
-        <Input id="bairro" {...register("bairro")} />
-        {errors.bairro && <p className="mt-1 text-sm text-red-500">{errors.bairro.message}</p>}
-      </div>
-      <div>
-        <Label htmlFor="cidade">Cidade</Label>
-        <Input id="cidade" {...register("cidade")} />
-        {errors.cidade && <p className="mt-1 text-sm text-red-500">{errors.cidade.message}</p>}
-      </div>
-      <div>
-        <Label htmlFor="estado">Estado (UF)</Label>
-        <Input id="estado" {...register("estado")} placeholder="Ex: SP" maxLength={2} />
-        {errors.estado && <p className="mt-1 text-sm text-red-500">{errors.estado.message}</p>}
-      </div>
-      <div className="flex justify-end gap-2 pt-4">
-        <Button type="button" variant="ghost" onClick={onCancel}>
+
+      <div className="flex justify-end gap-3 pt-6 border-t">
+        <Button 
+          type="button" 
+          variant="outline" 
+          onClick={onCancel}
+          disabled={isLoading}
+          className="gap-2"
+        >
+          <X className="h-4 w-4" />
           Cancelar
         </Button>
-        <Button type="submit">Salvar</Button>
+        <Button 
+          type="submit" 
+          disabled={isLoading}
+          className="gap-2 btn-simpix-primary"
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              {initialData ? "Atualizando..." : "Criando..."}
+            </>
+          ) : (
+            <>
+              <Save className="h-4 w-4" />
+              {initialData ? "Atualizar Parceiro" : "Criar Parceiro"}
+            </>
+          )}
+        </Button>
       </div>
     </form>
   );

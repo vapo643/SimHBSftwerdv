@@ -1,0 +1,37 @@
+# MISSÃO: Debate Técnico para uma Implementação Anti-Falha de CRUD de Parceiros
+
+**CONTEXTO ESTRATÉGICO:**
+Todas as tentativas anteriores de implementar a funcionalidade de Update e Delete para a "Gestão de Parceiros" resultaram em falha, seja por bugs de backend, erros de integração de frontend ou regressões. Estamos a iniciar um novo protocolo de "debate técnico" para construir um plano de implementação que antecipe e neutralize todos os pontos de falha conhecidos.
+
+**SUA TAREFA (ASSISTENTE):**
+A sua tarefa não é escrever código. A sua tarefa é atuar como um Arquiteto de Soluções e iniciar um debate técnico comigo (o Orquestrador). Você deve analisar a missão e propor um plano de implementação detalhado, com foco em identificar riscos e justificar decisões. Esta será a nossa **Interação 1 de 3**.
+
+---
+### **Análise da Missão (Sua Perspectiva)**
+
+**Missão:** Implementar a funcionalidade full-stack (backend e frontend) para permitir que um Administrador possa **Atualizar (Update)** e **Excluir (Delete)** Parceiros.
+
+**Regras de Negócio Conhecidas:**
+1.  A exclusão de um parceiro só é permitida se ele não tiver nenhuma loja associada.
+2.  O formulário de parceiro no frontend não deve mais conter o campo "Comissão Padrão".
+3.  A stack é Express.js (backend) e React com TanStack Query (frontend).
+
+### **Interação 1: Sua Proposta de Plano e Análise de Risco**
+
+Por favor, responda seguindo **exatamente** esta estrutura:
+
+**1. Proposta de Sequenciamento Lógico:**
+* Qual deveria ser a ordem exata de implementação? (Ex: Modificar o schema primeiro? Criar o endpoint DELETE? Modificar a UI?) Justifique a sua sequência.
+
+**2. Análise de Risco do Backend:**
+* **Endpoint `PUT /api/admin/parceiros/:id`:** Qual é o maior risco técnico ao implementar esta rota? (Ex: Validação de dados? Concorrência? Tratamento de erros?) Como podemos mitigar esse risco no código?
+* **Endpoint `DELETE /api/admin/parceiros/:id`:** Qual é a forma mais robusta e performática de verificar se um parceiro possui lojas associadas antes de excluir? (Ex: Uma query `COUNT(*)`? Um `SELECT` com `LIMIT 1`?) Justifique sua escolha.
+
+**3. Análise de Risco do Frontend:**
+* **Ficheiro Alvo:** `/client/src/pages/parceiros/index.tsx`.
+* **Gerenciamento de Estado:** Qual é o maior risco ao integrar as ações de `Update` e `Delete` com o TanStack Query? (Ex: Invalidação de cache? Atualizações otimistas que falham? Feedback para o usuário?) Como o código deve lidar com esses estados (sucesso, erro, carregando)?
+
+**4. Proposta de "Contrato de API":**
+* Defina o "contrato" exato para os nossos endpoints. Qual deve ser o formato do `body` da requisição `PUT`? Qual deve ser o formato das respostas de sucesso e de erro para `PUT` e `DELETE`?
+
+---
