@@ -288,6 +288,7 @@ describe('userService - createUser', () => {
       // Assert - The service should still create the user (validation happens at route level)
       expect(result.success).toBe(true);
       expect(result.user.loja_id).toBe(null);
+      expect(result.user.email).toBe(userData.email);
     });
   });
 

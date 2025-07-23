@@ -69,7 +69,6 @@ export async function createUser(userData: UserData) {
       success: true,
       message: 'Usuário criado com sucesso.',
       user: createdProfile,
-      temporaryPassword,
     };
 
   } catch (error) {
