@@ -17,6 +17,7 @@ import {
   Users, // Adicionando o ícone para usuários
   Building2, // Adicionando o ícone para parceiros
   Package, // Adicionando o ícone para produtos
+  Store, // Adicionando o ícone para lojas
 } from "lucide-react";
 
 interface DashboardLayoutProps {
@@ -38,6 +39,7 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
     { name: "Usuários", href: "/admin/usuarios", icon: Users }, // Novo item adicionado
     { name: "Parceiros", href: "/parceiros", icon: Building2 }, // Novo item adicionado
     { name: "Produtos", href: "/configuracoes/produtos", icon: Package }, // Novo item adicionado
+    { name: "Lojas", href: "/admin/lojas", icon: Store }, // Novo item adicionado
   ];
 
   const handleSignOut = async () => {

@@ -2,6 +2,7 @@ import {
   users,
   propostas,
   gerenteLojas,
+  lojas,
   type User,
   type InsertUser,
   type Proposta,
@@ -9,6 +10,9 @@ import {
   type UpdateProposta,
   type GerenteLojas,
   type InsertGerenteLojas,
+  type Loja,
+  type InsertLoja,
+  type UpdateLoja,
 } from "@shared/schema";
 import { db } from "./lib/supabase";
 import { eq, desc, and } from "drizzle-orm";
@@ -26,6 +30,14 @@ export interface IStorage {
   createProposta(proposta: InsertProposta): Promise<Proposta>;
   updateProposta(id: number, proposta: UpdateProposta): Promise<Proposta>;
   deleteProposta(id: number): Promise<void>;
+
+  // Lojas
+  getLojas(): Promise<Loja[]>;
+  getLojaById(id: number): Promise<Loja | undefined>;
+  createLoja(loja: InsertLoja): Promise<Loja>;
+  updateLoja(id: number, loja: UpdateLoja): Promise<Loja>;
+  deleteLoja(id: number): Promise<void>;
+  checkLojaDependencies(id: number): Promise<{ hasUsers: boolean; hasPropostas: boolean; hasGerentes: boolean }>;
 
   // Gerente-Lojas Relationships
   getGerenteLojas(gerenteId: number): Promise<GerenteLojas[]>;
@@ -84,6 +96,48 @@ export class DatabaseStorage implements IStorage {
 
   async deleteProposta(id: number): Promise<void> {
     await db.delete(propostas).where(eq(propostas.id, id));
+  }
+
+  // Lojas CRUD
+  async getLojas(): Promise<Loja[]> {
+    return await db.select().from(lojas).where(eq(lojas.isActive, true)).orderBy(desc(lojas.createdAt));
+  }
+
+  async getLojaById(id: number): Promise<Loja | undefined> {
+    const result = await db.select().from(lojas).where(and(eq(lojas.id, id), eq(lojas.isActive, true))).limit(1);
+    return result[0];
+  }
+
+  async createLoja(loja: InsertLoja): Promise<Loja> {
+    const result = await db.insert(lojas).values(loja).returning();
+    return result[0];
+  }
+
+  async updateLoja(id: number, loja: UpdateLoja): Promise<Loja> {
+    const result = await db
+      .update(lojas)
+      .set(loja)
+      .where(eq(lojas.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async deleteLoja(id: number): Promise<void> {
+    await db.update(lojas).set({ isActive: false }).where(eq(lojas.id, id));
+  }
+
+  async checkLojaDependencies(id: number): Promise<{ hasUsers: boolean; hasPropostas: boolean; hasGerentes: boolean }> {
+    // Check if there are proposals associated with this store
+    const propostasCount = await db.select().from(propostas).where(eq(propostas.lojaId, id)).limit(1);
+    
+    // Check if there are manager-store relationships
+    const gerentesCount = await db.select().from(gerenteLojas).where(eq(gerenteLojas.lojaId, id)).limit(1);
+    
+    return {
+      hasUsers: false, // Users don't have direct loja association in our current schema
+      hasPropostas: propostasCount.length > 0,
+      hasGerentes: gerentesCount.length > 0,
+    };
   }
 
   // Gerente-Lojas Relationships

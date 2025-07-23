@@ -27,6 +27,7 @@ export const lojas = pgTable("lojas", {
   parceiroId: integer("parceiro_id").references(() => parceiros.id).notNull(),
   nomeLoja: text("nome_loja").notNull(),
   endereco: text("endereco").notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -151,6 +152,11 @@ export const insertLojaSchema = createInsertSchema(lojas).omit({
   createdAt: true,
 });
 
+export const updateLojaSchema = createInsertSchema(lojas).partial().omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
   createdAt: true,
@@ -192,6 +198,7 @@ export const insertGerenteLojaSchema = createInsertSchema(gerenteLojas).omit({
 export type InsertParceiro = z.infer<typeof insertParceiroSchema>;
 export type Parceiro = typeof parceiros.$inferSelect;
 export type InsertLoja = z.infer<typeof insertLojaSchema>;
+export type UpdateLoja = z.infer<typeof updateLojaSchema>;
 export type Loja = typeof lojas.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;

@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import { createServerSupabaseClient } from "../client/src/lib/supabase";
 import { authMiddleware, type AuthRequest } from "./lib/auth";
 import { rlsAuthMiddleware, validateLojaAccess, type EnhancedAuthRequest } from "./lib/rls-setup";
-import { insertPropostaSchema, updatePropostaSchema, insertGerenteLojaSchema } from "@shared/schema";
+import { insertPropostaSchema, updatePropostaSchema, insertGerenteLojaSchema, insertLojaSchema, updateLojaSchema } from "@shared/schema";
 import { z } from "zod";
 import multer from "multer";
 
@@ -917,6 +917,112 @@ app.get("/api/tabelas-comerciais-disponiveis", authMiddleware, async (req, res) 
       }
       console.error("Erro ao criar usuário:", error.message);
       return res.status(500).json({ message: "Erro interno do servidor." });
+    }
+  });
+
+  // ============== LOJAS CRUD ROUTES ==============
+  
+  // GET all active lojas
+  app.get("/api/lojas", async (req, res) => {
+    try {
+      const lojas = await storage.getLojas();
+      res.json(lojas);
+    } catch (error) {
+      console.error("Erro ao buscar lojas:", error);
+      res.status(500).json({ message: "Erro ao buscar lojas" });
+    }
+  });
+
+  // GET loja by ID
+  app.get("/api/lojas/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "ID da loja inválido" });
+      }
+      
+      const loja = await storage.getLojaById(id);
+      if (!loja) {
+        return res.status(404).json({ message: "Loja não encontrada" });
+      }
+      
+      res.json(loja);
+    } catch (error) {
+      console.error("Erro ao buscar loja:", error);
+      res.status(500).json({ message: "Erro ao buscar loja" });
+    }
+  });
+
+  // POST create new loja
+  app.post("/api/admin/lojas", authMiddleware, adminMiddleware, async (req, res) => {
+    try {
+      const validatedData = insertLojaSchema.strict().parse(req.body);
+      const newLoja = await storage.createLoja(validatedData);
+      res.status(201).json(newLoja);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Dados inválidos", errors: error.errors });
+      }
+      console.error("Erro ao criar loja:", error);
+      res.status(500).json({ message: "Erro ao criar loja" });
+    }
+  });
+
+  // PUT update loja
+  app.put("/api/admin/lojas/:id", authMiddleware, adminMiddleware, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "ID da loja inválido" });
+      }
+      
+      const validatedData = updateLojaSchema.strict().parse(req.body);
+      const updatedLoja = await storage.updateLoja(id, validatedData);
+      
+      if (!updatedLoja) {
+        return res.status(404).json({ message: "Loja não encontrada" });
+      }
+      
+      res.json(updatedLoja);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Dados inválidos", errors: error.errors });
+      }
+      console.error("Erro ao atualizar loja:", error);
+      res.status(500).json({ message: "Erro ao atualizar loja" });
+    }
+  });
+
+  // DELETE soft delete loja (set is_active = false)
+  app.delete("/api/admin/lojas/:id", authMiddleware, adminMiddleware, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "ID da loja inválido" });
+      }
+      
+      // Check for dependencies before soft delete
+      const dependencies = await storage.checkLojaDependencies(id);
+      
+      if (dependencies.hasUsers || dependencies.hasPropostas || dependencies.hasGerentes) {
+        const dependencyDetails = [];
+        if (dependencies.hasUsers) dependencyDetails.push("usuários ativos");
+        if (dependencies.hasPropostas) dependencyDetails.push("propostas associadas");
+        if (dependencies.hasGerentes) dependencyDetails.push("gerentes associados");
+        
+        return res.status(409).json({ 
+          message: "Não é possível desativar esta loja",
+          details: `A loja possui ${dependencyDetails.join(", ")}. Remova ou transfira essas dependências antes de desativar a loja.`,
+          dependencies: dependencies
+        });
+      }
+      
+      // Perform soft delete
+      await storage.deleteLoja(id);
+      res.json({ message: "Loja desativada com sucesso" });
+    } catch (error) {
+      console.error("Erro ao desativar loja:", error);
+      res.status(500).json({ message: "Erro ao desativar loja" });
     }
   });
 
