@@ -32,7 +32,6 @@ const userSchema = z
   .object({
     nome: z.string().min(3, "Nome é obrigatório."),
     email: z.string().email("Formato de e-mail inválido."),
-    senhaProvisoria: z.string().optional(),
     perfil: z.enum(["ADMINISTRADOR", "DIRETOR", "GERENTE", "ATENDENTE", "ANALISTA", "FINANCEIRO"]),
     parceiroId: z.string().optional(),
     lojaId: z.string().optional(), // For ATENDENTE
@@ -139,9 +138,25 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, onSubmit, onCancel, is
       </div>
 
       {!initialData?.id && (
-        <div>
-          <Label htmlFor="senhaProvisoria">Senha Provisória (copie antes de salvar)</Label>
-          <Input id="senhaProvisoria" readOnly {...register("senhaProvisoria")} />
+        <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+          <div className="flex items-start space-x-3">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                Senha Automática
+              </h3>
+              <div className="mt-2 text-sm text-blue-700 dark:text-blue-300">
+                <p>
+                  Uma senha temporária será gerada automaticamente e enviada por email para o usuário.
+                  O usuário deverá alterar a senha no primeiro acesso ao sistema.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 

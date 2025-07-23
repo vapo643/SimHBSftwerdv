@@ -1,0 +1,28 @@
+# MISSÃO: Debate Técnico de Emergência - Diagnóstico e Correção do Fluxo de Autorização RBAC
+
+**CONTEXTO ESTRATÉGICO:**
+Enfrentamos uma falha de segurança e funcionalidade crítica. Um usuário que é `ADMINISTRADOR` no banco de dados (`profiles`) não é reconhecido como tal pela API após o login. Isto está a bloquear todas as ações administrativas. Acreditamos que a falha reside na sincronização entre o token de autenticação do Supabase e os dados do nosso perfil customizado.
+
+**SUA TAREFA (ASSISTENTE):**
+A sua tarefa não é escrever código ainda. A sua tarefa é atuar como um Arquiteto de Segurança e propor um plano de diagnóstico e solução. Esta será a nossa **Interação 1 de 3**.
+
+---
+### **Interação 1: Sua Proposta de Plano e Análise de Risco**
+
+Por favor, responda seguindo **exatamente** esta estrutura:
+
+**1. Análise da Causa Raiz:**
+* Inspecione o padrão de implementação comum para este cenário. Qual é a sua principal hipótese para a falha no nosso middleware (`rlsAuthMiddleware` ou similar) em buscar e anexar a `role` da tabela `profiles` ao objeto `req.user` em cada requisição?
+
+**2. Proposta de Arquitetura de Solução (Debate):**
+* Existem duas abordagens principais para resolver isto. Apresente os prós e contras de cada uma:
+    * **Abordagem A (Middleware Robusto no Backend):** Manter a lógica no nosso backend Express. A cada requisição, o middleware busca o perfil do usuário no nosso banco e anexa a `role`. Proponha como este middleware deveria ser escrito para ser 100% confiável.
+    * **Abordagem B (Claims Customizados no JWT):** Utilizar um Supabase Edge Function (Database Trigger) que, no momento do login, adicione a `role` da tabela `profiles` diretamente ao token JWT como um "claim customizado". Assim, a `role` já viria "dentro" do token.
+
+**3. Proposta de Melhoria de UX (Formulário de Usuários):**
+* O campo "Senha Provisória" no formulário de criação de usuários está a causar confusão. Proponha uma modificação na interface (`UserForm.tsx`) para tornar claro para o administrador que a senha é gerada automaticamente e de forma segura pelo sistema (ex: exibir o campo como desabilitado com um texto informativo ou um botão "Gerar Senha").
+
+**4. Plano de Validação Sugerido:**
+* Após a implementação da solução escolhida, como você recomendaria que validássemos de ponta a ponta que o problema foi resolvido?
+
+---

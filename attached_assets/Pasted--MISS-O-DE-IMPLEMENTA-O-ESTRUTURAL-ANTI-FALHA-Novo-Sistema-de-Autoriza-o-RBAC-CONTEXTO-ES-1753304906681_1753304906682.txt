@@ -1,0 +1,67 @@
+# MISSÃO DE IMPLEMENTAÇÃO ESTRUTURAL (ANTI-FALHA): Novo Sistema de Autorização RBAC
+
+**CONTEXTO ESTRATÉGICO:**
+Este prompt é o resultado final de um debate técnico rigoroso e representa a arquitetura final e aprovada para o nosso sistema de autorização (RBAC). A sua missão é implementar esta solução de ponta a ponta para resolver a nossa falha crítica de permissões. Siga cada passo com precisão absoluta.
+
+**ROADMAP DE EXECUÇÃO (Sequencial):**
+
+**PASSO 1: EXECUTAR MIGRAÇÃO DE BANCO DE DADOS**
+* **Ação:** Execute o seguinte script SQL no nosso banco de dados Supabase. Este script irá criar a função e os triggers que sincronizam a `role` da nossa tabela `profiles` para os claims do token JWT.
+
+    ```sql
+    -- Função para sincronizar role com JWT claims
+    CREATE OR REPLACE FUNCTION public.sync_user_role_to_jwt()
+    RETURNS trigger AS $$
+    BEGIN
+      -- Sincroniza a role atual no INSERT ou UPDATE
+      UPDATE auth.users 
+      SET raw_app_meta_data = COALESCE(raw_app_meta_data, '{}'::jsonb) || 
+                             jsonb_build_object('role', NEW.role)
+      WHERE id = NEW.id;
+      RETURN NEW;
+    END;
+    $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+    -- Trigger para INSERT (criação de usuário)
+    DROP TRIGGER IF EXISTS trigger_sync_role_on_insert ON public.profiles;
+    CREATE TRIGGER trigger_sync_role_on_insert
+        AFTER INSERT ON public.profiles
+        FOR EACH ROW
+        EXECUTE FUNCTION public.sync_user_role_to_jwt();
+
+    -- Trigger para UPDATE (alteração de perfil)
+    DROP TRIGGER IF EXISTS trigger_sync_role_on_update ON public.profiles;
+    CREATE TRIGGER trigger_sync_role_on_update
+        AFTER UPDATE OF role ON public.profiles
+        FOR EACH ROW
+        WHEN (OLD.role IS DISTINCT FROM NEW.role)
+        EXECUTE FUNCTION public.sync_user_role_to_jwt();
+    ```
+
+**PASSO 2: CRIAR NOVO MIDDLEWARE DE AUTENTICAÇÃO**
+* **Ação:** Crie um novo ficheiro em `/server/lib/jwt-auth-middleware.ts`.
+* **Conteúdo:** Cole o seguinte código, que irá validar o token JWT e extrair a `role` dos claims sem precisar de consultar o banco de dados.
+
+    ```typescript
+    // Conteúdo para /server/lib/jwt-auth-middleware.ts
+    // (Cole o código do 'jwtAuthMiddleware' e 'extractRoleFromToken' proposto pelo Assistente aqui)
+    ```
+
+**PASSO 3: CRIAR OS GUARDS DE AUTORIZAÇÃO**
+* **Ação:** Crie um novo ficheiro em `/server/lib/role-guards.ts`.
+* **Conteúdo:** Cole o seguinte código, que contém as funções reutilizáveis para proteger as rotas.
+
+    ```typescript
+    // Conteúdo para /server/lib/role-guards.ts
+    // (Cole o código das funções 'requireAdmin', 'requireManagerOrAdmin', etc. proposto pelo Assistente aqui)
+    ```
+
+**PASSO 4: REFATORAR AS ROTAS**
+* **Ficheiro Alvo:** `/server/routes.ts`.
+* **Ação:** Substitua o `authMiddleware` e `rlsAuthMiddleware` antigos pelo novo `jwtAuthMiddleware` e aplique os novos guards (`requireAdmin`) aos endpoints administrativos que já criamos (ex: `/api/admin/users`, `/api/admin/lojas`, etc.).
+
+**PASSO 5: REFATORAR O FORMULÁRIO DE USUÁRIOS (UX)**
+* **Ficheiro Alvo:** `/client/src/components/usuarios/UserForm.tsx`.
+* **Ação:** Remova o campo de input de senha e substitua-o pela seção informativa proposta, para deixar claro ao administrador que a senha é gerada automaticamente.
+
+Após completar todos os passos, reinicie o servidor e confirme que a aplicação inicia sem erros.

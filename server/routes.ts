@@ -2,8 +2,8 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { createServerSupabaseClient } from "../client/src/lib/supabase";
-import { authMiddleware, type AuthRequest } from "./lib/auth";
-import { rlsAuthMiddleware, validateLojaAccess, type EnhancedAuthRequest } from "./lib/rls-setup";
+import { jwtAuthMiddleware, type AuthenticatedRequest } from "./lib/jwt-auth-middleware";
+import { requireAdmin, requireManagerOrAdmin, requireAnyRole } from "./lib/role-guards";
 import { insertPropostaSchema, updatePropostaSchema, insertGerenteLojaSchema, insertLojaSchema, updateLojaSchema } from "@shared/schema";
 import { z } from "zod";
 import multer from "multer";
@@ -34,12 +34,7 @@ export const UserDataSchema = z.object({
   }
 });
 
-const adminMiddleware = (req: any, res: any, next: any) => {
-  if (req.user?.role !== 'ADMINISTRADOR') {
-    return res.status(403).json({ message: "Acesso negado. Permissão de administrador necessária." });
-  }
-  next();
-};
+// Admin middleware is now replaced by requireAdmin guard
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Authentication routes
@@ -96,7 +91,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/auth/logout", authMiddleware, async (req, res) => {
+  app.post("/api/auth/logout", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     try {
       const supabase = createServerSupabaseClient();
       const { error } = await supabase.auth.signOut();
@@ -123,7 +118,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Proposal routes
-  app.get("/api/propostas", authMiddleware, async (req, res) => {
+  app.get("/api/propostas", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     try {
       const propostas = await storage.getPropostas();
       res.json(propostas);
@@ -133,7 +128,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/propostas/:id", authMiddleware, async (req, res) => {
+  app.get("/api/propostas/:id", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     try {
       const idParam = req.params.id;
       let proposta;
@@ -180,7 +175,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/propostas", authMiddleware, async (req: AuthRequest, res) => {
+  app.post("/api/propostas", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     try {
       const validatedData = insertPropostaSchema.parse(req.body);
       const proposta = await storage.createProposta(validatedData);
@@ -198,7 +193,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // PILAR 12 - PROGRESSIVE ENHANCEMENT
   // Rota para submissão de formulário tradicional (fallback)
   // ====================================
-  app.post("/nova-proposta", authMiddleware, async (req: AuthRequest, res) => {
+  app.post("/nova-proposta", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     try {
       console.log("📝 Progressive Enhancement: Form submission received");
 
@@ -311,7 +306,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/propostas/:id", authMiddleware, async (req, res) => {
+  app.patch("/api/propostas/:id", jwtAuthMiddleware, requireManagerOrAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const id = parseInt(req.params.id);
       const validatedData = updatePropostaSchema.parse(req.body);
@@ -326,7 +321,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/propostas/status/:status", authMiddleware, async (req, res) => {
+  app.get("/api/propostas/status/:status", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     try {
       const status = req.params.status;
       const propostas = await storage.getPropostasByStatus(status);
@@ -338,7 +333,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // File upload route
-  app.post("/api/upload", authMiddleware, upload.single("file"), async (req, res) => {
+  app.post("/api/upload", jwtAuthMiddleware, upload.single("file"), async (req: AuthenticatedRequest, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ message: "No file uploaded" });
@@ -380,7 +375,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   } = await import("./controllers/produtoController");
 
   // Buscar tabelas comerciais disponíveis com lógica hierárquica
-app.get("/api/tabelas-comerciais-disponiveis", authMiddleware, async (req, res) => {
+app.get("/api/tabelas-comerciais-disponiveis", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const { produtoId, parceiroId } = req.query;
 
@@ -475,7 +470,7 @@ app.get("/api/tabelas-comerciais-disponiveis", authMiddleware, async (req, res) 
   });
 
   // API endpoint for partners - POST create
-  app.post("/api/admin/parceiros", authMiddleware, async (req, res) => {
+  app.post("/api/admin/parceiros", jwtAuthMiddleware, requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const { db } = await import("../server/lib/supabase");
       const { parceiros, insertParceiroSchema } = await import("../shared/schema");
@@ -495,7 +490,7 @@ app.get("/api/tabelas-comerciais-disponiveis", authMiddleware, async (req, res) 
   });
 
   // API endpoint for partners - PUT update
-  app.put("/api/admin/parceiros/:id", authMiddleware, async (req, res) => {
+  app.put("/api/admin/parceiros/:id", jwtAuthMiddleware, requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const { db } = await import("../server/lib/supabase");
       const { parceiros, updateParceiroSchema } = await import("../shared/schema");
@@ -529,7 +524,7 @@ app.get("/api/tabelas-comerciais-disponiveis", authMiddleware, async (req, res) 
   });
 
   // API endpoint for partners - DELETE 
-  app.delete("/api/admin/parceiros/:id", authMiddleware, async (req, res) => {
+  app.delete("/api/admin/parceiros/:id", jwtAuthMiddleware, requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const { db } = await import("../server/lib/supabase");
       const { parceiros, lojas } = await import("../shared/schema");
@@ -760,7 +755,7 @@ app.get("/api/tabelas-comerciais-disponiveis", authMiddleware, async (req, res) 
   });
 
   // Update proposal status
-  app.put("/api/propostas/:id/status", authMiddleware, async (req, res) => {
+  app.put("/api/propostas/:id/status", jwtAuthMiddleware, requireManagerOrAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const { id } = req.params;
       const { status, observacao } = req.body;
@@ -785,7 +780,7 @@ app.get("/api/tabelas-comerciais-disponiveis", authMiddleware, async (req, res) 
   });
 
   // Get proposal logs
-  app.get("/api/propostas/:id/logs", authMiddleware, async (req, res) => {
+  app.get("/api/propostas/:id/logs", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     try {
       const { id } = req.params;
 
@@ -817,7 +812,7 @@ app.get("/api/tabelas-comerciais-disponiveis", authMiddleware, async (req, res) 
 
 
   // Dashboard stats
-  app.get("/api/dashboard/stats", authMiddleware, async (req, res) => {
+  app.get("/api/dashboard/stats", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     try {
       const allPropostas = await storage.getPropostas();
 
@@ -837,7 +832,7 @@ app.get("/api/tabelas-comerciais-disponiveis", authMiddleware, async (req, res) 
 
   // Gerente-Lojas Relationship Routes
   // Get all stores managed by a specific manager
-  app.get("/api/gerentes/:gerenteId/lojas", authMiddleware, async (req, res) => {
+  app.get("/api/gerentes/:gerenteId/lojas", jwtAuthMiddleware, requireManagerOrAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const gerenteId = parseInt(req.params.gerenteId);
       const lojaIds = await storage.getLojasForGerente(gerenteId);
@@ -849,7 +844,7 @@ app.get("/api/tabelas-comerciais-disponiveis", authMiddleware, async (req, res) 
   });
 
   // Get all managers for a specific store
-  app.get("/api/lojas/:lojaId/gerentes", authMiddleware, async (req, res) => {
+  app.get("/api/lojas/:lojaId/gerentes", jwtAuthMiddleware, requireManagerOrAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const lojaId = parseInt(req.params.lojaId);
       const gerenteIds = await storage.getGerentesForLoja(lojaId);
@@ -861,7 +856,7 @@ app.get("/api/tabelas-comerciais-disponiveis", authMiddleware, async (req, res) 
   });
 
   // Add a manager to a store
-  app.post("/api/gerente-lojas", authMiddleware, async (req, res) => {
+  app.post("/api/gerente-lojas", jwtAuthMiddleware, requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const validatedData = insertGerenteLojaSchema.parse(req.body);
       const relationship = await storage.addGerenteToLoja(validatedData);
@@ -876,7 +871,7 @@ app.get("/api/tabelas-comerciais-disponiveis", authMiddleware, async (req, res) 
   });
 
   // Remove a manager from a store
-  app.delete("/api/gerente-lojas/:gerenteId/:lojaId", authMiddleware, async (req, res) => {
+  app.delete("/api/gerente-lojas/:gerenteId/:lojaId", jwtAuthMiddleware, requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const gerenteId = parseInt(req.params.gerenteId);
       const lojaId = parseInt(req.params.lojaId);
@@ -889,7 +884,7 @@ app.get("/api/tabelas-comerciais-disponiveis", authMiddleware, async (req, res) 
   });
 
   // Get all relationships for a specific manager
-  app.get("/api/gerentes/:gerenteId/relationships", authMiddleware, async (req, res) => {
+  app.get("/api/gerentes/:gerenteId/relationships", jwtAuthMiddleware, requireManagerOrAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const gerenteId = parseInt(req.params.gerenteId);
       const relationships = await storage.getGerenteLojas(gerenteId);
@@ -903,7 +898,7 @@ app.get("/api/tabelas-comerciais-disponiveis", authMiddleware, async (req, res) 
   // User Management API - Import the service
   const { createUser } = await import("./services/userService");
 
-  app.post("/api/admin/users", authMiddleware, rlsAuthMiddleware, adminMiddleware, async (req: any, res: any) => {
+  app.post("/api/admin/users", jwtAuthMiddleware, requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const validatedData = UserDataSchema.parse(req.body);
       const newUser = await createUser(validatedData);
@@ -954,7 +949,7 @@ app.get("/api/tabelas-comerciais-disponiveis", authMiddleware, async (req, res) 
   });
 
   // POST create new loja
-  app.post("/api/admin/lojas", authMiddleware, adminMiddleware, async (req, res) => {
+  app.post("/api/admin/lojas", jwtAuthMiddleware, requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const validatedData = insertLojaSchema.strict().parse(req.body);
       const newLoja = await storage.createLoja(validatedData);
@@ -969,7 +964,7 @@ app.get("/api/tabelas-comerciais-disponiveis", authMiddleware, async (req, res) 
   });
 
   // PUT update loja
-  app.put("/api/admin/lojas/:id", authMiddleware, adminMiddleware, async (req, res) => {
+  app.put("/api/admin/lojas/:id", jwtAuthMiddleware, requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
@@ -994,7 +989,7 @@ app.get("/api/tabelas-comerciais-disponiveis", authMiddleware, async (req, res) 
   });
 
   // DELETE soft delete loja (set is_active = false)
-  app.delete("/api/admin/lojas/:id", authMiddleware, adminMiddleware, async (req, res) => {
+  app.delete("/api/admin/lojas/:id", jwtAuthMiddleware, requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
