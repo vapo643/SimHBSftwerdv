@@ -379,6 +379,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
     deletarProduto 
   } = await import("./controllers/produtoController");
 
+  // Endpoint para busca hierárquica de tabelas comerciais
+  app.get("/api/tabelas-comerciais-disponiveis", authMiddleware, async (req, res) => {
+    try {
+      const { produtoId, parceiroId } = req.query;
+
+      // Validação dos parâmetros obrigatórios
+      if (!produtoId || !parceiroId) {
+        return res.status(400).json({ 
+          message: "Os parâmetros 'produtoId' e 'parceiroId' são obrigatórios" 
+        });
+      }
+
+      const produtoIdNum = parseInt(produtoId as string);
+      const parceiroIdNum = parseInt(parceiroId as string);
+
+      if (isNaN(produtoIdNum) || isNaN(parceiroIdNum)) {
+        return res.status(400).json({ 
+          message: "Os parâmetros 'produtoId' e 'parceiroId' devem ser números válidos" 
+        });
+      }
+
+      const supabase = createServerSupabaseClient();
+
+      // 1. Busca Prioritária: Tabelas personalizadas (produto + parceiro específico)
+      const { data: tabelasPersonalizadas, error: errorPersonalizadas } = await supabase
+        .from('tabelas_comerciais')
+        .select('*')
+        .eq('produto_id', produtoIdNum)
+        .eq('parceiro_id', parceiroIdNum)
+        .eq('ativo', true);
+
+      if (errorPersonalizadas) {
+        console.error("Erro ao buscar tabelas personalizadas:", errorPersonalizadas);
+        return res.status(500).json({ message: "Erro ao buscar tabelas comerciais" });
+      }
+
+      // Se encontrou tabelas personalizadas, retorna apenas essas
+      if (tabelasPersonalizadas && tabelasPersonalizadas.length > 0) {
+        return res.json(tabelasPersonalizadas);
+      }
+
+      // 2. Busca Secundária: Tabelas gerais (apenas produto, parceiro_id nulo)
+      const { data: tabelasGerais, error: errorGerais } = await supabase
+        .from('tabelas_comerciais')
+        .select('*')
+        .eq('produto_id', produtoIdNum)
+        .is('parceiro_id', null)
+        .eq('ativo', true);
+
+      if (errorGerais) {
+        console.error("Erro ao buscar tabelas gerais:", errorGerais);
+        return res.status(500).json({ message: "Erro ao buscar tabelas comerciais" });
+      }
+
+      // Retorna tabelas gerais (ou array vazio se não encontrar nenhuma)
+      res.json(tabelasGerais || []);
+
+    } catch (error) {
+      console.error("Erro no endpoint tabelas-comerciais-disponiveis:", error);
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
   // Mock data para prazos
   const prazos = [
     { id: 1, valor: "12 meses" },
