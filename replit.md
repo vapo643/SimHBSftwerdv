@@ -81,6 +81,10 @@ This is a full-stack TypeScript application for credit management called "Simpix
 - **Git Flow Documentation**: Complete branching strategy documentation with examples and workflow guidelines
 
 ### January 2025
+- **Complete Partners CRUD Refinement**: Finalized partners management system with blackout theme restoration and streamlined form
+- **Blackout Theme Fix**: Removed white background elements to maintain consistent dark theme throughout partners interface
+- **Form Simplification**: Removed obsolete "Comissão Padrão" and "Tabela Comercial Padrão" fields per business requirements
+- **Modern UI Enhancement**: Improved table layout with proper spacing and hover effects for blackout theme
 - **Complete Partners CRUD API Implementation**: Full create, read, update, delete operations for partners management with business rule validation
 - **Business Logic Enforcement**: DELETE endpoint prevents deletion of partners with associated stores (409 Conflict response)
 - **Schema Alignment**: Updated partners and stores schemas to match actual database structure (razao_social, nome_loja fields)
