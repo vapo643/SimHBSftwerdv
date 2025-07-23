@@ -81,10 +81,6 @@ This is a full-stack TypeScript application for credit management called "Simpix
 - **Git Flow Documentation**: Complete branching strategy documentation with examples and workflow guidelines
 
 ### January 2025
-- **Centralized API Client Implementation**: Created unified API client (`/client/src/lib/apiClient.ts`) to eliminate duplicate fetch code and standardize HTTP requests
-- **API Architecture Refactoring**: Replaced all direct `fetch` calls and `fetchWithToken` imports across CRUD pages with centralized `api` client
-- **Enhanced Error Handling**: Implemented consistent error handling and authentication token management in centralized client
-- **Code Quality Improvement**: Reduced code duplication and improved maintainability by consolidating API calls into single abstraction layer
 - **Complete Partners CRUD Refinement**: Finalized partners management system with blackout theme restoration and streamlined form
 - **Blackout Theme Fix**: Removed white background elements to maintain consistent dark theme throughout partners interface
 - **Form Simplification**: Removed obsolete "Comissão Padrão" and "Tabela Comercial Padrão" fields per business requirements

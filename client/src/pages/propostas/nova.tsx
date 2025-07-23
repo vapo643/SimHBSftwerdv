@@ -19,7 +19,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import DadosClienteForm from "@/components/forms/DadosClienteForm";
 import { useToast } from "@/hooks/use-toast";
-import { api } from "@/lib/apiClient";
+import fetchWithToken from "@/lib/apiClient";
 
 // Schema Unificado
 const fullProposalSchema = z.object({
@@ -76,7 +76,13 @@ const NovaProposta: React.FC = () => {
   // Load available products
   const { data: produtos = [] } = useQuery({
     queryKey: ["produtos"],
-    queryFn: () => api.get("/produtos"),
+    queryFn: async () => {
+      const response = await fetchWithToken("/api/produtos");
+      if (!response.ok) {
+        throw new Error("Erro ao buscar produtos");
+      }
+      return response.json();
+    },
   });
 
   // Load commercial tables based on selected product
@@ -88,7 +94,13 @@ const NovaProposta: React.FC = () => {
       // For now, using a fixed partner ID (1) - in a real app, this would come from user context
       const parceiroId = 1;
       
-      return await api.get(`/tabelas-comerciais-disponiveis?produtoId=${produto}&parceiroId=${parceiroId}`);
+      const response = await fetchWithToken(
+        `/api/tabelas-comerciais-disponiveis?produtoId=${produto}&parceiroId=${parceiroId}`
+      );
+      if (!response.ok) {
+        throw new Error("Erro ao buscar tabelas comerciais");
+      }
+      return response.json();
     },
     enabled: !!produto, // Only run query when product is selected
   });

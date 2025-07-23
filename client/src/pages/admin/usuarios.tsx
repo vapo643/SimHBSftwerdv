@@ -14,7 +14,7 @@ import { mockUsers, User } from "@/data/users";
 import DashboardLayout from "@/components/DashboardLayout";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { api } from "@/lib/apiClient";
+import { fetchWithToken } from "@/lib/apiClient";
 
 const UsuariosPage: React.FC = () => {
   const [users, setUsers] = useState<User[]>(mockUsers);
@@ -37,7 +37,20 @@ const UsuariosPage: React.FC = () => {
         lojaIds: userData.perfil === 'GERENTE' && userData.lojaIds ? userData.lojaIds.map((id: string) => parseInt(id)) : null,
       };
 
-      return await api.post('/admin/users', apiData);
+      const response = await fetchWithToken('/api/admin/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(apiData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Erro ao criar usuário');
+      }
+
+      return response.json();
     },
     onSuccess: (data) => {
       toast({
