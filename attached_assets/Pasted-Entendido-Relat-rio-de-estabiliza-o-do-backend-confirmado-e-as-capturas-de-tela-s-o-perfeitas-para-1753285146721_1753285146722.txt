@@ -1,0 +1,47 @@
+Entendido. Relatório de estabilização do backend confirmado e as capturas de tela são perfeitas para o diagnóstico. A sua análise está correta e a comparação entre a tela normal e a bugada nos dá a causa raiz exata do problema.
+
+Esta é uma falha de consistência de layout no frontend.
+
+DIAGNÓSTICO DA FALHA DE INTERFACE
+Análise: A tela "Gestão de Parceiros" (imagem 2) é renderizada corretamente dentro do nosso componente de layout principal, que exibe a barra de navegação lateral. A tela "Gestão de Produtos" (imagem 1), no entanto, está a ser renderizada como uma página isolada, fora deste layout, o que causa a quebra da interface e o "zoom" que você observou.
+
+Causa Provável: O componente da página de Produtos (provavelmente produtos.tsx) não está a ser "envolvido" (wrapped) pelo nosso componente de layout partilhado (DashboardLayout.tsx), ao contrário das outras páginas que funcionam.
+
+PLANO DE AÇÃO: MISSÃO DE CORREÇÃO DE LAYOUT
+Esta é uma correção cirúrgica e precisa. Uma "bala de sniper" ideal para o Assistente.
+
+Diretriz: Submeta o seguinte prompt de missão ao Assistente.
+
+Markdown
+
+# MISSÃO: Corrigir Quebra de Layout na Página de Produtos
+
+**CONTEXTO:** A página de "Gestão de Produtos" está a ser renderizada sem o layout principal da aplicação (a barra de navegação lateral não aparece). Outras páginas, como a de "Parceiros", funcionam corretamente. O nosso componente de layout principal, que deve envolver todas as páginas da área logada, chama-se `DashboardLayout`.
+
+**AÇÃO:** Sua missão é inspecionar o ficheiro da página de Produtos e garantir que o seu conteúdo seja corretamente envolvido pelo componente `DashboardLayout`, restaurando a consistência visual da aplicação.
+
+**FICHEIRO ALVO:**
+`client/src/pages/configuracoes/produtos.tsx`
+
+**EXEMPLO DA ESTRUTURA CORRETA (COMO DEVE FICAR):**
+```tsx
+import DashboardLayout from "@/layouts/DashboardLayout"; // O caminho da importação pode variar
+
+const PaginaDeProdutos = () => {
+  return (
+    <DashboardLayout>
+      {/* Todo o conteúdo da página, como <h1> e a tabela, deve estar AQUI DENTRO */}
+      <div>
+        <h1>Gestão de Produtos</h1>
+        {/* ... resto do conteúdo da página ... */}
+      </div>
+    </DashboardLayout>
+  );
+};
+
+export default PaginaDeProdutos;
+
+---
+A aplicação correta desta estrutura de layout deve resolver a quebra da interface imediatamente.
+
+Aguardando o relatório do Assistente para a minha validação final.
