@@ -1,0 +1,45 @@
+# MISSÃO: Absorver e confirmar a compreensão do fluxo de negócio ponta a ponta do software simpix.
+
+**PERSONA:** Você é um Arquiteto de Soluções Sênior, especialista em traduzir requisitos de negócio complexos em fluxos de sistema.
+
+**CONTEXTO:** Estamos prestes a iniciar a implementação da lógica de negócio principal do `simpix`. Antes de prosseguir, é crucial que você, como nosso consultor técnico, compreenda o fluxo prático completo, desde o login até a conclusão de uma proposta de crédito.
+
+**FLUXO DE NEGÓCIO DETALHADO (A JORNADA DA PROPOSTA):**
+
+* **PASSO 1: O Login e o Isolamento de Dados**
+    * Cada usuário que entra no sistema tem um `perfil` específico (ex: ATENDENTE, ANALISTA) e, se aplicável, está associado a uma `loja_id`.
+    * Políticas de Segurança em Nível de Linha (RLS) no banco de dados garantem que um ATENDENTE da "Loja A" NUNCA possa ver os dados da "Loja B".
+
+* **PASSO 2: A Originação (ATENDENTE)**
+    * **PERSONAGEM:** Atendente de uma loja parceira.
+    * **TELA:** `T-01 - Nova Proposta de Crédito`.
+    * **AÇÃO:** O Atendente preenche o formulário de 3 abas. O simulador de crédito calcula os valores em tempo real. Ao submeter, a proposta é criada no banco de dados com o status inicial "Em Análise" e fica visível para os Analistas da Simpix.
+
+* **PASSO 3: A Análise de Crédito (ANALISTA)**
+    * **PERSONAGEM:** Analista da Simpix.
+    * **TELA:** `T-02 - Fila de Análise` e `T-03 - Painel de Análise`.
+    * **AÇÃO:** O Analista vê a nova proposta na sua fila, abre-a para ver os detalhes completos na `Tela T-03` e utiliza o "Painel de Decisão".
+
+* **PASSO 4: A Decisão e o Canal de Comunicação**
+    * **PERSONAGEM:** Analista e Atendente.
+    * **AÇÃO:** O Analista pode **Aprovar**, **Negar** ou **Pendenciar** a proposta.
+        * Se **Pendenciar**, ele escreve uma observação, e a proposta volta para a "Fila do Atendente" com um alerta. O Atendente faz a correção e a reenvia para o Analista.
+        * Se **Negar**, o fluxo termina.
+        * Se **Aprovar**, o fluxo avança para a próxima etapa automática.
+
+* **PASSO 5: A Geração do Contrato (Pós-Aprovação)**
+    * **PERSONAGEM:** Sistema (Automático).
+    * **AÇÃO:** Imediatamente após a aprovação pelo Analista, o sistema dispara a lógica para **gerar automaticamente a CCB (o contrato) em PDF**, preenchida com os dados da operação.
+
+* **PASSO 6: A Formalização (ATENDENTE e Cliente)**
+    * **PERSONAGEM:** Atendente e Cliente.
+    * **TELA:** `T-04 - Acompanhamento da Formalização`.
+    * **AÇÃO:** O Atendente recebe a CCB gerada. O cliente então assina o contrato e realiza a validação biométrica (através de serviços externos).
+
+* **PASSO 7: A Liberação do Crédito (FINANCEIRO)**
+    * **PERSONAGEM:** Time Financeiro da Simpix.
+    * **TELA:** `T-05 - Fila de Pagamento`.
+    * **AÇÃO:** Assim que a formalização é concluída, a proposta aparece automaticamente na fila do Financeiro. O time então realiza o pagamento do valor do empréstimo para o cliente e da comissão para o parceiro.
+
+**PEDIDO FINAL:**
+Por favor, confirme que você compreendeu este fluxo de negócio de ponta a ponta. Responda apenas com "Contexto do fluxo de negócio `simpix` compreendido e carregado. Aguardando próxima instrução tática." se não houver ambiguidades.
