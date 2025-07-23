@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import DashboardLayout from "@/components/DashboardLayout";
+import { api } from "@/lib/apiClient";
 import { Button } from "@/components/ui/button";
 import { 
   Table, 
@@ -13,7 +14,7 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Store, Eye, Edit, Trash2, Plus } from "lucide-react";
-import { apiRequest } from "@/lib/queryClient";
+
 import { LojaForm } from "@/components/lojas/LojaForm";
 import type { Loja, InsertLoja, UpdateLoja } from "@shared/schema";
 
@@ -24,14 +25,21 @@ export default function LojasPage() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  // Fetch lojas
+  // Fetch lojas using new apiClient
   const { data: lojas = [], isLoading: loadingLojas } = useQuery<Loja[]>({
     queryKey: ['/api/lojas'],
+    queryFn: async () => {
+      const response = await api.get<Loja[]>('/api/lojas');
+      return response.data;
+    },
   });
 
-  // Create mutation
+  // Create mutation using new apiClient
   const createMutation = useMutation({
-    mutationFn: (data: InsertLoja) => apiRequest('/api/admin/lojas', 'POST', data),
+    mutationFn: async (data: InsertLoja) => {
+      const response = await api.post<Loja>('/api/admin/lojas', data);
+      return response.data;
+    },
     onSuccess: () => {
       toast({
         title: "Sucesso",
@@ -50,10 +58,12 @@ export default function LojasPage() {
     },
   });
 
-  // Update mutation
+  // Update mutation using new apiClient
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: UpdateLoja }) => 
-      apiRequest(`/api/admin/lojas/${id}`, 'PUT', data),
+    mutationFn: async ({ id, data }: { id: number; data: UpdateLoja }) => {
+      const response = await api.put<Loja>(`/api/admin/lojas/${id}`, data);
+      return response.data;
+    },
     onSuccess: () => {
       toast({
         title: "Sucesso",
@@ -72,9 +82,12 @@ export default function LojasPage() {
     },
   });
 
-  // Delete mutation
+  // Delete mutation using new apiClient
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => apiRequest(`/api/admin/lojas/${id}`, 'DELETE'),
+    mutationFn: async (id: number) => {
+      const response = await api.delete(`/api/admin/lojas/${id}`);
+      return response.data;
+    },
     onSuccess: () => {
       toast({
         title: "Sucesso",
