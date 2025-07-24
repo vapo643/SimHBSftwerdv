@@ -27,9 +27,9 @@ export default function LojasPage() {
 
   // Fetch lojas using new apiClient
   const { data: lojas = [], isLoading: loadingLojas } = useQuery<Loja[]>({
-    queryKey: ['/api/lojas'],
+    queryKey: ['/api/admin/lojas'],
     queryFn: async () => {
-      const response = await api.get<Loja[]>('/api/lojas');
+      const response = await api.get<Loja[]>('/api/admin/lojas');
       return response.data;
     },
   });
@@ -45,7 +45,7 @@ export default function LojasPage() {
         title: "Sucesso",
         description: "Loja criada com sucesso!",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/lojas'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/lojas'] });
       setIsModalOpen(false);
       setSelectedLoja(null);
     },
@@ -69,7 +69,7 @@ export default function LojasPage() {
         title: "Sucesso",
         description: "Loja atualizada com sucesso!",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/lojas'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/lojas'] });
       setIsModalOpen(false);
       setSelectedLoja(null);
     },
@@ -93,7 +93,7 @@ export default function LojasPage() {
         title: "Sucesso",
         description: "Loja desativada com sucesso!",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/lojas'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/lojas'] });
     },
     onError: (error: any) => {
       toast({

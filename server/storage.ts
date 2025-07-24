@@ -98,9 +98,9 @@ export class DatabaseStorage implements IStorage {
     await db.delete(propostas).where(eq(propostas.id, id));
   }
 
-  // Lojas CRUD
+  // Lojas CRUD implementation
   async getLojas(): Promise<Loja[]> {
-    return await db.select().from(lojas).where(eq(lojas.isActive, true)).orderBy(desc(lojas.createdAt));
+    return await db.select().from(lojas).where(eq(lojas.isActive, true)).orderBy(lojas.nomeLoja);
   }
 
   async getLojaById(id: number): Promise<Loja | undefined> {
