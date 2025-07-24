@@ -16,6 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { fetchWithToken } from "@/lib/apiClient";
 import type { User } from "@shared/schema";
 import { Users, Edit, UserX, UserCheck } from "lucide-react";
+import { USER_QUERIES } from "@/hooks/queries/queryKeys";
 
 const UsuariosPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -25,12 +26,13 @@ const UsuariosPage: React.FC = () => {
 
   // Fetch users from API using real data
   const { data: users = [], isLoading: loadingUsers } = useQuery<User[]>({
-    queryKey: ['/api/admin/users'],
+    queryKey: USER_QUERIES.lists(),
     queryFn: async () => {
       const response = await fetchWithToken('/api/admin/users');
       if (!response.ok) throw new Error('Failed to fetch users');
       return response.json();
     },
+    staleTime: 5 * 60 * 1000, // 5 minutes cache
   });
 
   // Mutation for creating new users
