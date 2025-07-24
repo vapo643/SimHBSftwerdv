@@ -1,17 +1,11 @@
 import { createServerSupabaseAdminClient } from '../lib/supabase';
 import { z } from 'zod';
-import crypto from 'crypto';
+
 import { UserDataSchema } from '../routes';
 
 export type UserData = z.infer<typeof UserDataSchema>;
 
-function sendWelcomeEmail(email: string, temporaryPassword: string): void {
-  console.log(`[MOCK EMAIL] Para: ${email} | Senha Provisória: ${temporaryPassword}`);
-}
 
-function generateTemporaryPassword(): string {
-  return crypto.randomBytes(12).toString('base64').replace(/[/+=]/g, '').substring(0, 12);
-}
 
 export async function createUser(userData: UserData) {
   const supabase = createServerSupabaseAdminClient();
@@ -32,10 +26,9 @@ export async function createUser(userData: UserData) {
       throw conflictError;
     }
 
-    const temporaryPassword = generateTemporaryPassword();
     const { data: authData, error: authError } = await supabase.auth.admin.createUser({
       email: userData.email,
-      password: temporaryPassword,
+      password: userData.password,
       email_confirm: true,
     });
 
@@ -63,13 +56,10 @@ export async function createUser(userData: UserData) {
       if (gerenteLojaError) throw new Error(`Erro ao associar gerente a lojas: ${gerenteLojaError.message}`);
     }
 
-    sendWelcomeEmail(userData.email, temporaryPassword);
-
     return {
       success: true,
       message: 'Usuário criado com sucesso.',
       user: createdProfile,
-      temporaryPassword: temporaryPassword,
     };
 
   } catch (error) {

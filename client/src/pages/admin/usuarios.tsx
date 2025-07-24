@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+
 import {
   Table,
   TableHeader,
@@ -24,8 +24,7 @@ import { Users, Edit, UserX, UserCheck, Loader2 } from "lucide-react";
 const UsuariosPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [successModalOpen, setSuccessModalOpen] = useState(false);
-  const [newUserCredentials, setNewUserCredentials] = useState<{email: string, temporaryPassword: string} | null>(null);
+
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -40,11 +39,11 @@ const UsuariosPage: React.FC = () => {
 
   // Mutation for creating new users
   const createUserMutation = useMutation({
-    // A mutationFn deve retornar o objeto completo da API
     mutationFn: async (userData: any) => {
       const apiData = {
         fullName: userData.nome,
         email: userData.email,
+        password: userData.senha,
         role: userData.perfil,
         lojaId: userData.perfil === 'ATENDENTE' && userData.lojaId ? parseInt(userData.lojaId) : null,
         lojaIds: userData.perfil === 'GERENTE' && userData.lojaIds ? userData.lojaIds.map((id: string) => parseInt(id)) : null,
@@ -53,24 +52,12 @@ const UsuariosPage: React.FC = () => {
       const response = await api.post('/api/admin/users', apiData);
       return response.data; // Retorna o corpo da resposta da API
     },
-    // O 'data' aqui é o que foi retornado pela mutationFn
-    onSuccess: (data) => {
-      // VERIFICAÇÃO DE SEGURANÇA: Garante que os dados necessários existem antes de prosseguir
-      if (data?.email && data?.temporaryPassword) {
-        setNewUserCredentials({
-          email: data.email, // CORREÇÃO: Usa o email da resposta da API
-          temporaryPassword: data.temporaryPassword
-        });
-        setSuccessModalOpen(true);
-      } else {
-        // Fallback: Se a API não retornar a senha, mostra um toast genérico.
-        toast({
-          title: "Sucesso",
-          description: "Usuário criado, mas as credenciais não puderam ser exibidas.",
-        });
-      }
+    onSuccess: () => {
+      toast({
+        title: "Sucesso",
+        description: "Usuário criado com sucesso!",
+      });
       
-      // Invalidação de cache permanece a mesma
       queryClient.invalidateQueries({ queryKey: queryKeys.users.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.partners.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.stores.all });
@@ -278,60 +265,7 @@ const UsuariosPage: React.FC = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Success Modal for New User Credentials */}
-      <Dialog open={successModalOpen} onOpenChange={setSuccessModalOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-green-600">Usuário Criado com Sucesso!</DialogTitle>
-          </DialogHeader>
-          {newUserCredentials && (
-            <div className="space-y-4">
-              <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg">
-                <p className="text-sm font-medium mb-2">Credenciais do Novo Usuário:</p>
-                <div className="space-y-2">
-                  <div>
-                    <span className="text-xs text-gray-600 dark:text-gray-400">Email:</span>
-                    <p className="font-mono text-sm">{newUserCredentials.email}</p>
-                  </div>
-                  <div>
-                    <span className="text-xs text-gray-600 dark:text-gray-400">Senha Provisória:</span>
-                    <div className="flex items-center gap-2">
-                      <p className="font-mono text-sm bg-yellow-100 dark:bg-yellow-900 px-2 py-1 rounded">
-                        {newUserCredentials.temporaryPassword}
-                      </p>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          navigator.clipboard.writeText(newUserCredentials.temporaryPassword);
-                          toast({
-                            title: "Copiado!",
-                            description: "Senha copiada para a área de transferência",
-                          });
-                        }}
-                      >
-                        Copiar
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <p className="text-xs text-gray-600 dark:text-gray-400">
-                Forneça essas credenciais ao usuário para o primeiro acesso. Ele será solicitado a alterar a senha no primeiro login.
-              </p>
-              <Button 
-                onClick={() => {
-                  setSuccessModalOpen(false);
-                  setNewUserCredentials(null);
-                }}
-                className="w-full"
-              >
-                Entendi
-              </Button>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+
     </DashboardLayout>
   );
 };

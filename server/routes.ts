@@ -14,6 +14,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 export const UserDataSchema = z.object({
   fullName: z.string().min(3, "Nome completo é obrigatório"),
   email: z.string().email("Formato de email inválido"),
+  password: z.string().min(8, "Senha deve ter pelo menos 8 caracteres"),
   role: z.enum(['ADMINISTRADOR', 'GERENTE', 'ATENDENTE']),
   lojaId: z.number().int().nullable().optional(),
   lojaIds: z.array(z.number().int()).nullable().optional(),

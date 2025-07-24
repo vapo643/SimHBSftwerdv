@@ -1,0 +1,34 @@
+# MISSÃO DE RE-ARQUITETURA: Novo Fluxo de Criação de Senha para Usuários
+
+**CONTEXTO ESTRATÉGICO:**
+O nosso fluxo atual de geração de senha automática com envio por email é inviável por falta de um serviço de email configurado. Estamos a re-arquitetar o processo para que o Administrador tenha controlo total sobre a senha inicial do novo usuário, definindo-a diretamente na interface de criação.
+
+**AÇÃO:**
+Sua missão é refatorar o Módulo de Usuários (backend e frontend) para implementar o novo fluxo de definição de senha.
+
+**ROADMAP DE EXECUÇÃO (Full-Stack):**
+
+**PASSO 1 (Backend): Modificar o Serviço de Criação de Usuário**
+* **Ficheiro Alvo:** `/server/services/userService.ts`.
+* **Tarefa:** Modifique a função `createUser`.
+    * Remova a lógica de geração de senha aleatória (`generateTemporaryPassword`).
+    * A função deve agora **aceitar um campo `password`** vindo do frontend.
+    * Utilize este `password` recebido diretamente na chamada `supabase.auth.admin.createUser({ email, password, ... })`.
+    * Remova a `temporaryPassword` do objeto de retorno da função.
+
+**PASSO 2 (Frontend): Refatorar o Formulário de Novo Usuário**
+* **Ficheiro Alvo:** `/client/src/components/usuarios/UserForm.tsx`.
+* **Tarefa:**
+    a. Remova a seção informativa sobre a senha automática que foi adicionada anteriormente.
+    b. Adicione dois novos campos ao formulário: **"Senha"** e **"Confirmar Senha"**. Ambos devem ser do tipo `password` (para ocultar os caracteres).
+    c. No schema de validação Zod do formulário, adicione regras para os novos campos: a senha deve ter um requisito mínimo de força (ex: 8 caracteres) e o campo "Confirmar Senha" deve ser igual ao campo "Senha".
+
+**PASSO 3 (Frontend): Atualizar a Chamada da API**
+* **Ficheiro Alvo:** `/client/src/pages/admin/usuarios/index.tsx`.
+* **Tarefa:** Na `mutation` de criação de usuário, atualize a lógica de transformação de dados (`apiData`) para que ela passe a nova senha, vinda do formulário, para o backend.
+
+**PASSO 4 (Frontend): Remover o Modal de Sucesso com Senha**
+* **Ficheiro Alvo:** `/client/src/pages/admin/usuarios/index.tsx`.
+* **Tarefa:** Remova a lógica e o componente do modal de sucesso que exibia a senha. Agora, um "toast" de sucesso simples é suficiente, pois o administrador já sabe a senha que definiu.
+
+Execute este plano para nos dar um fluxo de criação de usuários 100% funcional e controlável.
