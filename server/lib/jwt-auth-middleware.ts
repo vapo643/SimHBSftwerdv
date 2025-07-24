@@ -5,7 +5,9 @@ export interface AuthenticatedRequest extends Request {
   user?: {
     id: string;
     email: string;
-    role: string;
+    role: string | null;
+    full_name?: string | null;
+    loja_id?: number | null;
   };
 }
 
@@ -39,7 +41,6 @@ export async function jwtAuthMiddleware(
   next: NextFunction
 ) {
   try {
-    // Development bypass removed for security compliance
 
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -56,17 +57,23 @@ export async function jwtAuthMiddleware(
       return res.status(401).json({ message: 'Token inválido ou expirado' });
     }
 
-    // Extrair role dos metadata
-    const role = await extractRoleFromToken(token);
-    if (!role) {
-      return res.status(401).json({ message: 'Perfil de usuário não encontrado' });
-    }
+    // Session enrichment: Query profiles table for complete user data
+    const { createServerSupabaseAdminClient } = await import('./supabase');
+    const supabaseAdmin = createServerSupabaseAdminClient();
+    
+    const { data: profile, error: profileError } = await supabaseAdmin
+      .from('profiles')
+      .select('id, full_name, role, loja_id')
+      .eq('id', data.user.id)
+      .single();
 
-    // Adicionar dados do usuário autenticado ao request
+    // Adicionar dados do usuário autenticado ao request com enriched profile data
     req.user = {
       id: data.user.id,
       email: data.user.email || '',
-      role: role
+      role: profile?.role || null,
+      full_name: profile?.full_name || null,
+      loja_id: profile?.loja_id || null
     };
 
     next();

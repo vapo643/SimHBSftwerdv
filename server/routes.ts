@@ -1109,6 +1109,26 @@ app.get("/api/tabelas-comerciais-disponiveis", jwtAuthMiddleware, async (req: Au
     }
   });
 
+  // User profile endpoint for RBAC context
+  app.get('/api/auth/profile', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: 'Usuário não autenticado' });
+      }
+
+      res.json({
+        id: req.user.id,
+        email: req.user.email,
+        role: req.user.role,
+        full_name: req.user.full_name,
+        loja_id: req.user.loja_id,
+      });
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+      res.status(500).json({ message: 'Erro interno do servidor' });
+    }
+  });
+
   // Health check endpoints for system stability monitoring
   app.get('/api/health/storage', async (req, res) => {
     try {

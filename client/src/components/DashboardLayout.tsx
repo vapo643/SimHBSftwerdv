@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { signOut } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import OfflineIndicator from "./OfflineIndicator";
 import {
@@ -28,19 +29,30 @@ interface DashboardLayoutProps {
 export default function DashboardLayout({ children, title }: DashboardLayoutProps) {
   const [location] = useLocation();
   const { toast } = useToast();
+  const { user } = useAuth();
 
-  const navigation = [
+  // Base navigation items available to all authenticated users
+  const baseNavigation = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     { name: "Nova Proposta", href: "/propostas/nova", icon: PlusCircle },
     { name: "Fila de Análise", href: "/credito/fila", icon: List },
     { name: "Formalização", href: "/formalizacao/fila", icon: FileText },
     { name: "Pagamentos", href: "/financeiro/pagamentos", icon: CreditCard },
-    { name: "Tabelas Comerciais", href: "/configuracoes/tabelas", icon: Settings }, // Novo item adicionado
-    { name: "Usuários", href: "/admin/usuarios", icon: Users }, // Novo item adicionado
-    { name: "Parceiros", href: "/parceiros", icon: Building2 }, // Novo item adicionado
-    { name: "Produtos", href: "/configuracoes/produtos", icon: Package }, // Novo item adicionado
-    { name: "Lojas", href: "/admin/lojas", icon: Store }, // Novo item adicionado
   ];
+
+  // Administrative navigation items - only visible to ADMINISTRADOR role
+  const adminNavigation = [
+    { name: "Tabelas Comerciais", href: "/configuracoes/tabelas", icon: Settings },
+    { name: "Usuários", href: "/admin/usuarios", icon: Users },
+    { name: "Parceiros", href: "/parceiros", icon: Building2 },
+    { name: "Produtos", href: "/configuracoes/produtos", icon: Package },
+    { name: "Lojas", href: "/admin/lojas", icon: Store },
+  ];
+
+  // Conditional navigation based on user role
+  const navigation = user?.role === 'ADMINISTRADOR' 
+    ? [...baseNavigation, ...adminNavigation]
+    : baseNavigation;
 
   const handleSignOut = async () => {
     try {
