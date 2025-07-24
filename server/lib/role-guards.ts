@@ -2,7 +2,7 @@ import { Response, NextFunction } from 'express';
 import { AuthenticatedRequest } from './jwt-auth-middleware';
 
 /**
- * Guard que requer permissões de ADMIN
+ * Guard que requer permissões de ADMINISTRADOR
  */
 export function requireAdmin(
   req: AuthenticatedRequest,
@@ -14,10 +14,10 @@ export function requireAdmin(
     return;
   }
 
-  if (req.user.role !== 'ADMIN') {
+  if (req.user.role !== 'ADMINISTRADOR') {
     res.status(403).json({ 
       message: 'Acesso negado. Permissões de administrador requeridas.',
-      requiredRole: 'ADMIN',
+      requiredRole: 'ADMINISTRADOR',
       userRole: req.user.role
     });
     return;
@@ -27,7 +27,7 @@ export function requireAdmin(
 }
 
 /**
- * Guard que requer permissões de GERENTE ou ADMIN
+ * Guard que requer permissões de GERENTE ou ADMINISTRADOR
  */
 export function requireManagerOrAdmin(
   req: AuthenticatedRequest,
@@ -39,8 +39,8 @@ export function requireManagerOrAdmin(
     return;
   }
 
-  const allowedRoles = ['GERENTE', 'ADMIN'];
-  if (!allowedRoles.includes(req.user.role)) {
+  const allowedRoles = ['GERENTE', 'ADMINISTRADOR'];
+  if (!req.user.role || !allowedRoles.includes(req.user.role)) {
     res.status(403).json({ 
       message: 'Acesso negado. Permissões de gerente ou administrador requeridas.',
       requiredRoles: allowedRoles,
@@ -53,7 +53,7 @@ export function requireManagerOrAdmin(
 }
 
 /**
- * Guard que requer permissões de ATENDENTE, GERENTE ou ADMIN
+ * Guard que requer permissões de ATENDENTE, GERENTE ou ADMINISTRADOR
  */
 export function requireAnyRole(
   req: AuthenticatedRequest,
@@ -65,8 +65,8 @@ export function requireAnyRole(
     return;
   }
 
-  const allowedRoles = ['ATENDENTE', 'GERENTE', 'ADMIN'];
-  if (!allowedRoles.includes(req.user.role)) {
+  const allowedRoles = ['ATENDENTE', 'GERENTE', 'ADMINISTRADOR'];
+  if (!req.user.role || !allowedRoles.includes(req.user.role)) {
     res.status(403).json({ 
       message: 'Acesso negado. Usuário deve ter um perfil válido.',
       requiredRoles: allowedRoles,
@@ -88,7 +88,7 @@ export function requireRoles(roles: string[]) {
       return;
     }
 
-    if (!roles.includes(req.user.role)) {
+    if (!req.user.role || !roles.includes(req.user.role)) {
       res.status(403).json({ 
         message: 'Acesso negado. Permissões insuficientes.',
         requiredRoles: roles,

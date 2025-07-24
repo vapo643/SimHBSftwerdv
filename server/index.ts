@@ -8,8 +8,8 @@ import { config, logConfigStatus, isAppOperational } from "./lib/config";
 const app = express();
 
 // Configure trust proxy for rate limiting with X-Forwarded-For headers
-// In development, we trust all proxies for simplicity
-app.set('trust proxy', process.env.NODE_ENV === 'production' ? 1 : true);
+// Use specific configuration to avoid rate limiting warnings
+app.set('trust proxy', process.env.NODE_ENV === 'production' ? 1 : ['127.0.0.1', '::1']);
 
 // ====================================
 // PILAR 12 - PROGRESSIVE ENHANCEMENT

@@ -37,6 +37,10 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
     { name: "Nova Proposta", href: "/propostas/nova", icon: PlusCircle },
     { name: "Fila de Análise", href: "/credito/fila", icon: List },
     { name: "Formalização", href: "/formalizacao/fila", icon: FileText },
+  ];
+
+  // Financial navigation items - only visible to FINANCEIRO role
+  const financeNavigation = [
     { name: "Pagamentos", href: "/financeiro/pagamentos", icon: CreditCard },
   ];
 
@@ -49,10 +53,18 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
     { name: "Lojas", href: "/admin/lojas", icon: Store },
   ];
 
-  // Conditional navigation based on user role
-  const navigation = user?.role === 'ADMINISTRADOR' 
-    ? [...baseNavigation, ...adminNavigation]
-    : baseNavigation;
+  // Build navigation based on user role
+  let navigation = [...baseNavigation];
+  
+  // Add finance navigation for FINANCEIRO role
+  if (user?.role === 'FINANCEIRO') {
+    navigation = [...navigation, ...financeNavigation];
+  }
+  
+  // Add admin navigation for ADMINISTRADOR role
+  if (user?.role === 'ADMINISTRADOR') {
+    navigation = [...navigation, ...financeNavigation, ...adminNavigation];
+  }
 
   const handleSignOut = async () => {
     try {
