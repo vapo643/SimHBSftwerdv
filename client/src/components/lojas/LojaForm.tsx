@@ -53,6 +53,13 @@ const LojaForm: React.FC<LojaFormProps> = ({
   // Fetch parceiros for the select dropdown
   const { data: parceiros = [] } = useQuery<Parceiro[]>({
     queryKey: ['/api/parceiros'],
+    queryFn: async () => {
+      const response = await fetch('/api/parceiros');
+      if (!response.ok) {
+        throw new Error('Erro ao buscar parceiros');
+      }
+      return response.json();
+    },
   });
 
   return (
