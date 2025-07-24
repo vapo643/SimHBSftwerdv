@@ -22,6 +22,7 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  getUsers(): Promise<User[]>;
 
   // Propostas
   getPropostas(): Promise<Proposta[]>;
@@ -61,6 +62,10 @@ export class DatabaseStorage implements IStorage {
   async createUser(user: InsertUser): Promise<User> {
     const result = await db.insert(users).values(user).returning();
     return result[0];
+  }
+
+  async getUsers(): Promise<User[]> {
+    return await db.select().from(users).orderBy(users.name);
   }
 
   async getPropostas(): Promise<Proposta[]> {
@@ -127,17 +132,26 @@ export class DatabaseStorage implements IStorage {
   }
 
   async checkLojaDependencies(id: number): Promise<{ hasUsers: boolean; hasPropostas: boolean; hasGerentes: boolean }> {
-    // Check if there are proposals associated with this store
-    const propostasCount = await db.select().from(propostas).where(eq(propostas.lojaId, id)).limit(1);
-    
-    // Check if there are manager-store relationships
-    const gerentesCount = await db.select().from(gerenteLojas).where(eq(gerenteLojas.lojaId, id)).limit(1);
-    
-    return {
-      hasUsers: false, // Users don't have direct loja association in our current schema
-      hasPropostas: propostasCount.length > 0,
-      hasGerentes: gerentesCount.length > 0,
-    };
+    try {
+      // Check if there are proposals associated with this store
+      const propostasCount = await db.select({ id: propostas.id }).from(propostas).where(eq(propostas.lojaId, id)).limit(1);
+      
+      // Check if there are manager-store relationships
+      const gerentesCount = await db.select({ id: gerenteLojas.gerenteId }).from(gerenteLojas).where(eq(gerenteLojas.lojaId, id)).limit(1);
+      
+      return {
+        hasUsers: false, // Users don't have direct loja association in our current schema
+        hasPropostas: propostasCount.length > 0,
+        hasGerentes: gerentesCount.length > 0,
+      };
+    } catch (error) {
+      console.error('Error checking loja dependencies:', error);
+      return {
+        hasUsers: false,
+        hasPropostas: false,
+        hasGerentes: false,
+      };
+    }
   }
 
   // Gerente-Lojas Relationships
