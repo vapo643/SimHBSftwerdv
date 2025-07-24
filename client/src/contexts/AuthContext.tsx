@@ -32,14 +32,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const { data: currentUser } = await supabase.auth.getUser();
       if (currentUser.user) {
         try {
-          // Fetch complete user profile data with role information for RBAC
+          // Fetch user data from debug endpoint for RBAC validation
           const response = await api.get<{
             id: string;
             email: string;
             role: string | null;
             full_name?: string | null;
             loja_id?: number | null;
-          }>('/api/auth/profile');
+          }>('/api/debug/me');
           
           setUser(response.data);
         } catch (error) {

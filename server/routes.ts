@@ -118,6 +118,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // TEMPORARY DEBUG ENDPOINT - Returns complete user profile from JWT middleware
+  app.get("/api/debug/me", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+    try {
+      res.json(req.user);
+    } catch (error) {
+      console.error("Debug endpoint error:", error);
+      res.status(500).json({ message: "Debug endpoint failed" });
+    }
+  });
 
   // Proposal routes
   app.get("/api/propostas", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
