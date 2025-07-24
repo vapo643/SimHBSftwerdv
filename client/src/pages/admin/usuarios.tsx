@@ -40,34 +40,38 @@ const UsuariosPage: React.FC = () => {
 
   // Mutation for creating new users
   const createUserMutation = useMutation({
+    // A mutationFn deve retornar o objeto completo da API
     mutationFn: async (userData: any) => {
-      // Transform form data to match API schema
       const apiData = {
         fullName: userData.nome,
         email: userData.email,
         role: userData.perfil,
-        // For ATENDENTE: single store selection (lojaId)
         lojaId: userData.perfil === 'ATENDENTE' && userData.lojaId ? parseInt(userData.lojaId) : null,
-        // For GERENTE: multiple store selection (lojaIds array)
         lojaIds: userData.perfil === 'GERENTE' && userData.lojaIds ? userData.lojaIds.map((id: string) => parseInt(id)) : null,
       };
 
       const response = await api.post('/api/admin/users', apiData);
-      return response.data;
+      return response.data; // Retorna o corpo da resposta da API
     },
-    onSuccess: (response) => {
-      // Extract credentials from response and show success modal
-      if (response.temporaryPassword) {
+    // O 'data' aqui é o que foi retornado pela mutationFn
+    onSuccess: (data) => {
+      // VERIFICAÇÃO DE SEGURANÇA: Garante que os dados necessários existem antes de prosseguir
+      if (data?.email && data?.temporaryPassword) {
         setNewUserCredentials({
-          email: userData.email,
-          temporaryPassword: response.temporaryPassword
+          email: data.email, // CORREÇÃO: Usa o email da resposta da API
+          temporaryPassword: data.temporaryPassword
         });
         setSuccessModalOpen(true);
+      } else {
+        // Fallback: Se a API não retornar a senha, mostra um toast genérico.
+        toast({
+          title: "Sucesso",
+          description: "Usuário criado, mas as credenciais não puderam ser exibidas.",
+        });
       }
       
-      // Invalidate all user-related and dependent queries using hierarchical keys
+      // Invalidação de cache permanece a mesma
       queryClient.invalidateQueries({ queryKey: queryKeys.users.all });
-      // Also invalidate dependent data that might reference users
       queryClient.invalidateQueries({ queryKey: queryKeys.partners.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.stores.all });
       setIsModalOpen(false);

@@ -24,7 +24,7 @@ export async function createUser(userData: UserData) {
     if (checkError) {
       throw new Error(`Erro ao verificar email: ${checkError.message}`);
     }
-    
+
     const existingUser = existingUsers.users.find(user => user.email === userData.email);
     if (existingUser) {
       const conflictError = new Error(`Usuário com email ${userData.email} já existe.`);
@@ -64,7 +64,7 @@ export async function createUser(userData: UserData) {
     }
 
     sendWelcomeEmail(userData.email, temporaryPassword);
-    
+
     return {
       success: true,
       message: 'Usuário criado com sucesso.',
