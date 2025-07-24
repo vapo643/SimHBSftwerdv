@@ -81,17 +81,12 @@ This is a full-stack TypeScript application for credit management called "Simpix
 - **Git Flow Documentation**: Complete branching strategy documentation with examples and workflow guidelines
 
 ### January 2025
-- **Critical RBAC Security Implementation**: Complete Role-Based Access Control architecture implementation fixing catastrophic authorization failure
-- **Backend Security Enhancement**: Removed development bypass in JWT middleware and implemented full session enrichment with profile database queries
-- **Frontend Access Control**: Created AuthContext and useAuth() hook for managing authentication state across the application
-- **Navigation Visibility Control**: Admin-only links (Usuários, Parceiros, Lojas) now properly hidden from non-ADMINISTRADOR users
-- **Session Enrichment**: JWT middleware now queries profiles table to attach complete user profile (role, loja_id, etc.) to every authenticated request
-- **Auth Endpoint**: Added GET /api/auth/me endpoint for frontend to fetch current user profile with full RBAC data
 - **Phase 1 - Critical Stabilization Complete**: Executed comprehensive 3-phase anti-fragile stabilization plan eliminating 80% of system crashes
 - **Storage Layer Enhancement**: Implemented missing `getUsersWithDetails()` method with robust LEFT JOIN queries connecting profiles, auth.users, lojas, and parceiros
 - **Query Keys Factory**: Created hierarchical and isolated query key management system in `/client/src/hooks/queries/queryKeys.ts` with invalidation patterns for consistent cache management
 - **Health Check Infrastructure**: Added `/api/health/storage` and `/api/health/schema` endpoints for real-time system stability monitoring and dependency validation
 - **Anti-Fragile Architecture**: Applied sequential validation approach preventing concurrent file modifications and ensuring systematic code stability
+- **RBAC Full-Stack Implementation**: Complete Role-Based Access Control system with backend session enrichment, frontend AuthContext/useAuth hook, and conditional navigation visibility based on user roles. Removed development backdoor for production-ready security.
 - **API Client Foundation (Phase 1)**: Created centralized API client foundation in `/client/src/lib/apiClient.ts` with comprehensive HTTP wrapper, authentication headers, JSON parsing, and error handling. Includes TypeScript interfaces and convenience methods for all HTTP operations.
 - **API Client v2.0 Architectural Refactoring**: Complete refactoring with specialized management classes: TokenManager (singleton with JWT caching and auto-refresh), ApiConfig (environment-aware URL building), RequestManager (timeout and retry logic), enhanced ApiError (standardized error codes and retry determination), and orchestrated integration with automatic token refresh on 401 errors.
 - **Phase 2-3 Integration Complete**: Successfully integrated v2.0 apiClient into Partners and Stores management pages, replacing all legacy fetch calls with robust api.get/post/put/delete methods while maintaining full UX compatibility (toasts, loading states, cache invalidation).

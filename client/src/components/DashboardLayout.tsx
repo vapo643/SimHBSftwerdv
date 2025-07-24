@@ -2,9 +2,9 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { signOut } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import OfflineIndicator from "./OfflineIndicator";
-import { useAuth } from "@/contexts/AuthContext";
 import {
   LayoutDashboard,
   PlusCircle,
@@ -31,27 +31,28 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
   const { toast } = useToast();
   const { user } = useAuth();
 
-  // Definir navegação com permissões
-  const navigation = [
-    { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, requireAdmin: false },
-    { name: "Nova Proposta", href: "/propostas/nova", icon: PlusCircle, requireAdmin: false },
-    { name: "Fila de Análise", href: "/credito/fila", icon: List, requireAdmin: false },
-    { name: "Formalização", href: "/formalizacao/fila", icon: FileText, requireAdmin: false },
-    { name: "Pagamentos", href: "/financeiro/pagamentos", icon: CreditCard, requireAdmin: false },
-    { name: "Tabelas Comerciais", href: "/configuracoes/tabelas", icon: Settings, requireAdmin: false },
-    { name: "Usuários", href: "/admin/usuarios", icon: Users, requireAdmin: true }, // Admin only
-    { name: "Parceiros", href: "/parceiros", icon: Building2, requireAdmin: true }, // Admin only
-    { name: "Produtos", href: "/configuracoes/produtos", icon: Package, requireAdmin: false },
-    { name: "Lojas", href: "/admin/lojas", icon: Store, requireAdmin: true }, // Admin only
+  // Base navigation items available to all authenticated users
+  const baseNavigation = [
+    { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+    { name: "Nova Proposta", href: "/propostas/nova", icon: PlusCircle },
+    { name: "Fila de Análise", href: "/credito/fila", icon: List },
+    { name: "Formalização", href: "/formalizacao/fila", icon: FileText },
+    { name: "Pagamentos", href: "/financeiro/pagamentos", icon: CreditCard },
   ];
 
-  // Filtrar navegação baseado na role do usuário
-  const filteredNavigation = navigation.filter(item => {
-    if (item.requireAdmin && user?.role !== 'ADMINISTRADOR') {
-      return false;
-    }
-    return true;
-  });
+  // Administrative navigation items - only visible to ADMINISTRADOR role
+  const adminNavigation = [
+    { name: "Tabelas Comerciais", href: "/configuracoes/tabelas", icon: Settings },
+    { name: "Usuários", href: "/admin/usuarios", icon: Users },
+    { name: "Parceiros", href: "/parceiros", icon: Building2 },
+    { name: "Produtos", href: "/configuracoes/produtos", icon: Package },
+    { name: "Lojas", href: "/admin/lojas", icon: Store },
+  ];
+
+  // Conditional navigation based on user role
+  const navigation = user?.role === 'ADMINISTRADOR' 
+    ? [...baseNavigation, ...adminNavigation]
+    : baseNavigation;
 
   const handleSignOut = async () => {
     try {
@@ -87,7 +88,7 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
           </div>
           <div className="flex-1 overflow-auto py-2">
             <nav className="grid items-start px-4 text-sm font-medium">
-              {filteredNavigation.map(item => {
+              {navigation.map(item => {
                 const Icon = item.icon;
                 const isActive = location === item.href;
                 return (

@@ -1,64 +1,89 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { getSupabase } from '@/lib/supabase';
 import { api } from '@/lib/apiClient';
 
 interface User {
   id: string;
   email: string;
-  role: string;
-  full_name?: string;
-  loja_id?: number;
+  role: string | null;
+  full_name?: string | null;
+  loja_id?: number | null;
 }
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  error: Error | null;
-  refreshUser: () => void;
+  refetchUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Step 2.2: Custom hook for easy access to auth data
-export function useAuth() {
+interface AuthProviderProps {
+  children: ReactNode;
+}
+
+export function AuthProvider({ children }: AuthProviderProps) {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const fetchUserProfile = async () => {
+    try {
+      const supabase = getSupabase();
+      const { data: currentUser } = await supabase.auth.getUser();
+      if (currentUser.user) {
+        try {
+          // Fetch additional profile data from our API using authenticated client
+          const response = await api.get<{
+            id: string;
+            email: string;
+            role: string | null;
+            full_name?: string | null;
+            loja_id?: number | null;
+          }>('/api/auth/profile');
+          
+          setUser(response.data);
+        } catch (error) {
+          console.error('Error fetching profile data:', error);
+          // Fallback to basic user data if profile fetch fails
+          setUser({
+            id: currentUser.user.id,
+            email: currentUser.user.email || '',
+            role: null,
+          });
+        }
+      } else {
+        setUser(null);
+      }
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const refetchUser = async () => {
+    setLoading(true);
+    await fetchUserProfile();
+  };
+
+  useEffect(() => {
+    fetchUserProfile();
+  }, []);
+
+  const value = {
+    user,
+    loading,
+    refetchUser,
+  };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+export function useAuth(): AuthContextType {
   const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-}
-
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-
-  // Fetch current user profile
-  const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ['auth', 'currentUser'],
-    queryFn: async () => {
-      try {
-        const response = await api.get<{ user: User }>('/api/auth/me');
-        return response.data.user;
-      } catch (error) {
-        // Return null if user is not authenticated
-        return null;
-      }
-    },
-    retry: false,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
-
-  useEffect(() => {
-    if (data) {
-      setUser(data);
-    }
-  }, [data]);
-
-  const value: AuthContextType = {
-    user,
-    loading: isLoading,
-    error: error as Error | null,
-    refreshUser: () => refetch(),
-  };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

@@ -456,19 +456,6 @@ app.get("/api/tabelas-comerciais-disponiveis", jwtAuthMiddleware, async (req: Au
     { id: 3, valor: "36 meses" },
   ];
 
-  // Get current authenticated user profile
-  app.get("/api/auth/me", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
-    try {
-      if (!req.user) {
-        return res.status(401).json({ message: "Usuário não autenticado" });
-      }
-      res.json({ user: req.user });
-    } catch (error) {
-      console.error('Error fetching current user:', error);
-      res.status(500).json({ message: "Erro ao buscar dados do usuário" });
-    }
-  });
-
   // Users management endpoints
   app.get("/api/admin/users", jwtAuthMiddleware, requireAdmin, async (req, res) => {
     try {
@@ -1119,6 +1106,26 @@ app.get("/api/tabelas-comerciais-disponiveis", jwtAuthMiddleware, async (req: Au
     } catch (error) {
       console.error("Erro ao desativar loja:", error);
       res.status(500).json({ message: "Erro ao desativar loja" });
+    }
+  });
+
+  // User profile endpoint for RBAC context
+  app.get('/api/auth/profile', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: 'Usuário não autenticado' });
+      }
+
+      res.json({
+        id: req.user.id,
+        email: req.user.email,
+        role: req.user.role,
+        full_name: req.user.full_name,
+        loja_id: req.user.loja_id,
+      });
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+      res.status(500).json({ message: 'Erro interno do servidor' });
     }
   });
 

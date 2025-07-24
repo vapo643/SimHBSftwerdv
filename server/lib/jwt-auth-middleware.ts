@@ -5,11 +5,9 @@ export interface AuthenticatedRequest extends Request {
   user?: {
     id: string;
     email: string;
-    role: string;
-    full_name?: string;
-    loja_id?: number;
-    created_at?: string;
-    updated_at?: string;
+    role: string | null;
+    full_name?: string | null;
+    loja_id?: number | null;
   };
 }
 
@@ -43,6 +41,7 @@ export async function jwtAuthMiddleware(
   next: NextFunction
 ) {
   try {
+
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return res.status(401).json({ message: 'Token de acesso requerido' });
@@ -58,36 +57,24 @@ export async function jwtAuthMiddleware(
       return res.status(401).json({ message: 'Token inválido ou expirado' });
     }
 
-    // Session enrichment: buscar perfil completo do banco de dados
+    // Session enrichment: Query profiles table for complete user data
     const { createServerSupabaseAdminClient } = await import('./supabase');
-    const adminSupabase = createServerSupabaseAdminClient();
+    const supabaseAdmin = createServerSupabaseAdminClient();
     
-    const { data: profile, error: profileError } = await adminSupabase
+    const { data: profile, error: profileError } = await supabaseAdmin
       .from('profiles')
-      .select('*')
+      .select('id, full_name, role, loja_id')
       .eq('id', data.user.id)
       .single();
 
-    if (profileError || !profile) {
-      console.warn(`Profile not found for user ${data.user.id}:`, profileError);
-      // Prosseguir sem profile, mas com role indefinida
-      req.user = {
-        id: data.user.id,
-        email: data.user.email || '',
-        role: 'UNDEFINED'
-      };
-    } else {
-      // Anexar o perfil completo ao request
-      req.user = {
-        id: profile.id,
-        email: data.user.email || '',
-        role: profile.role || 'ATENDENTE',
-        full_name: profile.full_name,
-        loja_id: profile.loja_id,
-        created_at: profile.created_at,
-        updated_at: profile.updated_at
-      };
-    }
+    // Adicionar dados do usuário autenticado ao request com enriched profile data
+    req.user = {
+      id: data.user.id,
+      email: data.user.email || '',
+      role: profile?.role || null,
+      full_name: profile?.full_name || null,
+      loja_id: profile?.loja_id || null
+    };
 
     next();
   } catch (error) {

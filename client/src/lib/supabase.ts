@@ -20,13 +20,22 @@ export const createClientSupabaseClient = () => {
     return clientSupabaseInstance;
   }
 
-  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "";
-  const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || "";
+  // Check if we're in a browser environment before accessing import.meta.env
+  if (typeof window !== 'undefined') {
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "";
+    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || "";
 
-  if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error("Missing Supabase environment variables");
+    if (!supabaseUrl || !supabaseAnonKey) {
+      throw new Error("Missing Supabase environment variables");
+    }
+
+    clientSupabaseInstance = createClient(supabaseUrl, supabaseAnonKey);
+    return clientSupabaseInstance;
   }
 
-  clientSupabaseInstance = createClient(supabaseUrl, supabaseAnonKey);
-  return clientSupabaseInstance;
+  // For server-side, create a basic client that won't be used
+  throw new Error("Client supabase should not be used on server side");
 };
+
+// Lazy export the singleton client instance for React components  
+export const getSupabase = () => createClientSupabaseClient();
