@@ -10,28 +10,18 @@ import {
 } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import UserForm from "@/components/usuarios/UserForm";
+import { mockUsers, User } from "@/data/users";
 import DashboardLayout from "@/components/DashboardLayout";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { fetchWithToken } from "@/lib/apiClient";
-import type { User } from "@shared/schema";
-import { Users, Edit, UserX, UserCheck } from "lucide-react";
 
 const UsuariosPage: React.FC = () => {
+  const [users, setUsers] = useState<User[]>(mockUsers);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-
-  // Fetch users from API using real data
-  const { data: users = [], isLoading: loadingUsers } = useQuery<User[]>({
-    queryKey: ['/api/admin/users'],
-    queryFn: async () => {
-      const response = await fetchWithToken('/api/admin/users');
-      if (!response.ok) throw new Error('Failed to fetch users');
-      return response.json();
-    },
-  });
 
   // Mutation for creating new users
   const createUserMutation = useMutation({
@@ -62,12 +52,21 @@ const UsuariosPage: React.FC = () => {
 
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast({
         title: "Sucesso",
         description: "Usuário criado com sucesso!",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      // Add the new user to the local state (for now, until we implement listing API)
+      const newUser: User = {
+        id: data.id,
+        nome: data.full_name,
+        email: data.user?.email || 'N/A',
+        perfil: data.role,
+        loja: data.loja_id ? `Loja ${data.loja_id}` : 'N/A',
+        status: 'Ativo'
+      };
+      setUsers(prev => [...prev, newUser]);
       setIsModalOpen(false);
       setSelectedUser(null);
     },
@@ -80,16 +79,15 @@ const UsuariosPage: React.FC = () => {
     },
   });
 
-  const handleCreateOrEdit = (userData: any) => {
+  const handleCreateOrEdit = (user: any) => {
     if (selectedUser) {
-      // TODO: Implement edit functionality when needed
-      toast({
-        title: "Info",
-        description: "Edição de usuários será implementada em breve",
-      });
+      // For editing, keep the old logic for now
+      setUsers(users.map(u => (u.id === selectedUser.id ? { ...u, ...user } : u)));
+      setIsModalOpen(false);
+      setSelectedUser(null);
     } else {
       // For creating new users, use the API
-      createUserMutation.mutate(userData);
+      createUserMutation.mutate(user);
     }
   };
 
@@ -103,105 +101,58 @@ const UsuariosPage: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  const toggleUserStatus = (userId: number) => {
-    // TODO: Implement user status toggle when API is ready
-    toast({
-      title: "Info", 
-      description: "Alteração de status será implementada em breve",
-    });
-  };
-
-  if (loadingUsers) {
-    return (
-      <DashboardLayout title="Gestão de Usuários e Perfis">
-        <div className="flex items-center justify-center h-64">
-          <div className="text-gray-500">Carregando usuários...</div>
-        </div>
-      </DashboardLayout>
+  const toggleUserStatus = (userId: string) => {
+    setUsers(
+      users.map(user =>
+        user.id === userId
+          ? { ...user, status: user.status === "Ativo" ? "Inativo" : "Ativo" }
+          : user
+      )
     );
-  }
+  };
 
   return (
     <DashboardLayout title="Gestão de Usuários e Perfis">
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <Users className="h-8 w-8 text-blue-500" />
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Gestão de Usuários</h1>
-          </div>
-          <Button onClick={openNewModal} className="bg-blue-600 hover:bg-blue-700">
-            <Users className="h-4 w-4 mr-2" />
-            Novo Usuário
-          </Button>
-        </div>
+      <div className="mb-4 flex items-center justify-between">
+        <h1 className="text-2xl text-gradient-simpix">Usuários</h1>
+        <Button className="btn-simpix-accent" onClick={openNewModal}>Novo Usuário</Button>
       </div>
-
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Nome</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Perfil</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Ações</TableHead>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Nome</TableHead>
+            <TableHead>Email</TableHead>
+            <TableHead>Perfil</TableHead>
+            <TableHead>Loja</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Ações</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {users.map(user => (
+            <TableRow key={user.id}>
+              <TableCell>{user.nome}</TableCell>
+              <TableCell>{user.email}</TableCell>
+              <TableCell>{user.perfil}</TableCell>
+              <TableCell>{user.loja}</TableCell>
+              <TableCell>{user.status}</TableCell>
+              <TableCell className="space-x-2">
+                <Button className="btn-simpix-primary" size="sm" onClick={() => openEditModal(user)}>
+                  Editar
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => toggleUserStatus(user.id)}>
+                  {user.status === "Ativo" ? "Desativar" : "Ativar"}
+                </Button>
+              </TableCell>
             </TableRow>
-          </TableHeader>
-          <TableBody>
-            {users.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={5} className="text-center py-8 text-gray-500">
-                  Nenhum usuário encontrado
-                </TableCell>
-              </TableRow>
-            ) : (
-              users.map(user => (
-                <TableRow key={user.id}>
-                  <TableCell className="font-medium">{user.name}</TableCell>
-                  <TableCell>{user.email}</TableCell>
-                  <TableCell>
-                    <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
-                      {user.role}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
-                      Ativo
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => openEditModal(user)}
-                        className="h-8 w-8 p-0"
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => toggleUserStatus(user.id)}
-                        className="h-8 w-8 p-0"
-                      >
-                        <UserX className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
+          ))}
+        </TableBody>
+      </Table>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle>
-              {selectedUser ? "Editar Usuário" : "Novo Usuário"}
-            </DialogTitle>
+            <DialogTitle>{selectedUser ? "Editar Usuário" : "Novo Usuário"}</DialogTitle>
           </DialogHeader>
           <UserForm
             initialData={selectedUser}
