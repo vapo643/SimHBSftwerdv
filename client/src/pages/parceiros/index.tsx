@@ -25,6 +25,7 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { Link } from "wouter";
 import { api } from "@/lib/apiClient";
 import { queryClient } from "@/lib/queryClient";
+import { queryKeys } from "@/hooks/queries/queryKeys";
 import { useToast } from "@/hooks/use-toast";
 import { Parceiro, InsertParceiro } from "@shared/schema";
 import { Edit, Trash2, Eye, Building2, Users } from "lucide-react";
@@ -36,9 +37,9 @@ const PartnersPage: React.FC = () => {
   const [partnerToDelete, setPartnerToDelete] = useState<Parceiro | null>(null);
   const { toast } = useToast();
 
-  // Fetch partners data using new apiClient
+  // Fetch partners data using new apiClient and hierarchical query keys
   const { data: partners = [], isLoading, error } = useQuery<Parceiro[]>({
-    queryKey: ["/api/parceiros"],
+    queryKey: queryKeys.partners.list(),
     queryFn: async () => {
       const response = await api.get<Parceiro[]>("/api/parceiros");
       return response.data;

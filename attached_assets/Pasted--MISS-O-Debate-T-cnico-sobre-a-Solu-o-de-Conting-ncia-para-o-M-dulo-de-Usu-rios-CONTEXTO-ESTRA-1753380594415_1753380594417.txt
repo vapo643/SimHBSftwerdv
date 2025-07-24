@@ -1,0 +1,72 @@
+# MISSÃO: Debate Técnico sobre a Solução de Contingência para o Módulo de Usuários
+
+**CONTEXTO ESTRATÉGICO:**
+As tentativas de implementação do Agente para corrigir o Módulo de Usuários falharam repetidamente, resultando em múltiplos rollbacks. A falha principal é um erro de arquitetura de frontend que causa dependência de cache entre páginas e falhas na lógica de cascata dos formulários. O Orquestrador (GEM 02), operando sob um "Protocolo de Continuidade Operacional", gerou uma proposta de código completa para resolver o problema.
+
+**SUA TAREFA (ASSISTENTE):**
+A sua tarefa não é escrever código. A sua tarefa é atuar como um Arquiteto de Software Sênior e realizar uma **análise de risco e uma revisão de código** sobre a solução proposta pelo Orquestrador. O nosso objetivo é chegar a um acordo sobre a arquitetura final antes de qualquer nova tentativa de implementação. Esta será a nossa **Interação 1 de 3**.
+
+---
+### **PROPOSTA DE CÓDIGO DO ORQUESTRADOR (SOB ANÁLISE)**
+
+```typescript
+// PROPOSTA PARA: /client/src/hooks/queries/useUserFormData.ts
+// Este novo hook centraliza a busca de dados para o formulário de usuários.
+import { useQuery } from '@tanstack/react-query';
+import { api } from '@/lib/apiClient';
+
+interface Parceiro { id: number; razao_social: string; }
+interface Loja { id: number; nome_loja: string; parceiro_id: number; }
+
+export function useUserFormData() {
+  const { 
+    data: parceiros = [], 
+    isLoading: isLoadingParceiros, 
+    error: parceirosError 
+  } = useQuery<Parceiro[]>({
+    queryKey: ['admin_parceiros_list'],
+    queryFn: () => api.get('/api/admin/parceiros').then(res => res.data),
+  });
+
+  const { 
+    data: todasLojas = [], 
+    isLoading: isLoadingLojas, 
+    error: lojasError 
+  } = useQuery<Loja[]>({
+    queryKey: ['admin_lojas_list'],
+    queryFn: () => api.get('/api/admin/lojas').then(res => res.data),
+  });
+
+  return { parceiros, isLoadingParceiros, parceirosError, todasLojas, isLoadingLojas, lojasError, isLoading: isLoadingParceiros || isLoadingLojas };
+}
+TypeScript
+
+// PROPOSTA PARA: /client/src/pages/admin/usuarios/index.tsx
+// A página pai agora usa o hook para buscar os dados e os passa para o formulário.
+// ... (código omitido por brevidado, mas a lógica chave é usar o `useUserFormData` e passar `parceiros` e `todasLojas` como props para o UserForm)
+TypeScript
+
+// PROPOSTA PARA: /client/src/components/usuarios/UserForm.tsx
+// O formulário agora recebe os dados via props e implementa a lógica de cascata.
+// ... (código omitido por brevidade, mas a lógica chave é receber as props e usar `useMemo` para a filtragem client-side)
+Interação 1: Sua Análise Crítica e Proposta de Refinamento
+Por favor, analise a proposta do Orquestrador e responda com a sua avaliação técnica para os seguintes pontos:
+
+1. Análise da Arquitetura (Hook Centralizado):
+
+A estratégia de criar um hook customizado useUserFormData para isolar a busca de dados é a solução correta para a nossa falha de dependência de cache? Quais são os pontos fortes e fracos desta abordagem?
+
+2. Análise da Estratégia de Filtragem (Client-Side):
+
+O Orquestrador propôs uma filtragem client-side com useMemo. Dado o nosso requisito de alta escala (milhares de lojas), esta é uma abordagem segura? Ou deveríamos reconsiderar a filtragem server-side que discutimos anteriormente? Justifique a sua recomendação final.
+
+3. Análise de Risco do Código:
+
+Inspecione a proposta de código. Você identifica algum "code smell", anti-padrão ou risco de bug potencial que o Orquestrador possa não ter considerado? Proponha melhorias específicas no código se encontrar alguma.
+
+4. Proposta de Plano de Implementação (Se Aprovado):
+
+Se você concordar com a arquitetura geral (com ou sem as suas modificações), como você decomporia a implementação disto em "micro-passos" para o Agente, para garantir uma execução à prova de falhas?
+
+
+Aguardando a análise do Assistente para que possamos chegar a uma solução final e consensual.

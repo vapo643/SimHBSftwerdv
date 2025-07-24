@@ -9,13 +9,16 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Skeleton } from "@/components/ui/skeleton";
 import UserForm from "@/components/usuarios/UserForm";
 import DashboardLayout from "@/components/DashboardLayout";
+import { ErrorBoundary, UserFormErrorBoundary } from "@/components/ErrorBoundary";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { fetchWithToken } from "@/lib/apiClient";
+import { api } from "@/lib/apiClient";
+import { queryKeys } from "@/hooks/queries/queryKeys";
 import type { User } from "@shared/schema";
-import { Users, Edit, UserX, UserCheck } from "lucide-react";
+import { Users, Edit, UserX, UserCheck, Loader2 } from "lucide-react";
 
 const UsuariosPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -23,13 +26,12 @@ const UsuariosPage: React.FC = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Fetch users from API using real data
-  const { data: users = [], isLoading: loadingUsers } = useQuery<User[]>({
-    queryKey: ['/api/admin/users'],
+  // Fetch users from API using new API client and query keys
+  const { data: users = [], isLoading: loadingUsers, error: usersError } = useQuery<User[]>({
+    queryKey: queryKeys.users.list(),
     queryFn: async () => {
-      const response = await fetchWithToken('/api/admin/users');
-      if (!response.ok) throw new Error('Failed to fetch users');
-      return response.json();
+      const response = await api.get<User[]>('/api/admin/users');
+      return response.data;
     },
   });
 
@@ -47,27 +49,19 @@ const UsuariosPage: React.FC = () => {
         lojaIds: userData.perfil === 'GERENTE' && userData.lojaIds ? userData.lojaIds.map((id: string) => parseInt(id)) : null,
       };
 
-      const response = await fetchWithToken('/api/admin/users', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(apiData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Erro ao criar usuário');
-      }
-
-      return response.json();
+      const response = await api.post('/api/admin/users', apiData);
+      return response.data;
     },
     onSuccess: () => {
       toast({
         title: "Sucesso",
         description: "Usuário criado com sucesso!",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      // Invalidate all user-related and dependent queries using hierarchical keys
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.all });
+      // Also invalidate dependent data that might reference users
+      queryClient.invalidateQueries({ queryKey: queryKeys.partners.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.stores.all });
       setIsModalOpen(false);
       setSelectedUser(null);
     },
@@ -111,11 +105,66 @@ const UsuariosPage: React.FC = () => {
     });
   };
 
+  // Error handling
+  if (usersError) {
+    return (
+      <DashboardLayout title="Gestão de Usuários e Perfis">
+        <ErrorBoundary>
+          <div className="flex items-center justify-center h-64">
+            <div className="text-center space-y-4">
+              <p className="text-red-600 dark:text-red-400">Erro ao carregar usuários</p>
+              <Button onClick={() => window.location.reload()} variant="outline">
+                Tentar Novamente
+              </Button>
+            </div>
+          </div>
+        </ErrorBoundary>
+      </DashboardLayout>
+    );
+  }
+
+  // Loading skeleton
   if (loadingUsers) {
     return (
       <DashboardLayout title="Gestão de Usuários e Perfis">
-        <div className="flex items-center justify-center h-64">
-          <div className="text-gray-500">Carregando usuários...</div>
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <Users className="h-8 w-8 text-blue-500" />
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Gestão de Usuários</h1>
+            </div>
+            <Skeleton className="h-10 w-32" />
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Nome</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Perfil</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Ações</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {[...Array(5)].map((_, i) => (
+                <TableRow key={i}>
+                  <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-48" /></TableCell>
+                  <TableCell><Skeleton className="h-6 w-20" /></TableCell>
+                  <TableCell><Skeleton className="h-6 w-16" /></TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <Skeleton className="h-8 w-8" />
+                      <Skeleton className="h-8 w-8" />
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </div>
       </DashboardLayout>
     );
@@ -197,21 +246,23 @@ const UsuariosPage: React.FC = () => {
       </div>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {selectedUser ? "Editar Usuário" : "Novo Usuário"}
             </DialogTitle>
           </DialogHeader>
-          <UserForm
-            initialData={selectedUser}
-            onSubmit={handleCreateOrEdit}
-            onCancel={() => {
-              setIsModalOpen(false);
-              setSelectedUser(null);
-            }}
-            isLoading={createUserMutation.isPending}
-          />
+          <UserFormErrorBoundary>
+            <UserForm
+              initialData={selectedUser}
+              onSubmit={handleCreateOrEdit}
+              onCancel={() => {
+                setIsModalOpen(false);
+                setSelectedUser(null);
+              }}
+              isLoading={createUserMutation.isPending}
+            />
+          </UserFormErrorBoundary>
         </DialogContent>
       </Dialog>
     </DashboardLayout>

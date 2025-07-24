@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import DashboardLayout from "@/components/DashboardLayout";
 import { api } from "@/lib/apiClient";
+import { queryKeys } from "@/hooks/queries/queryKeys";
 import { Button } from "@/components/ui/button";
 import { 
   Table, 
@@ -25,9 +26,9 @@ export default function LojasPage() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  // Fetch lojas using new apiClient
+  // Fetch lojas using new apiClient and hierarchical query keys
   const { data: lojas = [], isLoading: loadingLojas } = useQuery<Loja[]>({
-    queryKey: ['/api/admin/lojas'],
+    queryKey: queryKeys.stores.list(),
     queryFn: async () => {
       const response = await api.get<Loja[]>('/api/admin/lojas');
       return response.data;
@@ -45,7 +46,11 @@ export default function LojasPage() {
         title: "Sucesso",
         description: "Loja criada com sucesso!",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/lojas'] });
+      // Invalidate all stores-related queries using hierarchical keys
+      queryClient.invalidateQueries({ queryKey: queryKeys.stores.all });
+      // Also invalidate system metadata and user form data
+      queryClient.invalidateQueries({ queryKey: queryKeys.system.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.all });
       setIsModalOpen(false);
       setSelectedLoja(null);
     },
@@ -69,7 +74,11 @@ export default function LojasPage() {
         title: "Sucesso",
         description: "Loja atualizada com sucesso!",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/lojas'] });
+      // Invalidate all stores-related queries using hierarchical keys
+      queryClient.invalidateQueries({ queryKey: queryKeys.stores.all });
+      // Also invalidate system metadata and user form data
+      queryClient.invalidateQueries({ queryKey: queryKeys.system.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.all });
       setIsModalOpen(false);
       setSelectedLoja(null);
     },
@@ -93,7 +102,11 @@ export default function LojasPage() {
         title: "Sucesso",
         description: "Loja desativada com sucesso!",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/lojas'] });
+      // Invalidate all stores-related queries using hierarchical keys
+      queryClient.invalidateQueries({ queryKey: queryKeys.stores.all });
+      // Also invalidate system metadata and user form data
+      queryClient.invalidateQueries({ queryKey: queryKeys.system.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.all });
     },
     onError: (error: any) => {
       toast({

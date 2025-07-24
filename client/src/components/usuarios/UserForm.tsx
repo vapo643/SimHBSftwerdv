@@ -14,16 +14,9 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { X, Info } from "lucide-react";
-import { useLojaFiltering } from "@/hooks/useLojaFiltering";
-
-// Import query hooks
-import { useQuery } from "@tanstack/react-query";
-import { fetchWithToken } from "@/lib/apiClient";
-
-interface Parceiro {
-  id: number;
-  razaoSocial: string;
-}
+import { useUserFormData, useStoresByPartner } from "@/hooks/queries/useUserFormData";
+import { Skeleton } from "@/components/ui/skeleton";
+import { AlertTriangle } from "lucide-react";
 
 const userSchema = z
   .object({
@@ -73,28 +66,51 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, onSubmit, onCancel, is
   });
 
   const selectedPerfil = watch("perfil");
-  const selectedParceiro = watch("parceiroId");
+  const selectedParceiroId = watch("parceiroId");
+
+  // Use the new comprehensive data hook
+  const {
+    partners,
+    isLoading: isFormDataLoading,
+    error: formDataError,
+    filteringStrategy,
+    getStoresByPartner,
+    canFilterClientSide,
+    isDataReady,
+  } = useUserFormData();
+
+  // Use server-side store fetching when needed
+  const {
+    data: serverStores = [],
+    isLoading: isServerStoresLoading,
+    error: serverStoresError,
+  } = useStoresByPartner(
+    selectedParceiroId ? parseInt(selectedParceiroId) : null,
+    !canFilterClientSide && !!selectedParceiroId
+  );
+
+  // State management for multiple stores (GERENTE profile)
   const [selectedLojas, setSelectedLojas] = useState<string[]>(initialData?.lojaIds || []);
 
-  // Use the hybrid filtering hook for dynamic loja loading
-  const { filteredLojas, isLoading: lojasLoading, error: lojasError, filteringMode } = useLojaFiltering(selectedParceiro);
+  // Get available stores based on filtering strategy
+  const getAvailableStores = () => {
+    if (!selectedParceiroId) return [];
+    
+    if (canFilterClientSide) {
+      // Client-side filtering: use pre-loaded data
+      return getStoresByPartner(parseInt(selectedParceiroId));
+    } else {
+      // Server-side filtering: use on-demand data
+      return serverStores;
+    }
+  };
 
-  // Fetch parceiros data for dropdown
-  const { data: parceiros = [], isLoading: parceirosLoading } = useQuery<Parceiro[]>({
-    queryKey: ['/api/parceiros'],
-    queryFn: async () => {
-      const response = await fetchWithToken('/api/parceiros');
-      if (!response.ok) throw new Error('Failed to fetch parceiros');
-      return response.json();
-    },
-    staleTime: 10 * 60 * 1000, // Cache for 10 minutes
-  });
+  const availableStores = getAvailableStores();
+  const isStoresLoading = canFilterClientSide ? false : isServerStoresLoading;
 
   useEffect(() => {
-    if (!initialData?.id) {
-      const generatedPassword = Math.random().toString(36).slice(-8);
-      setValue("senhaProvisoria", generatedPassword);
-    }
+    // Password is now handled server-side automatically
+    // No need to set senhaProvisoria in form
   }, [initialData, setValue]);
 
   // Update form values when selected stores change for GERENTE
@@ -126,10 +142,24 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, onSubmit, onCancel, is
   };
 
   const getLojaName = (lojaId: string) => {
-    // Use filtered lojas from the hybrid hook instead of mock data
-    const loja = filteredLojas.find(l => l.id.toString() === lojaId);
+    const loja = availableStores.find(l => l.id.toString() === lojaId);
     return loja ? loja.nomeLoja : "Loja não encontrada";
   };
+
+  // Handle errors and loading states
+  if (formDataError) {
+    return (
+      <div className="p-4 border border-red-200 bg-red-50 rounded-lg">
+        <div className="flex items-center gap-2">
+          <AlertTriangle className="h-5 w-5 text-red-600" />
+          <div>
+            <h4 className="font-medium text-red-800">Erro ao carregar dados</h4>
+            <p className="text-sm text-red-700">Não foi possível carregar os dados necessários para o formulário.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -198,12 +228,12 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, onSubmit, onCancel, is
               name="parceiroId"
               control={control}
               render={({ field }) => (
-                <Select onValueChange={field.onChange} defaultValue={field.value} disabled={parceirosLoading}>
+                <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isFormDataLoading}>
                   <SelectTrigger>
-                    <SelectValue placeholder={parceirosLoading ? "Carregando parceiros..." : "Selecione um parceiro..."} />
+                    <SelectValue placeholder={isFormDataLoading ? "Carregando parceiros..." : "Selecione um parceiro..."} />
                   </SelectTrigger>
                   <SelectContent>
-                    {parceiros.map(parceiro => (
+                    {partners.map(parceiro => (
                       <SelectItem key={parceiro.id} value={parceiro.id.toString()}>
                         {parceiro.razaoSocial}
                       </SelectItem>
@@ -220,13 +250,13 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, onSubmit, onCancel, is
             <div>
               <div className="flex items-center gap-2">
                 <Label>Loja Associada</Label>
-                {lojasError && (
+                {serverStoresError && (
                   <span className="text-xs text-red-500 flex items-center gap-1">
                     <Info className="h-3 w-3" />
                     Erro ao carregar lojas
                   </span>
                 )}
-                {filteringMode === 'server-side' && (
+                {filteringStrategy === 'server-side' && (
                   <span className="text-xs text-blue-500 flex items-center gap-1">
                     <Info className="h-3 w-3" />
                     Modo otimizado ativo
@@ -237,12 +267,12 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, onSubmit, onCancel, is
                 name="lojaId"
                 control={control}
                 render={({ field }) => (
-                  <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!selectedParceiro || lojasLoading}>
+                  <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!selectedParceiroId || isStoresLoading}>
                     <SelectTrigger>
-                      <SelectValue placeholder={lojasLoading ? "Carregando lojas..." : "Selecione uma loja..."} />
+                      <SelectValue placeholder={isStoresLoading ? "Carregando lojas..." : "Selecione uma loja..."} />
                     </SelectTrigger>
                     <SelectContent>
-                      {filteredLojas.map(l => (
+                      {availableStores.map(l => (
                         <SelectItem key={l.id} value={l.id.toString()}>{l.nomeLoja}</SelectItem>
                       ))}
                     </SelectContent>
@@ -258,13 +288,13 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, onSubmit, onCancel, is
             <div>
               <div className="flex items-center gap-2">
                 <Label>Lojas Associadas (Múltipla Seleção)</Label>
-                {lojasError && (
+                {serverStoresError && (
                   <span className="text-xs text-red-500 flex items-center gap-1">
                     <Info className="h-3 w-3" />
                     Erro ao carregar lojas
                   </span>
                 )}
-                {filteringMode === 'server-side' && (
+                {filteringStrategy === 'server-side' && (
                   <span className="text-xs text-blue-500 flex items-center gap-1">
                     <Info className="h-3 w-3" />
                     Modo otimizado ativo
@@ -272,12 +302,12 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, onSubmit, onCancel, is
                 )}
               </div>
               <div className="space-y-2">
-                <Select onValueChange={handleAddLoja} disabled={!selectedParceiro || lojasLoading}>
+                <Select onValueChange={handleAddLoja} disabled={!selectedParceiroId || isStoresLoading}>
                   <SelectTrigger>
-                    <SelectValue placeholder={lojasLoading ? "Carregando lojas..." : "Selecione lojas para adicionar..."} />
+                    <SelectValue placeholder={isStoresLoading ? "Carregando lojas..." : "Selecione lojas para adicionar..."} />
                   </SelectTrigger>
                   <SelectContent>
-                    {filteredLojas.filter(l => !selectedLojas.includes(l.id.toString())).map(l => (
+                    {availableStores.filter(l => !selectedLojas.includes(l.id.toString())).map(l => (
                       <SelectItem key={l.id} value={l.id.toString()}>{l.nomeLoja}</SelectItem>
                     ))}
                   </SelectContent>
