@@ -3,7 +3,6 @@ import {
   propostas,
   gerenteLojas,
   lojas,
-  parceiros,
   type User,
   type InsertUser,
   type Proposta,
@@ -16,21 +15,14 @@ import {
   type UpdateLoja,
 } from "@shared/schema";
 import { db } from "./lib/supabase";
-import { eq, desc, and, sql } from "drizzle-orm";
-
-// Extended User type for listing with related data
-export interface UserWithDetails extends User {
-  parceiroNome?: string;
-  lojaNome?: string;
-  lojaIds?: number[];
-}
+import { eq, desc, and } from "drizzle-orm";
 
 export interface IStorage {
   // Users
   getUser(id: number): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
-  getUsers(): Promise<UserWithDetails[]>;
   createUser(user: InsertUser): Promise<User>;
+  getUsers(): Promise<User[]>;
 
   // Propostas
   getPropostas(): Promise<Proposta[]>;
@@ -72,31 +64,8 @@ export class DatabaseStorage implements IStorage {
     return result[0];
   }
 
-  async getUsers(): Promise<UserWithDetails[]> {
-    // PHASE 1.1: Simplified query for now - just get basic user data
-    const result = await db
-      .select({
-        id: users.id,
-        email: users.email,
-        name: users.name,
-        role: users.role,
-        createdAt: users.createdAt,
-      })
-      .from(users)
-      .orderBy(desc(users.createdAt));
-
-    // Transform to UserWithDetails format
-    return result.map(row => ({
-      id: row.id,
-      email: row.email,
-      name: row.name,
-      password: '', // Don't return password
-      role: row.role,
-      createdAt: row.createdAt,
-      parceiroNome: undefined, // TODO: Add joins when schema is finalized
-      lojaNome: undefined,     // TODO: Add joins when schema is finalized
-      lojaIds: []              // TODO: Add logic for multiple store associations
-    }));
+  async getUsers(): Promise<User[]> {
+    return await db.select().from(users).orderBy(users.name);
   }
 
   async getPropostas(): Promise<Proposta[]> {
@@ -163,17 +132,26 @@ export class DatabaseStorage implements IStorage {
   }
 
   async checkLojaDependencies(id: number): Promise<{ hasUsers: boolean; hasPropostas: boolean; hasGerentes: boolean }> {
-    // Check if there are proposals associated with this store
-    const propostasCount = await db.select().from(propostas).where(eq(propostas.lojaId, id)).limit(1);
-    
-    // Check if there are manager-store relationships
-    const gerentesCount = await db.select().from(gerenteLojas).where(eq(gerenteLojas.lojaId, id)).limit(1);
-    
-    return {
-      hasUsers: false, // Users don't have direct loja association in our current schema
-      hasPropostas: propostasCount.length > 0,
-      hasGerentes: gerentesCount.length > 0,
-    };
+    try {
+      // Check if there are proposals associated with this store
+      const propostasCount = await db.select({ id: propostas.id }).from(propostas).where(eq(propostas.lojaId, id)).limit(1);
+      
+      // Check if there are manager-store relationships
+      const gerentesCount = await db.select({ id: gerenteLojas.gerenteId }).from(gerenteLojas).where(eq(gerenteLojas.lojaId, id)).limit(1);
+      
+      return {
+        hasUsers: false, // Users don't have direct loja association in our current schema
+        hasPropostas: propostasCount.length > 0,
+        hasGerentes: gerentesCount.length > 0,
+      };
+    } catch (error) {
+      console.error('Error checking loja dependencies:', error);
+      return {
+        hasUsers: false,
+        hasPropostas: false,
+        hasGerentes: false,
+      };
+    }
   }
 
   // Gerente-Lojas Relationships

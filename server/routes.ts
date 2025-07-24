@@ -455,6 +455,17 @@ app.get("/api/tabelas-comerciais-disponiveis", jwtAuthMiddleware, async (req: Au
     { id: 3, valor: "36 meses" },
   ];
 
+  // Users management endpoints
+  app.get("/api/admin/users", jwtAuthMiddleware, requireAdmin, async (req, res) => {
+    try {
+      const users = await storage.getUsers();
+      res.json(users);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      res.status(500).json({ message: "Erro ao buscar usuários" });
+    }
+  });
+
   // API endpoint for partners - GET all (public for dropdowns)
   app.get("/api/parceiros", async (req, res) => {
     try {
@@ -564,17 +575,6 @@ app.get("/api/tabelas-comerciais-disponiveis", jwtAuthMiddleware, async (req: Au
     } catch (error) {
       console.error("Erro ao excluir parceiro:", error);
       res.status(500).json({ message: "Erro ao excluir parceiro" });
-    }
-  });
-
-  // PHASE 1.3: Admin Users Management API
-  app.get("/api/admin/users", jwtAuthMiddleware, requireAdmin, async (req: AuthenticatedRequest, res) => {
-    try {
-      const users = await storage.getUsers();
-      res.json(users);
-    } catch (error) {
-      console.error("Erro ao buscar usuários:", error);
-      res.status(500).json({ message: "Erro ao buscar usuários" });
     }
   });
 
