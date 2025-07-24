@@ -117,29 +117,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
-  // Schema health check endpoint
-  app.get("/api/health/schema", jwtAuthMiddleware, requireAdmin, async (req: AuthenticatedRequest, res) => {
-    try {
-      const { SchemaValidator } = await import("./lib/schemaValidator");
-      const validator = new SchemaValidator();
-      const report = await validator.validateDatabaseSync();
-      
-      const httpStatus = report.isValid ? 200 : 500;
-      
-      res.status(httpStatus).json({
-        status: report.isValid ? 'healthy' : 'unhealthy',
-        ...report
-      });
-    } catch (error) {
-      console.error("Schema health check error:", error);
-      res.status(500).json({ 
-        status: 'error',
-        message: 'Schema validation service unavailable',
-        timestamp: new Date().toISOString()
-      });
-    }
-  });
-
   // Proposal routes
   app.get("/api/propostas", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     try {

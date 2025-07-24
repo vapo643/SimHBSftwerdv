@@ -65,14 +65,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUsers(): Promise<User[]> {
-    try {
-      const result = await db.select().from(users).orderBy(users.name);
-      console.log(`[Storage] getUsers() returned ${result.length} users`);
-      return result;
-    } catch (error) {
-      console.error('[Storage] Error in getUsers():', error);
-      throw new Error('Failed to fetch users from database');
-    }
+    return await db.select().from(users).orderBy(users.name);
   }
 
   async getPropostas(): Promise<Proposta[]> {
@@ -112,14 +105,7 @@ export class DatabaseStorage implements IStorage {
 
   // Lojas CRUD implementation
   async getLojas(): Promise<Loja[]> {
-    try {
-      const result = await db.select().from(lojas).where(eq(lojas.isActive, true)).orderBy(lojas.nomeLoja);
-      console.log(`[Storage] getLojas() returned ${result.length} active lojas`);
-      return result;
-    } catch (error) {
-      console.error('[Storage] Error in getLojas():', error);
-      throw new Error('Failed to fetch lojas from database');
-    }
+    return await db.select().from(lojas).where(eq(lojas.isActive, true)).orderBy(lojas.nomeLoja);
   }
 
   async getLojaById(id: number): Promise<Loja | undefined> {

@@ -15,7 +15,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { X, Info } from "lucide-react";
 import { useLojaFiltering } from "@/hooks/useLojaFiltering";
-import { PARCEIRO_QUERIES, LOJA_QUERIES } from "@/hooks/queries/queryKeys";
 
 // Import query hooks
 import { useQuery } from "@tanstack/react-query";
@@ -81,14 +80,14 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, onSubmit, onCancel, is
   const { filteredLojas, isLoading: lojasLoading, error: lojasError, filteringMode } = useLojaFiltering(selectedParceiro);
 
   // Fetch parceiros data for dropdown
-  const { data: parceiros = [] } = useQuery<Parceiro[]>({
-    queryKey: PARCEIRO_QUERIES.listsForForm(),
+  const { data: parceiros = [], isLoading: parceirosLoading } = useQuery<Parceiro[]>({
+    queryKey: ['/api/parceiros'],
     queryFn: async () => {
       const response = await fetchWithToken('/api/parceiros');
       if (!response.ok) throw new Error('Failed to fetch parceiros');
       return response.json();
     },
-    staleTime: 10 * 60 * 1000, // Longer cache for reference data
+    staleTime: 10 * 60 * 1000, // Cache for 10 minutes
   });
 
   useEffect(() => {
@@ -199,9 +198,9 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, onSubmit, onCancel, is
               name="parceiroId"
               control={control}
               render={({ field }) => (
-                <Select onValueChange={field.onChange} defaultValue={field.value} disabled={false}>
+                <Select onValueChange={field.onChange} defaultValue={field.value} disabled={parceirosLoading}>
                   <SelectTrigger>
-                    <SelectValue placeholder={"Selecione um parceiro..."} />
+                    <SelectValue placeholder={parceirosLoading ? "Carregando parceiros..." : "Selecione um parceiro..."} />
                   </SelectTrigger>
                   <SelectContent>
                     {parceiros.map(parceiro => (
@@ -283,7 +282,7 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, onSubmit, onCancel, is
                     ))}
                   </SelectContent>
                 </Select>
-
+                
                 {/* Display selected stores */}
                 {selectedLojas.length > 0 && (
                   <div className="flex flex-wrap gap-2 p-2 border rounded-md bg-muted/50">
