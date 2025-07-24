@@ -108,15 +108,24 @@ export default function GestãoProdutos() {
       queryClient.invalidateQueries({ queryKey: ["produtos"] });
       toast({
         title: "Sucesso!",
-        description: "Produto excluído com sucesso.",
+        description: "Produto excluído permanentemente.",
       });
     },
-    onError: (error: Error) => {
-      toast({
-        title: "Erro",
-        description: error.message,
-        variant: "destructive",
-      });
+    onError: (error: any) => {
+      // Handle 409 Conflict (dependency error) specifically
+      if (error.response?.status === 409) {
+        toast({
+          title: "Exclusão Bloqueada",
+          description: error.response.data.message || "Este produto não pode ser excluído pois está a ser utilizado por uma ou mais Tabelas Comerciais.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Erro",
+          description: error.message || "Erro ao excluir produto",
+          variant: "destructive",
+        });
+      }
     },
   });
 
@@ -307,10 +316,14 @@ export default function GestãoProdutos() {
                           </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader>
-                              <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+                              <AlertDialogTitle>Tem a certeza?</AlertDialogTitle>
                               <AlertDialogDescription>
-                                Tem certeza que deseja excluir o produto "{produto.nomeProduto}"?
-                                Esta ação não pode ser desfeita.
+                                <span className="text-red-600 font-medium">
+                                  Esta ação é irreversível e irá apagar permanentemente o produto "{produto.nomeProduto}" do banco de dados.
+                                </span>
+                                <br />
+                                <br />
+                                Esta operação só será bem-sucedida se o produto não estiver associado a nenhuma Tabela Comercial.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
@@ -318,8 +331,9 @@ export default function GestãoProdutos() {
                               <AlertDialogAction
                                 onClick={() => handleDelete(produto.id)}
                                 disabled={deleteMutation.isPending}
+                                className="bg-red-600 hover:bg-red-700 text-white"
                               >
-                                {deleteMutation.isPending ? "Excluindo..." : "Excluir"}
+                                {deleteMutation.isPending ? "Excluindo..." : "Excluir Permanentemente"}
                               </AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>

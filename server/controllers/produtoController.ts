@@ -26,13 +26,25 @@ export const atualizarProduto = async (id: string, data: { nome: string; status:
 };
 
 export const verificarProdutoEmUso = async (id: string) => {
-    // Since there's no direct relation between produtos and tabelasComerciais,
-    // we'll check if this product is referenced anywhere
-    // For now, return false to allow deletion
-    return false;
+    const produtoId = parseInt(id);
+    
+    // Check if product is referenced in tabelasComerciais
+    const dependencias = await db.query.tabelasComerciais.findMany({
+        where: eq(tabelasComerciais.produtoId, produtoId),
+    });
+    
+    return dependencias.length > 0;
 };
 
 export const deletarProduto = async (id: string) => {
-    // Soft delete
-    await db.update(produtos).set({ isActive: false }).where(eq(produtos.id, parseInt(id)));
+    const produtoId = parseInt(id);
+    
+    // Check for dependencies first
+    const emUso = await verificarProdutoEmUso(id);
+    if (emUso) {
+        throw new Error('Este produto não pode ser excluído pois está a ser utilizado por uma ou mais Tabelas Comerciais.');
+    }
+    
+    // Hard delete if no dependencies
+    await db.delete(produtos).where(eq(produtos.id, produtoId));
 };

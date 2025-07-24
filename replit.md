@@ -82,6 +82,12 @@ This is a full-stack TypeScript application for credit management called "Simpix
 
 ### January 2025
 
+- **Product Module Hard Delete Implementation (January 24)**: Re-architected product deletion from soft delete to hard delete with dependency safeguards
+- **Backend Security**: Implemented dependency checking before deletion - prevents removal if product is referenced in tabelas_comerciais
+- **Hard Delete Logic**: Products are now permanently removed from database (DELETE FROM produtos) instead of deactivation
+- **API Response Changes**: DELETE endpoint returns 409 Conflict for dependency violations, 204 No Content for successful deletions
+- **Frontend Safety**: Enhanced confirmation modal with explicit irreversible deletion warning and red-styled delete button
+- **Error Handling**: Added specific 409 Conflict response handling with clear dependency error messages
 - **Product Module Refinement Complete (January 24)**: Fixed critical backend filtering bug and frontend data format issues
 - **Backend Fix**: Removed `isActive = true` filter from products query to return ALL products (active and inactive) in admin interface
 - **Frontend Fix**: Corrected data format sent to API - now sends string status ("Ativo"/"Inativo") instead of boolean for proper backend processing

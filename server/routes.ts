@@ -674,18 +674,18 @@ app.get("/api/tabelas-comerciais-disponiveis", jwtAuthMiddleware, async (req: Au
     try {
       const { id } = req.params;
 
-      // Verificar se o produto está em uso
-      const emUso = await verificarProdutoEmUso(id);
-      if (emUso) {
-        return res.status(400).json({ 
-          message: "Não é possível excluir este produto pois ele está sendo utilizado em tabelas comerciais" 
-        });
-      }
-
       await deletarProduto(id);
-      res.json({ message: "Produto excluído com sucesso" });
+      res.status(204).send(); // 204 No Content on successful deletion
     } catch (error) {
       console.error("Erro ao excluir produto:", error);
+      
+      // Check if it's a dependency error
+      if (error instanceof Error && error.message.includes('Tabelas Comerciais')) {
+        return res.status(409).json({ 
+          message: error.message 
+        });
+      }
+      
       res.status(500).json({ message: "Erro ao excluir produto" });
     }
   });
