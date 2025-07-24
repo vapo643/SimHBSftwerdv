@@ -23,6 +23,7 @@ export interface IStorage {
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   getUsers(): Promise<User[]>;
+  getUsersWithDetails(): Promise<any[]>;
 
   // Propostas
   getPropostas(): Promise<Proposta[]>;
@@ -66,6 +67,35 @@ export class DatabaseStorage implements IStorage {
 
   async getUsers(): Promise<User[]> {
     return await db.select().from(users).orderBy(users.name);
+  }
+
+  async getUsersWithDetails(): Promise<any[]> {
+    const { createServerSupabaseAdminClient } = await import('./lib/supabase');
+    const supabase = createServerSupabaseAdminClient();
+    
+    try {
+      const { data: users, error } = await supabase
+        .from('profiles')
+        .select(`
+          id,
+          full_name,
+          role,
+          loja_id,
+          auth_user:auth.users!inner(email),
+          loja:lojas(id, nome_loja, parceiro_id, parceiro:parceiros(id, razao_social)),
+          gerente_lojas(loja_id, loja:lojas(id, nome_loja, parceiro_id, parceiro:parceiros(id, razao_social)))
+        `);
+
+      if (error) {
+        console.error('Database error in getUsersWithDetails:', error);
+        throw new Error(`Erro ao buscar usuários: ${error.message}`);
+      }
+
+      return users || [];
+    } catch (error) {
+      console.error('Critical error in getUsersWithDetails:', error);
+      throw error;
+    }
   }
 
   async getPropostas(): Promise<Proposta[]> {

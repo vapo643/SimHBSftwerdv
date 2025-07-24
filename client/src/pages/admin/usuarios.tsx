@@ -17,7 +17,7 @@ import { ErrorBoundary, UserFormErrorBoundary } from "@/components/ErrorBoundary
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { api } from "@/lib/apiClient";
-import { queryKeys } from "@/hooks/queries/queryKeys";
+import { queryKeys, invalidationPatterns } from "@/hooks/queries/queryKeys";
 import type { User } from "@shared/schema";
 import { Users, Edit, UserX, UserCheck, Loader2 } from "lucide-react";
 
@@ -28,13 +28,15 @@ const UsuariosPage: React.FC = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Fetch users from API using new API client and query keys
+  // Fetch users with comprehensive details using isolated query keys
   const { data: users = [], isLoading: loadingUsers, error: usersError } = useQuery<User[]>({
-    queryKey: queryKeys.users.list(),
+    queryKey: queryKeys.users.withDetails(),
     queryFn: async () => {
       const response = await api.get<User[]>('/api/admin/users');
       return response.data;
     },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000,   // 10 minutes
   });
 
   // Mutation for creating new users
@@ -58,9 +60,10 @@ const UsuariosPage: React.FC = () => {
         description: "Usuário criado com sucesso!",
       });
       
-      queryClient.invalidateQueries({ queryKey: queryKeys.users.all });
-      queryClient.invalidateQueries({ queryKey: queryKeys.partners.all });
-      queryClient.invalidateQueries({ queryKey: queryKeys.stores.all });
+      // Use invalidation patterns for consistent cache management
+      invalidationPatterns.onUserChange.forEach(pattern => {
+        queryClient.invalidateQueries({ queryKey: pattern });
+      });
       setIsModalOpen(false);
       setSelectedUser(null);
     },

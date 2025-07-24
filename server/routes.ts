@@ -1109,6 +1109,78 @@ app.get("/api/tabelas-comerciais-disponiveis", jwtAuthMiddleware, async (req: Au
     }
   });
 
+  // Health check endpoints for system stability monitoring
+  app.get('/api/health/storage', async (req, res) => {
+    try {
+      // Test basic storage operations
+      const users = await storage.getUsers();
+      const lojas = await storage.getLojas();
+      const usersWithDetails = await storage.getUsersWithDetails();
+
+      res.json({
+        status: 'healthy',
+        timestamp: new Date().toISOString(),
+        checks: {
+          getUsers: { status: 'ok', count: users.length },
+          getLojas: { status: 'ok', count: lojas.length },
+          getUsersWithDetails: { status: 'ok', count: usersWithDetails.length },
+        }
+      });
+    } catch (error) {
+      console.error('Storage health check failed:', error);
+      res.status(500).json({
+        status: 'unhealthy',
+        timestamp: new Date().toISOString(),
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  app.get('/api/health/schema', async (req, res) => {
+    try {
+      const { createServerSupabaseAdminClient } = await import('./lib/supabase');
+      const supabase = createServerSupabaseAdminClient();
+
+      // Check essential tables exist
+      const tables = ['profiles', 'lojas', 'parceiros', 'produtos', 'propostas'];
+      const checks: Record<string, any> = {};
+
+      for (const table of tables) {
+        try {
+          const { data, error } = await supabase
+            .from(table)
+            .select('*')
+            .limit(1);
+          
+          checks[table] = {
+            status: error ? 'error' : 'ok',
+            error: error?.message || null
+          };
+        } catch (err) {
+          checks[table] = {
+            status: 'error',
+            error: err instanceof Error ? err.message : 'Unknown error'
+          };
+        }
+      }
+
+      const allHealthy = Object.values(checks).every(check => check.status === 'ok');
+
+      res.status(allHealthy ? 200 : 500).json({
+        status: allHealthy ? 'healthy' : 'unhealthy',
+        timestamp: new Date().toISOString(),
+        tables: checks
+      });
+    } catch (error) {
+      console.error('Schema health check failed:', error);
+      res.status(500).json({
+        status: 'unhealthy',
+        timestamp: new Date().toISOString(),
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
