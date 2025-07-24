@@ -16,7 +16,6 @@ import { useToast } from "@/hooks/use-toast";
 import { fetchWithToken } from "@/lib/apiClient";
 import type { User } from "@shared/schema";
 import { Users, Edit, UserX, UserCheck } from "lucide-react";
-import { queryKeys, cacheInvalidation } from "@/hooks/queries/queryKeys";
 
 const UsuariosPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -24,9 +23,9 @@ const UsuariosPage: React.FC = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Fetch users from API using isolated query keys
+  // Fetch users from API using real data
   const { data: users = [], isLoading: loadingUsers } = useQuery<User[]>({
-    queryKey: queryKeys.users.list(),
+    queryKey: ['/api/admin/users'],
     queryFn: async () => {
       const response = await fetchWithToken('/api/admin/users');
       if (!response.ok) throw new Error('Failed to fetch users');
@@ -68,7 +67,7 @@ const UsuariosPage: React.FC = () => {
         title: "Sucesso",
         description: "Usuário criado com sucesso!",
       });
-      cacheInvalidation.invalidateAllUsers(queryClient);
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
       setIsModalOpen(false);
       setSelectedUser(null);
     },

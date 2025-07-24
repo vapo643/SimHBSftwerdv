@@ -14,7 +14,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 export const UserDataSchema = z.object({
   fullName: z.string().min(3, "Nome completo é obrigatório"),
   email: z.string().email("Formato de email inválido"),
-  role: z.enum(['ADMINISTRADOR', 'DIRETOR', 'GERENTE', 'ATENDENTE', 'ANALISTA', 'FINANCEIRO']),
+  role: z.enum(['ADMINISTRADOR', 'GERENTE', 'ATENDENTE']),
   lojaId: z.number().int().nullable().optional(),
   lojaIds: z.array(z.number().int()).nullable().optional(),
 }).superRefine((data, ctx) => {
@@ -463,78 +463,6 @@ app.get("/api/tabelas-comerciais-disponiveis", jwtAuthMiddleware, async (req: Au
     } catch (error) {
       console.error('Error fetching users:', error);
       res.status(500).json({ message: "Erro ao buscar usuários" });
-    }
-  });
-
-  // Health check endpoints
-  app.get("/api/health/storage", async (req, res) => {
-    try {
-      // Test storage layer by calling key methods
-      const usersCheck = await storage.getUsers();
-      const lojasCheck = await storage.getLojas();
-      
-      // Test parceiros via database query (since no storage method exists)
-      const { db } = await import("../server/lib/supabase");
-      const { parceiros } = await import("@shared/schema");
-      const parceirosCheck = await db.select().from(parceiros);
-      
-      res.json({
-        status: "healthy",
-        timestamp: new Date().toISOString(),
-        checks: {
-          users: { status: "ok", count: usersCheck.length },
-          lojas: { status: "ok", count: lojasCheck.length },
-          parceiros: { status: "ok", count: parceirosCheck.length }
-        }
-      });
-    } catch (error) {
-      console.error('Storage health check failed:', error);
-      res.status(500).json({
-        status: "unhealthy", 
-        timestamp: new Date().toISOString(),
-        error: error instanceof Error ? error.message : 'Unknown error',
-        checks: {
-          users: { status: "error" },
-          lojas: { status: "error" },
-          parceiros: { status: "error" }
-        }
-      });
-    }
-  });
-
-  // Optional: Schema validation health check
-  app.get("/api/health/schema", async (req, res) => {
-    try {
-      // Validate core table schemas by performing lightweight queries
-      const { db } = await import("../server/lib/supabase");
-      const { users, lojas, parceiros } = await import("@shared/schema");
-      
-      // Test basic schema structure with LIMIT 1 queries
-      const userTest = await db.select().from(users).limit(1);
-      const lojaTest = await db.select().from(lojas).limit(1);
-      const parceiroTest = await db.select().from(parceiros).limit(1);
-      
-      res.json({
-        status: "healthy",
-        timestamp: new Date().toISOString(),
-        schemas: {
-          users: { status: "ok", hasData: userTest.length > 0 },
-          lojas: { status: "ok", hasData: lojaTest.length > 0 },
-          parceiros: { status: "ok", hasData: parceiroTest.length > 0 }
-        }
-      });
-    } catch (error) {
-      console.error('Schema health check failed:', error);
-      res.status(500).json({
-        status: "unhealthy", 
-        timestamp: new Date().toISOString(),
-        error: error instanceof Error ? error.message : 'Schema validation failed',
-        schemas: {
-          users: { status: "error" },
-          lojas: { status: "error" },
-          parceiros: { status: "error" }
-        }
-      });
     }
   });
 

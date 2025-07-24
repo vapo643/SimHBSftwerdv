@@ -19,7 +19,6 @@ import { useLojaFiltering } from "@/hooks/useLojaFiltering";
 // Import query hooks
 import { useQuery } from "@tanstack/react-query";
 import { fetchWithToken } from "@/lib/apiClient";
-import { queryKeys } from "@/hooks/queries/queryKeys";
 
 interface Parceiro {
   id: number;
@@ -28,19 +27,19 @@ interface Parceiro {
 
 const userSchema = z
   .object({
-    fullName: z.string().min(3, "Nome é obrigatório."),
+    nome: z.string().min(3, "Nome é obrigatório."),
     email: z.string().email("Formato de e-mail inválido."),
-    role: z.enum(["ADMINISTRADOR", "DIRETOR", "GERENTE", "ATENDENTE", "ANALISTA", "FINANCEIRO"]),
+    perfil: z.enum(["ADMINISTRADOR", "DIRETOR", "GERENTE", "ATENDENTE", "ANALISTA", "FINANCEIRO"]),
     parceiroId: z.string().optional(),
-    lojaId: z.number().optional(), // For ATENDENTE - should be number
-    lojaIds: z.array(z.number()).optional(), // For GERENTE (multiple stores) - should be number array
+    lojaId: z.string().optional(), // For ATENDENTE
+    lojaIds: z.array(z.string()).optional(), // For GERENTE (multiple stores)
   })
   .refine(
     data => {
-      if (data.role === "ATENDENTE" && !data.lojaId) {
+      if (data.perfil === "ATENDENTE" && !data.lojaId) {
         return false;
       }
-      if (data.role === "GERENTE" && (!data.lojaIds || data.lojaIds.length === 0)) {
+      if (data.perfil === "GERENTE" && (!data.lojaIds || data.lojaIds.length === 0)) {
         return false;
       }
       return true;
@@ -73,14 +72,14 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, onSubmit, onCancel, is
     defaultValues: initialData || {},
   });
 
-  const selectedRole = watch("role");
+  const selectedPerfil = watch("perfil");
   const selectedParceiro = watch("parceiroId");
-  const [selectedLojas, setSelectedLojas] = useState<number[]>(initialData?.lojaIds || []);
+  const [selectedLojas, setSelectedLojas] = useState<string[]>(initialData?.lojaIds || []);
 
   // Use the hybrid filtering hook for dynamic loja loading
   const { filteredLojas, isLoading: lojasLoading, error: lojasError, filteringMode } = useLojaFiltering(selectedParceiro);
 
-  // Fetch parceiros data for dropdown - DIRECT ENDPOINT ACCESS (no cache dependency)
+  // Fetch parceiros data for dropdown
   const { data: parceiros = [], isLoading: parceirosLoading } = useQuery<Parceiro[]>({
     queryKey: ['/api/parceiros'],
     queryFn: async () => {
@@ -100,35 +99,35 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, onSubmit, onCancel, is
 
   // Update form values when selected stores change for GERENTE
   useEffect(() => {
-    if (selectedRole === "GERENTE") {
+    if (selectedPerfil === "GERENTE") {
       setValue("lojaIds", selectedLojas);
     }
-  }, [selectedLojas, selectedRole, setValue]);
+  }, [selectedLojas, selectedPerfil, setValue]);
 
   // Reset store selections when profile changes
   useEffect(() => {
-    if (selectedRole !== "GERENTE") {
+    if (selectedPerfil !== "GERENTE") {
       setSelectedLojas([]);
       setValue("lojaIds", []);
     }
-    if (selectedRole !== "ATENDENTE") {
-      setValue("lojaId", undefined);
+    if (selectedPerfil !== "ATENDENTE") {
+      setValue("lojaId", "");
     }
-  }, [selectedRole, setValue]);
+  }, [selectedPerfil, setValue]);
 
-  const handleAddLoja = (lojaId: number) => {
+  const handleAddLoja = (lojaId: string) => {
     if (!selectedLojas.includes(lojaId)) {
       setSelectedLojas([...selectedLojas, lojaId]);
     }
   };
 
-  const handleRemoveLoja = (lojaId: number) => {
+  const handleRemoveLoja = (lojaId: string) => {
     setSelectedLojas(selectedLojas.filter(id => id !== lojaId));
   };
 
-  const getLojaName = (lojaId: number) => {
+  const getLojaName = (lojaId: string) => {
     // Use filtered lojas from the hybrid hook instead of mock data
-    const loja = filteredLojas.find(l => l.id === lojaId);
+    const loja = filteredLojas.find(l => l.id.toString() === lojaId);
     return loja ? loja.nomeLoja : "Loja não encontrada";
   };
 
@@ -136,9 +135,9 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, onSubmit, onCancel, is
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <Label htmlFor="fullName">Nome Completo</Label>
-          <Input id="fullName" {...register("fullName")} />
-          {errors.fullName && <p className="mt-1 text-sm text-red-500">{errors.fullName.message}</p>}
+          <Label htmlFor="nome">Nome Completo</Label>
+          <Input id="nome" {...register("nome")} />
+          {errors.nome && <p className="mt-1 text-sm text-red-500">{errors.nome.message}</p>}
         </div>
         <div>
           <Label htmlFor="email">Email</Label>
@@ -173,25 +172,25 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, onSubmit, onCancel, is
       <div>
         <Label>Perfil de Acesso</Label>
         <Controller
-            name="role"
+            name="perfil"
             control={control}
             render={({ field }) => (
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <SelectTrigger><SelectValue placeholder="Selecione um perfil..." /></SelectTrigger>
                     <SelectContent>
-                        {["ADMINISTRADOR", "DIRETOR", "GERENTE", "ATENDENTE", "ANALISTA", "FINANCEIRO"].map((role) => (
-                          <SelectItem key={role} value={role}>
-                            {role}
+                        {["ADMINISTRADOR", "DIRETOR", "GERENTE", "ATENDENTE", "ANALISTA", "FINANCEIRO"].map((perfil) => (
+                          <SelectItem key={perfil} value={perfil}>
+                            {perfil}
                           </SelectItem>
                         ))}
                     </SelectContent>
                 </Select>
             )}
         />
-        {errors.role && <p className="mt-1 text-sm text-red-500">{errors.role.message}</p>}
+        {errors.perfil && <p className="mt-1 text-sm text-red-500">{errors.perfil.message}</p>}
       </div>
 
-      {(selectedRole === "GERENTE" || selectedRole === "ATENDENTE") && (
+      {(selectedPerfil === "GERENTE" || selectedPerfil === "ATENDENTE") && (
         <div className="space-y-4">
           <div>
             <Label htmlFor="parceiroId">Parceiro</Label>
@@ -217,7 +216,7 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, onSubmit, onCancel, is
           </div>
 
           {/* Single Store Selection for ATENDENTE */}
-          {selectedRole === "ATENDENTE" && (
+          {selectedPerfil === "ATENDENTE" && (
             <div>
               <div className="flex items-center gap-2">
                 <Label>Loja Associada</Label>
@@ -238,11 +237,7 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, onSubmit, onCancel, is
                 name="lojaId"
                 control={control}
                 render={({ field }) => (
-                  <Select 
-                    onValueChange={(value) => field.onChange(parseInt(value))} 
-                    defaultValue={field.value?.toString()} 
-                    disabled={!selectedParceiro || lojasLoading}
-                  >
+                  <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!selectedParceiro || lojasLoading}>
                     <SelectTrigger>
                       <SelectValue placeholder={lojasLoading ? "Carregando lojas..." : "Selecione uma loja..."} />
                     </SelectTrigger>
@@ -259,7 +254,7 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, onSubmit, onCancel, is
           )}
 
           {/* Multiple Store Selection for GERENTE */}
-          {selectedRole === "GERENTE" && (
+          {selectedPerfil === "GERENTE" && (
             <div>
               <div className="flex items-center gap-2">
                 <Label>Lojas Associadas (Múltipla Seleção)</Label>
@@ -277,12 +272,12 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, onSubmit, onCancel, is
                 )}
               </div>
               <div className="space-y-2">
-                <Select onValueChange={(value) => handleAddLoja(parseInt(value))} disabled={!selectedParceiro || lojasLoading}>
+                <Select onValueChange={handleAddLoja} disabled={!selectedParceiro || lojasLoading}>
                   <SelectTrigger>
                     <SelectValue placeholder={lojasLoading ? "Carregando lojas..." : "Selecione lojas para adicionar..."} />
                   </SelectTrigger>
                   <SelectContent>
-                    {filteredLojas.filter(l => !selectedLojas.includes(l.id)).map(l => (
+                    {filteredLojas.filter(l => !selectedLojas.includes(l.id.toString())).map(l => (
                       <SelectItem key={l.id} value={l.id.toString()}>{l.nomeLoja}</SelectItem>
                     ))}
                   </SelectContent>
