@@ -51,7 +51,7 @@ export default function GestãoProdutos() {
     mutationFn: async (data: ProdutoFormData) => {
       const response = await api.post<Produto>("/api/produtos", {
         nome: data.nome,
-        status: data.status === "Ativo"
+        status: data.status
       });
       return response.data;
     },
@@ -77,7 +77,7 @@ export default function GestãoProdutos() {
     mutationFn: async ({ id, data }: { id: number; data: ProdutoFormData }) => {
       const response = await api.put<Produto>(`/api/produtos/${id}`, {
         nome: data.nome,
-        status: data.status === "Ativo"
+        status: data.status
       });
       return response.data;
     },

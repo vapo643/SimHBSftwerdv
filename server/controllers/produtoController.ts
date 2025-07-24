@@ -5,7 +5,6 @@ import { eq, desc } from 'drizzle-orm';
 
 export const buscarTodosProdutos = async () => {
   return await db.query.produtos.findMany({
-    where: eq(produtos.isActive, true),
     orderBy: [desc(produtos.id)],
   });
 };
