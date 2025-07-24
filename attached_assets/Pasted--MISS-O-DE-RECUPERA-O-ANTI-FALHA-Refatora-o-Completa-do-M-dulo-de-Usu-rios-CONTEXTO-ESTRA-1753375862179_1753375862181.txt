@@ -1,0 +1,26 @@
+# MISSÃO DE RECUPERAÇÃO (ANTI-FALHA): Refatoração Completa do Módulo de Usuários
+
+**CONTEXTO ESTRATÉGICO:**
+Este prompt é o resultado final de um debate técnico rigoroso e representa a arquitetura final e aprovada para a recuperação e refatoração completa do módulo de "Gestão de Usuários", que está atualmente inoperacional. Siga cada fase com precisão absoluta.
+
+**AÇÃO:**
+Sua missão é executar um plano de recuperação de 3 fases para estabilizar o backend, corrigir o frontend e implementar a funcionalidade de formulário dinâmico.
+
+**ROADMAP DE EXECUÇÃO (Sequencial):**
+
+**FASE 1: CORREÇÃO DO BACKEND (CRÍTICO)**
+* **1.1: Implemente a Função de Storage Ausente:** No ficheiro `/server/storage.ts`, implemente a função `getLojas()` que está ausente. Ela deve buscar e retornar todas as lojas ativas.
+* **1.2: Implemente a Função de Storage de Usuários:** No mesmo ficheiro, crie a função `getUsers()`. A query ao banco de dados deve ser robusta, utilizando `LEFT JOIN`s para conectar `profiles` com `lojas`, `parceiros` e `auth.users`, retornando todos os dados necessários para a listagem (id, nome, email, role, nome da loja, etc.).
+* **1.3: Crie o Endpoint de Listagem de Usuários:** No ficheiro `/server/routes.ts`, crie o novo endpoint `GET /api/admin/users`, que deve ser protegido por `adminMiddleware` e chamar a nova função `storage.getUsers()`.
+
+**FASE 2: CORREÇÃO DO FRONTEND (ESTABILIZAÇÃO)**
+* **2.1: Refatore a Página de Listagem de Usuários:** No ficheiro `/client/src/pages/admin/usuarios/index.tsx`, refatore o hook `useQuery` para que ele chame o novo e correto endpoint (`/api/admin/users`).
+* **2.2: Implemente Loading e Error States:** Garanta que a página exiba um estado de carregamento (`skeleton` ou `spinner`) enquanto os dados são buscados e uma mensagem de erro clara se a API falhar.
+* **2.3: Renderize os Dados Reais:** Atualize a tabela para renderizar os dados completos e reais recebidos da nova API, incluindo a coluna "Loja".
+
+**FASE 3: DADOS DO FORMULÁRIO (REFINAMENTO)**
+* **3.1: Busque os Dados para os Dropdowns:** No componente pai (`usuarios/index.tsx`), adicione novas `useQuery` para buscar as listas completas de `/api/admin/parceiros` e `/api/admin/lojas`.
+* **3.2: Passe os Dados para o Formulário:** Passe as listas de parceiros e lojas como "props" para o componente `UserForm.tsx`.
+* **3.3: Implemente a Lógica em Cascata:** No `UserForm.tsx`, implemente a lógica de filtragem `client-side` para o dropdown de "Loja", de modo que ele seja filtrado com base no "Parceiro" selecionado.
+
+Execute este plano para entregar um módulo de Gestão de Usuários 100% funcional, estável e robusto.

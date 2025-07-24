@@ -3,6 +3,7 @@ import {
   propostas,
   gerenteLojas,
   lojas,
+  parceiros,
   type User,
   type InsertUser,
   type Proposta,
@@ -15,12 +16,20 @@ import {
   type UpdateLoja,
 } from "@shared/schema";
 import { db } from "./lib/supabase";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc, and, sql } from "drizzle-orm";
+
+// Extended User type for listing with related data
+export interface UserWithDetails extends User {
+  parceiroNome?: string;
+  lojaNome?: string;
+  lojaIds?: number[];
+}
 
 export interface IStorage {
   // Users
   getUser(id: number): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
+  getUsers(): Promise<UserWithDetails[]>;
   createUser(user: InsertUser): Promise<User>;
 
   // Propostas
@@ -61,6 +70,33 @@ export class DatabaseStorage implements IStorage {
   async createUser(user: InsertUser): Promise<User> {
     const result = await db.insert(users).values(user).returning();
     return result[0];
+  }
+
+  async getUsers(): Promise<UserWithDetails[]> {
+    // PHASE 1.1: Simplified query for now - just get basic user data
+    const result = await db
+      .select({
+        id: users.id,
+        email: users.email,
+        name: users.name,
+        role: users.role,
+        createdAt: users.createdAt,
+      })
+      .from(users)
+      .orderBy(desc(users.createdAt));
+
+    // Transform to UserWithDetails format
+    return result.map(row => ({
+      id: row.id,
+      email: row.email,
+      name: row.name,
+      password: '', // Don't return password
+      role: row.role,
+      createdAt: row.createdAt,
+      parceiroNome: undefined, // TODO: Add joins when schema is finalized
+      lojaNome: undefined,     // TODO: Add joins when schema is finalized
+      lojaIds: []              // TODO: Add logic for multiple store associations
+    }));
   }
 
   async getPropostas(): Promise<Proposta[]> {

@@ -10,18 +10,71 @@ import {
 } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import UserForm from "@/components/usuarios/UserForm";
-import { mockUsers, User } from "@/data/users";
 import DashboardLayout from "@/components/DashboardLayout";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { fetchWithToken } from "@/lib/apiClient";
+import { Loader2, Users, AlertCircle, Edit, UserCheck, UserX } from "lucide-react";
+
+// PHASE 2: Updated types based on backend UserWithDetails
+interface UserWithDetails {
+  id: number;
+  email: string;
+  name: string;
+  role: string;
+  createdAt: string;
+  parceiroNome?: string;
+  lojaNome?: string;
+  lojaIds?: number[];
+}
+
+interface Parceiro {
+  id: number;
+  razaoSocial: string;
+}
+
+interface Loja {
+  id: number;
+  parceiroId: number;
+  nomeLoja: string;
+  endereco: string;
+  isActive: boolean;
+}
 
 const UsuariosPage: React.FC = () => {
-  const [users, setUsers] = useState<User[]>(mockUsers);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [selectedUser, setSelectedUser] = useState<UserWithDetails | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // PHASE 2.1: Fetch users from the correct API endpoint
+  const { data: users = [], isLoading: loadingUsers, error: usersError } = useQuery<UserWithDetails[]>({
+    queryKey: ['/api/admin/users'],
+    queryFn: async () => {
+      const response = await fetchWithToken('/api/admin/users');
+      if (!response.ok) throw new Error('Failed to fetch users');
+      return response.json();
+    },
+  });
+
+  // PHASE 3.1: Fetch data for dropdowns (partners and stores)
+  const { data: parceiros = [] } = useQuery<Parceiro[]>({
+    queryKey: ['/api/parceiros'],
+    queryFn: async () => {
+      const response = await fetchWithToken('/api/parceiros');
+      if (!response.ok) throw new Error('Failed to fetch parceiros');
+      return response.json();
+    },
+  });
+
+  const { data: lojas = [] } = useQuery<Loja[]>({
+    queryKey: ['/api/admin/lojas'],
+    queryFn: async () => {
+      const response = await fetchWithToken('/api/admin/lojas');
+      if (!response.ok) throw new Error('Failed to fetch lojas');
+      return response.json();
+    },
+  });
 
   // Mutation for creating new users
   const createUserMutation = useMutation({
@@ -52,21 +105,12 @@ const UsuariosPage: React.FC = () => {
 
       return response.json();
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       toast({
         title: "Sucesso",
         description: "Usuário criado com sucesso!",
       });
-      // Add the new user to the local state (for now, until we implement listing API)
-      const newUser: User = {
-        id: data.id,
-        nome: data.full_name,
-        email: data.user?.email || 'N/A',
-        perfil: data.role,
-        loja: data.loja_id ? `Loja ${data.loja_id}` : 'N/A',
-        status: 'Ativo'
-      };
-      setUsers(prev => [...prev, newUser]);
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
       setIsModalOpen(false);
       setSelectedUser(null);
     },
@@ -79,19 +123,20 @@ const UsuariosPage: React.FC = () => {
     },
   });
 
-  const handleCreateOrEdit = (user: any) => {
+  const handleCreateOrEdit = (userData: any) => {
     if (selectedUser) {
-      // For editing, keep the old logic for now
-      setUsers(users.map(u => (u.id === selectedUser.id ? { ...u, ...user } : u)));
-      setIsModalOpen(false);
-      setSelectedUser(null);
+      // TODO: Implement edit functionality when needed
+      toast({
+        title: "Info",
+        description: "Funcionalidade de edição será implementada em breve",  
+      });
     } else {
       // For creating new users, use the API
-      createUserMutation.mutate(user);
+      createUserMutation.mutate(userData);
     }
   };
 
-  const openEditModal = (user: User) => {
+  const openEditModal = (user: UserWithDetails) => {
     setSelectedUser(user);
     setIsModalOpen(true);
   };
@@ -101,59 +146,105 @@ const UsuariosPage: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  const toggleUserStatus = (userId: string) => {
-    setUsers(
-      users.map(user =>
-        user.id === userId
-          ? { ...user, status: user.status === "Ativo" ? "Inativo" : "Ativo" }
-          : user
-      )
+  // PHASE 2.2: Implement loading and error states
+  if (loadingUsers) {
+    return (
+      <DashboardLayout title="Gestão de Usuários e Perfis">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+            <p className="text-muted-foreground">Carregando usuários...</p>
+          </div>
+        </div>
+      </DashboardLayout>
     );
-  };
+  }
+
+  if (usersError) {
+    return (
+      <DashboardLayout title="Gestão de Usuários e Perfis">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="flex flex-col items-center gap-4 text-center">
+            <AlertCircle className="h-8 w-8 text-red-500" />
+            <p className="text-muted-foreground">Erro ao carregar usuários</p>
+            <Button onClick={() => queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] })}>
+              Tentar Novamente
+            </Button>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout title="Gestão de Usuários e Perfis">
       <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-2xl text-gradient-simpix">Usuários</h1>
-        <Button className="btn-simpix-accent" onClick={openNewModal}>Novo Usuário</Button>
+        <div className="flex items-center gap-2">
+          <Users className="h-6 w-6 text-blue-500" />
+          <h1 className="text-2xl font-bold">Usuários</h1>
+        </div>
+        <Button onClick={openNewModal} className="flex items-center gap-2">
+          <UserCheck className="h-4 w-4" />
+          Novo Usuário
+        </Button>
       </div>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Nome</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Perfil</TableHead>
-            <TableHead>Loja</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Ações</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {users.map(user => (
-            <TableRow key={user.id}>
-              <TableCell>{user.nome}</TableCell>
-              <TableCell>{user.email}</TableCell>
-              <TableCell>{user.perfil}</TableCell>
-              <TableCell>{user.loja}</TableCell>
-              <TableCell>{user.status}</TableCell>
-              <TableCell className="space-x-2">
-                <Button className="btn-simpix-primary" size="sm" onClick={() => openEditModal(user)}>
-                  Editar
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => toggleUserStatus(user.id)}>
-                  {user.status === "Ativo" ? "Desativar" : "Ativar"}
-                </Button>
-              </TableCell>
+
+      {/* PHASE 2.3: Render real data from API */}
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Nome</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Perfil</TableHead>
+              <TableHead>Parceiro</TableHead>
+              <TableHead>Loja</TableHead>
+              <TableHead>Ações</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {users.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                  Nenhum usuário encontrado
+                </TableCell>
+              </TableRow>
+            ) : (
+              users.map(user => (
+                <TableRow key={user.id}>
+                  <TableCell className="font-medium">{user.name}</TableCell>
+                  <TableCell>{user.email}</TableCell>
+                  <TableCell>
+                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      {user.role}
+                    </span>
+                  </TableCell>
+                  <TableCell>{user.parceiroNome || '-'}</TableCell>
+                  <TableCell>{user.lojaNome || '-'}</TableCell>
+                  <TableCell className="space-x-2">
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      onClick={() => openEditModal(user)}
+                      className="flex items-center gap-1"
+                    >
+                      <Edit className="h-3 w-3" />
+                      Editar
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>{selectedUser ? "Editar Usuário" : "Novo Usuário"}</DialogTitle>
           </DialogHeader>
+          {/* PHASE 3.2: Pass parceiros and lojas as props to UserForm */}
           <UserForm
             initialData={selectedUser}
             onSubmit={handleCreateOrEdit}
@@ -162,6 +253,8 @@ const UsuariosPage: React.FC = () => {
               setSelectedUser(null);
             }}
             isLoading={createUserMutation.isPending}
+            parceiros={parceiros}
+            lojas={lojas}
           />
         </DialogContent>
       </Dialog>

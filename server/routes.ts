@@ -567,6 +567,17 @@ app.get("/api/tabelas-comerciais-disponiveis", jwtAuthMiddleware, async (req: Au
     }
   });
 
+  // PHASE 1.3: Admin Users Management API
+  app.get("/api/admin/users", jwtAuthMiddleware, requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const users = await storage.getUsers();
+      res.json(users);
+    } catch (error) {
+      console.error("Erro ao buscar usuários:", error);
+      res.status(500).json({ message: "Erro ao buscar usuários" });
+    }
+  });
+
   // Rotas CRUD para produtos
   app.get("/api/produtos", async (req, res) => {
     try {

@@ -1,0 +1,24 @@
+# MISSÃO: Debate Técnico de Emergência - Diagnóstico e Correção da Falha em Cascata no Módulo de Usuários
+
+**CONTEXTO ESTRATÉGICO:**
+A última tentativa de refatoração do Módulo de Usuários resultou numa falha em cascata: a API de listagem (`GET /api/admin/users`) está a crashar, e o frontend tem uma falha crítica de data fetching, onde os dados de uma página dependem da visita a outra. Após um rollback, estamos a recomeçar o planeamento do zero.
+
+**SUA TAREFA (ASSISTENTE):**
+A sua tarefa não é escrever código. A sua tarefa é atuar como um Arquiteto Full-Stack e propor um plano de recuperação anti-falha. Esta será a nossa **Interação 1 de 3**.
+
+---
+### **Interação 1: Sua Proposta de Plano e Análise de Risco**
+
+Por favor, responda seguindo **exatamente** esta estrutura:
+
+**1. Análise da Causa Raiz (Backend):**
+* **Hipótese:** Qual é a sua principal hipótese técnica para o crash do endpoint `GET /api/admin/users`? O erro está provavelmente na complexa query de `JOIN` entre `profiles`, `lojas`, `parceiros`, e `auth.users`. Proponha uma versão da query (SQL ou Drizzle) que seja mais segura e robusta.
+
+**2. Análise da Causa Raiz (Frontend):**
+* **Hipótese:** Qual é a falha de arquitetura no frontend que causa a dependência de cache entre páginas? Como o `useQuery` na página de usuários (`usuarios/index.tsx`) deveria ser estruturado para garantir que ele busque os seus próprios dados de forma independente e confiável no momento em que a página é carregada?
+
+**3. Proposta de Plano de Implementação Incremental e Seguro:**
+* Descreva uma sequência de passos, pequena e segura, para esta refatoração. A sua proposta deve priorizar a estabilidade. (Ex: Corrigir e validar o endpoint do backend primeiro. Depois, corrigir a busca de dados na página de listagem. Só então, como passo final, implementar a lógica em cascata no formulário).
+
+**4. Estratégia de Validação:**
+* Como você validaria que a correção foi bem-sucedida? Descreva os passos de um "smoke test" que você executaria para garantir que a listagem de usuários funciona, que o formulário carrega os dados corretamente na primeira visita, e que a lógica em cascata está funcional.
