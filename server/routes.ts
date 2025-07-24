@@ -458,11 +458,44 @@ app.get("/api/tabelas-comerciais-disponiveis", jwtAuthMiddleware, async (req: Au
   // Users management endpoints
   app.get("/api/admin/users", jwtAuthMiddleware, requireAdmin, async (req, res) => {
     try {
-      const users = await storage.getUsers();
+      // Query Supabase profiles directly instead of local users table
+      const { createServerSupabaseAdminClient } = await import("./lib/supabase");
+      const supabase = createServerSupabaseAdminClient();
+      
+      // Get all auth users first
+      const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
+      if (authError) {
+        console.error('Auth users error:', authError);
+        return res.status(500).json({ message: "Erro ao buscar usuários de autenticação" });
+      }
+
+      // Get all profiles
+      const { data: profiles, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('full_name');
+
+      if (profileError) {
+        console.error('Supabase profiles error:', profileError);
+        return res.status(500).json({ message: "Erro ao buscar perfis de usuários" });
+      }
+
+      // Join auth users with profiles manually
+      const users = profiles.map(profile => {
+        const authUser = authUsers.users.find(user => user.id === profile.id);
+        return {
+          id: profile.id,
+          name: profile.full_name,
+          email: authUser?.email || 'N/A',
+          role: profile.role,
+          lojaId: profile.loja_id,
+        };
+      });
+
       res.json(users);
     } catch (error) {
       console.error('Error fetching users:', error);
-      res.status(500).json({ message: "Erro ao buscar usuários" });
+      res.status(500).json({ message: "Erro interno do servidor" });
     }
   });
 
