@@ -19,6 +19,7 @@ import { useLojaFiltering } from "@/hooks/useLojaFiltering";
 // Import query hooks
 import { useQuery } from "@tanstack/react-query";
 import { fetchWithToken } from "@/lib/apiClient";
+import { queryKeys } from "@/hooks/queries/queryKeys";
 
 interface Parceiro {
   id: number;
@@ -79,9 +80,9 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, onSubmit, onCancel, is
   // Use the hybrid filtering hook for dynamic loja loading
   const { filteredLojas, isLoading: lojasLoading, error: lojasError, filteringMode } = useLojaFiltering(selectedParceiro);
 
-  // Fetch parceiros data for dropdown
+  // Fetch parceiros data for dropdown using isolated query keys
   const { data: parceiros = [], isLoading: parceirosLoading } = useQuery<Parceiro[]>({
-    queryKey: ['/api/parceiros'],
+    queryKey: queryKeys.partners.list(),
     queryFn: async () => {
       const response = await fetchWithToken('/api/parceiros');
       if (!response.ok) throw new Error('Failed to fetch parceiros');

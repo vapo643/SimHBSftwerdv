@@ -1,0 +1,34 @@
+# MISSÃO DE EXECUÇÃO (ANTI-FALHA): FASE 1 - ESTABILIZAÇÃO CRÍTICA
+
+**CONTEXTO ESTRATÉGICO E HISTÓRICO DE FALHAS:**
+Atenção, Agente. Esta não é uma missão de implementação padrão. Tentativas anteriores de refatorar o Módulo de Usuários resultaram em **falhas em cascata**, que exigiram múltiplos **rollbacks** para restaurar a estabilidade do sistema. Os erros incluíram APIs que retornavam HTML em vez de JSON, bugs de regressão e dependências de cache entre páginas. O plano a seguir foi projetado através de um debate rigoroso para ser **anti-falha**. A sua missão é executar este plano com **máxima precisão** para quebrar este ciclo de erros.
+
+**AÇÃO:**
+Sua missão é executar a **FASE 1** do nosso plano de refatoração para estabilizar a nossa base de código.
+
+**REGRAS DE EXECUÇÃO ANTI-FALHA (MANDATÓRIAS):**
+* **UM FICHEIRO POR VEZ:** Nunca modifique múltiplos ficheiros simultaneamente.
+* **TESTAR ANTES DE PROSSEGUIR:** Valide cada mudança antes de avançar para o próximo passo.
+* **MANTER COMPATIBILIDADE:** As suas alterações não devem quebrar nenhuma funcionalidade existente.
+
+**ROADMAP DE EXECUÇÃO (Sequencial):**
+
+---
+**FRENTE 1: COMPLETAR A CAMADA DE STORAGE (BACKEND)**
+* **Passo 1.1:** No ficheiro `/server/storage.ts`, implemente o método ausente `getLojas()`. Ele deve buscar e retornar todas as lojas ativas.
+* **Passo 1.2:** No mesmo ficheiro, valide e, se necessário, corrija o método `getUsers()`. Ele deve realizar os `JOIN`s necessários para retornar os dados completos do usuário, incluindo o nome da loja e do parceiro.
+
+---
+**FRENTE 2: ISOLAR AS QUERIES DO FRONTEND**
+* **Passo 2.1:** Crie o ficheiro `/client/src/hooks/queries/queryKeys.ts`. Implemente nele a "fábrica" de chaves de query hierárquicas e isoladas para `users`, `partners`, e `stores`, conforme o nosso plano.
+* **Passo 2.2:** Refatore o ficheiro `/client/src/pages/admin/usuarios.tsx`. Substitua as `queryKey`s antigas e genéricas pelas novas chaves isoladas geradas pela fábrica.
+* **Passo 2.3:** Refatore o ficheiro `/client/src/components/usuarios/UserForm.tsx`. Garanta que as queries para buscar dados de parceiros e lojas também utilizem o novo padrão de chaves isoladas.
+
+---
+**FRENTE 3: IMPLEMENTAR HEALTH CHECKS BÁSICOS**
+* **Passo 3.1:** No ficheiro `/server/routes.ts`, crie um novo endpoint `GET /api/health/storage`. Este endpoint deve chamar os métodos do `storage` (como `getUsers` e `getLojas`) para validar que a camada de dados está a funcionar e retornar um status de sucesso ou falha.
+* **Passo 3.2 (Opcional, se o tempo permitir):** Crie o endpoint `GET /api/health/schema` para a validação futura do alinhamento do schema.
+
+---
+
+Execute este plano para entregar a **FASE 1: ESTABILIZAÇÃO**.
