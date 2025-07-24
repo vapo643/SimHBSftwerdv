@@ -455,7 +455,7 @@ app.get("/api/tabelas-comerciais-disponiveis", jwtAuthMiddleware, async (req: Au
     { id: 3, valor: "36 meses" },
   ];
 
-  // API endpoint for partners - GET all
+  // API endpoint for partners - GET all (public for dropdowns)
   app.get("/api/parceiros", async (req, res) => {
     try {
       const { db } = await import("../server/lib/supabase");
@@ -915,10 +915,53 @@ app.get("/api/tabelas-comerciais-disponiveis", jwtAuthMiddleware, async (req: Au
     }
   });
 
+  // ============== SYSTEM METADATA ROUTES ==============
+  
+  // System metadata endpoint for hybrid filtering strategy
+  app.get("/api/admin/system/metadata", jwtAuthMiddleware, requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { db } = await import("../server/lib/supabase");
+      const { lojas } = await import("../shared/schema");
+      const { count } = await import("drizzle-orm");
+      
+      const result = await db.select({ count: count() }).from(lojas);
+      const totalLojas = result[0]?.count || 0;
+      
+      res.json({ totalLojas });
+    } catch (error) {
+      console.error("Erro ao buscar metadados do sistema:", error);
+      res.status(500).json({ message: "Erro ao buscar metadados do sistema" });
+    }
+  });
+
+  // Get lojas by parceiro ID for server-side filtering
+  app.get("/api/admin/parceiros/:parceiroId/lojas", jwtAuthMiddleware, requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { db } = await import("../server/lib/supabase");
+      const { lojas } = await import("../shared/schema");
+      const { eq } = await import("drizzle-orm");
+      
+      const parceiroId = parseInt(req.params.parceiroId);
+      if (isNaN(parceiroId)) {
+        return res.status(400).json({ message: "ID do parceiro inválido" });
+      }
+      
+      const lojasResult = await db
+        .select()
+        .from(lojas)
+        .where(eq(lojas.parceiroId, parceiroId));
+      
+      res.json(lojasResult);
+    } catch (error) {
+      console.error("Erro ao buscar lojas do parceiro:", error);
+      res.status(500).json({ message: "Erro ao buscar lojas do parceiro" });
+    }
+  });
+
   // ============== LOJAS CRUD ROUTES ==============
   
   // GET all active lojas
-  app.get("/api/lojas", async (req, res) => {
+  app.get("/api/admin/lojas", jwtAuthMiddleware, requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const lojas = await storage.getLojas();
       res.json(lojas);

@@ -13,20 +13,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { X } from "lucide-react";
+import { X, Info } from "lucide-react";
+import { useLojaFiltering } from "@/hooks/useLojaFiltering";
 
-// Mock data - no mundo real, viria de uma API
-const mockParceiros = [
-  { id: "1", nome: "Parceiro A" },
-  { id: "2", nome: "Parceiro B" },
-];
-const mockLojas: { [key: string]: { id: string; nome: string }[] } = {
-  "1": [{ id: "101", nome: "Loja Matriz A" }],
-  "2": [
-    { id: "201", nome: "Loja Filial Sul" },
-    { id: "202", nome: "Loja Filial Norte" },
-  ],
-};
+// Import query hooks
+import { useQuery } from "@tanstack/react-query";
+import { fetchWithToken } from "@/lib/apiClient";
+
+interface Parceiro {
+  id: number;
+  razaoSocial: string;
+}
 
 const userSchema = z
   .object({
@@ -79,6 +76,20 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, onSubmit, onCancel, is
   const selectedParceiro = watch("parceiroId");
   const [selectedLojas, setSelectedLojas] = useState<string[]>(initialData?.lojaIds || []);
 
+  // Use the hybrid filtering hook for dynamic loja loading
+  const { filteredLojas, isLoading: lojasLoading, error: lojasError, filteringMode } = useLojaFiltering(selectedParceiro);
+
+  // Fetch parceiros data for dropdown
+  const { data: parceiros = [], isLoading: parceirosLoading } = useQuery<Parceiro[]>({
+    queryKey: ['/api/parceiros'],
+    queryFn: async () => {
+      const response = await fetchWithToken('/api/parceiros');
+      if (!response.ok) throw new Error('Failed to fetch parceiros');
+      return response.json();
+    },
+    staleTime: 10 * 60 * 1000, // Cache for 10 minutes
+  });
+
   useEffect(() => {
     if (!initialData?.id) {
       const generatedPassword = Math.random().toString(36).slice(-8);
@@ -115,11 +126,9 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, onSubmit, onCancel, is
   };
 
   const getLojaName = (lojaId: string) => {
-    for (const parceiro in mockLojas) {
-      const loja = mockLojas[parceiro].find(l => l.id === lojaId);
-      if (loja) return loja.nome;
-    }
-    return "Loja não encontrada";
+    // Use filtered lojas from the hybrid hook instead of mock data
+    const loja = filteredLojas.find(l => l.id.toString() === lojaId);
+    return loja ? loja.nomeLoja : "Loja não encontrada";
   };
 
   return (
@@ -189,14 +198,14 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, onSubmit, onCancel, is
               name="parceiroId"
               control={control}
               render={({ field }) => (
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select onValueChange={field.onChange} defaultValue={field.value} disabled={parceirosLoading}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Selecione um parceiro..." />
+                    <SelectValue placeholder={parceirosLoading ? "Carregando parceiros..." : "Selecione um parceiro..."} />
                   </SelectTrigger>
                   <SelectContent>
-                    {mockParceiros.map(parceiro => (
-                      <SelectItem key={parceiro.id} value={parceiro.id}>
-                        {parceiro.nome}
+                    {parceiros.map(parceiro => (
+                      <SelectItem key={parceiro.id} value={parceiro.id.toString()}>
+                        {parceiro.razaoSocial}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -209,16 +218,32 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, onSubmit, onCancel, is
           {/* Single Store Selection for ATENDENTE */}
           {selectedPerfil === "ATENDENTE" && (
             <div>
-              <Label>Loja Associada</Label>
+              <div className="flex items-center gap-2">
+                <Label>Loja Associada</Label>
+                {lojasError && (
+                  <span className="text-xs text-red-500 flex items-center gap-1">
+                    <Info className="h-3 w-3" />
+                    Erro ao carregar lojas
+                  </span>
+                )}
+                {filteringMode === 'server-side' && (
+                  <span className="text-xs text-blue-500 flex items-center gap-1">
+                    <Info className="h-3 w-3" />
+                    Modo otimizado ativo
+                  </span>
+                )}
+              </div>
               <Controller
                 name="lojaId"
                 control={control}
                 render={({ field }) => (
-                  <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!selectedParceiro}>
-                    <SelectTrigger><SelectValue placeholder="Selecione uma loja..." /></SelectTrigger>
+                  <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!selectedParceiro || lojasLoading}>
+                    <SelectTrigger>
+                      <SelectValue placeholder={lojasLoading ? "Carregando lojas..." : "Selecione uma loja..."} />
+                    </SelectTrigger>
                     <SelectContent>
-                      {mockLojas[selectedParceiro!]?.map(l => (
-                        <SelectItem key={l.id} value={l.id}>{l.nome}</SelectItem>
+                      {filteredLojas.map(l => (
+                        <SelectItem key={l.id} value={l.id.toString()}>{l.nomeLoja}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -231,15 +256,29 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, onSubmit, onCancel, is
           {/* Multiple Store Selection for GERENTE */}
           {selectedPerfil === "GERENTE" && (
             <div>
-              <Label>Lojas Associadas (Múltipla Seleção)</Label>
+              <div className="flex items-center gap-2">
+                <Label>Lojas Associadas (Múltipla Seleção)</Label>
+                {lojasError && (
+                  <span className="text-xs text-red-500 flex items-center gap-1">
+                    <Info className="h-3 w-3" />
+                    Erro ao carregar lojas
+                  </span>
+                )}
+                {filteringMode === 'server-side' && (
+                  <span className="text-xs text-blue-500 flex items-center gap-1">
+                    <Info className="h-3 w-3" />
+                    Modo otimizado ativo
+                  </span>
+                )}
+              </div>
               <div className="space-y-2">
-                <Select onValueChange={handleAddLoja} disabled={!selectedParceiro}>
+                <Select onValueChange={handleAddLoja} disabled={!selectedParceiro || lojasLoading}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Selecione lojas para adicionar..." />
+                    <SelectValue placeholder={lojasLoading ? "Carregando lojas..." : "Selecione lojas para adicionar..."} />
                   </SelectTrigger>
                   <SelectContent>
-                    {mockLojas[selectedParceiro!]?.filter(l => !selectedLojas.includes(l.id)).map(l => (
-                      <SelectItem key={l.id} value={l.id}>{l.nome}</SelectItem>
+                    {filteredLojas.filter(l => !selectedLojas.includes(l.id.toString())).map(l => (
+                      <SelectItem key={l.id} value={l.id.toString()}>{l.nomeLoja}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
