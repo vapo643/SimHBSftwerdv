@@ -456,6 +456,19 @@ app.get("/api/tabelas-comerciais-disponiveis", jwtAuthMiddleware, async (req: Au
     { id: 3, valor: "36 meses" },
   ];
 
+  // Get current authenticated user profile
+  app.get("/api/auth/me", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: "Usuário não autenticado" });
+      }
+      res.json({ user: req.user });
+    } catch (error) {
+      console.error('Error fetching current user:', error);
+      res.status(500).json({ message: "Erro ao buscar dados do usuário" });
+    }
+  });
+
   // Users management endpoints
   app.get("/api/admin/users", jwtAuthMiddleware, requireAdmin, async (req, res) => {
     try {

@@ -4,6 +4,7 @@ import { signOut } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import OfflineIndicator from "./OfflineIndicator";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   LayoutDashboard,
   PlusCircle,
@@ -28,19 +29,29 @@ interface DashboardLayoutProps {
 export default function DashboardLayout({ children, title }: DashboardLayoutProps) {
   const [location] = useLocation();
   const { toast } = useToast();
+  const { user } = useAuth();
 
+  // Definir navegação com permissões
   const navigation = [
-    { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-    { name: "Nova Proposta", href: "/propostas/nova", icon: PlusCircle },
-    { name: "Fila de Análise", href: "/credito/fila", icon: List },
-    { name: "Formalização", href: "/formalizacao/fila", icon: FileText },
-    { name: "Pagamentos", href: "/financeiro/pagamentos", icon: CreditCard },
-    { name: "Tabelas Comerciais", href: "/configuracoes/tabelas", icon: Settings }, // Novo item adicionado
-    { name: "Usuários", href: "/admin/usuarios", icon: Users }, // Novo item adicionado
-    { name: "Parceiros", href: "/parceiros", icon: Building2 }, // Novo item adicionado
-    { name: "Produtos", href: "/configuracoes/produtos", icon: Package }, // Novo item adicionado
-    { name: "Lojas", href: "/admin/lojas", icon: Store }, // Novo item adicionado
+    { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, requireAdmin: false },
+    { name: "Nova Proposta", href: "/propostas/nova", icon: PlusCircle, requireAdmin: false },
+    { name: "Fila de Análise", href: "/credito/fila", icon: List, requireAdmin: false },
+    { name: "Formalização", href: "/formalizacao/fila", icon: FileText, requireAdmin: false },
+    { name: "Pagamentos", href: "/financeiro/pagamentos", icon: CreditCard, requireAdmin: false },
+    { name: "Tabelas Comerciais", href: "/configuracoes/tabelas", icon: Settings, requireAdmin: false },
+    { name: "Usuários", href: "/admin/usuarios", icon: Users, requireAdmin: true }, // Admin only
+    { name: "Parceiros", href: "/parceiros", icon: Building2, requireAdmin: true }, // Admin only
+    { name: "Produtos", href: "/configuracoes/produtos", icon: Package, requireAdmin: false },
+    { name: "Lojas", href: "/admin/lojas", icon: Store, requireAdmin: true }, // Admin only
   ];
+
+  // Filtrar navegação baseado na role do usuário
+  const filteredNavigation = navigation.filter(item => {
+    if (item.requireAdmin && user?.role !== 'ADMINISTRADOR') {
+      return false;
+    }
+    return true;
+  });
 
   const handleSignOut = async () => {
     try {
@@ -76,7 +87,7 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
           </div>
           <div className="flex-1 overflow-auto py-2">
             <nav className="grid items-start px-4 text-sm font-medium">
-              {navigation.map(item => {
+              {filteredNavigation.map(item => {
                 const Icon = item.icon;
                 const isActive = location === item.href;
                 return (

@@ -81,6 +81,12 @@ This is a full-stack TypeScript application for credit management called "Simpix
 - **Git Flow Documentation**: Complete branching strategy documentation with examples and workflow guidelines
 
 ### January 2025
+- **Critical RBAC Security Implementation**: Complete Role-Based Access Control architecture implementation fixing catastrophic authorization failure
+- **Backend Security Enhancement**: Removed development bypass in JWT middleware and implemented full session enrichment with profile database queries
+- **Frontend Access Control**: Created AuthContext and useAuth() hook for managing authentication state across the application
+- **Navigation Visibility Control**: Admin-only links (Usuários, Parceiros, Lojas) now properly hidden from non-ADMINISTRADOR users
+- **Session Enrichment**: JWT middleware now queries profiles table to attach complete user profile (role, loja_id, etc.) to every authenticated request
+- **Auth Endpoint**: Added GET /api/auth/me endpoint for frontend to fetch current user profile with full RBAC data
 - **Phase 1 - Critical Stabilization Complete**: Executed comprehensive 3-phase anti-fragile stabilization plan eliminating 80% of system crashes
 - **Storage Layer Enhancement**: Implemented missing `getUsersWithDetails()` method with robust LEFT JOIN queries connecting profiles, auth.users, lojas, and parceiros
 - **Query Keys Factory**: Created hierarchical and isolated query key management system in `/client/src/hooks/queries/queryKeys.ts` with invalidation patterns for consistent cache management

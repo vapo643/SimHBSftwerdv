@@ -1,0 +1,39 @@
+# MISSÃO DE IMPLEMENTAÇÃO (ANTI-FALHA): Arquitetura RBAC Full-Stack Definitiva
+
+**CONTEXTO ESTRATÉGICO:**
+Este prompt é o resultado final de um "Debate Máximo" e representa a arquitetura final e aprovada para a correção da nossa falha de segurança catastrófica. Siga cada fase e micro-passo com precisão absoluta. A falha não é uma opção.
+
+**AÇÃO:**
+Sua missão é refatorar de ponta a ponta o nosso sistema de autorização, implementando a nova arquitetura RBAC no backend e no frontend.
+
+**ROADMAP DE EXECUÇÃO (Sequencial):**
+
+---
+**FASE 1: REFATORAÇÃO CRÍTICA DO BACKEND**
+
+* **Passo 1.1: Remover o Backdoor:** No ficheiro `/server/lib/jwt-auth-middleware.ts`, remova completamente o bloco de código de "bypass de desenvolvimento".
+
+* **Passo 1.2: Implementar o Enriquecimento de Sessão:** No mesmo ficheiro, dentro da função `jwtAuthMiddleware`, após a validação bem-sucedida do token, implemente a seguinte lógica:
+    a.  Extraia o `id` do usuário do token.
+    b.  Faça uma query à nossa tabela `profiles` para buscar o perfil completo correspondente àquele `id`.
+    c.  Anexe o objeto de perfil completo (incluindo `id`, `email`, `role`, `loja_id`, etc.) ao objeto `req.user`.
+    d.  Se nenhum perfil for encontrado no banco para um usuário autenticado, prossiga, mas deixe a `role` como nula ou indefinida.
+
+---
+**FASE 2: IMPLEMENTAÇÃO DO CONTROLE DE ACESSO NO FRONTEND**
+
+* **Passo 2.1: Criar o Contexto de Autenticação:**
+    * Crie um novo Contexto React para armazenar os dados do usuário autenticado.
+    * Implemente um Provedor para este contexto no topo da sua aplicação (provavelmente em `App.tsx`) que busque os dados do usuário logado e os disponibilize para todos os componentes filhos.
+
+* **Passo 2.2: Criar o Hook `useAuth()`:**
+    * Crie um hook customizado `useAuth()` que facilite o acesso aos dados do usuário (especialmente `user.role`) a partir de qualquer componente.
+
+* **Passo 2.3: Aplicar o Controle de Visibilidade na Navegação:**
+    * **Ficheiro Alvo:** O componente de layout principal (`DashboardLayout.tsx` ou similar).
+    * **Lógica:** Utilize o novo hook `useAuth()` para obter a `role` do usuário atual.
+    * **Ação:** Implemente uma renderização condicional para que os links de navegação administrativos (como "Usuários", "Parceiros", "Lojas") sejam visíveis **apenas** se `user.role === 'ADMINISTRADOR'`.
+
+---
+
+Execute este plano para entregar um sistema RBAC robusto e seguro.

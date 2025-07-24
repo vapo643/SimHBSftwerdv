@@ -6,6 +6,10 @@ export interface AuthenticatedRequest extends Request {
     id: string;
     email: string;
     role: string;
+    full_name?: string;
+    loja_id?: number;
+    created_at?: string;
+    updated_at?: string;
   };
 }
 
@@ -39,17 +43,6 @@ export async function jwtAuthMiddleware(
   next: NextFunction
 ) {
   try {
-    // Check for development mode bypass
-    if (process.env.NODE_ENV === 'development') {
-      console.log('🔧 Development mode: Bypassing JWT authentication');
-      req.user = {
-        id: 'dev-user-id',
-        email: 'dev@example.com',
-        role: 'ADMIN'
-      };
-      return next();
-    }
-
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return res.status(401).json({ message: 'Token de acesso requerido' });
@@ -65,18 +58,36 @@ export async function jwtAuthMiddleware(
       return res.status(401).json({ message: 'Token inválido ou expirado' });
     }
 
-    // Extrair role dos metadata
-    const role = await extractRoleFromToken(token);
-    if (!role) {
-      return res.status(401).json({ message: 'Perfil de usuário não encontrado' });
-    }
+    // Session enrichment: buscar perfil completo do banco de dados
+    const { createServerSupabaseAdminClient } = await import('./supabase');
+    const adminSupabase = createServerSupabaseAdminClient();
+    
+    const { data: profile, error: profileError } = await adminSupabase
+      .from('profiles')
+      .select('*')
+      .eq('id', data.user.id)
+      .single();
 
-    // Adicionar dados do usuário autenticado ao request
-    req.user = {
-      id: data.user.id,
-      email: data.user.email || '',
-      role: role
-    };
+    if (profileError || !profile) {
+      console.warn(`Profile not found for user ${data.user.id}:`, profileError);
+      // Prosseguir sem profile, mas com role indefinida
+      req.user = {
+        id: data.user.id,
+        email: data.user.email || '',
+        role: 'UNDEFINED'
+      };
+    } else {
+      // Anexar o perfil completo ao request
+      req.user = {
+        id: profile.id,
+        email: data.user.email || '',
+        role: profile.role || 'ATENDENTE',
+        full_name: profile.full_name,
+        loja_id: profile.loja_id,
+        created_at: profile.created_at,
+        updated_at: profile.updated_at
+      };
+    }
 
     next();
   } catch (error) {
