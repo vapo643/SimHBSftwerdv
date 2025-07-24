@@ -18,6 +18,24 @@ if (!databaseUrl) {
 // Server-side Supabase client - properly isolated from client-side singleton
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+// NOVA FUNÇÃO para operações Admin:
+export function createServerSupabaseAdminClient() {
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    throw new Error('SUPABASE_SERVICE_ROLE_KEY é obrigatória para operações administrativas');
+  }
+  
+  return createClient(
+    process.env.SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    }
+  );
+}
+
 // Database connection using Drizzle
 const client = postgres(databaseUrl);
 export const db = drizzle(client, { schema });

@@ -1,4 +1,4 @@
-import { createServerSupabaseClient } from '../../client/src/lib/supabase';
+import { createServerSupabaseAdminClient } from '../lib/supabase';
 import { z } from 'zod';
 import crypto from 'crypto';
 import { UserDataSchema } from '../routes';
@@ -14,7 +14,7 @@ function generateTemporaryPassword(): string {
 }
 
 export async function createUser(userData: UserData) {
-  const supabase = createServerSupabaseClient();
+  const supabase = createServerSupabaseAdminClient();
   let createdAuthUser: any = null;
   let createdProfile: any = null;
 
