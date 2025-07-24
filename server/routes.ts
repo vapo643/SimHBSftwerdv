@@ -118,7 +118,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
-
+  // Debug endpoint for RBAC validation
+  app.get("/api/debug/me", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+    try {
+      res.json({
+        message: "Debug endpoint - User profile from robust JWT middleware",
+        user: req.user,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error("Debug endpoint error:", error);
+      res.status(500).json({ message: "Debug endpoint failed" });
+    }
+  });
 
   // Proposal routes
   app.get("/api/propostas", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {

@@ -12,7 +12,73 @@ export interface AuthenticatedRequest extends Request {
 }
 
 /**
- * Extrai a role do token JWT dos claims
+ * Middleware de autenticação JWT robusto com fallback de segurança
+ * Implementa validação completa e bloqueia usuários órfãos
+ */
+export async function jwtAuthMiddleware(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    // Step a: Validate JWT token
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ message: 'Token de acesso requerido' });
+    }
+
+    const token = authHeader.substring(7); // Remove 'Bearer ' prefix
+
+    // Validate token and extract user ID
+    const supabase = createServerSupabaseClient();
+    const { data, error } = await supabase.auth.getUser(token);
+    
+    if (error || !data.user) {
+      return res.status(401).json({ message: 'Token inválido ou expirado' });
+    }
+
+    // Step b: Extract user ID
+    const userId = data.user.id;
+    const userEmail = data.user.email || '';
+
+    // Step c: Query profiles table for complete user profile
+    const { createServerSupabaseAdminClient } = await import('./supabase');
+    const supabaseAdmin = createServerSupabaseAdminClient();
+    
+    const { data: profile, error: profileError } = await supabaseAdmin
+      .from('profiles')
+      .select('id, full_name, role, loja_id')
+      .eq('id', userId)
+      .single();
+
+    // Step d: Security fallback - Block orphaned users (no profile)
+    if (profileError || !profile) {
+      console.error('Profile query failed:', profileError);
+      return res.status(403).json({ 
+        message: 'Acesso negado. Perfil de usuário não encontrado.',
+        code: 'ORPHANED_USER'
+      });
+    }
+
+    // Step e: Attach complete and valid profile to req.user
+    req.user = {
+      id: userId,
+      email: userEmail,
+      role: profile.role,
+      full_name: profile.full_name || null,
+      loja_id: profile.loja_id || null
+    };
+
+    next();
+  } catch (error) {
+    console.error('JWT Auth middleware error:', error);
+    res.status(500).json({ message: 'Erro interno de autenticação' });
+  }
+}
+
+/**
+ * Legacy function - maintained for backward compatibility
+ * @deprecated Use jwtAuthMiddleware directly
  */
 export async function extractRoleFromToken(authToken: string): Promise<string | null> {
   try {
@@ -23,62 +89,18 @@ export async function extractRoleFromToken(authToken: string): Promise<string | 
       return null;
     }
 
-    // Extrai a role dos app_metadata
-    const role = data.user.app_metadata?.role || data.user.user_metadata?.role || 'ATENDENTE';
-    return role;
-  } catch (error) {
-    console.error('Error extracting role from token:', error);
-    return null;
-  }
-}
-
-/**
- * Middleware de autenticação JWT que valida o token e extrai a role
- */
-export async function jwtAuthMiddleware(
-  req: AuthenticatedRequest,
-  res: Response,
-  next: NextFunction
-) {
-  try {
-
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ message: 'Token de acesso requerido' });
-    }
-
-    const token = authHeader.substring(7); // Remove 'Bearer ' prefix
-
-    // Validar o token e extrair dados do usuário
-    const supabase = createServerSupabaseClient();
-    const { data, error } = await supabase.auth.getUser(token);
-    
-    if (error || !data.user) {
-      return res.status(401).json({ message: 'Token inválido ou expirado' });
-    }
-
-    // Session enrichment: Query profiles table for complete user data
     const { createServerSupabaseAdminClient } = await import('./supabase');
     const supabaseAdmin = createServerSupabaseAdminClient();
     
-    const { data: profile, error: profileError } = await supabaseAdmin
+    const { data: profile } = await supabaseAdmin
       .from('profiles')
-      .select('id, full_name, role, loja_id')
+      .select('role')
       .eq('id', data.user.id)
       .single();
 
-    // Adicionar dados do usuário autenticado ao request com enriched profile data
-    req.user = {
-      id: data.user.id,
-      email: data.user.email || '',
-      role: profile?.role || null,
-      full_name: profile?.full_name || null,
-      loja_id: profile?.loja_id || null
-    };
-
-    next();
+    return profile?.role || null;
   } catch (error) {
-    console.error('JWT Auth middleware error:', error);
-    res.status(500).json({ message: 'Erro interno de autenticação' });
+    console.error('Error extracting role from token:', error);
+    return null;
   }
 }

@@ -12,7 +12,8 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
-  loading: boolean;
+  isLoading: boolean;
+  error: Error | null;
   refetchUser: () => Promise<void>;
 }
 
@@ -24,47 +25,75 @@ interface AuthProviderProps {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
   const fetchUserProfile = async () => {
     try {
       const supabase = getSupabase();
       const { data: currentUser } = await supabase.auth.getUser();
+      
       if (currentUser.user) {
         try {
-          // Fetch user data from debug endpoint for RBAC validation
+          // Fetch complete user profile from debug endpoint
           const response = await api.get<{
-            id: string;
-            email: string;
-            role: string | null;
-            full_name?: string | null;
-            loja_id?: number | null;
+            message: string;
+            user: User;
+            timestamp: string;
           }>('/api/debug/me');
           
-          setUser(response.data);
-        } catch (error) {
-          console.error('Error fetching profile data:', error);
-          // Fallback to basic user data if profile fetch fails
-          setUser({
-            id: currentUser.user.id,
-            email: currentUser.user.email || '',
-            role: null,
-          });
+          if (response.data.user) {
+            setUser(response.data.user);
+            setError(null);
+          } else {
+            throw new Error('Invalid user data received');
+          }
+        } catch (apiError) {
+          console.error('Error fetching profile data:', apiError);
+          setError(apiError as Error);
+          // No fallback - security requirement per architecture
+          setUser(null);
         }
       } else {
         setUser(null);
+        setError(null);
       }
-    } catch (error) {
-      console.error('Error fetching user profile:', error);
+    } catch (authError) {
+      console.error('Error checking authentication:', authError);
+      setError(authError as Error);
       setUser(null);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
+  // Conservative refetch strategy: maintain old data while fetching new
   const refetchUser = async () => {
-    setLoading(true);
-    await fetchUserProfile();
+    // Don't set loading to true to maintain current user data
+    try {
+      const supabase = getSupabase();
+      const { data: currentUser } = await supabase.auth.getUser();
+      
+      if (currentUser.user) {
+        const response = await api.get<{
+          message: string;
+          user: User;
+          timestamp: string;
+        }>('/api/debug/me');
+        
+        if (response.data.user) {
+          setUser(response.data.user);
+          setError(null);
+        }
+      } else {
+        setUser(null);
+        setError(null);
+      }
+    } catch (err) {
+      console.error('Error refetching user:', err);
+      setError(err as Error);
+      // Keep existing user data on error (conservative strategy)
+    }
   };
 
   useEffect(() => {
@@ -73,7 +102,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const value = {
     user,
-    loading,
+    isLoading,
+    error,
     refetchUser,
   };
 
