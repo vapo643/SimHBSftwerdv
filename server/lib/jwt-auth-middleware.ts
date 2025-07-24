@@ -5,9 +5,7 @@ export interface AuthenticatedRequest extends Request {
   user?: {
     id: string;
     email: string;
-    role: string | null;
-    full_name?: string | null;
-    loja_id?: number | null;
+    role: string;
   };
 }
 
@@ -41,6 +39,16 @@ export async function jwtAuthMiddleware(
   next: NextFunction
 ) {
   try {
+    // Check for development mode bypass
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔧 Development mode: Bypassing JWT authentication');
+      req.user = {
+        id: 'dev-user-id',
+        email: 'dev@example.com',
+        role: 'ADMIN'
+      };
+      return next();
+    }
 
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -57,23 +65,17 @@ export async function jwtAuthMiddleware(
       return res.status(401).json({ message: 'Token inválido ou expirado' });
     }
 
-    // Session enrichment: Query profiles table for complete user data
-    const { createServerSupabaseAdminClient } = await import('./supabase');
-    const supabaseAdmin = createServerSupabaseAdminClient();
-    
-    const { data: profile, error: profileError } = await supabaseAdmin
-      .from('profiles')
-      .select('id, full_name, role, loja_id')
-      .eq('id', data.user.id)
-      .single();
+    // Extrair role dos metadata
+    const role = await extractRoleFromToken(token);
+    if (!role) {
+      return res.status(401).json({ message: 'Perfil de usuário não encontrado' });
+    }
 
-    // Adicionar dados do usuário autenticado ao request com enriched profile data
+    // Adicionar dados do usuário autenticado ao request
     req.user = {
       id: data.user.id,
       email: data.user.email || '',
-      role: profile?.role || null,
-      full_name: profile?.full_name || null,
-      loja_id: profile?.loja_id || null
+      role: role
     };
 
     next();
