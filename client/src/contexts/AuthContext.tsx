@@ -32,7 +32,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const { data: currentUser } = await supabase.auth.getUser();
       if (currentUser.user) {
         try {
-          // Fetch additional profile data from our API using authenticated client
+          // Fetch complete user profile data with role information for RBAC
           const response = await api.get<{
             id: string;
             email: string;

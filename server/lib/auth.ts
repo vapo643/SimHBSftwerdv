@@ -17,17 +17,6 @@ export interface AuthRequest extends Request {
  */
 export async function authMiddleware(req: AuthRequest, res: Response, next: NextFunction) {
   try {
-    // Development mode bypass para facilitar testes
-    if (process.env.NODE_ENV === "development") {
-      console.log("🔧 Development mode: Bypassing authentication");
-      req.user = {
-        id: "dev-user",
-        email: "dev@example.com",
-        name: "Usuário de Desenvolvimento",
-      };
-      return next();
-    }
-
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {

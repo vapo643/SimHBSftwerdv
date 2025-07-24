@@ -1,0 +1,32 @@
+# MISSÃO: DEBATE MÁXIMO (PÓS-MORTE) - Análise de Falha Sistémica do Módulo de Usuários
+
+**CONTEXTO ESTRATÉGICO:**
+Estamos num ciclo de implementação-falha-rollback. A última tentativa de implementar a nossa arquitetura de autorização (RBAC) falhou catastroficamente, resultando em um sistema onde nem mesmo um `ADMINISTRADOR` tem as suas permissões reconhecidas. Após um rollback, estamos a recomeçar o planeamento do zero.
+
+**SUA TAREFA (ASSISTENTE):**
+A sua tarefa não é escrever código. A sua tarefa é atuar como um Arquiteto de Software Sênior e realizar uma análise pós-morte para identificar as causas raiz desta falha sistémica e propor uma solução definitiva. Esta será a nossa **Interação 1 de 3** de um debate profundo.
+
+---
+### **Interação 1: Proposta de Diagnóstico e Plano de Recuperação Arquitetural**
+
+Por favor, analise a nossa situação crítica e responda com a sua proposta para os seguintes pontos:
+
+**1. Análise da Causa Raiz da Falha de Backend:**
+* **Hipótese:** A falha principal parece estar no nosso middleware `jwt-auth-middleware.ts`, que não está a enriquecer a sessão do usuário com a sua `role` da tabela `profiles`. Qual é a sua teoria sobre por que a implementação anterior do Agente falhou em executar esta lógica corretamente? Foi um erro na query, na lógica de anexação ao `req.user`, ou outro fator?
+
+**2. Análise da Causa Raiz da Falha de Frontend:**
+* **Hipótese:** Um bug secundário, mas igualmente crítico, foi a falha do Agente em ocultar os links de navegação administrativos para usuários não-autorizados. Qual falha de arquitetura de frontend permitiu que isso acontecesse? A ausência de um contexto de autenticação global?
+* **Proposta:** Proponha um padrão robusto (ex: React Context + hook `useAuth`) para gerir o estado de autenticação do usuário na UI.
+
+**3. Proposta de Plano de Reconstrução (Micro-Passos Atómicos):**
+* **Ação:** Proponha um novo roadmap, decomposto em "micro-passos" atómicos e sequenciais, com validação independente a cada passo. O objetivo é construir e verificar cada peça da fundação antes de montar a próxima.
+    * **Exemplo de Granularidade Esperada:**
+        * "Passo 1 (Backend): Refatorar o `jwtAuthMiddleware`. A sua **única** função será validar o token e extrair o `user.id`. Adicione `console.log` para provar que o `id` é extraído corretamente."
+        * "Passo 2 (Backend - Validação): Criar um endpoint de debug temporário, `GET /api/auth/me`, que apenas retorna o `req.user` após passar pelo middleware."
+        * "Passo 3 (Frontend): Criar o hook `useAuth` que, por agora, apenas chama o endpoint `/api/auth/me` e exibe o resultado bruto na consola."
+        * ... e assim por diante.
+
+**4. Estratégia de Validação por Micro-Passo:**
+* Para cada "micro-passo" que você propôs, defina o **critério de sucesso exato**. Como saberemos que aquele passo específico foi concluído com 100% de sucesso antes de avançarmos?
+
+---

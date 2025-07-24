@@ -118,6 +118,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+
   // Proposal routes
   app.get("/api/propostas", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     try {
