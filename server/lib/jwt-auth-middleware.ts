@@ -39,7 +39,16 @@ export async function jwtAuthMiddleware(
   next: NextFunction
 ) {
   try {
-    // Development bypass removed for security compliance
+    // Check for development mode bypass
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔧 Development mode: Bypassing JWT authentication');
+      req.user = {
+        id: 'dev-user-id',
+        email: 'dev@example.com',
+        role: 'ADMIN'
+      };
+      return next();
+    }
 
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
