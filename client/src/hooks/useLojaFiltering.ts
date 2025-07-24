@@ -10,7 +10,6 @@ interface Loja {
   id: number;
   parceiroId: number;
   nomeLoja: string;
-  isActive: boolean;
 }
 
 interface UseLojaFilteringResult {
@@ -34,9 +33,8 @@ export function useLojaFiltering(selectedParceiroId?: string | number): UseLojaF
   const { data: metadata, isLoading: metadataLoading, error: metadataError } = useQuery<SystemMetadata>({
     queryKey: ['/api/admin/system/metadata'],
     queryFn: async () => {
-      const response = await fetchWithToken('/api/admin/system/metadata');
-      if (!response.ok) throw new Error('Failed to fetch metadata');
-      return response.json();
+      const data = await fetchWithToken('/api/admin/system/metadata');
+      return data as SystemMetadata;
     },
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
@@ -55,11 +53,10 @@ export function useLojaFiltering(selectedParceiroId?: string | number): UseLojaF
     isLoading: allLojasLoading, 
     error: allLojasError 
   } = useQuery<Loja[]>({
-    queryKey: ['/api/lojas'],
+    queryKey: ['/api/admin/lojas'],
     queryFn: async () => {
-      const response = await fetchWithToken('/api/lojas');
-      if (!response.ok) throw new Error('Failed to fetch lojas');
-      return response.json();
+      const data = await fetchWithToken('/api/admin/lojas');
+      return data as Loja[];
     },
     enabled: filteringMode === 'client-side',
     staleTime: 10 * 60 * 1000, // Cache for 10 minutes
@@ -73,9 +70,8 @@ export function useLojaFiltering(selectedParceiroId?: string | number): UseLojaF
   } = useQuery<Loja[]>({
     queryKey: ['/api/admin/parceiros', parceiroId, 'lojas'],
     queryFn: async () => {
-      const response = await fetchWithToken(`/api/admin/parceiros/${parceiroId}/lojas`);
-      if (!response.ok) throw new Error('Failed to fetch parceiro lojas');
-      return response.json();
+      const data = await fetchWithToken(`/api/admin/parceiros/${parceiroId}/lojas`);
+      return data as Loja[];
     },
     enabled: filteringMode === 'server-side' && !!parceiroId,
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes

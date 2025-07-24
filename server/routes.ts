@@ -14,7 +14,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 export const UserDataSchema = z.object({
   fullName: z.string().min(3, "Nome completo é obrigatório"),
   email: z.string().email("Formato de email inválido"),
-  role: z.enum(['ADMINISTRADOR', 'GERENTE', 'ATENDENTE']),
+  role: z.enum(['ADMINISTRADOR', 'DIRETOR', 'GERENTE', 'ATENDENTE', 'ANALISTA', 'FINANCEIRO']),
   lojaId: z.number().int().nullable().optional(),
   lojaIds: z.array(z.number().int()).nullable().optional(),
 }).superRefine((data, ctx) => {
