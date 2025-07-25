@@ -54,6 +54,7 @@ export const statusEnum = pgEnum("status", [
   "rascunho",
   "aguardando_analise",
   "em_analise",
+  "pendente",
   "aprovado",
   "rejeitado",
   "documentos_enviados",
@@ -102,6 +103,9 @@ export const propostas = pgTable("propostas", {
 
   // Status e análise
   status: text("status").notNull(),
+  analistaId: text("analista_id"),
+  dataAnalise: timestamp("data_analise"),
+  motivoPendencia: text("motivo_pendencia"),
   valorAprovado: decimal("valor_aprovado", { precision: 15, scale: 2 }),
   taxaJuros: decimal("taxa_juros", { precision: 5, scale: 2 }),
   observacoes: text("observacoes"),
@@ -168,6 +172,17 @@ export const comunicacaoLogs = pgTable("comunicacao_logs", {
   tipo: text("tipo").notNull(), // email, telefone, whatsapp, sistema
   conteudo: text("conteudo").notNull(),
   userId: integer("user_id").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Logs de Auditoria para Propostas  
+export const propostaLogs = pgTable("proposta_logs", {
+  id: serial("id").primaryKey(),
+  propostaId: text("proposta_id").references(() => propostas.id).notNull(),
+  autorId: text("autor_id").notNull(), // UUID do usuário que fez a ação
+  statusAnterior: text("status_anterior"),
+  statusNovo: text("status_novo").notNull(),
+  observacao: text("observacao"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -262,6 +277,11 @@ export const insertComunicacaoLogSchema = createInsertSchema(comunicacaoLogs).om
   createdAt: true,
 });
 
+export const insertPropostaLogSchema = createInsertSchema(propostaLogs).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertGerenteLojaSchema = createInsertSchema(gerenteLojas).omit({
   createdAt: true,
 });
@@ -286,5 +306,7 @@ export type InsertProduto = z.infer<typeof insertProdutoSchema>;
 export type Produto = typeof produtos.$inferSelect;
 export type InsertComunicacaoLog = z.infer<typeof insertComunicacaoLogSchema>;
 export type ComunicacaoLog = typeof comunicacaoLogs.$inferSelect;
+export type InsertPropostaLog = z.infer<typeof insertPropostaLogSchema>;
+export type PropostaLog = typeof propostaLogs.$inferSelect;
 export type InsertGerenteLojas = z.infer<typeof insertGerenteLojaSchema>;
 export type GerenteLojas = typeof gerenteLojas.$inferSelect;

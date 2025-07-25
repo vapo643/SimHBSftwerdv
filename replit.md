@@ -107,6 +107,11 @@ This is a full-stack TypeScript application for credit management called "Simpix
 - **Critical Bug Fixes for Proposal Flow (January 25)**: Fixed two critical issues preventing proper proposal management
 - **Analysis Queue Empty Fix**: Removed non-existent `updatedAt` column reference in GET /api/propostas that was causing 500 errors
 - **Proposal Creation Fix**: Corrected lojaId path from `atendente.lojaId` to `atendente.loja.id` in T-01 form submission
+- **Complete Analysis Pipeline Implementation (January 25)**: Successfully implemented the complete analyst workflow for the Credit Analysis Pipeline
+- **Database Schema Enhancement**: Added `pendente` status to enum, created `proposta_logs` table for audit trail, and added analyst tracking fields to propostas table
+- **PUT /api/propostas/:id/status Endpoint**: Implemented atomic transaction-based status change endpoint with validation, audit logging, and role-based access control
+- **Enhanced GET /api/propostas Endpoint**: Added multi-filter support for atendenteId, status, and queue parameters enabling complete analyst and attendant workflow
+- **Analyst Workflow Engine**: Complete implementation of approve/reject/pending cycle with proper audit trail and role-based permissions
 - **T-01 Schema Migration for Proposal Origination (January 25)**: Completed database normalization for new proposal creation screen
 - **Products Table Enhancement**: Added TAC (Taxa de Abertura de Crédito) fields - tac_valor and tac_tipo with proper constraints
 - **Proposals Table Normalization**: Migrated from JSONB to normalized columns for client data, added produto_id and tabela_comercial_id relationships
