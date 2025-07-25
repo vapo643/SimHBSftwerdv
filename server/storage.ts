@@ -71,8 +71,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUsersWithDetails(): Promise<any[]> {
-    const { createServerSupabaseClient } = await import('./lib/supabase');
-    const supabase = createServerSupabaseClient();
+    const { createServerSupabaseAdminClient } = await import('./lib/supabase');
+    const supabase = createServerSupabaseAdminClient();
     
     try {
       const { data: users, error } = await supabase
@@ -101,8 +101,8 @@ export class DatabaseStorage implements IStorage {
 
   async getPropostas(): Promise<any[]> {
     // Using raw SQL to handle the actual database schema with JSONB fields
-    const { createServerSupabaseClient } = await import('./lib/supabase');
-    const supabase = createServerSupabaseClient();
+    const { createServerSupabaseAdminClient } = await import('./lib/supabase');
+    const supabase = createServerSupabaseAdminClient();
     
     const { data, error } = await supabase
       .from('propostas')
@@ -130,7 +130,7 @@ export class DatabaseStorage implements IStorage {
     }
     
     // Map the data to match the expected format, extracting from JSONB fields
-    return (data || []).map(p => {
+    return (data || []).map((p: any) => {
       const clienteData = p.cliente_data || {};
       const condicoesData = p.condicoes_data || {};
       
@@ -160,8 +160,8 @@ export class DatabaseStorage implements IStorage {
 
   async getPropostaById(id: string | number): Promise<any | undefined> {
     // Using Supabase to handle JSONB fields properly
-    const { createServerSupabaseClient } = await import('./lib/supabase');
-    const supabase = createServerSupabaseClient();
+    const { createServerSupabaseAdminClient } = await import('./lib/supabase');
+    const supabase = createServerSupabaseAdminClient();
     
     const { data, error } = await supabase
       .from('propostas')
@@ -253,8 +253,8 @@ export class DatabaseStorage implements IStorage {
 
   async createProposta(proposta: any): Promise<any> {
     // Transform the normalized data to JSONB format for the real database schema
-    const { createServerSupabaseClient } = await import('./lib/supabase');
-    const supabase = createServerSupabaseClient();
+    const { createServerSupabaseAdminClient } = await import('./lib/supabase');
+    const supabase = createServerSupabaseAdminClient();
     
     // Use the JSONB objects directly from the incoming data
     const clienteData = proposta.clienteData || {};

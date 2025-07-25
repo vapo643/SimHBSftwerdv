@@ -252,8 +252,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = statusChangeSchema.parse({ status, observacao, valorAprovado, motivoPendencia });
       
       // Use Supabase directly to avoid Drizzle schema issues
-      const { createServerSupabaseClient } = await import("../server/lib/supabase");
-      const supabase = createServerSupabaseClient();
+      const { createServerSupabaseAdminClient } = await import("../server/lib/supabase");
+      const supabase = createServerSupabaseAdminClient();
       
       // 1. Get current proposal
       const { data: currentProposta, error: fetchError } = await supabase
@@ -344,8 +344,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
       const { cliente_data, condicoes_data } = req.body;
       
-      const { createServerSupabaseClient } = await import("../server/lib/supabase");
-      const supabase = createServerSupabaseClient();
+      const { createServerSupabaseAdminClient } = await import("../server/lib/supabase");
+      const supabase = createServerSupabaseAdminClient();
       
       // Verificar se a proposta existe e pertence ao usuário
       const { data: proposta, error: fetchError } = await supabase
@@ -1200,8 +1200,8 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
   app.get("/api/admin/users", jwtAuthMiddleware, requireAdmin, async (req, res) => {
     try {
       // Query Supabase profiles directly instead of local users table
-      const { createServerSupabaseClient } = await import("./lib/supabase");
-      const supabase = createServerSupabaseClient();
+      const { createServerSupabaseAdminClient } = await import("./lib/supabase");
+      const supabase = createServerSupabaseAdminClient();
       
       // Get all auth users first
       const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
@@ -1987,8 +1987,8 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
 
   app.get('/api/health/schema', async (req, res) => {
     try {
-      const { createServerSupabaseClient } = await import('./lib/supabase');
-      const supabase = createServerSupabaseClient();
+      const { createServerSupabaseAdminClient } = await import('./lib/supabase');
+      const supabase = createServerSupabaseAdminClient();
 
       // Check essential tables exist
       const tables = ['profiles', 'lojas', 'parceiros', 'produtos', 'propostas'];
