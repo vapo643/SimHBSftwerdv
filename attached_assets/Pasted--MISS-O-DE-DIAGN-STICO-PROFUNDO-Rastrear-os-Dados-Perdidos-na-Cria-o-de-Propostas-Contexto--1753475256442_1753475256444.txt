@@ -1,0 +1,25 @@
+# MISSÃO DE DIAGNÓSTICO PROFUNDO: Rastrear os Dados Perdidos na Criação de Propostas
+
+**Contexto:** Olá, Agente. Estamos a enfrentar um bug crítico e persistente. Quando um atendente cria uma "Nova Proposta", todos os dados do formulário (dados do cliente, condições do empréstimo) são perdidos, e a proposta chega vazia ao banco de dados. Suspeitamos que a causa está na forma como os dados são passados do frontend para o backend.
+
+**Sua Missão:**
+A sua tarefa não é corrigir o bug ainda. A sua missão é atuar como um engenheiro de depuração e **rastrear a jornada dos dados**, passo a passo, para nos mostrar **exatamente onde eles estão a ser perdidos**.
+
+**Roadmap de Investigação (Execute na ordem):**
+
+**PASSO 1: Inspecionar o Frontend (O Ponto de Partida)**
+* **Ficheiro Alvo:** `/client/src/pages/propostas/nova.tsx`.
+* **Tarefa:** Localize a função que é chamada quando o botão "Enviar Proposta" é clicado (provavelmente `submitProposal` ou similar). Adicione um `console.log` para nos mostrar o **objeto de dados completo** que está a ser preparado para ser enviado para a API, **imediatamente antes** da chamada `fetch` ou `api.post`.
+
+**PASSO 2: Inspecionar o Backend (O Ponto de Chegada)**
+* **Ficheiro Alvo:** `/server/routes.ts`.
+* **Tarefa:** Localize o nosso endpoint `POST /api/propostas`. Imediatamente na primeira linha dentro da função do endpoint, adicione um `console.log` para nos mostrar o objeto `req.body` **bruto**, exatamente como ele chega do frontend.
+
+**PASSO 3: Executar o Teste e Reportar as Evidências**
+* **Ação:** Após adicionar os logs, crie você mesmo uma nova proposta de teste através da interface.
+* **Relatório:** Forneça-nos um relatório com as seguintes evidências:
+    1.  Cole o `console.log` do **frontend** (do Passo 1).
+    2.  Cole o `console.log` do **backend** (do Passo 2).
+
+**Conclusão Diagnóstica:**
+Ao comparar os dois logs, saberemos com 100% de certeza se o problema está no frontend (os dados nunca são enviados) ou no backend (os dados chegam, mas são perdidos durante o processamento).
