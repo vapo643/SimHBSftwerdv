@@ -18,6 +18,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import HistoricoComunicao from "@/components/analise/HistoricoComunicao";
+import { DocumentViewer } from "@/components/DocumentViewer";
 import { useAuth } from "@/contexts/AuthContext";
 
 import { api } from "@/lib/apiClient";
@@ -29,6 +30,17 @@ const fetchProposta = async (id: string | undefined) => {
     return response.data;
   } catch (error) {
     throw new Error("Proposta não encontrada");
+  }
+};
+
+const fetchPropostaDocuments = async (id: string | undefined) => {
+  if (!id) throw new Error("ID da proposta não fornecido.");
+  try {
+    const response = await api.get(`/api/propostas/${id}/documents`);
+    return response.data;
+  } catch (error) {
+    console.error("Erro ao buscar documentos:", error);
+    return { documents: [] };
   }
 };
 
@@ -73,6 +85,12 @@ const AnaliseManualPage: React.FC = () => {
   } = useQuery({
     queryKey: ["proposta", propostaId],
     queryFn: () => fetchProposta(propostaId),
+    enabled: !!propostaId,
+  });
+
+  const { data: documentsData } = useQuery({
+    queryKey: ["proposta-documents", propostaId],
+    queryFn: () => fetchPropostaDocuments(propostaId),
     enabled: !!propostaId,
   });
 
@@ -182,6 +200,14 @@ const AnaliseManualPage: React.FC = () => {
               )}
             </CardContent>
           </Card>
+          
+          {/* Visualizador de Documentos */}
+          <DocumentViewer 
+            propostaId={propostaId!}
+            documents={documentsData?.documents || []}
+            ccbDocumentoUrl={proposta.ccbDocumentoUrl}
+          />
+          
           {/* Renderização condicional - Painel de Decisão apenas para ANALISTA e ADMINISTRADOR */}
           {user && (user.role === 'ANALISTA' || user.role === 'ADMINISTRADOR') ? (
             <Card>

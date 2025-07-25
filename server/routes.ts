@@ -539,7 +539,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // File upload route
+  // Import document routes
+  const { getPropostaDocuments, uploadPropostaDocument } = await import("./routes/documents");
+
+  // Document routes for proposals
+  app.get("/api/propostas/:id/documents", jwtAuthMiddleware, getPropostaDocuments);
+  app.post("/api/propostas/:id/documents", jwtAuthMiddleware, upload.single("file"), uploadPropostaDocument);
+
+  // Legacy file upload route (mantido para compatibilidade)
   app.post("/api/upload", jwtAuthMiddleware, upload.single("file"), async (req: AuthenticatedRequest, res) => {
     try {
       if (!req.file) {
