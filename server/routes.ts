@@ -119,6 +119,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // Debug endpoint to check token presence
+  app.get("/api/debug/token", (req, res) => {
+    const authHeader = req.headers.authorization;
+    res.json({
+      hasAuthHeader: !!authHeader,
+      authHeader: authHeader || 'No authorization header',
+      tokenPresent: authHeader?.startsWith('Bearer ') || false
+    });
+  });
+
   // Debug endpoint for RBAC validation
   app.get("/api/debug/me", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     try {
