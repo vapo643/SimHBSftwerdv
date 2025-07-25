@@ -8,7 +8,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, AlertCircle, Save, Send } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { fetchWithToken } from "@/lib/apiClient";
+import { api } from "@/lib/apiClient";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -108,6 +108,8 @@ const EditarPropostaPendenciada: React.FC = () => {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  
+  console.log('🔍 COMPONENTE INICIADO com ID:', id);
   const [activeTab, setActiveTab] = useState("dados-cliente");
   
   // Estado inicial para os formulários - DEVE estar antes de qualquer retorno condicional
@@ -120,8 +122,16 @@ const EditarPropostaPendenciada: React.FC = () => {
   const { data: proposta, isLoading, error } = useQuery({
     queryKey: [`/api/propostas/${id}`],
     queryFn: async () => {
-      const response = await api.get(`/api/propostas/${id}`);
-      return response.data as PropostaData;
+      try {
+        console.log('🔍 INICIANDO QUERY para:', `/api/propostas/${id}`);
+        const response = await api.get(`/api/propostas/${id}`);
+        console.log('🔍 RESPOSTA DA API:', response);
+        console.log('🔍 DADOS EXTRAÍDOS:', response.data);
+        return response.data as PropostaData;
+      } catch (error) {
+        console.error('🔍 ERRO NA QUERY:', error);
+        throw error;
+      }
     },
     enabled: !!id,
     refetchInterval: 15000, // Auto-refresh para sincronização
@@ -221,13 +231,22 @@ const EditarPropostaPendenciada: React.FC = () => {
   }
 
   if (error || !proposta) {
+    console.log('🔍 ERRO OU PROPOSTA VAZIA:', { error, proposta });
     return (
       <DashboardLayout title="Editar Proposta Pendenciada">
         <Alert variant="destructive">
           <AlertDescription>
             Erro ao carregar proposta. Por favor, tente novamente.
+            <br />
+            <small>Debug: {error?.message || 'Proposta não encontrada'}</small>
           </AlertDescription>
         </Alert>
+        <div className="mt-4">
+          <Button onClick={() => window.location.reload()}>🔄 Recarregar</Button>
+          <Button onClick={() => setLocation('/dashboard')} variant="outline" className="ml-2">
+            Voltar ao Dashboard
+          </Button>
+        </div>
       </DashboardLayout>
     );
   }
