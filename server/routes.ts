@@ -152,7 +152,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           clienteData: propostas.clienteData,
           condicoesData: propostas.condicoesData,
           createdAt: propostas.createdAt,
-          updatedAt: propostas.updatedAt,
           loja: {
             id: lojas.id,
             nomeLoja: lojas.nomeLoja
@@ -192,8 +191,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           loja: p.loja ? {
             nomeLoja: p.loja.nomeLoja
           } : undefined,
-          createdAt: p.createdAt,
-          updatedAt: p.updatedAt
+          createdAt: p.createdAt
         };
       });
       
@@ -262,6 +260,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...req.body,
         id: proposalId,
         userId: req.user?.id,
+        lojaId: req.body.lojaId || req.user?.lojaId, // Fallback to user's lojaId if not provided
       };
       
       const validatedData = insertPropostaSchema.parse(dataWithId);

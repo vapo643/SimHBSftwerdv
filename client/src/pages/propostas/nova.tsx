@@ -109,7 +109,7 @@ function ProposalForm() {
         valorTotalFinanciado: state.simulation?.valorTotalFinanciado ? parseFloat(state.simulation.valorTotalFinanciado) : 0,
         
         // Required fields
-        lojaId: state.context?.atendente?.lojaId,
+        lojaId: state.context?.atendente?.loja?.id,
         status: 'rascunho',
         finalidade: 'Empréstimo pessoal',
         garantia: 'Sem garantia',

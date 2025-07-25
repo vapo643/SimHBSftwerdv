@@ -104,6 +104,9 @@ This is a full-stack TypeScript application for credit management called "Simpix
 - **Partners Cache Consistency**: Fixed all partner CRUD mutations to use queryKeys.partners.all for proper cache invalidation instead of mixed query keys
 - **Stores Form Integration**: Updated LojaForm component to use consistent queryKeys.partners.list() and apiClient instead of direct fetch calls
 - **Multi-Layer Architecture Stability**: Resolved post-N:N migration inconsistencies affecting backend queries, frontend cache management, and API integration patterns
+- **Critical Bug Fixes for Proposal Flow (January 25)**: Fixed two critical issues preventing proper proposal management
+- **Analysis Queue Empty Fix**: Removed non-existent `updatedAt` column reference in GET /api/propostas that was causing 500 errors
+- **Proposal Creation Fix**: Corrected lojaId path from `atendente.lojaId` to `atendente.loja.id` in T-01 form submission
 - **T-01 Schema Migration for Proposal Origination (January 25)**: Completed database normalization for new proposal creation screen
 - **Products Table Enhancement**: Added TAC (Taxa de Abertura de Crédito) fields - tac_valor and tac_tipo with proper constraints
 - **Proposals Table Normalization**: Migrated from JSONB to normalized columns for client data, added produto_id and tabela_comercial_id relationships
