@@ -239,13 +239,13 @@ const EditarPropostaPendenciada: React.FC = () => {
     statusLength: proposta.status?.length,
     expectedStatus: 'pendenciado',
     isEqual: proposta.status === 'pendenciado',
-    trimmedStatus: proposta.status?.trim(),
+    statusAsString: String(proposta.status),
     propostaCompleta: proposta
   });
 
-  // Verificar se a proposta está pendenciada (com tratamento para espaços)
-  const statusTrimmed = proposta.status?.trim();
-  if (statusTrimmed !== 'pendenciado') {
+  // Verificar se a proposta está pendenciada (tratamento universal de tipos)
+  const statusString = String(proposta.status || '').trim();
+  if (statusString !== 'pendenciado') {
     return (
       <DashboardLayout title="Editar Proposta">
         <div className="container mx-auto px-4 py-8">
@@ -258,10 +258,10 @@ const EditarPropostaPendenciada: React.FC = () => {
                   Esta proposta está com status "{proposta.status}" e só pode ser editada quando estiver "pendenciado".
                 </p>
                 <p className="text-sm text-gray-500 mb-4">
-                  Status atual: <span className="font-mono bg-gray-800 px-2 py-1 rounded">"{statusTrimmed}"</span>
+                  Status atual: <span className="font-mono bg-gray-800 px-2 py-1 rounded">"{statusString}"</span>
                 </p>
                 <p className="text-xs text-gray-600 mb-4">
-                  Debug: length={proposta.status?.length}, type={typeof proposta.status}
+                  Debug: raw={JSON.stringify(proposta.status)}, type={typeof proposta.status}
                 </p>
                 <div className="flex gap-2 justify-center">
                   <Button 
