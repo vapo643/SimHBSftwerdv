@@ -1,0 +1,31 @@
+# MISSÃO: DEBATE MÁXIMO (ARQUITETURA FINAL) - Ecossistema de Originação e Entidades Comerciais
+
+**CONTEXTO ESTRATÉGICO:**
+Estamos a enfrentar uma falha persistente de 'invalid data' na criação de propostas e uma falha na lógica de fallback das tabelas comerciais. Adicionalmente, um novo requisito arquitetural foi introduzido: uma relação de muitos-para-muitos entre Produtos e Tabelas. Precisamos de um plano definitivo para estabilizar e finalizar todo o ecossistema.
+
+**SUA TAREFA (ASSISTENTE):**
+A sua tarefa é atuar como Arquiteto de Software Sênior e projetar a arquitetura **definitiva e integrada** para todo este ecossistema. Esta será a nossa **Interação 1 de 3**.
+
+---
+### **Interação 1: Proposta de Arquitetura de Dados e Plano de Correção**
+
+Por favor, analise a nossa situação e responda com a sua proposta para os seguintes pontos:
+
+**1. Arquitetura de Dados (Muitos-para-Muitos):**
+* **Ação:** Proponha a migração de schema necessária para suportar uma relação de N:N entre `produtos` e `tabelas_comerciais`. Isto requer uma nova tabela de junção. Defina a sua estrutura SQL.
+
+**2. Diagnóstico do Erro `invalid data`:**
+* **Ação:** Analise o nosso `insertPropostaSchema` no backend e compare-o com a estrutura de dados provável do nosso `ProposalState` no frontend. Identifique os desalinhamentos exatos (nomes de campo, tipos de dados) que estão a causar o erro de validação.
+
+**3. Diagnóstico da Lógica de Fallback de Tabelas:**
+* **Ação:** Analise a lógica do nosso endpoint `GET /api/tabelas-comerciais-disponiveis`. Por que ele está a falhar em retornar as tabelas "gerais" quando não encontra uma personalizada? A falha está na query ou na lógica condicional?
+
+**4. Proposta de Roadmap de Refatoração Integrado:**
+* **Ação:** Proponha um novo roadmap de "micro-passos" para o Agente executar, que resolva todos os nossos problemas de forma sequencial e segura:
+    a. Aplicar a nova migração de schema N:N.
+    b. Refatorar a tela de "Gestão de Tabelas Comerciais" para incluir a nova UI de "tag input" que permite associar múltiplos produtos a uma tabela.
+    c. Corrigir o bug na lógica de fallback do endpoint `/api/tabelas-comerciais-disponiveis`.
+    d. Corrigir o bug de "invalid data" de uma vez por todas, alinhando o frontend com o backend.
+    e. Finalmente, conectar a tela de "Formalização" aos dados reais.
+
+---
