@@ -29,79 +29,61 @@ import {
   Store, 
   Filter,
   User,
-  Building
+  Building,
+  Loader2
 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
-const mockData = [
-  {
-    id: "PRO-001",
-    dataSolicitacao: "2025-07-18",
-    cliente: "João Silva",
-    cpf: "123.456.789-00",
-    parceiro: "Parceiro A",
-    loja: "Loja A1",
-    valorSolicitado: "R$ 10.000",
-    score: 700,
-    status: "Em Análise",
-  },
-  {
-    id: "PRO-002",
-    dataSolicitacao: "2025-07-18",
-    cliente: "Maria Oliveira",
-    cpf: "234.567.890-11",
-    parceiro: "Parceiro B",
-    loja: "Loja B1",
-    valorSolicitado: "R$ 20.000",
-    score: 680,
-    status: "Pendente",
-  },
-  {
-    id: "PRO-003",
-    dataSolicitacao: "2025-07-17",
-    cliente: "Carlos Almeida",
-    cpf: "345.678.901-22",
-    parceiro: "Parceiro A",
-    loja: "Loja A2",
-    valorSolicitado: "R$ 15.000",
-    score: 720,
-    status: "Aprovado",
-  },
-  {
-    id: "PRO-004",
-    dataSolicitacao: "2025-06-25",
-    cliente: "Ana Santos",
-    cpf: "456.789.012-33",
-    parceiro: "Parceiro C",
-    loja: "Loja C1",
-    valorSolicitado: "R$ 12.000",
-    score: 650,
-    status: "Rejeitado",
-  },
-];
+// Removed mock data - now using real API data
 
-const mockParceiros = [
-  { id: "parceiro-a", nome: "Parceiro A", lojas: ["Loja A1", "Loja A2"] },
-  { id: "parceiro-b", nome: "Parceiro B", lojas: ["Loja B1"] },
-  { id: "parceiro-c", nome: "Parceiro C", lojas: ["Loja C1", "Loja C2", "Loja C3"] },
-];
+interface Proposta {
+  id: number;
+  status: string;
+  clienteNome: string;
+  clienteCpf: string;
+  valorSolicitado: string;
+  parceiro?: {
+    razaoSocial: string;
+  };
+  loja?: {
+    nomeLoja: string;
+  };
+  createdAt: string;
+  updatedAt: string;
+}
 
 const FilaAnalise: React.FC = () => {
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterPartner, setFilterPartner] = useState("all");
   const [filterStore, setFilterStore] = useState("all");
 
+  // Fetch real proposals data
+  const { data: propostas, isLoading, error } = useQuery<Proposta[]>({
+    queryKey: ['/api/propostas'],
+  });
+
+  // Fetch partners data
+  const { data: parceiros } = useQuery({
+    queryKey: ['/api/parceiros'],
+  });
+
   const filteredData = useMemo(
-    () =>
-      mockData.filter(proposta => {
+    () => {
+      if (!propostas) return [];
+      
+      return propostas.filter(proposta => {
         const byStatus = filterStatus !== "all" ? proposta.status === filterStatus : true;
         const byPartner =
           filterPartner !== "all"
-            ? proposta.parceiro === mockParceiros.find(p => p.id === filterPartner)?.nome
+            ? proposta.parceiro?.razaoSocial === filterPartner
             : true;
-        const byStore = filterStore !== "all" ? proposta.loja === filterStore : true;
+        const byStore = filterStore !== "all" ? proposta.loja?.nomeLoja === filterStore : true;
         return byStatus && byPartner && byStore;
-      }),
-    [filterStatus, filterPartner, filterStore]
+      });
+    },
+    [propostas, filterStatus, filterPartner, filterStore]
   );
 
   const handlePartnerChange = (partnerId: string) => {
@@ -109,13 +91,16 @@ const FilaAnalise: React.FC = () => {
     setFilterStore("all"); // Reseta o filtro de loja ao mudar o parceiro
   };
 
-  const propostasHoje = mockData.filter(
-    p => p.dataSolicitacao === new Date().toISOString().split("T")[0]
-  ).length;
-  const propostasPendentes = mockData.filter(
-    p => p.status === "Pendente" || p.status === "Em Análise"
-  ).length;
-  const acumuladoMes = mockData.length;
+  const today = new Date().toISOString().split("T")[0];
+  const propostasHoje = propostas?.filter(
+    p => p.createdAt.split("T")[0] === today
+  ).length || 0;
+  
+  const propostasPendentes = propostas?.filter(
+    p => p.status === "aguardando_analise" || p.status === "em_analise"
+  ).length || 0;
+  
+  const acumuladoMes = propostas?.length || 0;
 
   return (
     <DashboardLayout title="Fila de Análise de Crédito">
@@ -161,10 +146,10 @@ const FilaAnalise: React.FC = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos os Status</SelectItem>
-                <SelectItem value="Em Análise">Em Análise</SelectItem>
-                <SelectItem value="Pendente">Pendente</SelectItem>
-                <SelectItem value="Aprovado">Aprovado</SelectItem>
-                <SelectItem value="Rejeitado">Rejeitado</SelectItem>
+                <SelectItem value="aguardando_analise">Aguardando Análise</SelectItem>
+                <SelectItem value="em_analise">Em Análise</SelectItem>
+                <SelectItem value="aprovado">Aprovado</SelectItem>
+                <SelectItem value="rejeitado">Rejeitado</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -176,9 +161,9 @@ const FilaAnalise: React.FC = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos os Parceiros</SelectItem>
-                {mockParceiros.map(p => (
-                  <SelectItem key={p.id} value={p.id}>
-                    {p.nome}
+                {parceiros?.map((p: any) => (
+                  <SelectItem key={p.id} value={p.razaoSocial}>
+                    {p.razaoSocial}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -196,13 +181,7 @@ const FilaAnalise: React.FC = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todas as Lojas</SelectItem>
-                {mockParceiros
-                  .find(p => p.id === filterPartner)
-                  ?.lojas.map(loja => (
-                    <SelectItem key={loja} value={loja}>
-                      {loja}
-                    </SelectItem>
-                  ))}
+                {/* TODO: Load stores based on selected partner */}
               </SelectContent>
             </Select>
           </div>
@@ -248,32 +227,57 @@ const FilaAnalise: React.FC = () => {
                   </TableRow>
                 </TableHeader>
               <TableBody>
-                {filteredData.map(proposta => (
-                  <TableRow key={proposta.id}>
-                    <TableCell className="font-medium">{proposta.id}</TableCell>
-                    <TableCell>{proposta.dataSolicitacao}</TableCell>
-                    <TableCell>{proposta.cliente}</TableCell>
-                    <TableCell>{proposta.parceiro}</TableCell>
-                    <TableCell>{proposta.loja}</TableCell>
-                    <TableCell>
-                      <span className={
-                        proposta.status === "Aprovado" ? "status-approved" :
-                        proposta.status === "Rejeitado" ? "status-rejected" :
-                        "status-pending"
-                      }>
-                        {proposta.status}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Link to={`/credito/analise/${proposta.id}`}>
-                        <Button className="btn-simpix-primary" size="sm">
-                          <Eye className="h-4 w-4 mr-2" />
-                          <span className="hidden sm:inline">Analisar</span>
-                        </Button>
-                      </Link>
+                {isLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8">
+                      <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2" />
+                      <p>Carregando propostas...</p>
                     </TableCell>
                   </TableRow>
-                ))}
+                ) : error ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8 text-red-500">
+                      Erro ao carregar propostas. Por favor, recarregue a página.
+                    </TableCell>
+                  </TableRow>
+                ) : filteredData.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8 text-gray-500">
+                      Nenhuma proposta encontrada.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredData.map(proposta => (
+                    <TableRow key={proposta.id}>
+                      <TableCell className="font-medium">PRO-{proposta.id}</TableCell>
+                      <TableCell>{format(new Date(proposta.createdAt), 'dd/MM/yyyy', { locale: ptBR })}</TableCell>
+                      <TableCell>{proposta.clienteNome}</TableCell>
+                      <TableCell>{proposta.parceiro?.razaoSocial || '-'}</TableCell>
+                      <TableCell>{proposta.loja?.nomeLoja || '-'}</TableCell>
+                      <TableCell>
+                        <span className={
+                          proposta.status === "aprovado" ? "status-approved" :
+                          proposta.status === "rejeitado" ? "status-rejected" :
+                          "status-pending"
+                        }>
+                          {proposta.status === "aguardando_analise" ? "Aguardando Análise" :
+                           proposta.status === "em_analise" ? "Em Análise" :
+                           proposta.status === "aprovado" ? "Aprovado" :
+                           proposta.status === "rejeitado" ? "Rejeitado" :
+                           proposta.status}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Link to={`/credito/analise/PRO-${proposta.id}`}>
+                          <Button className="btn-simpix-primary" size="sm">
+                            <Eye className="h-4 w-4 mr-2" />
+                            <span className="hidden sm:inline">Analisar</span>
+                          </Button>
+                        </Link>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
               </Table>
             </div>

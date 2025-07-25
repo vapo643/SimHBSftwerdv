@@ -35,7 +35,6 @@ import { LoanConditionsStep } from "@/components/propostas/LoanConditionsStep";
 import { DocumentsStep } from "@/components/propostas/DocumentsStep";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import CurrencyInput from "@/components/ui/CurrencyInput";
 
 // Component that uses the ProposalContext
 function ProposalForm() {
@@ -47,26 +46,36 @@ function ProposalForm() {
   useProposalEffects();
 
   // Load origination context on mount
-  const { isLoading: loadingContext, error: contextError } = useQuery({
+  const { isLoading: loadingContext, error: contextError, data: contextData } = useQuery({
     queryKey: ['/api/origination/context'],
     queryFn: async () => {
-      const response = await apiRequest('/api/origination/context');
+      const response = await apiRequest('/api/origination/context', {
+        method: 'GET'
+      });
       return response;
-    },
-    onSuccess: (data) => {
-      setContext(data);
+    }
+  });
+
+  // Handle context data
+  React.useEffect(() => {
+    if (contextData) {
+      setContext(contextData);
       setLoading(false);
-    },
-    onError: (error) => {
-      console.error('Erro ao carregar contexto:', error);
+    }
+  }, [contextData, setContext, setLoading]);
+
+  // Handle errors
+  React.useEffect(() => {
+    if (contextError) {
+      console.error('Erro ao carregar contexto:', contextError);
       toast({
         title: 'Erro ao carregar dados',
         description: 'Não foi possível carregar os dados necessários. Por favor, recarregue a página.',
         variant: 'destructive',
       });
       setLoading(false);
-    },
-  });
+    }
+  }, [contextError, toast, setLoading]);
 
   // Submit mutation
   const submitProposal = useMutation({

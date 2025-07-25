@@ -99,14 +99,17 @@ router.get('/context', jwtAuthMiddleware, async (req: AuthenticatedRequest, res)
       return res.status(404).json({ message: 'Loja não encontrada' });
     }
     
+    // Fix: parceiros should be a single object, not an array
+    const parceiro = lojaData.parceiros as any;
+    
     const userProfile = {
       id: profileData.id,
       nome: profileData.full_name,
       loja_id: profileData.loja_id,
       nome_loja: lojaData.nome_loja,
       parceiro_id: lojaData.parceiro_id,
-      razao_social: lojaData.parceiros.razao_social,
-      cnpj: lojaData.parceiros.cnpj
+      razao_social: parceiro?.razao_social,
+      cnpj: parceiro?.cnpj
     };
     
     const parceiroId = userProfile.parceiro_id;
@@ -131,7 +134,14 @@ router.get('/context', jwtAuthMiddleware, async (req: AuthenticatedRequest, res)
             )
           );
 
-        let tabelasDisponiveis = tabelasPersonalizadas.map(t => ({
+        let tabelasDisponiveis: Array<{
+          id: number;
+          nomeTabela: string;
+          taxaJuros: string;
+          prazos: number[];
+          comissao: string;
+          tipo: 'personalizada' | 'geral';
+        }> = tabelasPersonalizadas.map(t => ({
           id: t.id,
           nomeTabela: t.nomeTabela,
           taxaJuros: t.taxaJuros,
@@ -158,7 +168,7 @@ router.get('/context', jwtAuthMiddleware, async (req: AuthenticatedRequest, res)
             taxaJuros: t.taxaJuros,
             prazos: t.prazos,
             comissao: t.comissao,
-            tipo: 'geral' as const
+            tipo: 'geral' as 'personalizada' | 'geral'
           }));
         }
 
@@ -210,7 +220,7 @@ router.get('/context', jwtAuthMiddleware, async (req: AuthenticatedRequest, res)
     console.error('Erro ao buscar contexto de originação:', error);
     res.status(500).json({ 
       message: 'Erro ao buscar dados de originação',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      error: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined
     });
   }
 });
