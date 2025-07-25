@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "wouter";
 import { 
   Calendar, 
@@ -58,10 +59,18 @@ const FilaAnalise: React.FC = () => {
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterPartner, setFilterPartner] = useState("all");
   const [filterStore, setFilterStore] = useState("all");
+  const { user } = useAuth();
 
-  // Fetch real proposals data - filtered for analysis queue
+  // Build query based on user role
+  const queryUrl = user?.role === 'ATENDENTE' 
+    ? `/api/propostas?atendenteId=${user.id}`
+    : user?.role === 'ANALISTA'
+    ? '/api/propostas?queue=analysis'
+    : '/api/propostas';
+
+  // Fetch real proposals data - filtered based on role
   const { data: propostas, isLoading, error } = useQuery<Proposta[]>({
-    queryKey: ['/api/propostas?queue=analysis'],
+    queryKey: [queryUrl],
   });
 
   // Fetch partners data

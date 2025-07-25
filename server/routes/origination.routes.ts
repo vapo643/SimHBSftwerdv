@@ -75,8 +75,24 @@ router.get('/context', jwtAuthMiddleware, async (req: AuthenticatedRequest, res)
       return res.status(404).json({ message: 'Perfil do usuário não encontrado' });
     }
     
+    // CRITICAL FIX: Handle users without stores gracefully (e.g. ANALISTA role)
     if (!profileData.loja_id) {
-      return res.status(400).json({ message: 'Usuário não está associado a uma loja' });
+      // Return minimal context for users without stores
+      return res.json({
+        atendente: {
+          id: userId,
+          nome: profileData.full_name || 'Usuário',
+          loja: null
+        },
+        produtos: [],
+        documentosObrigatorios: [],
+        limites: {
+          valorMinimo: 1000,
+          valorMaximo: 50000,
+          prazoMinimo: 6,
+          prazoMaximo: 48
+        }
+      });
     }
     
     // Then, get the loja and parceiro data

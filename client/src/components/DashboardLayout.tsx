@@ -31,8 +31,20 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
   const { toast } = useToast();
   const { user } = useAuth();
 
-  // Base navigation items available to all authenticated users
-  const baseNavigation = [
+  // Base navigation items - varies by role
+  const attendantNavigation = [
+    { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+    { name: "Nova Proposta", href: "/propostas/nova", icon: PlusCircle },
+    { name: "Minhas Propostas", href: "/credito/fila", icon: List },
+  ];
+
+  const analystNavigation = [
+    { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+    { name: "Fila de Análise", href: "/credito/fila", icon: List },
+    { name: "Formalização", href: "/formalizacao/fila", icon: FileText },
+  ];
+
+  const managerNavigation = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     { name: "Nova Proposta", href: "/propostas/nova", icon: PlusCircle },
     { name: "Fila de Análise", href: "/credito/fila", icon: List },
@@ -54,16 +66,26 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
   ];
 
   // Build navigation based on user role
-  let navigation = [...baseNavigation];
+  let navigation = [];
   
-  // Add finance navigation for FINANCEIRO role
-  if (user?.role === 'FINANCEIRO') {
-    navigation = [...navigation, ...financeNavigation];
-  }
-  
-  // Add admin navigation for ADMINISTRADOR role
-  if (user?.role === 'ADMINISTRADOR') {
-    navigation = [...navigation, ...financeNavigation, ...adminNavigation];
+  switch (user?.role) {
+    case 'ATENDENTE':
+      navigation = attendantNavigation;
+      break;
+    case 'ANALISTA':
+      navigation = analystNavigation;
+      break;
+    case 'GERENTE':
+      navigation = managerNavigation;
+      break;
+    case 'FINANCEIRO':
+      navigation = [...managerNavigation, ...financeNavigation];
+      break;
+    case 'ADMINISTRADOR':
+      navigation = [...managerNavigation, ...financeNavigation, ...adminNavigation];
+      break;
+    default:
+      navigation = attendantNavigation;
   }
 
   const handleSignOut = async () => {
