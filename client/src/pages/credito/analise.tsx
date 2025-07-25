@@ -18,6 +18,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import HistoricoComunicao from "@/components/analise/HistoricoComunicao";
+import { useAuth } from "@/contexts/AuthContext";
 
 import { api } from "@/lib/apiClient";
 
@@ -63,6 +64,7 @@ const AnaliseManualPage: React.FC = () => {
   const propostaId = params?.id;
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   const {
     data: proposta,
@@ -145,41 +147,56 @@ const AnaliseManualPage: React.FC = () => {
               </p>
             </CardContent>
           </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>Painel de Decisão</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                <div>
-                  <Label>Decisão</Label>
-                  <Controller
-                    name="status"
-                    control={control}
-                    render={({ field }) => (
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione uma decisão..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Aprovada">Aprovar Proposta</SelectItem>
-                          <SelectItem value="Negada">Negar Proposta</SelectItem>
-                          <SelectItem value="Pendente com Observação">Pendenciar</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    )}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="observacao">Observações (obrigatório se pendenciar)</Label>
-                  <Textarea id="observacao" {...register("observacao")} />
-                </div>
-                <Button type="submit" className="w-full" disabled={mutation.isPending}>
-                  {mutation.isPending ? "Salvando..." : "Confirmar Decisão"}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
+          {/* Renderização condicional - Painel de Decisão apenas para ANALISTA e ADMINISTRADOR */}
+          {user && (user.role === 'ANALISTA' || user.role === 'ADMINISTRADOR') ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>Painel de Decisão</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                  <div>
+                    <Label>Decisão</Label>
+                    <Controller
+                      name="status"
+                      control={control}
+                      render={({ field }) => (
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione uma decisão..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Aprovada">Aprovar Proposta</SelectItem>
+                            <SelectItem value="Negada">Negar Proposta</SelectItem>
+                            <SelectItem value="Pendente com Observação">Pendenciar</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="observacao">Observações (obrigatório se pendenciar)</Label>
+                    <Textarea id="observacao" {...register("observacao")} />
+                  </div>
+                  <Button type="submit" className="w-full" disabled={mutation.isPending}>
+                    {mutation.isPending ? "Salvando..." : "Confirmar Decisão"}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card>
+              <CardHeader>
+                <CardTitle>Visualização da Proposta</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  Você está visualizando esta proposta em modo de leitura. 
+                  Apenas analistas podem aprovar ou negar propostas.
+                </p>
+              </CardContent>
+            </Card>
+          )}
         </div>
         <div className="md:col-span-1">
           <HistoricoComunicao propostaId={propostaId} />

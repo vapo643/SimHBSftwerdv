@@ -1,5 +1,5 @@
-import React from "react";
-import { Link } from "wouter";
+import React, { useEffect } from "react";
+import { Link, useLocation } from "wouter";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,10 +10,11 @@ import {
   TableRow,
   TableCell,
 } from "@/components/ui/table";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
+import { Loader2, FileText, Clock, Calendar, TrendingUp } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useAuth } from "@/contexts/AuthContext";
 
 const getStatusClass = (status: string) => {
   switch (status.toLowerCase()) {
@@ -45,10 +46,30 @@ const formatCurrency = (value: number) => {
 };
 
 const Dashboard: React.FC = () => {
+  const { user } = useAuth();
+  const [, setLocation] = useLocation();
+  
   // Fetch real proposals data
-  const { data: propostas, isLoading, error } = useQuery({
+  const { data: propostas, isLoading, error } = useQuery<any[]>({
     queryKey: ['/api/propostas'],
   });
+
+  // Fetch user metrics if user is ATENDENTE
+  const { data: metricas } = useQuery<{
+    hoje: number;
+    semana: number;
+    mes: number;
+  }>({
+    queryKey: ['/api/propostas/metricas'],
+    enabled: user?.role === 'ATENDENTE',
+  });
+
+  // Redirect ANALISTA to analysis queue
+  useEffect(() => {
+    if (user?.role === 'ANALISTA') {
+      setLocation('/credito/fila');
+    }
+  }, [user?.role, setLocation]);
 
   if (isLoading) {
     return (
@@ -76,8 +97,52 @@ const Dashboard: React.FC = () => {
   return (
     <DashboardLayout title="Dashboard de Propostas">
       <div className="space-y-6">
+        {/* Métricas de Performance para Atendentes */}
+        {user?.role === 'ATENDENTE' && metricas && (
+          <div className="grid gap-4 md:grid-cols-3">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Propostas Hoje</CardTitle>
+                <Calendar className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{metricas.hoje || 0}</div>
+                <p className="text-xs text-muted-foreground">
+                  Criadas nas últimas 24 horas
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Propostas Esta Semana</CardTitle>
+                <Clock className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{metricas.semana || 0}</div>
+                <p className="text-xs text-muted-foreground">
+                  Últimos 7 dias
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Propostas Este Mês</CardTitle>
+                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{metricas.mes || 0}</div>
+                <p className="text-xs text-muted-foreground">
+                  Desde o início do mês
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl text-gradient-simpix">Propostas</h1>
+          <h1 className="text-2xl text-gradient-simpix">
+            {user?.role === 'ATENDENTE' ? 'Minhas Propostas' : 'Propostas'}
+          </h1>
           <Link to="/propostas/nova">
             <Button className="btn-simpix-accent">Criar Nova Proposta</Button>
           </Link>

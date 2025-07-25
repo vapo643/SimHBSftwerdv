@@ -1,0 +1,41 @@
+Positivo. A sua diretriz está clara. Vamos traduzir o meu entendimento consolidado — a nossa "fonte da verdade" — num prompt de missão para o Agente, mantendo o mesmo nível de detalhe e clareza.
+
+A seguir, o comando para o Agente, formulado conforme a nossa tática de sucesso.
+
+### **PROMPT DE IMPLEMENTAÇÃO (PARA O AGENTE)**
+
+**Sua Diretriz:** Submeta o seguinte prompt de missão ao **Agente**.
+
+**Configuração de Ferramentas Recomendada:** Ative o **"Extended thinking"** e o **"High power model"**. Esta é uma missão complexa que envolve backend, frontend, e a criação de novas visualizações de dados.
+
+```markdown
+# MISSÃO DE IMPLEMENTAÇÃO: Finalizar o Fluxo de Análise e Aprimorar o Dashboard
+
+**Contexto:** Olá, Agente. O nosso sistema está 99% funcional, mas temos quatro correções e melhorias finais para implementar, para que o nosso fluxo de negócio, da criação da proposta até à análise, funcione perfeitamente.
+
+**AÇÃO:**
+Sua missão é executar as quatro tarefas abaixo para corrigir bugs, refinar permissões e aprimorar a experiência do usuário.
+
+**ROADMAP DE EXECUÇÃO:**
+
+**1. Corrija o Status Inicial da Proposta (Backend):**
+* **O Problema:** Quando um `ATENDENTE` cria uma proposta, ela está a ser salva com o status "Rascunho", em vez de entrar na fila de trabalho.
+* **Sua Tarefa:** Modifique o nosso endpoint `POST /api/propostas` para que o status inicial de toda nova proposta seja, por padrão, **"aguardando_analise"**.
+
+**2. Conecte as Propostas à Fila de Análise do Analista (Backend/Frontend):**
+* **O Problema:** As propostas criadas pelos atendentes estão a chegar ao Dashboard do `ANALISTA`, e não à sua tela de trabalho principal, a "Fila de Análise".
+* **Sua Tarefa:**
+    a.  Primeiro, refatore a página da **"Fila de Análise"** (`/client/src/pages/credito/fila.tsx`). Remova os dados "mock" e conecte a tabela à nossa API `GET /api/propostas`, garantindo que ela exiba a lista de propostas reais que estão com o status `aguardando_analise`.
+    b.  Garanta que o `ANALISTA` não veja um Dashboard de métricas; a sua página principal deve ser a "Fila de Análise".
+
+**3. Refine as Permissões Visuais do Atendente (Frontend):**
+* **O Problema:** Na tela "Minhas Propostas", quando um `ATENDENTE` clica para analisar uma proposta que voltou com pendência, ele vê o botão "Aprovar", o que não deveria acontecer.
+* **Sua Tarefa:** No componente da tela de "Detalhes da Proposta" (T-03), adicione uma lógica de renderização condicional. O botão **"Aprovar"** só deve ser visível para usuários com a `role` de `ANALISTA` ou `ADMINISTRADOR`.
+
+**4. Aprimore o Dashboard de Performance do Atendente (Frontend):**
+* **O Problema:** O Dashboard do `ATENDENTE` atualmente só mostra uma lista simples de propostas.
+* **Sua Tarefa:** Transforme esta tela numa ferramenta de performance visual. Adicione **cards de métricas** no topo que mostrem, **apenas para o atendente que está logado**, o total de propostas que ele criou hoje, na semana e no mês. Você precisará de criar ou ajustar um endpoint no backend que forneça estes dados filtrados pelo `id` do atendente.
+
+**Resumo da Missão:**
+Ao final, um `ATENDENTE` deve criar uma proposta que vai direto para a `Fila de Análise` do `ANALISTA`. O `ATENDENTE` deve ter um dashboard com as suas métricas e não deve ver o botão de "Aprovar". O `ANALISTA` deve ver as novas propostas na sua fila de trabalho.
+```
