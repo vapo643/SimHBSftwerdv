@@ -17,7 +17,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import HistoricoComunicao from "@/components/analise/HistoricoComunicao";
+import { AlertCircle } from "lucide-react";
 import { DocumentViewer } from "@/components/DocumentViewer";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -155,19 +155,19 @@ const AnaliseManualPage: React.FC = () => {
               <CardTitle>Dados do Cliente</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              <p><strong>Nome:</strong> {proposta.clienteNome || "N/A"}</p>
-              <p><strong>CPF:</strong> {proposta.clienteCpf || "N/A"}</p>
-              <p><strong>Email:</strong> {proposta.clienteEmail || "N/A"}</p>
-              <p><strong>Telefone:</strong> {proposta.clienteTelefone || "N/A"}</p>
-              <p><strong>Data de Nascimento:</strong> {proposta.clienteDataNascimento || "N/A"}</p>
-              <p><strong>Renda Mensal:</strong> {proposta.clienteRenda ? `R$ ${proposta.clienteRenda}` : "N/A"}</p>
-              <p><strong>RG:</strong> {proposta.clienteRg || "N/A"}</p>
-              <p><strong>Órgão Emissor:</strong> {proposta.clienteOrgaoEmissor || "N/A"}</p>
-              <p><strong>Estado Civil:</strong> {proposta.clienteEstadoCivil || "N/A"}</p>
-              <p><strong>Nacionalidade:</strong> {proposta.clienteNacionalidade || "N/A"}</p>
-              <p><strong>CEP:</strong> {proposta.clienteCep || "N/A"}</p>
-              <p><strong>Endereço:</strong> {proposta.clienteEndereco || "N/A"}</p>
-              <p><strong>Ocupação:</strong> {proposta.clienteOcupacao || "N/A"}</p>
+              <p><strong>Nome:</strong> {proposta.clienteData?.nome || "N/A"}</p>
+              <p><strong>CPF:</strong> {proposta.clienteData?.cpf || "N/A"}</p>
+              <p><strong>Email:</strong> {proposta.clienteData?.email || "N/A"}</p>
+              <p><strong>Telefone:</strong> {proposta.clienteData?.telefone || "N/A"}</p>
+              <p><strong>Data de Nascimento:</strong> {proposta.clienteData?.dataNascimento || "N/A"}</p>
+              <p><strong>Renda Mensal:</strong> {proposta.clienteData?.renda ? `R$ ${proposta.clienteData.renda}` : "N/A"}</p>
+              <p><strong>RG:</strong> {proposta.clienteData?.rg || "N/A"}</p>
+              <p><strong>Órgão Emissor:</strong> {proposta.clienteData?.orgaoEmissor || "N/A"}</p>
+              <p><strong>Estado Civil:</strong> {proposta.clienteData?.estadoCivil || "N/A"}</p>
+              <p><strong>Nacionalidade:</strong> {proposta.clienteData?.nacionalidade || "N/A"}</p>
+              <p><strong>CEP:</strong> {proposta.clienteData?.cep || "N/A"}</p>
+              <p><strong>Endereço:</strong> {proposta.clienteData?.endereco || "N/A"}</p>
+              <p><strong>Ocupação:</strong> {proposta.clienteData?.ocupacao || "N/A"}</p>
             </CardContent>
           </Card>
 
@@ -177,13 +177,13 @@ const AnaliseManualPage: React.FC = () => {
               <CardTitle>Condições do Empréstimo</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              <p><strong>Valor Solicitado:</strong> {proposta.valor ? `R$ ${proposta.valor}` : "N/A"}</p>
-              <p><strong>Prazo:</strong> {proposta.prazo ? `${proposta.prazo} meses` : "N/A"}</p>
-              <p><strong>Finalidade:</strong> {proposta.finalidade || "N/A"}</p>
-              <p><strong>Garantia:</strong> {proposta.garantia || "N/A"}</p>
-              <p><strong>TAC:</strong> {proposta.valorTac ? `R$ ${proposta.valorTac}` : "N/A"}</p>
-              <p><strong>IOF:</strong> {proposta.valorIof ? `R$ ${proposta.valorIof}` : "N/A"}</p>
-              <p><strong>Valor Total Financiado:</strong> {proposta.valorTotalFinanciado ? `R$ ${proposta.valorTotalFinanciado}` : "N/A"}</p>
+              <p><strong>Valor Solicitado:</strong> {proposta.condicoesData?.valor ? `R$ ${proposta.condicoesData.valor}` : "N/A"}</p>
+              <p><strong>Prazo:</strong> {proposta.condicoesData?.prazo ? `${proposta.condicoesData.prazo} meses` : "N/A"}</p>
+              <p><strong>Finalidade:</strong> {proposta.condicoesData?.finalidade || "N/A"}</p>
+              <p><strong>Garantia:</strong> {proposta.condicoesData?.garantia || "N/A"}</p>
+              <p><strong>TAC:</strong> {proposta.condicoesData?.valorTac ? `R$ ${proposta.condicoesData.valorTac}` : "N/A"}</p>
+              <p><strong>IOF:</strong> {proposta.condicoesData?.valorIof ? `R$ ${proposta.condicoesData.valorIof}` : "N/A"}</p>
+              <p><strong>Valor Total Financiado:</strong> {proposta.condicoesData?.valorTotalFinanciado ? `R$ ${proposta.condicoesData.valorTotalFinanciado}` : "N/A"}</p>
             </CardContent>
           </Card>
 
@@ -272,7 +272,62 @@ const AnaliseManualPage: React.FC = () => {
           )}
         </div>
         <div className="md:col-span-1">
-          <HistoricoComunicao propostaId={propostaId} />
+          {/* Histórico de Comunicação */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <AlertCircle className="h-5 w-5 text-blue-400" />
+                Histórico de Comunicação
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {/* Criação da proposta */}
+                <div className="flex items-start gap-3 p-3 bg-gray-800 rounded-lg">
+                  <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
+                  <div>
+                    <p className="text-sm font-medium text-green-400">✅ Proposta Criada</p>
+                    <p className="text-xs text-gray-400">
+                      {proposta?.createdAt ? new Date(proposta.createdAt).toLocaleString('pt-BR') : 'Data não disponível'}
+                    </p>
+                    <p className="text-sm text-gray-300 mt-1">
+                      Proposta criada pelo atendente da loja {proposta?.loja?.nomeLoja || 'N/A'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Pendência (se existir) */}
+                {proposta?.motivoPendencia && (
+                  <div className="flex items-start gap-3 p-3 bg-yellow-900 rounded-lg">
+                    <div className="w-2 h-2 bg-yellow-500 rounded-full mt-2"></div>
+                    <div>
+                      <p className="text-sm font-medium text-yellow-400">⚠️ Proposta Pendenciada</p>
+                      <p className="text-xs text-gray-400">
+                        {proposta?.dataAnalise ? new Date(proposta.dataAnalise).toLocaleString('pt-BR') : 'Data não disponível'}
+                      </p>
+                      <p className="text-sm text-gray-300 mt-1">
+                        <strong>Motivo:</strong> {proposta.motivoPendencia}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Status atual */}
+                <div className="flex items-start gap-3 p-3 bg-blue-900 rounded-lg">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+                  <div>
+                    <p className="text-sm font-medium text-blue-400">📋 Status Atual</p>
+                    <p className="text-xs text-gray-400">
+                      {new Date().toLocaleString('pt-BR')}
+                    </p>
+                    <p className="text-sm text-gray-300 mt-1">
+                      Proposta está <strong>{proposta?.status || 'N/A'}</strong>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </DashboardLayout>
