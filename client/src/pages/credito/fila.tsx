@@ -42,15 +42,19 @@ import { ptBR } from "date-fns/locale";
 interface Proposta {
   id: string;
   status: string;
-  clienteNome?: string;
-  clienteCpf?: string;
-  valor?: string;
-  nomeCliente?: string;
-  valorSolicitado?: string;
+  nomeCliente: string;
+  cpfCliente?: string;
+  emailCliente?: string;
+  telefoneCliente?: string;
+  valorSolicitado?: number;
+  prazo?: number;
+  lojaId?: number;
   parceiro?: {
+    id: number;
     razaoSocial: string;
   };
   loja?: {
+    id: number;
     nomeLoja: string;
   };
   createdAt: string;
@@ -80,7 +84,9 @@ const FilaAnalise: React.FC = () => {
 
   const filteredData = useMemo(
     () => {
-      if (!propostas) return [];
+      if (!propostas || !Array.isArray(propostas)) {
+        return [];
+      }
       
       let filtered = propostas;
       
@@ -270,7 +276,7 @@ const FilaAnalise: React.FC = () => {
                     <TableRow key={proposta.id}>
                       <TableCell className="font-medium">{proposta.id}</TableCell>
                       <TableCell>{format(new Date(proposta.createdAt), 'dd/MM/yyyy', { locale: ptBR })}</TableCell>
-                      <TableCell>{proposta.clienteNome || proposta.nomeCliente || '-'}</TableCell>
+                      <TableCell>{proposta.nomeCliente || '-'}</TableCell>
                       <TableCell>{proposta.parceiro?.razaoSocial || '-'}</TableCell>
                       <TableCell>{proposta.loja?.nomeLoja || '-'}</TableCell>
                       <TableCell>
