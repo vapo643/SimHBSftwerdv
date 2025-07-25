@@ -82,6 +82,11 @@ This is a full-stack TypeScript application for credit management called "Simpix
 
 ### January 2025
 
+- **Commercial Tables Personalized Flow Complete (January 25)**: Finalized custom commercial tables creation flow with enhanced form and tag input system
+- **Enhanced Form Modal**: Added modal dialog with table name field, product dropdown (GET /api/produtos), and tag-based term input
+- **Tag Input System**: Implemented interactive term input where users type numbers and see them as badges (e.g., "12 months")
+- **API Integration**: Created POST /api/admin/tabelas-comerciais endpoint for saving custom tables with partner and product associations
+- **Real-time Updates**: Form submission creates commercial table in database with automatic cache invalidation and UI refresh
 - **Partner Details Page UI Fix (January 25)**: Fixed two critical UI bugs in partner details page (/client/src/pages/parceiros/detalhe.tsx)
 - **Missing API Endpoint**: Added GET /api/parceiros/:id endpoint that was missing, causing "undefined" title display
 - **UI Field Cleanup**: Removed Email and Telefone display fields, now only shows Razão Social and CNPJ as required

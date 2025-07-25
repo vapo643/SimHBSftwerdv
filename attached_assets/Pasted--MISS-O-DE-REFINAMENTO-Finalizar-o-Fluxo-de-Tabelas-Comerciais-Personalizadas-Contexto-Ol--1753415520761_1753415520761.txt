@@ -1,0 +1,27 @@
+# MISSÃO DE REFINAMENTO: Finalizar o Fluxo de Tabelas Comerciais Personalizadas
+
+**Contexto:** Olá, Agente. A nossa tela de "Detalhes do Parceiro" está a funcionar, mas o fluxo para criar e gerir as "Tabelas Comerciais Personalizadas" está incompleto e precisa de ser refinado para corresponder às nossas regras de negócio e melhorar a experiência do usuário.
+
+**AÇÃO:**
+Sua missão é executar três aprimoramentos chave na seção de "Configuração Comercial" da página de detalhes de um parceiro.
+
+**ROADMAP DE EXECUÇÃO:**
+
+**1. Aprimore o Formulário de "Criar Tabela Personalizada":**
+* **Ficheiro Alvo:** O componente do modal/formulário que abre ao clicar em "-- Criar Tabela Personalizada --".
+* **Tarefa:** Adicione os seguintes campos obrigatórios a este formulário:
+    * a. **Nome da Tabela:** Um campo de texto para o nome da nova tabela personalizada.
+    * b. **Produto Associado:** Um dropdown que deve ser populado com a lista de todos os `Produtos` disponíveis (buscados da API `GET /api/produtos`). Lembre-se, pela nossa regra de negócio, toda tabela comercial deve estar atrelada a um produto.
+
+**2. Aprimore a Interface de "Prazos Permitidos":**
+* **Ficheiro Alvo:** O mesmo formulário do passo anterior.
+* **Tarefa:** Transforme o campo "Prazos Permitidos" num componente de "Tag Input". A funcionalidade deve ser:
+    * O usuário digita um número (ex: 12) no campo de input.
+    * Ele clica num botão "Adicionar".
+    * O prazo "12 meses" aparece como um "badge" ou "tag" visual abaixo do campo.
+    * O usuário pode adicionar múltiplos prazos desta forma, e cada um aparece como um "badge" separado.
+
+**3. Conecte as Funcionalidades ao Banco de Dados:**
+* **Tarefa:** Garanta que, ao submeter este formulário completo, uma nova `Tabela Comercial` seja criada no banco de dados. Este novo registro deve estar corretamente associado ao `Parceiro` da página de detalhes e ao `Produto` selecionado no novo dropdown.
+
+**Resumo da Missão:** Ao final, o Administrador deve ter uma experiência completa e intuitiva para criar Tabelas Comerciais personalizadas para um parceiro, com todos os dados necessários a serem salvos corretamente no banco de dados.

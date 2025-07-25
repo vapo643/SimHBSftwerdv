@@ -487,6 +487,47 @@ app.get("/api/tabelas-comerciais-disponiveis", jwtAuthMiddleware, async (req: Au
     }
   });
 
+  // API endpoint for creating commercial tables
+  app.post("/api/admin/tabelas-comerciais", jwtAuthMiddleware, requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { db } = await import("../server/lib/supabase");
+      const { tabelasComerciais } = await import("../shared/schema");
+      const { z } = await import("zod");
+
+      // Validation schema for creating commercial table
+      const createTabelaSchema = z.object({
+        nomeTabela: z.string().min(3, "Nome da tabela deve ter pelo menos 3 caracteres"),
+        taxaJuros: z.number().positive("Taxa de juros deve ser positiva"),
+        prazos: z.array(z.number().positive()).min(1, "Deve ter pelo menos um prazo"),
+        produtoId: z.number().int().positive("Produto é obrigatório"),
+        parceiroId: z.number().int().positive("Parceiro é obrigatório"),
+      });
+
+      const validatedData = createTabelaSchema.parse(req.body);
+
+      // Insert new commercial table
+      const [newTabela] = await db
+        .insert(tabelasComerciais)
+        .values({
+          nomeTabela: validatedData.nomeTabela,
+          taxaJuros: validatedData.taxaJuros.toString(),
+          prazos: validatedData.prazos,
+          produtoId: validatedData.produtoId,
+          parceiroId: validatedData.parceiroId,
+        })
+        .returning();
+
+      console.log(`[${new Date().toISOString()}] Nova tabela comercial criada: ${newTabela.id}`);
+      res.status(201).json(newTabela);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Dados inválidos", errors: error.errors });
+      }
+      console.error("Erro ao criar tabela comercial:", error);
+      res.status(500).json({ message: "Erro ao criar tabela comercial" });
+    }
+  });
+
   // Mock data para prazos
   const prazos = [
     { id: 1, valor: "12 meses" },
