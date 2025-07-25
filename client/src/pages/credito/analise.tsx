@@ -20,6 +20,7 @@ import { useToast } from "@/hooks/use-toast";
 import { AlertCircle } from "lucide-react";
 import { DocumentViewer } from "@/components/DocumentViewer";
 import { useAuth } from "@/contexts/AuthContext";
+import HistoricoCompartilhado from "@/components/HistoricoCompartilhado";
 
 import { api } from "@/lib/apiClient";
 
@@ -105,8 +106,12 @@ const AnaliseManualPage: React.FC = () => {
     mutationFn: updatePropostaStatus,
     onSuccess: () => {
       toast({ title: "Sucesso!", description: "O status da proposta foi atualizado." });
+      // Invalidar múltiplas queries para sincronização completa
       queryClient.invalidateQueries({ queryKey: ["proposta", propostaId] });
       queryClient.invalidateQueries({ queryKey: ["proposta_logs", propostaId] });
+      queryClient.invalidateQueries({ queryKey: [`/api/propostas/${propostaId}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/propostas/${propostaId}/observacoes`] });
+      queryClient.invalidateQueries({ queryKey: ['/api/propostas'] });
     },
     onError: (error: Error) => {
       toast({ title: "Erro!", description: error.message, variant: "destructive" });
@@ -272,62 +277,8 @@ const AnaliseManualPage: React.FC = () => {
           )}
         </div>
         <div className="md:col-span-1">
-          {/* Histórico de Comunicação */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <AlertCircle className="h-5 w-5 text-blue-400" />
-                Histórico de Comunicação
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {/* Criação da proposta */}
-                <div className="flex items-start gap-3 p-3 bg-gray-800 rounded-lg">
-                  <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
-                  <div>
-                    <p className="text-sm font-medium text-green-400">✅ Proposta Criada</p>
-                    <p className="text-xs text-gray-400">
-                      {proposta?.createdAt ? new Date(proposta.createdAt).toLocaleString('pt-BR') : 'Data não disponível'}
-                    </p>
-                    <p className="text-sm text-gray-300 mt-1">
-                      Proposta criada pelo atendente da loja {proposta?.loja?.nomeLoja || 'N/A'}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Pendência (se existir) */}
-                {proposta?.motivoPendencia && (
-                  <div className="flex items-start gap-3 p-3 bg-yellow-900 rounded-lg">
-                    <div className="w-2 h-2 bg-yellow-500 rounded-full mt-2"></div>
-                    <div>
-                      <p className="text-sm font-medium text-yellow-400">⚠️ Proposta Pendenciada</p>
-                      <p className="text-xs text-gray-400">
-                        {proposta?.dataAnalise ? new Date(proposta.dataAnalise).toLocaleString('pt-BR') : 'Data não disponível'}
-                      </p>
-                      <p className="text-sm text-gray-300 mt-1">
-                        <strong>Motivo:</strong> {proposta.motivoPendencia}
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Status atual */}
-                <div className="flex items-start gap-3 p-3 bg-blue-900 rounded-lg">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
-                  <div>
-                    <p className="text-sm font-medium text-blue-400">📋 Status Atual</p>
-                    <p className="text-xs text-gray-400">
-                      {new Date().toLocaleString('pt-BR')}
-                    </p>
-                    <p className="text-sm text-gray-300 mt-1">
-                      Proposta está <strong>{proposta?.status || 'N/A'}</strong>
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Histórico de Comunicação - Compartilhado */}
+          <HistoricoCompartilhado propostaId={propostaId!} context="analise" />
         </div>
       </div>
     </DashboardLayout>

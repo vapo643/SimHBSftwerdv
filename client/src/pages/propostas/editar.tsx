@@ -13,11 +13,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import CurrencyInput from "@/components/ui/CurrencyInput";
+import HistoricoCompartilhado from "@/components/HistoricoCompartilhado";
 
 // Componente separado para documentos
 const DocumentsTab: React.FC<{ propostaId: string }> = ({ propostaId }) => {
   const { data: documentos, isLoading } = useQuery({
     queryKey: [`/api/propostas/${propostaId}/documents`],
+    queryFn: () => fetchWithToken(`/api/propostas/${propostaId}/documents`).then(r => r.json()),
     enabled: !!propostaId,
   });
 
@@ -29,9 +31,9 @@ const DocumentsTab: React.FC<{ propostaId: string }> = ({ propostaId }) => {
     <div>
       <h3 className="text-lg font-semibold mb-4 text-blue-400">Documentos da Proposta</h3>
       
-      {documentos?.documentos && documentos.documentos.length > 0 ? (
+      {documentos?.documents && documentos.documents.length > 0 ? (
         <div className="space-y-3">
-          {documentos.documentos.map((doc: any, index: number) => (
+          {documentos.documents.map((doc: any, index: number) => (
             <div key={index} className="flex items-center justify-between p-3 bg-gray-800 rounded-lg">
               <div className="flex items-center gap-3">
                 <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
@@ -148,7 +150,10 @@ const EditarPropostaPendenciada: React.FC = () => {
         title: "Alterações salvas",
         description: "As alterações foram salvas com sucesso.",
       });
+      // Invalidar múltiplas queries para atualização completa
       queryClient.invalidateQueries({ queryKey: [`/api/propostas/${id}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/propostas/${id}/observacoes`] });
+      queryClient.invalidateQueries({ queryKey: ['/api/propostas'] });
     },
     onError: (error) => {
       toast({
@@ -177,7 +182,11 @@ const EditarPropostaPendenciada: React.FC = () => {
         title: "Proposta reenviada",
         description: "A proposta foi reenviada para análise com sucesso.",
       });
+      // Invalidar todas as queries relacionadas
       queryClient.invalidateQueries({ queryKey: ['/api/propostas'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/propostas/${id}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/propostas/${id}/observacoes`] });
+      queryClient.invalidateQueries({ queryKey: ["proposta"] });
       setLocation('/dashboard');
     },
     onError: (error) => {
@@ -275,63 +284,8 @@ const EditarPropostaPendenciada: React.FC = () => {
           </Alert>
         )}
 
-        {/* Histórico de Comunicação */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <AlertCircle className="h-5 w-5 text-blue-400" />
-              Histórico de Comunicação
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {/* Criação da proposta */}
-              <div className="flex items-start gap-3 p-3 bg-gray-800 rounded-lg">
-                <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
-                <div>
-                  <p className="text-sm font-medium text-green-400">✅ Proposta Criada</p>
-                  <p className="text-xs text-gray-400">
-                    {proposta?.createdAt ? new Date(proposta.createdAt).toLocaleString('pt-BR') : 'Data não disponível'}
-                  </p>
-                  <p className="text-sm text-gray-300 mt-1">
-                    Proposta criada pelo atendente {proposta?.loja?.nomeLoja || 'N/A'}
-                  </p>
-                </div>
-              </div>
-
-              {/* Pendência */}
-              {proposta?.motivoPendencia && (
-                <div className="flex items-start gap-3 p-3 bg-yellow-900/20 border border-yellow-600 rounded-lg">
-                  <div className="w-2 h-2 bg-yellow-500 rounded-full mt-2"></div>
-                  <div>
-                    <p className="text-sm font-medium text-yellow-400">⚠️ Proposta Pendenciada</p>
-                    <p className="text-xs text-gray-400">
-                      {proposta?.dataAnalise ? new Date(proposta.dataAnalise).toLocaleString('pt-BR') : 'Data não disponível'}
-                    </p>
-                    <p className="text-sm text-gray-300 mt-1">
-                      <strong>Analista:</strong> {proposta?.analistaId || 'N/A'}
-                    </p>
-                    <p className="text-sm text-yellow-200 mt-2 p-2 bg-yellow-900/30 rounded">
-                      "{proposta.motivoPendencia}"
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {/* Status atual */}
-              <div className="flex items-start gap-3 p-3 bg-blue-900/20 border border-blue-600 rounded-lg">
-                <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
-                <div>
-                  <p className="text-sm font-medium text-blue-400">🔄 Em Correção</p>
-                  <p className="text-xs text-gray-400">Agora</p>
-                  <p className="text-sm text-gray-300 mt-1">
-                    Atendente está corrigindo os dados conforme solicitado pelo analista
-                  </p>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Histórico de Comunicação - Compartilhado */}
+        <HistoricoCompartilhado propostaId={id!} context="edicao" />
 
         {/* Informações da proposta */}
         <Card>
