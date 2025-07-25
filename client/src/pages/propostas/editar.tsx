@@ -17,10 +17,20 @@ import CurrencyInput from "@/components/ui/CurrencyInput";
 interface PropostaData {
   id: string;
   status: string;
-  motivo_pendencia?: string;
+  motivoPendencia?: string;
+  observacoesAnalise?: string;
   clienteData?: any;
   condicoesData?: any;
-  documentos?: any[];
+  documentosAnexados?: any[];
+  // Related entities
+  loja?: { id: number; nomeLoja: string };
+  parceiro?: { id: number; razaoSocial: string };
+  produto?: { id: number; nomeProduto: string; tacValor?: string; tacTipo?: string };
+  tabelaComercial?: { id: number; nomeTabela: string; taxaJuros: string; prazos: number[]; comissao: string };
+  // Metadata
+  createdAt?: string;
+  analistaId?: string;
+  dataAnalise?: string;
 }
 
 const EditarPropostaPendenciada: React.FC = () => {
@@ -184,14 +194,72 @@ const EditarPropostaPendenciada: React.FC = () => {
     <DashboardLayout title="Editar Proposta Pendenciada">
       <div className="space-y-6">
         {/* Alerta de pendência */}
-        {proposta?.motivo_pendencia && (
+        {proposta?.motivoPendencia && (
           <Alert className="border-yellow-500 bg-yellow-950/20">
             <AlertCircle className="h-4 w-4 text-yellow-500" />
             <AlertDescription className="text-yellow-200">
-              <strong>Motivo da pendência:</strong> {proposta.motivo_pendencia}
+              <strong>Motivo da pendência:</strong> {proposta.motivoPendencia}
             </AlertDescription>
           </Alert>
         )}
+
+        {/* Histórico de Comunicação */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-blue-400" />
+              Histórico de Comunicação
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {/* Criação da proposta */}
+              <div className="flex items-start gap-3 p-3 bg-gray-800 rounded-lg">
+                <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
+                <div>
+                  <p className="text-sm font-medium text-green-400">✅ Proposta Criada</p>
+                  <p className="text-xs text-gray-400">
+                    {proposta?.createdAt ? new Date(proposta.createdAt).toLocaleString('pt-BR') : 'Data não disponível'}
+                  </p>
+                  <p className="text-sm text-gray-300 mt-1">
+                    Proposta criada pelo atendente {proposta?.loja?.nomeLoja || 'N/A'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Pendência */}
+              {proposta?.motivoPendencia && (
+                <div className="flex items-start gap-3 p-3 bg-yellow-900/20 border border-yellow-600 rounded-lg">
+                  <div className="w-2 h-2 bg-yellow-500 rounded-full mt-2"></div>
+                  <div>
+                    <p className="text-sm font-medium text-yellow-400">⚠️ Proposta Pendenciada</p>
+                    <p className="text-xs text-gray-400">
+                      {proposta?.dataAnalise ? new Date(proposta.dataAnalise).toLocaleString('pt-BR') : 'Data não disponível'}
+                    </p>
+                    <p className="text-sm text-gray-300 mt-1">
+                      <strong>Analista:</strong> {proposta?.analistaId || 'N/A'}
+                    </p>
+                    <p className="text-sm text-yellow-200 mt-2 p-2 bg-yellow-900/30 rounded">
+                      "{proposta.motivoPendencia}"
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Status atual */}
+              <div className="flex items-start gap-3 p-3 bg-blue-900/20 border border-blue-600 rounded-lg">
+                <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+                <div>
+                  <p className="text-sm font-medium text-blue-400">🔄 Em Correção</p>
+                  <p className="text-xs text-gray-400">Agora</p>
+                  <p className="text-sm text-gray-300 mt-1">
+                    Atendente está corrigindo os dados conforme solicitado pelo analista
+                  </p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Informações da proposta */}
         <Card>
@@ -220,120 +288,353 @@ const EditarPropostaPendenciada: React.FC = () => {
         <Card>
           <CardContent className="p-6">
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-2">
+              <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="dados-cliente">Dados do Cliente</TabsTrigger>
                 <TabsTrigger value="condicoes">Condições do Crédito</TabsTrigger>
+                <TabsTrigger value="documentos">Documentos</TabsTrigger>
               </TabsList>
 
-              <TabsContent value="dados-cliente" className="mt-6 space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="nome">Nome Completo</Label>
-                    <Input
-                      id="nome"
-                      value={(formData.clienteData as any)?.nome || ''}
-                      onChange={(e) => handleClientChange('nome', e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="cpf">CPF</Label>
-                    <Input
-                      id="cpf"
-                      value={(formData.clienteData as any)?.cpf || ''}
-                      onChange={(e) => handleClientChange('cpf', e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="email">E-mail</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={(formData.clienteData as any)?.email || ''}
-                      onChange={(e) => handleClientChange('email', e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="telefone">Telefone</Label>
-                    <Input
-                      id="telefone"
-                      value={(formData.clienteData as any)?.telefone || ''}
-                      onChange={(e) => handleClientChange('telefone', e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="rendaMensal">Renda Mensal</Label>
-                    <CurrencyInput
-                      id="rendaMensal"
-                      value={(formData.clienteData as any)?.rendaMensal || ''}
-                      onChange={(e) => handleClientChange('rendaMensal', e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="ocupacao">Ocupação</Label>
-                    <Input
-                      id="ocupacao"
-                      value={(formData.clienteData as any)?.ocupacao || ''}
-                      onChange={(e) => handleClientChange('ocupacao', e.target.value)}
-                    />
+              <TabsContent value="dados-cliente" className="mt-6 space-y-6">
+                {/* Dados Pessoais */}
+                <div>
+                  <h3 className="text-lg font-semibold mb-4 text-blue-400">Dados Pessoais</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="nome">Nome Completo *</Label>
+                      <Input
+                        id="nome"
+                        value={(formData.clienteData as any)?.nome || ''}
+                        onChange={(e) => handleClientChange('nome', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="cpf">CPF *</Label>
+                      <Input
+                        id="cpf"
+                        value={(formData.clienteData as any)?.cpf || ''}
+                        onChange={(e) => handleClientChange('cpf', e.target.value)}
+                        placeholder="000.000.000-00"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="rg">RG</Label>
+                      <Input
+                        id="rg"
+                        value={(formData.clienteData as any)?.rg || ''}
+                        onChange={(e) => handleClientChange('rg', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="orgaoEmissor">Órgão Emissor</Label>
+                      <Input
+                        id="orgaoEmissor"
+                        value={(formData.clienteData as any)?.orgaoEmissor || ''}
+                        onChange={(e) => handleClientChange('orgaoEmissor', e.target.value)}
+                        placeholder="SSP/SP"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="dataNascimento">Data de Nascimento</Label>
+                      <Input
+                        id="dataNascimento"
+                        type="date"
+                        value={(formData.clienteData as any)?.dataNascimento || ''}
+                        onChange={(e) => handleClientChange('dataNascimento', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="estadoCivil">Estado Civil</Label>
+                      <Input
+                        id="estadoCivil"
+                        value={(formData.clienteData as any)?.estadoCivil || ''}
+                        onChange={(e) => handleClientChange('estadoCivil', e.target.value)}
+                        placeholder="Solteiro, Casado, etc."
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="nacionalidade">Nacionalidade</Label>
+                      <Input
+                        id="nacionalidade"
+                        value={(formData.clienteData as any)?.nacionalidade || ''}
+                        onChange={(e) => handleClientChange('nacionalidade', e.target.value)}
+                        placeholder="Brasileira"
+                      />
+                    </div>
                   </div>
                 </div>
+
+                {/* Contato */}
                 <div>
-                  <Label htmlFor="endereco">Endereço Completo</Label>
-                  <Textarea
-                    id="endereco"
-                    value={(formData.clienteData as any)?.endereco || ''}
-                    onChange={(e) => handleClientChange('endereco', e.target.value)}
-                    rows={3}
-                  />
+                  <h3 className="text-lg font-semibold mb-4 text-blue-400">Contato</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="email">E-mail *</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={(formData.clienteData as any)?.email || ''}
+                        onChange={(e) => handleClientChange('email', e.target.value)}
+                        placeholder="cliente@email.com"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="telefone">Telefone *</Label>
+                      <Input
+                        id="telefone"
+                        value={(formData.clienteData as any)?.telefone || ''}
+                        onChange={(e) => handleClientChange('telefone', e.target.value)}
+                        placeholder="(11) 99999-9999"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Endereço */}
+                <div>
+                  <h3 className="text-lg font-semibold mb-4 text-blue-400">Endereço</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="cep">CEP</Label>
+                      <Input
+                        id="cep"
+                        value={(formData.clienteData as any)?.cep || ''}
+                        onChange={(e) => handleClientChange('cep', e.target.value)}
+                        placeholder="00000-000"
+                      />
+                    </div>
+                    <div className="col-span-2">
+                      <Label htmlFor="endereco">Endereço Completo</Label>
+                      <Textarea
+                        id="endereco"
+                        value={(formData.clienteData as any)?.endereco || ''}
+                        onChange={(e) => handleClientChange('endereco', e.target.value)}
+                        rows={3}
+                        placeholder="Rua, número, bairro, cidade, estado"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Dados Profissionais */}
+                <div>
+                  <h3 className="text-lg font-semibold mb-4 text-blue-400">Dados Profissionais</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="ocupacao">Ocupação *</Label>
+                      <Input
+                        id="ocupacao"
+                        value={(formData.clienteData as any)?.ocupacao || ''}
+                        onChange={(e) => handleClientChange('ocupacao', e.target.value)}
+                        placeholder="Profissão do cliente"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="rendaMensal">Renda Mensal *</Label>
+                      <CurrencyInput
+                        id="rendaMensal"
+                        value={(formData.clienteData as any)?.rendaMensal || ''}
+                        onChange={(e) => handleClientChange('rendaMensal', e.target.value)}
+                      />
+                    </div>
+                  </div>
                 </div>
               </TabsContent>
 
-              <TabsContent value="condicoes" className="mt-6 space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="valor">Valor Solicitado</Label>
-                    <CurrencyInput
-                      id="valor"
-                      value={(formData.condicoesData as any)?.valor || ''}
-                      onChange={(e) => handleCondicoesChange('valor', e.target.value)}
-                    />
+              <TabsContent value="condicoes" className="mt-6 space-y-6">
+                {/* Valores do Empréstimo */}
+                <div>
+                  <h3 className="text-lg font-semibold mb-4 text-blue-400">Valores do Empréstimo</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="valor">Valor Solicitado *</Label>
+                      <CurrencyInput
+                        id="valor"
+                        value={(formData.condicoesData as any)?.valor || ''}
+                        onChange={(e) => handleCondicoesChange('valor', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="prazo">Prazo (meses) *</Label>
+                      <Input
+                        id="prazo"
+                        type="number"
+                        min="1"
+                        max="120"
+                        value={(formData.condicoesData as any)?.prazo || ''}
+                        onChange={(e) => handleCondicoesChange('prazo', e.target.value)}
+                        placeholder="12"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="valorTac">Valor TAC</Label>
+                      <CurrencyInput
+                        id="valorTac"
+                        value={(formData.condicoesData as any)?.valorTac || ''}
+                        onChange={(e) => handleCondicoesChange('valorTac', e.target.value)}
+                        disabled
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="valorIof">Valor IOF</Label>
+                      <CurrencyInput
+                        id="valorIof"
+                        value={(formData.condicoesData as any)?.valorIof || ''}
+                        onChange={(e) => handleCondicoesChange('valorIof', e.target.value)}
+                        disabled
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="valorTotalFinanciado">Valor Total Financiado</Label>
+                      <CurrencyInput
+                        id="valorTotalFinanciado"
+                        value={(formData.condicoesData as any)?.valorTotalFinanciado || ''}
+                        onChange={(e) => handleCondicoesChange('valorTotalFinanciado', e.target.value)}
+                        disabled
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="valorParcela">Valor da Parcela</Label>
+                      <CurrencyInput
+                        id="valorParcela"
+                        value={(formData.condicoesData as any)?.valorParcela || ''}
+                        onChange={(e) => handleCondicoesChange('valorParcela', e.target.value)}
+                        disabled
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <Label htmlFor="prazo">Prazo (meses)</Label>
-                    <Input
-                      id="prazo"
-                      type="number"
-                      value={(formData.condicoesData as any)?.prazo || ''}
-                      onChange={(e) => handleCondicoesChange('prazo', e.target.value)}
-                    />
+                </div>
+
+                {/* Tabela e Produto */}
+                <div>
+                  <h3 className="text-lg font-semibold mb-4 text-blue-400">Produto e Tabela</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="produto">Produto</Label>
+                      <Input
+                        id="produto"
+                        value={proposta?.produto?.nomeProduto || 'N/A'}
+                        disabled
+                        className="bg-gray-800"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="tabelaComercial">Tabela Comercial</Label>
+                      <Input
+                        id="tabelaComercial"
+                        value={proposta?.tabelaComercial?.nomeTabela || 'N/A'}
+                        disabled
+                        className="bg-gray-800"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="taxaJuros">Taxa de Juros (%)</Label>
+                      <Input
+                        id="taxaJuros"
+                        value={proposta?.tabelaComercial?.taxaJuros || ''}
+                        disabled
+                        className="bg-gray-800"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="comissao">Comissão (%)</Label>
+                      <Input
+                        id="comissao"
+                        value={proposta?.tabelaComercial?.comissao || ''}
+                        disabled
+                        className="bg-gray-800"
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <Label htmlFor="taxa">Taxa de Juros (%)</Label>
-                    <Input
-                      id="taxa"
-                      type="number"
-                      step="0.01"
-                      value={(formData.condicoesData as any)?.taxaJuros || ''}
-                      onChange={(e) => handleCondicoesChange('taxaJuros', e.target.value)}
-                    />
+                </div>
+
+                {/* Finalidade e Garantia */}
+                <div>
+                  <h3 className="text-lg font-semibold mb-4 text-blue-400">Detalhes do Empréstimo</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="finalidade">Finalidade *</Label>
+                      <Input
+                        id="finalidade"
+                        value={(formData.condicoesData as any)?.finalidade || ''}
+                        onChange={(e) => handleCondicoesChange('finalidade', e.target.value)}
+                        placeholder="Capital de giro, aquisição de equipamentos, etc."
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="garantia">Garantia</Label>
+                      <Input
+                        id="garantia"
+                        value={(formData.condicoesData as any)?.garantia || ''}
+                        onChange={(e) => handleCondicoesChange('garantia', e.target.value)}
+                        placeholder="Sem garantia, aval, etc."
+                      />
+                    </div>
                   </div>
+                </div>
+
+                {/* Observações */}
+                <div>
+                  <h3 className="text-lg font-semibold mb-4 text-blue-400">Observações</h3>
                   <div>
-                    <Label htmlFor="valorParcela">Valor da Parcela</Label>
-                    <CurrencyInput
-                      id="valorParcela"
-                      value={(formData.condicoesData as any)?.valorParcela || ''}
-                      onChange={(e) => handleCondicoesChange('valorParcela', e.target.value)}
+                    <Label htmlFor="observacoes">Observações Adicionais</Label>
+                    <Textarea
+                      id="observacoes"
+                      value={(formData.condicoesData as any)?.observacoes || ''}
+                      onChange={(e) => handleCondicoesChange('observacoes', e.target.value)}
+                      rows={4}
+                      placeholder="Informações adicionais sobre o empréstimo..."
                     />
                   </div>
                 </div>
+              </TabsContent>
+
+              <TabsContent value="documentos" className="mt-6 space-y-4">
                 <div>
-                  <Label htmlFor="observacoes">Observações</Label>
-                  <Textarea
-                    id="observacoes"
-                    value={(formData.condicoesData as any)?.observacoes || ''}
-                    onChange={(e) => handleCondicoesChange('observacoes', e.target.value)}
-                    rows={3}
-                  />
+                  <h3 className="text-lg font-semibold mb-4 text-blue-400">Documentos Anexados</h3>
+                  
+                  {proposta?.documentosAnexados && proposta.documentosAnexados.length > 0 ? (
+                    <div className="space-y-3">
+                      {proposta.documentosAnexados.map((doc: any, index: number) => (
+                        <div key={index} className="flex items-center justify-between p-3 bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                            <div>
+                              <p className="text-sm font-medium">{doc.nome || `Documento ${index + 1}`}</p>
+                              <p className="text-xs text-gray-400">{doc.tipo || 'Tipo não especificado'}</p>
+                            </div>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button variant="outline" size="sm">
+                              Visualizar
+                            </Button>
+                            <Button variant="destructive" size="sm">
+                              Remover
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-gray-400">
+                      <p>Nenhum documento anexado</p>
+                    </div>
+                  )}
+
+                  <div className="border-2 border-dashed border-gray-600 rounded-lg p-6 text-center">
+                    <input
+                      type="file"
+                      multiple
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      className="hidden"
+                      id="file-upload"
+                    />
+                    <label htmlFor="file-upload" className="cursor-pointer">
+                      <div className="text-gray-400">
+                        <p className="text-sm font-medium">Clique para adicionar documentos</p>
+                        <p className="text-xs mt-1">PDF, JPG, JPEG, PNG (máx. 10MB cada)</p>
+                      </div>
+                    </label>
+                  </div>
                 </div>
               </TabsContent>
             </Tabs>

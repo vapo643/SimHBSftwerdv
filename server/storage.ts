@@ -169,7 +169,7 @@ export class DatabaseStorage implements IStorage {
         id,
         status,
         cliente_data,
-        condicoes_data,
+        condicoes_data,  
         loja_id,
         created_at,
         produto_id,
@@ -179,13 +179,28 @@ export class DatabaseStorage implements IStorage {
         analista_id,
         data_analise,
         motivo_pendencia,
-        lojas!inner (
+        observacoes_analise,
+        documentos_anexados,
+        lojas (
           id,
           nome_loja,
-          parceiros!inner (
+          parceiros (
             id,
             razao_social
           )
+        ),
+        produtos (
+          id,
+          nome_produto,
+          tac_valor,
+          tac_tipo
+        ),
+        tabelas_comerciais (
+          id,
+          nome_tabela,
+          taxa_juros,
+          prazos,
+          comissao
         )
       `)
       .eq('id', String(id))
@@ -196,33 +211,17 @@ export class DatabaseStorage implements IStorage {
       return undefined;
     }
     
-    const clienteData = data.cliente_data || {};
-    const condicoesData = data.condicoes_data || {};
-    
+    // Return complete structured data for editing
     return {
       id: data.id,
       status: data.status,
-      clienteNome: clienteData.nome,
-      clienteCpf: clienteData.cpf,
-      clienteEmail: clienteData.email,
-      clienteTelefone: clienteData.telefone,
-      clienteDataNascimento: clienteData.dataNascimento,
-      clienteRenda: clienteData.renda,
-      clienteRg: clienteData.rg,
-      clienteOrgaoEmissor: clienteData.orgaoEmissor,
-      clienteEstadoCivil: clienteData.estadoCivil,
-      clienteNacionalidade: clienteData.nacionalidade,
-      clienteCep: clienteData.cep,
-      clienteEndereco: clienteData.endereco,
-      clienteOcupacao: clienteData.ocupacao,
-      valor: condicoesData.valor,
-      valorSolicitado: condicoesData.valor,
-      prazo: condicoesData.prazo,
-      finalidade: condicoesData.finalidade,
-      garantia: condicoesData.garantia,
-      valorTac: condicoesData.valorTac,
-      valorIof: condicoesData.valorIof,
-      valorTotalFinanciado: condicoesData.valorTotalFinanciado,
+      // Keep JSONB structure for editing
+      clienteData: data.cliente_data || {},
+      condicoesData: data.condicoes_data || {},
+      // Additional fields for display and logic
+      motivoPendencia: data.motivo_pendencia,
+      observacoesAnalise: data.observacoes_analise,
+      documentosAnexados: data.documentos_anexados || [],
       produtoId: data.produto_id,
       tabelaComercialId: data.tabela_comercial_id,
       lojaId: data.loja_id,
@@ -231,14 +230,27 @@ export class DatabaseStorage implements IStorage {
       ccbDocumentoUrl: data.ccb_documento_url,
       analistaId: data.analista_id,
       dataAnalise: data.data_analise,
-      motivoPendencia: data.motivo_pendencia,
-      loja: data.lojas && data.lojas[0] ? {
-        id: data.lojas[0].id,
-        nomeLoja: data.lojas[0].nome_loja
+      // Related entities (handling Supabase array responses)
+      loja: data.lojas ? {
+        id: data.lojas.id,
+        nomeLoja: data.lojas.nome_loja
       } : null,
-      parceiro: data.lojas && data.lojas[0] && data.lojas[0].parceiros && data.lojas[0].parceiros[0] ? {
-        id: data.lojas[0].parceiros[0].id,
-        razaoSocial: data.lojas[0].parceiros[0].razao_social
+      parceiro: data.lojas?.parceiros ? {
+        id: data.lojas.parceiros.id,
+        razaoSocial: data.lojas.parceiros.razao_social
+      } : null,
+      produto: data.produtos ? {
+        id: data.produtos.id,
+        nomeProduto: data.produtos.nome_produto,
+        tacValor: data.produtos.tac_valor,
+        tacTipo: data.produtos.tac_tipo
+      } : null,
+      tabelaComercial: data.tabelas_comerciais ? {
+        id: data.tabelas_comerciais.id,
+        nomeTabela: data.tabelas_comerciais.nome_tabela,
+        taxaJuros: data.tabelas_comerciais.taxa_juros,
+        prazos: data.tabelas_comerciais.prazos,
+        comissao: data.tabelas_comerciais.comissao
       } : null
     };
   }
