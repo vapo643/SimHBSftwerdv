@@ -229,7 +229,7 @@ const AnaliseManualPage: React.FC = () => {
                           <SelectContent>
                             <SelectItem value="aprovado">Aprovar Proposta</SelectItem>
                             <SelectItem value="rejeitado">Negar Proposta</SelectItem>
-                            <SelectItem value="pendente">Pendenciar</SelectItem>
+                            <SelectItem value="pendenciado">Pendenciar</SelectItem>
                           </SelectContent>
                         </Select>
                       )}

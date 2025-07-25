@@ -144,6 +144,13 @@
   color: white;
 }
 
+.status-warning {
+  @apply inline-flex items-center rounded-full px-2 py-1 text-xs font-medium;
+  background: hsl(45, 90%, 51%);
+  color: hsl(45, 100%, 20%);
+  border: 1px solid hsl(45, 90%, 40%);
+}
+
 @layer utilities {
   .text-warning {
     color: hsl(var(--warning));

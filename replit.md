@@ -162,6 +162,11 @@ This is a full-stack TypeScript application for credit management called "Simpix
 - **Business Logic Implementation**: Implemented specific filtering for payment-ready proposals according to T-05 workflow requirements
 - **Frontend JSONB Integration**: Updated pagamentos.tsx to handle real database JSONB structure (clienteData, condicoesData) instead of mock flat fields
 - **Payment Processing Flow**: Enhanced payment mutations and cache invalidation to work with new endpoint and data structure
+- **Complete Pendency Management System (January 25)**: Implemented comprehensive proposal pendency workflow allowing analysts to send proposals back to attendants with observations
+- **Visual Pendency Indicators**: Added orange warning styling (status-warning class) for pending proposals in dashboard with analyst observations display
+- **Edit Pending Proposals Page**: Created dedicated /propostas/editar/:id page for attendants to modify pending proposals while viewing analyst feedback
+- **Enhanced Document Viewer**: Improved DocumentViewer component to properly support PDF, JPG, JPEG, and PNG formats with file extension detection
+- **Pendency API Infrastructure**: Added PUT /api/propostas/:id endpoint with role-based access control for incremental proposal updates without data loss
 - **Partner Details Page UI Fix (January 25)**: Fixed two critical UI bugs in partner details page (/client/src/pages/parceiros/detalhe.tsx)
 - **Missing API Endpoint**: Added GET /api/parceiros/:id endpoint that was missing, causing "undefined" title display
 - **UI Field Cleanup**: Removed Email and Telefone display fields, now only shows Razão Social and CNPJ as required

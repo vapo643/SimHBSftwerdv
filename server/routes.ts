@@ -267,9 +267,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // 2. Validate status transition
       const validTransitions = {
-        'aguardando_analise': ['em_analise', 'aprovado', 'rejeitado', 'pendente'],
-        'em_analise': ['aprovado', 'rejeitado', 'pendente'],
-        'pendente': ['aguardando_analise'] // Atendente can resubmit
+        'aguardando_analise': ['em_analise', 'aprovado', 'rejeitado', 'pendenciado'],
+        'em_analise': ['aprovado', 'rejeitado', 'pendenciado'],
+        'pendenciado': ['aguardando_analise'] // Atendente can resubmit after fixing
       };
       
       const currentStatus = currentProposta.status;
@@ -284,7 +284,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         data_analise: new Date().toISOString()
       };
       
-      if (status === 'pendente' && motivoPendencia) {
+      if (status === 'pendenciado' && motivoPendencia) {
         updateData.motivo_pendencia = motivoPendencia;
       }
       
@@ -335,6 +335,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Get proposta error:", error);
       res.status(500).json({ message: "Failed to fetch proposta" });
+    }
+  });
+
+  app.put("/api/propostas/:id", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { id } = req.params;
+      const { cliente_data, condicoes_data } = req.body;
+      
+      const supabase = createServerSupabaseAdminClient();
+      
+      // Verificar se a proposta existe e pertence ao usuário
+      const { data: proposta, error: fetchError } = await supabase
+        .from('propostas')
+        .select('user_id, status')
+        .eq('id', id)
+        .single();
+        
+      if (fetchError || !proposta) {
+        return res.status(404).json({ message: "Proposta não encontrada" });
+      }
+      
+      // Apenas o atendente dono da proposta ou admin pode editar
+      if (req.user?.role !== 'ADMINISTRADOR' && proposta.user_id !== req.user?.id) {
+        return res.status(403).json({ message: "Sem permissão para editar esta proposta" });
+      }
+      
+      // Apenas propostas pendenciadas podem ser editadas
+      if (proposta.status !== 'pendenciado' && proposta.status !== 'rascunho') {
+        return res.status(400).json({ 
+          message: "Apenas propostas pendenciadas ou em rascunho podem ser editadas" 
+        });
+      }
+      
+      // Atualizar a proposta
+      const { error: updateError } = await supabase
+        .from('propostas')
+        .update({
+          cliente_data,
+          condicoes_data
+        })
+        .eq('id', id);
+        
+      if (updateError) {
+        throw updateError;
+      }
+      
+      res.json({ success: true, message: "Proposta atualizada com sucesso" });
+    } catch (error) {
+      console.error("Update proposta error:", error);
+      res.status(500).json({ message: "Erro ao atualizar proposta" });
     }
   });
 

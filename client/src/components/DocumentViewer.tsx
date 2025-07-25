@@ -40,15 +40,19 @@ export function DocumentViewer({ propostaId, documents, ccbDocumentoUrl }: Docum
     }] : [])
   ];
 
-  const getFileIcon = (type: string) => {
-    if (type.includes('pdf')) return <FileText className="h-4 w-4" />;
-    if (type.includes('image')) return <Image className="h-4 w-4" />;
+  const getFileIcon = (type: string, name?: string) => {
+    const nameExt = name?.toLowerCase() || '';
+    if (type.includes('pdf') || nameExt.endsWith('.pdf')) return <FileText className="h-4 w-4" />;
+    if (type.includes('image') || nameExt.endsWith('.jpg') || nameExt.endsWith('.jpeg') || nameExt.endsWith('.png')) 
+      return <Image className="h-4 w-4" />;
     return <FileIcon className="h-4 w-4" />;
   };
 
-  const getFileTypeLabel = (type: string) => {
-    if (type.includes('pdf')) return 'PDF';
-    if (type.includes('image')) return 'Imagem';
+  const getFileTypeLabel = (type: string, name?: string) => {
+    const nameExt = name?.toLowerCase() || '';
+    if (type.includes('pdf') || nameExt.endsWith('.pdf')) return 'PDF';
+    if (type.includes('image') || nameExt.endsWith('.jpg') || nameExt.endsWith('.jpeg') || nameExt.endsWith('.png')) 
+      return 'Imagem';
     if (type.includes('doc')) return 'DOC';
     return 'Arquivo';
   };
@@ -72,10 +76,18 @@ export function DocumentViewer({ propostaId, documents, ccbDocumentoUrl }: Docum
 
   const DocumentPreview = ({ document }: { document: Document }) => {
     const { url, type, name } = document;
+    const nameExt = name?.toLowerCase() || '';
 
-    if (type.includes('pdf')) {
+    // Check both type and file extension
+    const isPDF = type.includes('pdf') || nameExt.endsWith('.pdf');
+    const isImage = type.includes('image') || 
+                   nameExt.endsWith('.jpg') || 
+                   nameExt.endsWith('.jpeg') || 
+                   nameExt.endsWith('.png');
+
+    if (isPDF) {
       return (
-        <div className="w-full h-96 border rounded">
+        <div className="w-full h-[600px] border rounded bg-gray-900">
           <iframe
             src={url}
             className="w-full h-full"
@@ -85,13 +97,13 @@ export function DocumentViewer({ propostaId, documents, ccbDocumentoUrl }: Docum
       );
     }
 
-    if (type.includes('image')) {
+    if (isImage) {
       return (
-        <div className="w-full max-h-96 flex justify-center">
+        <div className="w-full max-h-[600px] flex justify-center bg-gray-900 p-4 rounded">
           <img
             src={url}
             alt={name}
-            className="max-w-full max-h-96 object-contain"
+            className="max-w-full max-h-[550px] object-contain"
           />
         </div>
       );
@@ -136,12 +148,12 @@ export function DocumentViewer({ propostaId, documents, ccbDocumentoUrl }: Docum
             className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50"
           >
             <div className="flex items-center space-x-3">
-              {getFileIcon(doc.type)}
+              {getFileIcon(doc.type, doc.name)}
               <div>
                 <p className="font-medium text-sm">{doc.name}</p>
                 <div className="flex items-center space-x-2">
                   <Badge variant="secondary" className="text-xs">
-                    {getFileTypeLabel(doc.type)}
+                    {getFileTypeLabel(doc.type, doc.name)}
                   </Badge>
                   {doc.size && (
                     <span className="text-xs text-gray-500">{doc.size}</span>

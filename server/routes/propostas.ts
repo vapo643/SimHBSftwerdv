@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { AuthenticatedRequest } from "../middleware/auth";
+import { AuthenticatedRequest } from "../lib/jwt-auth-middleware";
 import { createServerSupabaseAdminClient } from "../lib/supabase";
 
 /**
@@ -56,8 +56,7 @@ export const togglePropostaStatus = async (req: AuthenticatedRequest, res: Respo
     const { error: updateError } = await supabase
       .from('propostas')
       .update({ 
-        status: novoStatus,
-        updated_at: new Date().toISOString()
+        status: novoStatus
       })
       .eq('id', propostaId);
     

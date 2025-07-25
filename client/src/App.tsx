@@ -20,6 +20,7 @@ import PartnersPage from "@/pages/parceiros/index";
 import PartnerDetailPage from "@/pages/parceiros/detalhe";
 import ProdutosPage from "@/pages/configuracoes/produtos";
 import LojasPage from "@/pages/admin/lojas";
+import EditarPropostaPendenciada from "@/pages/propostas/editar";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -34,6 +35,11 @@ function Router() {
       <Route path="/propostas/nova">
         <ProtectedRoute>
           <NovaProposta />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/propostas/editar/:id">
+        <ProtectedRoute>
+          <EditarPropostaPendenciada />
         </ProtectedRoute>
       </Route>
       <Route path="/nova-proposta">

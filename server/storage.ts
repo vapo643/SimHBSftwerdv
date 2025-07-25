@@ -289,7 +289,7 @@ export class DatabaseStorage implements IStorage {
   async updateProposta(id: string | number, proposta: UpdateProposta): Promise<Proposta> {
     const result = await db
       .update(propostas)
-      .set({ ...proposta, updatedAt: new Date() })
+      .set(proposta)
       .where(eq(propostas.id, String(id)))
       .returning();
     return result[0];

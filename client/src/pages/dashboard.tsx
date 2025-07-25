@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
-import { Loader2, FileText, Clock, Calendar, TrendingUp } from "lucide-react";
+import { Loader2, FileText, Clock, Calendar, TrendingUp, AlertCircle, Edit } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -23,6 +23,8 @@ const getStatusClass = (status: string) => {
     case "em_analise":
     case "aguardando_analise":
       return "status-pending";
+    case "pendenciado":
+      return "status-warning"; // Destaque especial para pendenciadas
     case "rejeitado":
       return "status-rejected";
     case "pago":
@@ -156,18 +158,47 @@ const Dashboard: React.FC = () => {
                   <TableHead>Cliente</TableHead>
                   <TableHead>Valor</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead>Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {propostasData.map((proposta: any) => (
-                  <TableRow key={proposta.id}>
+                  <TableRow key={proposta.id} className={proposta.status === 'pendenciado' ? 'bg-yellow-950/20' : ''}>
                     <TableCell className="font-mono">#{proposta.id}</TableCell>
-                    <TableCell>{proposta.nomeCliente || 'Sem nome'}</TableCell>
+                    <TableCell>
+                      <div>
+                        <div>{proposta.nomeCliente || 'Sem nome'}</div>
+                        {proposta.status === 'pendenciado' && proposta.motivo_pendencia && (
+                          <div className="flex items-start gap-1 mt-1">
+                            <AlertCircle className="h-3 w-3 text-yellow-500 mt-0.5" />
+                            <span className="text-xs text-yellow-500">
+                              Pendência: {proposta.motivo_pendencia}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </TableCell>
                     <TableCell>{formatCurrency(proposta.valorSolicitado || 0)}</TableCell>
                     <TableCell>
                       <span className={getStatusClass(proposta.status)}>
                         {proposta.status.replace(/_/g, ' ').replace(/^\w/, (c: string) => c.toUpperCase())}
                       </span>
+                    </TableCell>
+                    <TableCell>
+                      {proposta.status === 'pendenciado' ? (
+                        <Link to={`/propostas/editar/${proposta.id}`}>
+                          <Button size="sm" variant="outline" className="flex items-center gap-1">
+                            <Edit className="h-3 w-3" />
+                            Corrigir
+                          </Button>
+                        </Link>
+                      ) : (
+                        <Link to={`/credito/analise/${proposta.id}`}>
+                          <Button size="sm" variant="ghost" className="text-gray-400">
+                            Visualizar
+                          </Button>
+                        </Link>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}
