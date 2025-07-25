@@ -93,6 +93,11 @@ This is a full-stack TypeScript application for credit management called "Simpix
 - **JWT-Protected Endpoint**: Secured endpoint with authentication middleware requiring valid user session
 - **Hierarchical Commercial Tables**: Returns personalized tables first, then general tables as fallback for each product
 - **Complete Context Object**: Returns user profile, store, partner, products, commercial tables, required documents, and business limits
+- **ProposalContext Architecture (January 25)**: Implemented useReducer-based state management for T-01 origination screen
+- **Complex State Management**: Created ProposalContext with interfaces for ClientData, LoanData, SimulationResult, and Documents
+- **Action-Based Updates**: Implemented proposalReducer with 13 action types for immutable state updates
+- **Helper Hooks**: Created useProposal and useProposalActions hooks for simplified state access and manipulation
+- **Type-Safe Frontend**: Full TypeScript interfaces matching orchestrator endpoint data structure
 
 - **Critical Database Migration - Commission Field (January 25)**: Fixed critical missing commission field in tabelas_comerciais table
 - **Database Schema Fix**: Added `comissao` NUMERIC(5,2) NOT NULL DEFAULT 0.00 field with CHECK constraint (comissao >= 0)

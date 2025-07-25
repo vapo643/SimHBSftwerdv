@@ -1,0 +1,365 @@
+import { createContext, useContext, useReducer, ReactNode } from 'react';
+
+// Types from our orchestrator endpoint
+interface Atendente {
+  id: string;
+  nome: string;
+  loja: {
+    id: number;
+    nome: string;
+    parceiro: {
+      id: number;
+      razaoSocial: string;
+      cnpj: string;
+    };
+  };
+}
+
+interface TabelaComercial {
+  id: number;
+  nomeTabela: string;
+  taxaJuros: string;
+  prazos: number[];
+  comissao: string;
+  tipo: 'personalizada' | 'geral';
+}
+
+interface Produto {
+  id: number;
+  nome: string;
+  tacValor: string;
+  tacTipo: string;
+  tabelasDisponiveis: TabelaComercial[];
+}
+
+interface OriginationContext {
+  atendente: Atendente;
+  produtos: Produto[];
+  documentosObrigatorios: string[];
+  limites: {
+    valorMinimo: number;
+    valorMaximo: number;
+    prazoMinimo: number;
+    prazoMaximo: number;
+  };
+}
+
+// Client data interface
+interface ClientData {
+  // Dados pessoais
+  cpf: string;
+  nome: string;
+  email: string;
+  telefone: string;
+  
+  // Documentação
+  rg: string;
+  orgaoEmissor: string;
+  dataEmissao: string;
+  dataNascimento: string;
+  
+  // Informações adicionais
+  estadoCivil: string;
+  nacionalidade: string;
+  
+  // Endereço
+  cep: string;
+  endereco: string;
+  numero: string;
+  complemento?: string;
+  bairro: string;
+  cidade: string;
+  estado: string;
+  
+  // Dados profissionais
+  ocupacao: string;
+  rendaMensal: string;
+}
+
+// Loan data interface
+interface LoanData {
+  produtoId: number | null;
+  tabelaComercialId: number | null;
+  valorSolicitado: string;
+  prazo: number | null;
+  incluirTac: boolean;
+  dataCarencia?: string;
+}
+
+// Simulation result interface
+interface SimulationResult {
+  valorParcela: string;
+  taxaJuros: string;
+  valorIOF: string;
+  valorTAC: string;
+  valorTotalFinanciado: string;
+  custoEfetivoTotal: string;
+  jurosCarencia?: string;
+  diasCarencia?: number;
+}
+
+// Document interface
+interface Document {
+  id: string;
+  name: string;
+  type: string;
+  size: number;
+  file: File;
+}
+
+// Proposal state interface
+interface ProposalState {
+  context: OriginationContext | null;
+  clientData: ClientData;
+  loanData: LoanData;
+  simulation: SimulationResult | null;
+  documents: Document[];
+  currentStep: number;
+  errors: Record<string, string>;
+  isLoading: boolean;
+}
+
+// Action types
+type ProposalAction =
+  | { type: 'SET_CONTEXT'; payload: OriginationContext }
+  | { type: 'UPDATE_CLIENT'; payload: Partial<ClientData> }
+  | { type: 'SELECT_PRODUCT'; payload: number }
+  | { type: 'SELECT_TABLE'; payload: number }
+  | { type: 'UPDATE_LOAN_CONDITIONS'; payload: Partial<LoanData> }
+  | { type: 'SET_SIMULATION_RESULT'; payload: SimulationResult }
+  | { type: 'CLEAR_SIMULATION' }
+  | { type: 'ADD_DOCUMENT'; payload: Document }
+  | { type: 'REMOVE_DOCUMENT'; payload: string }
+  | { type: 'SET_STEP'; payload: number }
+  | { type: 'SET_ERROR'; payload: { field: string; message: string } }
+  | { type: 'CLEAR_ERRORS' }
+  | { type: 'SET_LOADING'; payload: boolean }
+  | { type: 'RESET' };
+
+// Initial state
+const initialState: ProposalState = {
+  context: null,
+  clientData: {
+    cpf: '',
+    nome: '',
+    email: '',
+    telefone: '',
+    rg: '',
+    orgaoEmissor: '',
+    dataEmissao: '',
+    dataNascimento: '',
+    estadoCivil: '',
+    nacionalidade: 'Brasileira',
+    cep: '',
+    endereco: '',
+    numero: '',
+    complemento: '',
+    bairro: '',
+    cidade: '',
+    estado: '',
+    ocupacao: '',
+    rendaMensal: '',
+  },
+  loanData: {
+    produtoId: null,
+    tabelaComercialId: null,
+    valorSolicitado: '',
+    prazo: null,
+    incluirTac: true,
+    dataCarencia: undefined,
+  },
+  simulation: null,
+  documents: [],
+  currentStep: 0,
+  errors: {},
+  isLoading: false,
+};
+
+// Reducer function
+function proposalReducer(state: ProposalState, action: ProposalAction): ProposalState {
+  switch (action.type) {
+    case 'SET_CONTEXT':
+      return {
+        ...state,
+        context: action.payload,
+      };
+
+    case 'UPDATE_CLIENT':
+      return {
+        ...state,
+        clientData: {
+          ...state.clientData,
+          ...action.payload,
+        },
+      };
+
+    case 'SELECT_PRODUCT':
+      return {
+        ...state,
+        loanData: {
+          ...state.loanData,
+          produtoId: action.payload,
+          tabelaComercialId: null, // Reset table when product changes
+        },
+        simulation: null, // Clear simulation when product changes
+      };
+
+    case 'SELECT_TABLE':
+      return {
+        ...state,
+        loanData: {
+          ...state.loanData,
+          tabelaComercialId: action.payload,
+        },
+        simulation: null, // Clear simulation when table changes
+      };
+
+    case 'UPDATE_LOAN_CONDITIONS':
+      return {
+        ...state,
+        loanData: {
+          ...state.loanData,
+          ...action.payload,
+        },
+        simulation: null, // Clear simulation when conditions change
+      };
+
+    case 'SET_SIMULATION_RESULT':
+      return {
+        ...state,
+        simulation: action.payload,
+      };
+
+    case 'CLEAR_SIMULATION':
+      return {
+        ...state,
+        simulation: null,
+      };
+
+    case 'ADD_DOCUMENT':
+      return {
+        ...state,
+        documents: [...state.documents, action.payload],
+      };
+
+    case 'REMOVE_DOCUMENT':
+      return {
+        ...state,
+        documents: state.documents.filter(doc => doc.id !== action.payload),
+      };
+
+    case 'SET_STEP':
+      return {
+        ...state,
+        currentStep: action.payload,
+      };
+
+    case 'SET_ERROR':
+      return {
+        ...state,
+        errors: {
+          ...state.errors,
+          [action.payload.field]: action.payload.message,
+        },
+      };
+
+    case 'CLEAR_ERRORS':
+      return {
+        ...state,
+        errors: {},
+      };
+
+    case 'SET_LOADING':
+      return {
+        ...state,
+        isLoading: action.payload,
+      };
+
+    case 'RESET':
+      return initialState;
+
+    default:
+      return state;
+  }
+}
+
+// Context
+const ProposalContext = createContext<{
+  state: ProposalState;
+  dispatch: React.Dispatch<ProposalAction>;
+} | undefined>(undefined);
+
+// Provider component
+interface ProposalProviderProps {
+  children: ReactNode;
+}
+
+export function ProposalProvider({ children }: ProposalProviderProps) {
+  const [state, dispatch] = useReducer(proposalReducer, initialState);
+
+  return (
+    <ProposalContext.Provider value={{ state, dispatch }}>
+      {children}
+    </ProposalContext.Provider>
+  );
+}
+
+// Custom hook
+export function useProposal() {
+  const context = useContext(ProposalContext);
+  
+  if (!context) {
+    throw new Error('useProposal must be used within a ProposalProvider');
+  }
+  
+  return context;
+}
+
+// Helper hook for common operations
+export function useProposalActions() {
+  const { dispatch } = useProposal();
+  
+  return {
+    setContext: (context: OriginationContext) => 
+      dispatch({ type: 'SET_CONTEXT', payload: context }),
+    
+    updateClient: (data: Partial<ClientData>) => 
+      dispatch({ type: 'UPDATE_CLIENT', payload: data }),
+    
+    selectProduct: (productId: number) => 
+      dispatch({ type: 'SELECT_PRODUCT', payload: productId }),
+    
+    selectTable: (tableId: number) => 
+      dispatch({ type: 'SELECT_TABLE', payload: tableId }),
+    
+    updateLoanConditions: (data: Partial<LoanData>) => 
+      dispatch({ type: 'UPDATE_LOAN_CONDITIONS', payload: data }),
+    
+    setSimulationResult: (result: SimulationResult) => 
+      dispatch({ type: 'SET_SIMULATION_RESULT', payload: result }),
+    
+    clearSimulation: () => 
+      dispatch({ type: 'CLEAR_SIMULATION' }),
+    
+    addDocument: (document: Document) => 
+      dispatch({ type: 'ADD_DOCUMENT', payload: document }),
+    
+    removeDocument: (documentId: string) => 
+      dispatch({ type: 'REMOVE_DOCUMENT', payload: documentId }),
+    
+    setStep: (step: number) => 
+      dispatch({ type: 'SET_STEP', payload: step }),
+    
+    setError: (field: string, message: string) => 
+      dispatch({ type: 'SET_ERROR', payload: { field, message } }),
+    
+    clearErrors: () => 
+      dispatch({ type: 'CLEAR_ERRORS' }),
+    
+    setLoading: (loading: boolean) => 
+      dispatch({ type: 'SET_LOADING', payload: loading }),
+    
+    reset: () => 
+      dispatch({ type: 'RESET' }),
+  };
+}
