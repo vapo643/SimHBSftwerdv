@@ -175,6 +175,10 @@ export class DatabaseStorage implements IStorage {
         produto_id,
         tabela_comercial_id,
         user_id,
+        ccb_documento_url,
+        analista_id,
+        data_analise,
+        motivo_pendencia,
         lojas!inner (
           id,
           nome_loja,
@@ -212,6 +216,7 @@ export class DatabaseStorage implements IStorage {
       clienteEndereco: clienteData.endereco,
       clienteOcupacao: clienteData.ocupacao,
       valor: condicoesData.valor,
+      valorSolicitado: condicoesData.valor,
       prazo: condicoesData.prazo,
       finalidade: condicoesData.finalidade,
       garantia: condicoesData.garantia,
@@ -223,6 +228,10 @@ export class DatabaseStorage implements IStorage {
       lojaId: data.loja_id,
       userId: data.user_id,
       createdAt: data.created_at,
+      ccbDocumentoUrl: data.ccb_documento_url,
+      analistaId: data.analista_id,
+      dataAnalise: data.data_analise,
+      motivoPendencia: data.motivo_pendencia,
       loja: data.lojas && data.lojas[0] ? {
         id: data.lojas[0].id,
         nomeLoja: data.lojas[0].nome_loja

@@ -119,32 +119,67 @@ const AnaliseManualPage: React.FC = () => {
     <DashboardLayout title={`Análise Manual - Proposta #${proposta.id}`}>
       <div className="grid gap-6 md:grid-cols-3">
         <div className="space-y-6 md:col-span-2">
+          {/* Card de Dados do Cliente */}
           <Card>
             <CardHeader>
-              <CardTitle>Detalhes da Proposta</CardTitle>
+              <CardTitle>Dados do Cliente</CardTitle>
             </CardHeader>
-            <CardContent>
-              <p>
-                <strong>Cliente:</strong> {proposta.clienteNome || "N/A"}
-              </p>
-              <p>
-                <strong>CPF:</strong> {proposta.cpf || "N/A"}
-              </p>
-              <p>
-                <strong>Valor Solicitado:</strong> {proposta.valorSolicitado || "N/A"}
-              </p>
-              <p>
-                <strong>Prazo:</strong> {proposta.prazo || "N/A"}
-              </p>
-              <p>
-                <strong>Score:</strong> {proposta.score || "N/A"}
-              </p>
-              <p>
-                <strong>Parceiro:</strong> {proposta.parceiro || "N/A"}
-              </p>
-              <p>
-                <strong>Status Atual:</strong> {proposta.status || "N/A"}
-              </p>
+            <CardContent className="space-y-2">
+              <p><strong>Nome:</strong> {proposta.clienteNome || "N/A"}</p>
+              <p><strong>CPF:</strong> {proposta.clienteCpf || "N/A"}</p>
+              <p><strong>Email:</strong> {proposta.clienteEmail || "N/A"}</p>
+              <p><strong>Telefone:</strong> {proposta.clienteTelefone || "N/A"}</p>
+              <p><strong>Data de Nascimento:</strong> {proposta.clienteDataNascimento || "N/A"}</p>
+              <p><strong>Renda Mensal:</strong> {proposta.clienteRenda ? `R$ ${proposta.clienteRenda}` : "N/A"}</p>
+              <p><strong>RG:</strong> {proposta.clienteRg || "N/A"}</p>
+              <p><strong>Órgão Emissor:</strong> {proposta.clienteOrgaoEmissor || "N/A"}</p>
+              <p><strong>Estado Civil:</strong> {proposta.clienteEstadoCivil || "N/A"}</p>
+              <p><strong>Nacionalidade:</strong> {proposta.clienteNacionalidade || "N/A"}</p>
+              <p><strong>CEP:</strong> {proposta.clienteCep || "N/A"}</p>
+              <p><strong>Endereço:</strong> {proposta.clienteEndereco || "N/A"}</p>
+              <p><strong>Ocupação:</strong> {proposta.clienteOcupacao || "N/A"}</p>
+            </CardContent>
+          </Card>
+
+          {/* Card de Condições do Empréstimo */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Condições do Empréstimo</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <p><strong>Valor Solicitado:</strong> {proposta.valor ? `R$ ${proposta.valor}` : "N/A"}</p>
+              <p><strong>Prazo:</strong> {proposta.prazo ? `${proposta.prazo} meses` : "N/A"}</p>
+              <p><strong>Finalidade:</strong> {proposta.finalidade || "N/A"}</p>
+              <p><strong>Garantia:</strong> {proposta.garantia || "N/A"}</p>
+              <p><strong>TAC:</strong> {proposta.valorTac ? `R$ ${proposta.valorTac}` : "N/A"}</p>
+              <p><strong>IOF:</strong> {proposta.valorIof ? `R$ ${proposta.valorIof}` : "N/A"}</p>
+              <p><strong>Valor Total Financiado:</strong> {proposta.valorTotalFinanciado ? `R$ ${proposta.valorTotalFinanciado}` : "N/A"}</p>
+            </CardContent>
+          </Card>
+
+          {/* Card de Informações da Proposta */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Informações da Proposta</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <p><strong>Status Atual:</strong> {proposta.status || "N/A"}</p>
+              <p><strong>Parceiro:</strong> {proposta.parceiro?.razaoSocial || "N/A"}</p>
+              <p><strong>Loja:</strong> {proposta.loja?.nomeLoja || "N/A"}</p>
+              <p><strong>Data de Criação:</strong> {proposta.createdAt ? new Date(proposta.createdAt).toLocaleDateString('pt-BR') : "N/A"}</p>
+              {proposta.ccbDocumentoUrl && (
+                <p>
+                  <strong>Documento CCB:</strong> 
+                  <a 
+                    href={proposta.ccbDocumentoUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="ml-2 text-blue-500 hover:underline"
+                  >
+                    Visualizar Documento
+                  </a>
+                </p>
+              )}
             </CardContent>
           </Card>
           {/* Renderização condicional - Painel de Decisão apenas para ANALISTA e ADMINISTRADOR */}
