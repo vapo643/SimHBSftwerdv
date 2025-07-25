@@ -242,63 +242,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const validatedData = statusChangeSchema.parse({ status, observacao, valorAprovado, motivoPendencia });
       
-      // Import database dependencies
-      const { db } = await import("../server/lib/supabase");
-      const { propostas, propostaLogs } = await import("../shared/schema");
-      const { eq } = await import("drizzle-orm");
+      // Use Supabase directly to avoid Drizzle schema issues
+      const { createServerSupabaseAdminClient } = await import("../server/lib/supabase");
+      const supabase = createServerSupabaseAdminClient();
       
-      // Execute atomic transaction
-      const result = await db.transaction(async (tx) => {
-        // 1. Get current proposal with pessimistic lock
-        const [currentProposta] = await tx
-          .select()
-          .from(propostas)
-          .where(eq(propostas.id, propostaId))
-          .for('update');
+      // 1. Get current proposal
+      const { data: currentProposta, error: fetchError } = await supabase
+        .from('propostas')
+        .select('status')
+        .eq('id', propostaId)
+        .single();
         
-        if (!currentProposta) {
-          throw new Error('Proposta não encontrada');
-        }
+      if (fetchError || !currentProposta) {
+        throw new Error('Proposta não encontrada');
+      }
+      
+      // 2. Validate status transition
+      const validTransitions = {
+        'aguardando_analise': ['em_analise', 'aprovado', 'rejeitado', 'pendente'],
+        'em_analise': ['aprovado', 'rejeitado', 'pendente'],
+        'pendente': ['aguardando_analise'] // Atendente can resubmit
+      };
+      
+      const currentStatus = currentProposta.status;
+      if (!validTransitions[currentStatus as keyof typeof validTransitions]?.includes(status)) {
+        throw new Error(`Transição inválida de ${currentStatus} para ${status}`);
+      }
+      
+      // 3. Update proposal using only fields that exist in the real table
+      const updateData: any = {
+        status,
+        analista_id: req.user?.id,
+        data_analise: new Date().toISOString()
+      };
+      
+      if (status === 'pendente' && motivoPendencia) {
+        updateData.motivo_pendencia = motivoPendencia;
+      }
+      
+      const { error: updateError } = await supabase
+        .from('propostas')
+        .update(updateData)
+        .eq('id', propostaId);
         
-        // 2. Validate status transition
-        const validTransitions = {
-          'aguardando_analise': ['em_analise', 'aprovado', 'rejeitado', 'pendente'],
-          'em_analise': ['aprovado', 'rejeitado', 'pendente'],
-          'pendente': ['aguardando_analise'] // Atendente can resubmit
-        };
-        
-        const currentStatus = currentProposta.status;
-        if (!validTransitions[currentStatus as keyof typeof validTransitions]?.includes(status)) {
-          throw new Error(`Transição inválida de ${currentStatus} para ${status}`);
-        }
-        
-        // 3. Update proposal
-        const updateData: any = {
-          status,
-          analistaId: req.user?.id,
-          dataAnalise: new Date(),
-          observacoes: observacao
-        };
-        
-        if (status === 'aprovado' && valorAprovado) {
-          updateData.valorAprovado = valorAprovado.toString();
-        }
-        
-        if (status === 'pendente' && motivoPendencia) {
-          updateData.motivoPendencia = motivoPendencia;
-        }
-        
-        await tx
-          .update(propostas)
-          .set(updateData)
-          .where(eq(propostas.id, propostaId));
-        
-        // 4. Create audit log (skip for now to avoid dependencies)
-        // Note: We'll implement full audit logging later
-        console.log(`Audit log: Proposta ${propostaId} status changed from ${currentStatus} to ${status} by ${req.user?.id}`);
-        
-        return { success: true, statusAnterior: currentStatus, statusNovo: status };
-      });
+      if (updateError) {
+        throw new Error(`Erro ao atualizar status: ${updateError.message}`);
+      }
+      
+      const result = { success: true, statusAnterior: currentStatus, statusNovo: status };
       
       console.log(`[${new Date().toISOString()}] Proposta ${propostaId} - status alterado de ${result.statusAnterior} para ${result.statusNovo} pelo analista ${req.user?.id}`);
       
