@@ -68,31 +68,19 @@ export const propostas = pgTable("propostas", {
   id: serial("id").primaryKey(),
   lojaId: integer("loja_id").references(() => lojas.id).notNull(), // Multi-tenant key
   
-  // Cliente dados - Normalized fields
+  // Cliente dados
   clienteNome: text("cliente_nome").notNull(),
   clienteCpf: text("cliente_cpf").notNull(),
   clienteEmail: text("cliente_email").notNull(),
   clienteTelefone: text("cliente_telefone").notNull(),
   clienteDataNascimento: text("cliente_data_nascimento").notNull(),
   clienteRenda: text("cliente_renda").notNull(),
-  clienteRg: text("cliente_rg"),
-  clienteOrgaoEmissor: text("cliente_orgao_emissor"),
-  clienteEstadoCivil: text("cliente_estado_civil"),
-  clienteNacionalidade: text("cliente_nacionalidade").default("Brasileira"),
-  clienteCep: text("cliente_cep"),
-  clienteEndereco: text("cliente_endereco"),
-  clienteOcupacao: text("cliente_ocupacao"),
 
-  // Empréstimo dados - Enhanced
-  produtoId: integer("produto_id").references(() => produtos.id),
-  tabelaComercialId: integer("tabela_comercial_id").references(() => tabelasComerciais.id),
+  // Empréstimo dados
   valor: decimal("valor", { precision: 15, scale: 2 }).notNull(),
   prazo: integer("prazo").notNull(),
   finalidade: text("finalidade").notNull(),
   garantia: text("garantia").notNull(),
-  valorTac: decimal("valor_tac", { precision: 10, scale: 2 }),
-  valorIof: decimal("valor_iof", { precision: 10, scale: 2 }),
-  valorTotalFinanciado: decimal("valor_total_financiado", { precision: 15, scale: 2 }),
 
   // Status e análise
   status: statusEnum("status").notNull().default("rascunho"),
@@ -135,8 +123,6 @@ export const produtos = pgTable("produtos", {
   id: serial("id").primaryKey(),
   nomeProduto: text("nome_produto").notNull(),
   isActive: boolean("is_active").notNull().default(true),
-  tacValor: decimal("tac_valor", { precision: 10, scale: 2 }).default("0"),
-  tacTipo: text("tac_tipo").default("fixo"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
