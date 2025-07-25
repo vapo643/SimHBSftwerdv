@@ -277,7 +277,7 @@ const FilaAnalise: React.FC = () => {
                         </span>
                       </TableCell>
                       <TableCell className="text-right">
-                        <Link to={`/credito/analise/PRO-${proposta.id}`}>
+                        <Link to={`/credito/analise/${proposta.id}`}>
                           <Button className="btn-simpix-primary" size="sm">
                             <Eye className="h-4 w-4 mr-2" />
                             <span className="hidden sm:inline">Analisar</span>

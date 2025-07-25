@@ -330,36 +330,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const idParam = req.params.id;
       let proposta;
 
-      // Handle both numeric and string IDs
-      if (idParam.startsWith("PRO-") || idParam.startsWith("PROP-")) {
-        // For string IDs like PRO-001, return mock data for development
-        proposta = {
-          id: idParam,
-          clienteNome: "João Silva",
-          clienteCpf: "123.456.789-00",
-          clienteEmail: "joao.silva@email.com",
-          clienteTelefone: "(11) 99999-9999",
-          clienteDataNascimento: "1990-01-01",
-          clienteRenda: "5000.00",
-          valor: "15000.00",
-          prazo: 12,
-          finalidade: "Capital de giro",
-          garantia: "Sem garantia",
-          status: "em_analise",
-          documentos: ["documento1.pdf", "documento2.pdf"],
-          createdAt: new Date().toISOString(),
-          score: 750,
-          parceiro: "Parceiro A",
-          loja: "Loja Central"
-        };
-      } else {
-        // For numeric IDs, use database
-        const id = parseInt(idParam);
-        if (isNaN(id)) {
-          return res.status(400).json({ message: "Invalid proposal ID format" });
-        }
-        proposta = await storage.getPropostaById(id);
-      }
+      // Get proposal from database - all IDs are strings now
+      proposta = await storage.getPropostaById(idParam);
 
       if (!proposta) {
         return res.status(404).json({ message: "Proposta not found" });
@@ -390,7 +362,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         id: dataWithId.id,
         userId: dataWithId.userId,
         lojaId: dataWithId.lojaId,
-        status: dataWithId.status || 'rascunho',
+        status: dataWithId.status || 'aguardando_analise',
         
         // Store client data as JSONB
         clienteData: JSON.stringify({

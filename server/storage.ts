@@ -158,9 +158,80 @@ export class DatabaseStorage implements IStorage {
     });
   }
 
-  async getPropostaById(id: string | number): Promise<Proposta | undefined> {
-    const result = await db.select().from(propostas).where(eq(propostas.id, String(id))).limit(1);
-    return result[0];
+  async getPropostaById(id: string | number): Promise<any | undefined> {
+    // Using Supabase to handle JSONB fields properly
+    const { createServerSupabaseAdminClient } = await import('./lib/supabase');
+    const supabase = createServerSupabaseAdminClient();
+    
+    const { data, error } = await supabase
+      .from('propostas')
+      .select(`
+        id,
+        status,
+        cliente_data,
+        condicoes_data,
+        loja_id,
+        created_at,
+        produto_id,
+        tabela_comercial_id,
+        user_id,
+        lojas!inner (
+          id,
+          nome_loja,
+          parceiros!inner (
+            id,
+            razao_social
+          )
+        )
+      `)
+      .eq('id', String(id))
+      .single();
+    
+    if (error || !data) {
+      console.error('Error fetching proposta by id:', error);
+      return undefined;
+    }
+    
+    const clienteData = data.cliente_data || {};
+    const condicoesData = data.condicoes_data || {};
+    
+    return {
+      id: data.id,
+      status: data.status,
+      clienteNome: clienteData.nome,
+      clienteCpf: clienteData.cpf,
+      clienteEmail: clienteData.email,
+      clienteTelefone: clienteData.telefone,
+      clienteDataNascimento: clienteData.dataNascimento,
+      clienteRenda: clienteData.renda,
+      clienteRg: clienteData.rg,
+      clienteOrgaoEmissor: clienteData.orgaoEmissor,
+      clienteEstadoCivil: clienteData.estadoCivil,
+      clienteNacionalidade: clienteData.nacionalidade,
+      clienteCep: clienteData.cep,
+      clienteEndereco: clienteData.endereco,
+      clienteOcupacao: clienteData.ocupacao,
+      valor: condicoesData.valor,
+      prazo: condicoesData.prazo,
+      finalidade: condicoesData.finalidade,
+      garantia: condicoesData.garantia,
+      valorTac: condicoesData.valorTac,
+      valorIof: condicoesData.valorIof,
+      valorTotalFinanciado: condicoesData.valorTotalFinanciado,
+      produtoId: data.produto_id,
+      tabelaComercialId: data.tabela_comercial_id,
+      lojaId: data.loja_id,
+      userId: data.user_id,
+      createdAt: data.created_at,
+      loja: data.lojas && data.lojas[0] ? {
+        id: data.lojas[0].id,
+        nomeLoja: data.lojas[0].nome_loja
+      } : null,
+      parceiro: data.lojas && data.lojas[0] && data.lojas[0].parceiros && data.lojas[0].parceiros[0] ? {
+        id: data.lojas[0].parceiros[0].id,
+        razaoSocial: data.lojas[0].parceiros[0].razao_social
+      } : null
+    };
   }
 
   async getPropostasByStatus(status: string): Promise<Proposta[]> {
