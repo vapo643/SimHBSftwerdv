@@ -238,11 +238,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     try {
       const propostaId = req.params.id;
-      const { status, observacao, valorAprovado, motivoPendencia } = req.body;
+      const { status, observacao, valorAprovado } = req.body;
+      const motivoPendencia = req.body.motivoPendencia || req.body.observacao; // Accept both field names
       
       // Validation schema for status change
       const statusChangeSchema = z.object({
-        status: z.enum(['aprovado', 'rejeitado', 'pendente']),
+        status: z.enum(['aprovado', 'rejeitado', 'pendenciado']),
         observacao: z.string().min(1, 'Observação é obrigatória'),
         valorAprovado: z.number().optional(),
         motivoPendencia: z.string().optional()
@@ -251,8 +252,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = statusChangeSchema.parse({ status, observacao, valorAprovado, motivoPendencia });
       
       // Use Supabase directly to avoid Drizzle schema issues
-      const { createServerSupabaseAdminClient } = await import("../server/lib/supabase");
-      const supabase = createServerSupabaseAdminClient();
+      const { createServerSupabaseClient } = await import("../server/lib/supabase");
+      const supabase = createServerSupabaseClient();
       
       // 1. Get current proposal
       const { data: currentProposta, error: fetchError } = await supabase
@@ -343,7 +344,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
       const { cliente_data, condicoes_data } = req.body;
       
-      const supabase = createServerSupabaseAdminClient();
+      const { createServerSupabaseClient } = await import("../server/lib/supabase");
+      const supabase = createServerSupabaseClient();
       
       // Verificar se a proposta existe e pertence ao usuário
       const { data: proposta, error: fetchError } = await supabase
@@ -1198,8 +1200,8 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
   app.get("/api/admin/users", jwtAuthMiddleware, requireAdmin, async (req, res) => {
     try {
       // Query Supabase profiles directly instead of local users table
-      const { createServerSupabaseAdminClient } = await import("./lib/supabase");
-      const supabase = createServerSupabaseAdminClient();
+      const { createServerSupabaseClient } = await import("./lib/supabase");
+      const supabase = createServerSupabaseClient();
       
       // Get all auth users first
       const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
@@ -1985,8 +1987,8 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
 
   app.get('/api/health/schema', async (req, res) => {
     try {
-      const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-      const supabase = createServerSupabaseAdminClient();
+      const { createServerSupabaseClient } = await import('./lib/supabase');
+      const supabase = createServerSupabaseClient();
 
       // Check essential tables exist
       const tables = ['profiles', 'lojas', 'parceiros', 'produtos', 'propostas'];

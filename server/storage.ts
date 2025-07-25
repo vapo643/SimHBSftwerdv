@@ -71,8 +71,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUsersWithDetails(): Promise<any[]> {
-    const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-    const supabase = createServerSupabaseAdminClient();
+    const { createServerSupabaseClient } = await import('./lib/supabase');
+    const supabase = createServerSupabaseClient();
     
     try {
       const { data: users, error } = await supabase
@@ -101,8 +101,8 @@ export class DatabaseStorage implements IStorage {
 
   async getPropostas(): Promise<any[]> {
     // Using raw SQL to handle the actual database schema with JSONB fields
-    const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-    const supabase = createServerSupabaseAdminClient();
+    const { createServerSupabaseClient } = await import('./lib/supabase');
+    const supabase = createServerSupabaseClient();
     
     const { data, error } = await supabase
       .from('propostas')
@@ -160,8 +160,8 @@ export class DatabaseStorage implements IStorage {
 
   async getPropostaById(id: string | number): Promise<any | undefined> {
     // Using Supabase to handle JSONB fields properly
-    const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-    const supabase = createServerSupabaseAdminClient();
+    const { createServerSupabaseClient } = await import('./lib/supabase');
+    const supabase = createServerSupabaseClient();
     
     const { data, error } = await supabase
       .from('propostas')
@@ -253,8 +253,8 @@ export class DatabaseStorage implements IStorage {
 
   async createProposta(proposta: any): Promise<any> {
     // Transform the normalized data to JSONB format for the real database schema
-    const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-    const supabase = createServerSupabaseAdminClient();
+    const { createServerSupabaseClient } = await import('./lib/supabase');
+    const supabase = createServerSupabaseClient();
     
     // Use the JSONB objects directly from the incoming data
     const clienteData = proposta.clienteData || {};

@@ -48,15 +48,18 @@ const updatePropostaStatus = async ({
   id,
   status,
   observacao,
+  motivoPendencia,
 }: {
   id: string;
   status: string;
   observacao?: string;
+  motivoPendencia?: string;
 }) => {
   try {
     const response = await api.put(`/api/propostas/${id}/status`, {
       status,
       observacao,
+      motivoPendencia,
     });
     return response.data;
   } catch (error: any) {
@@ -65,7 +68,7 @@ const updatePropostaStatus = async ({
 };
 
 const decisionSchema = z.object({
-  status: z.enum(["aprovado", "rejeitado", "pendente"]),
+  status: z.enum(["aprovado", "rejeitado", "pendenciado"]),
   observacao: z.string().min(1, "Observação é obrigatória"),
 });
 
@@ -112,7 +115,16 @@ const AnaliseManualPage: React.FC = () => {
 
   const onSubmit = (data: DecisionFormData) => {
     if (!propostaId) return;
-    mutation.mutate({ id: propostaId, ...data });
+    
+    // For pendenciado status, send observacao as motivoPendencia
+    const payload = {
+      id: propostaId,
+      status: data.status,
+      observacao: data.observacao,
+      ...(data.status === 'pendenciado' && { motivoPendencia: data.observacao })
+    };
+    
+    mutation.mutate(payload);
   };
 
   if (isLoading)
