@@ -14,6 +14,72 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import CurrencyInput from "@/components/ui/CurrencyInput";
 
+// Componente separado para documentos
+const DocumentsTab: React.FC<{ propostaId: string }> = ({ propostaId }) => {
+  const { data: documentos, isLoading } = useQuery({
+    queryKey: [`/api/propostas/${propostaId}/documents`],
+    enabled: !!propostaId,
+  });
+
+  if (isLoading) {
+    return <div className="text-center py-8 text-gray-400">Carregando documentos...</div>;
+  }
+
+  return (
+    <div>
+      <h3 className="text-lg font-semibold mb-4 text-blue-400">Documentos da Proposta</h3>
+      
+      {documentos?.documentos && documentos.documentos.length > 0 ? (
+        <div className="space-y-3">
+          {documentos.documentos.map((doc: any, index: number) => (
+            <div key={index} className="flex items-center justify-between p-3 bg-gray-800 rounded-lg">
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <div>
+                  <p className="text-sm font-medium">{doc.name || doc.nome || `Documento ${index + 1}`}</p>
+                  <p className="text-xs text-gray-400">{doc.size ? `${(doc.size/1024).toFixed(1)} KB` : 'Tamanho não especificado'}</p>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => doc.url && window.open(doc.url, '_blank')}
+                >
+                  Visualizar
+                </Button>
+                <Button variant="destructive" size="sm" disabled>
+                  Remover
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-8 text-gray-400">
+          <p>Nenhum documento encontrado para esta proposta</p>
+        </div>
+      )}
+
+      <div className="border-2 border-dashed border-gray-600 rounded-lg p-6 text-center mt-4">
+        <input
+          type="file"
+          multiple
+          accept=".pdf,.jpg,.jpeg,.png"
+          className="hidden"
+          id="file-upload"
+        />
+        <label htmlFor="file-upload" className="cursor-pointer">
+          <div className="text-gray-400">
+            <p className="text-sm font-medium">Clique para adicionar novos documentos</p>
+            <p className="text-xs mt-1">PDF, JPG, JPEG, PNG (máx. 10MB cada)</p>
+          </div>
+        </label>
+      </div>
+    </div>
+  );
+};
+
 interface PropostaData {
   id: string;
   status: string;
@@ -54,6 +120,13 @@ const EditarPropostaPendenciada: React.FC = () => {
   // Atualizar formData quando proposta carrega - TODOS OS HOOKS DEVEM ESTAR AQUI NO TOPO
   useEffect(() => {
     if (proposta) {
+      console.log('🔍 DADOS DA PROPOSTA CARREGADA:', {
+        clienteData: proposta.clienteData,
+        ocupacao_atual: proposta.clienteData?.ocupacao,
+        renda_atual: proposta.clienteData?.renda,
+        ocupacao_vazia: proposta.clienteData?.ocupacao === "",
+        renda_vazia: proposta.clienteData?.renda === ""
+      });
       setFormData({
         clienteData: proposta.clienteData || {},
         condicoesData: proposta.condicoesData || {},
@@ -422,17 +495,17 @@ const EditarPropostaPendenciada: React.FC = () => {
                       <Label htmlFor="ocupacao">Ocupação *</Label>
                       <Input
                         id="ocupacao"
-                        value={(formData.clienteData as any)?.ocupacao || ''}
+                        value={(formData.clienteData as any)?.ocupacao || (formData.clienteData as any)?.profissao || ''}
                         onChange={(e) => handleClientChange('ocupacao', e.target.value)}
                         placeholder="Profissão do cliente"
                       />
                     </div>
                     <div>
-                      <Label htmlFor="rendaMensal">Renda Mensal *</Label>
+                      <Label htmlFor="renda">Renda Mensal *</Label>
                       <CurrencyInput
-                        id="rendaMensal"
-                        value={(formData.clienteData as any)?.rendaMensal || ''}
-                        onChange={(e) => handleClientChange('rendaMensal', e.target.value)}
+                        id="renda"
+                        value={(formData.clienteData as any)?.renda || (formData.clienteData as any)?.rendaMensal || ''}
+                        onChange={(e) => handleClientChange('renda', e.target.value)}
                       />
                     </div>
                   </div>
@@ -588,53 +661,7 @@ const EditarPropostaPendenciada: React.FC = () => {
               </TabsContent>
 
               <TabsContent value="documentos" className="mt-6 space-y-4">
-                <div>
-                  <h3 className="text-lg font-semibold mb-4 text-blue-400">Documentos Anexados</h3>
-                  
-                  {proposta?.documentosAnexados && proposta.documentosAnexados.length > 0 ? (
-                    <div className="space-y-3">
-                      {proposta.documentosAnexados.map((doc: any, index: number) => (
-                        <div key={index} className="flex items-center justify-between p-3 bg-gray-800 rounded-lg">
-                          <div className="flex items-center gap-3">
-                            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                            <div>
-                              <p className="text-sm font-medium">{doc.nome || `Documento ${index + 1}`}</p>
-                              <p className="text-xs text-gray-400">{doc.tipo || 'Tipo não especificado'}</p>
-                            </div>
-                          </div>
-                          <div className="flex gap-2">
-                            <Button variant="outline" size="sm">
-                              Visualizar
-                            </Button>
-                            <Button variant="destructive" size="sm">
-                              Remover
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-8 text-gray-400">
-                      <p>Nenhum documento anexado</p>
-                    </div>
-                  )}
-
-                  <div className="border-2 border-dashed border-gray-600 rounded-lg p-6 text-center">
-                    <input
-                      type="file"
-                      multiple
-                      accept=".pdf,.jpg,.jpeg,.png"
-                      className="hidden"
-                      id="file-upload"
-                    />
-                    <label htmlFor="file-upload" className="cursor-pointer">
-                      <div className="text-gray-400">
-                        <p className="text-sm font-medium">Clique para adicionar documentos</p>
-                        <p className="text-xs mt-1">PDF, JPG, JPEG, PNG (máx. 10MB cada)</p>
-                      </div>
-                    </label>
-                  </div>
-                </div>
+                <DocumentsTab propostaId={id!} />
               </TabsContent>
             </Tabs>
           </CardContent>
