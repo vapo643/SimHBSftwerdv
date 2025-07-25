@@ -340,6 +340,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/propostas", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     try {
+      // CRITICAL DEBUG: Log what's coming from frontend
+      console.log('🔍 POST /api/propostas - RAW REQUEST BODY:', {
+        keys: Object.keys(req.body),
+        clienteNome: req.body.clienteNome,
+        clienteCpf: req.body.clienteCpf,
+        valor: req.body.valor,
+        prazo: req.body.prazo,
+        produtoId: req.body.produtoId,
+        tabelaComercialId: req.body.tabelaComercialId,
+        hasClienteData: !!req.body.clienteData,
+        hasCondicoesData: !!req.body.condicoesData
+      });
+
       // Generate unique ID for the proposal
       const proposalId = `PROP-${Date.now()}-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
       
