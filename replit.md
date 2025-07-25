@@ -82,6 +82,16 @@ This is a full-stack TypeScript application for credit management called "Simpix
 
 ### January 2025
 
+- **ARQUITETURA FINAL APROVADA - Ecossistema N:N (January 25)**: Complete architectural design approved for N:N relationship between products and commercial tables with comprehensive implementation plan
+- **Critical Schema Issues Diagnosed**: Identified root cause of "invalid data" errors - JSONB vs normalized field mismatch in validation schemas
+- **Fallback Logic Analysis**: Commercial tables hierarchical fallback logic validated as correct, lacking test data for proper validation
+- **N:N Migration Strategy**: Approved direct migration approach with performance indexes and no backward compatibility concerns
+- **Implementation Plan v2.0 COMPLETE**: 5-phase atomic implementation executed successfully: Schema Migration ✅ → UI Refactoring ✅ → Fallback Correction ✅ → Formalization Integration ✅ → Validation ✅
+- **N:N Database Migration Complete**: Created produto_tabela_comercial junction table with performance indexes, migrated 6 existing records, removed legacy direct relationship
+- **JSONB Validation Fix**: Implemented insertPropostaJsonbSchema to handle real database structure with cliente_data and condicoes_data fields
+- **Multi-Product UI Implementation**: Created MultiProductSelector component with tag-based product association and updated TabelaComercialForm for N:N relationship management
+- **Enhanced Fallback Logic**: Refactored endpoints to use JOIN queries with junction table, maintaining hierarchical fallback from personalized to general commercial tables
+- **Real-Data Formalization**: Connected formalization tracking page to live database with comprehensive proposal data display and status management
 - **T-01 Schema Migration for Proposal Origination (January 25)**: Completed database normalization for new proposal creation screen
 - **Products Table Enhancement**: Added TAC (Taxa de Abertura de Crédito) fields - tac_valor and tac_tipo with proper constraints
 - **Proposals Table Normalization**: Migrated from JSONB to normalized columns for client data, added produto_id and tabela_comercial_id relationships

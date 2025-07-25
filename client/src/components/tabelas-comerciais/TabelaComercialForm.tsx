@@ -11,18 +11,16 @@ import { X } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { TabelaComercial } from "@/pages/configuracoes/tabelas";
+import { Produto } from "@shared/schema";
+import { MultiProductSelector } from "./MultiProductSelector";
 
-interface Produto {
-  id: number;
-  nomeProduto: string;
-  isActive: boolean;
-}
-
+// Updated schema for N:N structure
 const tabelaSchema = z.object({
   nomeTabela: z.string().min(3, "Nome da Tabela deve ter pelo menos 3 caracteres."),
   taxaJuros: z.number().positive("Taxa de Juros deve ser um número positivo."),
+  comissao: z.number().min(0, "Comissão deve ser maior ou igual a zero.").default(0),
   prazosPermitidos: z.array(z.number()).min(1, "Deve conter ao menos um prazo."),
-  produtoId: z.number().int().positive("Produto é obrigatório"),
+  produtoIds: z.array(z.number().int().positive()).min(1, "Pelo menos um produto deve ser selecionado"),
 });
 
 type TabelaFormData = z.infer<typeof tabelaSchema>;
@@ -40,6 +38,7 @@ const TabelaComercialForm: React.FC<TabelaComercialFormProps> = ({
 }) => {
   const [novoPrazo, setNovoPrazo] = useState("");
   const [prazos, setPrazos] = useState<number[]>(initialData?.prazosPermitidos || []);
+  const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
 
   const {
     register,
@@ -53,8 +52,9 @@ const TabelaComercialForm: React.FC<TabelaComercialFormProps> = ({
     defaultValues: {
       nomeTabela: initialData?.nomeTabela || "",
       taxaJuros: initialData?.taxaJuros || 0,
+      comissao: initialData?.comissao || 0,
       prazosPermitidos: initialData?.prazosPermitidos || [],
-      produtoId: undefined,
+      produtoIds: [],
     },
   });
 
@@ -87,9 +87,15 @@ const TabelaComercialForm: React.FC<TabelaComercialFormProps> = ({
     onSubmit({
       nomeTabela: data.nomeTabela,
       taxaJuros: data.taxaJuros,
+      comissao: data.comissao,
       prazosPermitidos: prazos,
-      produtoId: data.produtoId,
+      produtoIds: selectedProducts,
     });
+  };
+
+  const handleProductsChange = (products: number[]) => {
+    setSelectedProducts(products);
+    setValue("produtoIds", products);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -116,38 +122,16 @@ const TabelaComercialForm: React.FC<TabelaComercialFormProps> = ({
       </div>
 
       <div>
-        <Label htmlFor="produtoId">Produto Associado</Label>
-        <Controller
-          name="produtoId"
-          control={control}
-          render={({ field }) => (
-            <Select onValueChange={(value) => field.onChange(parseInt(value))} value={field.value?.toString()}>
-              <SelectTrigger id="produtoId">
-                <SelectValue placeholder="Selecione um produto..." />
-              </SelectTrigger>
-              <SelectContent>
-                {loadingProdutos ? (
-                  <SelectItem value="loading" disabled>
-                    Carregando produtos...
-                  </SelectItem>
-                ) : produtos.length === 0 ? (
-                  <SelectItem value="empty" disabled>
-                    Nenhum produto encontrado
-                  </SelectItem>
-                ) : (
-                  produtos.map((produto) => (
-                    <SelectItem key={produto.id} value={produto.id.toString()}>
-                      {produto.nomeProduto}
-                    </SelectItem>
-                  ))
-                )}
-              </SelectContent>
-            </Select>
-          )}
+        <Label>Produtos Associados</Label>
+        <MultiProductSelector
+          selectedProducts={selectedProducts}
+          onProductsChange={handleProductsChange}
+          availableProducts={produtos}
+          disabled={loadingProdutos}
         />
-        {errors.produtoId && (
+        {errors.produtoIds && (
           <span className="text-sm text-red-500" role="alert">
-            {errors.produtoId.message}
+            {errors.produtoIds.message}
           </span>
         )}
       </div>
@@ -165,6 +149,23 @@ const TabelaComercialForm: React.FC<TabelaComercialFormProps> = ({
         {errors.taxaJuros && (
           <span className="text-sm text-red-500" role="alert">
             {errors.taxaJuros.message}
+          </span>
+        )}
+      </div>
+
+      <div>
+        <Label htmlFor="comissao">Comissão (%)</Label>
+        <Input
+          id="comissao"
+          type="number"
+          step="0.01"
+          min="0"
+          {...register("comissao", { valueAsNumber: true })}
+          placeholder="Ex: 10.00"
+        />
+        {errors.comissao && (
+          <span className="text-sm text-red-500" role="alert">
+            {errors.comissao.message}
           </span>
         )}
       </div>

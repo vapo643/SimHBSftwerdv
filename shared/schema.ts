@@ -131,15 +131,22 @@ export const propostas = pgTable("propostas", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Tabelas Comerciais
+// Tabelas Comerciais (estrutura N:N)
 export const tabelasComerciais = pgTable("tabelas_comerciais", {
   id: serial("id").primaryKey(),
   nomeTabela: text("nome_tabela").notNull(),
   taxaJuros: decimal("taxa_juros", { precision: 5, scale: 2 }).notNull(),
   prazos: integer("prazos").array().notNull(),
-  produtoId: integer("produto_id").notNull(),
   parceiroId: integer("parceiro_id").references(() => parceiros.id),
   comissao: decimal("comissao", { precision: 5, scale: 2 }).notNull().default("0.00"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Tabela de Junção N:N - Produtos <-> Tabelas Comerciais
+export const produtoTabelaComercial = pgTable("produto_tabela_comercial", {
+  id: serial("id").primaryKey(),
+  produtoId: integer("produto_id").references(() => produtos.id).notNull(),
+  tabelaComercialId: integer("tabela_comercial_id").references(() => tabelasComerciais.id).notNull(),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -197,6 +204,38 @@ export const insertPropostaSchema = createInsertSchema(propostas).omit({
   userId: true,
 });
 
+// CORREÇÃO CRÍTICA: Schema específico para estrutura JSONB real
+export const insertPropostaJsonbSchema = z.object({
+  status: z.string().default("rascunho"),
+  loja_id: z.number().int().positive(),
+  produto_id: z.number().int().positive().optional(),
+  tabela_comercial_id: z.number().int().positive().optional(),
+  cliente_data: z.object({
+    nome: z.string().min(1),
+    cpf: z.string().min(11),
+    email: z.string().email(),
+    telefone: z.string().min(10),
+    dataNascimento: z.string().optional(),
+    renda: z.string().optional(),
+    rg: z.string().optional(),
+    orgaoEmissor: z.string().optional(),
+    estadoCivil: z.string().optional(),
+    nacionalidade: z.string().default("Brasileira"),
+    cep: z.string().optional(),
+    endereco: z.string().optional(),
+    ocupacao: z.string().optional(),
+  }),
+  condicoes_data: z.object({
+    valor: z.number().positive(),
+    prazo: z.number().int().positive(),
+    finalidade: z.string().optional(),
+    garantia: z.string().optional(),
+    valorTac: z.number().optional(),
+    valorIof: z.number().optional(),
+    valorTotalFinanciado: z.number().optional(),
+  }),
+});
+
 export const updatePropostaSchema = createInsertSchema(propostas).partial().omit({
   id: true,
   createdAt: true,
@@ -204,6 +243,11 @@ export const updatePropostaSchema = createInsertSchema(propostas).partial().omit
 });
 
 export const insertTabelaComercialSchema = createInsertSchema(tabelasComerciais).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertProdutoTabelaComercialSchema = createInsertSchema(produtoTabelaComercial).omit({
   id: true,
   createdAt: true,
 });
@@ -235,6 +279,9 @@ export type UpdateProposta = z.infer<typeof updatePropostaSchema>;
 export type Proposta = typeof propostas.$inferSelect;
 export type InsertTabelaComercial = z.infer<typeof insertTabelaComercialSchema>;
 export type TabelaComercial = typeof tabelasComerciais.$inferSelect;
+export type InsertProdutoTabelaComercial = z.infer<typeof insertProdutoTabelaComercialSchema>;
+export type ProdutoTabelaComercial = typeof produtoTabelaComercial.$inferSelect;
+export type InsertPropostaJsonb = z.infer<typeof insertPropostaJsonbSchema>;
 export type InsertProduto = z.infer<typeof insertProdutoSchema>;
 export type Produto = typeof produtos.$inferSelect;
 export type InsertComunicacaoLog = z.infer<typeof insertComunicacaoLogSchema>;

@@ -1,0 +1,49 @@
+ositivo. Relatório de debate (Interação 1) recebido.
+
+A sua análise é de uma profundidade e precisão que superam todas as nossas auditorias anteriores. O seu diagnóstico da falha sistémica (desalinhamento de schema JSONB vs. normalizado, validação de tipos e lógica de fallback quebrada) é a causa raiz definitiva do nosso ciclo de falhas. A sua proposta de arquitetura é a solução que procurávamos.
+
+Esta é a nossa Interação 2. A sua proposta é tão sólida que não requer críticas, apenas decisões finais para que possamos selar o nosso plano.
+
+DEBATE PROFUNDO (INTERAÇÃO 2 de 5)
+PARA: Assistente (Arquiteto de Software Sênior)
+DE: GEM 02 (Orquestrador)
+ASSUNTO: Decisões Arquiteturais Finais e Consolidação do Plano de Refatoração
+
+A sua análise está APROVADA NA ÍNTEGRA. A sua proposta de refatoração em 5 fases é a nossa nova "fonte da verdade".
+
+A seguir, as minhas decisões para as suas questões críticas, para que possamos finalizar o plano:
+
+1. Decisão sobre a Estratégia de Migração e Retrocompatibilidade:
+
+Decisão: Executaremos a migração de schema diretamente no nosso ambiente de desenvolvimento. A prioridade é corrigir a arquitetura da forma correta. Não nos preocuparemos com retrocompatibilidade; iremos refatorar o código em paralelo para se alinhar imediatamente à nova estrutura N:N.
+
+2. Decisão sobre a Performance:
+
+Decisão: Você está correto. A nova tabela de junção produto_tabela_comercial DEVE ter índices em ambas as chaves estrangeiras (produto_id e tabela_comercial_id) para garantir a performance das nossas queries. A sua tarefa será incluir a criação destes índices no script de migração.
+
+3. Decisão sobre a Estratégia de Validação:
+
+Decisão: Manteremos a validação com Zod diretamente nos ficheiros de rotas por agora. Uma camada de middleware dedicada para validação é uma excelente ideia para o futuro, mas para esta missão, vamos manter o escopo focado.
+
+4. Decisão sobre a Prioridade de Execução:
+
+Decisão: A sua prioridade para a próxima interação é clara. A FASE 1 (Migração de Schema N:N), juntamente com a correção do bug de validação de dados, é o nosso bloqueador fundamental. O nosso plano de implementação deve começar por aí, pois sem a fundação de dados correta e a capacidade de criar propostas, nenhuma outra correção será eficaz.
+
+CONCLUSÃO DO DEBATE E PRÓXIMA AÇÃO
+Com estas decisões, o nosso debate técnico está quase concluído.
+
+A sua Interação 3 e final é agora a de consolidar este plano final numa única diretriz de implementação.
+
+Ação Requerida: Por favor, gere o plano de implementação v2.0 finalizado, que deve conter os micro-passos atómicos para que o Agente possa:
+
+Executar a migração de schema para a nova estrutura N:N, incluindo os índices de performance.
+
+Corrigir o bug de validação de dados, alinhando os tipos enviados pelo frontend (string) com o que o backend espera.
+
+Refatorar a tela de "Gestão de Tabelas Comerciais" para incluir a nova UI de "tag input" que permite associar múltiplos produtos.
+
+Corrigir a lógica de fallback de tabelas, implementando o endpoint dedicado /api/tabelas-comerciais-disponiveis.
+
+Finalmente, conectar a tela de "Formalização" aos dados reais.
+
+Este documento final será a base para o prompt que entregaremos ao Agente.

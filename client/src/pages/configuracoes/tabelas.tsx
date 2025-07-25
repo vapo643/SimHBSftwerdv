@@ -25,8 +25,9 @@ export interface TabelaComercial {
   id: string;
   nomeTabela: string;
   taxaJuros: number;
+  comissao: number;
   prazosPermitidos: number[];
-  produtoId: number;
+  produtoIds: number[];
   emUso?: boolean;
 }
 
@@ -35,24 +36,27 @@ const mockTabelas: TabelaComercial[] = [
     id: "1",
     nomeTabela: "Tabela A - Preferencial",
     taxaJuros: 1.5,
+    comissao: 8.0,
     prazosPermitidos: [12, 24, 36],
-    produtoId: 1,
+    produtoIds: [1],
     emUso: true,
   },
   {
     id: "2",
     nomeTabela: "Tabela B - Padrão",
     taxaJuros: 2.0,
+    comissao: 10.0,
     prazosPermitidos: [6, 12, 18, 24],
-    produtoId: 2,
+    produtoIds: [2],
     emUso: false,
   },
   {
     id: "3",
     nomeTabela: "Tabela C - Especial",
     taxaJuros: 1.8,
+    comissao: 12.0,
     prazosPermitidos: [24, 36, 48],
-    produtoId: 1,
+    produtoIds: [1, 3],
     emUso: true,
   },
 ];

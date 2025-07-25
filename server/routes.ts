@@ -446,15 +446,25 @@ app.get("/api/tabelas-comerciais-disponiveis", jwtAuthMiddleware, async (req: Au
     // Import database connection
     const { db } = await import("../server/lib/supabase");
     const { eq, and, isNull, desc } = await import("drizzle-orm");
-    const { tabelasComerciais } = await import("../shared/schema");
+    const { tabelasComerciais, produtoTabelaComercial } = await import("../shared/schema");
 
     // STEP 1: Busca Prioritária - Tabelas Personalizadas (produto + parceiro)
+    // Agora usando JOIN com a nova estrutura N:N
     const tabelasPersonalizadas = await db
-      .select()
+      .select({
+        id: tabelasComerciais.id,
+        nomeTabela: tabelasComerciais.nomeTabela,
+        taxaJuros: tabelasComerciais.taxaJuros,
+        prazos: tabelasComerciais.prazos,
+        parceiroId: tabelasComerciais.parceiroId,
+        comissao: tabelasComerciais.comissao,
+        createdAt: tabelasComerciais.createdAt,
+      })
       .from(tabelasComerciais)
+      .innerJoin(produtoTabelaComercial, eq(tabelasComerciais.id, produtoTabelaComercial.tabelaComercialId))
       .where(
         and(
-          eq(tabelasComerciais.produtoId, produtoIdNum),
+          eq(produtoTabelaComercial.produtoId, produtoIdNum),
           eq(tabelasComerciais.parceiroId, parceiroIdNum)
         )
       )
@@ -469,12 +479,22 @@ app.get("/api/tabelas-comerciais-disponiveis", jwtAuthMiddleware, async (req: Au
     console.log(`[${new Date().toISOString()}] Nenhuma tabela personalizada encontrada, buscando tabelas gerais`);
 
     // STEP 3: Busca Secundária - Tabelas Gerais (produto + parceiro nulo)
+    // Usando JOIN com a nova estrutura N:N
     const tabelasGerais = await db
-      .select()
+      .select({
+        id: tabelasComerciais.id,
+        nomeTabela: tabelasComerciais.nomeTabela,
+        taxaJuros: tabelasComerciais.taxaJuros,
+        prazos: tabelasComerciais.prazos,
+        parceiroId: tabelasComerciais.parceiroId,
+        comissao: tabelasComerciais.comissao,
+        createdAt: tabelasComerciais.createdAt,
+      })
       .from(tabelasComerciais)
+      .innerJoin(produtoTabelaComercial, eq(tabelasComerciais.id, produtoTabelaComercial.tabelaComercialId))
       .where(
         and(
-          eq(tabelasComerciais.produtoId, produtoIdNum),
+          eq(produtoTabelaComercial.produtoId, produtoIdNum),
           isNull(tabelasComerciais.parceiroId)
         )
       )
@@ -517,46 +537,108 @@ app.get("/api/tabelas-comerciais-disponiveis", jwtAuthMiddleware, async (req: Au
     }
   });
 
-  // API endpoint for creating commercial tables
+  // API endpoint for creating commercial tables (N:N structure)
   app.post("/api/admin/tabelas-comerciais", jwtAuthMiddleware, requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const { db } = await import("../server/lib/supabase");
-      const { tabelasComerciais } = await import("../shared/schema");
+      const { tabelasComerciais, produtoTabelaComercial } = await import("../shared/schema");
       const { z } = await import("zod");
 
-      // Validation schema for creating commercial table
+      // Updated validation schema for N:N structure
       const createTabelaSchema = z.object({
         nomeTabela: z.string().min(3, "Nome da tabela deve ter pelo menos 3 caracteres"),
         taxaJuros: z.number().positive("Taxa de juros deve ser positiva"),
         prazos: z.array(z.number().positive()).min(1, "Deve ter pelo menos um prazo"),
-        produtoId: z.number().int().positive("Produto é obrigatório"),
-        parceiroId: z.number().int().positive("Parceiro é obrigatório"),
+        produtoIds: z.array(z.number().int().positive()).min(1, "Pelo menos um produto deve ser selecionado"),
+        parceiroId: z.number().int().positive().optional(),
         comissao: z.number().min(0, "Comissão deve ser maior ou igual a zero").default(0),
       });
 
       const validatedData = createTabelaSchema.parse(req.body);
 
-      // Insert new commercial table
-      const [newTabela] = await db
-        .insert(tabelasComerciais)
-        .values({
-          nomeTabela: validatedData.nomeTabela,
-          taxaJuros: validatedData.taxaJuros.toString(),
-          prazos: validatedData.prazos,
-          produtoId: validatedData.produtoId,
-          parceiroId: validatedData.parceiroId,
-          comissao: validatedData.comissao.toString(),
-        })
-        .returning();
+      // TRANSACTION: Create table and associate products
+      const result = await db.transaction(async (tx) => {
+        // Step 1: Insert new commercial table
+        const [newTabela] = await tx
+          .insert(tabelasComerciais)
+          .values({
+            nomeTabela: validatedData.nomeTabela,
+            taxaJuros: validatedData.taxaJuros.toString(),
+            prazos: validatedData.prazos,
+            parceiroId: validatedData.parceiroId || null,
+            comissao: validatedData.comissao.toString(),
+          })
+          .returning();
 
-      console.log(`[${new Date().toISOString()}] Nova tabela comercial criada: ${newTabela.id}`);
-      res.status(201).json(newTabela);
+        // Step 2: Associate products via junction table
+        const associations = validatedData.produtoIds.map(produtoId => ({
+          produtoId,
+          tabelaComercialId: newTabela.id,
+        }));
+
+        await tx.insert(produtoTabelaComercial).values(associations);
+        
+        return newTabela;
+      });
+
+      console.log(`[${new Date().toISOString()}] Nova tabela comercial criada com ${validatedData.produtoIds.length} produtos: ${result.id}`);
+      res.status(201).json(result);
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Dados inválidos", errors: error.errors });
       }
       console.error("Erro ao criar tabela comercial:", error);
       res.status(500).json({ message: "Erro ao criar tabela comercial" });
+    }
+  });
+
+  // Endpoint for formalization data
+  app.get("/api/propostas/:id/formalizacao", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+    try {
+      const propostaId = parseInt(req.params.id);
+      if (isNaN(propostaId)) {
+        return res.status(400).json({ message: "ID da proposta inválido" });
+      }
+
+      const { db } = await import("../server/lib/supabase");
+      const { eq } = await import("drizzle-orm");
+      const { propostas, lojas, parceiros, produtos } = await import("../shared/schema");
+
+      // Get proposal with related data
+      const proposta = await db
+        .select({
+          id: propostas.id,
+          status: propostas.status,
+          clienteData: propostas.clienteData,
+          condicoesData: propostas.condicoesData,
+          dataAprovacao: propostas.dataAprovacao,
+          documentosAdicionais: propostas.documentosAdicionais,
+          contratoGerado: propostas.contratoGerado,
+          contratoAssinado: propostas.contratoAssinado,
+          dataAssinatura: propostas.dataAssinatura,
+          dataPagamento: propostas.dataPagamento,
+          observacoesFormalização: propostas.observacoesFormalização,
+          createdAt: propostas.createdAt,
+          lojaNome: lojas.nomeLoja,
+          parceiroRazaoSocial: parceiros.razaoSocial,
+          produtoNome: produtos.nomeProduto,
+        })
+        .from(propostas)
+        .leftJoin(lojas, eq(propostas.lojaId, lojas.id))
+        .leftJoin(parceiros, eq(lojas.parceiroId, parceiros.id))
+        .leftJoin(produtos, eq(propostas.produtoId, produtos.id))
+        .where(eq(propostas.id, propostaId))
+        .limit(1);
+
+      if (!proposta || proposta.length === 0) {
+        return res.status(404).json({ message: "Proposta não encontrada" });
+      }
+
+      console.log(`[${new Date().toISOString()}] Dados de formalização retornados para proposta ${propostaId}`);
+      res.json(proposta[0]);
+    } catch (error) {
+      console.error("Erro ao buscar dados de formalização:", error);
+      res.status(500).json({ message: "Erro ao buscar dados de formalização" });
     }
   });
 
