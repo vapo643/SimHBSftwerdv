@@ -179,7 +179,6 @@ export class DatabaseStorage implements IStorage {
         analista_id,
         data_analise,
         motivo_pendencia,
-        documentos_anexados,
         lojas (
           id,
           nome_loja,
@@ -219,7 +218,7 @@ export class DatabaseStorage implements IStorage {
       condicoesData: data.condicoes_data || {},
       // Additional fields for display and logic
       motivoPendencia: data.motivo_pendencia,
-      documentosAnexados: data.documentos_anexados || [],
+      documentosAnexados: [], // Column doesn't exist, will use documents endpoint
       produtoId: data.produto_id,
       tabelaComercialId: data.tabela_comercial_id,
       lojaId: data.loja_id,
