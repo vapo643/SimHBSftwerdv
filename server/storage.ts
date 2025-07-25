@@ -100,7 +100,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getPropostas(): Promise<any[]> {
-    // Using raw SQL to handle snake_case to camelCase mapping
+    // Using raw SQL to handle the actual database schema with JSONB fields
     const { createServerSupabaseAdminClient } = await import('./lib/supabase');
     const supabase = createServerSupabaseAdminClient();
     
@@ -109,15 +109,10 @@ export class DatabaseStorage implements IStorage {
       .select(`
         id,
         status,
-        cliente_nome,
-        cliente_cpf,
-        cliente_email,
-        cliente_telefone,
-        valor,
-        prazo,
+        cliente_data,
+        condicoes_data,
         loja_id,
         created_at,
-        updated_at,
         lojas!inner (
           id,
           nome_loja,
@@ -134,28 +129,33 @@ export class DatabaseStorage implements IStorage {
       throw error;
     }
     
-    // Map the data to match the expected format
-    return (data || []).map(p => ({
-      id: p.id,
-      status: p.status,
-      nomeCliente: p.cliente_nome || 'Cliente não informado',
-      cpfCliente: p.cliente_cpf,
-      emailCliente: p.cliente_email,
-      telefoneCliente: p.cliente_telefone,
-      valorSolicitado: p.valor || 0,
-      prazo: p.prazo,
-      lojaId: p.loja_id,
-      createdAt: p.created_at,
-      updatedAt: p.updated_at,
-      loja: p.lojas ? {
-        id: p.lojas.id,
-        nomeLoja: p.lojas.nome_loja
-      } : null,
-      parceiro: p.lojas?.parceiros ? {
-        id: p.lojas.parceiros.id,
-        razaoSocial: p.lojas.parceiros.razao_social
-      } : null
-    }));
+    // Map the data to match the expected format, extracting from JSONB fields
+    return (data || []).map(p => {
+      const clienteData = p.cliente_data || {};
+      const condicoesData = p.condicoes_data || {};
+      
+      return {
+        id: p.id,
+        status: p.status,
+        nomeCliente: clienteData.nome || 'Cliente não informado',
+        cpfCliente: clienteData.cpf,
+        emailCliente: clienteData.email,
+        telefoneCliente: clienteData.telefone,
+        valorSolicitado: condicoesData.valor || 0,
+        prazo: condicoesData.prazo,
+        lojaId: p.loja_id,
+        createdAt: p.created_at,
+        updatedAt: p.updated_at,
+        loja: p.lojas ? {
+          id: p.lojas.id,
+          nomeLoja: p.lojas.nome_loja
+        } : null,
+        parceiro: p.lojas?.parceiros ? {
+          id: p.lojas.parceiros.id,
+          razaoSocial: p.lojas.parceiros.razao_social
+        } : null
+      };
+    });
   }
 
   async getPropostaById(id: string | number): Promise<Proposta | undefined> {
@@ -171,9 +171,61 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(propostas.createdAt));
   }
 
-  async createProposta(proposta: InsertProposta): Promise<Proposta> {
-    const result = await db.insert(propostas).values(proposta).returning();
-    return result[0];
+  async createProposta(proposta: any): Promise<any> {
+    // Transform the normalized data to JSONB format for the real database schema
+    const { createServerSupabaseAdminClient } = await import('./lib/supabase');
+    const supabase = createServerSupabaseAdminClient();
+    
+    // Build cliente_data JSONB object
+    const clienteData = {
+      nome: proposta.clienteNome,
+      cpf: proposta.clienteCpf,
+      email: proposta.clienteEmail,
+      telefone: proposta.clienteTelefone,
+      dataNascimento: proposta.clienteDataNascimento,
+      renda: proposta.clienteRenda,
+      rg: proposta.clienteRg,
+      orgaoEmissor: proposta.clienteOrgaoEmissor,
+      estadoCivil: proposta.clienteEstadoCivil,
+      nacionalidade: proposta.clienteNacionalidade,
+      cep: proposta.clienteCep,
+      endereco: proposta.clienteEndereco,
+      ocupacao: proposta.clienteOcupacao
+    };
+    
+    // Build condicoes_data JSONB object
+    const condicoesData = {
+      valor: proposta.valor,
+      prazo: proposta.prazo,
+      finalidade: proposta.finalidade,
+      garantia: proposta.garantia,
+      valorTac: proposta.valorTac,
+      valorIof: proposta.valorIof,
+      valorTotalFinanciado: proposta.valorTotalFinanciado
+    };
+    
+    // Insert with the real database schema
+    const { data, error } = await supabase
+      .from('propostas')
+      .insert({
+        id: proposta.id,
+        status: proposta.status || 'rascunho',
+        loja_id: proposta.lojaId,
+        user_id: proposta.userId,
+        produto_id: proposta.produtoId,
+        tabela_comercial_id: proposta.tabelaComercialId,
+        cliente_data: clienteData,
+        condicoes_data: condicoesData
+      })
+      .select()
+      .single();
+    
+    if (error) {
+      console.error('Error creating proposta:', error);
+      throw error;
+    }
+    
+    return data;
   }
 
   async updateProposta(id: string | number, proposta: UpdateProposta): Promise<Proposta> {

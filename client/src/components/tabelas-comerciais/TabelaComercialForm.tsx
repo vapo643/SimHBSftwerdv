@@ -1,18 +1,28 @@
 import React, { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { X } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import { TabelaComercial } from "@/pages/configuracoes/tabelas";
+
+interface Produto {
+  id: number;
+  nomeProduto: string;
+  isActive: boolean;
+}
 
 const tabelaSchema = z.object({
   nomeTabela: z.string().min(3, "Nome da Tabela deve ter pelo menos 3 caracteres."),
   taxaJuros: z.number().positive("Taxa de Juros deve ser um número positivo."),
   prazosPermitidos: z.array(z.number()).min(1, "Deve conter ao menos um prazo."),
+  produtoId: z.number().int().positive("Produto é obrigatório"),
 });
 
 type TabelaFormData = z.infer<typeof tabelaSchema>;
@@ -37,13 +47,24 @@ const TabelaComercialForm: React.FC<TabelaComercialFormProps> = ({
     formState: { errors },
     setValue,
     watch,
+    control,
   } = useForm<TabelaFormData>({
     resolver: zodResolver(tabelaSchema),
     defaultValues: {
       nomeTabela: initialData?.nomeTabela || "",
       taxaJuros: initialData?.taxaJuros || 0,
       prazosPermitidos: initialData?.prazosPermitidos || [],
+      produtoId: undefined,
     },
+  });
+
+  // Fetch products for dropdown
+  const { data: produtos = [], isLoading: loadingProdutos } = useQuery<Produto[]>({
+    queryKey: ['/api/produtos'],
+    queryFn: async () => {
+      const response = await apiRequest('/api/produtos', { method: 'GET' });
+      return response.filter((p: Produto) => p.isActive);
+    }
   });
 
   const adicionarPrazo = () => {
@@ -67,6 +88,7 @@ const TabelaComercialForm: React.FC<TabelaComercialFormProps> = ({
       nomeTabela: data.nomeTabela,
       taxaJuros: data.taxaJuros,
       prazosPermitidos: prazos,
+      produtoId: data.produtoId,
     });
   };
 
@@ -89,6 +111,43 @@ const TabelaComercialForm: React.FC<TabelaComercialFormProps> = ({
         {errors.nomeTabela && (
           <span className="text-sm text-red-500" role="alert">
             {errors.nomeTabela.message}
+          </span>
+        )}
+      </div>
+
+      <div>
+        <Label htmlFor="produtoId">Produto Associado</Label>
+        <Controller
+          name="produtoId"
+          control={control}
+          render={({ field }) => (
+            <Select onValueChange={(value) => field.onChange(parseInt(value))} value={field.value?.toString()}>
+              <SelectTrigger id="produtoId">
+                <SelectValue placeholder="Selecione um produto..." />
+              </SelectTrigger>
+              <SelectContent>
+                {loadingProdutos ? (
+                  <SelectItem value="loading" disabled>
+                    Carregando produtos...
+                  </SelectItem>
+                ) : produtos.length === 0 ? (
+                  <SelectItem value="empty" disabled>
+                    Nenhum produto encontrado
+                  </SelectItem>
+                ) : (
+                  produtos.map((produto) => (
+                    <SelectItem key={produto.id} value={produto.id.toString()}>
+                      {produto.nomeProduto}
+                    </SelectItem>
+                  ))
+                )}
+              </SelectContent>
+            </Select>
+          )}
+        />
+        {errors.produtoId && (
+          <span className="text-sm text-red-500" role="alert">
+            {errors.produtoId.message}
           </span>
         )}
       </div>
