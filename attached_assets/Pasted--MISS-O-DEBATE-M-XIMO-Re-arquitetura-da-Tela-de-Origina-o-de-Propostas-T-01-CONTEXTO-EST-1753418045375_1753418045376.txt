@@ -1,0 +1,28 @@
+# MISSÃO: DEBATE MÁXIMO - Re-arquitetura da Tela de Originação de Propostas (T-01)
+
+**CONTEXTO ESTRATÉGICO:**
+Estamos a iniciar a refatoração da nossa tela mais crítica: "Nova Proposta" (T-01). O objetivo é transformá-la de um formulário com dados estáticos para uma ferramenta de vendas dinâmica e contextual, que respeite as regras de negócio e as permissões do usuário logado (`ATENDENTE`). A tela deve cruzar dados de `Produtos`, `Tabelas Comerciais`, `Parceiros` e `Lojas` para apresentar apenas as opções válidas.
+
+**SUA TAREFA (ASSISTENTE):**
+A sua tarefa não é escrever código. É atuar como um Arquiteto Full-Stack e propor um plano de arquitetura para esta refatoração complexa. Esta será a nossa **Interação 1 de 3**.
+
+---
+### **Interação 1: Proposta de Arquitetura de Dados e API**
+
+Por favor, analise a nossa missão e os requisitos de negócio, e responda com a sua proposta para os seguintes pontos:
+
+**1. Auditoria e Proposta de Schema de Banco de Dados:**
+* **Análise:** Primeiro, audite o nosso schema de banco de dados. As nossas tabelas (`produtos`, `tabelas_comerciais`, `propostas`) têm todos os campos necessários para suportar esta lógica? Por exemplo, precisamos de um campo para a taxa de `TAC` (que pode ser um valor fixo ou percentual) na tabela `produtos`? A tabela `propostas` está pronta para receber todos os dados do formulário?
+* **Ação:** Proponha quaisquer migrações de schema (novas colunas ou tabelas) que sejam necessárias como pré-requisito.
+
+**2. Proposta de Arquitetura de API (Backend):**
+* **Análise:** Para alimentar esta tela dinâmica, qual é a melhor estratégia de API?
+    * **Opção A (Orquestrador):** Um único endpoint "orquestrador" (ex: `GET /api/origination/context`) que, dado o `atendenteId`, retorna um grande objeto JSON com todos os dados já filtrados e prontos para o formulário (produtos permitidos, tabelas correspondentes, etc.)?
+    * **Opção B (Múltiplos Endpoints):** Múltiplos endpoints que são chamados em cascata pelo frontend (ex: primeiro busca produtos, depois tabelas, etc.)?
+* **Ação:** Recomende uma abordagem e justifique a sua escolha com base em performance, complexidade e manutenibilidade.
+
+**3. Proposta de Arquitetura de Estado (Frontend):**
+* **Análise:** Esta tela terá um estado complexo (dados do cliente, produto selecionado, tabela selecionada, prazos disponíveis, resultado da simulação em tempo real, uploads de documentos).
+* **Ação:** Proponha uma estratégia de gestão de estado para esta tela no React. Devemos usar um `reducer` (ex: `useReducer`) para gerir o estado do formulário? Uma biblioteca de gestão de estado como Zustand ou Jotai? Ou o `useState` padrão é suficiente? Justifique a sua escolha.
+
+---
