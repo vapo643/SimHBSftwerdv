@@ -114,6 +114,7 @@ export const tabelasComerciais = pgTable("tabelas_comerciais", {
   prazos: integer("prazos").array().notNull(),
   produtoId: integer("produto_id").notNull(),
   parceiroId: integer("parceiro_id").references(() => parceiros.id),
+  comissao: decimal("comissao", { precision: 5, scale: 2 }).notNull().default("0.00"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

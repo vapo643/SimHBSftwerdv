@@ -501,6 +501,7 @@ app.get("/api/tabelas-comerciais-disponiveis", jwtAuthMiddleware, async (req: Au
         prazos: z.array(z.number().positive()).min(1, "Deve ter pelo menos um prazo"),
         produtoId: z.number().int().positive("Produto é obrigatório"),
         parceiroId: z.number().int().positive("Parceiro é obrigatório"),
+        comissao: z.number().min(0, "Comissão deve ser maior ou igual a zero").default(0),
       });
 
       const validatedData = createTabelaSchema.parse(req.body);
@@ -514,6 +515,7 @@ app.get("/api/tabelas-comerciais-disponiveis", jwtAuthMiddleware, async (req: Au
           prazos: validatedData.prazos,
           produtoId: validatedData.produtoId,
           parceiroId: validatedData.parceiroId,
+          comissao: validatedData.comissao.toString(),
         })
         .returning();
 

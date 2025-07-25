@@ -82,6 +82,10 @@ This is a full-stack TypeScript application for credit management called "Simpix
 
 ### January 2025
 
+- **Critical Database Migration - Commission Field (January 25)**: Fixed critical missing commission field in tabelas_comerciais table
+- **Database Schema Fix**: Added `comissao` NUMERIC(5,2) NOT NULL DEFAULT 0.00 field with CHECK constraint (comissao >= 0)
+- **Full-Stack Integration**: Updated Drizzle schema, API validation, and frontend form to handle commission data
+- **Data Integrity**: All commercial tables now properly store commission rates for financial calculations
 - **Commercial Tables Personalized Flow Complete (January 25)**: Finalized custom commercial tables creation flow with enhanced form and tag input system
 - **Enhanced Form Modal**: Added modal dialog with table name field, product dropdown (GET /api/produtos), and tag-based term input
 - **Tag Input System**: Implemented interactive term input where users type numbers and see them as badges (e.g., "12 months")

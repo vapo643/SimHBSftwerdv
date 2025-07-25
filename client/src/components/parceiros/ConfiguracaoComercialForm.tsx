@@ -32,6 +32,7 @@ const customTabelaSchema = z.object({
   produtoId: z.number().positive("Produto é obrigatório"),
   taxaJuros: z.number().positive("Taxa de juros deve ser positiva"),
   prazos: z.array(z.number().positive()).min(1, "Deve ter pelo menos um prazo"),
+  comissao: z.number().min(0, "Comissão deve ser maior ou igual a zero").default(0),
 });
 
 type ConfigFormData = z.infer<typeof configSchema>;
@@ -320,6 +321,21 @@ const ConfiguracaoComercialForm: React.FC = () => {
             />
             {customErrors.taxaJuros && (
               <p className="mt-1 text-sm text-red-500">{customErrors.taxaJuros.message}</p>
+            )}
+          </div>
+
+          <div>
+            <Label htmlFor="comissao">Comissão (%)</Label>
+            <Input
+              id="comissao"
+              type="number"
+              step="0.01"
+              min="0"
+              {...registerCustom("comissao", { valueAsNumber: true })}
+              placeholder="Ex: 15.50"
+            />
+            {customErrors.comissao && (
+              <p className="mt-1 text-sm text-red-500">{customErrors.comissao.message}</p>
             )}
           </div>
 
