@@ -197,16 +197,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return {
           id: p.id,
           status: p.status,
-          clienteNome: clienteData.nome || 'Nome não informado',
-          clienteCpf: clienteData.cpf || 'CPF não informado',
-          valorSolicitado: condicoesData.valor || '0',
+          nomeCliente: clienteData.nome || 'Nome não informado',
+          cpfCliente: clienteData.cpf || 'CPF não informado',
+          emailCliente: clienteData.email || 'Email não informado',
+          telefoneCliente: clienteData.telefone || 'Telefone não informado',
+          valorSolicitado: condicoesData.valor || 0,
+          prazo: condicoesData.prazo || 0,
+          clienteData: clienteData, // Include full client data for details page
+          condicoesData: condicoesData, // Include full loan conditions
           parceiro: p.parceiro ? {
+            id: p.parceiro.id,
             razaoSocial: p.parceiro.razaoSocial
           } : undefined,
           loja: p.loja ? {
+            id: p.loja.id,
             nomeLoja: p.loja.nomeLoja
           } : undefined,
-          createdAt: p.createdAt
+          createdAt: p.createdAt,
+          userId: p.userId
         };
       });
       
@@ -350,8 +358,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         lojaId: dataWithId.lojaId,
         status: dataWithId.status || 'aguardando_analise',
         
-        // Store client data as JSONB
-        clienteData: JSON.stringify({
+        // Store client data as JSONB (as object, not string)
+        clienteData: {
           nome: dataWithId.clienteNome,
           cpf: dataWithId.clienteCpf,
           email: dataWithId.clienteEmail,
@@ -365,10 +373,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           cep: dataWithId.clienteCep,
           endereco: dataWithId.clienteEndereco,
           ocupacao: dataWithId.clienteOcupacao
-        }),
+        },
         
-        // Store loan conditions as JSONB
-        condicoesData: JSON.stringify({
+        // Store loan conditions as JSONB (as object, not string)
+        condicoesData: {
           valor: dataWithId.valor,
           prazo: dataWithId.prazo,
           finalidade: dataWithId.finalidade,
@@ -376,7 +384,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           valorTac: dataWithId.valorTac,
           valorIof: dataWithId.valorIof,
           valorTotalFinanciado: dataWithId.valorTotalFinanciado
-        }),
+        },
         
         // Additional fields
         produtoId: dataWithId.produtoId,
