@@ -1,6 +1,10 @@
 import { Request, Response } from "express";
 import { createServerSupabaseAdminClient } from "../lib/supabase";
-import { AuthenticatedRequest } from "../middleware/auth";
+
+export interface AuthenticatedRequest extends Request {
+  userId?: string;
+  user?: any;
+}
 
 /**
  * Buscar documentos de uma proposta
@@ -14,7 +18,7 @@ export const getPropostaDocuments = async (req: AuthenticatedRequest, res: Respo
       return res.status(400).json({ message: "ID da proposta é obrigatório" });
     }
 
-    const supabase = createServerSupabaseClient();
+    const supabase = createServerSupabaseAdminClient();
     
     // Buscar a proposta para verificar se existe e pegar documentos
     const { data: proposta, error: propostaError } = await supabase

@@ -63,6 +63,7 @@ export const statusEnum = pgEnum("status", [
   "pronto_pagamento",
   "pago",
   "cancelado",
+  "suspensa",
 ]);
 
 export const propostas = pgTable("propostas", {

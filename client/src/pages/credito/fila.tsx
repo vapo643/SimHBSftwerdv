@@ -31,11 +31,14 @@ import {
   Filter,
   User,
   Building,
-  Loader2
+  Loader2,
+  Edit
 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 // Removed mock data - now using real API data
 
@@ -116,6 +119,37 @@ const FilaAnalise: React.FC = () => {
     setFilterStore("all"); // Reseta o filtro de loja ao mudar o parceiro
   };
 
+  const { toast } = useToast();
+
+  // Mutation para alternar status
+  const toggleStatusMutation = useMutation({
+    mutationFn: async ({ propostaId, currentStatus }: { propostaId: string; currentStatus: string }) => {
+      const response = await apiRequest(`/api/propostas/${propostaId}/toggle-status`, {
+        method: 'PUT',
+      });
+      return response;
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Status alterado com sucesso",
+        description: data.message,
+      });
+      // Invalidar cache para atualizar a lista
+      queryClient.invalidateQueries({ queryKey: [queryUrl] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Erro ao alterar status",
+        description: error instanceof Error ? error.message : "Ocorreu um erro ao alterar o status da proposta",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleToggleStatus = (propostaId: string, currentStatus: string) => {
+    toggleStatusMutation.mutate({ propostaId, currentStatus });
+  };
+
   const today = new Date().toISOString().split("T")[0];
   const propostasHoje = propostas?.filter(
     p => p.createdAt.split("T")[0] === today
@@ -175,6 +209,7 @@ const FilaAnalise: React.FC = () => {
                 <SelectItem value="em_analise">Em Análise</SelectItem>
                 <SelectItem value="aprovado">Aprovado</SelectItem>
                 <SelectItem value="rejeitado">Rejeitado</SelectItem>
+                <SelectItem value="suspensa">Suspensa</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -283,22 +318,38 @@ const FilaAnalise: React.FC = () => {
                         <span className={
                           proposta.status === "aprovado" ? "status-approved" :
                           proposta.status === "rejeitado" ? "status-rejected" :
+                          proposta.status === "suspensa" ? "status-suspended" :
                           "status-pending"
                         }>
                           {proposta.status === "aguardando_analise" ? "Aguardando Análise" :
                            proposta.status === "em_analise" ? "Em Análise" :
                            proposta.status === "aprovado" ? "Aprovado" :
                            proposta.status === "rejeitado" ? "Rejeitado" :
+                           proposta.status === "suspensa" ? "Suspensa" :
                            proposta.status}
                         </span>
                       </TableCell>
                       <TableCell className="text-right">
-                        <Link to={`/credito/analise/${proposta.id}`}>
-                          <Button className="btn-simpix-primary" size="sm">
-                            <Eye className="h-4 w-4 mr-2" />
-                            <span className="hidden sm:inline">Analisar</span>
-                          </Button>
-                        </Link>
+                        <div className="flex gap-2 justify-end">
+                          <Link to={`/credito/analise/${proposta.id}`}>
+                            <Button className="btn-simpix-primary" size="sm">
+                              <Eye className="h-4 w-4 mr-2" />
+                              <span className="hidden sm:inline">Analisar</span>
+                            </Button>
+                          </Link>
+                          {/* Botão de editar/suspender apenas para atendentes e propostas suspensíveis */}
+                          {user?.role === 'ATENDENTE' && 
+                           ['aguardando_analise', 'em_analise', 'pendente', 'suspensa'].includes(proposta.status) && (
+                            <Button 
+                              className={proposta.status === 'suspensa' ? "btn-simpix-warning" : "btn-simpix-secondary"} 
+                              size="sm"
+                              onClick={() => handleToggleStatus(proposta.id, proposta.status)}
+                              title={proposta.status === 'suspensa' ? 'Reativar proposta' : 'Suspender proposta'}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))

@@ -95,6 +95,14 @@
   @apply bg-[hsl(var(--simpix-green))] text-white hover:bg-[hsl(var(--simpix-green-dark))] transition-colors;
 }
 
+.btn-simpix-secondary {
+  @apply bg-gray-600 text-white hover:bg-gray-700 transition-colors;
+}
+
+.btn-simpix-warning {
+  @apply bg-orange-500 text-white hover:bg-orange-600 transition-colors;
+}
+
 .card-simpix {
   @apply bg-card border-border;
   background: linear-gradient(135deg, hsl(0, 0%, 8%) 0%, hsl(0, 0%, 12%) 100%);
@@ -127,6 +135,12 @@
 .status-pending {
   @apply inline-flex items-center rounded-full px-2 py-1 text-xs font-medium;
   background: hsl(38, 92%, 50%);
+  color: white;
+}
+
+.status-suspended {
+  @apply inline-flex items-center rounded-full px-2 py-1 text-xs font-medium;
+  background: hsl(280, 60%, 50%);
   color: white;
 }
 

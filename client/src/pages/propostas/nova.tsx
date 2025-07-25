@@ -108,9 +108,11 @@ function ProposalForm() {
         valorIof: state.simulation?.valorIOF ? parseFloat(state.simulation.valorIOF) : 0,
         valorTotalFinanciado: state.simulation?.valorTotalFinanciado ? parseFloat(state.simulation.valorTotalFinanciado) : 0,
         
+        // IMPORTANTE: Definir status como aguardando_analise quando enviado com todos os campos
+        status: 'aguardando_analise',
+        
         // Required fields
         lojaId: state.context?.atendente?.loja?.id,
-        status: 'rascunho',
         finalidade: 'Empréstimo pessoal',
         garantia: 'Sem garantia',
       };

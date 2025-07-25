@@ -546,6 +546,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/propostas/:id/documents", jwtAuthMiddleware, getPropostaDocuments);
   app.post("/api/propostas/:id/documents", jwtAuthMiddleware, upload.single("file"), uploadPropostaDocument);
 
+  // Import propostas routes
+  const { togglePropostaStatus } = await import("./routes/propostas");
+  
+  // Rota para alternar status entre ativa/suspensa
+  app.put("/api/propostas/:id/toggle-status", jwtAuthMiddleware, togglePropostaStatus);
+
   // Legacy file upload route (mantido para compatibilidade)
   app.post("/api/upload", jwtAuthMiddleware, upload.single("file"), async (req: AuthenticatedRequest, res) => {
     try {
