@@ -337,9 +337,9 @@ const FilaAnalise: React.FC = () => {
                               <span className="hidden sm:inline">Analisar</span>
                             </Button>
                           </Link>
-                          {/* Botão de editar/suspender apenas para atendentes e propostas suspensíveis */}
-                          {user?.role === 'ATENDENTE' && 
-                           ['aguardando_analise', 'em_analise', 'pendente', 'suspensa'].includes(proposta.status) && (
+                          {/* Botão de editar/suspender para atendentes e administradores */}
+                          {(user?.role === 'ATENDENTE' || user?.role === 'ADMINISTRADOR') && 
+                           ['rascunho', 'aguardando_analise', 'em_analise', 'pendente', 'suspensa'].includes(proposta.status) && (
                             <Button 
                               className={proposta.status === 'suspensa' ? "btn-simpix-warning" : "btn-simpix-secondary"} 
                               size="sm"

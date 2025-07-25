@@ -35,7 +35,7 @@ export const togglePropostaStatus = async (req: AuthenticatedRequest, res: Respo
     }
 
     // 3. Verificar se a proposta está em um status que pode ser suspensa
-    const statusSuspensiveis = ['aguardando_analise', 'em_analise', 'pendente'];
+    const statusSuspensiveis = ['rascunho', 'aguardando_analise', 'em_analise', 'pendente'];
     if (!statusSuspensiveis.includes(proposta.status) && proposta.status !== 'suspensa') {
       return res.status(400).json({ 
         message: "Esta proposta não pode ser suspensa/reativada no status atual" 
