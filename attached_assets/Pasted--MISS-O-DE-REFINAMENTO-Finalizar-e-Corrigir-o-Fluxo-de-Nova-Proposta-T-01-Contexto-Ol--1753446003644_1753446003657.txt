@@ -1,0 +1,22 @@
+# MISSÃO DE REFINAMENTO: Finalizar e Corrigir o Fluxo de "Nova Proposta" (T-01)
+
+**Contexto:** Olá, Agente. O seu último trabalho na tela de "Nova Proposta" foi um avanço monumental! A arquitetura está no lugar, mas, como bons engenheiros, encontrámos três bugs na validação final que precisamos que você corrija para finalizarmos a funcionalidade.
+
+**Lista de Bugs a Corrigir:**
+
+* **1. O Envio da Proposta está a Falhar (O Bloqueador Principal):**
+    * **O Problema (Sintoma):** Ao preencher todos os campos e tentar enviar a proposta, a API retorna um erro de **"invalid data" (erro 400)**.
+    * **O Diagnóstico Provável:** O formato dos dados que o nosso novo formulário (com o `ProposalContext`) está a enviar para a API `POST /api/propostas` não corresponde exatamente ao que o schema de validação Zod no backend espera.
+    * **Sua Tarefa:** Investigue a função de submissão no frontend. Garanta que o objeto JSON enviado para a API seja **perfeitamente alinhado** com o schema de Drizzle e Zod que temos no backend para a tabela `propostas`.
+
+* **2. A Lógica de Tabelas Comerciais está Incompleta:**
+    * **O Problema (Sintoma):** Ao selecionar um produto, o formulário só está a mostrar a tabela comercial **personalizada** do parceiro. Ele não está a fazer o "fallback" para as tabelas gerais.
+    * **O Requisito:** A lógica deve ser: se não houver uma tabela personalizada para aquele parceiro e produto, o sistema DEVE exibir as tabelas "padrão" (gerais) para aquele produto.
+    * **Sua Tarefa:** Verifique a chamada de API no frontend para garantir que ela está a usar o nosso endpoint inteligente `GET /api/tabelas-comerciais-disponiveis` e a interpretar a resposta corretamente.
+
+* **3. A Simulação está Incompleta:**
+    * **O Problema (Sintoma):** A simulação em tempo real voltou, mas não está a calcular o **IOF** e o **CET Anual**.
+    * **Sua Tarefa:** Revise a lógica no endpoint de backend `GET /api/simulacao` para garantir que estes dois valores sejam calculados e retornados corretamente na resposta da simulação.
+
+**Resumo da Missão:**
+Corrija estes três bugs para que possamos, finalmente, criar uma proposta de ponta a ponta sem erros.

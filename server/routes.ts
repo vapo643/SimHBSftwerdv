@@ -211,11 +211,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/propostas", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     try {
-      const validatedData = insertPropostaSchema.parse(req.body);
+      // Generate unique ID for the proposal
+      const proposalId = `PROP-${Date.now()}-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
+      
+      // Add the generated ID and userId to the request body
+      const dataWithId = {
+        ...req.body,
+        id: proposalId,
+        userId: req.user?.id,
+      };
+      
+      const validatedData = insertPropostaSchema.parse(dataWithId);
       const proposta = await storage.createProposta(validatedData);
       res.status(201).json(proposta);
     } catch (error) {
       if (error instanceof z.ZodError) {
+        console.error("Validation error:", error.errors);
         return res.status(400).json({ message: "Invalid data", errors: error.errors });
       }
       console.error("Create proposta error:", error);
@@ -910,10 +921,13 @@ app.get("/api/tabelas-comerciais-disponiveis", jwtAuthMiddleware, async (req: Au
 
     return res.json({
       valorParcela: parseFloat(valorParcela.toFixed(2)),
-      taxaJurosMensal: taxaDeJurosMensal,
-      iof: parseFloat(iof.toFixed(2)),
-      valorTac: tac,
-      cet: parseFloat(cetAnual.toFixed(2)),
+      taxaJuros: taxaDeJurosMensal,
+      valorIOF: parseFloat(iof.toFixed(2)),
+      valorTAC: tac,
+      valorTotalFinanciado: parseFloat(valorTotalFinanciado.toFixed(2)),
+      custoEfetivoTotalAnual: parseFloat(cetAnual.toFixed(2)),
+      jurosCarencia: parseFloat(jurosCarencia.toFixed(2)),
+      diasCarencia: diasDiferenca,
     });
   });
 
