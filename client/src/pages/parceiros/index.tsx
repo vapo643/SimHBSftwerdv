@@ -109,25 +109,14 @@ const PartnersPage: React.FC = () => {
         description: "Parceiro excluído com sucesso!",
       });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       setDeleteDialogOpen(false);
       setPartnerToDelete(null);
-      
-      // Check if it's a 409 Conflict error (partner has associated stores)
-      if (error.status === 409 || error.response?.status === 409) {
-        const conflictMessage = error.message || error.response?.data?.message || "Não é possível excluir um parceiro que possui lojas cadastradas.";
-        toast({
-          title: "Operação não permitida",
-          description: conflictMessage,
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Erro!",
-          description: `Erro ao excluir parceiro: ${error.message}`,
-          variant: "destructive",
-        });
-      }
+      toast({
+        title: "Erro!",
+        description: `Erro ao excluir parceiro: ${error.message}`,
+        variant: "destructive",
+      });
     },
   });
 
