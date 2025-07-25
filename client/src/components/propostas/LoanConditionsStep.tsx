@@ -1,0 +1,250 @@
+import React from "react";
+import { useProposal, useProposalActions } from "@/contexts/ProposalContext";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { DollarSign, Package, Calendar, Calculator, AlertCircle, Loader2 } from "lucide-react";
+import CurrencyInput from "@/components/ui/CurrencyInput";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+
+export function LoanConditionsStep() {
+  const { state } = useProposal();
+  const { selectProduct, selectTable, updateLoanConditions } = useProposalActions();
+  const { context, loanData, simulation, errors } = state;
+
+  if (!context) {
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>
+          Erro ao carregar dados. Por favor, recarregue a página.
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  // Get selected product
+  const selectedProduct = context.produtos.find(p => p.id === loanData.produtoId);
+  
+  // Get available terms from selected table
+  const selectedTable = selectedProduct?.tabelasDisponiveis.find(t => t.id === loanData.tabelaComercialId);
+  const availableTerms = selectedTable?.prazos || [];
+
+  return (
+    <div className="space-y-6">
+      <Card className="bg-black border-gray-800">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Package className="h-5 w-5" />
+            Produto e Tabela Comercial
+          </CardTitle>
+          <CardDescription>
+            Selecione o produto de crédito e a tabela comercial
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <Label htmlFor="produto">Produto de Crédito</Label>
+            <Select
+              value={loanData.produtoId?.toString() || ''}
+              onValueChange={(value) => selectProduct(parseInt(value))}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione um produto..." />
+              </SelectTrigger>
+              <SelectContent>
+                {context.produtos.map((produto) => (
+                  <SelectItem key={produto.id} value={produto.id.toString()}>
+                    {produto.nome}
+                    {produto.tacTipo === 'fixo' 
+                      ? ` (TAC: R$ ${produto.tacValor})` 
+                      : ` (TAC: ${produto.tacValor}%)`}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {errors.produtoId && <p className="mt-1 text-sm text-red-500">{errors.produtoId}</p>}
+          </div>
+
+          <div>
+            <Label htmlFor="tabela">Tabela Comercial</Label>
+            <Select
+              value={loanData.tabelaComercialId?.toString() || ''}
+              onValueChange={(value) => selectTable(parseInt(value))}
+              disabled={!selectedProduct}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={
+                  !selectedProduct 
+                    ? "Primeiro selecione um produto" 
+                    : "Selecione uma tabela comercial..."
+                } />
+              </SelectTrigger>
+              <SelectContent>
+                {selectedProduct?.tabelasDisponiveis.map((tabela) => (
+                  <SelectItem key={tabela.id} value={tabela.id.toString()}>
+                    {tabela.nomeTabela}
+                    <span className="text-sm text-gray-500 ml-2">
+                      ({tabela.taxaJuros}% a.m. - {tabela.tipo})
+                    </span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {errors.tabelaComercialId && <p className="mt-1 text-sm text-red-500">{errors.tabelaComercialId}</p>}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="bg-black border-gray-800">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <DollarSign className="h-5 w-5" />
+            Condições do Empréstimo
+          </CardTitle>
+          <CardDescription>
+            Defina o valor, prazo e condições do empréstimo
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <Label htmlFor="valorSolicitado">Valor Solicitado</Label>
+            <CurrencyInput
+              id="valorSolicitado"
+              value={loanData.valorSolicitado}
+              onChange={(e) => updateLoanConditions({ valorSolicitado: e.target.value })}
+              placeholder={`Mín: R$ ${context.limites.valorMinimo.toLocaleString('pt-BR')} - Máx: R$ ${context.limites.valorMaximo.toLocaleString('pt-BR')}`}
+              className={errors.valorSolicitado ? "border-red-500" : ""}
+            />
+            {errors.valorSolicitado && <p className="mt-1 text-sm text-red-500">{errors.valorSolicitado}</p>}
+          </div>
+
+          <div>
+            <Label htmlFor="prazo">Prazo (meses)</Label>
+            <Select
+              value={loanData.prazo?.toString() || ''}
+              onValueChange={(value) => updateLoanConditions({ prazo: parseInt(value) })}
+              disabled={!selectedTable}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={
+                  !selectedTable 
+                    ? "Primeiro selecione uma tabela comercial" 
+                    : "Selecione o prazo..."
+                } />
+              </SelectTrigger>
+              <SelectContent>
+                {availableTerms.map((prazo) => (
+                  <SelectItem key={prazo} value={prazo.toString()}>
+                    {prazo} meses
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {errors.prazo && <p className="mt-1 text-sm text-red-500">{errors.prazo}</p>}
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="incluirTac"
+              checked={loanData.incluirTac}
+              onCheckedChange={(checked) => updateLoanConditions({ incluirTac: !!checked })}
+            />
+            <Label 
+              htmlFor="incluirTac" 
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+            >
+              Incluir Taxa de Abertura de Crédito (TAC)
+            </Label>
+          </div>
+
+          <div>
+            <Label htmlFor="dataCarencia">Data de Carência (opcional)</Label>
+            <Input
+              id="dataCarencia"
+              type="date"
+              value={loanData.dataCarencia || ''}
+              onChange={(e) => updateLoanConditions({ dataCarencia: e.target.value })}
+              min={format(new Date(), 'yyyy-MM-dd')}
+              max={format(new Date(Date.now() + 45 * 24 * 60 * 60 * 1000), 'yyyy-MM-dd')}
+            />
+            <p className="mt-1 text-sm text-gray-500">
+              Máximo de 45 dias a partir de hoje
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
+      {simulation && (
+        <Card className="bg-black border-gray-800 border-green-800">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-green-400">
+              <Calculator className="h-5 w-5" />
+              Simulação de Crédito
+            </CardTitle>
+            <CardDescription>
+              Resumo das condições calculadas
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm text-gray-500">Valor da Parcela</p>
+                <p className="text-2xl font-bold text-green-400">
+                  R$ {parseFloat(simulation.valorParcela).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Taxa de Juros</p>
+                <p className="text-lg font-semibold">
+                  {simulation.taxaJuros}% ao mês
+                </p>
+              </div>
+            </div>
+
+            <div className="border-t border-gray-800 pt-3 space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Valor Solicitado:</span>
+                <span>R$ {parseFloat(loanData.valorSolicitado || '0').toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">IOF:</span>
+                <span>R$ {parseFloat(simulation.valorIOF).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+              </div>
+              {loanData.incluirTac && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">TAC:</span>
+                  <span>R$ {parseFloat(simulation.valorTAC).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                </div>
+              )}
+              {simulation.jurosCarencia && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">Juros de Carência ({simulation.diasCarencia} dias):</span>
+                  <span>R$ {parseFloat(simulation.jurosCarencia).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                </div>
+              )}
+              <div className="flex justify-between text-sm font-semibold border-t border-gray-800 pt-2">
+                <span>Total Financiado:</span>
+                <span>R$ {parseFloat(simulation.valorTotalFinanciado).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">CET Anual:</span>
+                <span className="font-semibold">{simulation.custoEfetivoTotal}%</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
