@@ -53,8 +53,8 @@ const updatePropostaStatus = async ({
 };
 
 const decisionSchema = z.object({
-  status: z.enum(["Aprovada", "Negada", "Pendente com Observação"]),
-  observacao: z.string().optional(),
+  status: z.enum(["aprovado", "rejeitado", "pendente"]),
+  observacao: z.string().min(1, "Observação é obrigatória"),
 });
 
 type DecisionFormData = z.infer<typeof decisionSchema>;
@@ -166,9 +166,9 @@ const AnaliseManualPage: React.FC = () => {
                             <SelectValue placeholder="Selecione uma decisão..." />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="Aprovada">Aprovar Proposta</SelectItem>
-                            <SelectItem value="Negada">Negar Proposta</SelectItem>
-                            <SelectItem value="Pendente com Observação">Pendenciar</SelectItem>
+                            <SelectItem value="aprovado">Aprovar Proposta</SelectItem>
+                            <SelectItem value="rejeitado">Negar Proposta</SelectItem>
+                            <SelectItem value="pendente">Pendenciar</SelectItem>
                           </SelectContent>
                         </Select>
                       )}

@@ -994,6 +994,64 @@ app.get("/api/tabelas-comerciais-disponiveis", jwtAuthMiddleware, async (req: Au
     }
   });
 
+// GET /api/propostas/metricas - Get proposal metrics for current user
+app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+  try {
+    const userId = req.user!.id;
+    const { db } = await import("../server/lib/supabase");
+    const { propostas } = await import("../shared/schema");
+    const { eq, and, gte, count } = await import("drizzle-orm");
+    
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const weekStart = new Date(now);
+    weekStart.setDate(now.getDate() - 7);
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    // Count proposals created today by this user
+    const todayCount = await db
+      .select({ count: count() })
+      .from(propostas)
+      .where(
+        and(
+          eq(propostas.userId, userId),
+          gte(propostas.createdAt, todayStart)
+        )
+      );
+
+    // Count proposals created this week by this user
+    const weekCount = await db
+      .select({ count: count() })
+      .from(propostas)
+      .where(
+        and(
+          eq(propostas.userId, userId),
+          gte(propostas.createdAt, weekStart)
+        )
+      );
+
+    // Count proposals created this month by this user
+    const monthCount = await db
+      .select({ count: count() })
+      .from(propostas)
+      .where(
+        and(
+          eq(propostas.userId, userId),
+          gte(propostas.createdAt, monthStart)
+        )
+      );
+
+    res.json({
+      hoje: todayCount[0]?.count || 0,
+      semana: weekCount[0]?.count || 0,
+      mes: monthCount[0]?.count || 0,
+    });
+  } catch (error) {
+    console.error('Error fetching proposal metrics:', error);
+    res.status(500).json({ message: 'Erro interno do servidor' });
+  }
+});
+
   // Payment queue endpoint (T-05) - for FINANCEIRO team
   app.get("/api/propostas/pagamento", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     try {

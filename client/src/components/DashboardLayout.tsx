@@ -39,7 +39,6 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
   ];
 
   const analystNavigation = [
-    { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     { name: "Fila de Análise", href: "/credito/fila", icon: List },
     { name: "Formalização", href: "/formalizacao/fila", icon: FileText },
   ];

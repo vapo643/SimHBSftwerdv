@@ -40,11 +40,13 @@ import { ptBR } from "date-fns/locale";
 // Removed mock data - now using real API data
 
 interface Proposta {
-  id: number;
+  id: string;
   status: string;
-  clienteNome: string;
-  clienteCpf: string;
-  valorSolicitado: string;
+  clienteNome?: string;
+  clienteCpf?: string;
+  valor?: string;
+  nomeCliente?: string;
+  valorSolicitado?: string;
   parceiro?: {
     razaoSocial: string;
   };
@@ -52,7 +54,7 @@ interface Proposta {
     nomeLoja: string;
   };
   createdAt: string;
-  updatedAt: string;
+  updatedAt?: string;
 }
 
 const FilaAnalise: React.FC = () => {
@@ -61,12 +63,10 @@ const FilaAnalise: React.FC = () => {
   const [filterStore, setFilterStore] = useState("all");
   const { user } = useAuth();
 
-  // Build query based on user role
+  // Build query based on user role - for ANALISTA, filter to analysis-ready proposals
   const queryUrl = user?.role === 'ATENDENTE' 
     ? `/api/propostas?atendenteId=${user.id}`
-    : user?.role === 'ANALISTA'
-    ? '/api/propostas?queue=analysis'
-    : '/api/propostas';
+    : '/api/propostas'; // All proposals for ANALISTA/others, frontend filtering will handle analysis queue
 
   // Fetch real proposals data - filtered based on role
   const { data: propostas, isLoading, error } = useQuery<Proposta[]>({
@@ -82,7 +82,17 @@ const FilaAnalise: React.FC = () => {
     () => {
       if (!propostas) return [];
       
-      return propostas.filter(proposta => {
+      let filtered = propostas;
+      
+      // For ANALISTA role, only show analysis-ready proposals
+      if (user?.role === 'ANALISTA') {
+        filtered = propostas.filter(proposta => 
+          proposta.status === 'aguardando_analise' || proposta.status === 'em_analise'
+        );
+      }
+      
+      // Apply additional filters
+      return filtered.filter(proposta => {
         const byStatus = filterStatus !== "all" ? proposta.status === filterStatus : true;
         const byPartner =
           filterPartner !== "all"
@@ -92,7 +102,7 @@ const FilaAnalise: React.FC = () => {
         return byStatus && byPartner && byStore;
       });
     },
-    [propostas, filterStatus, filterPartner, filterStore]
+    [propostas, filterStatus, filterPartner, filterStore, user?.role]
   );
 
   const handlePartnerChange = (partnerId: string) => {
@@ -258,9 +268,9 @@ const FilaAnalise: React.FC = () => {
                 ) : (
                   filteredData.map(proposta => (
                     <TableRow key={proposta.id}>
-                      <TableCell className="font-medium">PRO-{proposta.id}</TableCell>
+                      <TableCell className="font-medium">{proposta.id}</TableCell>
                       <TableCell>{format(new Date(proposta.createdAt), 'dd/MM/yyyy', { locale: ptBR })}</TableCell>
-                      <TableCell>{proposta.clienteNome}</TableCell>
+                      <TableCell>{proposta.clienteNome || proposta.nomeCliente || '-'}</TableCell>
                       <TableCell>{proposta.parceiro?.razaoSocial || '-'}</TableCell>
                       <TableCell>{proposta.loja?.nomeLoja || '-'}</TableCell>
                       <TableCell>
