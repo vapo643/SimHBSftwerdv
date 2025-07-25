@@ -144,6 +144,11 @@ This is a full-stack TypeScript application for credit management called "Simpix
 - **Status Filtering Logic**: Implemented business logic to filter proposals by formalization statuses: aprovado, documentos_enviados, contratos_preparados, contratos_assinados, pronto_pagamento
 - **Frontend Data Connection**: Updated FormalizacaoList component to use real API data with proper query management and cache invalidation
 - **Test Data Creation**: Added comprehensive test proposals with various formalization statuses for proper system validation and demonstration
+- **Payment Queue Real Data Integration (January 25)**: Connected T-05 Payment Queue screen to real database data for FINANCEIRO team workflow
+- **Backend Payment Endpoint**: Created GET /api/propostas/pagamento endpoint filtering proposals with status 'pronto_pagamento' only
+- **Business Logic Implementation**: Implemented specific filtering for payment-ready proposals according to T-05 workflow requirements
+- **Frontend JSONB Integration**: Updated pagamentos.tsx to handle real database JSONB structure (clienteData, condicoesData) instead of mock flat fields
+- **Payment Processing Flow**: Enhanced payment mutations and cache invalidation to work with new endpoint and data structure
 - **Partner Details Page UI Fix (January 25)**: Fixed two critical UI bugs in partner details page (/client/src/pages/parceiros/detalhe.tsx)
 - **Missing API Endpoint**: Added GET /api/parceiros/:id endpoint that was missing, causing "undefined" title display
 - **UI Field Cleanup**: Removed Email and Telefone display fields, now only shows Razão Social and CNPJ as required

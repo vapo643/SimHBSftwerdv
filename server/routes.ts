@@ -743,7 +743,7 @@ app.get("/api/tabelas-comerciais-disponiveis", jwtAuthMiddleware, async (req: Au
         .select()
         .from(propostas)
         .where(inArray(propostas.status, formalizationStatuses))
-        .orderBy(desc(propostas.updatedAt));
+        .orderBy(desc(propostas.createdAt));
 
       console.log(`[${new Date().toISOString()}] Retornando ${formalizacaoPropostas.length} propostas em formalização`);
       res.json(formalizacaoPropostas);
@@ -751,6 +751,30 @@ app.get("/api/tabelas-comerciais-disponiveis", jwtAuthMiddleware, async (req: Au
       console.error("Erro ao buscar propostas de formalização:", error);
       res.status(500).json({ 
         message: "Erro ao buscar propostas de formalização" 
+      });
+    }
+  });
+
+  // Payment queue endpoint (T-05) - for FINANCEIRO team
+  app.get("/api/propostas/pagamento", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { db } = await import("../server/lib/supabase");
+      const { propostas } = await import("../shared/schema");
+      const { eq, desc } = await import("drizzle-orm");
+
+      // Payment queue logic: only proposals ready for payment
+      const pagamentoPropostas = await db
+        .select()
+        .from(propostas)
+        .where(eq(propostas.status, 'pronto_pagamento'))
+        .orderBy(desc(propostas.createdAt));
+
+      console.log(`[${new Date().toISOString()}] Retornando ${pagamentoPropostas.length} propostas prontas para pagamento`);
+      res.json(pagamentoPropostas);
+    } catch (error) {
+      console.error("Erro ao buscar propostas para pagamento:", error);
+      res.status(500).json({ 
+        message: "Erro ao buscar propostas para pagamento" 
       });
     }
   });

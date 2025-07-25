@@ -55,30 +55,28 @@ import {
 } from "lucide-react";
 
 interface Proposta {
-  id: number;
-  clienteNome: string;
-  clienteCpf: string;
-  clienteEmail: string;
-  clienteTelefone: string;
-  clienteDataNascimento: string;
-  clienteRenda: string;
-  valor: string;
-  valorAprovado: string;
-  taxaJuros: string;
-  prazo: number;
-  finalidade: string;
-  garantia: string;
+  id: string;
+  clienteData: {
+    nome: string;
+    cpf: string;
+    email: string;
+    telefone?: string;
+    dataNascimento?: string;
+    renda?: string;
+  };
+  condicoesData: {
+    valorSolicitado: number;
+    prazo: number;
+    taxaJuros: number;
+    valorParcela?: number;
+    finalidade?: string;
+  };
   status: string;
-  dataAprovacao: string;
-  dataAssinatura: string;
-  dataPagamento: string;
-  observacoesFormalização: string;
-  createdAt: string;
-  updatedAt: string;
+  created_at: string;
 }
 
 const paymentSchema = z.object({
-  propostaId: z.number(),
+  propostaId: z.string(),
   valorPago: z.string(),
   metodoPagamento: z.enum(["transferencia", "ted", "pix", "boleto"]),
   numeroConta: z.string().optional(),
@@ -91,7 +89,7 @@ const paymentSchema = z.object({
 type PaymentForm = z.infer<typeof paymentSchema>;
 
 export default function Pagamentos() {
-  const [selectedPropostas, setSelectedPropostas] = useState<number[]>([]);
+  const [selectedPropostas, setSelectedPropostas] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [sortBy, setSortBy] = useState<string>("dataAprovacao");
@@ -103,8 +101,12 @@ export default function Pagamentos() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: allPropostas, isLoading } = useQuery<Proposta[]>({
-    queryKey: ["/api/propostas"],
+  const { data: paymentPropostas, isLoading } = useQuery<Proposta[]>({
+    queryKey: ["/api/propostas/pagamento"],
+    queryFn: async () => {
+      const response = await apiRequest("/api/propostas/pagamento");
+      return response;
+    }
   });
 
   const form = useForm<PaymentForm>({
@@ -133,7 +135,7 @@ export default function Pagamentos() {
         title: "Pagamento processado com sucesso!",
         description: "O status da proposta foi atualizado para 'pago'.",
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/propostas"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/propostas/pagamento"] });
       setIsPaymentDialogOpen(false);
       setSelectedProposta(null);
       form.reset();
@@ -148,13 +150,13 @@ export default function Pagamentos() {
   });
 
   const batchProcessMutation = useMutation({
-    mutationFn: async (proposalIds: number[]) => {
+    mutationFn: async (proposalIds: string[]) => {
       const promises = proposalIds.map(id =>
         apiRequest(`/api/propostas/${id}`, {
           method: "PATCH",
           body: JSON.stringify({
             status: "pago",
-            dataPagamento: new Date().toISOString(),
+            // dataPagamento will be handled by backend
           }),
         })
       );
@@ -165,7 +167,7 @@ export default function Pagamentos() {
         title: "Lote processado com sucesso!",
         description: `${selectedPropostas.length} pagamentos foram processados.`,
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/propostas"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/propostas/pagamento"] });
       setSelectedPropostas([]);
     },
     onError: error => {
@@ -218,17 +220,17 @@ export default function Pagamentos() {
     return methodTexts[method as keyof typeof methodTexts] || method;
   };
 
-  // Filter propostas for payment queue
-  const paymentPropostas =
-    allPropostas?.filter(p => ["contratos_assinados", "pronto_pagamento"].includes(p.status)) || [];
+  // No need to filter since backend already filters by pronto_pagamento status
+  const allPaymentPropostas = paymentPropostas || [];
 
-  const completedPayments = allPropostas?.filter(p => p.status === "pago") || [];
+  // For completed payments, we'll need a separate query (mock for now)
+  const completedPayments: Proposta[] = [];
 
   // Apply filters and search
-  const filteredPropostas = paymentPropostas.filter(proposta => {
+  const filteredPropostas = allPaymentPropostas.filter(proposta => {
     const matchesSearch =
-      proposta.clienteNome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      proposta.clienteCpf.includes(searchTerm) ||
+      proposta.clienteData.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      proposta.clienteData.cpf.includes(searchTerm) ||
       proposta.id.toString().includes(searchTerm);
 
     const matchesStatus = filterStatus === "all" || proposta.status === filterStatus;
@@ -238,17 +240,22 @@ export default function Pagamentos() {
 
   // Sort propostas
   const sortedPropostas = [...filteredPropostas].sort((a, b) => {
-    let aVal: any = a[sortBy as keyof Proposta];
-    let bVal: any = b[sortBy as keyof Proposta];
+    let aVal: any;
+    let bVal: any;
 
-    if (sortBy === "valor" || sortBy === "valorAprovado") {
-      aVal = parseFloat(aVal || "0");
-      bVal = parseFloat(bVal || "0");
-    }
-
-    if (sortBy.includes("data") || sortBy === "createdAt") {
-      aVal = new Date(aVal || 0);
-      bVal = new Date(bVal || 0);
+    if (sortBy === "valor" || sortBy === "valorSolicitado") {
+      aVal = a.condicoesData.valorSolicitado || 0;
+      bVal = b.condicoesData.valorSolicitado || 0;
+    } else if (sortBy === "clienteNome") {
+      aVal = a.clienteData.nome;
+      bVal = b.clienteData.nome;
+    } else if (sortBy === "created_at") {
+      aVal = new Date(a.created_at || 0);
+      bVal = new Date(b.created_at || 0);
+    } else {
+      // Default fallback
+      aVal = a.status;
+      bVal = b.status;
     }
 
     if (sortOrder === "asc") {
@@ -258,7 +265,7 @@ export default function Pagamentos() {
     }
   });
 
-  const handleSelectProposta = (propostaId: number) => {
+  const handleSelectProposta = (propostaId: string) => {
     setSelectedPropostas(prev =>
       prev.includes(propostaId) ? prev.filter(id => id !== propostaId) : [...prev, propostaId]
     );
@@ -275,7 +282,7 @@ export default function Pagamentos() {
   const handleProcessPayment = (proposta: Proposta) => {
     setSelectedProposta(proposta);
     form.setValue("propostaId", proposta.id);
-    form.setValue("valorPago", proposta.valorAprovado || proposta.valor);
+    form.setValue("valorPago", proposta.condicoesData.valorSolicitado.toString());
     setIsPaymentDialogOpen(true);
   };
 
@@ -297,18 +304,18 @@ export default function Pagamentos() {
   };
 
   // Calculate statistics
-  const totalPendingValue = paymentPropostas.reduce(
-    (sum, p) => sum + parseFloat(p.valorAprovado || p.valor),
+  const totalPendingValue = allPaymentPropostas.reduce(
+    (sum, p) => sum + p.condicoesData.valorSolicitado,
     0
   );
 
   const totalCompletedValue = completedPayments.reduce(
-    (sum, p) => sum + parseFloat(p.valorAprovado || p.valor),
+    (sum, p) => sum + p.condicoesData.valorSolicitado,
     0
   );
 
-  const readyForPayment = paymentPropostas.filter(p => p.status === "pronto_pagamento").length;
-  const contractsSigned = paymentPropostas.filter(p => p.status === "contratos_assinados").length;
+  const readyForPayment = allPaymentPropostas.filter(p => p.status === "pronto_pagamento").length;
+  const contractsSigned = 0; // Since we're only showing pronto_pagamento, this would be 0
 
   if (isLoading) {
     return (
@@ -498,7 +505,7 @@ export default function Pagamentos() {
                     {formatCurrency(
                       selectedPropostas.reduce((sum, id) => {
                         const proposta = sortedPropostas.find(p => p.id === id);
-                        return sum + parseFloat(proposta?.valorAprovado || proposta?.valor || "0");
+                        return sum + (proposta?.condicoesData.valorSolicitado || 0);
                       }, 0)
                     )}
                   </span>
@@ -524,25 +531,25 @@ export default function Pagamentos() {
                           <div className="flex items-center space-x-4">
                             <div>
                               <p className="font-semibold text-gray-900">#{proposta.id}</p>
-                              <p className="text-sm text-gray-600">{proposta.clienteNome}</p>
+                              <p className="text-sm text-gray-600">{proposta.clienteData.nome}</p>
                             </div>
                             <div className="hidden sm:block">
                               <p className="text-sm text-gray-600">CPF</p>
-                              <p className="font-medium">{proposta.clienteCpf}</p>
+                              <p className="font-medium">{proposta.clienteData.cpf}</p>
                             </div>
                             <div>
-                              <p className="text-sm text-gray-600">Valor Aprovado</p>
+                              <p className="text-sm text-gray-600">Valor Solicitado</p>
                               <p className="font-bold text-green-600">
-                                {formatCurrency(proposta.valorAprovado || proposta.valor)}
+                                {formatCurrency(proposta.condicoesData.valorSolicitado)}
                               </p>
                             </div>
                             <div className="hidden md:block">
                               <p className="text-sm text-gray-600">Prazo</p>
-                              <p className="font-medium">{proposta.prazo} meses</p>
+                              <p className="font-medium">{proposta.condicoesData.prazo} meses</p>
                             </div>
                             <div className="hidden lg:block">
-                              <p className="text-sm text-gray-600">Data Aprovação</p>
-                              <p className="font-medium">{formatDate(proposta.dataAprovacao)}</p>
+                              <p className="text-sm text-gray-600">Data Criação</p>
+                              <p className="font-medium">{formatDate(proposta.created_at)}</p>
                             </div>
                           </div>
                         </div>
@@ -620,17 +627,17 @@ export default function Pagamentos() {
                             </div>
                             <div>
                               <p className="font-semibold text-gray-900">
-                                #{proposta.id} - {proposta.clienteNome}
+                                #{proposta.id} - {proposta.clienteData.nome}
                               </p>
-                              <p className="text-sm text-gray-600">CPF: {proposta.clienteCpf}</p>
+                              <p className="text-sm text-gray-600">CPF: {proposta.clienteData.cpf}</p>
                             </div>
                           </div>
                           <div className="text-right">
                             <p className="font-bold text-green-600">
-                              {formatCurrency(proposta.valorAprovado || proposta.valor)}
+                              {formatCurrency(proposta.condicoesData.valorSolicitado)}
                             </p>
                             <p className="text-sm text-gray-600">
-                              Pago em {formatDate(proposta.dataPagamento)}
+                              Pago em {formatDate(proposta.created_at)}
                             </p>
                           </div>
                         </div>
@@ -658,19 +665,19 @@ export default function Pagamentos() {
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <span className="text-gray-600">Nome:</span>
-                      <p className="font-medium">{selectedProposta.clienteNome}</p>
+                      <p className="font-medium">{selectedProposta.clienteData.nome}</p>
                     </div>
                     <div>
                       <span className="text-gray-600">CPF:</span>
-                      <p className="font-medium">{selectedProposta.clienteCpf}</p>
+                      <p className="font-medium">{selectedProposta.clienteData.cpf}</p>
                     </div>
                     <div>
                       <span className="text-gray-600">Email:</span>
-                      <p className="font-medium">{selectedProposta.clienteEmail}</p>
+                      <p className="font-medium">{selectedProposta.clienteData.email}</p>
                     </div>
                     <div>
                       <span className="text-gray-600">Telefone:</span>
-                      <p className="font-medium">{selectedProposta.clienteTelefone}</p>
+                      <p className="font-medium">{selectedProposta.clienteData.telefone || "N/A"}</p>
                     </div>
                   </div>
                 </div>
