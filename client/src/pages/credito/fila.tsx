@@ -59,13 +59,13 @@ const FilaAnalise: React.FC = () => {
   const [filterPartner, setFilterPartner] = useState("all");
   const [filterStore, setFilterStore] = useState("all");
 
-  // Fetch real proposals data
+  // Fetch real proposals data - filtered for analysis queue
   const { data: propostas, isLoading, error } = useQuery<Proposta[]>({
-    queryKey: ['/api/propostas'],
+    queryKey: ['/api/propostas?queue=analysis'],
   });
 
   // Fetch partners data
-  const { data: parceiros } = useQuery({
+  const { data: parceiros } = useQuery<Array<{ id: number; razaoSocial: string }>>({
     queryKey: ['/api/parceiros'],
   });
 

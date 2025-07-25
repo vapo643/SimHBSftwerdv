@@ -1,0 +1,31 @@
+# MISSÃO DE IMPLEMENTAÇÃO: Construir o Elo Perdido da Esteira de Análise
+
+**Contexto:** Olá, Agente. O seu último diagnóstico foi perfeito e identificou o ponto de falha exato no nosso fluxo de propostas. A sua nova missão é construir a lógica de backend que falta para dar vida à "Esteira de Análise".
+
+**AÇÃO:**
+Execute o seguinte roadmap de refatoração no nosso backend.
+
+**ROADMAP DE EXECUÇÃO:**
+
+**1. Refatore o Endpoint de Atualização de Status (O Elo Perdido):**
+* **Ficheiro Alvo:** `/server/routes.ts`.
+* **Endpoint:** `PUT /api/propostas/:id/status`.
+* **Tarefa:** Remova a lógica "mock" atual. A nova lógica deve:
+    a.  Receber o novo `status` e uma `observacao` do corpo da requisição.
+    b.  Iniciar uma **transação** no banco de dados.
+    c.  Dentro da transação, executar duas operações:
+        1.  Fazer um `UPDATE` na tabela `propostas` para alterar o `status` da proposta correta.
+        2.  Fazer um `INSERT` na tabela `proposta_logs` para criar um registo de auditoria desta mudança (registando o `proposta_id`, `autor_id`, `status_anterior`, `status_novo` e a `observacao`).
+    d.  Garantir que a rota esteja protegida por um `role-guard` apropriado (ex: `requireManagerOrAdmin`).
+
+**2. Refine o Endpoint da Fila de Análise:**
+* **Ficheiro Alvo:** `/server/routes.ts`.
+* **Endpoint:** O endpoint `GET` que alimenta a "Fila de Análise" (T-02), provavelmente `/api/propostas`.
+* **Tarefa:** Adicione um filtro de backend a este endpoint para que ele retorne **apenas** as propostas com os status relevantes para a análise (ex: `aguardando_analise`, `em_analise`).
+
+**3. Resolva a Inconsistência de Schemas (Opcional, mas recomendado):**
+* **Ficheiro Alvo:** `/shared/schema.ts` e a rota `POST /api/propostas`.
+* **Tarefa:** Unifique os schemas de validação para a criação de propostas. Elimine a duplicidade e garanta que o `insertPropostaSchema` valide corretamente a estrutura `JSONB` que o nosso banco de dados espera.
+
+**Resumo da Missão:**
+Construa a lógica real para a mudança de status das propostas e refine a query da fila de análise.

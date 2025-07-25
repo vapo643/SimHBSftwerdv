@@ -133,28 +133,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Proposal routes
+  // Proposal routes - ENHANCED WITH ANALYSIS FILTER
   app.get("/api/propostas", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     try {
-      const propostas = await storage.getPropostas();
+      // Check if this is for analysis queue
+      const isAnalysisQueue = req.query.queue === 'analysis';
       
-      // Map database fields to expected frontend format
-      const mappedPropostas = propostas.map(p => ({
-        id: p.id,
-        status: p.status,
-        clienteNome: p.clienteNome,
-        clienteCpf: p.clienteCpf,
-        valorSolicitado: p.valor,
-        parceiro: p.parceiro ? {
-          razaoSocial: p.parceiro.razaoSocial
-        } : undefined,
-        loja: p.loja ? {
-          nomeLoja: p.loja.nomeLoja
-        } : undefined,
-        createdAt: p.createdAt,
-        updatedAt: p.updatedAt
-      }));
+      // Import database dependencies
+      const { db } = await import("../server/lib/supabase");
+      const { propostas, lojas, parceiros } = await import("../shared/schema");
+      const { inArray, desc, eq } = await import("drizzle-orm");
       
+      // Build query with conditional where clause
+      const baseQuery = db
+        .select({
+          id: propostas.id,
+          status: propostas.status,
+          clienteData: propostas.clienteData,
+          condicoesData: propostas.condicoesData,
+          createdAt: propostas.createdAt,
+          updatedAt: propostas.updatedAt,
+          loja: {
+            id: lojas.id,
+            nomeLoja: lojas.nomeLoja
+          },
+          parceiro: {
+            id: parceiros.id,
+            razaoSocial: parceiros.razaoSocial
+          }
+        })
+        .from(propostas)
+        .leftJoin(lojas, eq(propostas.lojaId, lojas.id))
+        .leftJoin(parceiros, eq(lojas.parceiroId, parceiros.id));
+      
+      // Apply analysis filter if requested
+      const results = isAnalysisQueue 
+        ? await baseQuery
+            .where(inArray(propostas.status, ['aguardando_analise', 'em_analise']))
+            .orderBy(desc(propostas.createdAt))
+        : await baseQuery
+            .orderBy(desc(propostas.createdAt));
+      
+      // Map to expected format - extract from JSONB
+      const mappedPropostas = results.map(p => {
+        // Extract client data from JSONB
+        const clienteData = p.clienteData as any || {};
+        const condicoesData = p.condicoesData as any || {};
+        
+        return {
+          id: p.id,
+          status: p.status,
+          clienteNome: clienteData.nome || 'Nome não informado',
+          clienteCpf: clienteData.cpf || 'CPF não informado',
+          valorSolicitado: condicoesData.valor || '0',
+          parceiro: p.parceiro ? {
+            razaoSocial: p.parceiro.razaoSocial
+          } : undefined,
+          loja: p.loja ? {
+            nomeLoja: p.loja.nomeLoja
+          } : undefined,
+          createdAt: p.createdAt,
+          updatedAt: p.updatedAt
+        };
+      });
+      
+      console.log(`[${new Date().toISOString()}] Retornando ${mappedPropostas.length} propostas${isAnalysisQueue ? ' para análise' : ''}`);
       res.json(mappedPropostas);
     } catch (error) {
       console.error("Get propostas error:", error);
@@ -1210,7 +1253,7 @@ app.get("/api/tabelas-comerciais-disponiveis", jwtAuthMiddleware, async (req: Au
     res.json(mockPropostas);
   });
 
-  // Update proposal status
+  // Update proposal status - REAL IMPLEMENTATION WITH AUDIT TRAIL
   app.put("/api/propostas/:id/status", jwtAuthMiddleware, requireManagerOrAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const { id } = req.params;
@@ -1220,45 +1263,115 @@ app.get("/api/tabelas-comerciais-disponiveis", jwtAuthMiddleware, async (req: Au
         return res.status(400).json({ message: "Status é obrigatório" });
       }
 
-      // Mock update - in real app would update database
-      const mockUpdatedProposta = {
-        id,
-        status,
-        observacao,
-        updatedAt: new Date().toISOString(),
-      };
+      // Import database and schema dependencies
+      const { db } = await import("../server/lib/supabase");
+      const { propostas, comunicacaoLogs } = await import("../shared/schema");
+      const { eq } = await import("drizzle-orm");
 
-      res.json(mockUpdatedProposta);
+      // Execute transaction for atomic updates
+      const result = await db.transaction(async (tx) => {
+        // Step 1: Get current proposal for audit trail
+        const [currentProposta] = await tx
+          .select({
+            status: propostas.status,
+            lojaId: propostas.lojaId
+          })
+          .from(propostas)
+          .where(eq(propostas.id, id));
+
+        if (!currentProposta) {
+          throw new Error("Proposta não encontrada");
+        }
+
+        // Step 2: Update proposal status
+        const [updatedProposta] = await tx
+          .update(propostas)
+          .set({
+            status,
+            updatedAt: new Date()
+          })
+          .where(eq(propostas.id, id))
+          .returning();
+
+        // Step 3: Create audit log
+        await tx.insert(comunicacaoLogs).values({
+          propostaId: id, // Now accepts text directly
+          lojaId: currentProposta.lojaId,
+          tipo: "sistema",
+          conteudo: JSON.stringify({
+            acao: "mudanca_status",
+            status_anterior: currentProposta.status,
+            status_novo: status,
+            observacao: observacao || null,
+            usuario: req.user?.email
+          }),
+          userId: req.user?.id
+        });
+
+        return updatedProposta;
+      });
+
+      console.log(`[${new Date().toISOString()}] Status da proposta ${id} atualizado de ${result.status} para ${status}`);
+      res.json(result);
     } catch (error) {
       console.error("Update status error:", error);
+      if (error instanceof Error && error.message === "Proposta não encontrada") {
+        return res.status(404).json({ message: error.message });
+      }
       res.status(500).json({ message: "Erro ao atualizar status" });
     }
   });
 
-  // Get proposal logs
+  // Get proposal logs - REAL IMPLEMENTATION
   app.get("/api/propostas/:id/logs", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     try {
       const { id } = req.params;
 
-      // Mock logs data
-      const mockLogs = [
-        {
-          id: 1,
-          status_novo: "Em Análise",
-          observacao: "Proposta iniciada para análise",
-          user_id: "user-123",
-          created_at: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
-        },
-        {
-          id: 2,
-          status_novo: "Pendente",
-          observacao: "Documentos adicionais necessários",
-          user_id: "user-456",
-          created_at: new Date(Date.now() - 43200000).toISOString(), // 12 hours ago
-        },
-      ];
+      // Import database dependencies
+      const { db } = await import("../server/lib/supabase");
+      const { comunicacaoLogs, users } = await import("../shared/schema");
+      const { eq, desc, and } = await import("drizzle-orm");
 
-      res.json(mockLogs);
+      // Fetch communication logs for this proposal
+      const logs = await db
+        .select({
+          id: comunicacaoLogs.id,
+          conteudo: comunicacaoLogs.conteudo,
+          tipo: comunicacaoLogs.tipo,
+          userId: comunicacaoLogs.userId,
+          createdAt: comunicacaoLogs.createdAt,
+          userName: users.name
+        })
+        .from(comunicacaoLogs)
+        .leftJoin(users, eq(comunicacaoLogs.userId, users.id))
+        .where(
+          and(
+            eq(comunicacaoLogs.propostaId, id), // Now accepts text directly
+            eq(comunicacaoLogs.tipo, "sistema")
+          )
+        )
+        .orderBy(desc(comunicacaoLogs.createdAt));
+
+      // Transform logs to expected format
+      const formattedLogs = logs.map(log => {
+        let parsedContent;
+        try {
+          parsedContent = JSON.parse(log.conteudo);
+        } catch {
+          parsedContent = { observacao: log.conteudo };
+        }
+
+        return {
+          id: log.id,
+          status_novo: parsedContent.status_novo || parsedContent.acao || "Atualização",
+          observacao: parsedContent.observacao || null,
+          user_id: log.userId || "Sistema",
+          user_name: log.userName || "Sistema",
+          created_at: log.createdAt
+        };
+      });
+
+      res.json(formattedLogs);
     } catch (error) {
       console.error("Get logs error:", error);
       res.status(500).json({ message: "Erro ao carregar histórico" });

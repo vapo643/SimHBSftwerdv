@@ -163,7 +163,7 @@ export const produtos = pgTable("produtos", {
 // Logs de Comunicação - Multi-tenant  
 export const comunicacaoLogs = pgTable("comunicacao_logs", {
   id: serial("id").primaryKey(),
-  propostaId: integer("proposta_id").references(() => propostas.id).notNull(),
+  propostaId: text("proposta_id").references(() => propostas.id).notNull(), // Changed from integer to text to match propostas.id
   lojaId: integer("loja_id").references(() => lojas.id).notNull(), // Multi-tenant key
   tipo: text("tipo").notNull(), // email, telefone, whatsapp, sistema
   conteudo: text("conteudo").notNull(),
