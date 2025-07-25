@@ -463,6 +463,30 @@ app.get("/api/tabelas-comerciais-disponiveis", jwtAuthMiddleware, async (req: Au
   }
 });
 
+  // Simple GET endpoint for all commercial tables (for dropdowns)
+  app.get("/api/tabelas-comerciais", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+    try {
+      // Import database connection
+      const { db } = await import("../server/lib/supabase");
+      const { desc } = await import("drizzle-orm");
+      const { tabelasComerciais } = await import("../shared/schema");
+
+      // Get all commercial tables ordered by creation date
+      const tabelas = await db
+        .select()
+        .from(tabelasComerciais)
+        .orderBy(desc(tabelasComerciais.createdAt));
+
+      console.log(`[${new Date().toISOString()}] Retornando ${tabelas.length} tabelas comerciais`);
+      res.json(tabelas);
+    } catch (error) {
+      console.error("Erro ao buscar tabelas comerciais:", error);
+      res.status(500).json({ 
+        message: "Erro ao buscar tabelas comerciais" 
+      });
+    }
+  });
+
   // Mock data para prazos
   const prazos = [
     { id: 1, valor: "12 meses" },

@@ -2,6 +2,7 @@ import React from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { api } from "@/lib/apiClient";
 
 const configSchema = z
   .object({
@@ -36,6 +38,15 @@ const configSchema = z
 
 type ConfigFormData = z.infer<typeof configSchema>;
 
+interface TabelaComercial {
+  id: number;
+  nomeTabela: string;
+  taxaJuros: string;
+  prazos: number[];
+  produtoId: number;
+  parceiroId?: number;
+}
+
 const ConfiguracaoComercialForm: React.FC = () => {
   const {
     register,
@@ -49,11 +60,18 @@ const ConfiguracaoComercialForm: React.FC = () => {
 
   const selectedTable = watch("tabelaComercial");
 
+  // Fetch commercial tables from API
+  const { data: tabelasComerciais = [], isLoading: loadingTabelas, error: tabelasError } = useQuery<TabelaComercial[]>({
+    queryKey: ['tabelas-comerciais'],
+    queryFn: async () => {
+      const response = await api.get<TabelaComercial[]>('/api/tabelas-comerciais');
+      return response.data;
+    },
+  });
+
   const onSubmit = (data: ConfigFormData) => {
     console.log("Configuração Salva:", data);
   };
-
-  const mockTabelas = ["Tabela Padrão 2024", "Tabela Prime"];
 
   return (
     <Card>
@@ -74,11 +92,25 @@ const ConfiguracaoComercialForm: React.FC = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="custom">-- Criar Tabela Personalizada --</SelectItem>
-                    {mockTabelas.map(t => (
-                      <SelectItem key={t} value={t}>
-                        {t}
+                    {loadingTabelas ? (
+                      <SelectItem value="loading" disabled>
+                        Carregando tabelas...
                       </SelectItem>
-                    ))}
+                    ) : tabelasError ? (
+                      <SelectItem value="error" disabled>
+                        Erro ao carregar tabelas
+                      </SelectItem>
+                    ) : tabelasComerciais.length === 0 ? (
+                      <SelectItem value="empty" disabled>
+                        Nenhuma tabela encontrada
+                      </SelectItem>
+                    ) : (
+                      tabelasComerciais.map((tabela) => (
+                        <SelectItem key={tabela.id} value={tabela.id.toString()}>
+                          {tabela.nomeTabela} - {tabela.taxaJuros}% a.m.
+                        </SelectItem>
+                      ))
+                    )}
                   </SelectContent>
                 </Select>
               )}
