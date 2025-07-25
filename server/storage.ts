@@ -145,14 +145,14 @@ export class DatabaseStorage implements IStorage {
         prazo: condicoesData.prazo,
         lojaId: p.loja_id,
         createdAt: p.created_at,
-        updatedAt: p.updated_at,
-        loja: p.lojas ? {
-          id: p.lojas.id,
-          nomeLoja: p.lojas.nome_loja
+        updatedAt: p.created_at,
+        loja: p.lojas && p.lojas[0] ? {
+          id: p.lojas[0].id,
+          nomeLoja: p.lojas[0].nome_loja
         } : null,
-        parceiro: p.lojas?.parceiros ? {
-          id: p.lojas.parceiros.id,
-          razaoSocial: p.lojas.parceiros.razao_social
+        parceiro: p.lojas && p.lojas[0] && p.lojas[0].parceiros && p.lojas[0].parceiros[0] ? {
+          id: p.lojas[0].parceiros[0].id,
+          razaoSocial: p.lojas[0].parceiros[0].razao_social
         } : null
       };
     });

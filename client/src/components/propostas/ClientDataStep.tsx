@@ -12,11 +12,91 @@ import {
 } from "@/components/ui/select";
 import { User, Phone, Mail, Calendar, MapPin, Briefcase } from "lucide-react";
 import CurrencyInput from "@/components/ui/CurrencyInput";
+import InputMask from "react-input-mask";
+
+// Validation helpers
+const validateCPF = (cpf: string): string | null => {
+  const cleanCPF = cpf.replace(/\D/g, '');
+  if (cleanCPF.length < 11) return 'CPF deve ter 11 dígitos';
+  if (cleanCPF.length > 11) return 'CPF inválido';
+  // Simple CPF validation (just checking format for now)
+  if (/^(\d)\1{10}$/.test(cleanCPF)) return 'CPF inválido';
+  return null;
+};
+
+const validateEmail = (email: string): string | null => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!email) return 'Email é obrigatório';
+  if (!emailRegex.test(email)) return 'Email inválido';
+  return null;
+};
+
+const validatePhone = (phone: string): string | null => {
+  const cleanPhone = phone.replace(/\D/g, '');
+  if (cleanPhone.length < 10) return 'Telefone deve ter pelo menos 10 dígitos';
+  return null;
+};
+
+const validateCEP = (cep: string): string | null => {
+  const cleanCEP = cep.replace(/\D/g, '');
+  if (cleanCEP.length < 8) return 'CEP deve ter 8 dígitos';
+  return null;
+};
 
 export function ClientDataStep() {
   const { state } = useProposal();
-  const { updateClient } = useProposalActions();
+  const { updateClient, setError, clearError } = useProposalActions();
   const { clientData, errors } = state;
+
+  // Real-time validation handlers
+  const handleCPFChange = (value: string) => {
+    updateClient({ cpf: value });
+    const error = validateCPF(value);
+    if (error) {
+      setError('cpf', error);
+    } else {
+      clearError('cpf');
+    }
+  };
+
+  const handleEmailChange = (value: string) => {
+    updateClient({ email: value });
+    const error = validateEmail(value);
+    if (error) {
+      setError('email', error);
+    } else {
+      clearError('email');
+    }
+  };
+
+  const handlePhoneChange = (value: string) => {
+    updateClient({ telefone: value });
+    const error = validatePhone(value);
+    if (error) {
+      setError('telefone', error);
+    } else {
+      clearError('telefone');
+    }
+  };
+
+  const handleCEPChange = (value: string) => {
+    updateClient({ cep: value });
+    const error = validateCEP(value);
+    if (error) {
+      setError('cep', error);
+    } else {
+      clearError('cep');
+    }
+  };
+
+  const handleNameChange = (value: string) => {
+    updateClient({ nome: value });
+    if (!value || value.trim().length === 0) {
+      setError('nome', 'Nome é obrigatório');
+    } else {
+      clearError('nome');
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -32,26 +112,33 @@ export function ClientDataStep() {
         </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <Label htmlFor="cpf">CPF</Label>
-            <Input
-              id="cpf"
-              type="text"
-              placeholder="000.000.000-00"
+            <Label htmlFor="cpf">CPF *</Label>
+            <InputMask
+              mask="999.999.999-99"
               value={clientData.cpf}
-              onChange={(e) => updateClient({ cpf: e.target.value })}
-              className={errors.cpf ? "border-red-500" : ""}
-            />
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleCPFChange(e.target.value)}
+            >
+              {(inputProps: any) => (
+                <Input
+                  {...inputProps}
+                  id="cpf"
+                  type="text"
+                  placeholder="000.000.000-00"
+                  className={errors.cpf ? "border-red-500 focus:border-red-500" : ""}
+                />
+              )}
+            </InputMask>
             {errors.cpf && <p className="mt-1 text-sm text-red-500">{errors.cpf}</p>}
           </div>
 
           <div>
-            <Label htmlFor="nome">Nome Completo</Label>
+            <Label htmlFor="nome">Nome Completo *</Label>
             <Input
               id="nome"
               type="text"
               value={clientData.nome}
-              onChange={(e) => updateClient({ nome: e.target.value })}
-              className={errors.nome ? "border-red-500" : ""}
+              onChange={(e) => handleNameChange(e.target.value)}
+              className={errors.nome ? "border-red-500 focus:border-red-500" : ""}
             />
             {errors.nome && <p className="mt-1 text-sm text-red-500">{errors.nome}</p>}
           </div>
@@ -142,26 +229,33 @@ export function ClientDataStep() {
         </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <Label htmlFor="telefone">Telefone/WhatsApp</Label>
-            <Input
-              id="telefone"
-              type="tel"
-              placeholder="(11) 98765-4321"
+            <Label htmlFor="telefone">Telefone/WhatsApp *</Label>
+            <InputMask
+              mask="(99) 99999-9999"
               value={clientData.telefone}
-              onChange={(e) => updateClient({ telefone: e.target.value })}
-              className={errors.telefone ? "border-red-500" : ""}
-            />
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => handlePhoneChange(e.target.value)}
+            >
+              {(inputProps: any) => (
+                <Input
+                  {...inputProps}
+                  id="telefone"
+                  type="tel"
+                  placeholder="(11) 98765-4321"
+                  className={errors.telefone ? "border-red-500 focus:border-red-500" : ""}
+                />
+              )}
+            </InputMask>
             {errors.telefone && <p className="mt-1 text-sm text-red-500">{errors.telefone}</p>}
           </div>
 
           <div>
-            <Label htmlFor="email">E-mail</Label>
+            <Label htmlFor="email">E-mail *</Label>
             <Input
               id="email"
               type="email"
               value={clientData.email}
-              onChange={(e) => updateClient({ email: e.target.value })}
-              className={errors.email ? "border-red-500" : ""}
+              onChange={(e) => handleEmailChange(e.target.value)}
+              className={errors.email ? "border-red-500 focus:border-red-500" : ""}
             />
             {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
           </div>
@@ -181,14 +275,21 @@ export function ClientDataStep() {
         <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <Label htmlFor="cep">CEP</Label>
-            <Input
-              id="cep"
-              type="text"
-              placeholder="00000-000"
+            <InputMask
+              mask="99999-999"
               value={clientData.cep}
-              onChange={(e) => updateClient({ cep: e.target.value })}
-              className={errors.cep ? "border-red-500" : ""}
-            />
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleCEPChange(e.target.value)}
+            >
+              {(inputProps: any) => (
+                <Input
+                  {...inputProps}
+                  id="cep"
+                  type="text"
+                  placeholder="00000-000"
+                  className={errors.cep ? "border-red-500 focus:border-red-500" : ""}
+                />
+              )}
+            </InputMask>
             {errors.cep && <p className="mt-1 text-sm text-red-500">{errors.cep}</p>}
           </div>
 

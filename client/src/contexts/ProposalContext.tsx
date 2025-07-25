@@ -353,6 +353,9 @@ export function useProposalActions() {
     setError: (field: string, message: string) => 
       dispatch({ type: 'SET_ERROR', payload: { field, message } }),
     
+    clearError: (field: string) =>
+      dispatch({ type: 'SET_ERROR', payload: { field, message: '' } }),
+    
     clearErrors: () => 
       dispatch({ type: 'CLEAR_ERRORS' }),
     

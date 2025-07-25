@@ -425,7 +425,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         tabelaComercialId: dataWithId.tabelaComercialId
       };
       
-      // Skip Zod validation for now - direct insert
+      // Create the proposal
       const proposta = await storage.createProposta(dataForDatabase);
       res.status(201).json(proposta);
     } catch (error) {
