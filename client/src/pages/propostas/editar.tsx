@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import DashboardLayout from "@/components/DashboardLayout";
@@ -29,6 +29,12 @@ const EditarPropostaPendenciada: React.FC = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("dados-cliente");
+  
+  // Estado inicial para os formulários - DEVE estar antes de qualquer retorno condicional
+  const [formData, setFormData] = useState({
+    clienteData: {},
+    condicoesData: {},
+  });
 
   // Buscar dados da proposta
   const { data: proposta, isLoading, error } = useQuery<PropostaData>({
@@ -127,11 +133,15 @@ const EditarPropostaPendenciada: React.FC = () => {
     );
   }
 
-  // Estado inicial para os formulários
-  const [formData, setFormData] = useState({
-    clienteData: proposta?.clienteData || {},
-    condicoesData: proposta?.condicoesData || {},
-  });
+  // Atualizar formData quando proposta carrega
+  useEffect(() => {
+    if (proposta) {
+      setFormData({
+        clienteData: proposta.clienteData || {},
+        condicoesData: proposta.condicoesData || {},
+      });
+    }
+  }, [proposta]);
 
   const handleClientChange = (field: string, value: any) => {
     setFormData(prev => ({
