@@ -1,0 +1,31 @@
+# MISSÃO: DEBATE MÁXIMO (ANTI-FRÁGIL) - Arquitetura Completa da Esteira de Análise (Capítulo 5)
+
+**CONTEXTO ESTRATÉGICO:**
+Descobrimos que a causa raiz das nossas falhas persistentes é que a funcionalidade central da "Esteira de Análise" nunca foi implementada. O nosso sistema não tem a lógica para um `ANALISTA` aprovar, negar ou pendenciar propostas. A sua missão é projetar esta arquitetura do zero.
+
+**SUA TAREFA (ASSISTENTE):**
+A sua tarefa é atuar como um Arquiteto de Sistemas e propor um plano de implementação para a Esteira de Análise. Esta será a nossa **Interação 1 de 3**.
+
+---
+### **Interação 1: Proposta de Arquitetura de Dados e Lógica de Negócio**
+
+Por favor, analise os nossos requisitos e responda com a sua proposta para os seguintes pontos:
+
+**1. Análise e Proposta de Schema de Banco de Dados:**
+* **Análise:** O `ANALISTA` é um perfil central da Simpix, sem vínculo a lojas. A tabela `proposta_logs` é crucial para auditar o ciclo de "pendenciar". As nossas tabelas `profiles` e `proposta_logs` estão prontas para suportar este fluxo?
+* **Ação:** Proponha quaisquer migrações de schema necessárias. A tabela `profiles` precisa de alguma modificação para o `ANALISTA`? A tabela `proposta_logs` tem todos os campos para registar uma observação de pendência e a transição de status?
+
+**2. Proposta de Arquitetura de API (Backend):**
+* **Análise:** O coração deste fluxo é a capacidade de mudar o `status` de uma proposta.
+* **Ação:** Proponha a arquitetura para o endpoint `PUT /api/propostas/:id/status`. Como este endpoint deve:
+    a. Validar que o usuário autenticado tem a `role` de `ANALISTA` (ou `ADMIN`)?
+    b. Receber o novo `status` (`aprovado`, `negado`, `pendente`) e uma `observacao`?
+    c. Executar uma **transação** no banco de dados para, de forma atómica, atualizar o `status` na tabela `propostas` E criar um novo registo na tabela `proposta_logs`?
+
+**3. Proposta de Lógica de "Pendência" (O Ciclo de Retorno):**
+* **Análise:** Se um `ANALISTA` pendencia uma proposta, ela deve retornar para o `ATENDENTE` que a criou.
+* **Ação:** Como o nosso sistema deve gerir este fluxo?
+    * A "Fila de Análise" (`GET /api/propostas?queue=analysis`) deve excluir propostas com status `pendente`?
+    * Devemos criar um novo endpoint ou uma nova view para a "Fila do Atendente", que mostre apenas as suas propostas pendentes?
+
+---
