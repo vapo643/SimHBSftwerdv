@@ -260,15 +260,7 @@ export class DatabaseStorage implements IStorage {
     const clienteData = proposta.clienteData || {};
     const condicoesData = proposta.condicoesData || {};
     
-    // Debug log to track what we're saving
-    console.log('Storage createProposta - Data received:', {
-      hasClienteData: !!proposta.clienteData,
-      clienteDataKeys: Object.keys(clienteData),
-      clienteNome: clienteData.nome,
-      hasCondicoesData: !!proposta.condicoesData,
-      condicoesDataKeys: Object.keys(condicoesData),
-      valor: condicoesData.valor
-    });
+
     
     // Insert with the real database schema
     const { data, error } = await supabase

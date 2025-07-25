@@ -117,8 +117,7 @@ function ProposalForm() {
         garantia: 'Sem garantia',
       };
 
-      // DIAGNÓSTICO PASSO 1: Log dos dados completos antes do envio
-      console.log('🔍 FRONTEND - Dados completos sendo enviados para API:', JSON.stringify(proposalData, null, 2));
+
       
       const response = await apiRequest('/api/propostas', {
         method: 'POST',

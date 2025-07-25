@@ -340,8 +340,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/propostas", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     try {
-      // DIAGNÓSTICO PASSO 2: Log do req.body bruto como chega do frontend
-      console.log('🔍 BACKEND - req.body bruto recebido:', JSON.stringify(req.body, null, 2));
+
 
       // Generate unique ID for the proposal
       const proposalId = `PROP-${Date.now()}-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
@@ -394,14 +393,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         tabelaComercialId: dataWithId.tabelaComercialId
       };
       
-      // Debug log to track data
-      console.log('POST /api/propostas - Data being sent to storage:', {
-        id: dataForDatabase.id,
-        clienteDataKeys: Object.keys(dataForDatabase.clienteData || {}),
-        clienteNome: dataForDatabase.clienteData?.nome,
-        condicoesDataKeys: Object.keys(dataForDatabase.condicoesData || {}),
-        valor: dataForDatabase.condicoesData?.valor
-      });
+
       
       // Create the proposal
       const proposta = await storage.createProposta(dataForDatabase);

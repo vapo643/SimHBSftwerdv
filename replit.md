@@ -82,6 +82,11 @@ This is a full-stack TypeScript application for credit management called "Simpix
 
 ### January 2025
 
+- **Critical Data Persistence Bug RESOLVED (January 25)**: Identified and fixed critical proposal data loss issue where client information and loan conditions appeared empty in analysis queue and dashboard
+- **Root Cause Analysis**: Data transformation mismatch between frontend flat structure and backend JSONB structure - frontend was sending correct data but backend was not processing it correctly
+- **Solution Implementation**: Fixed storage.ts to properly handle incoming JSONB objects (clienteData/condicoesData) instead of attempting to rebuild them from flat fields
+- **Data Flow Validation**: Confirmed complete data pipeline from frontend submission through database storage to interface display is now working correctly
+- **Backward Compatibility**: Old proposals created during bug period remain empty, but all new proposals save and display complete data correctly
 - **ARQUITETURA FINAL APROVADA - Ecossistema N:N (January 25)**: Complete architectural design approved for N:N relationship between products and commercial tables with comprehensive implementation plan
 - **Critical Schema Issues Diagnosed**: Identified root cause of "invalid data" errors - JSONB vs normalized field mismatch in validation schemas
 - **Fallback Logic Analysis**: Commercial tables hierarchical fallback logic validated as correct, lacking test data for proper validation
