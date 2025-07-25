@@ -7,7 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Login from "@/pages/login";
 import Dashboard from "@/pages/dashboard";
-import NovaProposta from "@/pages/propostas/nova";
+import NovaProposta from "@/pages/propostas/nova-v2";
 import FilaAnalise from "@/pages/credito/fila";
 import AnaliseManual from "@/pages/credito/analise";
 import Pagamentos from "@/pages/financeiro/pagamentos";

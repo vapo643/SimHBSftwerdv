@@ -1,0 +1,28 @@
+# MISSÃO DE IMPLEMENTAÇÃO (ARQUITETURA FINAL): Re-arquitetura Completa da Tela de Originação (T-01)
+
+**CONTEXTO ESTRATÉGICO:**
+Este prompt é o resultado final de um debate arquitetural profundo. Ele contém a arquitetura definitiva e aprovada para a reconstrução completa da nossa tela mais crítica: "Nova Proposta". Siga cada fase com precisão absoluta.
+
+**ROADMAP DE EXECUÇÃO (Sequencial):**
+
+**FASE 1: MIGRAÇÃO DO BANCO DE DADOS (Pré-requisito)**
+* **Ação:** Execute as migrações de schema necessárias para:
+    1. Adicionar os campos `tac_valor` e `tac_tipo` à tabela `produtos`.
+    2. Normalizar a tabela `propostas`, adicionando as colunas detalhadas para os dados do cliente e da proposta (ex: `produto_id`, `tabela_comercial_id`, `cliente_rg`, `valor_tac`, etc.) e removendo o antigo campo JSONB.
+
+**FASE 2: CONSTRUÇÃO DO BACKEND (Endpoint Orquestrador)**
+* **Ação:** Crie o novo endpoint `GET /api/origination/context`.
+* **Lógica:** Este endpoint deve ser protegido e, com base no `id` do atendente autenticado, deve fazer as queries necessárias para construir e retornar o objeto `OriginationContext` completo, com todos os produtos, tabelas disponíveis e limites já filtrados e prontos para o frontend.
+
+**FASE 3: RE-ARQUITETURA DO FRONTEND (useReducer e Contexto)**
+* **Ação 3.1:** Crie um novo `ProposalContext` e um `proposalReducer` para gerir o estado complexo do formulário da T-01.
+* **Ação 3.2:** Envolva a página da T-01 com o novo `ProposalProvider`.
+* **Ação 3.3:** Crie um hook customizado `useProposalEffects` para lidar com os efeitos colaterais (como a filtragem de tabelas e a auto-simulação), mantendo o `reducer` puro.
+* **Ação 3.4:** Refatore a UI da T-01 para consumir o estado do `reducer` e despachar ações.
+
+**FASE 4: IMPLEMENTAÇÃO DO UPLOAD RESILIENTE DE DOCUMENTOS**
+* **Ação:** Implemente a arquitetura de "Upload Diferido":
+    1. A submissão inicial do formulário deve criar a proposta no banco com placeholders para os documentos.
+    2. Após o sucesso, inicie o upload dos ficheiros para o Supabase Storage em background, atualizando o status de cada um individualmente através de uma nova rota `PATCH`.
+
+Execute este plano para entregar a nova Tela de Originação de Propostas.

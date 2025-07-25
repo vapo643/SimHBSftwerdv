@@ -7,6 +7,7 @@ import { requireAdmin, requireManagerOrAdmin, requireAnyRole } from "./lib/role-
 import { insertPropostaSchema, updatePropostaSchema, insertGerenteLojaSchema, insertLojaSchema, updateLojaSchema } from "@shared/schema";
 import { z } from "zod";
 import multer from "multer";
+import { registerOriginationRoutes } from "./routes/origination.js";
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -1309,6 +1310,9 @@ app.get("/api/tabelas-comerciais-disponiveis", jwtAuthMiddleware, async (req: Au
       });
     }
   });
+
+  // Register origination routes
+  registerOriginationRoutes(app);
 
   const httpServer = createServer(app);
   return httpServer;
