@@ -232,15 +232,56 @@ const EditarPropostaPendenciada: React.FC = () => {
     );
   }
 
-  // Verificar se a proposta está pendenciada
-  if (proposta.status !== 'pendenciado') {
+  // DEBUG: Log para verificar status
+  console.log('🔍 STATUS DEBUG:', {
+    propostaStatus: proposta.status,
+    statusType: typeof proposta.status,
+    statusLength: proposta.status?.length,
+    expectedStatus: 'pendenciado',
+    isEqual: proposta.status === 'pendenciado',
+    trimmedStatus: proposta.status?.trim(),
+    propostaCompleta: proposta
+  });
+
+  // Verificar se a proposta está pendenciada (com tratamento para espaços)
+  const statusTrimmed = proposta.status?.trim();
+  if (statusTrimmed !== 'pendenciado') {
     return (
       <DashboardLayout title="Editar Proposta">
-        <Alert>
-          <AlertDescription>
-            Esta proposta não está pendenciada e não pode ser editada neste momento.
-          </AlertDescription>
-        </Alert>
+        <div className="container mx-auto px-4 py-8">
+          <Card>
+            <CardContent className="p-6">
+              <div className="text-center">
+                <AlertCircle className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
+                <h2 className="text-xl font-semibold mb-2">Proposta não editável</h2>
+                <p className="text-gray-400 mb-4">
+                  Esta proposta está com status "{proposta.status}" e só pode ser editada quando estiver "pendenciado".
+                </p>
+                <p className="text-sm text-gray-500 mb-4">
+                  Status atual: <span className="font-mono bg-gray-800 px-2 py-1 rounded">"{statusTrimmed}"</span>
+                </p>
+                <p className="text-xs text-gray-600 mb-4">
+                  Debug: length={proposta.status?.length}, type={typeof proposta.status}
+                </p>
+                <div className="flex gap-2 justify-center">
+                  <Button 
+                    onClick={() => {
+                      // Force refresh data
+                      queryClient.invalidateQueries({ queryKey: [`/api/propostas/${id}`] });
+                      window.location.reload();
+                    }} 
+                    variant="secondary"
+                  >
+                    🔄 Recarregar Página
+                  </Button>
+                  <Button onClick={() => setLocation('/dashboard')} variant="outline">
+                    Voltar ao Dashboard
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </DashboardLayout>
     );
   }
