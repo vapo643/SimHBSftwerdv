@@ -256,33 +256,19 @@ export class DatabaseStorage implements IStorage {
     const { createServerSupabaseAdminClient } = await import('./lib/supabase');
     const supabase = createServerSupabaseAdminClient();
     
-    // Build cliente_data JSONB object
-    const clienteData = {
-      nome: proposta.clienteNome,
-      cpf: proposta.clienteCpf,
-      email: proposta.clienteEmail,
-      telefone: proposta.clienteTelefone,
-      dataNascimento: proposta.clienteDataNascimento,
-      renda: proposta.clienteRenda,
-      rg: proposta.clienteRg,
-      orgaoEmissor: proposta.clienteOrgaoEmissor,
-      estadoCivil: proposta.clienteEstadoCivil,
-      nacionalidade: proposta.clienteNacionalidade,
-      cep: proposta.clienteCep,
-      endereco: proposta.clienteEndereco,
-      ocupacao: proposta.clienteOcupacao
-    };
+    // Use the JSONB objects directly from the incoming data
+    const clienteData = proposta.clienteData || {};
+    const condicoesData = proposta.condicoesData || {};
     
-    // Build condicoes_data JSONB object
-    const condicoesData = {
-      valor: proposta.valor,
-      prazo: proposta.prazo,
-      finalidade: proposta.finalidade,
-      garantia: proposta.garantia,
-      valorTac: proposta.valorTac,
-      valorIof: proposta.valorIof,
-      valorTotalFinanciado: proposta.valorTotalFinanciado
-    };
+    // Debug log to track what we're saving
+    console.log('Storage createProposta - Data received:', {
+      hasClienteData: !!proposta.clienteData,
+      clienteDataKeys: Object.keys(clienteData),
+      clienteNome: clienteData.nome,
+      hasCondicoesData: !!proposta.condicoesData,
+      condicoesDataKeys: Object.keys(condicoesData),
+      valor: condicoesData.valor
+    });
     
     // Insert with the real database schema
     const { data, error } = await supabase

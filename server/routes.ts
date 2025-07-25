@@ -391,6 +391,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         tabelaComercialId: dataWithId.tabelaComercialId
       };
       
+      // Debug log to track data
+      console.log('POST /api/propostas - Data being sent to storage:', {
+        id: dataForDatabase.id,
+        clienteDataKeys: Object.keys(dataForDatabase.clienteData || {}),
+        clienteNome: dataForDatabase.clienteData?.nome,
+        condicoesDataKeys: Object.keys(dataForDatabase.condicoesData || {}),
+        valor: dataForDatabase.condicoesData?.valor
+      });
+      
       // Create the proposal
       const proposta = await storage.createProposta(dataForDatabase);
       res.status(201).json(proposta);
