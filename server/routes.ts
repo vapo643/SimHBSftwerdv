@@ -552,6 +552,34 @@ app.get("/api/tabelas-comerciais-disponiveis", jwtAuthMiddleware, async (req: Au
     }
   });
 
+  // API endpoint for partners - GET by ID
+  app.get("/api/parceiros/:id", async (req, res) => {
+    try {
+      const { db } = await import("../server/lib/supabase");
+      const { parceiros } = await import("../shared/schema");
+      const { eq } = await import("drizzle-orm");
+      
+      const parceiroId = parseInt(req.params.id);
+      if (isNaN(parceiroId)) {
+        return res.status(400).json({ message: "ID do parceiro inválido" });
+      }
+      
+      const [parceiro] = await db
+        .select()
+        .from(parceiros)
+        .where(eq(parceiros.id, parceiroId));
+      
+      if (!parceiro) {
+        return res.status(404).json({ message: "Parceiro não encontrado" });
+      }
+      
+      res.json(parceiro);
+    } catch (error) {
+      console.error("Erro ao buscar parceiro:", error);
+      res.status(500).json({ message: "Erro ao buscar parceiro" });
+    }
+  });
+
   // API endpoint for partners - POST create
   app.post("/api/admin/parceiros", jwtAuthMiddleware, requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {

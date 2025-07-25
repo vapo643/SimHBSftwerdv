@@ -22,9 +22,9 @@ interface Partner {
   id: number;
   razaoSocial: string;
   cnpj: string;
-  email: string;
-  telefone: string;
-  endereco: string;
+  email?: string;
+  telefone?: string;
+  endereco?: string;
   isActive: boolean;
 }
 
@@ -92,11 +92,9 @@ const PartnerDetailPage: React.FC = () => {
   }
 
   return (
-    <DashboardLayout title={`Detalhe do Parceiro: ${partner.razaoSocial}`}>
+    <DashboardLayout title={`Detalhe do Parceiro: ${partner.razaoSocial || 'Parceiro'}`}>
       <h1 className="text-2xl font-bold">{partner.razaoSocial}</h1>
       <p className="text-muted-foreground">CNPJ: {partner.cnpj}</p>
-      <p className="text-muted-foreground">Email: {partner.email}</p>
-      <p className="text-muted-foreground">Telefone: {partner.telefone}</p>
 
       <div className="mt-8 grid gap-8">
         <Card>

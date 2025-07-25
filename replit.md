@@ -82,6 +82,11 @@ This is a full-stack TypeScript application for credit management called "Simpix
 
 ### January 2025
 
+- **Partner Details Page UI Fix (January 25)**: Fixed two critical UI bugs in partner details page (/client/src/pages/parceiros/detalhe.tsx)
+- **Missing API Endpoint**: Added GET /api/parceiros/:id endpoint that was missing, causing "undefined" title display
+- **UI Field Cleanup**: Removed Email and Telefone display fields, now only shows Razão Social and CNPJ as required
+- **Data Connection**: Partner details now properly displays real API data with correct field mapping (razaoSocial from schema)
+- **Commercial Tables Dropdown**: Connected to real database via GET /api/tabelas-comerciais endpoint, replacing mock data
 - **Product Module Hard Delete Implementation (January 24)**: Re-architected product deletion from soft delete to hard delete with dependency safeguards
 - **Backend Security**: Implemented dependency checking before deletion - prevents removal if product is referenced in tabelas_comerciais
 - **Hard Delete Logic**: Products are now permanently removed from database (DELETE FROM produtos) instead of deactivation
