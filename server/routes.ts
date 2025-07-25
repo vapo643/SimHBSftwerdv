@@ -137,7 +137,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/propostas", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     try {
       const propostas = await storage.getPropostas();
-      res.json(propostas);
+      
+      // Map database fields to expected frontend format
+      const mappedPropostas = propostas.map(p => ({
+        id: p.id,
+        status: p.status,
+        clienteNome: p.clienteNome,
+        clienteCpf: p.clienteCpf,
+        valorSolicitado: p.valor,
+        parceiro: p.parceiro ? {
+          razaoSocial: p.parceiro.razaoSocial
+        } : undefined,
+        loja: p.loja ? {
+          nomeLoja: p.loja.nomeLoja
+        } : undefined,
+        createdAt: p.createdAt,
+        updatedAt: p.updatedAt
+      }));
+      
+      res.json(mappedPropostas);
     } catch (error) {
       console.error("Get propostas error:", error);
       res.status(500).json({ message: "Failed to fetch propostas" });

@@ -3,6 +3,7 @@ import {
   propostas,
   gerenteLojas,
   lojas,
+  parceiros,
   type User,
   type InsertUser,
   type Proposta,
@@ -26,12 +27,12 @@ export interface IStorage {
   getUsersWithDetails(): Promise<any[]>;
 
   // Propostas
-  getPropostas(): Promise<Proposta[]>;
-  getPropostaById(id: number): Promise<Proposta | undefined>;
+  getPropostas(): Promise<any[]>;
+  getPropostaById(id: string | number): Promise<Proposta | undefined>;
   getPropostasByStatus(status: string): Promise<Proposta[]>;
   createProposta(proposta: InsertProposta): Promise<Proposta>;
-  updateProposta(id: number, proposta: UpdateProposta): Promise<Proposta>;
-  deleteProposta(id: number): Promise<void>;
+  updateProposta(id: string | number, proposta: UpdateProposta): Promise<Proposta>;
+  deleteProposta(id: string | number): Promise<void>;
 
   // Lojas
   getLojas(): Promise<Loja[]>;
@@ -98,12 +99,37 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async getPropostas(): Promise<Proposta[]> {
-    return await db.select().from(propostas).orderBy(desc(propostas.createdAt));
+  async getPropostas(): Promise<any[]> {
+    return await db
+      .select({
+        id: propostas.id,
+        status: propostas.status,
+        clienteNome: propostas.clienteNome,
+        clienteCpf: propostas.clienteCpf,
+        clienteEmail: propostas.clienteEmail,
+        clienteTelefone: propostas.clienteTelefone,
+        valor: propostas.valor,
+        prazo: propostas.prazo,
+        lojaId: propostas.lojaId,
+        createdAt: propostas.createdAt,
+        updatedAt: propostas.updatedAt,
+        loja: {
+          id: lojas.id,
+          nomeLoja: lojas.nomeLoja,
+        },
+        parceiro: {
+          id: parceiros.id,
+          razaoSocial: parceiros.razaoSocial,
+        }
+      })
+      .from(propostas)
+      .leftJoin(lojas, eq(propostas.lojaId, lojas.id))
+      .leftJoin(parceiros, eq(lojas.parceiroId, parceiros.id))
+      .orderBy(desc(propostas.createdAt));
   }
 
-  async getPropostaById(id: number): Promise<Proposta | undefined> {
-    const result = await db.select().from(propostas).where(eq(propostas.id, id)).limit(1);
+  async getPropostaById(id: string | number): Promise<Proposta | undefined> {
+    const result = await db.select().from(propostas).where(eq(propostas.id, String(id))).limit(1);
     return result[0];
   }
 
@@ -120,17 +146,17 @@ export class DatabaseStorage implements IStorage {
     return result[0];
   }
 
-  async updateProposta(id: number, proposta: UpdateProposta): Promise<Proposta> {
+  async updateProposta(id: string | number, proposta: UpdateProposta): Promise<Proposta> {
     const result = await db
       .update(propostas)
       .set({ ...proposta, updatedAt: new Date() })
-      .where(eq(propostas.id, id))
+      .where(eq(propostas.id, String(id)))
       .returning();
     return result[0];
   }
 
-  async deleteProposta(id: number): Promise<void> {
-    await db.delete(propostas).where(eq(propostas.id, id));
+  async deleteProposta(id: string | number): Promise<void> {
+    await db.delete(propostas).where(eq(propostas.id, String(id)));
   }
 
   // Lojas CRUD implementation
