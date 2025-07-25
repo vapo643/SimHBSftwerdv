@@ -96,6 +96,9 @@ This is a full-stack TypeScript application for credit management called "Simpix
 - **RLS Policy Implementation**: Created comprehensive SELECT, INSERT, UPDATE, DELETE policies for authenticated users on parceiros, lojas, produtos, tabelas_comerciais, propostas, produto_tabela_comercial, and comunicacao_logs tables
 - **Profile Access Control**: Implemented user-specific access control for profiles table (users can only see/edit their own profiles)
 - **Database Access Restored**: All API endpoints and database queries now functioning correctly with proper authentication and authorization
+- **Critical Origination Endpoint Fix (January 25)**: Resolved SQL syntax errors in origination context endpoint by updating N:N relationship queries
+- **Junction Table Integration**: Fixed origination routes to use produto_tabela_comercial junction table instead of deprecated direct relationship
+- **Type Safety Enhancement**: Corrected Drizzle type mismatches in propostas queries by ensuring proper string/number type handling
 - **T-01 Schema Migration for Proposal Origination (January 25)**: Completed database normalization for new proposal creation screen
 - **Products Table Enhancement**: Added TAC (Taxa de Abertura de Crédito) fields - tac_valor and tac_tipo with proper constraints
 - **Proposals Table Normalization**: Migrated from JSONB to normalized columns for client data, added produto_id and tabela_comercial_id relationships

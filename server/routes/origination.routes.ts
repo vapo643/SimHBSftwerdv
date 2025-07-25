@@ -7,7 +7,8 @@ import {
   tabelasComerciais, 
   lojas, 
   parceiros,
-  users 
+  users,
+  produtoTabelaComercial
 } from '@shared/schema';
 
 const router = Router();
@@ -123,13 +124,20 @@ router.get('/context', jwtAuthMiddleware, async (req: AuthenticatedRequest, res)
     // 3. For each product, fetch available commercial tables
     const produtosComTabelas = await Promise.all(
       produtosAtivos.map(async (produto) => {
-        // First, fetch personalized tables for this partner
+        // First, fetch personalized tables for this partner using N:N relationship
         const tabelasPersonalizadas = await db
-          .select()
+          .select({
+            id: tabelasComerciais.id,
+            nomeTabela: tabelasComerciais.nomeTabela,
+            taxaJuros: tabelasComerciais.taxaJuros,
+            prazos: tabelasComerciais.prazos,
+            comissao: tabelasComerciais.comissao,
+          })
           .from(tabelasComerciais)
+          .innerJoin(produtoTabelaComercial, eq(tabelasComerciais.id, produtoTabelaComercial.tabelaComercialId))
           .where(
             and(
-              eq(tabelasComerciais.produtoId, produto.id),
+              eq(produtoTabelaComercial.produtoId, produto.id),
               eq(tabelasComerciais.parceiroId, parceiroId)
             )
           );
@@ -150,14 +158,21 @@ router.get('/context', jwtAuthMiddleware, async (req: AuthenticatedRequest, res)
           tipo: 'personalizada' as const
         }));
 
-        // If no personalized tables, fetch general tables
+        // If no personalized tables, fetch general tables using N:N relationship
         if (tabelasPersonalizadas.length === 0) {
           const tabelasGerais = await db
-            .select()
+            .select({
+              id: tabelasComerciais.id,
+              nomeTabela: tabelasComerciais.nomeTabela,
+              taxaJuros: tabelasComerciais.taxaJuros,
+              prazos: tabelasComerciais.prazos,
+              comissao: tabelasComerciais.comissao,
+            })
             .from(tabelasComerciais)
+            .innerJoin(produtoTabelaComercial, eq(tabelasComerciais.id, produtoTabelaComercial.tabelaComercialId))
             .where(
               and(
-                eq(tabelasComerciais.produtoId, produto.id),
+                eq(produtoTabelaComercial.produtoId, produto.id),
                 isNull(tabelasComerciais.parceiroId)
               )
             );

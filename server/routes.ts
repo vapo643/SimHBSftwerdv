@@ -627,7 +627,7 @@ app.get("/api/tabelas-comerciais-disponiveis", jwtAuthMiddleware, async (req: Au
         .leftJoin(lojas, eq(propostas.lojaId, lojas.id))
         .leftJoin(parceiros, eq(lojas.parceiroId, parceiros.id))
         .leftJoin(produtos, eq(propostas.produtoId, produtos.id))
-        .where(eq(propostas.id, propostaId))
+        .where(eq(propostas.id, propostaId.toString()))
         .limit(1);
 
       if (!proposta || proposta.length === 0) {
