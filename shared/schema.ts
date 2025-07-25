@@ -65,33 +65,54 @@ export const statusEnum = pgEnum("status", [
 ]);
 
 export const propostas = pgTable("propostas", {
-  id: serial("id").primaryKey(),
-  lojaId: integer("loja_id").references(() => lojas.id).notNull(), // Multi-tenant key
+  id: text("id").primaryKey(),
+  lojaId: integer("loja_id").notNull(), // Multi-tenant key
   
-  // Cliente dados
-  clienteNome: text("cliente_nome").notNull(),
-  clienteCpf: text("cliente_cpf").notNull(),
-  clienteEmail: text("cliente_email").notNull(),
-  clienteTelefone: text("cliente_telefone").notNull(),
-  clienteDataNascimento: text("cliente_data_nascimento").notNull(),
-  clienteRenda: text("cliente_renda").notNull(),
+  // Relacionamentos de negócio
+  produtoId: integer("produto_id").references(() => produtos.id),
+  tabelaComercialId: integer("tabela_comercial_id").references(() => tabelasComerciais.id),
+  
+  // Cliente dados básicos (mantendo campos existentes para compatibilidade)
+  clienteNome: text("cliente_nome"),
+  clienteCpf: text("cliente_cpf"),
+  clienteEmail: text("cliente_email"),
+  clienteTelefone: text("cliente_telefone"),
+  clienteDataNascimento: text("cliente_data_nascimento"),
+  clienteRenda: text("cliente_renda"),
+  
+  // Cliente dados adicionais (novos campos normalizados)
+  clienteRg: text("cliente_rg"),
+  clienteOrgaoEmissor: text("cliente_orgao_emissor"),
+  clienteEstadoCivil: text("cliente_estado_civil"),
+  clienteNacionalidade: text("cliente_nacionalidade").default("Brasileira"),
+  clienteCep: text("cliente_cep"),
+  clienteEndereco: text("cliente_endereco"),
+  clienteOcupacao: text("cliente_ocupacao"),
 
   // Empréstimo dados
-  valor: decimal("valor", { precision: 15, scale: 2 }).notNull(),
-  prazo: integer("prazo").notNull(),
-  finalidade: text("finalidade").notNull(),
-  garantia: text("garantia").notNull(),
+  valor: decimal("valor", { precision: 15, scale: 2 }),
+  prazo: integer("prazo"),
+  finalidade: text("finalidade"),
+  garantia: text("garantia"),
+
+  // Valores calculados
+  valorTac: decimal("valor_tac", { precision: 10, scale: 2 }),
+  valorIof: decimal("valor_iof", { precision: 10, scale: 2 }),
+  valorTotalFinanciado: decimal("valor_total_financiado", { precision: 15, scale: 2 }),
 
   // Status e análise
-  status: statusEnum("status").notNull().default("rascunho"),
+  status: text("status").notNull(),
   valorAprovado: decimal("valor_aprovado", { precision: 15, scale: 2 }),
   taxaJuros: decimal("taxa_juros", { precision: 5, scale: 2 }),
   observacoes: text("observacoes"),
 
-  // Documentos
+  // Documentos (mantendo campos legados)
   documentos: text("documentos").array(),
-
+  ccbDocumentoUrl: text("ccb_documento_url"),
+  
   // Formalização
+  statusAssinatura: text("status_assinatura").default("pendente"),
+  statusBiometria: text("status_biometria").default("pendente"),
   dataAprovacao: timestamp("data_aprovacao"),
   documentosAdicionais: text("documentos_adicionais").array(),
   contratoGerado: boolean("contrato_gerado").default(false),
@@ -100,8 +121,12 @@ export const propostas = pgTable("propostas", {
   dataPagamento: timestamp("data_pagamento"),
   observacoesFormalização: text("observacoes_formalizacao"),
 
+  // Campos JSONB legados (mantidos para compatibilidade)
+  clienteData: text("cliente_data"),
+  condicoesData: text("condicoes_data"),
+
   // Auditoria
-  userId: integer("user_id").references(() => users.id),
+  userId: text("user_id"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -123,6 +148,8 @@ export const produtos = pgTable("produtos", {
   id: serial("id").primaryKey(),
   nomeProduto: text("nome_produto").notNull(),
   isActive: boolean("is_active").notNull().default(true),
+  tacValor: decimal("tac_valor", { precision: 10, scale: 2 }).default("0"),
+  tacTipo: text("tac_tipo").notNull().default("fixo"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

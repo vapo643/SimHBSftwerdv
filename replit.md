@@ -82,6 +82,13 @@ This is a full-stack TypeScript application for credit management called "Simpix
 
 ### January 2025
 
+- **T-01 Schema Migration for Proposal Origination (January 25)**: Completed database normalization for new proposal creation screen
+- **Products Table Enhancement**: Added TAC (Taxa de Abertura de Crédito) fields - tac_valor and tac_tipo with proper constraints
+- **Proposals Table Normalization**: Migrated from JSONB to normalized columns for client data, added produto_id and tabela_comercial_id relationships
+- **Extended Client Data Fields**: Added comprehensive client documentation fields (RG, órgão emissor, estado civil, nacionalidade, CEP, endereço, ocupação)
+- **Financial Calculation Fields**: Added valor_tac, valor_iof, and valor_total_financiado for transparent cost calculations
+- **Drizzle Schema Sync**: Updated TypeScript schemas to match database structure while maintaining backward compatibility
+
 - **Critical Database Migration - Commission Field (January 25)**: Fixed critical missing commission field in tabelas_comerciais table
 - **Database Schema Fix**: Added `comissao` NUMERIC(5,2) NOT NULL DEFAULT 0.00 field with CHECK constraint (comissao >= 0)
 - **Full-Stack Integration**: Updated Drizzle schema, API validation, and frontend form to handle commission data
