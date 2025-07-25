@@ -106,13 +106,22 @@ const ConfiguracaoComercialForm: React.FC = () => {
 
   // Mutation for creating custom table
   const createTabelaMutation = useMutation({
-    mutationFn: async (data: CustomTabelaFormData) => {
+    mutationFn: async (data: CustomTabelaFormData & { prazos: number[] }) => {
       if (!partnerId) throw new Error("Partner ID not found");
       
-      const response = await api.post('/api/admin/tabelas-comerciais', {
-        ...data,
+      // Convert single produtoId to produtoIds array as expected by backend
+      const payload = {
+        nomeTabela: data.nomeTabela,
+        taxaJuros: data.taxaJuros,
+        comissao: data.comissao,
+        prazos: data.prazos,
+        produtoIds: [data.produtoId], // Convert single ID to array
         parceiroId: partnerId,
-      });
+      };
+      
+      console.log("Sending payload to backend:", payload);
+      
+      const response = await api.post('/api/admin/tabelas-comerciais', payload);
       return response.data;
     },
     onSuccess: () => {
@@ -143,6 +152,19 @@ const ConfiguracaoComercialForm: React.FC = () => {
   };
 
   const onSubmitCustom = (data: CustomTabelaFormData) => {
+    // Validate that we have at least one prazo
+    if (prazos.length === 0) {
+      toast({
+        title: "Erro!",
+        description: "Adicione pelo menos um prazo permitido.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    console.log("Form data:", data);
+    console.log("Prazos:", prazos);
+    
     createTabelaMutation.mutate({
       ...data,
       prazos,
