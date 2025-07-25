@@ -99,6 +99,11 @@ This is a full-stack TypeScript application for credit management called "Simpix
 - **Critical Origination Endpoint Fix (January 25)**: Resolved SQL syntax errors in origination context endpoint by updating N:N relationship queries
 - **Junction Table Integration**: Fixed origination routes to use produto_tabela_comercial junction table instead of deprecated direct relationship
 - **Type Safety Enhancement**: Corrected Drizzle type mismatches in propostas queries by ensuring proper string/number type handling
+- **Systemic Admin Panel Bug Fixes (January 25)**: Comprehensive refactoring of admin panel modules resolving cache invalidation and backend consistency issues
+- **Product Deletion Fix**: Updated verificarProdutoEmUso() to use produto_tabela_comercial junction table instead of deprecated produtoId column in tabelasComerciais
+- **Partners Cache Consistency**: Fixed all partner CRUD mutations to use queryKeys.partners.all for proper cache invalidation instead of mixed query keys
+- **Stores Form Integration**: Updated LojaForm component to use consistent queryKeys.partners.list() and apiClient instead of direct fetch calls
+- **Multi-Layer Architecture Stability**: Resolved post-N:N migration inconsistencies affecting backend queries, frontend cache management, and API integration patterns
 - **T-01 Schema Migration for Proposal Origination (January 25)**: Completed database normalization for new proposal creation screen
 - **Products Table Enhancement**: Added TAC (Taxa de Abertura de Crédito) fields - tac_valor and tac_tipo with proper constraints
 - **Proposals Table Normalization**: Migrated from JSONB to normalized columns for client data, added produto_id and tabela_comercial_id relationships

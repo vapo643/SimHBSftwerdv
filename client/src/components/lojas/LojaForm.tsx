@@ -9,6 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Save, X, Loader2 } from "lucide-react";
 import { z } from "zod";
 import type { Loja, Parceiro } from "@shared/schema";
+import { queryKeys } from "@/hooks/queries/queryKeys";
 
 // Simplified schema for the form
 const lojaFormSchema = z.object({
@@ -50,15 +51,13 @@ const LojaForm: React.FC<LojaFormProps> = ({
     },
   });
 
-  // Fetch parceiros for the select dropdown
+  // Fetch parceiros for the select dropdown using consistent queryKeys and apiClient
   const { data: parceiros = [] } = useQuery<Parceiro[]>({
-    queryKey: ['/api/parceiros'],
+    queryKey: queryKeys.partners.list(),
     queryFn: async () => {
-      const response = await fetch('/api/parceiros');
-      if (!response.ok) {
-        throw new Error('Erro ao buscar parceiros');
-      }
-      return response.json();
+      const { api } = await import('@/lib/apiClient');
+      const response = await api.get<Parceiro[]>('/api/parceiros');
+      return response.data;
     },
   });
 

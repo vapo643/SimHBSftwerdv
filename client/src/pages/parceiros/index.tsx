@@ -53,7 +53,7 @@ const PartnersPage: React.FC = () => {
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/parceiros"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.partners.all });
       setIsModalOpen(false);
       setSelectedPartner(null);
       toast({
@@ -77,7 +77,7 @@ const PartnersPage: React.FC = () => {
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/parceiros"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.partners.all });
       setIsModalOpen(false);
       setSelectedPartner(null);
       toast({
@@ -101,7 +101,7 @@ const PartnersPage: React.FC = () => {
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/parceiros"] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.partners.all });
       setDeleteDialogOpen(false);
       setPartnerToDelete(null);
       toast({

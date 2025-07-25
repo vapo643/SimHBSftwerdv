@@ -1,6 +1,6 @@
 
 import { db } from '../lib/supabase';
-import { produtos, tabelasComerciais } from '../../shared/schema';
+import { produtos, tabelasComerciais, produtoTabelaComercial } from '../../shared/schema';
 import { eq, desc } from 'drizzle-orm';
 
 export const buscarTodosProdutos = async () => {
@@ -28,9 +28,9 @@ export const atualizarProduto = async (id: string, data: { nome: string; status:
 export const verificarProdutoEmUso = async (id: string) => {
     const produtoId = parseInt(id);
     
-    // Check if product is referenced in tabelasComerciais
-    const dependencias = await db.query.tabelasComerciais.findMany({
-        where: eq(tabelasComerciais.produtoId, produtoId),
+    // Check if product is referenced in produto_tabela_comercial junction table
+    const dependencias = await db.query.produtoTabelaComercial.findMany({
+        where: eq(produtoTabelaComercial.produtoId, produtoId),
     });
     
     return dependencias.length > 0;
