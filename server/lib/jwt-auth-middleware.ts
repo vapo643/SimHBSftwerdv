@@ -1,81 +1,106 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
-import { createServerSupabaseAdminClient } from './supabase';
+import { createServerSupabaseClient } from '../../client/src/lib/supabase';
 
-// Extended Request interface with user data
 export interface AuthenticatedRequest extends Request {
   user?: {
     id: string;
     email: string;
-    role?: string;
-    lojaId?: number;
-    parceiroId?: number;
+    role: string | null;
+    full_name?: string | null;
+    loja_id?: number | null;
   };
 }
 
-// JWT middleware to validate and enrich user session
+/**
+ * Middleware de autenticação JWT robusto com fallback de segurança
+ * Implementa validação completa e bloqueia usuários órfãos
+ */
 export async function jwtAuthMiddleware(
   req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
 ) {
   try {
-    // Extract token from Authorization header
+    // Step a: Validate JWT token
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ message: 'Token não fornecido' });
+      return res.status(401).json({ message: 'Token de acesso requerido' });
     }
 
-    const token = authHeader.substring(7);
+    const token = authHeader.substring(7); // Remove 'Bearer ' prefix
 
-    // Verify JWT token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as {
-      sub: string;
-      email: string;
-    };
+    // Validate token and extract user ID
+    const supabase = createServerSupabaseClient();
+    const { data, error } = await supabase.auth.getUser(token);
+    
+    if (error || !data.user) {
+      return res.status(401).json({ message: 'Token inválido ou expirado' });
+    }
 
-    // Fetch user profile from database to get role and additional info
-    const supabase = createServerSupabaseAdminClient();
-    const { data: userProfile, error } = await supabase
+    // Step b: Extract user ID
+    const userId = data.user.id;
+    const userEmail = data.user.email || '';
+
+    // Step c: Query profiles table for complete user profile
+    const { createServerSupabaseAdminClient } = await import('./supabase');
+    const supabaseAdmin = createServerSupabaseAdminClient();
+    
+    const { data: profile, error: profileError } = await supabaseAdmin
       .from('profiles')
-      .select('id, role, loja_id')
-      .eq('id', decoded.sub)
+      .select('id, full_name, role, loja_id')
+      .eq('id', userId)
       .single();
 
-    if (error || !userProfile) {
-      return res.status(401).json({ message: 'Perfil de usuário não encontrado' });
+    // Step d: Security fallback - Block orphaned users (no profile)
+    if (profileError || !profile) {
+      console.error('Profile query failed:', profileError);
+      return res.status(403).json({ 
+        message: 'Acesso negado. Perfil de usuário não encontrado.',
+        code: 'ORPHANED_USER'
+      });
     }
 
-    // Enrich request with user data
+    // Step e: Attach complete and valid profile to req.user
     req.user = {
-      id: decoded.sub,
-      email: decoded.email,
-      role: userProfile.role || undefined,
-      lojaId: userProfile.loja_id || undefined
+      id: userId,
+      email: userEmail,
+      role: profile.role,
+      full_name: profile.full_name || null,
+      loja_id: profile.loja_id || null
     };
 
     next();
   } catch (error) {
-    if (error instanceof jwt.JsonWebTokenError) {
-      return res.status(401).json({ message: 'Token inválido ou expirado' });
-    }
+    console.error('JWT Auth middleware error:', error);
+    res.status(500).json({ message: 'Erro interno de autenticação' });
+  }
+}
+
+/**
+ * Legacy function - maintained for backward compatibility
+ * @deprecated Use jwtAuthMiddleware directly
+ */
+export async function extractRoleFromToken(authToken: string): Promise<string | null> {
+  try {
+    const supabase = createServerSupabaseClient();
+    const { data, error } = await supabase.auth.getUser(authToken);
     
-    console.error('Erro no middleware de autenticação:', error);
-    return res.status(500).json({ message: 'Erro interno do servidor' });
-  }
-}
+    if (error || !data.user) {
+      return null;
+    }
 
-// Role-based access control guards
-export function requireAdmin(req: AuthenticatedRequest, res: Response, next: NextFunction) {
-  if (!req.user || req.user.role !== 'ADMINISTRADOR') {
-    return res.status(403).json({ message: 'Acesso negado. Requer privilégios de administrador.' });
-  }
-  next();
-}
+    const { createServerSupabaseAdminClient } = await import('./supabase');
+    const supabaseAdmin = createServerSupabaseAdminClient();
+    
+    const { data: profile } = await supabaseAdmin
+      .from('profiles')
+      .select('role')
+      .eq('id', data.user.id)
+      .single();
 
-export function requireManagerOrAdmin(req: AuthenticatedRequest, res: Response, next: NextFunction) {
-  if (!req.user || !['ADMINISTRADOR', 'GERENTE'].includes(req.user.role || '')) {
-    return res.status(403).json({ message: 'Acesso negado. Requer privilégios de gerente ou administrador.' });
+    return profile?.role || null;
+  } catch (error) {
+    console.error('Error extracting role from token:', error);
+    return null;
   }
-  next();
 }

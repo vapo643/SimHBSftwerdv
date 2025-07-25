@@ -100,16 +100,16 @@ function ProposalForm() {
         // Loan data
         produtoId: state.loanData.produtoId,
         tabelaComercialId: state.loanData.tabelaComercialId,
-        valor: state.loanData.valorSolicitado.replace(/[^\d,]/g, '').replace(',', '.'),
+        valor: parseFloat(state.loanData.valorSolicitado.replace(/[^\d,]/g, '').replace(',', '.')),
         prazo: state.loanData.prazo,
         
-        // Additional fields from simulation - convert to string
-        valorTac: state.simulation?.valorTAC ? String(state.simulation.valorTAC) : '0',
-        valorIof: state.simulation?.valorIOF ? String(state.simulation.valorIOF) : '0',
-        valorTotalFinanciado: state.simulation?.valorTotalFinanciado ? String(state.simulation.valorTotalFinanciado) : '0',
+        // Additional fields from simulation
+        valorTac: state.simulation?.valorTAC ? parseFloat(state.simulation.valorTAC) : 0,
+        valorIof: state.simulation?.valorIOF ? parseFloat(state.simulation.valorIOF) : 0,
+        valorTotalFinanciado: state.simulation?.valorTotalFinanciado ? parseFloat(state.simulation.valorTotalFinanciado) : 0,
         
-        // Required fields - fix lojaId path
-        lojaId: state.context?.loja?.id,
+        // Required fields
+        lojaId: state.context?.atendente?.lojaId,
         status: 'rascunho',
         finalidade: 'Empréstimo pessoal',
         garantia: 'Sem garantia',
