@@ -56,6 +56,13 @@ export class SupabaseAuthProvider implements AuthProvider {
 
     const user = this.mapSupabaseUser(data.user);
     const session = this.mapSupabaseSession(data.session);
+    
+    // Log de diagnóstico para rastrear o token JWT
+    console.log('[PASSO 1 - LOGIN]', { 
+      accessToken: data.session.access_token,
+      tokenLength: data.session.access_token?.length,
+      expiresAt: data.session.expires_at
+    });
 
     return { user, session };
   }

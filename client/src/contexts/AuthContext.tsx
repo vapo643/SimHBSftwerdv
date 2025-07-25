@@ -43,6 +43,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
           }>('/api/debug/me');
           
           if (response.data.user) {
+            // Log de diagnóstico para rastrear o usuário e token no contexto
+            const supabase = getSupabase();
+            const session = await supabase.auth.getSession();
+            console.log('[PASSO 2 - CONTEXTO]', { 
+              user: response.data.user,
+              token: session.data.session?.access_token,
+              tokenLength: session.data.session?.access_token?.length
+            });
+            
             setUser(response.data.user);
             setError(null);
           } else {

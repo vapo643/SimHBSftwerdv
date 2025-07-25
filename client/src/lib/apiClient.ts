@@ -314,6 +314,13 @@ export async function apiClient<T = any>(
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
     }
+    
+    // Log de diagnóstico para rastrear o header de Authorization
+    console.log('[PASSO 3 - ENVIO]', { 
+      url: fullUrl,
+      authorizationHeader: headers['Authorization'],
+      hasToken: !!token
+    });
   }
 
   // Prepare request configuration

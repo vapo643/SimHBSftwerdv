@@ -1,0 +1,28 @@
+# MISSÃO DE DIAGNÓSTICO (ANTI-FALHA): Rastreamento do Fluxo de Token JWT
+
+**CONTEXTO ESTRATÉGICO:**
+O nosso sistema tem uma falha crítica de autenticação. A nossa hipótese, validada num debate, é que o token JWT não está a ser corretamente armazenado, lido ou enviado do frontend para o backend. A sua missão é instrumentar o nosso código com logs de diagnóstico para que possamos rastrear a jornada do token e encontrar o ponto exato da falha.
+
+**AÇÃO:**
+Sua missão é adicionar `console.log` de diagnóstico em pontos críticos do nosso fluxo de autenticação e corrigir um import quebrado que impede o servidor de funcionar corretamente.
+
+**ROADMAP DE EXECUÇÃO (Sequencial):**
+
+**PASSO 1: Corrigir a Falha Crítica de Import no Backend**
+* **Ficheiro Alvo:** `/server/storage.ts`
+* **Tarefa:** Localize o `import` quebrado do cliente Supabase e corrija-o para que o servidor possa iniciar sem erros.
+
+**PASSO 2: Instrumentar a Função de Login**
+* **Ficheiro Alvo:** `/client/src/lib/providers/supabase-auth-provider.ts` (ou o ficheiro que contém a sua lógica de login).
+* **Tarefa:** Na função de login, imediatamente após a chamada bem-sucedida ao Supabase, adicione um `console.log` para exibir o `accessToken` recebido.
+    * **Exemplo:** `console.log('[PASSO 1 - LOGIN]', { accessToken: session.access_token });`
+
+**PASSO 3: Instrumentar o Contexto de Autenticação**
+* **Ficheiro Alvo:** `/client/src/contexts/AuthContext.tsx`.
+* **Tarefa:** Dentro do `AuthProvider`, onde o estado do usuário é definido ou lido da sessão, adicione um `console.log` para mostrar o usuário e o token que estão a ser armazenados no estado.
+    * **Exemplo:** `console.log('[PASSO 2 - CONTEXTO]', { user, token });`
+
+**PASSO 4: Instrumentar o Cliente de API**
+* **Ficheiro Alvo:** `/client/src/lib/apiClient.ts`.
+* **Tarefa:** Dentro da função principal `apiClient`, antes de executar a chamada `fetch`, adicione um `console.log` para exibir o `header` de 'Authorization' que está a ser preparado para a requisição.
+    * **Exemplo:** `console.log('[PASSO 3 - ENVIO]', { authorizationHeader: headers['Authorization'] });`
