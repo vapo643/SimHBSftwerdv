@@ -88,6 +88,11 @@ This is a full-stack TypeScript application for credit management called "Simpix
 - **Extended Client Data Fields**: Added comprehensive client documentation fields (RG, órgão emissor, estado civil, nacionalidade, CEP, endereço, ocupação)
 - **Financial Calculation Fields**: Added valor_tac, valor_iof, and valor_total_financiado for transparent cost calculations
 - **Drizzle Schema Sync**: Updated TypeScript schemas to match database structure while maintaining backward compatibility
+- **Origination Orchestrator Endpoint (January 25)**: Created GET /api/origination/context endpoint for T-01 screen
+- **Single Data Source Architecture**: Implemented orchestrator pattern to aggregate all necessary data for proposal origination in one API call
+- **JWT-Protected Endpoint**: Secured endpoint with authentication middleware requiring valid user session
+- **Hierarchical Commercial Tables**: Returns personalized tables first, then general tables as fallback for each product
+- **Complete Context Object**: Returns user profile, store, partner, products, commercial tables, required documents, and business limits
 
 - **Critical Database Migration - Commission Field (January 25)**: Fixed critical missing commission field in tabelas_comerciais table
 - **Database Schema Fix**: Added `comissao` NUMERIC(5,2) NOT NULL DEFAULT 0.00 field with CHECK constraint (comissao >= 0)
