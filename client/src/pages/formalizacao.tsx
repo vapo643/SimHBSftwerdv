@@ -88,7 +88,11 @@ function FormalizacaoList() {
   const [, setLocation] = useLocation();
 
   const { data: propostas, isLoading } = useQuery<Proposta[]>({
-    queryKey: ["/api/formalizacao/propostas"],
+    queryKey: ["/api/propostas/formalizacao"],
+    queryFn: async () => {
+      const response = await apiRequest("/api/propostas/formalizacao");
+      return response;
+    }
   });
 
   const formatCurrency = (value: string | number) => {
@@ -128,18 +132,8 @@ function FormalizacaoList() {
     return statusTexts[status as keyof typeof statusTexts] || status;
   };
 
-  // Filter propostas that are approved or in formalization process
-  const formalizacaoPropostas =
-    propostas?.filter(p =>
-      [
-        "aprovado",
-        "documentos_enviados",
-        "contratos_preparados",
-        "contratos_assinados",
-        "pronto_pagamento",
-        "pago",
-      ].includes(p.status)
-    ) || [];
+  // No need to filter since backend already filters by formalization statuses
+  const formalizacaoPropostas = propostas || [];
 
   if (isLoading) {
     return (
@@ -305,6 +299,10 @@ export default function Formalizacao() {
       });
       queryClient.invalidateQueries({
         queryKey: ["/api/propostas", propostaId],
+      });
+      // Also invalidate the formalization list
+      queryClient.invalidateQueries({
+        queryKey: ["/api/propostas/formalizacao"],
       });
     },
     onError: error => {

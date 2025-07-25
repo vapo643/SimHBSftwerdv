@@ -139,6 +139,11 @@ This is a full-stack TypeScript application for credit management called "Simpix
 - **Data Format Alignment**: Fixed ConfiguracaoComercialForm to convert single produtoId to produtoIds array as expected by backend validation schema
 - **Commission Field Integration**: Ensured commission field is properly sent in personalized table creation payload
 - **Validation Enhancement**: Added prazos validation and detailed error logging for debugging personalized table creation
+- **Formalization Screen Real Data Integration (January 25)**: Connected T-04 Formalization tracking screen to real database data eliminating mock data usage
+- **Backend Formalization Endpoint**: Created GET /api/propostas/formalizacao endpoint with status filtering for approved proposals in formalization workflow
+- **Status Filtering Logic**: Implemented business logic to filter proposals by formalization statuses: aprovado, documentos_enviados, contratos_preparados, contratos_assinados, pronto_pagamento
+- **Frontend Data Connection**: Updated FormalizacaoList component to use real API data with proper query management and cache invalidation
+- **Test Data Creation**: Added comprehensive test proposals with various formalization statuses for proper system validation and demonstration
 - **Partner Details Page UI Fix (January 25)**: Fixed two critical UI bugs in partner details page (/client/src/pages/parceiros/detalhe.tsx)
 - **Missing API Endpoint**: Added GET /api/parceiros/:id endpoint that was missing, causing "undefined" title display
 - **UI Field Cleanup**: Removed Email and Telefone display fields, now only shows Razão Social and CNPJ as required

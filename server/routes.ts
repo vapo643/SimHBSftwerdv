@@ -722,6 +722,39 @@ app.get("/api/tabelas-comerciais-disponiveis", jwtAuthMiddleware, async (req: Au
     }
   });
 
+  // New endpoint for formalization proposals (filtered by status)
+  app.get("/api/propostas/formalizacao", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { db } = await import("../server/lib/supabase");
+      const { propostas } = await import("../shared/schema");
+      const { inArray, desc } = await import("drizzle-orm");
+
+      // Formalization statuses according to business logic
+      const formalizationStatuses = [
+        'aprovado',
+        'documentos_enviados', 
+        'contratos_preparados',
+        'contratos_assinados',
+        'pronto_pagamento'
+      ];
+
+      // Query proposals with formalization statuses
+      const formalizacaoPropostas = await db
+        .select()
+        .from(propostas)
+        .where(inArray(propostas.status, formalizationStatuses))
+        .orderBy(desc(propostas.updatedAt));
+
+      console.log(`[${new Date().toISOString()}] Retornando ${formalizacaoPropostas.length} propostas em formalização`);
+      res.json(formalizacaoPropostas);
+    } catch (error) {
+      console.error("Erro ao buscar propostas de formalização:", error);
+      res.status(500).json({ 
+        message: "Erro ao buscar propostas de formalização" 
+      });
+    }
+  });
+
   // Endpoint for formalization data
   app.get("/api/propostas/:id/formalizacao", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     try {
