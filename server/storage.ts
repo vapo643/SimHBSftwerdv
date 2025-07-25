@@ -179,7 +179,6 @@ export class DatabaseStorage implements IStorage {
         analista_id,
         data_analise,
         motivo_pendencia,
-        observacoes_analise,
         documentos_anexados,
         lojas (
           id,
@@ -220,7 +219,6 @@ export class DatabaseStorage implements IStorage {
       condicoesData: data.condicoes_data || {},
       // Additional fields for display and logic
       motivoPendencia: data.motivo_pendencia,
-      observacoesAnalise: data.observacoes_analise,
       documentosAnexados: data.documentos_anexados || [],
       produtoId: data.produto_id,
       tabelaComercialId: data.tabela_comercial_id,
@@ -230,27 +228,27 @@ export class DatabaseStorage implements IStorage {
       ccbDocumentoUrl: data.ccb_documento_url,
       analistaId: data.analista_id,
       dataAnalise: data.data_analise,
-      // Related entities (handling Supabase array responses)
+      // Related entities (handling Supabase responses)
       loja: data.lojas ? {
-        id: data.lojas.id,
-        nomeLoja: data.lojas.nome_loja
+        id: (data.lojas as any).id,
+        nomeLoja: (data.lojas as any).nome_loja
       } : null,
-      parceiro: data.lojas?.parceiros ? {
-        id: data.lojas.parceiros.id,
-        razaoSocial: data.lojas.parceiros.razao_social
+      parceiro: data.lojas && (data.lojas as any).parceiros ? {
+        id: (data.lojas as any).parceiros.id,
+        razaoSocial: (data.lojas as any).parceiros.razao_social
       } : null,
       produto: data.produtos ? {
-        id: data.produtos.id,
-        nomeProduto: data.produtos.nome_produto,
-        tacValor: data.produtos.tac_valor,
-        tacTipo: data.produtos.tac_tipo
+        id: (data.produtos as any).id,
+        nomeProduto: (data.produtos as any).nome_produto,
+        tacValor: (data.produtos as any).tac_valor,
+        tacTipo: (data.produtos as any).tac_tipo
       } : null,
       tabelaComercial: data.tabelas_comerciais ? {
-        id: data.tabelas_comerciais.id,
-        nomeTabela: data.tabelas_comerciais.nome_tabela,
-        taxaJuros: data.tabelas_comerciais.taxa_juros,
-        prazos: data.tabelas_comerciais.prazos,
-        comissao: data.tabelas_comerciais.comissao
+        id: (data.tabelas_comerciais as any).id,
+        nomeTabela: (data.tabelas_comerciais as any).nome_tabela,
+        taxaJuros: (data.tabelas_comerciais as any).taxa_juros,
+        prazos: (data.tabelas_comerciais as any).prazos,
+        comissao: (data.tabelas_comerciais as any).comissao
       } : null
     };
   }

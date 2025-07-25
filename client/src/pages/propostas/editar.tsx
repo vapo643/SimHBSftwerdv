@@ -18,7 +18,6 @@ interface PropostaData {
   id: string;
   status: string;
   motivoPendencia?: string;
-  observacoesAnalise?: string;
   clienteData?: any;
   condicoesData?: any;
   documentosAnexados?: any[];
