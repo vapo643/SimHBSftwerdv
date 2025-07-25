@@ -20,7 +20,6 @@ import PartnersPage from "@/pages/parceiros/index";
 import PartnerDetailPage from "@/pages/parceiros/detalhe";
 import ProdutosPage from "@/pages/configuracoes/produtos";
 import LojasPage from "@/pages/admin/lojas";
-import DebugTokenPage from "@/pages/debug-token";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -100,11 +99,6 @@ function Router() {
       <Route path="/admin/lojas">
         <ProtectedRoute>
           <LojasPage />
-        </ProtectedRoute>
-      </Route>
-      <Route path="/debug-token">
-        <ProtectedRoute>
-          <DebugTokenPage />
         </ProtectedRoute>
       </Route>
       <Route path="/">

@@ -101,7 +101,7 @@ export class DatabaseStorage implements IStorage {
 
   async getPropostas(): Promise<any[]> {
     // Using raw SQL to handle snake_case to camelCase mapping
-    const { createServerSupabaseAdminClient } = await import('./lib/supabase');
+    const { createServerSupabaseAdminClient } = await import('./supabase');
     const supabase = createServerSupabaseAdminClient();
     
     const { data, error } = await supabase
