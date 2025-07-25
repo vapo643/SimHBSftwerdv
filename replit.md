@@ -130,6 +130,11 @@ This is a full-stack TypeScript application for credit management called "Simpix
 - **Tag Input System**: Implemented interactive term input where users type numbers and see them as badges (e.g., "12 months")
 - **API Integration**: Created POST /api/admin/tabelas-comerciais endpoint for saving custom tables with partner and product associations
 - **Real-time Updates**: Form submission creates commercial table in database with automatic cache invalidation and UI refresh
+- **Commercial Tables Full CRUD Implementation (January 25)**: Fixed critical data persistence issue with product associations in commercial tables
+- **Backend API Completion**: Added PUT /api/admin/tabelas-comerciais/:id and DELETE endpoints with N:N relationship handling
+- **GET Endpoint Enhancement**: Updated /api/tabelas-comerciais to include produtoIds array from junction table for each commercial table
+- **Frontend Refactoring**: Replaced mock data with real API integration using TanStack Query for all CRUD operations
+- **Data Persistence Fix**: Product associations now properly persist through page refreshes with transactional database updates
 - **Partner Details Page UI Fix (January 25)**: Fixed two critical UI bugs in partner details page (/client/src/pages/parceiros/detalhe.tsx)
 - **Missing API Endpoint**: Added GET /api/parceiros/:id endpoint that was missing, causing "undefined" title display
 - **UI Field Cleanup**: Removed Email and Telefone display fields, now only shows Razão Social and CNPJ as required

@@ -518,8 +518,8 @@ app.get("/api/tabelas-comerciais-disponiveis", jwtAuthMiddleware, async (req: Au
     try {
       // Import database connection
       const { db } = await import("../server/lib/supabase");
-      const { desc } = await import("drizzle-orm");
-      const { tabelasComerciais } = await import("../shared/schema");
+      const { desc, eq } = await import("drizzle-orm");
+      const { tabelasComerciais, produtoTabelaComercial } = await import("../shared/schema");
 
       // Get all commercial tables ordered by creation date
       const tabelas = await db
@@ -527,8 +527,23 @@ app.get("/api/tabelas-comerciais-disponiveis", jwtAuthMiddleware, async (req: Au
         .from(tabelasComerciais)
         .orderBy(desc(tabelasComerciais.createdAt));
 
-      console.log(`[${new Date().toISOString()}] Retornando ${tabelas.length} tabelas comerciais`);
-      res.json(tabelas);
+      // For each table, get associated products
+      const tabelasWithProducts = await Promise.all(
+        tabelas.map(async (tabela) => {
+          const associations = await db
+            .select({ produtoId: produtoTabelaComercial.produtoId })
+            .from(produtoTabelaComercial)
+            .where(eq(produtoTabelaComercial.tabelaComercialId, tabela.id));
+          
+          return {
+            ...tabela,
+            produtoIds: associations.map(a => a.produtoId)
+          };
+        })
+      );
+
+      console.log(`[${new Date().toISOString()}] Retornando ${tabelasWithProducts.length} tabelas comerciais com produtos`);
+      res.json(tabelasWithProducts);
     } catch (error) {
       console.error("Erro ao buscar tabelas comerciais:", error);
       res.status(500).json({ 
@@ -589,6 +604,121 @@ app.get("/api/tabelas-comerciais-disponiveis", jwtAuthMiddleware, async (req: Au
       }
       console.error("Erro ao criar tabela comercial:", error);
       res.status(500).json({ message: "Erro ao criar tabela comercial" });
+    }
+  });
+
+  // API endpoint for updating commercial tables (N:N structure)
+  app.put("/api/admin/tabelas-comerciais/:id", jwtAuthMiddleware, requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { db } = await import("../server/lib/supabase");
+      const { tabelasComerciais, produtoTabelaComercial } = await import("../shared/schema");
+      const { z } = await import("zod");
+      const { eq } = await import("drizzle-orm");
+
+      const tabelaId = parseInt(req.params.id);
+      if (isNaN(tabelaId)) {
+        return res.status(400).json({ message: "ID da tabela inválido" });
+      }
+
+      // Updated validation schema for N:N structure
+      const updateTabelaSchema = z.object({
+        nomeTabela: z.string().min(3, "Nome da tabela deve ter pelo menos 3 caracteres"),
+        taxaJuros: z.number().positive("Taxa de juros deve ser positiva"),
+        prazos: z.array(z.number().positive()).min(1, "Deve ter pelo menos um prazo"),
+        produtoIds: z.array(z.number().int().positive()).min(1, "Pelo menos um produto deve ser selecionado"),
+        parceiroId: z.number().int().positive().nullable().optional(),
+        comissao: z.number().min(0, "Comissão deve ser maior ou igual a zero").default(0),
+      });
+
+      const validatedData = updateTabelaSchema.parse(req.body);
+
+      // TRANSACTION: Update table and reassociate products
+      const result = await db.transaction(async (tx) => {
+        // Step 1: Update the commercial table
+        const [updatedTabela] = await tx
+          .update(tabelasComerciais)
+          .set({
+            nomeTabela: validatedData.nomeTabela,
+            taxaJuros: validatedData.taxaJuros.toString(),
+            prazos: validatedData.prazos,
+            parceiroId: validatedData.parceiroId || null,
+            comissao: validatedData.comissao.toString(),
+          })
+          .where(eq(tabelasComerciais.id, tabelaId))
+          .returning();
+
+        if (!updatedTabela) {
+          throw new Error("Tabela comercial não encontrada");
+        }
+
+        // Step 2: Delete existing product associations
+        await tx
+          .delete(produtoTabelaComercial)
+          .where(eq(produtoTabelaComercial.tabelaComercialId, tabelaId));
+
+        // Step 3: Create new product associations
+        const associations = validatedData.produtoIds.map(produtoId => ({
+          produtoId,
+          tabelaComercialId: tabelaId,
+        }));
+
+        await tx.insert(produtoTabelaComercial).values(associations);
+        
+        return updatedTabela;
+      });
+
+      console.log(`[${new Date().toISOString()}] Tabela comercial atualizada com ${validatedData.produtoIds.length} produtos: ${result.id}`);
+      res.json(result);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Dados inválidos", errors: error.errors });
+      }
+      if (error instanceof Error && error.message === "Tabela comercial não encontrada") {
+        return res.status(404).json({ message: error.message });
+      }
+      console.error("Erro ao atualizar tabela comercial:", error);
+      res.status(500).json({ message: "Erro ao atualizar tabela comercial" });
+    }
+  });
+
+  // API endpoint for deleting commercial tables
+  app.delete("/api/admin/tabelas-comerciais/:id", jwtAuthMiddleware, requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { db } = await import("../server/lib/supabase");
+      const { tabelasComerciais, produtoTabelaComercial } = await import("../shared/schema");
+      const { eq } = await import("drizzle-orm");
+
+      const tabelaId = parseInt(req.params.id);
+      if (isNaN(tabelaId)) {
+        return res.status(400).json({ message: "ID da tabela inválido" });
+      }
+
+      // TRANSACTION: Delete table and its associations
+      await db.transaction(async (tx) => {
+        // Step 1: Delete product associations
+        await tx
+          .delete(produtoTabelaComercial)
+          .where(eq(produtoTabelaComercial.tabelaComercialId, tabelaId));
+
+        // Step 2: Delete the commercial table
+        const result = await tx
+          .delete(tabelasComerciais)
+          .where(eq(tabelasComerciais.id, tabelaId))
+          .returning();
+
+        if (result.length === 0) {
+          throw new Error("Tabela comercial não encontrada");
+        }
+      });
+
+      console.log(`[${new Date().toISOString()}] Tabela comercial deletada: ${tabelaId}`);
+      res.status(204).send();
+    } catch (error) {
+      if (error instanceof Error && error.message === "Tabela comercial não encontrada") {
+        return res.status(404).json({ message: error.message });
+      }
+      console.error("Erro ao deletar tabela comercial:", error);
+      res.status(500).json({ message: "Erro ao deletar tabela comercial" });
     }
   });
 

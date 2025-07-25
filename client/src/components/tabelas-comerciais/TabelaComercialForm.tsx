@@ -37,8 +37,8 @@ const TabelaComercialForm: React.FC<TabelaComercialFormProps> = ({
   onCancel,
 }) => {
   const [novoPrazo, setNovoPrazo] = useState("");
-  const [prazos, setPrazos] = useState<number[]>(initialData?.prazosPermitidos || []);
-  const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
+  const [prazos, setPrazos] = useState<number[]>(initialData?.prazos || []);
+  const [selectedProducts, setSelectedProducts] = useState<number[]>(initialData?.produtoIds || []);
 
   const {
     register,
@@ -51,10 +51,10 @@ const TabelaComercialForm: React.FC<TabelaComercialFormProps> = ({
     resolver: zodResolver(tabelaSchema),
     defaultValues: {
       nomeTabela: initialData?.nomeTabela || "",
-      taxaJuros: initialData?.taxaJuros || 0,
-      comissao: initialData?.comissao || 0,
-      prazosPermitidos: initialData?.prazosPermitidos || [],
-      produtoIds: [],
+      taxaJuros: Number(initialData?.taxaJuros) || 0,
+      comissao: Number(initialData?.comissao) || 0,
+      prazosPermitidos: initialData?.prazos || [],
+      produtoIds: initialData?.produtoIds || [],
     },
   });
 
@@ -88,7 +88,7 @@ const TabelaComercialForm: React.FC<TabelaComercialFormProps> = ({
       nomeTabela: data.nomeTabela,
       taxaJuros: data.taxaJuros,
       comissao: data.comissao,
-      prazosPermitidos: prazos,
+      prazos: prazos,
       produtoIds: selectedProducts,
     });
   };
