@@ -20,8 +20,8 @@ const DocumentsTab: React.FC<{ propostaId: string }> = ({ propostaId }) => {
   const { data: documentos, isLoading } = useQuery({
     queryKey: [`/api/propostas/${propostaId}/documents`],
     queryFn: async () => {
-      const response = await fetchWithToken(`/api/propostas/${propostaId}/documents`);
-      return response;
+      const response = await api.get(`/api/propostas/${propostaId}/documents`);
+      return response.data;
     },
     enabled: !!propostaId,
   });
@@ -120,8 +120,8 @@ const EditarPropostaPendenciada: React.FC = () => {
   const { data: proposta, isLoading, error } = useQuery({
     queryKey: [`/api/propostas/${id}`],
     queryFn: async () => {
-      const response = await fetchWithToken(`/api/propostas/${id}`);
-      return response as PropostaData;
+      const response = await api.get(`/api/propostas/${id}`);
+      return response.data as PropostaData;
     },
     enabled: !!id,
     refetchInterval: 15000, // Auto-refresh para sincronização
@@ -233,7 +233,7 @@ const EditarPropostaPendenciada: React.FC = () => {
   }
 
   // DEBUG: Log para verificar status
-  console.log('🔍 STATUS DEBUG:', {
+  console.log('🔍 STATUS DEBUG CORRIGIDO:', {
     propostaStatus: proposta.status,
     statusType: typeof proposta.status,
     statusLength: proposta.status?.length,

@@ -16,7 +16,10 @@ const HistoricoCompartilhadoV2: React.FC<HistoricoCompartilhadoV2Props> = ({
   // Query para buscar dados da proposta com auto-refresh
   const { data: proposta, isLoading } = useQuery({
     queryKey: [`/api/propostas/${propostaId}`],
-    queryFn: () => api.get(`/api/propostas/${propostaId}`),
+    queryFn: async () => {
+      const response = await api.get(`/api/propostas/${propostaId}`);
+      return response.data;
+    },
     enabled: !!propostaId,
     refetchInterval: 12000, // Refetch a cada 12 segundos
     refetchOnWindowFocus: true,
@@ -27,7 +30,14 @@ const HistoricoCompartilhadoV2: React.FC<HistoricoCompartilhadoV2Props> = ({
   // Query para buscar observações adicionais com auto-refresh mais frequente
   const { data: observacoes } = useQuery({
     queryKey: [`/api/propostas/${propostaId}/observacoes`],
-    queryFn: () => api.get(`/api/propostas/${propostaId}/observacoes`).catch(() => ({ observacoes: [] })),
+    queryFn: async () => {
+      try {
+        const response = await api.get(`/api/propostas/${propostaId}/observacoes`);
+        return response.data;
+      } catch (error) {
+        return { observacoes: [] };
+      }
+    },
     enabled: !!propostaId,
     refetchInterval: 8000, // Refetch mais frequente para observações
     refetchOnWindowFocus: true,
