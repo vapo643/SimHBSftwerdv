@@ -232,9 +232,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // NEW ENDPOINT: PUT /api/propostas/:id/status - ANALYST WORKFLOW ENGINE
   app.put("/api/propostas/:id/status", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
-    // Role validation for ANALISTA or ADMINISTRADOR
-    if (!req.user?.role || !['ANALISTA', 'ADMINISTRADOR'].includes(req.user.role)) {
-      return res.status(403).json({ message: 'Acesso negado. Apenas analistas e administradores podem alterar status.' });
+    // Dynamic role validation based on the status change requested
+    const { status } = req.body;
+    const userRole = req.user?.role;
+    
+    // ATENDENTE can only change pendenciado -> aguardando_analise
+    if (userRole === 'ATENDENTE') {
+      if (status !== 'aguardando_analise') {
+        return res.status(403).json({ 
+          message: 'Atendentes só podem reenviar propostas pendentes para análise.' 
+        });
+      }
+    }
+    // ANALISTA and ADMINISTRADOR can make all status changes
+    else if (!userRole || !['ANALISTA', 'ADMINISTRADOR'].includes(userRole)) {
+      return res.status(403).json({ 
+        message: 'Acesso negado. Apenas analistas, administradores e atendentes (para reenvio) podem alterar status.' 
+      });
     }
     try {
       const propostaId = req.params.id;
@@ -243,7 +257,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Validation schema for status change
       const statusChangeSchema = z.object({
-        status: z.enum(['aprovado', 'rejeitado', 'pendenciado']),
+        status: z.enum(['aprovado', 'rejeitado', 'pendenciado', 'aguardando_analise']),
         observacao: z.string().min(1, 'Observação é obrigatória'),
         valorAprovado: z.number().optional(),
         motivoPendencia: z.string().optional()
@@ -280,13 +294,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // 3. Update proposal using only fields that exist in the real table
       const updateData: any = {
-        status,
-        analista_id: req.user?.id,
-        data_analise: new Date().toISOString()
+        status
       };
+      
+      // Only set analyst fields for analyst actions (not for attendant resubmission)
+      if (userRole !== 'ATENDENTE') {
+        updateData.analista_id = req.user?.id;
+        updateData.data_analise = new Date().toISOString();
+      }
       
       if (status === 'pendenciado' && motivoPendencia) {
         updateData.motivo_pendencia = motivoPendencia;
+      }
+      
+      // Clear pendency reason when resubmitting
+      if (status === 'aguardando_analise') {
+        updateData.motivo_pendencia = null;
       }
       
       const { error: updateError } = await supabase
