@@ -1,0 +1,24 @@
+# MISSÃO DE DIAGNÓSTICO PROFUNDO: Análise de Causa Raiz da Falha Persistente do Fluxo de Propostas
+
+**Contexto:** Olá, Agente. Estamos a enfrentar uma falha crítica e persistente. Após múltiplas tentativas de correção, as telas de "Nova Proposta" (T-01) e "Detalhes da Proposta" (T-03) continuam a falhar com o erro "Erro ao carregar dados necessários". Correções pontuais não resolveram o problema. Precisamos da sua máxima capacidade de investigação para nos dar uma conclusão precisa e definitiva sobre a causa raiz.
+
+**Sua Missão de Investigação (Roadmap):**
+
+A sua tarefa não é corrigir o código ainda. A sua missão é executar um plano de diagnóstico rigoroso e reportar as evidências.
+
+**PASSO 1: Validar o Backend de Forma Isolada (com Autenticação Correta)**
+* **Ação 1.1:** Primeiro, obtenha um **token de autenticação JWT válido** para um usuário com o perfil `ATENDENTE`. Você pode precisar de fazer uma chamada `POST /api/auth/login` com credenciais de teste para obter este token.
+* **Ação 1.2:** Em seguida, use este token para fazer uma chamada `curl` direta ao nosso endpoint orquestrador: `GET /api/origination/context`.
+* **Ação 1.3 (Relatório):** Reporte a **resposta completa** desta chamada `curl`: o código de status HTTP e o corpo da resposta (seja um JSON de sucesso ou uma página de erro HTML).
+
+**PASSO 2: Investigar o Log do Servidor em Tempo Real**
+* **Ação:** Enquanto o `curl` do Passo 1 está a ser executado, monitore a consola (logs) do nosso servidor Express.js.
+* **Ação (Relatório):** Copie e cole **qualquer erro** ou `stack trace` que aparecer no log do servidor no exato momento da chamada à API. Esta é a evidência mais importante.
+
+**PASSO 3: Conclusão Diagnóstica**
+* **Ação (Relatório):** Com base na resposta do `curl` (Passo 1) e no log do servidor (Passo 2), qual é a sua **conclusão precisa e detalhada** sobre a causa raiz da falha?
+    * O erro está na query do banco de dados dentro do endpoint?
+    * É um problema de permissão ou RLS que não previmos?
+    * É uma falha na lógica de agregação de dados no código do endpoint?
+
+Aguardamos o seu relatório de diagnóstico. A nossa próxima ação dependerá da precisão da sua análise.
