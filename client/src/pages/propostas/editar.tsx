@@ -13,13 +13,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import CurrencyInput from "@/components/ui/CurrencyInput";
-import HistoricoCompartilhado from "@/components/HistoricoCompartilhado";
+import HistoricoCompartilhadoV2 from "@/components/HistoricoCompartilhadoV2";
 
 // Componente separado para documentos
 const DocumentsTab: React.FC<{ propostaId: string }> = ({ propostaId }) => {
   const { data: documentos, isLoading } = useQuery({
     queryKey: [`/api/propostas/${propostaId}/documents`],
-    queryFn: () => fetchWithToken(`/api/propostas/${propostaId}/documents`).then(r => r.json()),
+    queryFn: async () => {
+      const response = await fetchWithToken(`/api/propostas/${propostaId}/documents`);
+      return response;
+    },
     enabled: !!propostaId,
   });
 
@@ -113,10 +116,18 @@ const EditarPropostaPendenciada: React.FC = () => {
     condicoesData: {},
   });
 
-  // Buscar dados da proposta
-  const { data: proposta, isLoading, error } = useQuery<PropostaData>({
+  // Buscar dados da proposta com auto-refresh
+  const { data: proposta, isLoading, error } = useQuery({
     queryKey: [`/api/propostas/${id}`],
+    queryFn: async () => {
+      const response = await fetchWithToken(`/api/propostas/${id}`);
+      return response as PropostaData;
+    },
     enabled: !!id,
+    refetchInterval: 15000, // Auto-refresh para sincronização
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
+    staleTime: 0, // Always fresh data
   });
 
   // Atualizar formData quando proposta carrega - TODOS OS HOOKS DEVEM ESTAR AQUI NO TOPO
@@ -284,8 +295,8 @@ const EditarPropostaPendenciada: React.FC = () => {
           </Alert>
         )}
 
-        {/* Histórico de Comunicação - Compartilhado */}
-        <HistoricoCompartilhado propostaId={id!} context="edicao" />
+        {/* Histórico de Comunicação - Compartilhado V2 */}
+        <HistoricoCompartilhadoV2 propostaId={id!} context="edicao" />
 
         {/* Informações da proposta */}
         <Card>

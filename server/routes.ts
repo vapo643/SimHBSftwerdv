@@ -109,6 +109,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // GET proposal observations endpoint for shared history
+  app.get("/api/propostas/:id/observacoes", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+    try {
+      const propostaId = req.params.id;
+      
+      // For now return empty array - prepared for future observations functionality
+      // This endpoint ensures the historical component works correctly
+      const observacoes = {
+        observacoes: []
+      };
+      
+      res.json(observacoes);
+    } catch (error) {
+      console.error('Error fetching proposal observations:', error);
+      res.status(500).json({ error: 'Failed to fetch observations' });
+    }
+  });
+
   // Health check endpoint para testar security headers
   app.get("/api/health", (req, res) => {
     res.json({

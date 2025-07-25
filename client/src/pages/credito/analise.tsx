@@ -20,7 +20,7 @@ import { useToast } from "@/hooks/use-toast";
 import { AlertCircle } from "lucide-react";
 import { DocumentViewer } from "@/components/DocumentViewer";
 import { useAuth } from "@/contexts/AuthContext";
-import HistoricoCompartilhado from "@/components/HistoricoCompartilhado";
+import HistoricoCompartilhadoV2 from "@/components/HistoricoCompartilhadoV2";
 
 import { api } from "@/lib/apiClient";
 
@@ -90,12 +90,18 @@ const AnaliseManualPage: React.FC = () => {
     queryKey: ["proposta", propostaId],
     queryFn: () => fetchProposta(propostaId),
     enabled: !!propostaId,
+    refetchInterval: 15000, // Auto-refresh proposta data
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
+    staleTime: 0, // Always fresh data for analysis
   });
 
   const { data: documentsData } = useQuery({
     queryKey: ["proposta-documents", propostaId],
     queryFn: () => fetchPropostaDocuments(propostaId),
     enabled: !!propostaId,
+    refetchInterval: 30000, // Less frequent refresh for documents
+    refetchOnWindowFocus: true,
   });
 
   const { register, handleSubmit, control } = useForm<DecisionFormData>({
@@ -277,8 +283,8 @@ const AnaliseManualPage: React.FC = () => {
           )}
         </div>
         <div className="md:col-span-1">
-          {/* Histórico de Comunicação - Compartilhado */}
-          <HistoricoCompartilhado propostaId={propostaId!} context="analise" />
+          {/* Histórico de Comunicação - Compartilhado V2 */}
+          <HistoricoCompartilhadoV2 propostaId={propostaId!} context="analise" />
         </div>
       </div>
     </DashboardLayout>
