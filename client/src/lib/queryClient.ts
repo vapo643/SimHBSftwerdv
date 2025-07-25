@@ -1,5 +1,5 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
-import fetchWithToken from "./apiClient";
+import { api } from "./apiClient";
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
@@ -9,17 +9,27 @@ async function throwIfResNotOk(res: Response) {
 }
 
 export async function apiRequest(
-  method: string,
   url: string,
-  data?: unknown | undefined
-): Promise<Response> {
-  const res = await fetchWithToken(url, {
-    method,
-    body: data ? JSON.stringify(data) : undefined,
-    credentials: "include",
-  });
-
-  return res;
+  options: { method: string; body?: unknown } = { method: 'GET' }
+): Promise<any> {
+  const { method, body } = options;
+  
+  // Use the new api client methods
+  if (method === 'GET') {
+    const response = await api.get(url);
+    return response.data;
+  } else if (method === 'POST') {
+    const response = await api.post(url, body);
+    return response.data;
+  } else if (method === 'PUT') {
+    const response = await api.put(url, body);
+    return response.data;
+  } else if (method === 'DELETE') {
+    const response = await api.delete(url);
+    return response.data;
+  }
+  
+  throw new Error(`Unsupported method: ${method}`);
 }
 
 type UnauthorizedBehavior = "returnNull" | "throw";
@@ -27,11 +37,10 @@ export const getQueryFn: <T>(options: { on401: UnauthorizedBehavior }) => QueryF
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
     try {
-      const res = await fetchWithToken(queryKey.join("/") as string, {
-        credentials: "include",
-      });
-
-      return await res.json();
+      // Convert queryKey array to URL string
+      const url = queryKey.join("/") as string;
+      const response = await api.get(url);
+      return response.data;
     } catch (error: any) {
       if (unauthorizedBehavior === "returnNull" && error.message?.includes("401")) {
         return null;

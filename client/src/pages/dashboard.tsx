@@ -11,27 +11,68 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { Card, CardContent } from "@/components/ui/card";
-
-const mockData = [
-  { id: 1, cliente: "Cliente A", valor: "R$ 10.000", status: "Aprovado" },
-  { id: 2, cliente: "Cliente B", valor: "R$ 20.000", status: "Em Análise" },
-  { id: 3, cliente: "Cliente C", valor: "R$ 15.000", status: "Rejeitado" },
-];
+import { useQuery } from "@tanstack/react-query";
+import { Loader2 } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const getStatusClass = (status: string) => {
-  switch (status) {
-    case "Aprovado":
+  switch (status.toLowerCase()) {
+    case "aprovado":
       return "status-approved";
-    case "Em Análise":
+    case "em_analise":
+    case "aguardando_analise":
       return "status-pending";
-    case "Rejeitado":
+    case "rejeitado":
+      return "status-rejected";
+    case "pago":
+      return "status-approved";
+    case "pronto_pagamento":
+      return "status-pending";
+    case "rascunho":
+      return "status-draft";
+    case "cancelado":
       return "status-rejected";
     default:
       return "status-pending";
   }
 };
 
+const formatCurrency = (value: number) => {
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL'
+  }).format(value);
+};
+
 const Dashboard: React.FC = () => {
+  // Fetch real proposals data
+  const { data: propostas, isLoading, error } = useQuery({
+    queryKey: ['/api/propostas'],
+  });
+
+  if (isLoading) {
+    return (
+      <DashboardLayout title="Dashboard de Propostas">
+        <div className="flex items-center justify-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <DashboardLayout title="Dashboard de Propostas">
+        <Alert variant="destructive">
+          <AlertDescription>
+            Erro ao carregar propostas. Por favor, tente novamente.
+          </AlertDescription>
+        </Alert>
+      </DashboardLayout>
+    );
+  }
+  const propostasData = propostas || [];
+
   return (
     <DashboardLayout title="Dashboard de Propostas">
       <div className="space-y-6">
@@ -53,21 +94,21 @@ const Dashboard: React.FC = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {mockData.map(proposta => (
+                {propostasData.map((proposta: any) => (
                   <TableRow key={proposta.id}>
-                    <TableCell>{proposta.id}</TableCell>
-                    <TableCell>{proposta.cliente}</TableCell>
-                    <TableCell>{proposta.valor}</TableCell>
+                    <TableCell className="font-mono">#{proposta.id}</TableCell>
+                    <TableCell>{proposta.nomeCliente || 'Sem nome'}</TableCell>
+                    <TableCell>{formatCurrency(proposta.valorSolicitado || 0)}</TableCell>
                     <TableCell>
                       <span className={getStatusClass(proposta.status)}>
-                        {proposta.status}
+                        {proposta.status.replace(/_/g, ' ').replace(/^\w/, (c: string) => c.toUpperCase())}
                       </span>
                     </TableCell>
                   </TableRow>
                 ))}
-                {mockData.length === 0 && (
+                {propostasData.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center">
+                    <TableCell colSpan={4} className="text-center text-gray-500">
                       Nenhuma proposta encontrada
                     </TableCell>
                   </TableRow>
