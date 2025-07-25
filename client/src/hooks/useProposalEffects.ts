@@ -51,18 +51,17 @@ export function useProposalEffects() {
       try {
         clearErrors();
         
+        // Calculate first payment date - if no grace period, use 30 days from now
+        const dataVencimento = state.loanData.dataCarencia || 
+          new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
         const params = new URLSearchParams({
           valor: debouncedValorSolicitado.replace(/[^\d,]/g, '').replace(',', '.'),
           prazo: debouncedPrazo.toString(),
-          taxa_juros: selectedTable.taxaJuros,
+          produto_id: state.loanData.produtoId.toString(),
           incluir_tac: state.loanData.incluirTac.toString(),
-          tac_valor: selectedProduct.tacValor,
-          tac_tipo: selectedProduct.tacTipo,
+          dataVencimento: dataVencimento,
         });
-
-        if (state.loanData.dataCarencia) {
-          params.append('data_carencia', state.loanData.dataCarencia);
-        }
 
         const response = await apiRequest(`/api/simulacao?${params.toString()}`);
         

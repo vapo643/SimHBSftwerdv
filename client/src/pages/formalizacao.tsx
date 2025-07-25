@@ -88,7 +88,7 @@ function FormalizacaoList() {
   const [, setLocation] = useLocation();
 
   const { data: propostas, isLoading } = useQuery<Proposta[]>({
-    queryKey: ["/api/propostas"],
+    queryKey: ["/api/formalizacao/propostas"],
   });
 
   const formatCurrency = (value: string | number) => {

@@ -80,20 +80,44 @@ function ProposalForm() {
   // Submit mutation
   const submitProposal = useMutation({
     mutationFn: async () => {
-      // Prepare proposal data
+      // Transform nested data to flat structure expected by backend
       const proposalData = {
-        clientData: state.clientData,
-        loanData: state.loanData,
-        documents: state.documents.map(doc => ({
-          name: doc.name,
-          type: doc.type,
-          size: doc.size,
-        })),
+        // Cliente data - matching schema field names
+        clienteNome: state.clientData.nome,
+        clienteCpf: state.clientData.cpf,
+        clienteEmail: state.clientData.email,
+        clienteTelefone: state.clientData.telefone,
+        clienteDataNascimento: state.clientData.dataNascimento,
+        clienteRenda: state.clientData.rendaMensal,
+        clienteRg: state.clientData.rg,
+        clienteOrgaoEmissor: state.clientData.orgaoEmissor,
+        clienteEstadoCivil: state.clientData.estadoCivil,
+        clienteNacionalidade: state.clientData.nacionalidade,
+        clienteCep: state.clientData.cep,
+        clienteEndereco: state.clientData.endereco,
+        clienteOcupacao: state.clientData.ocupacao,
+        
+        // Loan data
+        produtoId: state.loanData.produtoId,
+        tabelaComercialId: state.loanData.tabelaComercialId,
+        valor: parseFloat(state.loanData.valorSolicitado.replace(/[^\d,]/g, '').replace(',', '.')),
+        prazo: state.loanData.prazo,
+        
+        // Additional fields from simulation
+        valorTac: state.simulation?.valorTAC ? parseFloat(state.simulation.valorTAC) : 0,
+        valorIof: state.simulation?.valorIOF ? parseFloat(state.simulation.valorIOF) : 0,
+        valorTotalFinanciado: state.simulation?.valorTotalFinanciado ? parseFloat(state.simulation.valorTotalFinanciado) : 0,
+        
+        // Required fields
+        lojaId: state.context?.atendente?.lojaId,
+        status: 'rascunho',
+        finalidade: 'Empréstimo pessoal',
+        garantia: 'Sem garantia',
       };
 
       const response = await apiRequest('/api/propostas', {
         method: 'POST',
-        body: JSON.stringify(proposalData),
+        body: proposalData,
       });
 
       return response;
