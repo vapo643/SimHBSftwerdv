@@ -100,32 +100,62 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getPropostas(): Promise<any[]> {
-    return await db
-      .select({
-        id: propostas.id,
-        status: propostas.status,
-        clienteNome: propostas.clienteNome,
-        clienteCpf: propostas.clienteCpf,
-        clienteEmail: propostas.clienteEmail,
-        clienteTelefone: propostas.clienteTelefone,
-        valor: propostas.valor,
-        prazo: propostas.prazo,
-        lojaId: propostas.lojaId,
-        createdAt: propostas.createdAt,
-        updatedAt: propostas.updatedAt,
-        loja: {
-          id: lojas.id,
-          nomeLoja: lojas.nomeLoja,
-        },
-        parceiro: {
-          id: parceiros.id,
-          razaoSocial: parceiros.razaoSocial,
-        }
-      })
-      .from(propostas)
-      .leftJoin(lojas, eq(propostas.lojaId, lojas.id))
-      .leftJoin(parceiros, eq(lojas.parceiroId, parceiros.id))
-      .orderBy(desc(propostas.createdAt));
+    // Using raw SQL to handle snake_case to camelCase mapping
+    const { createServerSupabaseAdminClient } = await import('./supabase');
+    const supabase = createServerSupabaseAdminClient();
+    
+    const { data, error } = await supabase
+      .from('propostas')
+      .select(`
+        id,
+        status,
+        cliente_nome,
+        cliente_cpf,
+        cliente_email,
+        cliente_telefone,
+        valor,
+        prazo,
+        loja_id,
+        created_at,
+        updated_at,
+        lojas!inner (
+          id,
+          nome_loja,
+          parceiros!inner (
+            id,
+            razao_social
+          )
+        )
+      `)
+      .order('created_at', { ascending: false });
+    
+    if (error) {
+      console.error('Error fetching propostas:', error);
+      throw error;
+    }
+    
+    // Map the data to match the expected format
+    return (data || []).map(p => ({
+      id: p.id,
+      status: p.status,
+      clienteNome: p.cliente_nome,
+      clienteCpf: p.cliente_cpf,
+      clienteEmail: p.cliente_email,
+      clienteTelefone: p.cliente_telefone,
+      valor: p.valor,
+      prazo: p.prazo,
+      lojaId: p.loja_id,
+      createdAt: p.created_at,
+      updatedAt: p.updated_at,
+      loja: p.lojas ? {
+        id: p.lojas.id,
+        nomeLoja: p.lojas.nome_loja
+      } : null,
+      parceiro: p.lojas?.parceiros ? {
+        id: p.lojas.parceiros.id,
+        razaoSocial: p.lojas.parceiros.razao_social
+      } : null
+    }));
   }
 
   async getPropostaById(id: string | number): Promise<Proposta | undefined> {
