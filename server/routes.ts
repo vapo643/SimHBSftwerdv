@@ -558,78 +558,92 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`🔐 [PROPOSTA ACCESS] User ${user.id} (${user.role}) accessing proposta ${idParam}`);
 
-      // 🔧 CORREÇÃO CRÍTICA: Para ATENDENTEs, usar RLS para verificar permissão
+      // 🔧 CORREÇÃO: Usar mesma abordagem do endpoint de formalização que funciona
       if (user.role === 'ATENDENTE') {
-        console.log(`🔐 [ATENDENTE ACCESS] Checking RLS permissions for user loja_id: ${user.loja_id}`);
+        console.log(`🔐 [ATENDENTE ACCESS] Using RLS query for user loja_id: ${user.loja_id}`);
         
-        // Usar client do usuário com RLS ativo
-        const { createServerSupabaseClient } = await import('./lib/supabase');
-        const supabaseUser = createServerSupabaseClient();
-        
-        // Definir contexto de segurança para RLS
-        await supabaseUser.rpc('set_user_context', {
-          user_id: user.id,
-          user_role: user.role,
-          loja_id: user.loja_id
-        });
+        // Usar Drizzle com RLS como no endpoint de formalização
+        const { db } = await import("../server/lib/supabase");
+        const { propostas, lojas, parceiros, produtos, tabelasComerciais } = await import("../shared/schema");
+        const { eq, and } = await import("drizzle-orm");
 
-        const { data: proposta, error } = await supabaseUser
-          .from('propostas')
-          .select(`
-            id,
-            status,
-            cliente_data,
-            condicoes_data,  
-            loja_id,
-            created_at,
-            produto_id,
-            tabela_comercial_id,
-            user_id,
-            ccb_documento_url,
-            analista_id,
-            data_analise,
-            motivo_pendencia,
-            data_aprovacao,
-            documentos_adicionais,
-            contrato_gerado,
-            contrato_assinado,
-            data_assinatura,
-            data_pagamento,
-            observacoes_formalizacao,
-            lojas (
-              id,
-              nome_loja,
-              parceiros (
-                id,
-                razao_social
-              )
-            ),
-            produtos (
-              id,
-              nome_produto,
-              tac_valor,
-              tac_tipo
-            ),
-            tabelas_comerciais (
-              id,
-              nome_tabela,
-              taxa_juros,
-              prazos,
-              comissao
-            )
-          `)
-          .eq('id', idParam)
-          .single();
+        // Query with RLS active - same as formalization endpoint
+        const result = await db
+          .select({
+            id: propostas.id,
+            status: propostas.status,
+            cliente_data: propostas.clienteData,
+            condicoes_data: propostas.condicoesData,
+            loja_id: propostas.lojaId,
+            created_at: propostas.createdAt,
+            produto_id: propostas.produtoId,
+            tabela_comercial_id: propostas.tabelaComercialId,
+            user_id: propostas.userId,
+            ccb_documento_url: propostas.ccbDocumentoUrl,
+            analista_id: propostas.analistaId,
+            data_analise: propostas.dataAnalise,
+            motivo_pendencia: propostas.motivoPendencia,
+            data_aprovacao: propostas.dataAprovacao,
+            documentos_adicionais: propostas.documentosAdicionais,
+            contrato_gerado: propostas.contratoGerado,
+            contrato_assinado: propostas.contratoAssinado,
+            data_assinatura: propostas.dataAssinatura,
+            data_pagamento: propostas.dataPagamento,
+            observacoes_formalizacao: propostas.observacoesFormalização,
+            loja: {
+              id: lojas.id,
+              nome_loja: lojas.nomeLoja,
+            },
+            parceiro: {
+              id: parceiros.id,
+              razao_social: parceiros.razaoSocial
+            },
+            produto: {
+              id: produtos.id,
+              nome_produto: produtos.nomeProduto,
+              tac_valor: produtos.tacValor,
+              tac_tipo: produtos.tacTipo
+            },
+            tabela_comercial: {
+              id: tabelasComerciais.id,
+              nome_tabela: tabelasComerciais.nomeTabela,
+              taxa_juros: tabelasComerciais.taxaJuros,
+              prazos: tabelasComerciais.prazos,
+              comissao: tabelasComerciais.comissao
+            }
+          })
+          .from(propostas)
+          .leftJoin(lojas, eq(propostas.lojaId, lojas.id))
+          .leftJoin(parceiros, eq(lojas.parceiroId, parceiros.id))
+          .leftJoin(produtos, eq(propostas.produtoId, produtos.id))
+          .leftJoin(tabelasComerciais, eq(propostas.tabelaComercialId, tabelasComerciais.id))
+          .where(eq(propostas.id, idParam))
+          .limit(1);
 
-        if (error || !proposta) {
-          console.log(`🔐 [ATENDENTE BLOCKED] User ${user.id} denied access to proposta ${idParam} - RLS policy blocked`);
+        if (!result || result.length === 0) {
+          console.log(`🔐 [ATENDENTE BLOCKED] User ${user.id} denied access to proposta ${idParam} - RLS policy blocked or not found`);
           return res.status(403).json({ 
             message: "Você não tem permissão para acessar esta proposta" 
           });
         }
 
+        const proposta = result[0];
         console.log(`🔐 [ATENDENTE ALLOWED] User ${user.id} granted access to proposta ${idParam} from loja ${proposta.loja_id}`);
-        res.json(proposta);
+        
+        // Transform to match expected format
+        const formattedProposta = {
+          ...proposta,
+          lojas: proposta.loja,
+          produtos: proposta.produto,
+          tabelas_comerciais: proposta.tabela_comercial,
+          // Add nested parceiros to lojas
+          lojas: proposta.loja ? {
+            ...proposta.loja,
+            parceiros: proposta.parceiro
+          } : null
+        };
+        
+        res.json(formattedProposta);
       } else {
         // Para outros roles (ADMIN, GERENTE), usar método original sem RLS
         const proposta = await storage.getPropostaById(idParam);
