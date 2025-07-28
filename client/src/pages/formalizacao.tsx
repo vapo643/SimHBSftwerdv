@@ -101,13 +101,35 @@ function FormalizacaoList() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
+  // Função para parsing defensivo de dados JSONB
+  const parseJsonbField = (field: any, fieldName: string, propostaId: string) => {
+    if (typeof field === 'string') {
+      try {
+        return JSON.parse(field);
+      } catch (e) {
+        console.warn(`Erro ao fazer parse de ${fieldName} para proposta ${propostaId}:`, e);
+        return {};
+      }
+    }
+    return field || {};
+  };
+
   const { data: propostas, isLoading, error } = useQuery<Proposta[]>({
     queryKey: ["/api/propostas/formalizacao"],
     queryFn: async () => {
       console.log("Fazendo requisição para /api/propostas/formalizacao");
       const response = await apiRequest("/api/propostas/formalizacao");
       console.log("Resposta do endpoint formalizacao:", response);
-      return response;
+      
+      // PARSING DEFENSIVO: Garantir que dados JSONB sejam objetos
+      const propostsWithParsedData = response.map((proposta: any) => ({
+        ...proposta,
+        cliente_data: parseJsonbField(proposta.cliente_data, 'cliente_data', proposta.id),
+        condicoes_data: parseJsonbField(proposta.condicoes_data, 'condicoes_data', proposta.id)
+      }));
+      
+      console.log("Propostas com dados parseados:", propostsWithParsedData);
+      return propostsWithParsedData;
     }
   });
 
@@ -274,13 +296,15 @@ function FormalizacaoList() {
                 <div className="space-y-3">
                   <div>
                     <p className="text-sm text-gray-600">Cliente</p>
-                    <p className="font-medium text-gray-900">{proposta.cliente_data?.nome || 'Nome não informado'}</p>
+                    <p className="font-medium text-gray-900">
+                      {parseJsonbField(proposta.cliente_data, 'cliente_data', proposta.id)?.nome || 'Nome não informado'}
+                    </p>
                   </div>
 
                   <div>
                     <p className="text-sm text-gray-600">Valor Aprovado</p>
                     <p className="font-bold text-green-600">
-                      {formatCurrency(proposta.condicoes_data?.valor || 0)}
+                      {formatCurrency(parseJsonbField(proposta.condicoes_data, 'condicoes_data', proposta.id)?.valor || 0)}
                     </p>
                   </div>
 

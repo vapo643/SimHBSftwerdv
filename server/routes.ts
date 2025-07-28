@@ -1242,13 +1242,50 @@ app.get("/api/tabelas-comerciais-disponiveis", jwtAuthMiddleware, async (req: Au
       ];
 
       // Query proposals with formalization statuses using correct column name
-      const formalizacaoPropostas = await db
+      const rawPropostas = await db
         .select()
         .from(propostas)
         .where(inArray(propostas.status, formalizationStatuses))
         .orderBy(desc(propostas.createdAt));
 
-      console.log(`[${new Date().toISOString()}] Retornando ${formalizacaoPropostas.length} propostas em formalização`);
+      // CORREÇÃO CRÍTICA: Parse JSONB fields para objetos JavaScript
+      const formalizacaoPropostas = rawPropostas.map(proposta => {
+        let clienteData = null;
+        let condicoesData = null;
+
+        // Parse cliente_data se for string
+        if (typeof proposta.clienteData === 'string') {
+          try {
+            clienteData = JSON.parse(proposta.clienteData);
+          } catch (e) {
+            console.warn(`Erro ao fazer parse de cliente_data para proposta ${proposta.id}:`, e);
+            clienteData = {};
+          }
+        } else {
+          clienteData = proposta.clienteData || {};
+        }
+
+        // Parse condicoes_data se for string  
+        if (typeof proposta.condicoesData === 'string') {
+          try {
+            condicoesData = JSON.parse(proposta.condicoesData);
+          } catch (e) {
+            console.warn(`Erro ao fazer parse de condicoes_data para proposta ${proposta.id}:`, e);
+            condicoesData = {};
+          }
+        } else {
+          condicoesData = proposta.condicoesData || {};
+        }
+
+        return {
+          ...proposta,
+          cliente_data: clienteData,
+          condicoes_data: condicoesData
+        };
+      });
+
+      console.log(`[${new Date().toISOString()}] Retornando ${formalizacaoPropostas.length} propostas em formalização com parsing JSONB`);
+      console.log(`[DEBUG] Primeira proposta cliente_data type:`, typeof formalizacaoPropostas[0]?.cliente_data);
       res.json(formalizacaoPropostas);
     } catch (error) {
       console.error("Erro ao buscar propostas de formalização:", error);
