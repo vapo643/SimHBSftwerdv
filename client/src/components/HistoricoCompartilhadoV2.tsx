@@ -27,19 +27,20 @@ const HistoricoCompartilhadoV2: React.FC<HistoricoCompartilhadoV2Props> = ({
     staleTime: 0, // Always fresh data
   });
 
-  // Query para buscar observações adicionais com auto-refresh mais frequente
-  const { data: observacoes } = useQuery({
+  // Query para buscar logs de auditoria com auto-refresh mais frequente
+  const { data: auditLogs } = useQuery({
     queryKey: [`/api/propostas/${propostaId}/observacoes`],
     queryFn: async () => {
       try {
         const response = await api.get(`/api/propostas/${propostaId}/observacoes`);
         return response.data;
       } catch (error) {
-        return { observacoes: [] };
+        console.warn('Erro ao buscar logs de auditoria:', error);
+        return { logs: [] };
       }
     },
     enabled: !!propostaId,
-    refetchInterval: 8000, // Refetch mais frequente para observações
+    refetchInterval: 8000, // Refetch mais frequente para logs
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
     staleTime: 0,
@@ -87,8 +88,8 @@ const HistoricoCompartilhadoV2: React.FC<HistoricoCompartilhadoV2Props> = ({
             </div>
           </div>
 
-          {/* Pendência (se existir) */}
-          {proposta?.motivoPendencia && (
+          {/* Pendência (fallback se não houver logs) */}
+          {(!auditLogs?.logs || auditLogs.logs.length === 0) && proposta?.motivoPendencia && (
             <div className="flex items-start gap-3 p-3 bg-yellow-900/30 border border-yellow-600 rounded-lg">
               <div className="w-2 h-2 bg-yellow-500 rounded-full mt-2 flex-shrink-0"></div>
               <div className="flex-1">
@@ -106,25 +107,70 @@ const HistoricoCompartilhadoV2: React.FC<HistoricoCompartilhadoV2Props> = ({
             </div>
           )}
 
-          {/* Observações do atendente (futuro) */}
-          {observacoes?.observacoes && observacoes.observacoes.length > 0 && (
-            <div className="space-y-2">
-              {observacoes.observacoes.map((obs: any, index: number) => (
-                <div key={index} className="flex items-start gap-3 p-3 bg-blue-900/30 border border-blue-600 rounded-lg">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-blue-400">💬 Observação do Atendente</p>
-                    <p className="text-xs text-gray-400">
-                      {obs.createdAt ? new Date(obs.createdAt).toLocaleString('pt-BR') : 'Agora'}
+          {/* Logs de auditoria em tempo real */}
+          {auditLogs?.logs && auditLogs.logs.length > 0 && auditLogs.logs.map((log: any, index: number) => {
+            const isResubmit = log.acao === 'reenvio_atendente';
+            const isPendency = log.acao === 'mudanca_status_pendenciado';
+            const isApproval = log.acao === 'mudanca_status_aprovado';
+            const isRejection = log.acao === 'mudanca_status_rejeitado';
+            
+            let bgColor = 'bg-gray-800';
+            let borderColor = '';
+            let dotColor = 'bg-blue-500';
+            let textColor = 'text-blue-400';
+            let icon = '📝';
+            
+            if (isPendency) {
+              bgColor = 'bg-yellow-900/30';
+              borderColor = 'border border-yellow-600';
+              dotColor = 'bg-yellow-500';
+              textColor = 'text-yellow-400';
+              icon = '⚠️';
+            } else if (isResubmit) {
+              bgColor = 'bg-blue-900/30';
+              borderColor = 'border border-blue-600';
+              dotColor = 'bg-blue-500';
+              textColor = 'text-blue-400';
+              icon = '🔄';
+            } else if (isApproval) {
+              bgColor = 'bg-green-900/30';
+              borderColor = 'border border-green-600';
+              dotColor = 'bg-green-500';
+              textColor = 'text-green-400';
+              icon = '✅';
+            } else if (isRejection) {
+              bgColor = 'bg-red-900/30';
+              borderColor = 'border border-red-600';
+              dotColor = 'bg-red-500';
+              textColor = 'text-red-400';
+              icon = '❌';
+            }
+            
+            return (
+              <div key={`${log.id}-${index}`} className={`flex items-start gap-3 p-3 ${bgColor} ${borderColor} rounded-lg`}>
+                <div className={`w-2 h-2 ${dotColor} rounded-full mt-2 flex-shrink-0`}></div>
+                <div className="flex-1">
+                  <p className={`text-sm font-medium ${textColor}`}>
+                    {icon} {
+                      isPendency ? 'Proposta Pendenciada' :
+                      isResubmit ? 'Proposta Reenviada' :
+                      isApproval ? 'Proposta Aprovada' :
+                      isRejection ? 'Proposta Rejeitada' :
+                      `Status alterado: ${log.status_anterior} → ${log.status_novo}`
+                    }
+                  </p>
+                  <p className="text-xs text-gray-400">
+                    {log.data_acao ? new Date(log.data_acao).toLocaleString('pt-BR') : 'Data não disponível'}
+                  </p>
+                  {log.detalhes && (
+                    <p className="text-sm text-gray-300 mt-1">
+                      {log.detalhes}
                     </p>
-                    <div className="text-sm text-blue-200 mt-2 p-2 bg-blue-900/30 rounded border-l-2 border-blue-500">
-                      "{obs.texto}"
-                    </div>
-                  </div>
+                  )}
                 </div>
-              ))}
-            </div>
-          )}
+              </div>
+            );
+          })}
 
           {/* Status atual com indicador dinâmico */}
           <div className="flex items-start gap-3 p-3 bg-gray-700/50 border border-gray-600 rounded-lg">

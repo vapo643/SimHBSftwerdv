@@ -109,21 +109,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // GET proposal observations endpoint for shared history
+  // GET proposal audit logs for real-time communication history
   app.get("/api/propostas/:id/observacoes", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     try {
       const propostaId = req.params.id;
       
-      // For now return empty array - prepared for future observations functionality
-      // This endpoint ensures the historical component works correctly
-      const observacoes = {
-        observacoes: []
-      };
+      const { createServerSupabaseAdminClient } = await import("../server/lib/supabase");
+      const supabase = createServerSupabaseAdminClient();
       
-      res.json(observacoes);
+      // Buscar logs de auditoria da tabela proposta_logs
+      const { data: logs, error } = await supabase
+        .from('proposta_logs')
+        .select(`
+          id,
+          acao,
+          detalhes,
+          status_anterior,
+          status_novo,
+          data_acao,
+          autor_id
+        `)
+        .eq('proposta_id', propostaId)
+        .order('data_acao', { ascending: true });
+        
+      if (error) {
+        console.warn('Erro ao buscar logs de auditoria:', error);
+        // Return empty if table doesn't exist or has issues
+        return res.json({ logs: [] });
+      }
+      
+      console.log(`[${new Date().toISOString()}] Retornando ${logs?.length || 0} logs de auditoria para proposta ${propostaId}`);
+      
+      res.json({ 
+        logs: logs || [],
+        total: logs?.length || 0
+      });
     } catch (error) {
-      console.error('Error fetching proposal observations:', error);
-      res.status(500).json({ error: 'Failed to fetch observations' });
+      console.error('Error fetching proposal audit logs:', error);
+      // Return empty array instead of error to prevent breaking the UI
+      res.json({ logs: [] });
     }
   });
 
