@@ -1294,7 +1294,7 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
   app.get("/api/propostas/formalizacao", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     try {
       const { createServerSupabaseClient } = await import('./lib/supabase');
-      const supabase = createServerSupabaseClient(req.user?.accessToken);
+      const supabase = createServerSupabaseClient();
       
       // Buscar propostas em processo de formalização
       const { data: propostas, error } = await supabase
@@ -2273,6 +2273,67 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
         status: 'unhealthy',
         timestamp: new Date().toISOString(),
         error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // ====================================
+  // ENDPOINT DE UPLOAD DE DOCUMENTOS
+  // ====================================
+  app.post("/api/upload", upload.single('file'), jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+    try {
+      const file = req.file;
+      const proposalId = req.body.proposalId || req.body.filename?.split('-')[0] || 'temp';
+      
+      if (!file) {
+        return res.status(400).json({ message: "Arquivo é obrigatório" });
+      }
+
+      const { createServerSupabaseAdminClient } = await import('./lib/supabase');
+      const supabase = createServerSupabaseAdminClient();
+      
+      // Usar filename do body ou gerar um timestamp
+      const fileName = req.body.filename || `${Date.now()}-${file.originalname}`;
+      const filePath = `proposta-${proposalId}/${fileName}`;
+      
+      console.log(`[DEBUG] Fazendo upload de ${file.originalname} para ${filePath}`);
+      
+      // Upload para o Supabase Storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('documents')
+        .upload(filePath, file.buffer, {
+          contentType: file.mimetype,
+          upsert: false
+        });
+
+      if (uploadError) {
+        console.error('[ERROR] Erro no upload:', uploadError);
+        return res.status(400).json({ 
+          message: `Erro no upload: ${uploadError.message}` 
+        });
+      }
+
+      // Obter URL pública
+      const { data: publicUrl } = supabase.storage
+        .from('documents')
+        .getPublicUrl(filePath);
+
+      console.log(`[DEBUG] Upload bem-sucedido. Arquivo salvo em: ${publicUrl.publicUrl}`);
+
+      res.json({
+        success: true,
+        fileName: fileName,
+        filePath: filePath,
+        url: publicUrl.publicUrl,
+        originalName: file.originalname,
+        size: file.size,
+        type: file.mimetype
+      });
+
+    } catch (error) {
+      console.error('[ERROR] Erro no upload de documento:', error);
+      res.status(500).json({ 
+        message: "Erro interno do servidor no upload" 
       });
     }
   });

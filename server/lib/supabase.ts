@@ -47,13 +47,10 @@ export function createServerSupabaseClient(accessToken?: string) {
 
   // Se token fornecido, configurar para respeitar RLS
   if (accessToken) {
+    // Configurar sessão manualmente para RLS
     client.auth.setSession({
       access_token: accessToken,
-      refresh_token: '',
-      token_type: 'bearer',
-      expires_in: 3600,
-      expires_at: Date.now() + 3600000,
-      user: null
+      refresh_token: ''
     });
   }
 

@@ -80,7 +80,45 @@ function ProposalForm() {
   // Submit mutation
   const submitProposal = useMutation({
     mutationFn: async () => {
-      // Transform nested data to flat structure expected by backend
+      // 1. PRIMEIRO: Upload dos documentos para o Supabase Storage
+      const uploadedDocuments: string[] = [];
+      
+      if (state.documents.length > 0) {
+        console.log(`[DEBUG] Iniciando upload de ${state.documents.length} documentos`);
+        
+        // Gerar ID temporário da proposta para organizar os arquivos
+        const tempPropostaId = `PROP-${Date.now()}-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
+        
+        for (const doc of state.documents) {
+          try {
+            const timestamp = Date.now();
+            const fileName = `${timestamp}-${doc.name}`;
+            const filePath = `proposta-${tempPropostaId}/${fileName}`;
+            
+            // Upload usando apiRequest com FormData
+            const formData = new FormData();
+            formData.append('file', doc.file);
+            formData.append('filename', fileName);
+            formData.append('proposalId', tempPropostaId);
+            
+            const uploadResponse = await apiRequest('/api/upload', {
+              method: 'POST',
+              body: formData,
+            });
+            
+            console.log(`[DEBUG] Documento ${doc.name} enviado com sucesso:`, uploadResponse);
+            uploadedDocuments.push(fileName);
+            
+          } catch (uploadError) {
+            console.error(`[ERROR] Falha ao enviar documento ${doc.name}:`, uploadError);
+            throw new Error(`Falha ao enviar documento ${doc.name}. Tente novamente.`);
+          }
+        }
+        
+        console.log(`[DEBUG] Todos os ${uploadedDocuments.length} documentos enviados com sucesso`);
+      }
+      
+      // 2. SEGUNDO: Criar a proposta com dados + lista de documentos
       const proposalData = {
         // Cliente data - matching schema field names
         clienteNome: state.clientData.nome,
@@ -115,9 +153,12 @@ function ProposalForm() {
         lojaId: state.context?.atendente?.loja?.id,
         finalidade: 'Empréstimo pessoal',
         garantia: 'Sem garantia',
+        
+        // CRÍTICO: Incluir lista de documentos para associação no backend
+        documentos: uploadedDocuments,
       };
 
-
+      console.log(`[DEBUG] Criando proposta com ${uploadedDocuments.length} documentos associados`);
       
       const response = await apiRequest('/api/propostas', {
         method: 'POST',
@@ -126,11 +167,15 @@ function ProposalForm() {
 
       return response;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast({
         title: 'Proposta criada com sucesso!',
-        description: 'A proposta foi encaminhada para análise.',
+        description: `Proposta ${data.id} foi encaminhada para análise com ${state.documents.length} documento(s) anexado(s).`,
       });
+      
+      // Limpar documentos após sucesso
+      setContext(state.context);
+      setStep(0);
     },
     onError: (error) => {
       toast({
@@ -223,15 +268,24 @@ function ProposalForm() {
           <Button
             type="button"
             onClick={() => submitProposal.mutate()}
-            disabled={submitProposal.isPending || state.documents.length === 0}
+            disabled={submitProposal.isPending}
+            className="min-w-[200px]"
           >
             {submitProposal.isPending ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Enviando...
+                {state.documents.length > 0 ? `Enviando ${state.documents.length} documentos...` : 'Criando proposta...'}
               </>
             ) : (
-              'Enviar Proposta'
+              <>
+                <CheckCircle2 className="h-4 w-4 mr-2" />
+                Enviar Proposta
+                {state.documents.length > 0 && (
+                  <span className="ml-2 text-xs bg-green-600 px-2 py-1 rounded-full">
+                    {state.documents.length} doc(s)
+                  </span>
+                )}
+              </>
             )}
           </Button>
         )}
