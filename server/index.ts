@@ -44,14 +44,38 @@ import { registerRoutes } from "./routes";
       const documentsExists = buckets.some(bucket => bucket.name === 'documents');
       
       if (documentsExists) {
-        log('✅ Storage bucket "documents" already exists');
-        return;
+        // Check if it's public or private
+        const documentsBucket = buckets.find(bucket => bucket.name === 'documents');
+        if (documentsBucket && documentsBucket.public === true) {
+          log('⚠️ Storage bucket "documents" exists but is PUBLIC. Need to recreate as PRIVATE.');
+          
+          // Delete the public bucket
+          log('🗑️ Deleting public bucket...');
+          const { error: deleteError } = await supabase.storage.deleteBucket('documents');
+          if (deleteError) {
+            log('❌ Could not delete bucket:', deleteError.message);
+            return;
+          }
+          log('✅ Public bucket deleted.');
+        } else {
+          log('✅ Storage bucket "documents" already exists as PRIVATE');
+          return;
+        }
       }
       
-      // Create documents bucket
-      log('🔨 Creating storage bucket "documents"...');
+      // Delete existing public bucket if it exists (to recreate as private)
+      if (documentsExists) {
+        log('🗑️ Deleting existing public bucket to recreate as private...');
+        const { error: deleteError } = await supabase.storage.deleteBucket('documents');
+        if (deleteError) {
+          log('⚠️ Could not delete bucket:', deleteError.message);
+        }
+      }
+      
+      // Create documents bucket AS PRIVATE
+      log('🔨 Creating PRIVATE storage bucket "documents"...');
       const { data: bucket, error: createError } = await supabase.storage.createBucket('documents', {
-        public: true,
+        public: false, // PRIVATE bucket for security
         fileSizeLimit: 52428800, // 50MB
         allowedMimeTypes: [
           'application/pdf',
