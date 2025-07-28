@@ -90,6 +90,12 @@ This is a full-stack TypeScript application for credit management called "Simpix
 - **100% Reactive System**: Data updates now occur only through user actions and queryClient.invalidateQueries, preventing rate limiting attacks
 - **Supabase Database Optimizations Applied**: Created 13 performance indexes on foreign keys and common query patterns including comunicacao_logs, proposta_logs, parcelas, and profiles tables
 - **Enhanced Query Performance**: Added composite indexes for status+date, loja+status+date, and temporal ordering for audit trails and dashboard analytics
+- **Document Flow Audit Complete (January 28)**: Comprehensive audit of document lifecycle from upload to visualization revealed 60% implementation with critical gaps
+- **Document Upload Infrastructure**: Confirmed /api/upload route exists and successfully saves files to Supabase Storage
+- **DocumentViewer Fully Functional**: Component properly displays PDFs and images with modal preview, download, and open-in-new-tab functionality
+- **Critical Gap - Document Association**: Documents uploaded during proposal creation are NOT associated with the proposal in the database
+- **Edit Page Upload Not Implemented**: Document upload functionality in edit page exists as UI only without backend integration
+- **Missing Database Relationship**: No document-proposal relationship table exists to persist document associations
 - **Critical Data Persistence Bug RESOLVED (January 25)**: Identified and fixed critical proposal data loss issue where client information and loan conditions appeared empty in analysis queue and dashboard
 - **Root Cause Analysis**: Data transformation mismatch between frontend flat structure and backend JSONB structure - frontend was sending correct data but backend was not processing it correctly
 - **Solution Implementation**: Fixed storage.ts to properly handle incoming JSONB objects (clienteData/condicoesData) instead of attempting to rebuild them from flat fields
