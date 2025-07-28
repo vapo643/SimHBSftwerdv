@@ -157,14 +157,12 @@ const EditarPropostaPendenciada: React.FC = () => {
     }
   }, [proposta]);
 
-  // Mutation para salvar alterações
+  // Mutation para salvar alterações (dados da proposta)
   const updateMutation = useMutation({
     mutationFn: async (data: any) => {
-      return fetchWithToken(`/api/propostas/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
+      console.log('🔍 SALVANDO ALTERAÇÕES:', data);
+      const response = await api.put(`/api/propostas/${id}`, data);
+      return response.data;
     },
     onSuccess: () => {
       toast({
@@ -177,26 +175,35 @@ const EditarPropostaPendenciada: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['/api/propostas'] });
     },
     onError: (error) => {
+      console.error("🔍 ERRO AO SALVAR:", error);
       toast({
         variant: "destructive",
         title: "Erro ao salvar",
-        description: "Ocorreu um erro ao salvar as alterações.",
+        description: error?.message || "Ocorreu um erro ao salvar as alterações.",
       });
-      console.error("Erro ao salvar:", error);
     },
   });
 
-  // Mutation para reenviar proposta
+  // Mutation para reenviar proposta (mudança de status)
   const resubmitMutation = useMutation({
     mutationFn: async () => {
-      return fetchWithToken(`/api/propostas/${id}/status`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          status: 'aguardando_analise',
-          observacao: 'Proposta corrigida e reenviada após pendências'
-        }),
+      console.log('🔍 REENVIANDO PROPOSTA para análise');
+      // Primeiro salva as alterações se houver
+      if (Object.keys(formData.clienteData).length > 0 || Object.keys(formData.condicoesData).length > 0) {
+        console.log('🔍 SALVANDO ALTERAÇÕES antes de reenviar');
+        await api.put(`/api/propostas/${id}`, {
+          cliente_data: formData.clienteData,
+          condicoes_data: formData.condicoesData
+        });
+      }
+      
+      // Depois muda o status para aguardando_analise
+      console.log('🔍 MUDANDO STATUS para aguardando_analise');
+      const response = await api.put(`/api/propostas/${id}/status`, {
+        status: 'aguardando_analise',
+        observacao: 'Proposta corrigida e reenviada pelo atendente'
       });
+      return response.data;
     },
     onSuccess: () => {
       toast({
@@ -211,12 +218,12 @@ const EditarPropostaPendenciada: React.FC = () => {
       setLocation('/dashboard');
     },
     onError: (error) => {
+      console.error("🔍 ERRO AO REENVIAR:", error);
       toast({
         variant: "destructive",
         title: "Erro ao reenviar",
-        description: "Ocorreu um erro ao reenviar a proposta.",
+        description: error?.message || "Ocorreu um erro ao reenviar a proposta.",
       });
-      console.error("Erro ao reenviar:", error);
     },
   });
 

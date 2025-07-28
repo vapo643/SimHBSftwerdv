@@ -339,9 +339,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
         throw new Error(`Erro ao atualizar status: ${updateError.message}`);
       }
       
+      // 4. Log the action in proposta_logs for audit trail
+      try {
+        const { data: logResult, error: logError } = await supabase
+          .from('proposta_logs')
+          .insert({
+            proposta_id: propostaId,
+            autor_id: req.user?.id,
+            acao: status === 'aguardando_analise' ? 'reenvio_atendente' : `mudanca_status_${status}`,
+            detalhes: validatedData.observacao,
+            status_anterior: currentStatus,
+            status_novo: status,
+            data_acao: new Date().toISOString()
+          });
+          
+        if (logError) {
+          console.warn('Falha ao registrar log:', logError);
+          // Don't fail the request, just log the warning
+        } else {
+          console.log('Log de auditoria registrado com sucesso');
+        }
+      } catch (logError) {
+        console.warn('Erro ao registrar log de auditoria:', logError);
+        // Continue execution even if logging fails
+      }
+      
       const result = { success: true, statusAnterior: currentStatus, statusNovo: status };
       
-      console.log(`[${new Date().toISOString()}] Proposta ${propostaId} - status alterado de ${result.statusAnterior} para ${result.statusNovo} pelo analista ${req.user?.id}`);
+      const actionBy = userRole === 'ATENDENTE' ? 'atendente' : 'analista';
+      console.log(`[${new Date().toISOString()}] Proposta ${propostaId} - status alterado de ${result.statusAnterior} para ${result.statusNovo} pelo ${actionBy} ${req.user?.id}`);
       
       res.json({
         success: true,
