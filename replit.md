@@ -82,6 +82,11 @@ This is a full-stack TypeScript application for credit management called "Simpix
 
 ### January 2025
 
+- **CRITICAL RATE LIMITING AUTO-ATTACK RESOLVED (January 28)**: Eliminated system self-attack by removing aggressive polling intervals from all React components
+- **Auto-Attack Sources Eliminated**: Removed refetchInterval polling (8s, 15s, 20s, 25s, 30s) from HistoricoCompartilhadoV2, HistoricoCompartilhado, credito/analise, and propostas/editar components
+- **100% Reactive System**: Data updates now occur only through user actions and queryClient.invalidateQueries, preventing rate limiting attacks
+- **Supabase Database Optimizations Applied**: Created 13 performance indexes on foreign keys and common query patterns including comunicacao_logs, proposta_logs, parcelas, and profiles tables
+- **Enhanced Query Performance**: Added composite indexes for status+date, loja+status+date, and temporal ordering for audit trails and dashboard analytics
 - **Critical Data Persistence Bug RESOLVED (January 25)**: Identified and fixed critical proposal data loss issue where client information and loan conditions appeared empty in analysis queue and dashboard
 - **Root Cause Analysis**: Data transformation mismatch between frontend flat structure and backend JSONB structure - frontend was sending correct data but backend was not processing it correctly
 - **Solution Implementation**: Fixed storage.ts to properly handle incoming JSONB objects (clienteData/condicoesData) instead of attempting to rebuild them from flat fields

@@ -13,7 +13,7 @@ const HistoricoCompartilhado: React.FC<HistoricoCompartilhadoProps> = ({
   propostaId, 
   context = 'analise' 
 }) => {
-  // Query para buscar dados da proposta com auto-refresh
+  // Query para buscar dados da proposta - APENAS reativa (sem polling)
   const { data: proposta } = useQuery({
     queryKey: [`/api/propostas/${propostaId}`],
     queryFn: async () => {
@@ -21,12 +21,12 @@ const HistoricoCompartilhado: React.FC<HistoricoCompartilhadoProps> = ({
       return response;
     },
     enabled: !!propostaId,
-    refetchInterval: 15000, // Refetch a cada 15 segundos
-    refetchOnWindowFocus: true, // Refetch when user focuses window
-    refetchOnReconnect: true, // Refetch on network reconnect
+    refetchOnWindowFocus: false, // Desabilitado para evitar rate limiting
+    refetchOnReconnect: true,
+    staleTime: 5 * 60 * 1000, // 5 minutos - dados ficam válidos por mais tempo
   });
 
-  // Query para buscar observações adicionais com auto-refresh mais frequente
+  // Query para buscar observações - APENAS reativa (sem polling)
   const { data: observacoes } = useQuery({
     queryKey: [`/api/propostas/${propostaId}/observacoes`],
     queryFn: async () => {
@@ -38,10 +38,9 @@ const HistoricoCompartilhado: React.FC<HistoricoCompartilhadoProps> = ({
       }
     },
     enabled: !!propostaId,
-    refetchInterval: 8000, // Refetch a cada 8 segundos para sincronização mais rápida
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: false, // Desabilitado para evitar rate limiting
     refetchOnReconnect: true,
-    staleTime: 0, // Always consider data stale to ensure fresh updates
+    staleTime: 2 * 60 * 1000, // 2 minutos - dados ficam válidos por mais tempo
   });
 
   return (

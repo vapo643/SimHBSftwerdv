@@ -118,7 +118,7 @@ const EditarPropostaPendenciada: React.FC = () => {
     condicoesData: {},
   });
 
-  // Buscar dados da proposta com auto-refresh
+  // Buscar dados da proposta - APENAS reativa (sem polling)
   const { data: proposta, isLoading, error } = useQuery({
     queryKey: [`/api/propostas/${id}`],
     queryFn: async () => {
@@ -134,10 +134,9 @@ const EditarPropostaPendenciada: React.FC = () => {
       }
     },
     enabled: !!id,
-    refetchInterval: 30000, // Auto-refresh reduzido para evitar rate limiting
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: false, // Desabilitado para evitar rate limiting
     refetchOnReconnect: true,
-    staleTime: 0, // Always fresh data
+    staleTime: 5 * 60 * 1000, // 5 minutos - dados ficam válidos por mais tempo
   });
 
   // Atualizar formData quando proposta carrega - TODOS OS HOOKS DEVEM ESTAR AQUI NO TOPO

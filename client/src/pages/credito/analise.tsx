@@ -85,23 +85,22 @@ const AnaliseManualPage: React.FC = () => {
   const {
     data: proposta,
     isLoading,
-    isError,
+    isError,  
   } = useQuery({
     queryKey: ["proposta", propostaId],
     queryFn: () => fetchProposta(propostaId),
     enabled: !!propostaId,
-    refetchInterval: 15000, // Auto-refresh proposta data
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: false, // Desabilitado para evitar rate limiting
     refetchOnReconnect: true,
-    staleTime: 0, // Always fresh data for analysis
+    staleTime: 5 * 60 * 1000, // 5 minutos - dados ficam válidos por mais tempo
   });
 
   const { data: documentsData } = useQuery({
     queryKey: ["proposta-documents", propostaId],
     queryFn: () => fetchPropostaDocuments(propostaId),
     enabled: !!propostaId,
-    refetchInterval: 30000, // Less frequent refresh for documents
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: false, // Desabilitado para evitar rate limiting
+    staleTime: 10 * 60 * 1000, // 10 minutos - documentos mudam pouco
   });
 
   const { register, handleSubmit, control } = useForm<DecisionFormData>({
