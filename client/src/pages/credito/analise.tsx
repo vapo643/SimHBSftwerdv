@@ -20,7 +20,7 @@ import { useToast } from "@/hooks/use-toast";
 import { AlertCircle } from "lucide-react";
 import { DocumentViewer } from "@/components/DocumentViewer";
 import { useAuth } from "@/contexts/AuthContext";
-import HistoricoCompartilhadoV2 from "@/components/HistoricoCompartilhadoV2";
+import HistoricoCompartilhado from "@/components/HistoricoCompartilhado";
 
 import { api } from "@/lib/apiClient";
 
@@ -283,7 +283,7 @@ const AnaliseManualPage: React.FC = () => {
         </div>
         <div className="md:col-span-1">
           {/* Histórico de Comunicação - Compartilhado V2 */}
-          <HistoricoCompartilhadoV2 propostaId={propostaId!} context="analise" />
+          <HistoricoCompartilhado propostaId={propostaId!} context="analise" />
         </div>
       </div>
     </DashboardLayout>

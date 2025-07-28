@@ -1,8 +1,8 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { AlertCircle } from "lucide-react";
-import { fetchWithToken } from "@/lib/apiClient";
+import { AlertCircle, User, MessageCircle, Clock, CheckCircle, XCircle, AlertTriangle, Send } from "lucide-react";
+import { api } from "@/lib/apiClient";
 
 interface HistoricoCompartilhadoProps {
   propostaId: string;
@@ -14,11 +14,11 @@ const HistoricoCompartilhado: React.FC<HistoricoCompartilhadoProps> = ({
   context = 'analise' 
 }) => {
   // Query para buscar dados da proposta - APENAS reativa (sem polling)
-  const { data: proposta } = useQuery({
+  const { data: proposta, isLoading } = useQuery({
     queryKey: [`/api/propostas/${propostaId}`],
     queryFn: async () => {
-      const response = await fetchWithToken(`/api/propostas/${propostaId}`);
-      return response;
+      const response = await api.get(`/api/propostas/${propostaId}`);
+      return response.data;
     },
     enabled: !!propostaId,
     refetchOnWindowFocus: false, // Desabilitado para evitar rate limiting
@@ -26,15 +26,16 @@ const HistoricoCompartilhado: React.FC<HistoricoCompartilhadoProps> = ({
     staleTime: 5 * 60 * 1000, // 5 minutos - dados ficam válidos por mais tempo
   });
 
-  // Query para buscar observações - APENAS reativa (sem polling)
-  const { data: observacoes } = useQuery({
+  // Query para buscar logs de auditoria - APENAS reativa (sem polling)
+  const { data: auditLogs } = useQuery({
     queryKey: [`/api/propostas/${propostaId}/observacoes`],
     queryFn: async () => {
       try {
-        const response = await fetchWithToken(`/api/propostas/${propostaId}/observacoes`);
-        return response;
+        const response = await api.get(`/api/propostas/${propostaId}/observacoes`);
+        return response.data;
       } catch (error) {
-        return { observacoes: [] };
+        console.warn('Erro ao buscar logs de auditoria:', error);
+        return { logs: [] };
       }
     },
     enabled: !!propostaId,
@@ -43,6 +44,27 @@ const HistoricoCompartilhado: React.FC<HistoricoCompartilhadoProps> = ({
     staleTime: 2 * 60 * 1000, // 2 minutos - dados ficam válidos por mais tempo
   });
 
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <AlertCircle className="h-5 w-5 text-blue-400" />
+            Histórico de Comunicação
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center py-4 text-gray-400">
+            Carregando histórico...
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Processar logs para extrair eventos significativos
+  const logs = auditLogs?.logs || [];
+  
   return (
     <Card>
       <CardHeader>
@@ -55,75 +77,105 @@ const HistoricoCompartilhado: React.FC<HistoricoCompartilhadoProps> = ({
         <div className="space-y-4">
           {/* Criação da proposta */}
           <div className="flex items-start gap-3 p-3 bg-gray-800 rounded-lg">
-            <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
-            <div>
-              <p className="text-sm font-medium text-green-400">✅ Proposta Criada</p>
+            <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+            <div className="flex-1">
+              <p className="text-sm font-medium text-green-400">
+                <CheckCircle className="inline w-4 h-4 mr-1" />
+                Proposta Criada
+              </p>
               <p className="text-xs text-gray-400">
-                {proposta?.createdAt ? new Date(proposta.createdAt).toLocaleString('pt-BR') : 'Data não disponível'}
+                {proposta?.created_at ? new Date(proposta.created_at).toLocaleString('pt-BR') : 'Data não disponível'}
               </p>
               <p className="text-sm text-gray-300 mt-1">
-                Proposta criada pelo atendente da loja {proposta?.loja?.nomeLoja || 'N/A'}
+                Proposta criada pelo atendente da loja {proposta?.loja?.nome_loja || 'N/A'}
               </p>
             </div>
           </div>
 
-          {/* Pendência (se existir) */}
-          {proposta?.motivoPendencia && (
-            <div className="flex items-start gap-3 p-3 bg-yellow-900/20 border border-yellow-600 rounded-lg">
-              <div className="w-2 h-2 bg-yellow-500 rounded-full mt-2"></div>
-              <div>
-                <p className="text-sm font-medium text-yellow-400">⚠️ Proposta Pendenciada</p>
-                <p className="text-xs text-gray-400">
-                  {proposta?.dataAnalise ? new Date(proposta.dataAnalise).toLocaleString('pt-BR') : 'Data não disponível'}
-                </p>
-                <p className="text-sm text-gray-300 mt-1">
-                  <strong>Analista:</strong> {proposta?.analistaId || 'N/A'}
-                </p>
-                <p className="text-sm text-yellow-200 mt-2 p-2 bg-yellow-900/30 rounded">
-                  "{proposta.motivoPendencia}"
-                </p>
-              </div>
-            </div>
-          )}
+          {/* Logs de auditoria em ordem cronológica */}
+          {logs.length > 0 ? (
+            logs.map((log: any, index: number) => {
+              const isPendency = log.status_novo === 'pendenciado';
+              const isResubmit = log.status_novo === 'aguardando_analise' && log.status_anterior === 'pendenciado';
+              const isApproval = log.status_novo === 'aprovado';
+              const isRejection = log.status_novo === 'rejeitado';
+              const isAtendente = log.autor_id !== proposta?.analista_id; // Assumindo que autor diferente do analista é atendente
+              
+              // Definir cores e ícones baseado no tipo
+              let bgColor = 'bg-gray-800';
+              let borderColor = '';
+              let textColor = 'text-gray-300';
+              let dotColor = 'bg-gray-500';
+              let icon = <Clock className="inline w-4 h-4 mr-1" />;
+              
+              if (isPendency) {
+                bgColor = 'bg-yellow-900/20';
+                borderColor = 'border border-yellow-600';
+                textColor = 'text-yellow-400';
+                dotColor = 'bg-yellow-500';
+                icon = <AlertTriangle className="inline w-4 h-4 mr-1" />;
+              } else if (isResubmit) {
+                bgColor = 'bg-indigo-900/20';
+                borderColor = 'border border-indigo-600';
+                textColor = 'text-indigo-400';
+                dotColor = 'bg-indigo-500';
+                icon = <Send className="inline w-4 h-4 mr-1" />;
+              } else if (isApproval) {
+                bgColor = 'bg-green-900/20';
+                borderColor = 'border border-green-600';
+                textColor = 'text-green-400';
+                dotColor = 'bg-green-500';
+                icon = <CheckCircle className="inline w-4 h-4 mr-1" />;
+              } else if (isRejection) {
+                bgColor = 'bg-red-900/20';
+                borderColor = 'border border-red-600';
+                textColor = 'text-red-400';
+                dotColor = 'bg-red-500';
+                icon = <XCircle className="inline w-4 h-4 mr-1" />;
+              }
 
-          {/* Observações do atendente (se existirem) */}
-          {observacoes?.observacoes && observacoes.observacoes.length > 0 && (
-            <div className="space-y-2">
-              {observacoes.observacoes.map((obs: any, index: number) => (
-                <div key={index} className="flex items-start gap-3 p-3 bg-blue-900/20 border border-blue-600 rounded-lg">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
-                  <div>
-                    <p className="text-sm font-medium text-blue-400">💬 Observação do Atendente</p>
+              return (
+                <div key={`${log.id}-${index}`} className={`flex items-start gap-3 p-3 ${bgColor} ${borderColor} rounded-lg`}>
+                  <div className={`w-2 h-2 ${dotColor} rounded-full mt-2 flex-shrink-0`}></div>
+                  <div className="flex-1">
+                    <p className={`text-sm font-medium ${textColor}`}>
+                      {icon} {isResubmit ? 'Proposta reenviada para análise' : 
+                            isPendency ? 'Proposta pendenciada' :
+                            isApproval ? 'Proposta aprovada' :
+                            isRejection ? 'Proposta rejeitada' : 'Status alterado'}
+                    </p>
                     <p className="text-xs text-gray-400">
-                      {obs.createdAt ? new Date(obs.createdAt).toLocaleString('pt-BR') : 'Agora'}
+                      {log.created_at ? new Date(log.created_at).toLocaleString('pt-BR') : 'Data não disponível'}
                     </p>
-                    <p className="text-sm text-blue-200 mt-2 p-2 bg-blue-900/30 rounded">
-                      "{obs.texto}"
-                    </p>
+                    
+                    {/* Destacar observação baseado no tipo de usuário e ação */}
+                    {(log.observacao || log.detalhes) && (
+                      <div className={`text-sm mt-2 p-2 rounded border-l-2 ${
+                        isAtendente 
+                          ? 'bg-indigo-900/30 border-indigo-400 text-indigo-100' 
+                          : isPendency
+                          ? 'bg-yellow-900/30 border-yellow-400 text-yellow-100'
+                          : 'bg-gray-700/50 border-gray-500 text-gray-200'
+                      }`}>
+                        {isAtendente && <span className="text-indigo-300 font-medium">💬 Observação do Atendente:</span>}
+                        {isPendency && !isAtendente && <span className="text-yellow-300 font-medium">⚠️ Motivo da Pendência:</span>}
+                        {isApproval && !isAtendente && <span className="text-green-300 font-medium">✅ Observação da Aprovação:</span>}
+                        {isRejection && !isAtendente && <span className="text-red-300 font-medium">❌ Motivo da Rejeição:</span>}
+                        <div className={isAtendente ? 'italic mt-1' : 'mt-1'}>
+                          "{log.detalhes || log.observacao}"
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
-              ))}
+              );
+            })
+          ) : (
+            <div className="text-center py-4 text-gray-400">
+              <MessageCircle className="w-8 h-8 mx-auto mb-2 opacity-50" />
+              <p>Nenhuma comunicação registrada ainda</p>
             </div>
           )}
-
-          {/* Status atual */}
-          <div className="flex items-start gap-3 p-3 bg-gray-700 rounded-lg">
-            <div className="w-2 h-2 bg-gray-400 rounded-full mt-2"></div>
-            <div>
-              <p className="text-sm font-medium text-gray-300">
-                {context === 'edicao' ? '🔄 Em Correção' : '📋 Status Atual'}
-              </p>
-              <p className="text-xs text-gray-400">
-                {new Date().toLocaleString('pt-BR')}
-              </p>
-              <p className="text-sm text-gray-300 mt-1">
-                {context === 'edicao' 
-                  ? 'Atendente está corrigindo os dados conforme solicitado pelo analista'
-                  : `Proposta está ${proposta?.status || 'N/A'}`
-                }
-              </p>
-            </div>
-          </div>
         </div>
       </CardContent>
     </Card>

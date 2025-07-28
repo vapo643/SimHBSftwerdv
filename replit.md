@@ -84,6 +84,9 @@ This is a full-stack TypeScript application for credit management called "Simpix
 
 - **CRITICAL RATE LIMITING AUTO-ATTACK RESOLVED (January 28)**: Eliminated system self-attack by removing aggressive polling intervals from all React components
 - **Auto-Attack Sources Eliminated**: Removed refetchInterval polling (8s, 15s, 20s, 25s, 30s) from HistoricoCompartilhadoV2, HistoricoCompartilhado, credito/analise, and propostas/editar components
+- **Communication History Refinement Complete (January 28)**: Enhanced HistoricoCompartilhado component to properly display analyst pendency reasons and attendant correction observations
+- **Enhanced Data Display**: Added proper labels and visual distinction for analyst pendency motives (⚠️ Motivo da Pendência) and attendant observations (💬 Observação do Atendente)
+- **Component Consolidation**: Replaced HistoricoCompartilhadoV2 with refined HistoricoCompartilhado component across all pages for consistency
 - **100% Reactive System**: Data updates now occur only through user actions and queryClient.invalidateQueries, preventing rate limiting attacks
 - **Supabase Database Optimizations Applied**: Created 13 performance indexes on foreign keys and common query patterns including comunicacao_logs, proposta_logs, parcelas, and profiles tables
 - **Enhanced Query Performance**: Added composite indexes for status+date, loja+status+date, and temporal ordering for audit trails and dashboard analytics

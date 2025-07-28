@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import CurrencyInput from "@/components/ui/CurrencyInput";
-import HistoricoCompartilhadoV2 from "@/components/HistoricoCompartilhadoV2";
+import HistoricoCompartilhado from "@/components/HistoricoCompartilhado";
 
 // Componente separado para documentos
 const DocumentsTab: React.FC<{ propostaId: string }> = ({ propostaId }) => {
@@ -365,7 +365,7 @@ const EditarPropostaPendenciada: React.FC = () => {
         )}
 
         {/* Histórico de Comunicação - Compartilhado V2 */}
-        <HistoricoCompartilhadoV2 propostaId={id!} context="edicao" />
+        <HistoricoCompartilhado propostaId={id!} context="edicao" />
 
         {/* Informações da proposta */}
         <Card>
