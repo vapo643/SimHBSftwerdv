@@ -1293,8 +1293,8 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
   // Endpoint for formalization queue list
   app.get("/api/propostas/formalizacao", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     try {
-      const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-      const supabase = createServerSupabaseAdminClient();
+      const { createServerSupabaseClient } = await import('./lib/supabase');
+      const supabase = createServerSupabaseClient(req.user?.accessToken);
       
       // Buscar propostas em processo de formalização
       const { data: propostas, error } = await supabase
