@@ -82,6 +82,10 @@ This is a full-stack TypeScript application for credit management called "Simpix
 
 ### January 2025
 
+- **Critical RLS Security Policies CORRECTED (January 28)**: Fixed 3 critical Row Level Security policy gaps identified in comprehensive security audit
+- **Profiles Table Security**: Enhanced policy to allow ADMINISTRADOR access to all user profiles while maintaining user-specific access control
+- **Partners/Stores Access Control**: Corrected lojas policy to allow GERENTE access to their own store while maintaining ADMINISTRADOR full access, confirmed parceiros restricted to ADMINISTRADOR only
+- **Security Audit Complete**: Validated all 4 core tables (profiles, lojas, parceiros, propostas) now align 100% with business requirements and role-based access patterns
 - **Complete Document Upload Flow FIXED (January 28)**: Resolved "Multipart: Boundary not found" error by refactoring apiClient for intelligent FormData detection
 - **ApiClient v2.1 Enhancement**: Automatic FormData detection eliminates manual Content-Type configuration - browser sets multipart boundary automatically
 - **Upload Architecture Fix**: Removed manual Content-Type headers from all upload pages (nova-proposta, editar) allowing proper multipart/form-data handling
