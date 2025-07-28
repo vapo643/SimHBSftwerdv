@@ -212,18 +212,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .select({
           id: propostas.id,
           status: propostas.status,
-          clienteNome: propostas.clienteNome,
-          clienteCpf: propostas.clienteCpf,
-          clienteEmail: propostas.clienteEmail,
-          clienteTelefone: propostas.clienteTelefone,
-          valor: propostas.valor,
-          prazo: propostas.prazo,
-          finalidade: propostas.finalidade,
-          garantia: propostas.garantia,
-          valorTac: propostas.valorTac,
-          valorIof: propostas.valorIof,
-          valorTotalFinanciado: propostas.valorTotalFinanciado,
-          taxaJuros: propostas.taxaJuros,
+          clienteData: propostas.clienteData,
+          condicoesData: propostas.condicoesData,
           userId: propostas.userId,
           createdAt: propostas.createdAt,
           loja: {
@@ -260,33 +250,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         : await baseQuery
             .orderBy(desc(propostas.createdAt));
       
-      // Map to expected format using normalized fields
+      // Map to expected format - extract from JSONB
       const mappedPropostas = results.map(p => {
+        // Extract client data from JSONB
+        const clienteData = p.clienteData as any || {};
+        const condicoesData = p.condicoesData as any || {};
+        
         return {
           id: p.id,
           status: p.status,
-          nomeCliente: p.clienteNome || 'Nome não informado',
-          cpfCliente: p.clienteCpf || 'CPF não informado',
-          emailCliente: p.clienteEmail || 'Email não informado',
-          telefoneCliente: p.clienteTelefone || 'Telefone não informado',
-          valorSolicitado: p.valor || 0,
-          prazo: p.prazo || 0,
-          clienteData: {
-            nome: p.clienteNome,
-            cpf: p.clienteCpf,
-            email: p.clienteEmail,
-            telefone: p.clienteTelefone
-          },
-          condicoesData: {
-            valor: p.valor,
-            prazo: p.prazo,
-            finalidade: p.finalidade,
-            garantia: p.garantia,
-            valorTac: p.valorTac,
-            valorIof: p.valorIof,
-            valorTotalFinanciado: p.valorTotalFinanciado,
-            taxaJuros: p.taxaJuros
-          },
+          nomeCliente: clienteData.nome || 'Nome não informado',
+          cpfCliente: clienteData.cpf || 'CPF não informado',
+          emailCliente: clienteData.email || 'Email não informado',
+          telefoneCliente: clienteData.telefone || 'Telefone não informado',
+          valorSolicitado: condicoesData.valor || 0,
+          prazo: condicoesData.prazo || 0,
+          clienteData: clienteData, // Include full client data for details page
+          condicoesData: condicoesData, // Include full loan conditions
           parceiro: p.parceiro ? {
             id: p.parceiro.id,
             razaoSocial: p.parceiro.razaoSocial
@@ -473,9 +453,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/propostas/:id", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     try {
       const { id } = req.params;
-      const { clienteData, condicoesData } = req.body;
+      const { cliente_data, condicoes_data } = req.body;
       
-      console.log(`🔍 [PUT /api/propostas/${id}] Salvando alterações com campos normalizados`);
+      console.log(`🔍 [PUT /api/propostas/${id}] Salvando alterações:`, { cliente_data, condicoes_data });
       
       const { createServerSupabaseAdminClient } = await import("../server/lib/supabase");
       const supabase = createServerSupabaseAdminClient();
@@ -506,42 +486,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // Preparar update com campos normalizados
-      const updateData: any = {};
-      
-      // Cliente fields
-      if (clienteData) {
-        updateData.cliente_nome = clienteData.nome;
-        updateData.cliente_cpf = clienteData.cpf;
-        updateData.cliente_email = clienteData.email;
-        updateData.cliente_telefone = clienteData.telefone;
-        updateData.cliente_rg = clienteData.rg;
-        updateData.cliente_orgao_emissor = clienteData.orgaoEmissor;
-        updateData.cliente_estado_civil = clienteData.estadoCivil;
-        updateData.cliente_nacionalidade = clienteData.nacionalidade;
-        updateData.cliente_cep = clienteData.cep;
-        updateData.cliente_endereco = clienteData.endereco;
-        updateData.cliente_ocupacao = clienteData.ocupacao;
-        updateData.cliente_data_nascimento = clienteData.dataNascimento;
-        updateData.cliente_renda = clienteData.renda;
-      }
-      
-      // Condições fields
-      if (condicoesData) {
-        updateData.valor = condicoesData.valor;
-        updateData.prazo = condicoesData.prazo;
-        updateData.finalidade = condicoesData.finalidade;
-        updateData.garantia = condicoesData.garantia;
-        updateData.valor_tac = condicoesData.valorTac;
-        updateData.valor_iof = condicoesData.valorIof;
-        updateData.valor_total_financiado = condicoesData.valorTotalFinanciado;
-        updateData.taxa_juros = condicoesData.taxaJuros;
-      }
-      
       // Atualizar a proposta
       const { data: updatedProposta, error: updateError } = await supabase
         .from('propostas')
-        .update(updateData)
+        .update({
+          cliente_data,
+          condicoes_data
+        })
         .eq('id', id)
         .select()
         .single();
@@ -1297,37 +1248,39 @@ app.get("/api/tabelas-comerciais-disponiveis", jwtAuthMiddleware, async (req: Au
         .where(inArray(propostas.status, formalizationStatuses))
         .orderBy(desc(propostas.createdAt));
 
-      // Use normalized fields directly
+      // CORREÇÃO CRÍTICA: Parse JSONB fields e mapear snake_case para frontend
       const formalizacaoPropostas = rawPropostas.map(proposta => {
+        let clienteData = null;
+        let condicoesData = null;
+
+        // Parse cliente_data se for string
+        if (typeof proposta.clienteData === 'string') {
+          try {
+            clienteData = JSON.parse(proposta.clienteData);
+          } catch (e) {
+            console.warn(`Erro ao fazer parse de cliente_data para proposta ${proposta.id}:`, e);
+            clienteData = {};
+          }
+        } else {
+          clienteData = proposta.clienteData || {};
+        }
+
+        // Parse condicoes_data se for string  
+        if (typeof proposta.condicoesData === 'string') {
+          try {
+            condicoesData = JSON.parse(proposta.condicoesData);
+          } catch (e) {
+            console.warn(`Erro ao fazer parse de condicoes_data para proposta ${proposta.id}:`, e);
+            condicoesData = {};
+          }
+        } else {
+          condicoesData = proposta.condicoesData || {};
+        }
+
         return {
           ...proposta,
-          // Reconstruct cliente_data from normalized fields
-          cliente_data: {
-            nome: proposta.clienteNome,
-            cpf: proposta.clienteCpf,
-            email: proposta.clienteEmail,
-            telefone: proposta.clienteTelefone,
-            rg: proposta.clienteRg,
-            orgaoEmissor: proposta.clienteOrgaoEmissor,
-            estadoCivil: proposta.clienteEstadoCivil,
-            nacionalidade: proposta.clienteNacionalidade,
-            cep: proposta.clienteCep,
-            endereco: proposta.clienteEndereco,
-            ocupacao: proposta.clienteOcupacao,
-            dataNascimento: proposta.clienteDataNascimento,
-            renda: proposta.clienteRenda
-          },
-          // Reconstruct condicoes_data from normalized fields
-          condicoes_data: {
-            valor: proposta.valor,
-            prazo: proposta.prazo,
-            finalidade: proposta.finalidade,
-            garantia: proposta.garantia,
-            valorTac: proposta.valorTac,
-            valorIof: proposta.valorIof,
-            valorTotalFinanciado: proposta.valorTotalFinanciado,
-            taxaJuros: proposta.taxaJuros
-          },
+          cliente_data: clienteData,
+          condicoes_data: condicoesData,
           // Mapear snake_case para camelCase para compatibilidade frontend
           documentosAdicionais: proposta.documentosAdicionais,
           contratoGerado: proposta.contratoGerado,
@@ -1340,7 +1293,8 @@ app.get("/api/tabelas-comerciais-disponiveis", jwtAuthMiddleware, async (req: Au
         };
       });
 
-      console.log(`[${new Date().toISOString()}] Retornando ${formalizacaoPropostas.length} propostas em formalização`);
+      console.log(`[${new Date().toISOString()}] Retornando ${formalizacaoPropostas.length} propostas em formalização com parsing JSONB`);
+      console.log(`[DEBUG] Primeira proposta cliente_data type:`, typeof formalizacaoPropostas[0]?.cliente_data);
       res.json(formalizacaoPropostas);
     } catch (error) {
       console.error("Erro ao buscar propostas de formalização:", error);
@@ -1514,30 +1468,8 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
         .select({
           id: propostas.id,
           status: propostas.status,
-          // Cliente fields
-          clienteNome: propostas.clienteNome,
-          clienteCpf: propostas.clienteCpf,
-          clienteEmail: propostas.clienteEmail,
-          clienteTelefone: propostas.clienteTelefone,
-          clienteRg: propostas.clienteRg,
-          clienteOrgaoEmissor: propostas.clienteOrgaoEmissor,
-          clienteEstadoCivil: propostas.clienteEstadoCivil,
-          clienteNacionalidade: propostas.clienteNacionalidade,
-          clienteCep: propostas.clienteCep,
-          clienteEndereco: propostas.clienteEndereco,
-          clienteOcupacao: propostas.clienteOcupacao,
-          clienteDataNascimento: propostas.clienteDataNascimento,
-          clienteRenda: propostas.clienteRenda,
-          // Condições fields
-          valor: propostas.valor,
-          prazo: propostas.prazo,
-          finalidade: propostas.finalidade,
-          garantia: propostas.garantia,
-          valorTac: propostas.valorTac,
-          valorIof: propostas.valorIof,
-          valorTotalFinanciado: propostas.valorTotalFinanciado,
-          taxaJuros: propostas.taxaJuros,
-          // Formalização fields
+          clienteData: propostas.clienteData,
+          condicoesData: propostas.condicoesData,
           dataAprovacao: propostas.dataAprovacao,
           documentosAdicionais: propostas.documentosAdicionais,
           contratoGerado: propostas.contratoGerado,
