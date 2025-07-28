@@ -23,7 +23,7 @@ import {
 import PartnerForm from "@/components/parceiros/PartnerForm";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Link } from "wouter";
-import { api } from "@/lib/apiClient";
+import { apiClient } from "@/lib/apiClient";
 import { queryClient } from "@/lib/queryClient";
 import { queryKeys } from "@/hooks/queries/queryKeys";
 import { useToast } from "@/hooks/use-toast";
@@ -41,16 +41,22 @@ const PartnersPage: React.FC = () => {
   const { data: partners = [], isLoading, error } = useQuery<Parceiro[]>({
     queryKey: queryKeys.partners.list(),
     queryFn: async () => {
-      const response = await api.get<Parceiro[]>("/api/parceiros");
-      return response.data;
+      const response = await apiClient.get<Parceiro[]>("/api/parceiros");
+      return response;
     },
   });
 
   // Create partner mutation using new apiClient
   const createMutation = useMutation({
     mutationFn: async (data: InsertParceiro) => {
-      const response = await api.post<Parceiro>("/api/admin/parceiros", data);
-      return response.data;
+      // Temporariamente mantendo fetch direto até FASE 3
+      const response = await fetch("/api/admin/parceiros", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error("Erro ao criar parceiro");
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.partners.all });
@@ -73,8 +79,14 @@ const PartnersPage: React.FC = () => {
   // Update partner mutation using new apiClient
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: Partial<InsertParceiro> }) => {
-      const response = await api.put<Parceiro>(`/api/admin/parceiros/${id}`, data);
-      return response.data;
+      // Temporariamente mantendo fetch direto até FASE 3
+      const response = await fetch(`/api/admin/parceiros/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error("Erro ao atualizar parceiro");
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.partners.all });
@@ -97,8 +109,12 @@ const PartnersPage: React.FC = () => {
   // Delete partner mutation using new apiClient
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      const response = await api.delete(`/api/admin/parceiros/${id}`);
-      return response.data;
+      // Temporariamente mantendo fetch direto até FASE 3
+      const response = await fetch(`/api/admin/parceiros/${id}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) throw new Error("Erro ao deletar parceiro");
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.partners.all });

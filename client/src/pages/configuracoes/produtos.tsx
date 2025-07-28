@@ -47,7 +47,7 @@ export default function GestãoProdutos() {
     queryKey: ["produtos"],
     queryFn: async () => {
       const response = await api.get<Produto[]>("/api/produtos");
-      return response.data;
+      return response;
     },
   });
 

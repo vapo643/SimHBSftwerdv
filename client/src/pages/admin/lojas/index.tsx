@@ -31,7 +31,7 @@ export default function LojasPage() {
     queryKey: queryKeys.stores.list(),
     queryFn: async () => {
       const response = await api.get<Loja[]>('/api/admin/lojas');
-      return response.data;
+      return response;
     },
   });
 
