@@ -126,9 +126,7 @@ export const propostas = pgTable("propostas", {
   dataPagamento: timestamp("data_pagamento"),
   observacoesFormalização: text("observacoes_formalizacao"),
 
-  // Campos JSONB legados (mantidos para compatibilidade)
-  clienteData: text("cliente_data"),
-  condicoesData: text("condicoes_data"),
+  // Campos JSONB removidos - agora usando apenas campos normalizados
 
   // Auditoria
   userId: text("user_id"),

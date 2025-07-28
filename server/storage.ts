@@ -109,8 +109,12 @@ export class DatabaseStorage implements IStorage {
       .select(`
         id,
         status,
-        cliente_data,
-        condicoes_data,
+        cliente_nome,
+        cliente_cpf,
+        cliente_email,
+        cliente_telefone,
+        valor,
+        prazo,
         loja_id,
         created_at,
         lojas!inner (
@@ -129,20 +133,17 @@ export class DatabaseStorage implements IStorage {
       throw error;
     }
     
-    // Map the data to match the expected format, extracting from JSONB fields
+    // Map the data to match the expected format using normalized fields
     return (data || []).map((p: any) => {
-      const clienteData = p.cliente_data || {};
-      const condicoesData = p.condicoes_data || {};
-      
       return {
         id: p.id,
         status: p.status,
-        nomeCliente: clienteData.nome || 'Cliente não informado',
-        cpfCliente: clienteData.cpf,
-        emailCliente: clienteData.email,
-        telefoneCliente: clienteData.telefone,
-        valorSolicitado: condicoesData.valor || 0,
-        prazo: condicoesData.prazo,
+        nomeCliente: p.cliente_nome || 'Cliente não informado',
+        cpfCliente: p.cliente_cpf,
+        emailCliente: p.cliente_email,
+        telefoneCliente: p.cliente_telefone,
+        valorSolicitado: p.valor || 0,
+        prazo: p.prazo,
         lojaId: p.loja_id,
         createdAt: p.created_at,
         updatedAt: p.created_at,
@@ -168,8 +169,27 @@ export class DatabaseStorage implements IStorage {
       .select(`
         id,
         status,
-        cliente_data,
-        condicoes_data,  
+        cliente_nome,
+        cliente_cpf,
+        cliente_email,
+        cliente_telefone,
+        cliente_rg,
+        cliente_orgao_emissor,
+        cliente_estado_civil,
+        cliente_nacionalidade,
+        cliente_cep,
+        cliente_endereco,
+        cliente_ocupacao,
+        cliente_data_nascimento,
+        cliente_renda,
+        valor,
+        prazo,
+        finalidade,
+        garantia,
+        valor_tac,
+        valor_iof,
+        valor_total_financiado,
+        taxa_juros,
         loja_id,
         created_at,
         produto_id,
@@ -275,9 +295,32 @@ export class DatabaseStorage implements IStorage {
     return {
       id: data.id,
       status: data.status,
-      // Keep JSONB structure for editing
-      clienteData: data.cliente_data || {},
-      condicoesData: data.condicoes_data || {},
+      // Use normalized fields
+      clienteData: {
+        nome: data.cliente_nome,
+        cpf: data.cliente_cpf,
+        email: data.cliente_email,
+        telefone: data.cliente_telefone,
+        rg: data.cliente_rg,
+        orgaoEmissor: data.cliente_orgao_emissor,
+        estadoCivil: data.cliente_estado_civil,
+        nacionalidade: data.cliente_nacionalidade,
+        cep: data.cliente_cep,
+        endereco: data.cliente_endereco,
+        ocupacao: data.cliente_ocupacao,
+        dataNascimento: data.cliente_data_nascimento,
+        renda: data.cliente_renda,
+      },
+      condicoesData: {
+        valor: data.valor,
+        prazo: data.prazo,
+        finalidade: data.finalidade,
+        garantia: data.garantia,
+        valorTac: data.valor_tac,
+        valorIof: data.valor_iof,
+        valorTotalFinanciado: data.valor_total_financiado,
+        taxaJuros: data.taxa_juros,
+      },
       // Additional fields for display and logic
       motivoPendencia: data.motivo_pendencia,
       documentosAnexados: documentosAnexados, // Now includes real documents
@@ -323,17 +366,14 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createProposta(proposta: any): Promise<any> {
-    // Transform the normalized data to JSONB format for the real database schema
     const { createServerSupabaseAdminClient } = await import('./lib/supabase');
     const supabase = createServerSupabaseAdminClient();
     
-    // Use the JSONB objects directly from the incoming data
+    // Extract normalized data from the incoming objects
     const clienteData = proposta.clienteData || {};
     const condicoesData = proposta.condicoesData || {};
     
-
-    
-    // Insert with the real database schema
+    // Insert with normalized fields
     const { data, error } = await supabase
       .from('propostas')
       .insert({
@@ -343,8 +383,29 @@ export class DatabaseStorage implements IStorage {
         user_id: proposta.userId,
         produto_id: proposta.produtoId,
         tabela_comercial_id: proposta.tabelaComercialId,
-        cliente_data: clienteData,
-        condicoes_data: condicoesData
+        // Cliente fields
+        cliente_nome: clienteData.nome,
+        cliente_cpf: clienteData.cpf,
+        cliente_email: clienteData.email,
+        cliente_telefone: clienteData.telefone,
+        cliente_rg: clienteData.rg,
+        cliente_orgao_emissor: clienteData.orgaoEmissor,
+        cliente_estado_civil: clienteData.estadoCivil,
+        cliente_nacionalidade: clienteData.nacionalidade,
+        cliente_cep: clienteData.cep,
+        cliente_endereco: clienteData.endereco,
+        cliente_ocupacao: clienteData.ocupacao,
+        cliente_data_nascimento: clienteData.dataNascimento,
+        cliente_renda: clienteData.renda,
+        // Condições fields
+        valor: condicoesData.valor,
+        prazo: condicoesData.prazo,
+        finalidade: condicoesData.finalidade,
+        garantia: condicoesData.garantia,
+        valor_tac: condicoesData.valorTac,
+        valor_iof: condicoesData.valorIof,
+        valor_total_financiado: condicoesData.valorTotalFinanciado,
+        taxa_juros: condicoesData.taxaJuros,
       })
       .select()
       .single();

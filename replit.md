@@ -199,6 +199,11 @@ This is a full-stack TypeScript application for credit management called "Simpix
 - **Frontend JSONB Integration**: Updated pagamentos.tsx to handle real database JSONB structure (clienteData, condicoesData) instead of mock flat fields
 - **Payment Processing Flow**: Enhanced payment mutations and cache invalidation to work with new endpoint and data structure
 - **Complete Pendency Management System (January 25)**: Implemented comprehensive proposal pendency workflow allowing analysts to send proposals back to attendants with observations
+- **Complete JSONB Field Elimination (January 28)**: Successfully removed all JSONB fields from entire codebase, migrating to fully normalized database structure
+- **Backend Normalization Completed**: Eliminated clienteData/condicoesData JSONB fields from schema.ts, storage.ts, and all API routes
+- **Frontend Refactoring Completed**: Updated all React components (editar.tsx, formalizacao.tsx, dashboard.tsx) to work with normalized data structure
+- **Data Flow Optimization**: Backend now returns cliente_data and condicoes_data objects reconstructed from normalized fields for frontend compatibility
+- **Performance Enhancement**: Normalized structure provides superior query performance, type safety, and database scalability
 - **Visual Pendency Indicators**: Added orange warning styling (status-warning class) for pending proposals in dashboard with analyst observations display
 - **Edit Pending Proposals Page**: Created dedicated /propostas/editar/:id page for attendants to modify pending proposals while viewing analyst feedback
 - **Enhanced Document Viewer**: Improved DocumentViewer component to properly support PDF, JPG, JPEG, and PNG formats with file extension detection

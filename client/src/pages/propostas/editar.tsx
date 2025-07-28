@@ -257,8 +257,8 @@ const EditarPropostaPendenciada: React.FC = () => {
       if (Object.keys(formData.clienteData).length > 0 || Object.keys(formData.condicoesData).length > 0) {
         console.log('🔍 SALVANDO ALTERAÇÕES antes de reenviar');
         await api.put(`/api/propostas/${id}`, {
-          cliente_data: formData.clienteData,
-          condicoes_data: formData.condicoesData
+          clienteData: formData.clienteData,
+          condicoesData: formData.condicoesData
         });
       }
       
@@ -403,8 +403,8 @@ const EditarPropostaPendenciada: React.FC = () => {
 
   const handleSave = () => {
     updateMutation.mutate({
-      cliente_data: formData.clienteData,
-      condicoes_data: formData.condicoesData
+      clienteData: formData.clienteData,
+      condicoesData: formData.condicoesData
     });
   };
 
