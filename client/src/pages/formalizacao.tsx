@@ -347,18 +347,20 @@ function FormalizacaoList() {
 }
 
 export default function Formalizacao() {
+  // 🔧 CORREÇÃO CRÍTICA: Mover TODOS os hooks para o topo (Rules of Hooks)
   const [, params] = useRoute("/formalizacao/acompanhamento/:id");
   const [, setLocation] = useLocation();
+  const [activeTab, setActiveTab] = useState<"timeline" | "documents" | "contracts">("timeline");
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+  
   const propostaId = params?.id;
 
   // If no ID provided, show list of propostas for formalization
   if (!propostaId) {
     return <FormalizacaoList />;
   }
-  const [activeTab, setActiveTab] = useState<"timeline" | "documents" | "contracts">("timeline");
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-  const { user } = useAuth();
 
   const { data: proposta, isLoading } = useQuery<Proposta>({
     queryKey: ["/api/propostas", propostaId],
