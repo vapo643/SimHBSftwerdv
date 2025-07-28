@@ -1241,7 +1241,7 @@ app.get("/api/tabelas-comerciais-disponiveis", jwtAuthMiddleware, async (req: Au
         'pronto_pagamento'
       ];
 
-      // Query proposals with formalization statuses
+      // Query proposals with formalization statuses using correct column name
       const formalizacaoPropostas = await db
         .select()
         .from(propostas)
@@ -1403,101 +1403,7 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
     }
   });
 
-  // Endpoint for formalization queue list
-  app.get("/api/propostas/formalizacao", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
-    try {
-      const { createServerSupabaseClient } = await import('./lib/supabase');
-      const supabase = createServerSupabaseClient();
-      
-      // Buscar propostas em processo de formalização
-      const { data: propostas, error } = await supabase
-        .from('propostas')
-        .select(`
-          id,
-          status,
-          cliente_data,
-          condicoes_data,
-          loja_id,
-          created_at,
-          updated_at,
-          data_aprovacao,
-          documentos_adicionais,
-          contrato_gerado,
-          contrato_assinado,
-          data_assinatura,
-          data_pagamento,
-          observacoes_formalizacao,
-          lojas!inner (
-            id,
-            nome_loja,
-            parceiros!inner (
-              id,
-              razao_social
-            )
-          )
-        `)
-        .in('status', ['aprovado', 'documentos_enviados', 'contratos_preparados', 'contratos_assinados', 'pronto_pagamento'])
-        .order('created_at', { ascending: false });
-      
-      if (error) {
-        console.error('Erro ao buscar propostas de formalização:', error);
-        return res.status(500).json({ 
-          message: "Erro ao buscar propostas de formalização" 
-        });
-      }
-      
-      // Transformar dados para o formato esperado pelo frontend
-      const propostasFormatadas = (propostas || []).map((p: any) => {
-        const clienteData = p.cliente_data || {};
-        const condicoesData = p.condicoes_data || {};
-        
-        return {
-          id: p.id,
-          status: p.status,
-          clienteNome: clienteData.nome || 'Cliente não informado',
-          clienteCpf: clienteData.cpf,
-          clienteEmail: clienteData.email,
-          clienteTelefone: clienteData.telefone,
-          clienteDataNascimento: clienteData.dataNascimento,
-          clienteRenda: clienteData.renda,
-          valor: condicoesData.valor || 0,
-          valorAprovado: condicoesData.valorAprovado || condicoesData.valor || 0,
-          taxaJuros: condicoesData.taxaJuros || 0,
-          prazo: condicoesData.prazo || 0,
-          finalidade: condicoesData.finalidade,
-          garantia: condicoesData.garantia,
-          documentos: [],
-          documentosAdicionais: p.documentos_adicionais,
-          contratoGerado: p.contrato_gerado || false,
-          contratoAssinado: p.contrato_assinado || false,
-          dataAprovacao: p.data_aprovacao,
-          dataAssinatura: p.data_assinatura,
-          dataPagamento: p.data_pagamento,
-          observacoesFormalização: p.observacoes_formalizacao,
-          createdAt: p.created_at,
-          updatedAt: p.updated_at || p.created_at,
-          loja: p.lojas && p.lojas[0] ? {
-            id: p.lojas[0].id,
-            nome: p.lojas[0].nome_loja,
-            parceiro: p.lojas[0].parceiros && p.lojas[0].parceiros[0] ? {
-              id: p.lojas[0].parceiros[0].id,
-              razaoSocial: p.lojas[0].parceiros[0].razao_social
-            } : null
-          } : null
-        };
-      });
-      
-      console.log(`[${new Date().toISOString()}] Retornando ${propostasFormatadas.length} propostas de formalização para usuário:`, req.user?.id);
-      console.log("Propostas de formalização:", propostasFormatadas.map(p => ({ id: p.id, status: p.status, clienteNome: p.clienteNome })));
-      res.json(propostasFormatadas);
-      
-    } catch (error) {
-      console.error('Erro ao buscar propostas de formalização:', error);
-      res.status(500).json({ 
-        message: "Erro interno do servidor ao buscar propostas de formalização" 
-      });
-    }
-  });
+
 
   // Endpoint for formalization data
   app.get("/api/propostas/:id/formalizacao", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
