@@ -82,6 +82,12 @@ This is a full-stack TypeScript application for credit management called "Simpix
 
 ### January 2025
 
+- **Complete Document Flow Implementation FINALIZED (January 28)**: Successfully implemented end-to-end document management system with private bucket, folder organization, and secure visualization
+- **Private Storage Architecture**: Created secure private bucket 'documents' with folder structure 'proposta-{ID}/{timestamp}-{filename}' for proper organization
+- **Document Association System**: Implemented 3-step process: Create proposal → Upload documents with real ID → Associate via proposta_documentos table
+- **Secure URL Generation**: All document access uses temporary signed URLs (1-hour expiry) for private bucket security
+- **Complete Visualization Fix**: Documents uploaded during proposal creation now properly appear in analysis interface with full document viewer functionality
+- **API Endpoint Enhancement**: Added POST /api/propostas/:id/documentos for proper document-proposal association after upload
 - **Critical RLS Security Policies CORRECTED (January 28)**: Fixed 3 critical Row Level Security policy gaps identified in comprehensive security audit
 - **Profiles Table Security**: Enhanced policy to allow ADMINISTRADOR access to all user profiles while maintaining user-specific access control
 - **Partners/Stores Access Control**: Corrected lojas policy to allow GERENTE access to their own store while maintaining ADMINISTRADOR full access, confirmed parceiros restricted to ADMINISTRADOR only
