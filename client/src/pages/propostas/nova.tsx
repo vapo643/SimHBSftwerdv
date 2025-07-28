@@ -80,45 +80,8 @@ function ProposalForm() {
   // Submit mutation
   const submitProposal = useMutation({
     mutationFn: async () => {
-      // 1. PRIMEIRO: Upload dos documentos para o Supabase Storage
-      const uploadedDocuments: string[] = [];
-      
-      if (state.documents.length > 0) {
-        console.log(`[DEBUG] Iniciando upload de ${state.documents.length} documentos`);
-        
-        // Gerar ID temporário da proposta para organizar os arquivos
-        const tempPropostaId = `PROP-${Date.now()}-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
-        
-        for (const doc of state.documents) {
-          try {
-            const timestamp = Date.now();
-            const fileName = `${timestamp}-${doc.name}`;
-            const filePath = `proposta-${tempPropostaId}/${fileName}`;
-            
-            // Upload usando apiRequest com FormData
-            const formData = new FormData();
-            formData.append('file', doc.file);
-            formData.append('filename', fileName);
-            formData.append('proposalId', tempPropostaId);
-            
-            const uploadResponse = await apiRequest('/api/upload', {
-              method: 'POST',
-              body: formData,
-            });
-            
-            console.log(`[DEBUG] Documento ${doc.name} enviado com sucesso:`, uploadResponse);
-            uploadedDocuments.push(fileName);
-            
-          } catch (uploadError) {
-            console.error(`[ERROR] Falha ao enviar documento ${doc.name}:`, uploadError);
-            throw new Error(`Falha ao enviar documento ${doc.name}. Tente novamente.`);
-          }
-        }
-        
-        console.log(`[DEBUG] Todos os ${uploadedDocuments.length} documentos enviados com sucesso`);
-      }
-      
-      // 2. SEGUNDO: Criar a proposta com dados + lista de documentos
+      // NOVO FLUXO: Criar proposta primeiro, depois upload com ID real
+      // 1. PRIMEIRO: Criar a proposta sem documentos
       const proposalData = {
         // Cliente data - matching schema field names
         clienteNome: state.clientData.nome,
@@ -153,19 +116,66 @@ function ProposalForm() {
         lojaId: state.context?.atendente?.loja?.id,
         finalidade: 'Empréstimo pessoal',
         garantia: 'Sem garantia',
-        
-        // CRÍTICO: Incluir lista de documentos para associação no backend
-        documentos: uploadedDocuments,
       };
 
-      console.log(`[DEBUG] Criando proposta com ${uploadedDocuments.length} documentos associados`);
-      
-      const response = await apiRequest('/api/propostas', {
+      console.log(`[DEBUG] Criando proposta primeiro...`);
+      const propostaResponse = await apiRequest('/api/propostas', {
         method: 'POST',
         body: proposalData,
       });
-
-      return response;
+      
+      const propostaId = propostaResponse.id;
+      console.log(`[DEBUG] Proposta criada com ID: ${propostaId}`);
+      
+      // 2. SEGUNDO: Upload dos documentos com ID real da proposta
+      const uploadedDocuments: string[] = [];
+      
+      if (state.documents.length > 0) {
+        console.log(`[DEBUG] Iniciando upload de ${state.documents.length} documentos para proposta ${propostaId}`);
+        
+        for (const doc of state.documents) {
+          try {
+            const timestamp = Date.now();
+            const fileName = `${timestamp}-${doc.name}`;
+            
+            // Upload usando apiRequest com FormData
+            const formData = new FormData();
+            formData.append('file', doc.file);
+            formData.append('filename', fileName);
+            formData.append('proposalId', propostaId); // Usar ID real da proposta
+            
+            const uploadResponse = await apiRequest('/api/upload', {
+              method: 'POST',
+              body: formData,
+            });
+            
+            console.log(`[DEBUG] Documento ${doc.name} enviado com sucesso:`, uploadResponse);
+            uploadedDocuments.push(fileName);
+            
+          } catch (uploadError) {
+            console.error(`[ERROR] Falha ao enviar documento ${doc.name}:`, uploadError);
+            throw new Error(`Falha ao enviar documento ${doc.name}. Tente novamente.`);
+          }
+        }
+        
+        console.log(`[DEBUG] Todos os ${uploadedDocuments.length} documentos enviados com sucesso`);
+        
+        // 3. TERCEIRO: Associar documentos na proposta via API específica
+        if (uploadedDocuments.length > 0) {
+          try {
+            await apiRequest(`/api/propostas/${propostaId}/documentos`, {
+              method: 'POST',
+              body: { documentos: uploadedDocuments }
+            });
+            console.log(`[DEBUG] ${uploadedDocuments.length} documentos associados à proposta ${propostaId}`);
+          } catch (associationError) {
+            console.error(`[ERROR] Falha ao associar documentos:`, associationError);
+            // Não falhar a operação, documentos já estão no storage
+          }
+        }
+      }
+      
+      return propostaResponse;
     },
     onSuccess: (data) => {
       toast({
@@ -174,7 +184,9 @@ function ProposalForm() {
       });
       
       // Limpar documentos após sucesso
-      setContext(state.context);
+      if (state.context) {
+        setContext(state.context);
+      }
       setStep(0);
     },
     onError: (error) => {

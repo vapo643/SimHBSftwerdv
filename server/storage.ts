@@ -354,6 +354,10 @@ export class DatabaseStorage implements IStorage {
       throw error;
     }
     
+    console.log(`[DEBUG] Proposta ${data.id} criada com sucesso`);
+    
+    // Documents will be uploaded and associated separately via /api/propostas/:id/documentos endpoint
+    
     return data;
   }
 

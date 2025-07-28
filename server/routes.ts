@@ -569,38 +569,73 @@ export async function registerRoutes(app: Express): Promise<Server> {
         tabelaComercialId: dataWithId.tabelaComercialId
       };
       
-
-      
       // Create the proposal
       const proposta = await storage.createProposta(dataForDatabase);
       
-      // Associate documents if provided
-      if (req.body.documentos && Array.isArray(req.body.documentos) && req.body.documentos.length > 0) {
+      res.status(201).json(proposta);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        console.error("Validation error:", error.errors);
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      console.error("Create proposta error:", error);
+      res.status(500).json({ message: "Failed to create proposta" });
+    }
+  });
+
+  // Endpoint específico para associar documentos a uma proposta
+  app.post("/api/propostas/:id/documentos", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { id: propostaId } = req.params;
+      const { documentos } = req.body;
+      
+      if (!documentos || !Array.isArray(documentos)) {
+        return res.status(400).json({ message: 'Lista de documentos é obrigatória' });
+      }
+      
+      const { createServerSupabaseAdminClient } = await import('./lib/supabase');
+      const supabase = createServerSupabaseAdminClient();
+      
+      console.log(`[DEBUG] Associando ${documentos.length} documentos à proposta ${propostaId}`);
+      
+      // Inserir associações na tabela proposta_documentos
+      for (const fileName of documentos) {
         try {
-          const { createServerSupabaseClient } = await import('./lib/supabase');
-          const supabase = createServerSupabaseClient();
+          const filePath = `proposta-${propostaId}/${fileName}`;
           
-          // Insert document associations
-          for (const nomeArquivo of req.body.documentos) {
-            await supabase
-              .from('proposta_documentos')
-              .insert({
-                proposta_id: proposta.id,
-                nome_arquivo: nomeArquivo,
-                url: `${process.env.SUPABASE_URL}/storage/v1/object/public/documents/${nomeArquivo}`,
-                tipo: nomeArquivo.endsWith('.pdf') ? 'application/pdf' : 
-                      nomeArquivo.endsWith('.jpg') || nomeArquivo.endsWith('.jpeg') ? 'image/jpeg' : 
-                      nomeArquivo.endsWith('.png') ? 'image/png' : 'application/octet-stream'
-              });
+          // Gerar URL assinada para o documento
+          const { data: signedUrlData } = await supabase.storage
+            .from('documents')
+            .createSignedUrl(filePath, 3600); // 1 hora
+          
+          const { error: insertError } = await supabase
+            .from('proposta_documentos')
+            .insert({
+              proposta_id: propostaId,
+              nome_arquivo: fileName.split('-').slice(1).join('-'), // Remove timestamp prefix
+              url: signedUrlData?.signedUrl || `documents/${filePath}`,
+              tipo: fileName.endsWith('.pdf') ? 'application/pdf' : 
+                    fileName.endsWith('.jpg') || fileName.endsWith('.jpeg') ? 'image/jpeg' : 
+                    fileName.endsWith('.png') ? 'image/png' : 
+                    fileName.endsWith('.gif') ? 'image/gif' : 'application/octet-stream',
+              tamanho: 0 // Will be updated if size is available
+            });
+          
+          if (insertError) {
+            console.error(`[ERROR] Falha ao associar documento ${fileName}:`, insertError);
+          } else {
+            console.log(`[DEBUG] Documento ${fileName} associado com sucesso à proposta ${propostaId}`);
           }
-          console.log(`[${new Date().toISOString()}] Associados ${req.body.documentos.length} documentos à proposta ${proposta.id}`);
         } catch (docError) {
-          console.error('Erro ao associar documentos:', docError);
-          // Continue sem falhar a criação da proposta
+          console.error(`[ERROR] Erro ao processar documento ${fileName}:`, docError);
         }
       }
       
-      res.status(201).json(proposta);
+      res.json({ 
+        success: true, 
+        message: `${documentos.length} documentos associados com sucesso`,
+        proposalId: propostaId
+      });
     } catch (error) {
       if (error instanceof z.ZodError) {
         console.error("Validation error:", error.errors);
@@ -813,7 +848,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
     } catch (error) {
       console.error('Erro no setup:', error);
-      res.status(500).json({ message: 'Erro interno', error: error.message });
+      res.status(500).json({ 
+        message: 'Erro interno', 
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      });
     }
   });
 
