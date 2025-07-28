@@ -26,7 +26,7 @@ const DocumentsTab: React.FC<{ propostaId: string }> = ({ propostaId }) => {
       const response = await api.get(`/api/propostas/${propostaId}/documents`);
       return response.data;
     },
-    enabled: !!propostaId,
+    enabled: !!propostaId && propostaId.trim() !== '' && propostaId !== 'undefined',
   });
 
   // Mutation para upload de arquivo
@@ -160,6 +160,21 @@ const EditarPropostaPendenciada: React.FC = () => {
   const queryClient = useQueryClient();
   
   console.log('🔍 COMPONENTE INICIADO com ID:', id);
+  
+  // Validação early return para IDs inválidos - DEVE estar antes de qualquer hook
+  if (!id || id.trim() === '' || id === 'undefined' || id === 'null') {
+    console.log('🔍 ID INVÁLIDO DETECTADO:', id, ' - redirecionando para dashboard');
+    return (
+      <DashboardLayout title="Erro">
+        <Alert variant="destructive">
+          <AlertDescription>
+            ID de proposta inválido. Redirecionando para o dashboard...
+          </AlertDescription>
+        </Alert>
+      </DashboardLayout>
+    );
+  }
+  
   const [activeTab, setActiveTab] = useState("dados-cliente");
   
   // Estado inicial para os formulários - DEVE estar antes de qualquer retorno condicional
@@ -183,7 +198,7 @@ const EditarPropostaPendenciada: React.FC = () => {
         throw error;
       }
     },
-    enabled: !!id,
+    enabled: !!id && id.trim() !== '' && id !== 'undefined', // Validação mais robusta
     refetchOnWindowFocus: false, // Desabilitado para evitar rate limiting
     refetchOnReconnect: true,
     staleTime: 5 * 60 * 1000, // 5 minutos - dados ficam válidos por mais tempo
