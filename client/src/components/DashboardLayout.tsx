@@ -36,6 +36,8 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     { name: "Nova Proposta", href: "/propostas/nova", icon: PlusCircle },
     { name: "Minhas Propostas", href: "/credito/fila", icon: List },
+    { name: "Formalização", href: "/formalizacao", icon: FileText },
+    { name: "Formalização", href: "/formalizacao", icon: FileText },
   ];
 
   const analystNavigation = [
