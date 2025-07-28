@@ -476,13 +476,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`🔐 [FORMALIZATION] Querying for user ${req.user?.id} with role ${req.user?.role}`);
 
-      // Query proposals via Supabase Client personalizado para respeitar RLS
+      // 🔧 CORREÇÃO: Query simplificada para evitar recursão RLS
+      // Remover JOINs complexos que causam "infinite recursion" nas políticas RLS
       const { data: rawPropostas, error } = await userSupabase
         .from('propostas')
-        .select(`
-          *,
-          lojas!inner(id, nome_loja, parceiros!inner(id, razao_social))
-        `)
+        .select('*')
         .in('status', formalizationStatuses)
         .order('created_at', { ascending: false });
 
