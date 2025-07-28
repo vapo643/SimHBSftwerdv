@@ -42,7 +42,7 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
 
   const analystNavigation = [
     { name: "Fila de Análise", href: "/credito/fila", icon: List },
-    { name: "Formalização", href: "/formalizacao/fila", icon: FileText },
+    // Nota: ANALISTA não tem acesso à Formalização conforme regras de negócio
   ];
 
   const managerNavigation = [

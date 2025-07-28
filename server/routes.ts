@@ -1248,7 +1248,7 @@ app.get("/api/tabelas-comerciais-disponiveis", jwtAuthMiddleware, async (req: Au
         .where(inArray(propostas.status, formalizationStatuses))
         .orderBy(desc(propostas.createdAt));
 
-      // CORREÇÃO CRÍTICA: Parse JSONB fields para objetos JavaScript
+      // CORREÇÃO CRÍTICA: Parse JSONB fields e mapear snake_case para frontend
       const formalizacaoPropostas = rawPropostas.map(proposta => {
         let clienteData = null;
         let condicoesData = null;
@@ -1280,7 +1280,16 @@ app.get("/api/tabelas-comerciais-disponiveis", jwtAuthMiddleware, async (req: Au
         return {
           ...proposta,
           cliente_data: clienteData,
-          condicoes_data: condicoesData
+          condicoes_data: condicoesData,
+          // Mapear snake_case para camelCase para compatibilidade frontend
+          documentosAdicionais: proposta.documentosAdicionais,
+          contratoGerado: proposta.contratoGerado,
+          contratoAssinado: proposta.contratoAssinado,
+          dataAprovacao: proposta.dataAprovacao,
+          dataAssinatura: proposta.dataAssinatura,
+          dataPagamento: proposta.dataPagamento,
+          observacoesFormalização: proposta.observacoesFormalização,
+          loja_id: proposta.lojaId
         };
       });
 

@@ -82,6 +82,12 @@ This is a full-stack TypeScript application for credit management called "Simpix
 
 ### January 2025
 
+- **Complete Formalization Queue Implementation (January 28)**: Successfully implemented end-to-end formalization queue system with backend endpoint, frontend integration, and proper RBAC navigation permissions
+- **Backend Endpoint Creation**: Built GET /api/propostas/formalizacao endpoint with JSONB parsing, authentication middleware, and proper status filtering for formalization workflow
+- **Frontend TypeScript Fixes**: Corrected property name mismatches between camelCase frontend and snake_case database schema (contrato_gerado, documentos_adicionais, etc.)
+- **RBAC Navigation Permissions**: Fixed navigation permissions per business rules - ANALISTA users no longer see "Formalização" menu item, restricted to ATENDENTE, GERENTE, FINANCEIRO, and ADMINISTRADOR only
+- **Data Parsing Enhancement**: Implemented robust JSONB field parsing in both backend and frontend with defensive parsing to prevent crashes on malformed data
+
 - **Complete Document Flow Implementation FINALIZED (January 28)**: Successfully implemented end-to-end document management system with private bucket, folder organization, and secure visualization
 - **Private Storage Architecture**: Created secure private bucket 'documents' with folder structure 'proposta-{ID}/{timestamp}-{filename}' for proper organization
 - **Document Association System**: Implemented 3-step process: Create proposal → Upload documents with real ID → Associate via proposta_documentos table

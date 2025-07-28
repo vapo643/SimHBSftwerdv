@@ -369,7 +369,7 @@ export default function Formalizacao() {
     resolver: zodResolver(updateFormalizacaoSchema),
     defaultValues: {
       status: proposta?.status as any,
-      documentosAdicionais: proposta?.documentosAdicionais || [],
+      documentosAdicionais: proposta?.documentos_adicionais || [],
       contratoGerado: proposta?.contrato_gerado || false,
       contratoAssinado: proposta?.contrato_assinado || false,
       observacoesFormalização: proposta?.observacoes_formalizacao || "",
@@ -864,19 +864,19 @@ export default function Formalizacao() {
                       <div className="flex items-center gap-3 rounded-lg bg-gray-50 p-4">
                         <div
                           className={`flex h-10 w-10 items-center justify-center rounded-full ${
-                            proposta.contratoGerado ? "bg-green-100" : "bg-gray-200"
+                            proposta.contrato_gerado ? "bg-green-100" : "bg-gray-200"
                           }`}
                         >
                           <FileCheck
                             className={`h-5 w-5 ${
-                              proposta.contratoGerado ? "text-green-600" : "text-gray-400"
+                              proposta.contrato_gerado ? "text-green-600" : "text-gray-400"
                             }`}
                           />
                         </div>
                         <div>
                           <p className="font-medium text-gray-900">Contrato Gerado</p>
                           <p className="text-sm text-gray-600">
-                            {proposta.contratoGerado ? "Sim" : "Não"}
+                            {proposta.contrato_gerado ? "Sim" : "Não"}
                           </p>
                         </div>
                       </div>
@@ -884,19 +884,19 @@ export default function Formalizacao() {
                       <div className="flex items-center gap-3 rounded-lg bg-gray-50 p-4">
                         <div
                           className={`flex h-10 w-10 items-center justify-center rounded-full ${
-                            proposta.contratoAssinado ? "bg-green-100" : "bg-gray-200"
+                            proposta.contrato_assinado ? "bg-green-100" : "bg-gray-200"
                           }`}
                         >
                           <Signature
                             className={`h-5 w-5 ${
-                              proposta.contratoAssinado ? "text-green-600" : "text-gray-400"
+                              proposta.contrato_assinado ? "text-green-600" : "text-gray-400"
                             }`}
                           />
                         </div>
                         <div>
                           <p className="font-medium text-gray-900">Contrato Assinado</p>
                           <p className="text-sm text-gray-600">
-                            {proposta.contratoAssinado ? "Sim" : "Não"}
+                            {proposta.contrato_assinado ? "Sim" : "Não"}
                           </p>
                         </div>
                       </div>
