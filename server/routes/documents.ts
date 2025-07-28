@@ -55,14 +55,54 @@ export const getPropostaDocuments = async (req: AuthenticatedRequest, res: Respo
 
     if (!docsError && propostaDocumentos) {
       for (const doc of propostaDocumentos) {
-        documents.push({
-          name: doc.nome_arquivo,
-          url: doc.url,
-          type: doc.tipo || 'application/octet-stream',
-          size: doc.tamanho ? `${Math.round(doc.tamanho / 1024)} KB` : undefined,
-          uploadDate: doc.created_at,
-          category: 'supporting'
-        });
+        try {
+          // Construir o caminho do arquivo no storage: proposta-{id}/{timestamp}-{fileName}
+          // A URL salva contém o caminho completo: https://xxx.supabase.co/storage/v1/object/public/documents/proposta-{id}/{fileName}
+          // Extrair o caminho após '/documents/'
+          const documentsIndex = doc.url.indexOf('/documents/');
+          let filePath;
+          
+          if (documentsIndex !== -1) {
+            // Extrair caminho após '/documents/'
+            filePath = doc.url.substring(documentsIndex + '/documents/'.length);
+          } else {
+            // Fallback: tentar extrair filename e reconstruir
+            const urlParts = doc.url.split('/');
+            const fileName = urlParts[urlParts.length - 1];
+            filePath = `proposta-${propostaId}/${fileName}`;
+          }
+          
+          console.log(`[DEBUG] Gerando URL assinada para: ${filePath}`);
+          
+          // Gerar URL assinada temporária (válida por 1 hora)
+          const { data: signedUrl, error: signError } = await supabase.storage
+            .from('documents')
+            .createSignedUrl(filePath, 3600); // 1 hora
+          
+          if (signError) {
+            console.error(`[ERROR] Erro ao gerar URL assinada para ${filePath}:`, signError);
+          }
+          
+          documents.push({
+            name: doc.nome_arquivo,
+            url: signError ? doc.url : signedUrl.signedUrl, // Fallback para URL original se houver erro
+            type: doc.tipo || 'application/octet-stream',
+            size: doc.tamanho ? `${Math.round(doc.tamanho / 1024)} KB` : undefined,
+            uploadDate: doc.created_at,
+            category: 'supporting'
+          });
+        } catch (error) {
+          console.error(`Erro ao gerar URL assinada para documento ${doc.nome_arquivo}:`, error);
+          // Fallback para URL original
+          documents.push({
+            name: doc.nome_arquivo,
+            url: doc.url,
+            type: doc.tipo || 'application/octet-stream',
+            size: doc.tamanho ? `${Math.round(doc.tamanho / 1024)} KB` : undefined,
+            uploadDate: doc.created_at,
+            category: 'supporting'
+          });
+        }
       }
     }
 
