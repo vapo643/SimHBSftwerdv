@@ -20,7 +20,7 @@ export const getPropostaDocuments = async (req: AuthenticatedRequest, res: Respo
 
     const supabase = createServerSupabaseAdminClient();
     
-    // Buscar a proposta para verificar se existe e pegar documentos
+    // Buscar a proposta para verificar se existe
     const { data: proposta, error: propostaError } = await supabase
       .from('propostas')
       .select('id, ccb_documento_url')
@@ -46,31 +46,23 @@ export const getPropostaDocuments = async (req: AuthenticatedRequest, res: Respo
       });
     }
 
-    // Buscar outros documentos relacionados à proposta no storage
-    // Para expandir no futuro quando tivermos mais tipos de documento
-    const { data: storageFiles, error: storageError } = await supabase.storage
-      .from('documents')
-      .list(`proposta-${propostaId}/`, {
-        limit: 100,
-        sortBy: { column: 'created_at', order: 'desc' }
-      });
+    // Buscar documentos da tabela proposta_documentos
+    const { data: propostaDocumentos, error: docsError } = await supabase
+      .from('proposta_documentos')
+      .select('*')
+      .eq('proposta_id', propostaId)
+      .order('created_at', { ascending: false });
 
-    if (!storageError && storageFiles) {
-      for (const file of storageFiles) {
-        if (file.name && !file.name.includes('.emptyFolderPlaceholder')) {
-          const { data: publicUrl } = supabase.storage
-            .from('documents')
-            .getPublicUrl(`proposta-${propostaId}/${file.name}`);
-
-          documents.push({
-            name: file.name,
-            url: publicUrl.publicUrl,
-            type: file.metadata?.mimetype || 'application/octet-stream',
-            size: file.metadata?.size ? `${Math.round(file.metadata.size / 1024)} KB` : undefined,
-            uploadDate: file.created_at,
-            category: 'supporting'
-          });
-        }
+    if (!docsError && propostaDocumentos) {
+      for (const doc of propostaDocumentos) {
+        documents.push({
+          name: doc.nome_arquivo,
+          url: doc.url,
+          type: doc.tipo || 'application/octet-stream',
+          size: doc.tamanho ? `${Math.round(doc.tamanho / 1024)} KB` : undefined,
+          uploadDate: doc.created_at,
+          category: 'supporting'
+        });
       }
     }
 
@@ -142,6 +134,22 @@ export const uploadPropostaDocument = async (req: AuthenticatedRequest, res: Res
     const { data: publicUrl } = supabase.storage
       .from('documents')
       .getPublicUrl(filePath);
+
+    // Inserir registro na tabela proposta_documentos
+    const { error: insertError } = await supabase
+      .from('proposta_documentos')
+      .insert({
+        proposta_id: propostaId,
+        nome_arquivo: file.originalname,
+        url: publicUrl.publicUrl,
+        tipo: file.mimetype,
+        tamanho: file.size
+      });
+
+    if (insertError) {
+      console.error('Erro ao salvar documento no banco:', insertError);
+      // Não falhar a operação, mas avisar no console
+    }
 
     res.json({
       success: true,

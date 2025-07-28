@@ -17,6 +17,9 @@ import HistoricoCompartilhado from "@/components/HistoricoCompartilhado";
 
 // Componente separado para documentos
 const DocumentsTab: React.FC<{ propostaId: string }> = ({ propostaId }) => {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  
   const { data: documentos, isLoading } = useQuery({
     queryKey: [`/api/propostas/${propostaId}/documents`],
     queryFn: async () => {
@@ -25,6 +28,47 @@ const DocumentsTab: React.FC<{ propostaId: string }> = ({ propostaId }) => {
     },
     enabled: !!propostaId,
   });
+
+  // Mutation para upload de arquivo
+  const uploadMutation = useMutation({
+    mutationFn: async (file: File) => {
+      // Usar o endpoint existente que faz upload e associa à proposta
+      const formData = new FormData();
+      formData.append("file", file);
+      
+      const response = await api.post(`/api/propostas/${propostaId}/documents`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      
+      return response.data;
+    },
+    onSuccess: () => {
+      toast({
+        title: "Documento enviado com sucesso!",
+        description: "O documento foi anexado à proposta.",
+      });
+      // Invalidar a query para recarregar a lista de documentos
+      queryClient.invalidateQueries({ queryKey: [`/api/propostas/${propostaId}/documents`] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro ao enviar documento",
+        description: error.message || "Tente novamente em alguns instantes.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files && files.length > 0) {
+      Array.from(files).forEach(file => {
+        uploadMutation.mutate(file);
+      });
+    }
+  };
 
   if (isLoading) {
     return <div className="text-center py-8 text-gray-400">Carregando documentos...</div>;
@@ -73,11 +117,21 @@ const DocumentsTab: React.FC<{ propostaId: string }> = ({ propostaId }) => {
           accept=".pdf,.jpg,.jpeg,.png"
           className="hidden"
           id="file-upload"
+          onChange={handleFileUpload}
         />
         <label htmlFor="file-upload" className="cursor-pointer">
           <div className="text-gray-400">
-            <p className="text-sm font-medium">Clique para adicionar novos documentos</p>
-            <p className="text-xs mt-1">PDF, JPG, JPEG, PNG (máx. 10MB cada)</p>
+            {uploadMutation.isPending ? (
+              <>
+                <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2" />
+                <p className="text-sm font-medium">Enviando documento...</p>
+              </>
+            ) : (
+              <>
+                <p className="text-sm font-medium">Clique para adicionar novos documentos</p>
+                <p className="text-xs mt-1">PDF, JPG, JPEG, PNG (máx. 10MB cada)</p>
+              </>
+            )}
           </div>
         </label>
       </div>

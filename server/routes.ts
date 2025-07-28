@@ -573,6 +573,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Create the proposal
       const proposta = await storage.createProposta(dataForDatabase);
+      
+      // Associate documents if provided
+      if (req.body.documentos && Array.isArray(req.body.documentos) && req.body.documentos.length > 0) {
+        try {
+          const { createServerSupabaseClient } = await import('./lib/supabase');
+          const supabase = createServerSupabaseClient();
+          
+          // Insert document associations
+          for (const nomeArquivo of req.body.documentos) {
+            await supabase
+              .from('proposta_documentos')
+              .insert({
+                proposta_id: proposta.id,
+                nome_arquivo: nomeArquivo,
+                url: `${process.env.SUPABASE_URL}/storage/v1/object/public/documents/${nomeArquivo}`,
+                tipo: nomeArquivo.endsWith('.pdf') ? 'application/pdf' : 
+                      nomeArquivo.endsWith('.jpg') || nomeArquivo.endsWith('.jpeg') ? 'image/jpeg' : 
+                      nomeArquivo.endsWith('.png') ? 'image/png' : 'application/octet-stream'
+              });
+          }
+          console.log(`[${new Date().toISOString()}] Associados ${req.body.documentos.length} documentos à proposta ${proposta.id}`);
+        } catch (docError) {
+          console.error('Erro ao associar documentos:', docError);
+          // Continue sem falhar a criação da proposta
+        }
+      }
+      
       res.status(201).json(proposta);
     } catch (error) {
       if (error instanceof z.ZodError) {

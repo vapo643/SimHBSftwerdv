@@ -187,6 +187,17 @@ export const propostaLogs = pgTable("proposta_logs", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Tabela de Junção - Propostas <-> Documentos
+export const propostaDocumentos = pgTable("proposta_documentos", {
+  id: serial("id").primaryKey(),
+  propostaId: text("proposta_id").references(() => propostas.id).notNull(),
+  nomeArquivo: text("nome_arquivo").notNull(),
+  url: text("url").notNull(),
+  tamanho: integer("tamanho"), // tamanho em bytes
+  tipo: text("tipo"), // application/pdf, image/jpeg, etc
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Zod Schemas para validação
 export const insertParceiroSchema = createInsertSchema(parceiros).omit({
   id: true,
@@ -273,6 +284,11 @@ export const insertProdutoSchema = createInsertSchema(produtos).omit({
   createdAt: true,
 });
 
+export const insertPropostaDocumentoSchema = createInsertSchema(propostaDocumentos).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertComunicacaoLogSchema = createInsertSchema(comunicacaoLogs).omit({
   id: true,
   createdAt: true,
@@ -311,3 +327,5 @@ export type InsertPropostaLog = z.infer<typeof insertPropostaLogSchema>;
 export type PropostaLog = typeof propostaLogs.$inferSelect;
 export type InsertGerenteLojas = z.infer<typeof insertGerenteLojaSchema>;
 export type GerenteLojas = typeof gerenteLojas.$inferSelect;
+export type InsertPropostaDocumento = z.infer<typeof insertPropostaDocumentoSchema>;
+export type PropostaDocumento = typeof propostaDocumentos.$inferSelect;
