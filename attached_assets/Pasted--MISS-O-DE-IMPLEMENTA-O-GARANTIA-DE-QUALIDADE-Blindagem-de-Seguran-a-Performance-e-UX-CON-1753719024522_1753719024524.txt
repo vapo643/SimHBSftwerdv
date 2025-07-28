@@ -1,0 +1,55 @@
+# MISSÃO DE IMPLEMENTAÇÃO (GARANTIA DE QUALIDADE): Blindagem de Segurança, Performance e UX
+
+**CONTEXTO ESTRATÉGICO:**
+Este prompt é o resultado final do nosso planeamento de Garantia de Qualidade. A sua missão é executar as correções e otimizações de maior prioridade para blindar o nosso sistema, tornando-o mais seguro, rápido e consistente.
+
+**AÇÃO:**
+Execute o seguinte roadmap de 4 fases em ordem de prioridade.
+
+**ROADMAP DE EXECUÇÃO (Sequencial):**
+
+---
+**FASE 1: CORREÇÃO DE SEGURANÇA CRÍTICA (PRIORIDADE MÁXIMA)**
+* **Tarefa:** Aplique as políticas de Row Level Security (RLS) que faltam na tabela `proposta_logs` para garantir o isolamento de dados entre lojas. Execute os seguintes scripts SQL:
+    ```sql
+    ALTER TABLE proposta_logs ENABLE ROW LEVEL SECURITY;
+
+    CREATE POLICY "Users can view logs from their own store proposals" ON proposta_logs
+      FOR SELECT USING (
+        EXISTS (
+          SELECT 1 FROM propostas p 
+          WHERE p.id = proposta_logs.proposta_id 
+          AND p.loja_id = get_current_user_loja_id() -- (Assumindo que esta função auxiliar já existe)
+        )
+      );
+
+    CREATE POLICY "Users can create logs for their own store proposals" ON proposta_logs
+      FOR INSERT WITH CHECK (
+        EXISTS (
+          SELECT 1 FROM propostas p 
+          WHERE p.id = proposta_logs.proposta_id 
+          AND p.loja_id = get_current_user_loja_id()
+        )
+      );
+    ```
+
+---
+**FASE 2: OTIMIZAÇÃO DE PERFORMANCE DO BANCO DE DADOS**
+* **Tarefa:** Crie os seguintes índices compostos para acelerar as nossas queries mais comuns. Execute os seguintes scripts SQL:
+    ```sql
+    CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_propostas_status_loja_created ON propostas(status, loja_id, created_at DESC);
+    CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_propostas_user_status_created ON propostas(user_id, status, created_at DESC);
+    CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_proposta_logs_proposta_created ON proposta_logs(proposta_id, created_at DESC);
+    ```
+
+---
+**FASE 3: REFINAMENTO DE UX E CONSISTÊNCIA**
+* **Tarefa 3.1:** Crie um novo componente reutilizável em `/client/src/components/ui/ConfirmationDialog.tsx`. Este componente deve ser um modal de confirmação padronizado (`AlertDialog`) que recebe `title`, `description` e uma função `onConfirm`.
+* **Tarefa 3.2:** Refatore todas as operações de exclusão nas nossas páginas de administração para usar este novo componente, garantindo uma experiência de usuário consistente.
+* **Tarefa 3.3:** Crie um `ErrorHandler` centralizado (ex: `/client/src/lib/errorHandler.ts`) que mapeie códigos de erro da API para mensagens amigáveis, e refatore os nossos `catch` de erro para usá-lo, padronizando as notificações "toast".
+
+---
+**FASE 4: IMPLEMENTAÇÃO DOS TESTES DE BACKEND**
+* **Tarefa:** Crie um novo ficheiro de teste (ex: `/server/tests/propostas.test.ts`) e implemente os testes de integração com `Vitest` para os nossos endpoints de propostas, cobrindo os cenários críticos de criação, mudança de status e filtros.
+
+Execute este plano para entregar a blindagem final do nosso sistema.

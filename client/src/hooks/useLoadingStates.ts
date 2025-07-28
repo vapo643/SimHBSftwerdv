@@ -1,0 +1,17 @@
+export const useLoadingStates = () => ({
+  saving: "Salvando...",
+  loading: "Carregando...",
+  deleting: "Excluindo...",
+  creating: "Criando...",
+  updating: "Atualizando...",
+  processing: "Processando...",
+  sending: "Enviando...",
+  validating: "Validando...",
+  searching: "Pesquisando...",
+  uploading: "Enviando arquivo...",
+  downloading: "Baixando...",
+  generating: "Gerando...",
+  analyzing: "Analisando...",
+  approving: "Aprovando...",
+  rejecting: "Rejeitando..."
+});

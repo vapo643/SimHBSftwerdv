@@ -9,10 +9,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import ConfirmationDialog from "@/components/ui/ConfirmationDialog";
 import { useToast } from "@/hooks/use-toast";
 import { Pencil, Trash2, Plus } from "lucide-react";
 import { api } from "@/lib/apiClient";
+import { handleApiError, showSuccessMessage } from "@/lib/errorHandler";
+import { useLoadingStates } from "@/hooks/useLoadingStates";
 import DashboardLayout from "@/components/DashboardLayout";
 
 interface Produto {
@@ -29,6 +31,8 @@ interface ProdutoFormData {
 export default function GestãoProdutos() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Produto | null>(null);
+  const [deletingProduct, setDeletingProduct] = useState<Produto | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [formData, setFormData] = useState<ProdutoFormData>({
     nome: "",
     status: "Ativo",
@@ -36,6 +40,7 @@ export default function GestãoProdutos() {
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const loadingStates = useLoadingStates();
 
   // Query para buscar produtos
   const { data: produtos = [], isLoading } = useQuery({
@@ -57,18 +62,11 @@ export default function GestãoProdutos() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["produtos"] });
-      toast({
-        title: "Sucesso!",
-        description: "Produto criado com sucesso.",
-      });
+      showSuccessMessage("create", "Produto");
       handleCloseDialog();
     },
-    onError: (error: Error) => {
-      toast({
-        title: "Erro",
-        description: error.message,
-        variant: "destructive",
-      });
+    onError: (error: any) => {
+      handleApiError(error);
     },
   });
 
@@ -83,18 +81,11 @@ export default function GestãoProdutos() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["produtos"] });
-      toast({
-        title: "Sucesso!",
-        description: "Produto atualizado com sucesso.",
-      });
+      showSuccessMessage("update", "Produto");
       handleCloseDialog();
     },
-    onError: (error: Error) => {
-      toast({
-        title: "Erro",
-        description: error.message,
-        variant: "destructive",
-      });
+    onError: (error: any) => {
+      handleApiError(error);
     },
   });
 
@@ -106,26 +97,10 @@ export default function GestãoProdutos() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["produtos"] });
-      toast({
-        title: "Sucesso!",
-        description: "Produto excluído permanentemente.",
-      });
+      showSuccessMessage("delete", "Produto");
     },
     onError: (error: any) => {
-      // Handle 409 Conflict (dependency error) specifically
-      if (error.response?.status === 409) {
-        toast({
-          title: "Exclusão Bloqueada",
-          description: error.response.data.message || "Este produto não pode ser excluído pois está a ser utilizado por uma ou mais Tabelas Comerciais.",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Erro",
-          description: error.message || "Erro ao excluir produto",
-          variant: "destructive",
-        });
-      }
+      handleApiError(error);
     },
   });
 
@@ -157,8 +132,20 @@ export default function GestãoProdutos() {
     setIsDialogOpen(true);
   };
 
-  const handleDelete = (id: number) => {
-    deleteMutation.mutate(id);
+  const handleDelete = () => {
+    if (deletingProduct) {
+      deleteMutation.mutate(deletingProduct.id, {
+        onSuccess: () => {
+          setIsDeleteDialogOpen(false);
+          setDeletingProduct(null);
+        }
+      });
+    }
+  };
+
+  const handleOpenDeleteDialog = (produto: Produto) => {
+    setDeletingProduct(produto);
+    setIsDeleteDialogOpen(true);
   };
 
   const handleCloseDialog = () => {
@@ -251,7 +238,7 @@ export default function GestãoProdutos() {
                   disabled={createMutation.isPending || updateMutation.isPending}
                 >
                   {createMutation.isPending || updateMutation.isPending
-                    ? "Salvando..."
+                    ? loadingStates.saving
                     : editingProduct
                     ? "Atualizar"
                     : "Criar"}
@@ -308,36 +295,13 @@ export default function GestãoProdutos() {
                         >
                           <Pencil className="h-4 w-4" />
                         </Button>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="outline" size="sm">
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Tem a certeza?</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                <span className="text-red-600 font-medium">
-                                  Esta ação é irreversível e irá apagar permanentemente o produto "{produto.nomeProduto}" do banco de dados.
-                                </span>
-                                <br />
-                                <br />
-                                Esta operação só será bem-sucedida se o produto não estiver associado a nenhuma Tabela Comercial.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => handleDelete(produto.id)}
-                                disabled={deleteMutation.isPending}
-                                className="bg-red-600 hover:bg-red-700 text-white"
-                              >
-                                {deleteMutation.isPending ? "Excluindo..." : "Excluir Permanentemente"}
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleOpenDeleteDialog(produto)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -348,6 +312,24 @@ export default function GestãoProdutos() {
         </CardContent>
       </Card>
       </div>
+
+      <ConfirmationDialog
+        isOpen={isDeleteDialogOpen}
+        onClose={() => {
+          setIsDeleteDialogOpen(false);
+          setDeletingProduct(null);
+        }}
+        onConfirm={handleDelete}
+        title="Tem a certeza?"
+        description={
+          deletingProduct
+            ? `Esta ação é irreversível e irá apagar permanentemente o produto "${deletingProduct.nomeProduto}" do banco de dados. Esta operação só será bem-sucedida se o produto não estiver associado a nenhuma Tabela Comercial.`
+            : ""
+        }
+        confirmText="Excluir Permanentemente"
+        variant="destructive"
+        isLoading={deleteMutation.isPending}
+      />
     </DashboardLayout>
   );
 }
