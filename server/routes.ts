@@ -437,6 +437,122 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // 🔧 CORREÇÃO CRÍTICA: Mover endpoint específico ANTES da rota genérica /:id
+  // New endpoint for formalization proposals (filtered by status)
+  app.get("/api/propostas/formalizacao", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { supabase } = await import("../server/lib/supabase");
+
+      // 🔐 CORREÇÃO CRÍTICA: Usar cliente Supabase para respeitar políticas RLS
+      // O token JWT já foi validado pelo middleware jwtAuthMiddleware
+      // Criar cliente Supabase com contexto do usuário autenticado
+      const userToken = req.headers.authorization?.replace('Bearer ', '');
+      if (!userToken) {
+        return res.status(401).json({ message: "Token de autenticação necessário" });
+      }
+
+      // Criar cliente Supabase personalizado com o token do usuário para RLS
+      const { createClient } = await import('@supabase/supabase-js');
+      const userSupabase = createClient(
+        process.env.SUPABASE_URL!,
+        process.env.SUPABASE_ANON_KEY!,
+        {
+          global: {
+            headers: {
+              Authorization: `Bearer ${userToken}`
+            }
+          }
+        }
+      );
+
+      // Formalization statuses according to business logic
+      const formalizationStatuses = [
+        'aprovado',
+        'documentos_enviados', 
+        'contratos_preparados',
+        'contratos_assinados',
+        'pronto_pagamento'
+      ];
+
+      console.log(`🔐 [FORMALIZATION] Querying for user ${req.user?.id} with role ${req.user?.role}`);
+
+      // Query proposals via Supabase Client personalizado para respeitar RLS
+      const { data: rawPropostas, error } = await userSupabase
+        .from('propostas')
+        .select(`
+          *,
+          lojas!inner(id, nome_loja, parceiros!inner(id, razao_social))
+        `)
+        .in('status', formalizationStatuses)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('🚨 [FORMALIZATION] Supabase error:', error);
+        return res.status(500).json({ message: "Erro ao consultar propostas de formalização" });
+      }
+
+      if (!rawPropostas || rawPropostas.length === 0) {
+        console.log(`🔐 [FORMALIZATION] No proposals found for user ${req.user?.id} with role ${req.user?.role}`);
+        return res.json([]);
+      }
+
+      console.log(`🔐 [FORMALIZATION] Found ${rawPropostas.length} proposals for user ${req.user?.id}`);
+      console.log('🔐 [FORMALIZATION] First proposal:', rawPropostas[0]?.id, rawPropostas[0]?.status);
+
+      // CORREÇÃO CRÍTICA: Parse JSONB fields e mapear snake_case para frontend
+      const formalizacaoPropostas = rawPropostas.map(proposta => {
+        let clienteData = null;
+        let condicoesData = null;
+
+        // Parse cliente_data se for string
+        if (typeof proposta.cliente_data === 'string') {
+          try {
+            clienteData = JSON.parse(proposta.cliente_data);
+          } catch (e) {
+            console.warn(`Erro ao fazer parse de cliente_data para proposta ${proposta.id}:`, e);
+            clienteData = {};
+          }
+        } else {
+          clienteData = proposta.cliente_data || {};
+        }
+
+        // Parse condicoes_data se for string  
+        if (typeof proposta.condicoes_data === 'string') {
+          try {
+            condicoesData = JSON.parse(proposta.condicoes_data);
+          } catch (e) {
+            console.warn(`Erro ao fazer parse de condicoes_data para proposta ${proposta.id}:`, e);
+            condicoesData = {};
+          }
+        } else {
+          condicoesData = proposta.condicoes_data || {};
+        }
+
+        return {
+          ...proposta,
+          cliente_data: clienteData,
+          condicoes_data: condicoesData,
+          // Map database fields to frontend format
+          documentos_adicionais: proposta.documentos_adicionais,
+          contrato_gerado: proposta.contrato_gerado,
+          contrato_assinado: proposta.contrato_assinado,
+          data_aprovacao: proposta.data_aprovacao,
+          data_assinatura: proposta.data_assinatura,
+          data_pagamento: proposta.data_pagamento,
+          observacoes_formalizacao: proposta.observacoes_formalizacao
+        };
+      });
+
+      console.log(`[${new Date().toISOString()}] Retornando ${formalizacaoPropostas.length} propostas em formalização via RLS`);
+      res.json(formalizacaoPropostas);
+    } catch (error) {
+      console.error("Erro ao buscar propostas de formalização:", error);
+      res.status(500).json({ 
+        message: "Erro ao buscar propostas de formalização" 
+      });
+    }
+  });
+
   app.get("/api/propostas/:id", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     try {
       const idParam = req.params.id;
@@ -1231,120 +1347,7 @@ app.get("/api/tabelas-comerciais-disponiveis", jwtAuthMiddleware, async (req: Au
     }
   });
 
-  // New endpoint for formalization proposals (filtered by status)
-  app.get("/api/propostas/formalizacao", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
-    try {
-      const { supabase } = await import("../server/lib/supabase");
-
-      // 🔐 CORREÇÃO CRÍTICA: Usar cliente Supabase para respeitar políticas RLS
-      // O token JWT já foi validado pelo middleware jwtAuthMiddleware
-      // Criar cliente Supabase com contexto do usuário autenticado
-      const userToken = req.headers.authorization?.replace('Bearer ', '');
-      if (!userToken) {
-        return res.status(401).json({ message: "Token de autenticação necessário" });
-      }
-
-      // Criar cliente Supabase personalizado com o token do usuário para RLS
-      const { createClient } = await import('@supabase/supabase-js');
-      const userSupabase = createClient(
-        process.env.SUPABASE_URL!,
-        process.env.SUPABASE_ANON_KEY!,
-        {
-          global: {
-            headers: {
-              Authorization: `Bearer ${userToken}`
-            }
-          }
-        }
-      );
-
-      // Formalization statuses according to business logic
-      const formalizationStatuses = [
-        'aprovado',
-        'documentos_enviados', 
-        'contratos_preparados',
-        'contratos_assinados',
-        'pronto_pagamento'
-      ];
-
-      console.log(`🔐 [FORMALIZATION] Querying for user ${req.user?.id} with role ${req.user?.role}`);
-
-      // Query proposals via Supabase Client personalizado para respeitar RLS
-      const { data: rawPropostas, error } = await userSupabase
-        .from('propostas')
-        .select(`
-          *,
-          lojas!inner(id, nome_loja, parceiros!inner(id, razao_social))
-        `)
-        .in('status', formalizationStatuses)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('🚨 [FORMALIZATION] Supabase error:', error);
-        return res.status(500).json({ message: "Erro ao consultar propostas de formalização" });
-      }
-
-      if (!rawPropostas || rawPropostas.length === 0) {
-        console.log(`🔐 [FORMALIZATION] No proposals found for user ${req.user?.id} with role ${req.user?.role}`);
-        return res.json([]);
-      }
-
-      console.log(`🔐 [FORMALIZATION] Found ${rawPropostas.length} proposals for user ${req.user?.id}`);
-      console.log('🔐 [FORMALIZATION] First proposal:', rawPropostas[0]?.id, rawPropostas[0]?.status);
-
-      // CORREÇÃO CRÍTICA: Parse JSONB fields e mapear snake_case para frontend
-      const formalizacaoPropostas = rawPropostas.map(proposta => {
-        let clienteData = null;
-        let condicoesData = null;
-
-        // Parse cliente_data se for string
-        if (typeof proposta.cliente_data === 'string') {
-          try {
-            clienteData = JSON.parse(proposta.cliente_data);
-          } catch (e) {
-            console.warn(`Erro ao fazer parse de cliente_data para proposta ${proposta.id}:`, e);
-            clienteData = {};
-          }
-        } else {
-          clienteData = proposta.cliente_data || {};
-        }
-
-        // Parse condicoes_data se for string  
-        if (typeof proposta.condicoes_data === 'string') {
-          try {
-            condicoesData = JSON.parse(proposta.condicoes_data);
-          } catch (e) {
-            console.warn(`Erro ao fazer parse de condicoes_data para proposta ${proposta.id}:`, e);
-            condicoesData = {};
-          }
-        } else {
-          condicoesData = proposta.condicoes_data || {};
-        }
-
-        return {
-          ...proposta,
-          cliente_data: clienteData,
-          condicoes_data: condicoesData,
-          // Map database fields to frontend format
-          documentos_adicionais: proposta.documentos_adicionais,
-          contrato_gerado: proposta.contrato_gerado,
-          contrato_assinado: proposta.contrato_assinado,
-          data_aprovacao: proposta.data_aprovacao,
-          data_assinatura: proposta.data_assinatura,
-          data_pagamento: proposta.data_pagamento,
-          observacoes_formalizacao: proposta.observacoes_formalizacao
-        };
-      });
-
-      console.log(`[${new Date().toISOString()}] Retornando ${formalizacaoPropostas.length} propostas em formalização via RLS`);
-      res.json(formalizacaoPropostas);
-    } catch (error) {
-      console.error("Erro ao buscar propostas de formalização:", error);
-      res.status(500).json({ 
-        message: "Erro ao buscar propostas de formalização" 
-      });
-    }
-  });
+  // REMOVIDO: Rota duplicada movida para linha 441 - ver comentário 🔧 CORREÇÃO CRÍTICA
 
   // Metrics endpoint for attendants - returns proposals count for today, week, month
   app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
