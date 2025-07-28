@@ -34,16 +34,7 @@ const fetchProposta = async (id: string | undefined) => {
   }
 };
 
-const fetchPropostaDocuments = async (id: string | undefined) => {
-  if (!id) throw new Error("ID da proposta não fornecido.");
-  try {
-    const response = await api.get(`/api/propostas/${id}/documents`);
-    return response.data;
-  } catch (error) {
-    console.error("Erro ao buscar documentos:", error);
-    return { documents: [] };
-  }
-};
+// Removido - documentos agora vêm incluídos na proposta
 
 const updatePropostaStatus = async ({
   id,
@@ -95,13 +86,7 @@ const AnaliseManualPage: React.FC = () => {
     staleTime: 5 * 60 * 1000, // 5 minutos - dados ficam válidos por mais tempo
   });
 
-  const { data: documentsData } = useQuery({
-    queryKey: ["proposta-documents", propostaId],
-    queryFn: () => fetchPropostaDocuments(propostaId),
-    enabled: !!propostaId,
-    refetchOnWindowFocus: false, // Desabilitado para evitar rate limiting
-    staleTime: 10 * 60 * 1000, // 10 minutos - documentos mudam pouco
-  });
+// Removido - documentos agora vêm incluídos na proposta
 
   const { register, handleSubmit, control } = useForm<DecisionFormData>({
     resolver: zodResolver(decisionSchema),
@@ -226,7 +211,7 @@ const AnaliseManualPage: React.FC = () => {
           {/* Visualizador de Documentos */}
           <DocumentViewer 
             propostaId={propostaId!}
-            documents={documentsData?.documents || []}
+            documents={proposta.documentosAnexados || []}
             ccbDocumentoUrl={proposta.ccbDocumentoUrl}
           />
           

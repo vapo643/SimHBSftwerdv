@@ -209,6 +209,23 @@ export class DatabaseStorage implements IStorage {
       return undefined;
     }
     
+    // Buscar documentos associados à proposta
+    const { data: documentos, error: docsError } = await supabase
+      .from('proposta_documentos')
+      .select('*')
+      .eq('proposta_id', String(id))
+      .order('created_at', { ascending: false });
+    
+    // Formatear documentos para o frontend
+    const documentosAnexados = documentos?.map(doc => ({
+      name: doc.nome_arquivo,
+      url: doc.url,
+      type: doc.tipo || 'application/octet-stream',
+      size: doc.tamanho ? `${Math.round(doc.tamanho / 1024)} KB` : undefined,
+      uploadDate: doc.created_at,
+      category: 'supporting'
+    })) || [];
+    
     // Return complete structured data for editing
     return {
       id: data.id,
@@ -218,7 +235,7 @@ export class DatabaseStorage implements IStorage {
       condicoesData: data.condicoes_data || {},
       // Additional fields for display and logic
       motivoPendencia: data.motivo_pendencia,
-      documentosAnexados: [], // Column doesn't exist, will use documents endpoint
+      documentosAnexados: documentosAnexados, // Now includes real documents
       produtoId: data.produto_id,
       tabelaComercialId: data.tabela_comercial_id,
       lojaId: data.loja_id,
