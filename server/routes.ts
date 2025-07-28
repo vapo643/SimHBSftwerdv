@@ -554,16 +554,93 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/propostas/:id", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     try {
       const idParam = req.params.id;
-      let proposta;
+      const user = req.user;
 
-      // Get proposal from database - all IDs are strings now
-      proposta = await storage.getPropostaById(idParam);
+      console.log(`🔐 [PROPOSTA ACCESS] User ${user.id} (${user.role}) accessing proposta ${idParam}`);
 
-      if (!proposta) {
-        return res.status(404).json({ message: "Proposta not found" });
+      // 🔧 CORREÇÃO CRÍTICA: Para ATENDENTEs, usar RLS para verificar permissão
+      if (user.role === 'ATENDENTE') {
+        console.log(`🔐 [ATENDENTE ACCESS] Checking RLS permissions for user loja_id: ${user.loja_id}`);
+        
+        // Usar client do usuário com RLS ativo
+        const { createServerSupabaseClient } = await import('./lib/supabase');
+        const supabaseUser = createServerSupabaseClient();
+        
+        // Definir contexto de segurança para RLS
+        await supabaseUser.rpc('set_user_context', {
+          user_id: user.id,
+          user_role: user.role,
+          loja_id: user.loja_id
+        });
+
+        const { data: proposta, error } = await supabaseUser
+          .from('propostas')
+          .select(`
+            id,
+            status,
+            cliente_data,
+            condicoes_data,  
+            loja_id,
+            created_at,
+            produto_id,
+            tabela_comercial_id,
+            user_id,
+            ccb_documento_url,
+            analista_id,
+            data_analise,
+            motivo_pendencia,
+            data_aprovacao,
+            documentos_adicionais,
+            contrato_gerado,
+            contrato_assinado,
+            data_assinatura,
+            data_pagamento,
+            observacoes_formalizacao,
+            lojas (
+              id,
+              nome_loja,
+              parceiros (
+                id,
+                razao_social
+              )
+            ),
+            produtos (
+              id,
+              nome_produto,
+              tac_valor,
+              tac_tipo
+            ),
+            tabelas_comerciais (
+              id,
+              nome_tabela,
+              taxa_juros,
+              prazos,
+              comissao
+            )
+          `)
+          .eq('id', idParam)
+          .single();
+
+        if (error || !proposta) {
+          console.log(`🔐 [ATENDENTE BLOCKED] User ${user.id} denied access to proposta ${idParam} - RLS policy blocked`);
+          return res.status(403).json({ 
+            message: "Você não tem permissão para acessar esta proposta" 
+          });
+        }
+
+        console.log(`🔐 [ATENDENTE ALLOWED] User ${user.id} granted access to proposta ${idParam} from loja ${proposta.loja_id}`);
+        res.json(proposta);
+      } else {
+        // Para outros roles (ADMIN, GERENTE), usar método original sem RLS
+        const proposta = await storage.getPropostaById(idParam);
+
+        if (!proposta) {
+          return res.status(404).json({ message: "Proposta not found" });
+        }
+
+        console.log(`🔐 [ADMIN/GERENTE ACCESS] User ${user.id} (${user.role}) accessing proposta ${idParam}`);
+        res.json(proposta);
       }
-
-      res.json(proposta);
     } catch (error) {
       console.error("Get proposta error:", error);
       res.status(500).json({ message: "Failed to fetch proposta" });
