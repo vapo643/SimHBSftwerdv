@@ -49,7 +49,7 @@ const TabelasComerciais: React.FC = () => {
     queryKey: ['tabelas-comerciais-admin'],
     queryFn: async () => {
       const response = await api.get<TabelaComercial[]>('/api/tabelas-comerciais');
-      return response;
+      return response.data;
     }
   });
 
