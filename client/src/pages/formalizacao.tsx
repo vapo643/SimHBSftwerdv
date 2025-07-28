@@ -38,6 +38,7 @@ import {
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import RefreshButton from "@/components/RefreshButton";
 
 interface Proposta {
   id: number;
@@ -160,8 +161,21 @@ function FormalizacaoList() {
     );
   }
 
+  const handleRefresh = () => {
+    queryClient.invalidateQueries({ queryKey: ['/api/propostas/formalizacao'] });
+  };
+
   return (
-    <DashboardLayout title="Formalização">
+    <DashboardLayout 
+      title="Formalização"
+      actions={
+        <RefreshButton 
+          onRefresh={handleRefresh}
+          isLoading={isLoading}
+          variant="ghost"
+        />
+      }
+    >
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">

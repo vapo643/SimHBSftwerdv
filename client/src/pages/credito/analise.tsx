@@ -21,6 +21,7 @@ import { AlertCircle } from "lucide-react";
 import { DocumentViewer } from "@/components/DocumentViewer";
 import { useAuth } from "@/contexts/AuthContext";
 import HistoricoCompartilhado from "@/components/HistoricoCompartilhado";
+import RefreshButton from "@/components/RefreshButton";
 
 import { api } from "@/lib/apiClient";
 
@@ -140,8 +141,24 @@ const AnaliseManualPage: React.FC = () => {
       </DashboardLayout>
     );
 
+  const handleRefresh = () => {
+    queryClient.invalidateQueries({ queryKey: ["proposta", propostaId] });
+    queryClient.invalidateQueries({ queryKey: ["proposta_logs", propostaId] });
+    queryClient.invalidateQueries({ queryKey: [`/api/propostas/${propostaId}`] });
+    queryClient.invalidateQueries({ queryKey: [`/api/propostas/${propostaId}/observacoes`] });
+  };
+
   return (
-    <DashboardLayout title={`Análise Manual - Proposta #${proposta.id}`}>
+    <DashboardLayout 
+      title={`Análise Manual - Proposta #${proposta.id}`}
+      actions={
+        <RefreshButton 
+          onRefresh={handleRefresh}
+          isLoading={isLoading}
+          variant="ghost"
+        />
+      }
+    >
       <div className="grid gap-6 md:grid-cols-3">
         <div className="space-y-6 md:col-span-2">
           {/* Card de Dados do Cliente */}

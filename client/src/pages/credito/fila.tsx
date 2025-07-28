@@ -39,6 +39,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import RefreshButton from "@/components/RefreshButton";
 
 // Removed mock data - now using real API data
 
@@ -161,8 +162,22 @@ const FilaAnalise: React.FC = () => {
   
   const acumuladoMes = propostas?.length || 0;
 
+  const handleRefresh = () => {
+    queryClient.invalidateQueries({ queryKey: [queryUrl] });
+    queryClient.invalidateQueries({ queryKey: ['/api/parceiros'] });
+  };
+
   return (
-    <DashboardLayout title="Fila de Análise de Crédito">
+    <DashboardLayout 
+      title={user?.role === 'ANALISTA' ? "Fila de Análise de Crédito" : "Minhas Propostas"}
+      actions={
+        <RefreshButton 
+          onRefresh={handleRefresh}
+          isLoading={isLoading}
+          variant="ghost"
+        />
+      }
+    >
       <div className="space-y-6">
         {/* KPIs Section */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">

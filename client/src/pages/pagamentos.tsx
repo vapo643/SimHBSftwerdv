@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import RefreshButton from "@/components/RefreshButton";
 import {
   Clock,
   DollarSign,
@@ -337,8 +338,21 @@ export default function Pagamentos() {
     );
   }
 
+  const handleRefresh = () => {
+    queryClient.invalidateQueries({ queryKey: ['/api/propostas/pagamento'] });
+  };
+
   return (
-    <DashboardLayout title="Fila de Pagamento">
+    <DashboardLayout 
+      title="Fila de Pagamento"
+      actions={
+        <RefreshButton 
+          onRefresh={handleRefresh}
+          isLoading={isLoading}
+          variant="ghost"
+        />
+      }
+    >
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">

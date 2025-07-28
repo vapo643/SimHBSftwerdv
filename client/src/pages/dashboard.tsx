@@ -11,10 +11,11 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2, FileText, Clock, Calendar, TrendingUp, AlertCircle, Edit } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from "@/contexts/AuthContext";
+import RefreshButton from "@/components/RefreshButton";
 
 const getStatusClass = (status: string) => {
   switch (status.toLowerCase()) {
@@ -50,6 +51,7 @@ const formatCurrency = (value: number) => {
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
+  const queryClient = useQueryClient();
   
   // Fetch real proposals data
   const { data: propostas, isLoading, error } = useQuery<any[]>({
@@ -96,8 +98,26 @@ const Dashboard: React.FC = () => {
   }
   const propostasData = propostas || [];
 
+  const handleRefresh = () => {
+    queryClient.invalidateQueries({ queryKey: ['/api/propostas'] });
+    if (user?.role === 'ATENDENTE') {
+      queryClient.invalidateQueries({ queryKey: ['/api/propostas/metricas'] });
+    }
+  };
+
   return (
-    <DashboardLayout title="Dashboard de Propostas">
+    <DashboardLayout 
+      title="Dashboard de Propostas"
+      actions={
+        <RefreshButton 
+          onRefresh={handleRefresh}
+          isLoading={isLoading}
+          showLabel={true}
+          label="Atualizar"
+          variant="outline"
+        />
+      }
+    >
       <div className="space-y-6">
         {/* Métricas de Performance para Atendentes */}
         {user?.role === 'ATENDENTE' && metricas && (

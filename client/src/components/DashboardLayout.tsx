@@ -24,9 +24,10 @@ import {
 interface DashboardLayoutProps {
   children: React.ReactNode;
   title: string;
+  actions?: React.ReactNode;
 }
 
-export default function DashboardLayout({ children, title }: DashboardLayoutProps) {
+export default function DashboardLayout({ children, title, actions }: DashboardLayoutProps) {
   const [location] = useLocation();
   const { toast } = useToast();
   const { user } = useAuth();
@@ -146,10 +147,15 @@ export default function DashboardLayout({ children, title }: DashboardLayoutProp
       </div>
       <div className="flex flex-col">
         <header className="bg-muted/40 flex h-14 items-center gap-4 border-b px-6 lg:h-[60px]">
-          {/* Lógica do cabeçalho, como busca ou menu de usuário, pode vir aqui */}
           <div className="flex-1">
             <h1 className="text-lg font-semibold">{title}</h1>
           </div>
+          {/* Actions area - for refresh buttons and other page-specific actions */}
+          {actions && (
+            <div className="flex items-center gap-2">
+              {actions}
+            </div>
+          )}
           {/* Pilar 12 - Progressive Enhancement: Offline indicator in header */}
           <OfflineIndicator variant="icon-only" />
           <Button onClick={handleSignOut} variant="outline" size="icon">
