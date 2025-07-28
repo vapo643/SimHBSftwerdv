@@ -1,0 +1,20 @@
+# MISSÃO DE CORREÇÃO: Sincronizar o Histórico e as Observações do Atendente
+
+**Contexto:** Olá, Agente. O nosso fluxo de correção de propostas pendentes está quase perfeito. O Atendente já consegue salvar as alterações. Agora, precisamos de garantir que a comunicação e a trilha de auditoria dessa interação sejam corretamente registadas e visíveis para o Analista.
+
+**Lista de Bugs e Melhorias a Implementar:**
+
+* **1. O Histórico não está a ser Atualizado (Bug de Backend):**
+    * **O Problema (Sintoma):** Quando um `ATENDENTE` clica em "Reenviar para Análise", a ação funciona, mas o histórico de comunicação não é atualizado. O `ANALISTA` não vê que o atendente fez uma alteração.
+    * **Sua Tarefa:** Modifique o nosso endpoint de backend `PUT /api/propostas/:id/status`. Quando o status de uma proposta muda de `'pendente'` para `'aguardando_analise'`, você **DEVE** criar um novo registo na tabela `proposta_logs` para documentar esta ação.
+
+* **2. A Observação do Atendente está a ser Perdida (Bug de Backend):**
+    * **O Problema (Sintoma):** O `ATENDENTE` tem um campo de "Observação Adicional" para explicar as suas correções, mas este texto não está a ser salvo e não chega ao `ANALISTA`.
+    * **Sua Tarefa:** Na mesma lógica do backend (`PUT /api/propostas/:id/status`), garanta que você está a ler o campo de `observacao` do corpo da requisição e a salvá-lo corretamente no novo registo da tabela `proposta_logs`.
+
+* **3. Destacar a Observação do Atendente (Melhoria de UI):**
+    * **O Requisito:** Para facilitar o trabalho do `ANALISTA`, a observação deixada pelo `ATENDENTE` deve ser visualmente diferente no histórico.
+    * **Sua Tarefa:** Modifique o nosso componente `HistoricoCompartilhado`. Quando estiver a renderizar um log que foi criado por um `ATENDENTE`, a sua observação deve ser exibida com um **destaque visual** (ex: um fundo de cor diferente, um ícone de "resposta" ou um texto em itálico).
+
+**Resumo da Missão:**
+Faça com que, ao "Reenviar para Análise", a observação do Atendente seja salva no histórico e que este novo histórico seja visível e destacado para o Analista.
