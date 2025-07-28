@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { getSupabase } from '@/lib/supabase';
 import { api } from '@/lib/apiClient';
+import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
 
 interface User {
   id: string;
@@ -12,6 +13,8 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
+  session: Session | null;
+  accessToken: string | null;
   isLoading: boolean;
   error: Error | null;
   refetchUser: () => Promise<void>;
@@ -25,15 +28,14 @@ interface AuthProviderProps {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  const fetchUserProfile = async () => {
+  const fetchUserProfile = async (currentSession: Session | null) => {
     try {
-      const supabase = getSupabase();
-      const { data: currentUser } = await supabase.auth.getUser();
-      
-      if (currentUser.user) {
+      if (currentSession?.user) {
         try {
           // Fetch complete user profile from debug endpoint
           const response = await api.get<{
@@ -43,15 +45,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           }>('/api/debug/me');
           
           if (response.data.user) {
-            // Log de diagnóstico para rastrear o usuário e token no contexto
-            const supabase = getSupabase();
-            const session = await supabase.auth.getSession();
-            console.log('[PASSO 2 - CONTEXTO]', { 
-              user: response.data.user,
-              token: session.data.session?.access_token,
-              tokenLength: session.data.session?.access_token?.length
-            });
-            
+            console.log('🔐 [AUTH RESTORED] User profile loaded with valid token');
             setUser(response.data.user);
             setError(null);
           } else {
@@ -60,7 +54,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
         } catch (apiError) {
           console.error('Error fetching profile data:', apiError);
           setError(apiError as Error);
-          // No fallback - security requirement per architecture
           setUser(null);
         }
       } else {
@@ -106,11 +99,45 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   useEffect(() => {
-    fetchUserProfile();
+    const supabase = getSupabase();
+    
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
+      setSession(initialSession);
+      setAccessToken(initialSession?.access_token || null);
+      fetchUserProfile(initialSession);
+    });
+
+    // Set up reactive auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event: AuthChangeEvent, currentSession: Session | null) => {
+        console.log(`🔐 [AUTH EVENT] ${event}`, { 
+          hasSession: !!currentSession, 
+          tokenLength: currentSession?.access_token?.length 
+        });
+        
+        setSession(currentSession);
+        setAccessToken(currentSession?.access_token || null);
+        
+        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+          fetchUserProfile(currentSession);
+        } else if (event === 'SIGNED_OUT') {
+          setUser(null);
+          setError(null);
+          setIsLoading(false);
+        }
+      }
+    );
+
+    return () => {
+      subscription?.unsubscribe();
+    };
   }, []);
 
   const value = {
     user,
+    session,
+    accessToken,
     isLoading,
     error,
     refetchUser,

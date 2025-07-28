@@ -10,6 +10,7 @@
  */
 
 import { getSession } from './auth';
+import { getSupabase } from './supabase';
 
 export interface ApiClientOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
@@ -128,14 +129,17 @@ class TokenManager {
 
   private async refreshToken(): Promise<string | null> {
     try {
-      const session = await getSession();
-      if (!session?.accessToken) {
+      // Get fresh session directly from Supabase - bypasses auth.ts abstraction
+      const supabase = getSupabase();
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session?.access_token) {
         this.clearCache();
         return null;
       }
 
       // Decode JWT to get expiry (simple base64 decode of payload)
-      const tokenParts = session.accessToken.split('.');
+      const tokenParts = session.access_token.split('.');
       if (tokenParts.length === 3) {
         try {
           const payload = JSON.parse(atob(tokenParts[1]));
@@ -146,9 +150,11 @@ class TokenManager {
         }
       }
 
-      this.cachedToken = session.accessToken;
+      this.cachedToken = session.access_token;
+      console.log(`🔐 [TOKEN MANAGER] Fresh token obtained, length: ${this.cachedToken.length}`);
       return this.cachedToken;
     } catch (error) {
+      console.error('🔐 [TOKEN MANAGER] Error refreshing token:', error);
       this.clearCache();
       return null;
     }
