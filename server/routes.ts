@@ -122,15 +122,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .from('proposta_logs')
         .select(`
           id,
-          acao,
-          detalhes,
+          observacao,
           status_anterior,
           status_novo,
-          data_acao,
+          created_at,
           autor_id
         `)
         .eq('proposta_id', propostaId)
-        .order('data_acao', { ascending: true });
+        .order('created_at', { ascending: true });
         
       if (error) {
         console.warn('Erro ao buscar logs de auditoria:', error);
@@ -138,11 +137,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json({ logs: [] });
       }
       
-      console.log(`[${new Date().toISOString()}] Retornando ${logs?.length || 0} logs de auditoria para proposta ${propostaId}`);
+      // Transformar logs para o formato esperado pelo frontend
+      const transformedLogs = logs?.map(log => ({
+        id: log.id,
+        acao: log.status_novo === 'aguardando_analise' ? 'reenvio_atendente' : `mudanca_status_${log.status_novo}`,
+        detalhes: log.observacao,
+        status_anterior: log.status_anterior,
+        status_novo: log.status_novo,
+        data_acao: log.created_at,
+        autor_id: log.autor_id
+      })) || [];
+      
+      console.log(`[${new Date().toISOString()}] Retornando ${transformedLogs.length} logs de auditoria para proposta ${propostaId}`);
       
       res.json({ 
-        logs: logs || [],
-        total: logs?.length || 0
+        logs: transformedLogs,
+        total: transformedLogs.length
       });
     } catch (error) {
       console.error('Error fetching proposal audit logs:', error);
@@ -435,6 +445,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
       const { cliente_data, condicoes_data } = req.body;
       
+      console.log(`🔍 [PUT /api/propostas/${id}] Salvando alterações:`, { cliente_data, condicoes_data });
+      
       const { createServerSupabaseAdminClient } = await import("../server/lib/supabase");
       const supabase = createServerSupabaseAdminClient();
       
@@ -446,35 +458,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .single();
         
       if (fetchError || !proposta) {
+        console.error(`🔍 Proposta ${id} não encontrada:`, fetchError);
         return res.status(404).json({ message: "Proposta não encontrada" });
       }
       
       // Apenas o atendente dono da proposta ou admin pode editar
       if (req.user?.role !== 'ADMINISTRADOR' && proposta.user_id !== req.user?.id) {
+        console.error(`🔍 Usuário ${req.user?.id} sem permissão para editar proposta ${id} (owner: ${proposta.user_id})`);
         return res.status(403).json({ message: "Sem permissão para editar esta proposta" });
       }
       
       // Apenas propostas pendenciadas podem ser editadas
       if (proposta.status !== 'pendenciado' && proposta.status !== 'rascunho') {
+        console.error(`🔍 Proposta ${id} com status ${proposta.status} não pode ser editada`);
         return res.status(400).json({ 
           message: "Apenas propostas pendenciadas ou em rascunho podem ser editadas" 
         });
       }
       
       // Atualizar a proposta
-      const { error: updateError } = await supabase
+      const { data: updatedProposta, error: updateError } = await supabase
         .from('propostas')
         .update({
           cliente_data,
-          condicoes_data
+          condicoes_data,
+          updated_at: new Date().toISOString()
         })
-        .eq('id', id);
+        .eq('id', id)
+        .select()
+        .single();
         
       if (updateError) {
-        throw updateError;
+        console.error(`🔍 Erro ao atualizar proposta ${id}:`, updateError);
+        return res.status(500).json({ message: "Erro ao atualizar proposta" });
       }
       
-      res.json({ success: true, message: "Proposta atualizada com sucesso" });
+      console.log(`🔍 [PUT /api/propostas/${id}] Proposta atualizada com sucesso`);
+      res.json({ 
+        success: true, 
+        message: "Proposta atualizada com sucesso", 
+        data: updatedProposta 
+      });
     } catch (error) {
       console.error("Update proposta error:", error);
       res.status(500).json({ message: "Erro ao atualizar proposta" });

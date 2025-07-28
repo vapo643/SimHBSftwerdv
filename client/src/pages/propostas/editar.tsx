@@ -134,7 +134,7 @@ const EditarPropostaPendenciada: React.FC = () => {
       }
     },
     enabled: !!id,
-    refetchInterval: 15000, // Auto-refresh para sincronização
+    refetchInterval: 30000, // Auto-refresh reduzido para evitar rate limiting
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
     staleTime: 0, // Always fresh data
@@ -174,12 +174,13 @@ const EditarPropostaPendenciada: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: [`/api/propostas/${id}/observacoes`] });
       queryClient.invalidateQueries({ queryKey: ['/api/propostas'] });
     },
-    onError: (error) => {
-      console.error("🔍 ERRO AO SALVAR:", error);
+    onError: (error: any) => {
+      const errorMessage = error?.message || error?.response?.data?.message || (typeof error === 'object' ? JSON.stringify(error) : String(error)) || "Erro desconhecido";
+      console.error("🔍 ERRO AO SALVAR:", { error, errorMessage });
       toast({
         variant: "destructive",
         title: "Erro ao salvar",
-        description: error?.message || "Ocorreu um erro ao salvar as alterações.",
+        description: errorMessage,
       });
     },
   });
@@ -217,12 +218,13 @@ const EditarPropostaPendenciada: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ["proposta"] });
       setLocation('/dashboard');
     },
-    onError: (error) => {
-      console.error("🔍 ERRO AO REENVIAR:", error);
+    onError: (error: any) => {
+      const errorMessage = error?.message || error?.response?.data?.message || (typeof error === 'object' ? JSON.stringify(error) : String(error)) || "Erro desconhecido";
+      console.error("🔍 ERRO AO REENVIAR:", { error, errorMessage });
       toast({
         variant: "destructive",
         title: "Erro ao reenviar",
-        description: error?.message || "Ocorreu um erro ao reenviar a proposta.",
+        description: errorMessage,
       });
     },
   });
@@ -238,14 +240,15 @@ const EditarPropostaPendenciada: React.FC = () => {
   }
 
   if (error || !proposta) {
-    console.log('🔍 ERRO OU PROPOSTA VAZIA:', { error, proposta });
+    const errorMessage = error?.message || (typeof error === 'object' ? JSON.stringify(error) : String(error)) || 'Proposta não encontrada';
+    console.log('🔍 ERRO OU PROPOSTA VAZIA:', { error, proposta, errorMessage });
     return (
       <DashboardLayout title="Editar Proposta Pendenciada">
         <Alert variant="destructive">
           <AlertDescription>
             Erro ao carregar proposta. Por favor, tente novamente.
             <br />
-            <small>Debug: {error?.message || 'Proposta não encontrada'}</small>
+            <small>Debug: {errorMessage}</small>
           </AlertDescription>
         </Alert>
         <div className="mt-4">

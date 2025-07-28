@@ -21,7 +21,7 @@ const HistoricoCompartilhadoV2: React.FC<HistoricoCompartilhadoV2Props> = ({
       return response.data;
     },
     enabled: !!propostaId,
-    refetchInterval: 12000, // Refetch a cada 12 segundos
+    refetchInterval: 25000, // Refetch reduzido para evitar rate limiting
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
     staleTime: 0, // Always fresh data
@@ -40,7 +40,7 @@ const HistoricoCompartilhadoV2: React.FC<HistoricoCompartilhadoV2Props> = ({
       }
     },
     enabled: !!propostaId,
-    refetchInterval: 8000, // Refetch mais frequente para logs
+    refetchInterval: 20000, // Refetch reduzido para evitar rate limiting
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
     staleTime: 0,
