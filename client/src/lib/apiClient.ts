@@ -301,11 +301,16 @@ export async function apiClient<T = any>(
   const apiConfig = ApiConfig.getInstance();
   const fullUrl = apiConfig.buildUrl(url);
 
-  // Build headers
+  // Build headers - Don't set Content-Type for FormData
   const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
     ...customHeaders
   };
+
+  // Only set Content-Type if it's not FormData
+  // FormData needs the browser to set the boundary automatically
+  if (!(body instanceof FormData)) {
+    headers['Content-Type'] = 'application/json';
+  }
 
   // PASSO 5.2: Use TokenManager to get valid authentication token
   if (requireAuth) {
@@ -319,7 +324,8 @@ export async function apiClient<T = any>(
     console.log('[PASSO 3 - ENVIO]', { 
       url: fullUrl,
       authorizationHeader: headers['Authorization'],
-      hasToken: !!token
+      hasToken: !!token,
+      isFormData: body instanceof FormData
     });
   }
 
@@ -331,7 +337,10 @@ export async function apiClient<T = any>(
 
   // Add body for non-GET requests
   if (body && method !== 'GET') {
-    if (typeof body === 'string') {
+    if (body instanceof FormData) {
+      // FormData should be passed directly
+      requestConfig.body = body;
+    } else if (typeof body === 'string') {
       requestConfig.body = body;
     } else {
       requestConfig.body = JSON.stringify(body);

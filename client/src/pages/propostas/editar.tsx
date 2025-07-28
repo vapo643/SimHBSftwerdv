@@ -36,11 +36,7 @@ const DocumentsTab: React.FC<{ propostaId: string }> = ({ propostaId }) => {
       const formData = new FormData();
       formData.append("file", file);
       
-      const response = await api.post(`/api/propostas/${propostaId}/documents`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      const response = await api.post(`/api/propostas/${propostaId}/documents`, formData);
       
       return response.data;
     },
