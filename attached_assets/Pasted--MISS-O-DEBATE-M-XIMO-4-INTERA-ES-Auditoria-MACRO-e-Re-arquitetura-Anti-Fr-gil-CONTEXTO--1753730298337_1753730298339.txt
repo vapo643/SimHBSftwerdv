@@ -1,0 +1,26 @@
+# MISSÃO: DEBATE MÁXIMO (4 INTERAÇÕES) - Auditoria MACRO e Re-arquitetura Anti-Frágil
+
+**CONTEXTO ESTRATÉGICO:**
+Estamos a enfrentar uma falha sistémica e recorrente. A nossa tela de "Formalização" está completamente inoperacional, com múltiplos sintomas: crash do frontend (`queryClient is not defined`), propostas aprovadas que não aparecem na lista e uma interface inconsistente entre os perfis de `ATENDENTE` e `ANALISTA`. Tentativas de correção pontual falharam.
+
+**SUA TAREFA (ASSISTENTE):**
+A sua tarefa não é propor uma solução rápida. A sua tarefa é iniciar um debate profundo de 4 interações para projetarmos uma solução arquitetural definitiva. Nesta **Interação 1**, o seu objetivo é fornecer um **diagnóstico holístico e MACRO**.
+
+---
+### **Interação 1: Diagnóstico Holístico da Causa Raiz**
+
+Por favor, analise a nossa situação crítica e responda com a sua proposta para os seguintes pontos. Não proponha código ainda. Proponha a **estratégia**.
+
+**1. A Teoria do "Ponto Único de Falha":**
+* Analise os três bugs reportados (o crash de `queryClient`, a falha no carregamento de dados e a inconsistência de UI/RBAC). Você acredita que eles são problemas isolados, ou são todos sintomas de uma única e mesma falha arquitetural fundamental? Apresente a sua "Teoria do Ponto Único de Falha", explicando como uma única causa raiz poderia gerar todos estes problemas em cascata.
+
+**2. O Eixo da Falha (Backend vs. Frontend):**
+* Onde você localiza o epicentro da nossa fragilidade? É primariamente uma falha na nossa camada de **backend** (ex: o endpoint `/api/propostas/formalizacao` está a falhar), na nossa camada de **frontend** (ex: a forma como o nosso `QueryClientProvider` ou `AuthContext` estão estruturados), ou uma falha de comunicação entre as duas?
+
+**3. Proposta de Plano de Depuração (Passo a Passo):**
+* Com base na sua teoria, descreva um plano de depuração metódico para confirmarmos a sua hipótese. Quais `console.log` ou testes de `curl` seriam os mais eficazes para isolarmos o problema?
+
+**4. Definição dos Pilares da Solução:**
+* Em alto nível, quais são os pilares técnicos que a nossa solução final **DEVE** ter para resolver este problema de forma definitiva e garantir que ele não aconteça novamente?
+
+---
