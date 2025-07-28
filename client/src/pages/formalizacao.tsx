@@ -41,30 +41,40 @@ import { useToast } from "@/hooks/use-toast";
 import RefreshButton from "@/components/RefreshButton";
 
 interface Proposta {
-  id: number;
-  clienteNome: string;
-  clienteCpf: string;
-  clienteEmail: string;
-  clienteTelefone: string;
-  clienteDataNascimento: string;
-  clienteRenda: string;
-  valor: string;
-  valorAprovado: string;
-  taxaJuros: string;
-  prazo: number;
-  finalidade: string;
-  garantia: string;
+  id: string;
   status: string;
-  documentos: string[] | null;
-  documentosAdicionais: string[] | null;
-  contratoGerado: boolean;
-  contratoAssinado: boolean;
-  dataAprovacao: string;
-  dataAssinatura: string;
-  dataPagamento: string;
-  observacoesFormalização: string;
-  createdAt: string;
-  updatedAt: string;
+  cliente_data: {
+    nome: string;
+    cpf: string;
+    email: string;
+    telefone: string;
+    dataNascimento: string;
+    renda: number;
+  };
+  condicoes_data: {
+    valor: number;
+    prazo: number;
+    finalidade: string;
+    garantia: string;
+  };
+  lojas?: {
+    id: number;
+    nome_loja: string;
+    parceiros: {
+      id: number;
+      razao_social: string;
+    };
+  };
+  loja_id: number;
+  created_at: string;
+  updated_at: string;
+  data_aprovacao?: string;
+  documentos_adicionais?: string[];
+  contrato_gerado?: boolean;
+  contrato_assinado?: boolean;
+  data_assinatura?: string;
+  data_pagamento?: string;
+  observacoes_formalizacao?: string;
 }
 
 const updateFormalizacaoSchema = z.object({
@@ -233,20 +243,20 @@ function FormalizacaoList() {
                 <div className="space-y-3">
                   <div>
                     <p className="text-sm text-gray-600">Cliente</p>
-                    <p className="font-medium text-gray-900">{proposta.clienteNome}</p>
+                    <p className="font-medium text-gray-900">{proposta.cliente_data?.nome || 'Nome não informado'}</p>
                   </div>
 
                   <div>
                     <p className="text-sm text-gray-600">Valor Aprovado</p>
                     <p className="font-bold text-green-600">
-                      {formatCurrency(proposta.valorAprovado || proposta.valor)}
+                      {formatCurrency(proposta.condicoes_data?.valor || 0)}
                     </p>
                   </div>
 
                   <div>
                     <p className="text-sm text-gray-600">Data da Aprovação</p>
                     <p className="text-gray-900">
-                      {formatDate(proposta.dataAprovacao || proposta.createdAt)}
+                      {formatDate(proposta.data_aprovacao || proposta.created_at)}
                     </p>
                   </div>
                 </div>
@@ -299,9 +309,9 @@ export default function Formalizacao() {
     defaultValues: {
       status: proposta?.status as any,
       documentosAdicionais: proposta?.documentosAdicionais || [],
-      contratoGerado: proposta?.contratoGerado || false,
-      contratoAssinado: proposta?.contratoAssinado || false,
-      observacoesFormalização: proposta?.observacoesFormalização || "",
+      contratoGerado: proposta?.contrato_gerado || false,
+      contratoAssinado: proposta?.contrato_assinado || false,
+      observacoesFormalização: proposta?.observacoes_formalizacao || "",
     },
   });
 
@@ -396,7 +406,7 @@ export default function Formalizacao() {
       description: "Proposta foi aprovada pela equipe de crédito",
       icon: CheckCircle,
       status: "completed",
-      date: formatDate(proposta.dataAprovacao || proposta.createdAt),
+      date: formatDate(proposta.data_aprovacao || proposta.created_at),
       completed: true,
     },
     {
@@ -410,7 +420,7 @@ export default function Formalizacao() {
           : proposta.status === "aprovado"
             ? "current"
             : "completed",
-      date: proposta.documentosAdicionais?.length ? formatDate(proposta.updatedAt) : "Pendente",
+      date: proposta.documentos_adicionais?.length ? formatDate(proposta.updated_at) : "Pendente",
       completed: proposta.status !== "aprovado",
     },
     {
@@ -421,11 +431,11 @@ export default function Formalizacao() {
       status:
         proposta.status === "contratos_preparados"
           ? "current"
-          : proposta.contratoGerado
+          : proposta.contrato_gerado
             ? "completed"
             : "pending",
-      date: proposta.contratoGerado ? formatDate(proposta.updatedAt) : "Pendente",
-      completed: proposta.contratoGerado,
+      date: proposta.contrato_gerado ? formatDate(proposta.updated_at) : "Pendente",
+      completed: proposta.contrato_gerado,
     },
     {
       id: 4,
@@ -435,11 +445,11 @@ export default function Formalizacao() {
       status:
         proposta.status === "contratos_assinados"
           ? "current"
-          : proposta.contratoAssinado
+          : proposta.contrato_assinado
             ? "completed"
             : "pending",
-      date: proposta.dataAssinatura ? formatDate(proposta.dataAssinatura) : "Pendente",
-      completed: proposta.contratoAssinado,
+      date: proposta.data_assinatura ? formatDate(proposta.data_assinatura) : "Pendente",
+      completed: proposta.contrato_assinado,
     },
     {
       id: 5,
@@ -452,7 +462,7 @@ export default function Formalizacao() {
           : proposta.status === "pago"
             ? "completed"
             : "pending",
-      date: proposta.dataPagamento ? formatDate(proposta.dataPagamento) : "Pendente",
+      date: proposta.data_pagamento ? formatDate(proposta.data_pagamento) : "Pendente",
       completed: proposta.status === "pago",
     },
   ];
@@ -685,36 +695,11 @@ export default function Formalizacao() {
                     <div>
                       <h4 className="mb-3 font-medium text-gray-900">Documentos Originais</h4>
                       <div className="space-y-2">
-                        {proposta.documentos && proposta.documentos.length > 0 ? (
-                          proposta.documentos.map((documento, index) => (
-                            <div
-                              key={index}
-                              className="flex items-center justify-between rounded-md bg-gray-50 p-3"
-                            >
-                              <div className="flex items-center space-x-3">
-                                <FileText className="h-4 w-4 text-blue-500" />
-                                <span className="text-sm font-medium text-gray-700">
-                                  {documento}
-                                </span>
-                              </div>
-                              <div className="flex gap-2">
-                                <Button variant="ghost" size="sm">
-                                  <Eye className="mr-1 h-4 w-4" />
-                                  Visualizar
-                                </Button>
-                                <Button variant="ghost" size="sm">
-                                  <Download className="mr-1 h-4 w-4" />
-                                  Baixar
-                                </Button>
-                              </div>
-                            </div>
-                          ))
-                        ) : (
-                          <div className="py-4 text-center text-gray-500">
-                            <FileText className="mx-auto mb-2 h-8 w-8 opacity-50" />
-                            <p>Nenhum documento original anexado</p>
-                          </div>
-                        )}
+                        {/* TODO: Implementar busca de documentos originais da proposta */}
+                        <div className="py-4 text-center text-gray-500">
+                          <FileText className="mx-auto mb-2 h-8 w-8 opacity-50" />
+                          <p>Carregamento de documentos originais em desenvolvimento</p>
+                        </div>
                       </div>
                     </div>
 
@@ -724,9 +709,9 @@ export default function Formalizacao() {
                     <div>
                       <h4 className="mb-3 font-medium text-gray-900">Documentos Adicionais</h4>
                       <div className="space-y-2">
-                        {proposta.documentosAdicionais &&
-                        proposta.documentosAdicionais.length > 0 ? (
-                          proposta.documentosAdicionais.map((documento, index) => (
+                        {proposta.documentos_adicionais &&
+                        proposta.documentos_adicionais.length > 0 ? (
+                          proposta.documentos_adicionais.map((documento, index) => (
                             <div
                               key={index}
                               className="flex items-center justify-between rounded-md bg-green-50 p-3"
@@ -822,7 +807,7 @@ export default function Formalizacao() {
                       <div className="flex flex-wrap gap-2">
                         <Button
                           variant="outline"
-                          disabled={!proposta.contratoGerado}
+                          disabled={!proposta.contrato_gerado}
                           className="flex items-center gap-2"
                         >
                           <Eye className="h-4 w-4" />
@@ -830,7 +815,7 @@ export default function Formalizacao() {
                         </Button>
                         <Button
                           variant="outline"
-                          disabled={!proposta.contratoGerado}
+                          disabled={!proposta.contrato_gerado}
                           className="flex items-center gap-2"
                         >
                           <Download className="h-4 w-4" />
@@ -838,7 +823,7 @@ export default function Formalizacao() {
                         </Button>
                         <Button
                           variant="outline"
-                          disabled={!proposta.contratoGerado || proposta.contratoAssinado}
+                          disabled={!proposta.contrato_gerado || proposta.contrato_assinado}
                           className="flex items-center gap-2"
                         >
                           <Send className="h-4 w-4" />
@@ -866,30 +851,31 @@ export default function Formalizacao() {
                 <div className="space-y-4">
                   <div>
                     <Label className="text-sm font-medium text-gray-700">Cliente</Label>
-                    <p className="font-medium text-gray-900">{proposta.clienteNome}</p>
+                    <p className="font-medium text-gray-900">{proposta.cliente_data?.nome || 'Nome não informado'}</p>
                   </div>
                   <div>
                     <Label className="text-sm font-medium text-gray-700">Valor Aprovado</Label>
                     <p className="text-2xl font-bold text-green-600">
-                      {formatCurrency(proposta.valorAprovado || proposta.valor)}
+                      {formatCurrency(proposta.condicoes_data?.valor || 0)}
                     </p>
                   </div>
                   <div>
                     <Label className="text-sm font-medium text-gray-700">Taxa de Juros</Label>
                     <p className="flex items-center gap-1 font-medium text-gray-900">
                       <Percent className="h-4 w-4" />
-                      {proposta.taxaJuros || "N/A"}% a.m.
+                      {/* TODO: Adicionar taxa de juros */}
+                      N/A% a.m.
                     </p>
                   </div>
                   <div>
                     <Label className="text-sm font-medium text-gray-700">Prazo</Label>
-                    <p className="font-medium text-gray-900">{proposta.prazo} meses</p>
+                    <p className="font-medium text-gray-900">{proposta.condicoes_data?.prazo || 0} meses</p>
                   </div>
                   <div>
                     <Label className="text-sm font-medium text-gray-700">Data da Aprovação</Label>
                     <p className="flex items-center gap-1 text-gray-900">
                       <Calendar className="h-4 w-4" />
-                      {formatDate(proposta.dataAprovacao || proposta.createdAt)}
+                      {formatDate(proposta.data_aprovacao || proposta.created_at)}
                     </p>
                   </div>
                 </div>
