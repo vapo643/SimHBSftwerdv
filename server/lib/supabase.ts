@@ -36,6 +36,30 @@ export function createServerSupabaseAdminClient() {
   );
 }
 
+// FUNÇÃO ANTI-FRÁGIL para operações com RLS (autenticadas):
+export function createServerSupabaseClient(accessToken?: string) {
+  const client = createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  });
+
+  // Se token fornecido, configurar para respeitar RLS
+  if (accessToken) {
+    client.auth.setSession({
+      access_token: accessToken,
+      refresh_token: '',
+      token_type: 'bearer',
+      expires_in: 3600,
+      expires_at: Date.now() + 3600000,
+      user: null
+    });
+  }
+
+  return client;
+}
+
 // Database connection using Drizzle
 const client = postgres(databaseUrl);
 export const db = drizzle(client, { schema });
