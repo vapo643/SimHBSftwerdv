@@ -586,13 +586,31 @@ export default function Formalizacao() {
       : "/credito/fila";
   };
 
+  // 🔧 DEBUG: Verificar valores antes da comparação
+  console.log('🔍 [DEBUG PERMISSION]', {
+    userRole: user?.role,
+    userLojaId: user?.loja_id,
+    userLojaIdType: typeof user?.loja_id,
+    propostaLojaId: proposta.loja_id,
+    propostaLojaIdType: typeof proposta.loja_id,
+    areEqual: proposta.loja_id === user?.loja_id,
+    strictEqual: proposta.loja_id !== user?.loja_id
+  });
+
   // Verificar se ATENDENTE tem permissão para acessar esta proposta
-  if (user?.role === 'ATENDENTE' && proposta.loja_id !== user.loja_id) {
+  // 🔧 CORREÇÃO: Usar Number() para garantir comparação correta
+  if (user?.role === 'ATENDENTE' && Number(proposta.loja_id) !== Number(user.loja_id)) {
     return (
       <DashboardLayout title="Acesso Negado">
         <div className="py-12 text-center">
           <Shield className="mx-auto mb-4 h-16 w-16 text-red-400" />
-          <p className="text-lg text-gray-500">Você não tem permissão para acessar esta proposta</p>
+          <p className="text-lg text-gray-500">
+            Você não tem permissão para acessar esta proposta
+            <br/>
+            <small className="text-gray-400">
+              Debug: Sua loja {user.loja_id} vs Proposta loja {proposta.loja_id}
+            </small>
+          </p>
           <Button onClick={() => setLocation("/formalizacao")} className="mt-4">
             Voltar para Minhas Propostas
           </Button>
