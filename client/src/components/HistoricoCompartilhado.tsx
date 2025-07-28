@@ -99,7 +99,11 @@ const HistoricoCompartilhado: React.FC<HistoricoCompartilhadoProps> = ({
               const isResubmit = log.status_novo === 'aguardando_analise' && log.status_anterior === 'pendenciado';
               const isApproval = log.status_novo === 'aprovado';
               const isRejection = log.status_novo === 'rejeitado';
-              const isAtendente = log.autor_id !== proposta?.analista_id; // Assumindo que autor diferente do analista é atendente
+              
+              // Verificar autoria baseada no role do perfil do autor
+              const autorRole = log.profiles?.role;
+              const isAtendente = autorRole === 'ATENDENTE';
+              const isAnalista = autorRole === 'ANALISTA';
               
               // Definir cores e ícones baseado no tipo
               let bgColor = 'bg-gray-800';
@@ -158,9 +162,10 @@ const HistoricoCompartilhado: React.FC<HistoricoCompartilhadoProps> = ({
                           : 'bg-gray-700/50 border-gray-500 text-gray-200'
                       }`}>
                         {isAtendente && <span className="text-indigo-300 font-medium">💬 Observação do Atendente:</span>}
-                        {isPendency && !isAtendente && <span className="text-yellow-300 font-medium">⚠️ Motivo da Pendência:</span>}
-                        {isApproval && !isAtendente && <span className="text-green-300 font-medium">✅ Observação da Aprovação:</span>}
-                        {isRejection && !isAtendente && <span className="text-red-300 font-medium">❌ Motivo da Rejeição:</span>}
+                        {isAnalista && isPendency && <span className="text-yellow-300 font-medium">⚠️ Motivo da Pendência:</span>}
+                        {isAnalista && isApproval && <span className="text-green-300 font-medium">✅ Observação da Aprovação:</span>}
+                        {isAnalista && isRejection && <span className="text-red-300 font-medium">❌ Motivo da Rejeição:</span>}
+                        {isAnalista && !isPendency && !isApproval && !isRejection && <span className="text-gray-300 font-medium">📝 Observação do Analista:</span>}
                         <div className={isAtendente ? 'italic mt-1' : 'mt-1'}>
                           "{log.detalhes || log.observacao}"
                         </div>

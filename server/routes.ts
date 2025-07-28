@@ -117,7 +117,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { createServerSupabaseAdminClient } = await import("../server/lib/supabase");
       const supabase = createServerSupabaseAdminClient();
       
-      // Buscar logs de auditoria da tabela proposta_logs
+      // Buscar logs de auditoria da tabela proposta_logs com informações do autor
       const { data: logs, error } = await supabase
         .from('proposta_logs')
         .select(`
@@ -126,7 +126,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           status_anterior,
           status_novo,
           created_at,
-          autor_id
+          autor_id,
+          profiles!proposta_logs_autor_id_fkey (
+            full_name,
+            role
+          )
         `)
         .eq('proposta_id', propostaId)
         .order('created_at', { ascending: true });
@@ -137,6 +141,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json({ logs: [] });
       }
       
+      console.log(`🔍 [DEBUG] Raw logs from Supabase:`, JSON.stringify(logs, null, 2));
+      
       // Transformar logs para o formato esperado pelo frontend
       const transformedLogs = logs?.map(log => ({
         id: log.id,
@@ -145,9 +151,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status_anterior: log.status_anterior,
         status_novo: log.status_novo,
         data_acao: log.created_at,
-        autor_id: log.autor_id
+        autor_id: log.autor_id,
+        profiles: log.profiles,
+        observacao: log.observacao,
+        created_at: log.created_at
       })) || [];
       
+      console.log(`🔍 [DEBUG] Transformed logs:`, JSON.stringify(transformedLogs, null, 2));
       console.log(`[${new Date().toISOString()}] Retornando ${transformedLogs.length} logs de auditoria para proposta ${propostaId}`);
       
       res.json({ 
