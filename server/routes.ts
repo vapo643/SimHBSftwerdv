@@ -374,6 +374,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         updateData.motivo_pendencia = null;
       }
       
+      // CORREÇÃO CRÍTICA: Definir data_aprovacao quando proposta é aprovada
+      if (status === 'aprovado') {
+        updateData.data_aprovacao = new Date().toISOString();
+        console.log(`🎯 [APROVAÇÃO] Definindo data_aprovacao para proposta ${propostaId}`);
+      }
+      
       const { error: updateError } = await supabase
         .from('propostas')
         .update(updateData)

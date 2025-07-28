@@ -88,6 +88,8 @@ This is a full-stack TypeScript application for credit management called "Simpix
 - **RBAC Navigation Permissions**: Fixed navigation permissions per business rules - ANALISTA users no longer see "Formalização" menu item, restricted to ATENDENTE, GERENTE, FINANCEIRO, and ADMINISTRADOR only
 - **Data Parsing Enhancement**: Implemented robust JSONB field parsing in both backend and frontend with defensive parsing to prevent crashes on malformed data
 - **Architectural Cleanup (January 28)**: Executed complete removal of duplicate formalization components - eliminated legacy files `formalizacao/fila.tsx` and `formalizacao/acompanhamento.tsx`, unified routing through single `formalizacao.tsx` component, resolved routing conflicts causing PGRST116 errors
+- **Critical Approval Bug Fixed (January 28)**: Identified and resolved missing `data_aprovacao` field in analyst approval process - when proposals are approved, they now receive proper approval timestamp enabling them to appear in formalization queue
+- **Database Schema Synchronization (January 28)**: Added missing formalization fields to propostas table (`data_aprovacao`, `documentos`, `documentos_adicionais`, `contrato_gerado`, `contrato_assinado`, `data_assinatura`, `data_pagamento`, `observacoes_formalizacao`) to match Drizzle schema definition
 
 - **Complete Document Flow Implementation FINALIZED (January 28)**: Successfully implemented end-to-end document management system with private bucket, folder organization, and secure visualization
 - **Private Storage Architecture**: Created secure private bucket 'documents' with folder structure 'proposta-{ID}/{timestamp}-{filename}' for proper organization
