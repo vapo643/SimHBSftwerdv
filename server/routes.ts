@@ -767,6 +767,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Rota para alternar status entre ativa/suspensa
   app.put("/api/propostas/:id/toggle-status", jwtAuthMiddleware, togglePropostaStatus);
 
+  // Emergency route to setup storage bucket (temporary - no auth for setup)
+  app.post("/api/setup-storage", async (req, res) => {
+    try {
+      const { createServerSupabaseAdminClient } = await import('./lib/supabase');
+      const supabase = createServerSupabaseAdminClient();
+      
+      // Check existing buckets
+      const { data: buckets, error: listError } = await supabase.storage.listBuckets();
+      
+      if (listError) {
+        console.error('❌ Erro ao listar buckets:', listError);
+        return res.status(500).json({ message: 'Erro ao acessar storage', error: listError.message });
+      }
+      
+      const documentsExists = buckets.some(bucket => bucket.name === 'documents');
+      
+      if (documentsExists) {
+        return res.json({ message: 'Bucket documents já existe', buckets: buckets.map(b => b.name) });
+      }
+      
+      // Create documents bucket
+      const { data: bucket, error: createError } = await supabase.storage.createBucket('documents', {
+        public: true,
+        fileSizeLimit: 52428800, // 50MB
+        allowedMimeTypes: [
+          'application/pdf',
+          'image/jpeg', 
+          'image/jpg',
+          'image/png',
+          'image/gif'
+        ]
+      });
+      
+      if (createError) {
+        console.error('❌ Erro ao criar bucket:', createError);
+        return res.status(500).json({ message: 'Erro ao criar bucket', error: createError.message });
+      }
+      
+      res.json({ 
+        message: 'Bucket documents criado com sucesso!', 
+        bucket: bucket,
+        allBuckets: buckets.map(b => b.name).concat(['documents'])
+      });
+      
+    } catch (error) {
+      console.error('Erro no setup:', error);
+      res.status(500).json({ message: 'Erro interno', error: error.message });
+    }
+  });
+
   // Legacy file upload route (mantido para compatibilidade)
   app.post("/api/upload", jwtAuthMiddleware, upload.single("file"), async (req: AuthenticatedRequest, res) => {
     try {
