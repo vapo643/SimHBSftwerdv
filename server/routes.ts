@@ -481,8 +481,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .from('propostas')
         .update({
           cliente_data,
-          condicoes_data,
-          updated_at: new Date().toISOString()
+          condicoes_data
         })
         .eq('id', id)
         .select()
