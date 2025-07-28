@@ -347,7 +347,7 @@ function FormalizacaoList() {
 }
 
 export default function Formalizacao() {
-  // 🔧 CORREÇÃO CRÍTICA: Mover TODOS os hooks para o topo (Rules of Hooks)
+  // 🔧 CORREÇÃO CRÍTICA: TODOS os hooks devem estar ANTES de qualquer lógica condicional ou return
   const [, params] = useRoute("/formalizacao/acompanhamento/:id");
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState<"timeline" | "documents" | "contracts">("timeline");
@@ -357,11 +357,7 @@ export default function Formalizacao() {
   
   const propostaId = params?.id;
 
-  // If no ID provided, show list of propostas for formalization
-  if (!propostaId) {
-    return <FormalizacaoList />;
-  }
-
+  // TODOS os hooks devem estar aqui no topo
   const { data: proposta, isLoading } = useQuery<Proposta>({
     queryKey: ["/api/propostas", propostaId],
     enabled: !!propostaId,
@@ -461,6 +457,14 @@ export default function Formalizacao() {
     };
     return statusTexts[status as keyof typeof statusTexts] || status;
   };
+
+  // AGORA toda a lógica condicional pode vir aqui, APÓS todos os hooks
+  
+  // 🔧 CORREÇÃO CRÍTICA: Lógica condicional APÓS todos os hooks
+  // Se não tem ID, mostrar lista de propostas
+  if (!propostaId) {
+    return <FormalizacaoList />;
+  }
 
   const getFormalizationSteps = (proposta: Proposta) => [
     {
