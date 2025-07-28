@@ -39,6 +39,7 @@ import {
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import RefreshButton from "@/components/RefreshButton";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Proposta {
   id: string;
@@ -97,6 +98,8 @@ type UpdateFormalizacaoForm = z.infer<typeof updateFormalizacaoSchema>;
 
 function FormalizacaoList() {
   const [, setLocation] = useLocation();
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   const { data: propostas, isLoading, error } = useQuery<Proposta[]>({
     queryKey: ["/api/propostas/formalizacao"],
@@ -175,9 +178,31 @@ function FormalizacaoList() {
     queryClient.invalidateQueries({ queryKey: ['/api/propostas/formalizacao'] });
   };
 
+  // Filtrar propostas baseado no papel do usuário
+  const filteredPropostas = user?.role === 'ATENDENTE' 
+    ? formalizacaoPropostas.filter(p => 
+        // ATENDENTE só vê propostas que precisam de sua ação
+        p.status === 'aprovado' || 
+        p.status === 'documentos_enviados' ||
+        (p.loja_id === user.loja_id) // Suas próprias propostas
+      )
+    : formalizacaoPropostas; // ANALISTA vê todas
+
+  const getTitle = () => {
+    return user?.role === 'ATENDENTE' 
+      ? "Minhas Propostas - Formalização"
+      : "Formalização - Visão Geral";
+  };
+
+  const getDescription = () => {
+    return user?.role === 'ATENDENTE'
+      ? "Propostas que precisam da sua ação para prosseguir na formalização"
+      : "Acompanhe o processo de formalização das propostas aprovadas";
+  };
+
   return (
     <DashboardLayout 
-      title="Formalização"
+      title={getTitle()}
       actions={
         <RefreshButton 
           onRefresh={handleRefresh}
@@ -190,15 +215,21 @@ function FormalizacaoList() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Formalização</h1>
+            <h1 className="text-2xl font-bold text-gray-900">{getTitle()}</h1>
             <p className="text-gray-600">
-              Acompanhe o processo de formalização das propostas aprovadas
+              {getDescription()}
             </p>
+            {user?.role === 'ATENDENTE' && (
+              <div className="mt-2 flex items-center gap-2 text-sm text-blue-600">
+                <Shield className="h-4 w-4" />
+                <span>Visualização do Atendente - Ações Pendentes</span>
+              </div>
+            )}
           </div>
           <div className="flex items-center gap-4">
             <div className="text-right">
               <p className="text-sm text-gray-600">Total em Formalização</p>
-              <p className="text-2xl font-bold text-blue-600">{formalizacaoPropostas.length}</p>
+              <p className="text-2xl font-bold text-blue-600">{filteredPropostas.length}</p>
             </div>
           </div>
         </div>
@@ -213,7 +244,7 @@ function FormalizacaoList() {
             { status: "pronto_pagamento", label: "Pronto Pag.", color: "bg-orange-500" },
             { status: "pago", label: "Pago", color: "bg-green-600" },
           ].map(item => {
-            const count = formalizacaoPropostas.filter(p => p.status === item.status).length;
+            const count = filteredPropostas.filter(p => p.status === item.status).length;
             return (
               <Card key={item.status}>
                 <CardContent className="p-4">
@@ -230,7 +261,7 @@ function FormalizacaoList() {
 
         {/* Propostas List */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {formalizacaoPropostas.map(proposta => (
+          {filteredPropostas.map(proposta => (
             <Card key={proposta.id} className="cursor-pointer transition-shadow hover:shadow-lg">
               <CardContent className="p-6">
                 <div className="mb-4 flex items-center justify-between">
@@ -265,8 +296,13 @@ function FormalizacaoList() {
                   <Button
                     onClick={() => setLocation(`/formalizacao/acompanhamento/${proposta.id}`)}
                     className="w-full"
+                    variant={user?.role === 'ATENDENTE' && 
+                            (proposta.status === 'aprovado' || proposta.status === 'documentos_enviados') 
+                            ? "default" : "outline"}
                   >
-                    Acompanhar
+                    {user?.role === 'ATENDENTE' && 
+                     (proposta.status === 'aprovado' || proposta.status === 'documentos_enviados')
+                      ? "Ação Necessária" : "Acompanhar"}
                   </Button>
                 </div>
               </CardContent>
@@ -274,7 +310,7 @@ function FormalizacaoList() {
           ))}
         </div>
 
-        {formalizacaoPropostas.length === 0 && (
+        {filteredPropostas.length === 0 && (
           <div className="py-12 text-center">
             <FileText className="mx-auto mb-4 h-16 w-16 text-gray-400" />
             <p className="text-lg text-gray-500">Nenhuma proposta em formalização</p>
@@ -298,6 +334,7 @@ export default function Formalizacao() {
   const [activeTab, setActiveTab] = useState<"timeline" | "documents" | "contracts">("timeline");
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   const { data: proposta, isLoading } = useQuery<Proposta>({
     queryKey: ["/api/propostas", propostaId],
@@ -505,19 +542,56 @@ export default function Formalizacao() {
 
   const formalizationSteps = getFormalizationSteps(proposta);
 
+  // Função para obter título baseado no papel
+  const getTitle = () => {
+    return user?.role === 'ATENDENTE' 
+      ? `Minha Proposta #${proposta.id} - Ação Necessária`
+      : `Acompanhamento da Formalização - Proposta #${proposta.id}`;
+  };
+
+  // Função para obter destino do botão voltar
+  const getBackLocation = () => {
+    return user?.role === 'ATENDENTE' 
+      ? "/formalizacao"
+      : "/credito/fila";
+  };
+
+  // Verificar se ATENDENTE tem permissão para acessar esta proposta
+  if (user?.role === 'ATENDENTE' && proposta.loja_id !== user.loja_id) {
+    return (
+      <DashboardLayout title="Acesso Negado">
+        <div className="py-12 text-center">
+          <Shield className="mx-auto mb-4 h-16 w-16 text-red-400" />
+          <p className="text-lg text-gray-500">Você não tem permissão para acessar esta proposta</p>
+          <Button onClick={() => setLocation("/formalizacao")} className="mt-4">
+            Voltar para Minhas Propostas
+          </Button>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   return (
-    <DashboardLayout title={`Acompanhamento da Formalização - Proposta #${proposta.id}`}>
+    <DashboardLayout title={getTitle()}>
       <div className="space-y-6">
         {/* Header Actions */}
         <div className="flex items-center justify-between">
-          <Button
-            variant="outline"
-            onClick={() => setLocation("/credito/fila")}
-            className="flex items-center gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Voltar para Fila
-          </Button>
+          <div className="flex items-center gap-4">
+            <Button
+              variant="outline"
+              onClick={() => setLocation(getBackLocation())}
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              {user?.role === 'ATENDENTE' ? 'Voltar para Minhas Propostas' : 'Voltar para Fila'}
+            </Button>
+            {user?.role === 'ATENDENTE' && (
+              <div className="flex items-center gap-2 text-sm text-blue-600">
+                <Shield className="h-4 w-4" />
+                <span>Visualização do Atendente</span>
+              </div>
+            )}
+          </div>
 
           <div className="flex items-center gap-2">
             <Badge variant="outline" className={`${getStatusColor(proposta.status)} text-white`}>
@@ -536,7 +610,7 @@ export default function Formalizacao() {
               <div className="mb-2 flex items-center justify-between">
                 <h3 className="flex items-center gap-2 text-lg font-semibold text-gray-900">
                   <TrendingUp className="h-5 w-5 text-blue-600" />
-                  Progresso da Formalização
+                  {user?.role === 'ATENDENTE' ? 'Sua Ação Necessária' : 'Progresso da Formalização'}
                 </h3>
                 <span className="text-sm font-medium text-gray-600">
                   {getStatusProgress(proposta.status)}% concluído
@@ -561,7 +635,7 @@ export default function Formalizacao() {
                   }`}
                 >
                   <Activity className="h-4 w-4" />
-                  Timeline
+                  {user?.role === 'ATENDENTE' ? 'Progresso' : 'Timeline'}
                 </button>
                 <button
                   onClick={() => setActiveTab("documents")}
@@ -574,17 +648,20 @@ export default function Formalizacao() {
                   <FileText className="h-4 w-4" />
                   Documentos
                 </button>
-                <button
-                  onClick={() => setActiveTab("contracts")}
-                  className={`flex items-center gap-2 border-b-2 pb-2 text-sm font-medium ${
-                    activeTab === "contracts"
-                      ? "border-blue-500 text-blue-600"
-                      : "border-transparent text-gray-500 hover:text-gray-700"
-                  }`}
-                >
-                  <FileCheck className="h-4 w-4" />
-                  Contratos
-                </button>
+                {/* ANALISTA vê todas as tabs, ATENDENTE pode ter acesso limitado */}
+                {user?.role !== 'ATENDENTE' && (
+                  <button
+                    onClick={() => setActiveTab("contracts")}
+                    className={`flex items-center gap-2 border-b-2 pb-2 text-sm font-medium ${
+                      activeTab === "contracts"
+                        ? "border-blue-500 text-blue-600"
+                        : "border-transparent text-gray-500 hover:text-gray-700"
+                    }`}
+                  >
+                    <FileCheck className="h-4 w-4" />
+                    Contratos
+                  </button>
+                )}
               </div>
             </div>
           </CardContent>
