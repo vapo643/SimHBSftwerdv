@@ -87,13 +87,20 @@ type UpdateFormalizacaoForm = z.infer<typeof updateFormalizacaoSchema>;
 function FormalizacaoList() {
   const [, setLocation] = useLocation();
 
-  const { data: propostas, isLoading } = useQuery<Proposta[]>({
+  const { data: propostas, isLoading, error } = useQuery<Proposta[]>({
     queryKey: ["/api/propostas/formalizacao"],
     queryFn: async () => {
+      console.log("Fazendo requisição para /api/propostas/formalizacao");
       const response = await apiRequest("/api/propostas/formalizacao");
+      console.log("Resposta do endpoint formalizacao:", response);
       return response;
     }
   });
+
+  // Debug: log error if any
+  if (error) {
+    console.error("Erro na query de formalização:", error);
+  }
 
   const formatCurrency = (value: string | number) => {
     const numValue = typeof value === "string" ? parseFloat(value) : value;

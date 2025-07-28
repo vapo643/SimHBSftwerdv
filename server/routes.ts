@@ -1374,7 +1374,8 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
         };
       });
       
-      console.log(`[${new Date().toISOString()}] Retornando ${propostasFormatadas.length} propostas de formalização`);
+      console.log(`[${new Date().toISOString()}] Retornando ${propostasFormatadas.length} propostas de formalização para usuário:`, req.user?.id);
+      console.log("Propostas de formalização:", propostasFormatadas.map(p => ({ id: p.id, status: p.status, clienteNome: p.clienteNome })));
       res.json(propostasFormatadas);
       
     } catch (error) {
