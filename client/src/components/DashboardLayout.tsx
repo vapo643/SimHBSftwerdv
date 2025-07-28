@@ -49,7 +49,7 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     { name: "Nova Proposta", href: "/propostas/nova", icon: PlusCircle },
     { name: "Fila de Análise", href: "/credito/fila", icon: List },
-    { name: "Formalização", href: "/formalizacao/fila", icon: FileText },
+    { name: "Formalização", href: "/formalizacao", icon: FileText },
   ];
 
   // Financial navigation items - only visible to FINANCEIRO role

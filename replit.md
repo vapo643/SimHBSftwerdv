@@ -87,6 +87,7 @@ This is a full-stack TypeScript application for credit management called "Simpix
 - **Frontend TypeScript Fixes**: Corrected property name mismatches between camelCase frontend and snake_case database schema (contrato_gerado, documentos_adicionais, etc.)
 - **RBAC Navigation Permissions**: Fixed navigation permissions per business rules - ANALISTA users no longer see "Formalização" menu item, restricted to ATENDENTE, GERENTE, FINANCEIRO, and ADMINISTRADOR only
 - **Data Parsing Enhancement**: Implemented robust JSONB field parsing in both backend and frontend with defensive parsing to prevent crashes on malformed data
+- **Architectural Cleanup (January 28)**: Executed complete removal of duplicate formalization components - eliminated legacy files `formalizacao/fila.tsx` and `formalizacao/acompanhamento.tsx`, unified routing through single `formalizacao.tsx` component, resolved routing conflicts causing PGRST116 errors
 
 - **Complete Document Flow Implementation FINALIZED (January 28)**: Successfully implemented end-to-end document management system with private bucket, folder organization, and secure visualization
 - **Private Storage Architecture**: Created secure private bucket 'documents' with folder structure 'proposta-{ID}/{timestamp}-{filename}' for proper organization
