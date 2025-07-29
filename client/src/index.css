@@ -5,20 +5,20 @@
 @tailwind utilities;
 
 :root {
-  /* Tema Dark (Blackout) - Default */
-  --background: hsl(0, 0%, 0%);
+  /* TEMA DARK HARMONIZADO - Design System Profissional */
+  --background: hsl(225, 9%, 9%);
   --foreground: hsl(0, 0%, 98%);
-  --muted: hsl(0, 0%, 8%);
+  --muted: hsl(225, 9%, 14%);
   --muted-foreground: hsl(0, 0%, 64%);
-  --popover: hsl(0, 0%, 8%);
+  --popover: hsl(225, 9%, 14%);
   --popover-foreground: hsl(0, 0%, 98%);
-  --card: hsl(0, 0%, 8%);
+  --card: hsl(225, 9%, 14%);
   --card-foreground: hsl(0, 0%, 98%);
-  --border: hsl(0, 0%, 15%);
-  --input: hsl(0, 0%, 12%);
+  --border: hsl(225, 9%, 20%);
+  --input: hsl(225, 9%, 16%);
   --primary: hsl(220, 100%, 45%);
   --primary-foreground: hsl(0, 0%, 100%);
-  --secondary: hsl(0, 0%, 12%);
+  --secondary: hsl(225, 9%, 16%);
   --secondary-foreground: hsl(0, 0%, 98%);
   --accent: hsl(120, 100%, 45%);
   --accent-foreground: hsl(0, 0%, 100%);
@@ -28,15 +28,19 @@
   --radius: 0.5rem;
   --warning: hsl(38, 92%, 50%);
   --success: hsl(142, 76%, 36%);
-  /* Cores Simpix */
+  /* Cores Simpix Harmonizadas */
   --simpix-blue: hsl(220, 100%, 45%);
   --simpix-green: hsl(120, 100%, 45%);
   --simpix-blue-light: hsl(220, 100%, 55%);
   --simpix-green-dark: hsl(120, 100%, 35%);
+  /* Novas variáveis para harmonia visual */
+  --card-hover: hsl(225, 9%, 18%);
+  --table-header: hsl(225, 9%, 16%);
+  --table-row-hover: hsl(225, 9%, 16%);
 }
 
 .light {
-  /* Tema Light */
+  /* TEMA LIGHT HARMONIZADO - Design System Profissional */
   --background: hsl(0, 0%, 100%);
   --foreground: hsl(240, 10%, 3.9%);
   --muted: hsl(240, 4.8%, 95.9%);
@@ -46,7 +50,7 @@
   --card: hsl(0, 0%, 100%);
   --card-foreground: hsl(240, 10%, 3.9%);
   --border: hsl(240, 5.9%, 90%);
-  --input: hsl(240, 5.9%, 90%);
+  --input: hsl(240, 5.9%, 96%);
   --primary: hsl(220, 100%, 45%);
   --primary-foreground: hsl(0, 0%, 100%);
   --secondary: hsl(240, 4.8%, 95.9%);
@@ -59,11 +63,15 @@
   --radius: 0.5rem;
   --warning: hsl(38, 92%, 50%);
   --success: hsl(142, 76%, 36%);
-  /* Cores Simpix para tema claro */
+  /* Cores Simpix harmonizadas para tema claro */
   --simpix-blue: hsl(220, 100%, 45%);
   --simpix-green: hsl(120, 100%, 45%);
   --simpix-blue-light: hsl(220, 100%, 55%);
   --simpix-green-dark: hsl(120, 100%, 35%);
+  /* Novas variáveis para harmonia visual */
+  --card-hover: hsl(240, 4.8%, 97%);
+  --table-header: hsl(240, 4.8%, 97%);
+  --table-row-hover: hsl(240, 4.8%, 98%);
 }
 
 .dark {
@@ -127,51 +135,74 @@
 }
 
 .btn-simpix-secondary {
-  @apply bg-gray-600 text-white hover:bg-gray-700 transition-colors;
+  @apply bg-secondary text-secondary-foreground hover:bg-muted transition-colors;
 }
 
 .btn-simpix-warning {
   @apply bg-orange-500 text-white hover:bg-orange-600 transition-colors;
 }
 
-.card-simpix {
+.card-harmonized {
+  @apply bg-card border-border text-card-foreground transition-colors;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+}
+
+.card-harmonized:hover {
+  background-color: hsl(var(--card-hover));
+}
+
+.input-harmonized {
+  @apply bg-input border-border text-foreground placeholder:text-muted-foreground transition-colors;
+}
+
+.input-harmonized:focus {
+  @apply ring-2 ring-primary border-primary;
+}
+
+.table-harmonized {
   @apply bg-card border-border;
-  background: linear-gradient(135deg, hsl(0, 0%, 8%) 0%, hsl(0, 0%, 12%) 100%);
-  border: 1px solid hsl(0, 0%, 15%);
 }
 
-.input-simpix {
-  @apply bg-input border-border text-foreground placeholder:text-muted-foreground;
-  background: hsl(0, 0%, 12%);
-  border: 1px solid hsl(0, 0%, 15%);
+.table-harmonized th {
+  @apply bg-[hsl(var(--table-header))] text-card-foreground font-medium;
 }
 
-.input-simpix:focus {
-  @apply ring-2 ring-[hsl(var(--simpix-blue))] border-[hsl(var(--simpix-blue))];
+.table-harmonized tr:hover {
+  @apply bg-[hsl(var(--table-row-hover))];
 }
 
-/* Status badges */
+.dialog-harmonized {
+  @apply bg-card border-border text-card-foreground;
+}
+
+/* Status badges harmonizados */
 .status-approved {
   @apply inline-flex items-center rounded-full px-2 py-1 text-xs font-medium;
-  background: hsl(142, 76%, 36%);
+  background: hsl(var(--success));
   color: white;
 }
 
 .status-rejected {
   @apply inline-flex items-center rounded-full px-2 py-1 text-xs font-medium;
-  background: hsl(0, 84.2%, 60.2%);
+  background: hsl(var(--destructive));
   color: white;
 }
 
 .status-pending {
   @apply inline-flex items-center rounded-full px-2 py-1 text-xs font-medium;
-  background: hsl(38, 92%, 50%);
+  background: hsl(var(--warning));
+  color: white;
+}
+
+.status-warning {
+  @apply inline-flex items-center rounded-full px-2 py-1 text-xs font-medium;
+  background: hsl(var(--warning));
   color: white;
 }
 
 .status-suspended {
   @apply inline-flex items-center rounded-full px-2 py-1 text-xs font-medium;
-  background: hsl(280, 60%, 50%);
+  background: hsl(var(--accent));
   color: white;
 }
 

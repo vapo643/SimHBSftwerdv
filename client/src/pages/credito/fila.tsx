@@ -181,32 +181,32 @@ const FilaAnalise: React.FC = () => {
       <div className="space-y-6">
         {/* KPIs Section */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          <Card className="card-simpix">
+          <Card className="card-harmonized">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5 text-blue-400" />
+              <CardTitle className="flex items-center gap-2 text-card-foreground">
+                <Calendar className="h-5 w-5 text-primary" />
                 Propostas no Dia
               </CardTitle>
             </CardHeader>
-            <CardContent className="text-2xl font-bold">{propostasHoje}</CardContent>
+            <CardContent className="text-2xl font-bold text-card-foreground">{propostasHoje}</CardContent>
           </Card>
-          <Card className="card-simpix">
+          <Card className="card-harmonized">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 text-green-400" />
+              <CardTitle className="flex items-center gap-2 text-card-foreground">
+                <TrendingUp className="h-5 w-5 text-[hsl(var(--success))]" />
                 Acumulado no Mês
               </CardTitle>
             </CardHeader>
-            <CardContent className="text-2xl font-bold">{acumuladoMes}</CardContent>
+            <CardContent className="text-2xl font-bold text-card-foreground">{acumuladoMes}</CardContent>
           </Card>
-          <Card className="card-simpix">
+          <Card className="card-harmonized">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Clock className="h-5 w-5 text-yellow-400" />
+              <CardTitle className="flex items-center gap-2 text-card-foreground">
+                <Clock className="h-5 w-5 text-[hsl(var(--warning))]" />
                 Propostas Pendentes
               </CardTitle>
             </CardHeader>
-            <CardContent className="text-2xl font-bold">{propostasPendentes}</CardContent>
+            <CardContent className="text-2xl font-bold text-card-foreground">{propostasPendentes}</CardContent>
           </Card>
         </div>
 

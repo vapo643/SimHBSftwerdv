@@ -237,12 +237,12 @@ function FormalizacaoList() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-white dark:text-white">{getTitle()}</h1>
-            <p className="text-gray-400 dark:text-gray-400">
+            <h1 className="text-2xl font-bold text-foreground">{getTitle()}</h1>
+            <p className="text-muted-foreground">
               {getDescription()}
             </p>
             {user?.role === 'ATENDENTE' && (
-              <div className="mt-2 flex items-center gap-2 text-sm text-blue-400">
+              <div className="mt-2 flex items-center gap-2 text-sm text-primary">
                 <Shield className="h-4 w-4" />
                 <span>Visualização do Atendente - Ações Pendentes</span>
               </div>
@@ -250,8 +250,8 @@ function FormalizacaoList() {
           </div>
           <div className="flex items-center gap-4">
             <div className="text-right">
-              <p className="text-sm text-gray-400">Total em Formalização</p>
-              <p className="text-2xl font-bold text-blue-400">{filteredPropostas.length}</p>
+              <p className="text-sm text-muted-foreground">Total em Formalização</p>
+              <p className="text-2xl font-bold text-primary">{filteredPropostas.length}</p>
             </div>
           </div>
         </div>

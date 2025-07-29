@@ -158,13 +158,13 @@ export default function FilaAnalise() {
     return (
       <DashboardLayout title="Fila de Análise de Crédito">
         <div className="space-y-6">
-          <Card>
+          <Card className="card-harmonized">
             <CardContent className="p-6">
               <div className="animate-pulse space-y-4">
-                <div className="h-4 w-1/4 rounded bg-gray-200"></div>
+                <div className="h-4 w-1/4 rounded bg-muted"></div>
                 <div className="grid grid-cols-4 gap-4">
                   {[1, 2, 3, 4].map(i => (
-                    <div key={i} className="h-10 rounded bg-gray-200"></div>
+                    <div key={i} className="h-10 rounded bg-muted"></div>
                   ))}
                 </div>
               </div>
@@ -181,26 +181,26 @@ export default function FilaAnalise() {
         {/* Statistics Cards */}
         {stats && (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Card>
+            <Card className="card-harmonized">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-600">Aguardando Análise</p>
-                    <p className="text-2xl font-bold text-orange-600">{stats.aguardando}</p>
+                    <p className="text-sm text-muted-foreground">Aguardando Análise</p>
+                    <p className="text-2xl font-bold text-[hsl(var(--warning))]">{stats.aguardando}</p>
                   </div>
-                  <Clock className="h-8 w-8 text-orange-600" />
+                  <Clock className="h-8 w-8 text-[hsl(var(--warning))]" />
                 </div>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="card-harmonized">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-600">Em Análise</p>
-                    <p className="text-2xl font-bold text-blue-600">{stats.emAnalise}</p>
+                    <p className="text-sm text-muted-foreground">Em Análise</p>
+                    <p className="text-2xl font-bold text-primary">{stats.emAnalise}</p>
                   </div>
-                  <AlertCircle className="h-8 w-8 text-blue-600" />
+                  <AlertCircle className="h-8 w-8 text-primary" />
                 </div>
               </CardContent>
             </Card>

@@ -236,17 +236,17 @@ export default function AnaliseManual() {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           <div className="space-y-6 lg:col-span-2">
             {[1, 2, 3].map(i => (
-              <Card key={i} className="animate-pulse">
+              <Card key={i} className="animate-pulse card-harmonized">
                 <CardContent className="p-6">
-                  <div className="h-32 rounded bg-gray-200"></div>
+                  <div className="h-32 rounded bg-muted"></div>
                 </CardContent>
               </Card>
             ))}
           </div>
           <div className="space-y-6">
-            <Card className="animate-pulse">
+            <Card className="animate-pulse card-harmonized">
               <CardContent className="p-6">
-                <div className="h-48 rounded bg-gray-200"></div>
+                <div className="h-48 rounded bg-muted"></div>
               </CardContent>
             </Card>
           </div>
