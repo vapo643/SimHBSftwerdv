@@ -753,6 +753,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         console.log(`🔍 [ANÁLISE] Documentos encontrados para proposta ${idParam}:`, documentos?.length || 0);
         
+        // Gerar URLs assinadas para visualização dos documentos
+        let documentosComUrls = [];
+        if (documentos && documentos.length > 0) {
+          console.log(`🔍 [ANÁLISE] Gerando URLs assinadas para ${documentos.length} documentos...`);
+          
+          for (const doc of documentos) {
+            try {
+              const { data: signedUrlData, error: urlError } = await supabase.storage
+                .from('documents')
+                .createSignedUrl(doc.caminho_arquivo, 3600); // 1 hora
+
+              if (!urlError && signedUrlData) {
+                documentosComUrls.push({
+                  ...doc,
+                  // Mapeamento para formato esperado pelo DocumentViewer
+                  name: doc.nome_arquivo,
+                  url: signedUrlData.signedUrl,
+                  type: doc.tipo_documento,
+                  uploadDate: doc.created_at,
+                  // Manter campos originais também
+                  url_visualizacao: signedUrlData.signedUrl
+                });
+                console.log(`🔍 [ANÁLISE] ✅ URL gerada para documento: ${doc.nome_arquivo}`);
+              } else {
+                console.log(`🔍 [ANÁLISE] ❌ Erro ao gerar URL para documento ${doc.nome_arquivo}:`, urlError?.message);
+                documentosComUrls.push({
+                  ...doc,
+                  // Mesmo sem URL, mapear para formato esperado
+                  name: doc.nome_arquivo,
+                  url: '',
+                  type: doc.tipo_documento,
+                  uploadDate: doc.created_at
+                }); // Adiciona sem URL em caso de erro
+              }
+            } catch (error) {
+              console.log(`🔍 [ANÁLISE] ❌ Erro ao processar documento ${doc.nome_arquivo}:`, error);
+              documentosComUrls.push(doc); // Adiciona sem URL em caso de erro
+            }
+          }
+        }
+        
         // Transform to match expected format with proper camelCase conversion
         const formattedProposta = {
           ...proposta,
@@ -781,8 +822,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           } : null,
           produtos: proposta.produto,
           tabelas_comerciais: proposta.tabela_comercial,
-          // Include documents
-          documentos: documentos || []
+          // Include documents with signed URLs
+          documentos: documentosComUrls || []
         };
         
         res.json(formattedProposta);

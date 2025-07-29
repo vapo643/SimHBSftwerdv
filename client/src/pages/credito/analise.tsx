@@ -228,7 +228,7 @@ const AnaliseManualPage: React.FC = () => {
           {/* Visualizador de Documentos */}
           <DocumentViewer 
             propostaId={propostaId!}
-            documents={proposta.documentosAnexados || []}
+            documents={proposta.documentos || []}
             ccbDocumentoUrl={proposta.ccbDocumentoUrl}
           />
           
