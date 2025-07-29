@@ -910,107 +910,12 @@ export default function Formalizacao() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    {/* Original Documents */}
-                    <div>
-                      <h4 className="mb-3 font-medium text-white">Documentos Originais</h4>
-                      <div className="space-y-2">
-                        {proposta.documentos && proposta.documentos.length > 0 ? (
-                          proposta.documentos.map((doc: any, index: number) => (
-                            <div key={doc.id || index} className="flex items-center justify-between rounded-lg bg-gray-700 border border-gray-600 p-3">
-                              <div className="flex items-center gap-3">
-                                <FileText className="h-5 w-5 text-blue-400" />
-                                <div>
-                                  <p className="font-medium text-white">{doc.nome_arquivo || doc.nomeArquivo || 'Documento sem nome'}</p>
-                                  <p className="text-sm text-gray-400">{doc.tipo_documento || doc.tipoDocumento || 'Tipo não informado'}</p>
-                                </div>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Button variant="ghost" size="sm" onClick={() => {
-                                  if (doc.url_visualizacao) {
-                                    window.open(doc.url_visualizacao, '_blank');
-                                  } else {
-                                    toast({
-                                      title: "Erro",
-                                      description: "URL de visualização não disponível",
-                                      variant: "destructive",
-                                    });
-                                  }
-                                }}>
-                                  <Eye className="mr-1 h-4 w-4" />
-                                  Ver
-                                </Button>
-                                <Button variant="ghost" size="sm" onClick={() => {
-                                  if (doc.url_visualizacao) {
-                                    const link = document.createElement('a');
-                                    link.href = doc.url_visualizacao;
-                                    link.download = doc.nome_arquivo || doc.nomeArquivo || 'documento';
-                                    document.body.appendChild(link);
-                                    link.click();
-                                    document.body.removeChild(link);
-                                  } else {
-                                    toast({
-                                      title: "Erro",
-                                      description: "URL de download não disponível",
-                                      variant: "destructive",
-                                    });
-                                  }
-                                }}>
-                                  <Download className="mr-1 h-4 w-4" />
-                                  Baixar
-                                </Button>
-                              </div>
-                            </div>
-                          ))
-                        ) : (
-                          <div className="py-4 text-center text-gray-400">
-                            <FileText className="mx-auto mb-2 h-8 w-8 opacity-50" />
-                            <p>Nenhum documento original encontrado</p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    <Separator />
-
-                    {/* Additional Documents */}
-                    <div>
-                      <h4 className="mb-3 font-medium text-gray-900">Documentos Adicionais</h4>
-                      <div className="space-y-2">
-                        {proposta.documentosAdicionais &&
-                        proposta.documentosAdicionais.length > 0 ? (
-                          proposta.documentosAdicionais.map((documento, index) => (
-                            <div
-                              key={index}
-                              className="flex items-center justify-between rounded-md bg-green-50 p-3"
-                            >
-                              <div className="flex items-center space-x-3">
-                                <FileText className="h-4 w-4 text-green-500" />
-                                <span className="text-sm font-medium text-gray-700">
-                                  {documento}
-                                </span>
-                              </div>
-                              <div className="flex gap-2">
-                                <Button variant="ghost" size="sm">
-                                  <Eye className="mr-1 h-4 w-4" />
-                                  Visualizar
-                                </Button>
-                                <Button variant="ghost" size="sm">
-                                  <Download className="mr-1 h-4 w-4" />
-                                  Baixar
-                                </Button>
-                              </div>
-                            </div>
-                          ))
-                        ) : (
-                          <div className="py-4 text-center text-gray-500">
-                            <Upload className="mx-auto mb-2 h-8 w-8 opacity-50" />
-                            <p>Nenhum documento adicional enviado</p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
+                  {/* Usar DocumentViewer com popup modal como na análise */}
+                  <DocumentViewer 
+                    propostaId={proposta.id} 
+                    documents={proposta.documentos || []} 
+                    ccbDocumentoUrl={proposta.ccbGerado ? `/api/propostas/${proposta.id}/ccb-url` : undefined}
+                  />
                 </CardContent>
               </Card>
             )}

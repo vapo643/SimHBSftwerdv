@@ -82,6 +82,8 @@ This is a full-stack TypeScript application for credit management called "Simpix
 
 ### January 2025
 
+- **Document Viewer Consistency Fix (January 29)**: Unified document viewing experience across analysis and formalization screens using DocumentViewer component with popup modal instead of direct new tab opening
+- **Modal-First Document Interface**: Both analysis and formalization screens now use popup modal for document viewing with "Open in New Tab" button option inside modal
 - **Database Schema Extension for Formalization Workflow (January 29)**: Successfully executed database migration to add formalization tracking columns to propostas table
 - **CCB and Electronic Signature Tracking**: Added ccb_gerado, assinatura_eletronica_concluida, biometria_concluida boolean fields with NOT NULL DEFAULT false constraints
 - **Document Path Storage**: Added caminho_ccb_assinado TEXT nullable field for storing signed CCB document links
