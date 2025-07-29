@@ -603,11 +603,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Gerar CCB
       console.log(`[CCB] Gerando CCB para proposta ${id}...`);
       const { generateCCB } = await import("./services/ccbGenerator");
-      const { TemplateManager } = await import("./services/templateManager");
       
       try {
-        const templateId = req.body?.templateId || undefined;
-        const ccbPath = await generateCCB(id, templateId);
+        const ccbPath = await generateCCB(id);
         console.log(`[CCB] CCB gerada com sucesso: ${ccbPath}`);
         res.json({ 
           success: true, 
@@ -750,10 +748,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const idParam = req.params.id;
       const user = req.user;
-
-      if (!user) {
-        return res.status(401).json({ message: "Usuário não autenticado" });
-      }
 
       console.log(`🔐 [PROPOSTA ACCESS] User ${user.id} (${user.role}) accessing proposta ${idParam}`);
 
@@ -2078,10 +2072,7 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
       res.json(propostaProcessada);
     } catch (error) {
       console.error(`[${new Date().toISOString()}] ❌ ERRO ao buscar dados de formalização:`, error);
-      res.status(500).json({ 
-        message: "Erro ao buscar dados de formalização", 
-        error: error instanceof Error ? error.message : String(error)
-      });
+      res.status(500).json({ message: "Erro ao buscar dados de formalização", error: error.message });
     }
   });
 
@@ -3149,142 +3140,6 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
       res.status(500).json({ 
         message: "Erro interno do servidor no upload" 
       });
-    }
-  });
-
-  // === PDF TEMPLATE MANAGEMENT ROUTES ===
-
-  // Get all PDF templates
-  app.get("/api/admin/pdf-templates", jwtAuthMiddleware, requireAdmin, async (req: AuthenticatedRequest, res) => {
-    try {
-      const { TemplateManager } = await import("./services/templateManager");
-      const templates = await TemplateManager.getAllTemplates();
-      res.json(templates);
-    } catch (error) {
-      console.error('Error fetching templates:', error);
-      res.status(500).json({ error: 'Erro ao buscar templates' });
-    }
-  });
-
-  // Get specific PDF template
-  app.get("/api/admin/pdf-templates/:id", jwtAuthMiddleware, requireAdmin, async (req: AuthenticatedRequest, res) => {
-    try {
-      const { TemplateManager } = await import("./services/templateManager");
-      const template = await TemplateManager.getTemplate(req.params.id);
-      
-      if (!template) {
-        return res.status(404).json({ error: 'Template não encontrado' });
-      }
-      
-      res.json(template);
-    } catch (error) {
-      console.error('Error fetching template:', error);
-      res.status(500).json({ error: 'Erro ao buscar template' });
-    }
-  });
-
-  // Create or update PDF template
-  app.post("/api/admin/pdf-templates", jwtAuthMiddleware, requireAdmin, async (req: AuthenticatedRequest, res) => {
-    try {
-      const { TemplateManager } = await import("./services/templateManager");
-      const template = req.body;
-
-      // Validate template
-      const validation = TemplateManager.validateTemplate(template);
-      if (!validation.valid) {
-        return res.status(400).json({ error: 'Template inválido', details: validation.errors });
-      }
-
-      await TemplateManager.saveTemplate(template);
-      res.json({ success: true, message: 'Template salvo com sucesso' });
-    } catch (error) {
-      console.error('Error saving template:', error);
-      res.status(500).json({ error: 'Erro ao salvar template' });
-    }
-  });
-
-  // Duplicate PDF template
-  app.post("/api/admin/pdf-templates/:id/duplicate", jwtAuthMiddleware, requireAdmin, async (req: AuthenticatedRequest, res) => {
-    try {
-      const { TemplateManager } = await import("./services/templateManager");
-      const { name, description } = req.body;
-      
-      if (!name) {
-        return res.status(400).json({ error: 'Nome é obrigatório para duplicação' });
-      }
-
-      const newTemplate = await TemplateManager.duplicateTemplate(req.params.id, name, description);
-      res.json(newTemplate);
-    } catch (error) {
-      console.error('Error duplicating template:', error);
-      res.status(500).json({ error: 'Erro ao duplicar template' });
-    }
-  });
-
-  // Delete PDF template
-  app.delete("/api/admin/pdf-templates/:id", jwtAuthMiddleware, requireAdmin, async (req: AuthenticatedRequest, res) => {
-    try {
-      const { TemplateManager } = await import("./services/templateManager");
-      await TemplateManager.deleteTemplate(req.params.id);
-      res.json({ success: true, message: 'Template excluído com sucesso' });
-    } catch (error) {
-      console.error('Error deleting template:', error);
-      res.status(500).json({ error: 'Erro ao excluir template' });
-    }
-  });
-
-  // Preview PDF template
-  app.post("/api/admin/pdf-templates/:id/preview", jwtAuthMiddleware, requireAdmin, async (req: AuthenticatedRequest, res) => {
-    try {
-      const { TemplateManager } = await import("./services/templateManager");
-      const { PDFTemplateEngine } = await import("./services/pdfTemplateEngine");
-      
-      const template = await TemplateManager.getTemplate(req.params.id);
-      if (!template) {
-        return res.status(404).json({ error: 'Template não encontrado' });
-      }
-
-      // Sample data for preview
-      const sampleData = {
-        propostaId: 'PREVIEW-123456',
-        dataEmissao: new Date(),
-        dataVencimento: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
-        clienteData: {
-          nome: 'João da Silva',
-          cpf: '123.456.789-00',
-          email: 'joao@email.com',
-          telefone: '(11) 99999-9999',
-          endereco: 'Rua das Flores, 123 - São Paulo/SP'
-        },
-        condicoesData: {
-          valor: 10000,
-          prazo: 12,
-          prazoMeses: '12 meses',
-          parcela: 920.50,
-          taxaJuros: 2.5,
-          valorTac: 150.00,
-          valorIof: 38.00
-        },
-        credorData: {
-          razaoSocial: 'Empresa de Crédito LTDA',
-          cnpj: '12.345.678/0001-90'
-        },
-        pagamentoInfo: '• Parcelas mensais fixas\n• Vencimento: dia 15 de cada mês',
-        clausulasGerais: '1. Cláusula exemplo\n2. Outra cláusula',
-        localData: 'São Paulo/SP, ' + new Date().toLocaleDateString('pt-BR'),
-        assinaturaDevedor: '________________\nJoão da Silva\nCPF: 123.456.789-00',
-        assinaturaCredor: '________________\nEmpresa Crédito\nCNPJ: 12.345.678/0001-90'
-      };
-
-      const engine = new PDFTemplateEngine(template, sampleData);
-      const pdfBuffer = await engine.generate();
-
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `attachment; filename="preview-${template.name}.pdf"`);
-      res.send(pdfBuffer);
-    } catch (error) {
-      console.error('Error generating preview:', error);
-      res.status(500).json({ error: 'Erro ao gerar preview' });
     }
   });
 

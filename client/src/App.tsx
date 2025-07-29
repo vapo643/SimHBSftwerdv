@@ -19,7 +19,6 @@ import PartnersPage from "@/pages/parceiros/index";
 import PartnerDetailPage from "@/pages/parceiros/detalhe";
 import ProdutosPage from "@/pages/configuracoes/produtos";
 import LojasPage from "@/pages/admin/lojas";
-import TemplatesPage from "@/pages/admin/templates";
 import EditarPropostaPendenciada from "@/pages/propostas/editar";
 import NotFound from "@/pages/not-found";
 
@@ -100,11 +99,6 @@ function Router() {
       <Route path="/admin/lojas">
         <ProtectedRoute>
           <LojasPage />
-        </ProtectedRoute>
-      </Route>
-      <Route path="/admin/templates">
-        <ProtectedRoute>
-          <TemplatesPage />
         </ProtectedRoute>
       </Route>
       <Route path="/">
