@@ -742,17 +742,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const proposta = result[0];
         console.log(`🔐 [ATENDENTE ALLOWED] User ${user.id} granted access to proposta ${idParam} from loja ${proposta.loja_id}`);
         
-        // Transform to match expected format
+        // Buscar documentos da proposta
+        const { createServerSupabaseAdminClient } = await import('../server/lib/supabase');
+        const supabase = createServerSupabaseAdminClient();
+        
+        const { data: documentos, error: docError } = await supabase
+          .from('proposta_documentos')
+          .select('*')
+          .eq('proposta_id', idParam);
+        
+        console.log(`🔍 [ANÁLISE] Documentos encontrados para proposta ${idParam}:`, documentos?.length || 0);
+        
+        // Transform to match expected format with proper camelCase conversion
         const formattedProposta = {
           ...proposta,
-          lojas: proposta.loja,
-          produtos: proposta.produto,
-          tabelas_comerciais: proposta.tabela_comercial,
-          // Add nested parceiros to lojas
+          // Convert snake_case to camelCase for frontend compatibility
+          clienteData: proposta.cliente_data,
+          condicoesData: proposta.condicoes_data,
+          createdAt: proposta.created_at,
+          lojaId: proposta.loja_id,
+          produtoId: proposta.produto_id,
+          tabelaComercialId: proposta.tabela_comercial_id,
+          userId: proposta.user_id,
+          analistaId: proposta.analista_id,
+          dataAnalise: proposta.data_analise,
+          motivoPendencia: proposta.motivo_pendencia,
+          dataAprovacao: proposta.data_aprovacao,
+          documentosAdicionais: proposta.documentos_adicionais,
+          contratoGerado: proposta.contrato_gerado,
+          contratoAssinado: proposta.contrato_assinado,
+          dataAssinatura: proposta.data_assinatura,
+          dataPagamento: proposta.data_pagamento,
+          observacoesFormalização: proposta.observacoes_formalizacao,
+          // Nested objects with proper structure
           lojas: proposta.loja ? {
             ...proposta.loja,
             parceiros: proposta.parceiro
-          } : null
+          } : null,
+          produtos: proposta.produto,
+          tabelas_comerciais: proposta.tabela_comercial,
+          // Include documents
+          documentos: documentos || []
         };
         
         res.json(formattedProposta);
