@@ -6,7 +6,9 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 import { Plus, Eye, Copy, Trash2, Edit } from 'lucide-react';
+import AdminOnlyFeature from '@/components/AdminOnlyFeature';
 
 interface PDFTemplate {
   id: string;
@@ -17,45 +19,28 @@ interface PDFTemplate {
 }
 
 export default function TemplatesPage() {
+  const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<PDFTemplate | null>(null);
 
-  // Fetch templates
+  // Fetch templates using apiClient
   const { data: templates = [], isLoading } = useQuery({
     queryKey: ['pdf-templates'],
     queryFn: async () => {
-      const response = await fetch('/api/admin/pdf-templates', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
-      
-      if (!response.ok) {
-        throw new Error('Falha ao carregar templates');
-      }
-      
-      return response.json();
+      const { fetchWithToken } = await import('@/lib/apiClient');
+      return await fetchWithToken('/api/admin/pdf-templates');
     },
   });
 
   // Delete template mutation
   const deleteTemplateMutation = useMutation({
     mutationFn: async (templateId: string) => {
-      const response = await fetch(`/api/admin/pdf-templates/${templateId}`, {
+      const { fetchWithToken } = await import('@/lib/apiClient');
+      return await fetchWithToken(`/api/admin/pdf-templates/${templateId}`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
       });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Erro ao excluir template');
-      }
-
-      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pdf-templates'] });
@@ -76,21 +61,14 @@ export default function TemplatesPage() {
   // Duplicate template mutation
   const duplicateTemplateMutation = useMutation({
     mutationFn: async ({ templateId, name, description }: { templateId: string; name: string; description?: string }) => {
-      const response = await fetch(`/api/admin/pdf-templates/${templateId}/duplicate`, {
+      const { fetchWithToken } = await import('@/lib/apiClient');
+      return await fetchWithToken(`/api/admin/pdf-templates/${templateId}/duplicate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
         },
         body: JSON.stringify({ name, description }),
       });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Erro ao duplicar template');
-      }
-
-      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pdf-templates'] });
@@ -110,6 +88,7 @@ export default function TemplatesPage() {
 
   const handlePreview = async (templateId: string) => {
     try {
+      const { fetchWithToken } = await import('@/lib/apiClient');
       const response = await fetch(`/api/admin/pdf-templates/${templateId}/preview`, {
         method: 'POST',
         headers: {
@@ -170,14 +149,15 @@ export default function TemplatesPage() {
   }
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-3xl font-bold">Gestão de Templates PDF</h1>
-          <p className="text-gray-600 mt-2">
-            Gerencie templates personalizados para geração de documentos CCB
-          </p>
-        </div>
+    <AdminOnlyFeature featureName="Gestão de Templates PDF" currentRole={user?.role || 'VISITANTE'}>
+      <div className="container mx-auto p-6">
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">Gestão de Templates PDF</h1>
+            <p className="text-muted-foreground mt-2">
+              Gerencie templates personalizados para geração de documentos CCB
+            </p>
+          </div>
 
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
@@ -186,9 +166,9 @@ export default function TemplatesPage() {
               Novo Template
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>
+              <DialogTitle className="text-xl">
                 {editingTemplate ? 'Editar Template' : 'Criar Novo Template'}
               </DialogTitle>
             </DialogHeader>
@@ -286,7 +266,8 @@ export default function TemplatesPage() {
           </CardContent>
         </Card>
       )}
-    </div>
+      </div>
+    </AdminOnlyFeature>
   );
 }
 
@@ -306,21 +287,14 @@ function TemplateEditor({
 
   const saveTemplateMutation = useMutation({
     mutationFn: async (templateData: any) => {
-      const response = await fetch('/api/admin/pdf-templates', {
+      const { fetchWithToken } = await import('@/lib/apiClient');
+      return await fetchWithToken('/api/admin/pdf-templates', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
         },
         body: JSON.stringify(templateData),
       });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Erro ao salvar template');
-      }
-
-      return response.json();
     },
     onSuccess: () => {
       toast({
@@ -348,25 +322,92 @@ function TemplateEditor({
       return;
     }
 
-    // For now, create a basic template structure
-    // In a full implementation, this would be a visual editor
+    // Create a complete template structure based on CCB template
     const templateData = {
       id: template?.id || `custom-${Date.now()}`,
       name: name.trim(),
       description: description.trim(),
       pageSize: 'A4' as const,
       margins: { top: 40, bottom: 40, left: 60, right: 60 },
-      sections: template?.id ? undefined : [
+      
+      header: {
+        id: 'header',
+        title: name.trim().toUpperCase(),
+        position: { x: 0, y: 0 },
+        fontSize: 20,
+        fontStyle: 'bold' as const,
+        alignment: 'center' as const
+      },
+
+      sections: [
         {
-          id: 'header',
-          title: 'DOCUMENTO PERSONALIZADO',
-          position: { x: 0, y: 0 },
-          fontSize: 18,
+          id: 'identification',
+          title: '',
+          position: { x: 0, y: 60 },
+          fields: [
+            {
+              id: 'document-number',
+              label: 'Nº do Documento:',
+              position: { x: 0, y: 0 },
+              dataPath: 'propostaId',
+              fontSize: 10
+            },
+            {
+              id: 'emission-date',
+              label: 'Data de Emissão:',
+              position: { x: 180, y: 0 },
+              dataPath: 'dataEmissao',
+              formatter: 'date' as const,
+              fontSize: 10
+            }
+          ]
+        },
+        {
+          id: 'client-info',
+          title: 'I. INFORMAÇÕES DO CLIENTE',
+          position: { x: 0, y: 120 },
+          fontSize: 12,
           fontStyle: 'bold' as const,
-          alignment: 'center' as const,
-          fields: []
+          underline: true,
+          fields: [
+            {
+              id: 'client-name',
+              label: 'Nome:',
+              position: { x: 0, y: 25 },
+              dataPath: 'clienteData.nome',
+              width: 320,
+              fontSize: 10
+            },
+            {
+              id: 'client-document',
+              label: 'CPF:',
+              position: { x: 0, y: 45 },
+              dataPath: 'clienteData.cpf',
+              width: 320,
+              fontSize: 10
+            }
+          ]
         }
-      ]
+      ],
+
+      footer: {
+        id: 'signatures',
+        title: 'ASSINATURAS',
+        position: { x: 0, y: 650 },
+        fontSize: 12,
+        fontStyle: 'bold' as const,
+        underline: true,
+        fields: [
+          {
+            id: 'location-date',
+            label: '',
+            position: { x: 0, y: 25 },
+            dataPath: 'localData',
+            width: 480,
+            fontSize: 10
+          }
+        ]
+      }
     };
 
     saveTemplateMutation.mutate(templateData);
@@ -394,10 +435,10 @@ function TemplateEditor({
       </div>
 
       {!template && (
-        <div className="bg-blue-50 p-4 rounded-lg">
-          <p className="text-sm text-blue-700">
-            <strong>Nota:</strong> Esta é uma versão simplificada do editor de templates. 
-            O template será criado com uma estrutura básica que pode ser personalizada posteriormente.
+        <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+          <p className="text-sm text-blue-700 dark:text-blue-300">
+            <strong>Nota:</strong> O template será criado com uma estrutura baseada no modelo CCB padrão. 
+            Você pode duplicar e modificar templates existentes para criar variações personalizadas.
           </p>
         </div>
       )}

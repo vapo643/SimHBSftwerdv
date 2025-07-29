@@ -751,6 +751,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const idParam = req.params.id;
       const user = req.user;
 
+      if (!user) {
+        return res.status(401).json({ message: "Usuário não autenticado" });
+      }
+
       console.log(`🔐 [PROPOSTA ACCESS] User ${user.id} (${user.role}) accessing proposta ${idParam}`);
 
       // 🔧 CORREÇÃO: Usar mesma abordagem do endpoint de formalização que funciona
@@ -2074,7 +2078,10 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
       res.json(propostaProcessada);
     } catch (error) {
       console.error(`[${new Date().toISOString()}] ❌ ERRO ao buscar dados de formalização:`, error);
-      res.status(500).json({ message: "Erro ao buscar dados de formalização", error: error.message });
+      res.status(500).json({ 
+        message: "Erro ao buscar dados de formalização", 
+        error: error instanceof Error ? error.message : String(error)
+      });
     }
   });
 
