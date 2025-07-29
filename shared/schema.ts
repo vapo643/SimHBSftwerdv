@@ -137,7 +137,6 @@ export const propostas = pgTable("propostas", {
   // Auditoria
   userId: text("user_id"),
   createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 // Tabelas Comerciais (estrutura N:N)
@@ -231,7 +230,6 @@ export const insertUserSchema = createInsertSchema(users).omit({
 export const insertPropostaSchema = createInsertSchema(propostas).omit({
   id: true,
   createdAt: true,
-  updatedAt: true,
   userId: true,
 });
 

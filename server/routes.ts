@@ -1652,9 +1652,30 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
       const { eq } = await import("drizzle-orm");
       const { propostas, lojas, parceiros, produtos } = await import("../shared/schema");
 
-      // Usar abordagem mais simples sem joins complexos
+      // Especificar exatamente os campos que existem na tabela
       const proposta = await db
-        .select()
+        .select({
+          id: propostas.id,
+          status: propostas.status,
+          clienteData: propostas.clienteData,
+          condicoesData: propostas.condicoesData,
+          dataAprovacao: propostas.dataAprovacao,
+          documentosAdicionais: propostas.documentosAdicionais,
+          contratoGerado: propostas.contratoGerado,
+          contratoAssinado: propostas.contratoAssinado,
+          dataAssinatura: propostas.dataAssinatura,
+          dataPagamento: propostas.dataPagamento,
+          observacoesFormalização: propostas.observacoesFormalização,
+          ccbGerado: propostas.ccbGerado,
+          assinaturaEletronicaConcluida: propostas.assinaturaEletronicaConcluida,
+          biometriaConcluida: propostas.biometriaConcluida,
+          caminhoCcbAssinado: propostas.caminhoCcbAssinado,
+          createdAt: propostas.createdAt,
+          lojaId: propostas.lojaId,
+          clienteNome: propostas.clienteNome,
+          valor: propostas.valor,
+          prazo: propostas.prazo
+        })
         .from(propostas)
         .where(eq(propostas.id, propostaId))
         .limit(1);
