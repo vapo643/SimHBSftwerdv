@@ -1113,7 +1113,7 @@ export default function Formalizacao() {
                     <Label className="text-sm font-medium text-gray-400">Taxa de Juros</Label>
                     <p className="flex items-center gap-1 font-medium text-white">
                       <Percent className="h-4 w-4" />
-                      {proposta.condicoesData?.taxaJuros || proposta.condicoesData?.taxa || proposta.condicoesData?.taxaJurosMensal || 'N/A'}% a.m.
+                      {proposta.taxaJurosTabela || proposta.condicoesData?.taxaJuros || proposta.condicoesData?.taxa || proposta.condicoesData?.taxaJurosMensal || 'N/A'}% a.m.
                     </p>
                   </div>
                   <div>
