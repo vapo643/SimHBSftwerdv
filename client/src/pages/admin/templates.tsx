@@ -26,12 +26,23 @@ export default function TemplatesPage() {
   const [editingTemplate, setEditingTemplate] = useState<PDFTemplate | null>(null);
 
   // Fetch templates using apiClient
-  const { data: templates = [], isLoading } = useQuery({
+  const { data: templatesResponse, isLoading, error } = useQuery({
     queryKey: ['pdf-templates'],
     queryFn: async () => {
       const { fetchWithToken } = await import('@/lib/apiClient');
       return await fetchWithToken('/api/admin/pdf-templates');
     },
+  });
+
+  // Ensure templates is always an array - Handle both array responses and error responses
+  const templates = Array.isArray(templatesResponse) ? templatesResponse : [];
+  
+  // Debug log to see what we're getting
+  console.log('🔍 [TEMPLATES DEBUG] Response from API:', {
+    type: typeof templatesResponse,
+    isArray: Array.isArray(templatesResponse),
+    value: templatesResponse,
+    templatesLength: templates.length
   });
 
   // Delete template mutation
@@ -142,9 +153,21 @@ export default function TemplatesPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-lg">Carregando templates...</div>
-      </div>
+      <AdminOnlyFeature featureName="Gestão de Templates PDF" currentRole={user?.role || 'VISITANTE'}>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-lg">Carregando templates...</div>
+        </div>
+      </AdminOnlyFeature>
+    );
+  }
+
+  if (error) {
+    return (
+      <AdminOnlyFeature featureName="Gestão de Templates PDF" currentRole={user?.role || 'VISITANTE'}>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-lg text-red-500">Erro ao carregar templates: {error.message}</div>
+        </div>
+      </AdminOnlyFeature>
     );
   }
 
