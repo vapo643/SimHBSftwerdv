@@ -1,0 +1,32 @@
+chunk-276SZO74.js?v=a0ea5c7c:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+AuthContext.tsx:114 🔐 [AUTH EVENT] SIGNED_IN Object
+formalizacao.tsx:395 🔍 [DEBUG] Buscando dados de formalização para proposta: PROP-1753723342043-S543HGB
+AuthContext.tsx:114 🔐 [AUTH EVENT] INITIAL_SESSION Object
+apiClient.ts:154 🔐 [TOKEN MANAGER] Fresh token obtained, length: 757
+apiClient.ts:330 [PASSO 3 - ENVIO] Object
+apiClient.ts:330 [PASSO 3 - ENVIO] Object
+apiClient.ts:330 [PASSO 3 - ENVIO] Object
+2AuthContext.tsx:48 🔐 [AUTH RESTORED] User profile loaded with valid token
+formalizacao.tsx:397 🔍 [DEBUG] Dados recebidos do backend: Object
+formalizacao.tsx:398 🔍 [DEBUG] Cliente Data: Object
+formalizacao.tsx:399 🔍 [DEBUG] Condicoes Data: Object
+formalizacao.tsx:400 🔍 [DEBUG] Data Aprovação: 2025-07-28T20:11:15.482932
+formalizacao.tsx:401 🔍 [DEBUG] Documentos - Total: 0
+formalizacao.tsx:402 🔍 [DEBUG] Documentos - Estrutura: Array(0)
+formalizacao.tsx:403 🔍 [DEBUG] Primeiro documento: undefined
+apiClient.ts:330 [PASSO 3 - ENVIO] Object
+/api/propostas/PROP-1753723342043-S543HGB/etapa-formalizacao:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)Understand this error
+chunk-24TMK7GW.js?v=a0ea5c7c:337 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-24TMK7GW.js?v=a0ea5c7c:337Understand this warning
+ccb-url:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)Understand this error
+AuthContext.tsx:114 🔐 [AUTH EVENT] SIGNED_IN Object
+apiClient.ts:330 [PASSO 3 - ENVIO] Object
+AuthContext.tsx:48 🔐 [AUTH RESTORED] User profile loaded with valid token
+chunk-24TMK7GW.js?v=a0ea5c7c:337 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-24TMK7GW.js?v=a0ea5c7c:337Understand this warning
+ccb-url:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)Understand this error
+AuthContext.tsx:114 🔐 [AUTH EVENT] SIGNED_IN Object
+apiClient.ts:330 [PASSO 3 - ENVIO] Object
+ccb-url:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)Understand this error
+AuthContext.tsx:48 🔐 [AUTH RESTORED] User profile loaded with valid token
+ccb-url:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)

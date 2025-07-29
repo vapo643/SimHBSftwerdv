@@ -2386,7 +2386,7 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
       console.log(`🔍 [ETAPA DEBUG] User info:`, {
         userId: req.user?.id,
         userRole: req.user?.role,
-        userLojaId: req.user?.lojaId,
+        userLojaId: req.user?.loja_id,
         etapa,
         concluida,
         propostaId: id
@@ -2432,23 +2432,23 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
       if (etapa === 'ccb_gerado') {
         // CCB generation can be done by ANALISTA, GERENTE, ATENDENTE, or ADMINISTRADOR
         const allowedRoles = ['ANALISTA', 'GERENTE', 'ATENDENTE', 'ADMINISTRADOR'];
-        console.log(`🔍 [ETAPA DEBUG] Checking CCB permissions - Role: ${req.user.role}, Allowed: ${allowedRoles.join(', ')}`);
+        console.log(`🔍 [ETAPA DEBUG] Checking CCB permissions - Role: ${req.user?.role}, Allowed: ${allowedRoles.join(', ')}`);
         
-        if (!allowedRoles.includes(req.user.role)) {
-          console.log(`❌ [ETAPA DEBUG] Permission denied for role: ${req.user.role}`);
+        if (!req.user?.role || !allowedRoles.includes(req.user.role)) {
+          console.log(`❌ [ETAPA DEBUG] Permission denied for role: ${req.user?.role}`);
           return res.status(403).json({ 
-            message: `Você não tem permissão para gerar CCB. Seu role: ${req.user.role}` 
+            message: `Você não tem permissão para gerar CCB. Seu role: ${req.user?.role}` 
           });
         }
         console.log(`✅ [ETAPA DEBUG] Permission granted for CCB generation`);
       } else {
         // Other steps (ClickSign, Biometry) only ATENDENTE of the same store
-        console.log(`🔍 [ETAPA DEBUG] Checking other steps permissions - Role: ${req.user.role}, LojaId: ${req.user.lojaId}, PropostaLojaId: ${proposta.lojaId}`);
+        console.log(`🔍 [ETAPA DEBUG] Checking other steps permissions - Role: ${req.user?.role}, LojaId: ${req.user?.loja_id}, PropostaLojaId: ${proposta.lojaId}`);
         
-        if (req.user.role !== 'ATENDENTE' || req.user.lojaId !== proposta.lojaId) {
+        if (req.user?.role !== 'ATENDENTE' || req.user?.loja_id !== proposta.lojaId) {
           console.log(`❌ [ETAPA DEBUG] Permission denied for step ${etapa}`);
           return res.status(403).json({ 
-            message: `Apenas o atendente da loja pode atualizar as etapas de assinatura e biometria. Seu role: ${req.user.role}` 
+            message: `Apenas o atendente da loja pode atualizar as etapas de assinatura e biometria. Seu role: ${req.user?.role}` 
           });
         }
         console.log(`✅ [ETAPA DEBUG] Permission granted for step ${etapa}`);
@@ -2499,24 +2499,16 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
       // Update the proposal
       const [updatedProposta] = await db
         .update(propostas)
-        .set({
-          ...updateData,
-          updatedAt: new Date()
-        })
+        .set(updateData)
         .where(eq(propostas.id, id))
         .returning();
 
       // Create audit log
       await db.insert(propostaLogs).values({
         propostaId: id,
-        acao: 'etapa_formalizacao_atualizada',
-        detalhes: JSON.stringify({
-          etapa,
-          concluida,
-          usuario: req.user.email,
-          timestamp: new Date().toISOString()
-        }),
-        usuarioId: req.user.id
+        autorId: req.user?.id || '',
+        statusNovo: `etapa_${etapa}_${concluida ? 'concluida' : 'revertida'}`,
+        observacao: `Etapa ${etapa} ${concluida ? 'marcada como concluída' : 'revertida'} por ${req.user?.role || 'usuário'}`
       });
 
       // Check if all formalization steps are complete
@@ -2527,8 +2519,7 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
         await db
           .update(propostas)
           .set({
-            status: 'pronto_pagamento',
-            updatedAt: new Date()
+            status: 'pronto_pagamento'
           })
           .where(eq(propostas.id, id));
 
@@ -2584,8 +2575,8 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
         const [updatedProposta] = await tx
           .update(propostas)
           .set({
-            status,
-            updatedAt: new Date()
+            status: status as any,
+            dataAprovacao: status === 'aprovado' ? new Date() : undefined
           })
           .where(eq(propostas.id, id))
           .returning();
