@@ -463,6 +463,36 @@ export default function Formalizacao() {
     return new Date(dateString).toLocaleString("pt-BR");
   };
 
+  // Função para gerar CCB
+  const generateCCB = async (propostaId: string) => {
+    try {
+      toast({
+        title: "Gerando CCB",
+        description: "Aguarde, gerando CCB com todos os dados da proposta...",
+      });
+      
+      const response = await apiRequest(`/api/propostas/${propostaId}/gerar-ccb`, {
+        method: "POST"
+      });
+      
+      if (response.success) {
+        toast({
+          title: "Sucesso",
+          description: response.message,
+        });
+        // Recarregar dados para atualizar status ccbGerado
+        refetch();
+      }
+    } catch (error) {
+      console.error('Erro ao gerar CCB:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao gerar CCB. Tente novamente.",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Função para visualizar CCB
   const viewCCB = async (propostaId: string) => {
     try {
@@ -472,9 +502,10 @@ export default function Formalizacao() {
         window.open(response.url, '_blank');
       }
     } catch (error) {
+      console.error('Erro ao visualizar CCB:', error);
       toast({
         title: "Erro",
-        description: "Erro ao obter URL da CCB",
+        description: "CCB ainda não foi gerada ou erro ao obter URL",
         variant: "destructive",
       });
     }
@@ -833,17 +864,29 @@ export default function Formalizacao() {
                                 </div>
                               )}
 
-                              {/* Botão para visualizar CCB quando gerada */}
-                              {step.id === 2 && proposta.ccbGerado && (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="mt-2"
-                                  onClick={() => viewCCB(proposta.id)}
-                                >
-                                  <Eye className="mr-2 h-4 w-4" />
-                                  Visualizar CCB
-                                </Button>
+                              {/* Botões para CCB */}
+                              {step.id === 2 && (
+                                <div className="mt-2 space-x-2">
+                                  {!proposta.ccbGerado ? (
+                                    <Button
+                                      variant="default"
+                                      size="sm"
+                                      onClick={() => generateCCB(proposta.id)}
+                                    >
+                                      <FileText className="mr-2 h-4 w-4" />
+                                      Gerar CCB
+                                    </Button>
+                                  ) : (
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => viewCCB(proposta.id)}
+                                    >
+                                      <Eye className="mr-2 h-4 w-4" />
+                                      Visualizar CCB
+                                    </Button>
+                                  )}
+                                </div>
                               )}
                             </div>
                           </div>

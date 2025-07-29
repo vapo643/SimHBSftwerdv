@@ -566,6 +566,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Endpoint para gerar CCB automaticamente
+  app.post("/api/propostas/:id/gerar-ccb", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { id } = req.params;
+      console.log(`[CCB] Solicitação de geração de CCB para proposta: ${id}`);
+
+      const { createServerSupabaseAdminClient } = await import('./lib/supabase');
+      const supabase = createServerSupabaseAdminClient();
+      
+      // Verificar se proposta está aprovada
+      const { data: proposta, error: propostaError } = await supabase
+        .from('propostas')
+        .select('status, ccb_gerado, caminho_ccb_assinado')
+        .eq('id', id)
+        .single();
+
+      if (propostaError || !proposta) {
+        return res.status(404).json({ error: "Proposta não encontrada" });
+      }
+
+      if (proposta.status !== 'aprovado') {
+        return res.status(400).json({ error: "CCB só pode ser gerada para propostas aprovadas" });
+      }
+
+      // Se CCB já foi gerada, retornar sucesso
+      if (proposta.ccb_gerado && proposta.caminho_ccb_assinado) {
+        console.log(`[CCB] CCB já existe para proposta ${id}`);
+        return res.json({ 
+          success: true, 
+          message: "CCB já foi gerada anteriormente",
+          caminho: proposta.caminho_ccb_assinado 
+        });
+      }
+
+      // Gerar CCB
+      console.log(`[CCB] Gerando CCB para proposta ${id}...`);
+      const { generateCCB } = await import("./services/ccbGenerator");
+      
+      try {
+        const ccbPath = await generateCCB(id);
+        console.log(`[CCB] CCB gerada com sucesso: ${ccbPath}`);
+        res.json({ 
+          success: true, 
+          message: "CCB gerada com sucesso",
+          caminho: ccbPath 
+        });
+      } catch (error) {
+        console.error(`[CCB] Erro ao gerar CCB: ${error}`);
+        return res.status(500).json({ error: "Erro ao gerar CCB" });
+      }
+
+    } catch (error) {
+      console.error("[CCB] Erro interno:", error);
+      res.status(500).json({ error: "Erro interno do servidor" });
+    }
+  });
+
   // Get CCB signed URL
   app.get("/api/propostas/:id/ccb-url", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     try {
@@ -1652,7 +1709,10 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
       const { eq } = await import("drizzle-orm");
       const { propostas, lojas, parceiros, produtos } = await import("../shared/schema");
 
-      // Especificar exatamente os campos que existem na tabela
+      // Buscar proposta com JOIN na tabela comercial para obter taxa de juros
+      const { tabelasComerciais } = await import("../shared/schema");
+      const { leftJoin } = await import("drizzle-orm");
+      
       const proposta = await db
         .select({
           id: propostas.id,
@@ -1674,9 +1734,14 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
           lojaId: propostas.lojaId,
           clienteNome: propostas.clienteNome,
           valor: propostas.valor,
-          prazo: propostas.prazo
+          prazo: propostas.prazo,
+          tabelaComercialId: propostas.tabelaComercialId,
+          taxaJurosMensal: propostas.taxaJurosMensal,
+          // Taxa de juros da tabela comercial
+          taxaJurosTabela: tabelasComerciais.taxaJuros
         })
         .from(propostas)
+        .leftJoin(tabelasComerciais, eq(propostas.tabelaComercialId, tabelasComerciais.id))
         .where(eq(propostas.id, propostaId))
         .limit(1);
 
@@ -1716,7 +1781,7 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
         totalDocumentos: propostaProcessada.documentos?.length || 0,
         clienteNome: propostaProcessada.clienteData?.nome || 'Nome não informado',
         valorEmprestimo: propostaProcessada.condicoesData?.valor || 'Valor não informado',
-        taxaJuros: propostaProcessada.condicoesData?.taxaJuros || propostaProcessada.condicoesData?.taxa || 'Taxa não informada',
+        taxaJuros: propostaProcessada.taxaJurosTabela || propostaProcessada.condicoesData?.taxaJuros || propostaProcessada.condicoesData?.taxa || propostaProcessada.condicoesData?.taxaJurosMensal || propostaProcessada.taxaJurosMensal || 'Taxa não informada',
         clienteDataCompleto: propostaProcessada.clienteData,
         condicoesDataCompleto: propostaProcessada.condicoesData
       });
