@@ -1710,11 +1710,15 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
         id: propostaProcessada.id,
         status: propostaProcessada.status,
         ccbGerado: propostaProcessada.ccbGerado,
+        dataAprovacao: propostaProcessada.dataAprovacao,
         temClienteData: !!propostaProcessada.clienteData?.nome,
         temCondicoesData: !!propostaProcessada.condicoesData?.valor,
         totalDocumentos: propostaProcessada.documentos?.length || 0,
         clienteNome: propostaProcessada.clienteData?.nome || 'Nome não informado',
-        valorEmprestimo: propostaProcessada.condicoesData?.valor || 'Valor não informado'
+        valorEmprestimo: propostaProcessada.condicoesData?.valor || 'Valor não informado',
+        taxaJuros: propostaProcessada.condicoesData?.taxaJuros || propostaProcessada.condicoesData?.taxa || 'Taxa não informada',
+        clienteDataCompleto: propostaProcessada.clienteData,
+        condicoesDataCompleto: propostaProcessada.condicoesData
       });
       res.json(propostaProcessada);
     } catch (error) {

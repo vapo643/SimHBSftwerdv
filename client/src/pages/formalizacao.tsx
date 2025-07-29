@@ -392,7 +392,13 @@ export default function Formalizacao() {
   const { data: proposta, isLoading, refetch } = useQuery<Proposta>({
     queryKey: ["/api/propostas", propostaId, "formalizacao"],
     queryFn: async () => {
+      console.log(`🔍 [DEBUG] Buscando dados de formalização para proposta: ${propostaId}`);
       const response = await apiRequest(`/api/propostas/${propostaId}/formalizacao`);
+      console.log(`🔍 [DEBUG] Dados recebidos do backend:`, response);
+      console.log(`🔍 [DEBUG] Cliente Data:`, response.clienteData);
+      console.log(`🔍 [DEBUG] Condicoes Data:`, response.condicoesData);
+      console.log(`🔍 [DEBUG] Data Aprovação:`, response.dataAprovacao);
+      console.log(`🔍 [DEBUG] Documentos:`, response.documentos);
       return response;
     },
     enabled: !!propostaId,
@@ -1064,7 +1070,7 @@ export default function Formalizacao() {
                     <Label className="text-sm font-medium text-gray-400">Taxa de Juros</Label>
                     <p className="flex items-center gap-1 font-medium text-white">
                       <Percent className="h-4 w-4" />
-                      {proposta.condicoesData?.taxaJuros || 'N/A'}% a.m.
+                      {proposta.condicoesData?.taxaJuros || proposta.condicoesData?.taxa || proposta.condicoesData?.taxaJurosMensal || 'N/A'}% a.m.
                     </p>
                   </div>
                   <div>
@@ -1075,7 +1081,7 @@ export default function Formalizacao() {
                     <Label className="text-sm font-medium text-gray-400">Data da Aprovação</Label>
                     <p className="flex items-center gap-1 text-white">
                       <Calendar className="h-4 w-4" />
-                      {formatDate(proposta.data_aprovacao || proposta.created_at)}
+                      {proposta.dataAprovacao ? formatDate(proposta.dataAprovacao) : formatDate(proposta.createdAt)}
                     </p>
                   </div>
                 </div>
