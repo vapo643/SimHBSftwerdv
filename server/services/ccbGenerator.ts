@@ -81,8 +81,21 @@ export async function generateCCB(propostaId: string): Promise<string> {
     const clienteData = proposta.cliente_data as ClientData;
     const condicoesData = proposta.condicoes_data as CondicoesData;
     
-    // 2. Criar o documento PDF com margem reduzida para mais conteúdo
-    const doc = new PDFDocument({ margin: 40, size: 'A4' });
+    // 2. Criar o documento PDF com metadados de segurança para evitar falsos positivos
+    const doc = new PDFDocument({ 
+      margin: 40, 
+      size: 'A4',
+      info: {
+        Title: `CCB - Cédula de Crédito Bancário ${propostaId}`,
+        Author: 'Sistema Simpix - Gestão de Crédito',
+        Subject: 'Cédula de Crédito Bancário',
+        Keywords: 'CCB, Crédito, Bancário, Financeiro, Proposta',
+        Creator: 'Simpix CCB Generator v1.0',
+        Producer: 'PDFKit/Node.js',
+        CreationDate: new Date(),
+        ModDate: new Date()
+      }
+    });
     const chunks: Buffer[] = [];
     
     doc.on('data', (chunk: Buffer) => chunks.push(chunk));
@@ -335,7 +348,13 @@ export async function generateCCB(propostaId: string): Promise<string> {
       .from('documents')
       .upload(filePath, pdfBuffer, {
         contentType: 'application/pdf',
-        upsert: false
+        upsert: false,
+        metadata: {
+          'x-document-type': 'ccb',
+          'x-proposta-id': propostaId,
+          'x-generated-by': 'simpix-system',
+          'x-document-version': '1.0'
+        }
       });
     
     if (uploadError) {

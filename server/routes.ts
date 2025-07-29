@@ -686,7 +686,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(500).json({ message: 'Erro ao gerar URL do documento' });
       }
       
-      res.json({ url: signedUrlData.signedUrl });
+      // Retornar com headers de segurança
+      res.setHeader('X-Content-Type-Options', 'nosniff');
+      res.setHeader('X-Frame-Options', 'DENY');
+      res.setHeader('Content-Security-Policy', "default-src 'none'; object-src 'none';");
+      res.json({ 
+        url: signedUrlData.signedUrl,
+        filename: `CCB-${id}.pdf`,
+        contentType: 'application/pdf'
+      });
     } catch (error) {
       console.error('Erro ao buscar CCB:', error);
       res.status(500).json({ message: 'Erro ao buscar CCB' });
