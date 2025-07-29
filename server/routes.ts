@@ -1685,12 +1685,38 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
         return res.status(404).json({ message: "Proposta não encontrada" });
       }
 
+      // Buscar documentos da proposta
+      const { propostaDocumentos } = await import("../shared/schema");
+      const documentos = await db
+        .select()
+        .from(propostaDocumentos)
+        .where(eq(propostaDocumentos.propostaId, propostaId));
+
+      // Parse dos dados JSONB antes de retornar
+      const propostaProcessada = {
+        ...proposta[0],
+        // Parse seguro dos dados JSONB
+        clienteData: proposta[0].clienteData ? 
+          (typeof proposta[0].clienteData === 'string' ? 
+            JSON.parse(proposta[0].clienteData) : proposta[0].clienteData) : {},
+        condicoesData: proposta[0].condicoesData ? 
+          (typeof proposta[0].condicoesData === 'string' ? 
+            JSON.parse(proposta[0].condicoesData) : proposta[0].condicoesData) : {},
+        // Adicionar documentos
+        documentos: documentos
+      };
+
       console.log(`[${new Date().toISOString()}] Dados de formalização retornados para proposta ${propostaId}:`, {
-        id: proposta[0].id,
-        status: proposta[0].status,
-        ccbGerado: proposta[0].ccbGerado
+        id: propostaProcessada.id,
+        status: propostaProcessada.status,
+        ccbGerado: propostaProcessada.ccbGerado,
+        temClienteData: !!propostaProcessada.clienteData?.nome,
+        temCondicoesData: !!propostaProcessada.condicoesData?.valor,
+        totalDocumentos: propostaProcessada.documentos?.length || 0,
+        clienteNome: propostaProcessada.clienteData?.nome || 'Nome não informado',
+        valorEmprestimo: propostaProcessada.condicoesData?.valor || 'Valor não informado'
       });
-      res.json(proposta[0]);
+      res.json(propostaProcessada);
     } catch (error) {
       console.error("Erro ao buscar dados de formalização:", error);
       res.status(500).json({ message: "Erro ao buscar dados de formalização" });

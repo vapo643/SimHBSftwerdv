@@ -534,7 +534,7 @@ export default function Formalizacao() {
       description: "Cédula de Crédito Bancário gerada automaticamente",
       icon: FileText,
       status: proposta.ccbGerado ? "completed" : "current",
-      date: proposta.ccbGerado ? formatDate(proposta.updatedAt) : "Pendente",
+      date: proposta.ccbGerado ? formatDate(proposta.createdAt) : "Pendente",
       completed: proposta.ccbGerado,
       interactive: user?.role === 'ATENDENTE',
       etapa: 'ccb_gerado' as const,
@@ -545,7 +545,7 @@ export default function Formalizacao() {
       description: "Documento enviado para ClickSign para assinatura",
       icon: Signature,
       status: proposta.assinaturaEletronicaConcluida ? "completed" : proposta.ccbGerado ? "current" : "pending",
-      date: proposta.assinaturaEletronicaConcluida ? formatDate(proposta.updatedAt) : "Pendente",
+      date: proposta.assinaturaEletronicaConcluida ? formatDate(proposta.createdAt) : "Pendente",
       completed: proposta.assinaturaEletronicaConcluida,
       interactive: user?.role === 'ATENDENTE' && proposta.ccbGerado,
       etapa: 'assinatura_eletronica' as const,
@@ -556,7 +556,7 @@ export default function Formalizacao() {
       description: "Validação biométrica concluída",
       icon: Shield,
       status: proposta.biometriaConcluida ? "completed" : proposta.assinaturaEletronicaConcluida ? "current" : "pending",
-      date: proposta.biometriaConcluida ? formatDate(proposta.updatedAt) : "Pendente",
+      date: proposta.biometriaConcluida ? formatDate(proposta.createdAt) : "Pendente",
       completed: proposta.biometriaConcluida,
       interactive: user?.role === 'ATENDENTE' && proposta.assinaturaEletronicaConcluida,
       etapa: 'biometria' as const,
@@ -864,11 +864,43 @@ export default function Formalizacao() {
                     <div>
                       <h4 className="mb-3 font-medium text-gray-900">Documentos Originais</h4>
                       <div className="space-y-2">
-                        {/* TODO: Implementar busca de documentos originais da proposta */}
-                        <div className="py-4 text-center text-gray-500">
-                          <FileText className="mx-auto mb-2 h-8 w-8 opacity-50" />
-                          <p>Carregamento de documentos originais em desenvolvimento</p>
-                        </div>
+                        {proposta.documentos && proposta.documentos.length > 0 ? (
+                          proposta.documentos.map((doc: any) => (
+                            <div key={doc.id} className="flex items-center justify-between rounded-lg bg-gray-50 p-3">
+                              <div className="flex items-center gap-3">
+                                <FileText className="h-5 w-5 text-blue-600" />
+                                <div>
+                                  <p className="font-medium text-gray-900">{doc.nomeArquivo}</p>
+                                  <p className="text-sm text-gray-600">{doc.tipoDocumento}</p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Button variant="ghost" size="sm" onClick={() => {
+                                  // Implementar visualização do documento
+                                  window.open(doc.caminhoArquivo, '_blank');
+                                }}>
+                                  <Eye className="mr-1 h-4 w-4" />
+                                  Ver
+                                </Button>
+                                <Button variant="ghost" size="sm" onClick={() => {
+                                  // Implementar download do documento
+                                  const link = document.createElement('a');
+                                  link.href = doc.caminhoArquivo;
+                                  link.download = doc.nomeArquivo;
+                                  link.click();
+                                }}>
+                                  <Download className="mr-1 h-4 w-4" />
+                                  Baixar
+                                </Button>
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="py-4 text-center text-gray-500">
+                            <FileText className="mx-auto mb-2 h-8 w-8 opacity-50" />
+                            <p>Nenhum documento original encontrado</p>
+                          </div>
+                        )}
                       </div>
                     </div>
 
@@ -1020,25 +1052,24 @@ export default function Formalizacao() {
                 <div className="space-y-4">
                   <div>
                     <Label className="text-sm font-medium text-gray-400">Cliente</Label>
-                    <p className="font-medium text-white">{proposta.cliente_data?.nome || 'Nome não informado'}</p>
+                    <p className="font-medium text-white">{proposta.clienteData?.nome || proposta.clienteNome || 'Nome não informado'}</p>
                   </div>
                   <div>
                     <Label className="text-sm font-medium text-gray-400">Valor Aprovado</Label>
                     <p className="text-2xl font-bold text-green-400">
-                      {formatCurrency(proposta.condicoes_data?.valor || 0)}
+                      {formatCurrency(proposta.condicoesData?.valor || proposta.valor || 0)}
                     </p>
                   </div>
                   <div>
                     <Label className="text-sm font-medium text-gray-400">Taxa de Juros</Label>
                     <p className="flex items-center gap-1 font-medium text-white">
                       <Percent className="h-4 w-4" />
-                      {/* TODO: Adicionar taxa de juros */}
-                      N/A% a.m.
+                      {proposta.condicoesData?.taxaJuros || 'N/A'}% a.m.
                     </p>
                   </div>
                   <div>
                     <Label className="text-sm font-medium text-gray-400">Prazo</Label>
-                    <p className="font-medium text-white">{proposta.condicoes_data?.prazo || 0} meses</p>
+                    <p className="font-medium text-white">{proposta.condicoesData?.prazo || proposta.prazo || 0} meses</p>
                   </div>
                   <div>
                     <Label className="text-sm font-medium text-gray-400">Data da Aprovação</Label>
