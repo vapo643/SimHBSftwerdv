@@ -2382,6 +2382,16 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
       const { id } = req.params;
       const { etapa, concluida, caminho_documento } = req.body;
 
+      // 🔍 DEBUG: Log user information
+      console.log(`🔍 [ETAPA DEBUG] User info:`, {
+        userId: req.user?.id,
+        userRole: req.user?.role,
+        userLojaId: req.user?.lojaId,
+        etapa,
+        concluida,
+        propostaId: id
+      });
+
       // Validate input
       const etapasValidas = ['ccb_gerado', 'assinatura_eletronica', 'biometria'];
       if (!etapa || !etapasValidas.includes(etapa)) {
@@ -2411,22 +2421,37 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
         return res.status(404).json({ message: "Proposta não encontrada" });
       }
 
+      // 🔍 DEBUG: Log proposta info
+      console.log(`🔍 [ETAPA DEBUG] Proposta info:`, {
+        propostaId: proposta.id,
+        propostaLojaId: proposta.lojaId,
+        propostaStatus: proposta.status
+      });
+
       // Check permissions based on step and role
       if (etapa === 'ccb_gerado') {
         // CCB generation can be done by ANALISTA, GERENTE, ATENDENTE, or ADMINISTRADOR
         const allowedRoles = ['ANALISTA', 'GERENTE', 'ATENDENTE', 'ADMINISTRADOR'];
+        console.log(`🔍 [ETAPA DEBUG] Checking CCB permissions - Role: ${req.user.role}, Allowed: ${allowedRoles.join(', ')}`);
+        
         if (!allowedRoles.includes(req.user.role)) {
+          console.log(`❌ [ETAPA DEBUG] Permission denied for role: ${req.user.role}`);
           return res.status(403).json({ 
-            message: "Você não tem permissão para gerar CCB" 
+            message: `Você não tem permissão para gerar CCB. Seu role: ${req.user.role}` 
           });
         }
+        console.log(`✅ [ETAPA DEBUG] Permission granted for CCB generation`);
       } else {
         // Other steps (ClickSign, Biometry) only ATENDENTE of the same store
+        console.log(`🔍 [ETAPA DEBUG] Checking other steps permissions - Role: ${req.user.role}, LojaId: ${req.user.lojaId}, PropostaLojaId: ${proposta.lojaId}`);
+        
         if (req.user.role !== 'ATENDENTE' || req.user.lojaId !== proposta.lojaId) {
+          console.log(`❌ [ETAPA DEBUG] Permission denied for step ${etapa}`);
           return res.status(403).json({ 
-            message: "Apenas o atendente da loja pode atualizar as etapas de assinatura e biometria" 
+            message: `Apenas o atendente da loja pode atualizar as etapas de assinatura e biometria. Seu role: ${req.user.role}` 
           });
         }
+        console.log(`✅ [ETAPA DEBUG] Permission granted for step ${etapa}`);
       }
 
       // Build update object based on the step
