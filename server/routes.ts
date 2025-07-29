@@ -1743,6 +1743,35 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
         .eq('proposta_id', propostaId);
 
       console.log(`[${new Date().toISOString()}] 🔍 STEP 4 - Documentos encontrados:`, documentos?.length || 0);
+      console.log(`[${new Date().toISOString()}] 🔍 STEP 4.1 - Estrutura dos documentos:`, documentos);
+
+      // STEP 4.2: Gerar URLs assinadas para visualização dos documentos
+      let documentosComUrls = [];
+      if (documentos && documentos.length > 0) {
+        console.log(`[${new Date().toISOString()}] 🔍 STEP 4.2 - Gerando URLs assinadas para ${documentos.length} documentos...`);
+        
+        for (const doc of documentos) {
+          try {
+            const { data: signedUrlData, error: urlError } = await supabase.storage
+              .from('documents')
+              .createSignedUrl(doc.caminho_arquivo, 3600); // 1 hora
+
+            if (!urlError && signedUrlData) {
+              documentosComUrls.push({
+                ...doc,
+                url_visualizacao: signedUrlData.signedUrl
+              });
+              console.log(`[${new Date().toISOString()}] ✅ URL gerada para documento: ${doc.nome_arquivo}`);
+            } else {
+              console.log(`[${new Date().toISOString()}] ❌ Erro ao gerar URL para documento ${doc.nome_arquivo}:`, urlError?.message);
+              documentosComUrls.push(doc); // Adiciona sem URL em caso de erro
+            }
+          } catch (error) {
+            console.log(`[${new Date().toISOString()}] ❌ Erro ao processar documento ${doc.nome_arquivo}:`, error);
+            documentosComUrls.push(doc); // Adiciona sem URL em caso de erro
+          }
+        }
+      }
 
       // Buscar taxa de juros da tabela comercial se existir
       let taxaJurosTabela = null;
@@ -1788,8 +1817,8 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
         biometriaConcluida: proposta.biometria_concluida || false,
         caminhoCcbAssinado: proposta.caminho_ccb_assinado,
         createdAt: proposta.created_at,
-        // Adicionar documentos
-        documentos: documentos || [],
+        // Adicionar documentos com URLs assinadas
+        documentos: documentosComUrls || [],
         // Adicionar taxa de juros da tabela comercial
         taxaJurosTabela: taxaJurosTabela
       };
