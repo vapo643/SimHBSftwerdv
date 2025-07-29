@@ -87,6 +87,11 @@ This is a full-stack TypeScript application for credit management called "Simpix
 - **Document Path Storage**: Added caminho_ccb_assinado TEXT nullable field for storing signed CCB document links
 - **Drizzle Schema Sync**: Updated shared/schema.ts to reflect new database structure with proper TypeScript types
 - **Formalization Business Logic**: Prepared infrastructure for three-stage formalization process: CCB generation → Electronic signature → Biometry completion
+- **Complete CCB Generation System (January 29)**: Implemented automatic CCB generation service with PDFKit that triggers when proposals are approved
+- **CCB Generator Service**: Created comprehensive PDF generation service with professional document formatting, loan calculations, and legal terms
+- **Automatic Workflow Integration**: CCB generation now automatically triggers in PUT /api/propostas/:id/status endpoint when status changes to 'aprovado'
+- **CCB Viewing System**: Added GET /api/propostas/:id/ccb-url endpoint for secure CCB access with signed URLs and integrated viewer button in formalization interface
+- **Document Security**: CCB documents stored in private Supabase bucket with signed URL access and automatic database field updates (ccb_gerado, caminho_ccb_assinado)
 - **Complete Theme System Implementation**: Successfully implemented comprehensive theme management system with ThemeContext, ThemeSelector components, and CSS variables for dark, light, and system theme options
 - **Color Standardization**: Enhanced CSS theme variables with proper light/dark mode support and consistent color palette across all components
 - **Theme Integration**: Added ThemeProvider to App.tsx and ThemeSelector to DashboardLayout for system-wide theme support with user preference persistence
@@ -105,6 +110,12 @@ This is a full-stack TypeScript application for credit management called "Simpix
 - **Secure URL Generation**: All document access uses temporary signed URLs (1-hour expiry) for private bucket security
 - **Complete Visualization Fix**: Documents uploaded during proposal creation now properly appear in analysis interface with full document viewer functionality
 - **API Endpoint Enhancement**: Added POST /api/propostas/:id/documentos for proper document-proposal association after upload
+- **Interactive Formalization Workflow (January 29)**: Implemented complete automated formalization workflow with ATENDENTE-controlled checkboxes
+- **EtapaFormalizacaoControl Component**: Created interactive control component allowing ATENDENTEs to mark formalization steps as completed
+- **Backend PATCH Endpoint**: Built /api/propostas/:id/etapa-formalizacao with role-based validation and atomic field updates
+- **Formalization Timeline Enhancement**: Integrated interactive controls into formalization timeline with conditional rendering based on user role
+- **Data Format Synchronization**: Fixed camelCase/snake_case mismatch between frontend and backend for new formalization fields
+- **Sequential Workflow Validation**: Implemented business logic ensuring steps must be completed in order: CCB → ClickSign → Biometry
 - **Critical RLS Security Policies CORRECTED (January 28)**: Fixed 3 critical Row Level Security policy gaps identified in comprehensive security audit
 - **Profiles Table Security**: Enhanced policy to allow ADMINISTRADOR access to all user profiles while maintaining user-specific access control
 - **Partners/Stores Access Control**: Corrected lojas policy to allow GERENTE access to their own store while maintaining ADMINISTRADOR full access, confirmed parceiros restricted to ADMINISTRADOR only

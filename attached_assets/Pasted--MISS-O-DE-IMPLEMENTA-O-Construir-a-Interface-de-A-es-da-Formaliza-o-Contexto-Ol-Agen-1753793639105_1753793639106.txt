@@ -1,0 +1,31 @@
+# MISSÃO DE IMPLEMENTAÇÃO: Construir a Interface de Ações da Formalização
+
+**Contexto:** Olá, Agente. O seu plano de arquitetura para a tela de "Formalização" foi aprovado. A sua nova missão é **executar** este plano, transformando o design em funcionalidade.
+
+**AÇÃO:**
+Execute o seguinte roadmap de 4 fases para construir a interface de ações interativa na tela de Formalização.
+
+**ROADMAP DE EXECUÇÃO (Sequencial):**
+
+---
+**FASE 1: Atualização do Schema TypeScript**
+* **Ficheiro Alvo:** `/shared/schema.ts` (ou onde a `interface Proposta` estiver definida).
+* **Tarefa:** Atualize a nossa `interface Proposta` no frontend para incluir os novos campos booleanos que já existem no banco de dados: `ccb_gerado`, `assinatura_eletronica_concluida`, `biometria_concluida`, e o campo `caminho_ccb_assinado`.
+
+---
+**FASE 2: Construção do Backend (Novo Endpoint de Etapa)**
+* **Ficheiro Alvo:** `/server/routes.ts`.
+* **Tarefa:** Crie o novo endpoint `PATCH /api/propostas/:id/etapa-formalizacao`.
+* **Lógica:** Este endpoint deve receber no `body` uma `etapa` (ex: "ccb_gerado") e um valor `concluida` (true/false), atualizar a coluna correta no banco de dados para a proposta específica e registar um log de auditoria na tabela `proposta_logs`.
+
+---
+**FASE 3: Criação do Componente de Controlo Interativo**
+* **Ficheiro Alvo:** Crie um novo componente em `/client/src/components/propostas/EtapaFormalizacaoControl.tsx`.
+* **Tarefa:** Construa o componente reutilizável `EtapaFormalizacaoControl`. Ele deve conter a lógica do `checkbox` ou do botão para marcar uma etapa como concluída e deve chamar o novo endpoint `PATCH` da Fase 2.
+
+---
+**FASE 4: Integração Final com a Tela de Formalização**
+* **Ficheiro Alvo:** `/client/src/pages/formalizacao.tsx`.
+* **Tarefa:** Refatore a `timeline` visual existente nesta página. Integre o seu novo componente `EtapaFormalizacaoControl` em cada etapa relevante da formalização (CCB, Assinatura, Biometria), garantindo que a interface seja atualizada reativamente após cada ação do atendente.
+
+Execute este plano para entregar a interface de gestão do nosso fluxo de formalização.

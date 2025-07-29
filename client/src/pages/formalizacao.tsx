@@ -40,6 +40,8 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import RefreshButton from "@/components/RefreshButton";
 import { useAuth } from "@/contexts/AuthContext";
+import { EtapaFormalizacaoControl } from "@/components/propostas/EtapaFormalizacaoControl";
+import { DocumentViewer } from "@/components/DocumentViewer";
 
 interface Proposta {
   id: string;
@@ -76,6 +78,22 @@ interface Proposta {
   data_assinatura?: string;
   data_pagamento?: string;
   observacoes_formalizacao?: string;
+  // Novos campos de formalização
+  ccbGerado: boolean;
+  assinaturaEletronicaConcluida: boolean;
+  biometriaConcluida: boolean;
+  caminhoCcbAssinado?: string;
+  // Backend fields (camelCase)
+  lojaId: number;
+  createdAt: string;
+  updatedAt: string;
+  dataAprovacao?: string;
+  documentosAdicionais?: string[];
+  contratoGerado?: boolean;
+  contratoAssinado?: boolean;
+  dataAssinatura?: string;
+  dataPagamento?: string;
+  observacoesFormalização?: string;
 }
 
 const updateFormalizacaoSchema = z.object({
@@ -354,12 +372,18 @@ export default function Formalizacao() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const [ccbUrl, setCcbUrl] = useState<string | null>(null);
+  const [showCcbViewer, setShowCcbViewer] = useState(false);
   
   const propostaId = params?.id;
 
   // TODOS os hooks devem estar aqui no topo
-  const { data: proposta, isLoading } = useQuery<Proposta>({
-    queryKey: ["/api/propostas", propostaId],
+  const { data: proposta, isLoading, refetch } = useQuery<Proposta>({
+    queryKey: ["/api/propostas", propostaId, "formalizacao"],
+    queryFn: async () => {
+      const response = await apiRequest(`/api/propostas/${propostaId}/formalizacao`);
+      return response;
+    },
     enabled: !!propostaId,
   });
 
@@ -367,10 +391,10 @@ export default function Formalizacao() {
     resolver: zodResolver(updateFormalizacaoSchema),
     defaultValues: {
       status: proposta?.status as any,
-      documentosAdicionais: proposta?.documentos_adicionais || [],
-      contratoGerado: proposta?.contrato_gerado || false,
-      contratoAssinado: proposta?.contrato_assinado || false,
-      observacoesFormalização: proposta?.observacoes_formalizacao || "",
+      documentosAdicionais: proposta?.documentosAdicionais || [],
+      contratoGerado: proposta?.contratoGerado || false,
+      contratoAssinado: proposta?.contratoAssinado || false,
+      observacoesFormalização: proposta?.observacoesFormalização || "",
     },
   });
 
@@ -420,6 +444,23 @@ export default function Formalizacao() {
   const formatDateTime = (dateString: string) => {
     if (!dateString) return "N/A";
     return new Date(dateString).toLocaleString("pt-BR");
+  };
+
+  // Função para visualizar CCB
+  const viewCCB = async (propostaId: string) => {
+    try {
+      const response = await apiRequest(`/api/propostas/${propostaId}/ccb-url`);
+      if (response.url) {
+        // Abrir em nova aba
+        window.open(response.url, '_blank');
+      }
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao obter URL da CCB",
+        variant: "destructive",
+      });
+    }
   };
 
   const getStatusProgress = (status: string) => {
@@ -473,55 +514,46 @@ export default function Formalizacao() {
       description: "Proposta foi aprovada pela equipe de crédito",
       icon: CheckCircle,
       status: "completed",
-      date: formatDate(proposta.data_aprovacao || proposta.created_at),
+      date: formatDate(proposta.dataAprovacao || proposta.createdAt),
       completed: true,
     },
     {
       id: 2,
-      title: "Documentos Adicionais",
-      description: "Envio de documentos complementares",
+      title: "CCB Gerada",
+      description: "Cédula de Crédito Bancário gerada automaticamente",
       icon: FileText,
-      status:
-        proposta.status === "documentos_enviados"
-          ? "current"
-          : proposta.status === "aprovado"
-            ? "current"
-            : "completed",
-      date: proposta.documentos_adicionais?.length ? formatDate(proposta.updated_at) : "Pendente",
-      completed: proposta.status !== "aprovado",
+      status: proposta.ccbGerado ? "completed" : "current",
+      date: proposta.ccbGerado ? formatDate(proposta.updatedAt) : "Pendente",
+      completed: proposta.ccbGerado,
+      interactive: user?.role === 'ATENDENTE',
+      etapa: 'ccb_gerado' as const,
     },
     {
       id: 3,
-      title: "Contratos Preparados",
-      description: "Geração e preparação dos contratos",
-      icon: FileCheck,
-      status:
-        proposta.status === "contratos_preparados"
-          ? "current"
-          : proposta.contrato_gerado
-            ? "completed"
-            : "pending",
-      date: proposta.contrato_gerado ? formatDate(proposta.updated_at) : "Pendente",
-      completed: proposta.contrato_gerado,
+      title: "Assinatura Eletrônica",
+      description: "Documento enviado para ClickSign para assinatura",
+      icon: Signature,
+      status: proposta.assinaturaEletronicaConcluida ? "completed" : proposta.ccbGerado ? "current" : "pending",
+      date: proposta.assinaturaEletronicaConcluida ? formatDate(proposta.updatedAt) : "Pendente",
+      completed: proposta.assinaturaEletronicaConcluida,
+      interactive: user?.role === 'ATENDENTE' && proposta.ccbGerado,
+      etapa: 'assinatura_eletronica' as const,
     },
     {
       id: 4,
-      title: "Assinatura dos Contratos",
-      description: "Assinatura digital dos contratos",
-      icon: Signature,
-      status:
-        proposta.status === "contratos_assinados"
-          ? "current"
-          : proposta.contrato_assinado
-            ? "completed"
-            : "pending",
-      date: proposta.data_assinatura ? formatDate(proposta.data_assinatura) : "Pendente",
-      completed: proposta.contrato_assinado,
+      title: "Biometria Validada",
+      description: "Validação biométrica concluída",
+      icon: Shield,
+      status: proposta.biometriaConcluida ? "completed" : proposta.assinaturaEletronicaConcluida ? "current" : "pending",
+      date: proposta.biometriaConcluida ? formatDate(proposta.updatedAt) : "Pendente",
+      completed: proposta.biometriaConcluida,
+      interactive: user?.role === 'ATENDENTE' && proposta.assinaturaEletronicaConcluida,
+      etapa: 'biometria' as const,
     },
     {
       id: 5,
       title: "Liberação do Pagamento",
-      description: "Processo de liberação do valor aprovado",
+      description: "Boletos gerados e valor liberado para pagamento",
       icon: CreditCard,
       status:
         proposta.status === "pronto_pagamento"
@@ -529,7 +561,7 @@ export default function Formalizacao() {
           : proposta.status === "pago"
             ? "completed"
             : "pending",
-      date: proposta.data_pagamento ? formatDate(proposta.data_pagamento) : "Pendente",
+      date: proposta.dataPagamento ? formatDate(proposta.dataPagamento) : "Pendente",
       completed: proposta.status === "pago",
     },
   ];
@@ -704,6 +736,24 @@ export default function Formalizacao() {
                       const isCompleted = step.completed;
                       const isCurrent = step.status === "current";
 
+                      // Se é uma etapa interativa e o usuário é ATENDENTE, mostra o controle
+                      if (step.interactive && step.etapa && user?.role === 'ATENDENTE') {
+                        return (
+                          <div key={step.id} className="mb-4">
+                            <EtapaFormalizacaoControl
+                              propostaId={proposta.id}
+                              etapa={step.etapa}
+                              titulo={step.title}
+                              descricao={step.description}
+                              concluida={isCompleted}
+                              habilitada={step.interactive}
+                              onUpdate={() => refetch()}
+                            />
+                          </div>
+                        );
+                      }
+
+                      // Caso contrário, mostra a timeline normal
                       return (
                         <div key={step.id} className="relative">
                           {index !== formalizationSteps.length - 1 && (
@@ -752,7 +802,7 @@ export default function Formalizacao() {
                                 {step.description}
                               </p>
 
-                              {isCurrent && (
+                              {isCurrent && !step.interactive && (
                                 <div className="mt-2 rounded-md bg-blue-900/30 border border-blue-700 p-3">
                                   <div className="flex items-center">
                                     <AlertCircle className="mr-2 h-4 w-4 text-blue-400" />
@@ -764,6 +814,19 @@ export default function Formalizacao() {
                                     Aguardando ação do cliente ou processamento interno.
                                   </p>
                                 </div>
+                              )}
+
+                              {/* Botão para visualizar CCB quando gerada */}
+                              {step.id === 2 && proposta.ccbGerado && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="mt-2"
+                                  onClick={() => viewCCB(proposta.id)}
+                                >
+                                  <Eye className="mr-2 h-4 w-4" />
+                                  Visualizar CCB
+                                </Button>
                               )}
                             </div>
                           </div>
@@ -804,9 +867,9 @@ export default function Formalizacao() {
                     <div>
                       <h4 className="mb-3 font-medium text-gray-900">Documentos Adicionais</h4>
                       <div className="space-y-2">
-                        {proposta.documentos_adicionais &&
-                        proposta.documentos_adicionais.length > 0 ? (
-                          proposta.documentos_adicionais.map((documento, index) => (
+                        {proposta.documentosAdicionais &&
+                        proposta.documentosAdicionais.length > 0 ? (
+                          proposta.documentosAdicionais.map((documento, index) => (
                             <div
                               key={index}
                               className="flex items-center justify-between rounded-md bg-green-50 p-3"
@@ -858,19 +921,19 @@ export default function Formalizacao() {
                       <div className="flex items-center gap-3 rounded-lg bg-gray-50 p-4">
                         <div
                           className={`flex h-10 w-10 items-center justify-center rounded-full ${
-                            proposta.contrato_gerado ? "bg-green-100" : "bg-gray-200"
+                            proposta.contratoGerado ? "bg-green-100" : "bg-gray-200"
                           }`}
                         >
                           <FileCheck
                             className={`h-5 w-5 ${
-                              proposta.contrato_gerado ? "text-green-600" : "text-gray-400"
+                              proposta.contratoGerado ? "text-green-600" : "text-gray-400"
                             }`}
                           />
                         </div>
                         <div>
                           <p className="font-medium text-gray-900">Contrato Gerado</p>
                           <p className="text-sm text-gray-600">
-                            {proposta.contrato_gerado ? "Sim" : "Não"}
+                            {proposta.contratoGerado ? "Sim" : "Não"}
                           </p>
                         </div>
                       </div>
@@ -878,19 +941,19 @@ export default function Formalizacao() {
                       <div className="flex items-center gap-3 rounded-lg bg-gray-50 p-4">
                         <div
                           className={`flex h-10 w-10 items-center justify-center rounded-full ${
-                            proposta.contrato_assinado ? "bg-green-100" : "bg-gray-200"
+                            proposta.contratoAssinado ? "bg-green-100" : "bg-gray-200"
                           }`}
                         >
                           <Signature
                             className={`h-5 w-5 ${
-                              proposta.contrato_assinado ? "text-green-600" : "text-gray-400"
+                              proposta.contratoAssinado ? "text-green-600" : "text-gray-400"
                             }`}
                           />
                         </div>
                         <div>
                           <p className="font-medium text-gray-900">Contrato Assinado</p>
                           <p className="text-sm text-gray-600">
-                            {proposta.contrato_assinado ? "Sim" : "Não"}
+                            {proposta.contratoAssinado ? "Sim" : "Não"}
                           </p>
                         </div>
                       </div>
@@ -902,7 +965,7 @@ export default function Formalizacao() {
                       <div className="flex flex-wrap gap-2">
                         <Button
                           variant="outline"
-                          disabled={!proposta.contrato_gerado}
+                          disabled={!proposta.contratoGerado}
                           className="flex items-center gap-2"
                         >
                           <Eye className="h-4 w-4" />
@@ -910,7 +973,7 @@ export default function Formalizacao() {
                         </Button>
                         <Button
                           variant="outline"
-                          disabled={!proposta.contrato_gerado}
+                          disabled={!proposta.contratoGerado}
                           className="flex items-center gap-2"
                         >
                           <Download className="h-4 w-4" />
@@ -918,7 +981,7 @@ export default function Formalizacao() {
                         </Button>
                         <Button
                           variant="outline"
-                          disabled={!proposta.contrato_gerado || proposta.contrato_assinado}
+                          disabled={!proposta.contratoGerado || proposta.contratoAssinado}
                           className="flex items-center gap-2"
                         >
                           <Send className="h-4 w-4" />

@@ -378,6 +378,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (status === 'aprovado') {
         updateData.data_aprovacao = new Date().toISOString();
         console.log(`🎯 [APROVAÇÃO] Definindo data_aprovacao para proposta ${propostaId}`);
+        
+        // NOVO: Geração automática da CCB ao aprovar proposta
+        try {
+          const { generateCCB } = await import('./services/ccbGenerator');
+          console.log(`📄 [CCB] Iniciando geração automática de CCB para proposta ${propostaId}`);
+          const ccbPath = await generateCCB(propostaId);
+          console.log(`✅ [CCB] CCB gerada com sucesso: ${ccbPath}`);
+          
+          // A função generateCCB já atualiza os campos ccb_gerado e caminho_ccb_assinado
+          // então não precisamos fazer isso aqui
+        } catch (ccbError) {
+          console.error(`❌ [CCB] Erro ao gerar CCB para proposta ${propostaId}:`, ccbError);
+          // Não vamos falhar a aprovação por causa do erro na CCB
+          // O atendente pode gerar manualmente depois se necessário
+        }
       }
       
       const { error: updateError } = await supabase
@@ -548,6 +563,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ 
         message: "Erro ao buscar propostas de formalização" 
       });
+    }
+  });
+
+  // Get CCB signed URL
+  app.get("/api/propostas/:id/ccb-url", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { id } = req.params;
+      
+      const { createServerSupabaseAdminClient } = await import('./lib/supabase');
+      const supabase = createServerSupabaseAdminClient();
+      
+      // Buscar dados da proposta
+      const { data: proposta, error } = await supabase
+        .from('propostas')
+        .select('ccb_gerado, caminho_ccb_assinado')
+        .eq('id', id)
+        .single();
+      
+      if (error || !proposta) {
+        return res.status(404).json({ message: 'Proposta não encontrada' });
+      }
+      
+      if (!proposta.ccb_gerado || !proposta.caminho_ccb_assinado) {
+        return res.status(404).json({ message: 'CCB não gerada para esta proposta' });
+      }
+      
+      // Gerar URL assinada
+      const { data: signedUrlData, error: urlError } = await supabase.storage
+        .from('documents')
+        .createSignedUrl(proposta.caminho_ccb_assinado, 3600); // 1 hora
+      
+      if (urlError || !signedUrlData) {
+        console.error('Erro ao gerar URL assinada:', urlError);
+        return res.status(500).json({ message: 'Erro ao gerar URL do documento' });
+      }
+      
+      res.json({ url: signedUrlData.signedUrl });
+    } catch (error) {
+      console.error('Erro ao buscar CCB:', error);
+      res.status(500).json({ message: 'Erro ao buscar CCB' });
     }
   });
 
@@ -1611,7 +1666,14 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
           dataAssinatura: propostas.dataAssinatura,
           dataPagamento: propostas.dataPagamento,
           observacoesFormalização: propostas.observacoesFormalização,
+          // Novos campos de formalização
+          ccbGerado: propostas.ccbGerado,
+          assinaturaEletronicaConcluida: propostas.assinaturaEletronicaConcluida,
+          biometriaConcluida: propostas.biometriaConcluida,
+          caminhoCcbAssinado: propostas.caminhoCcbAssinado,
           createdAt: propostas.createdAt,
+          updatedAt: propostas.updatedAt,
+          lojaId: propostas.lojaId,
           lojaNome: lojas.nomeLoja,
           parceiroRazaoSocial: parceiros.razaoSocial,
           produtoNome: produtos.nomeProduto,
@@ -2014,6 +2076,135 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
       { id: "PROP-105", cliente: "Empresa C", status: "CCB Gerada" },
     ];
     res.json(mockPropostas);
+  });
+
+  // Update proposal formalization step
+  app.patch("/api/propostas/:id/etapa-formalizacao", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { id } = req.params;
+      const { etapa, concluida, caminho_documento } = req.body;
+
+      // Validate input
+      const etapasValidas = ['ccb_gerado', 'assinatura_eletronica', 'biometria'];
+      if (!etapa || !etapasValidas.includes(etapa)) {
+        return res.status(400).json({ 
+          message: "Etapa inválida. Use: ccb_gerado, assinatura_eletronica ou biometria" 
+        });
+      }
+
+      if (typeof concluida !== 'boolean') {
+        return res.status(400).json({ 
+          message: "O campo 'concluida' deve ser um booleano" 
+        });
+      }
+
+      // Import dependencies
+      const { db } = await import("../server/lib/supabase");
+      const { propostas, propostaLogs } = await import("../shared/schema");
+      const { eq } = await import("drizzle-orm");
+
+      // Get the proposal first to check permissions
+      const [proposta] = await db
+        .select()
+        .from(propostas)
+        .where(eq(propostas.id, id));
+
+      if (!proposta) {
+        return res.status(404).json({ message: "Proposta não encontrada" });
+      }
+
+      // Check permissions - only ATENDENTE of the same store can update
+      if (req.user.role !== 'ATENDENTE' || req.user.lojaId !== proposta.lojaId) {
+        return res.status(403).json({ 
+          message: "Apenas o atendente da loja pode atualizar as etapas de formalização" 
+        });
+      }
+
+      // Build update object based on the step
+      const updateData: any = {};
+      
+      if (etapa === 'ccb_gerado') {
+        updateData.ccbGerado = concluida;
+        
+        // Automatically generate CCB when marked as complete
+        if (concluida && !proposta.ccbGerado) {
+          // TODO: Integrate with CCB generation service
+          console.log(`[${new Date().toISOString()}] Gerando CCB para proposta ${id}`);
+        }
+      } else if (etapa === 'assinatura_eletronica') {
+        updateData.assinaturaEletronicaConcluida = concluida;
+        
+        // TODO: Integrate with ClickSign when marked as complete
+        if (concluida && !proposta.assinaturaEletronicaConcluida) {
+          console.log(`[${new Date().toISOString()}] Enviando para ClickSign - proposta ${id}`);
+        }
+      } else if (etapa === 'biometria') {
+        updateData.biometriaConcluida = concluida;
+        
+        // Generate boletos when biometry is complete
+        if (concluida && !proposta.biometriaConcluida) {
+          // TODO: Generate payment boletos
+          console.log(`[${new Date().toISOString()}] Gerando boletos para proposta ${id}`);
+        }
+      }
+
+      // Add document path if provided
+      if (caminho_documento && etapa === 'ccb_gerado' && concluida) {
+        updateData.caminhoCcbAssinado = caminho_documento;
+      }
+
+      // Update the proposal
+      const [updatedProposta] = await db
+        .update(propostas)
+        .set({
+          ...updateData,
+          updatedAt: new Date()
+        })
+        .where(eq(propostas.id, id))
+        .returning();
+
+      // Create audit log
+      await db.insert(propostaLogs).values({
+        propostaId: id,
+        acao: 'etapa_formalizacao_atualizada',
+        detalhes: JSON.stringify({
+          etapa,
+          concluida,
+          usuario: req.user.email,
+          timestamp: new Date().toISOString()
+        }),
+        usuarioId: req.user.id
+      });
+
+      // Check if all formalization steps are complete
+      if (updatedProposta.ccbGerado && 
+          updatedProposta.assinaturaEletronicaConcluida && 
+          updatedProposta.biometriaConcluida) {
+        // Update status to ready for payment if all steps are complete
+        await db
+          .update(propostas)
+          .set({
+            status: 'pronto_pagamento',
+            updatedAt: new Date()
+          })
+          .where(eq(propostas.id, id));
+
+        console.log(`[${new Date().toISOString()}] Proposta ${id} pronta para pagamento`);
+      }
+
+      res.json({
+        message: "Etapa de formalização atualizada com sucesso",
+        etapa,
+        concluida,
+        proposta: updatedProposta
+      });
+
+    } catch (error) {
+      console.error("Erro ao atualizar etapa de formalização:", error);
+      res.status(500).json({ 
+        message: "Erro ao atualizar etapa de formalização" 
+      });
+    }
   });
 
   // Update proposal status - REAL IMPLEMENTATION WITH AUDIT TRAIL
