@@ -5,6 +5,7 @@
 
 import express from 'express';
 import { clickSignService } from '../services/clickSignService.js';
+import { interBankService } from '../services/interBankService.js';
 import { storage } from '../storage.js';
 import { jwtAuthMiddleware, type AuthenticatedRequest } from '../lib/jwt-auth-middleware.js';
 import { getBrasiliaTimestamp } from '../lib/timezone.js';
@@ -215,6 +216,87 @@ router.post('/webhook', async (req, res) => {
         updateData.status = 'contratos_assinados';
         
         console.log(`[CLICKSIGN WEBHOOK] ✅ Document signed for proposal: ${proposta.id}`);
+        
+        // 🚀 NOVO: Gerar boleto automaticamente após assinatura da CCB
+        try {
+          console.log(`[CLICKSIGN → INTER] Generating boleto for signed CCB: ${proposta.id}`);
+          
+          // Verificar se já existe cobrança para esta proposta
+          const existingCollection = await storage.getInterCollectionByProposalId(proposta.id);
+          if (!existingCollection) {
+            
+            // Obter dados do cliente da proposta
+            const clienteData = typeof proposta.clienteData === 'string' 
+              ? JSON.parse(proposta.clienteData) 
+              : proposta.clienteData || {};
+            
+            const condicoesData = typeof proposta.condicoesData === 'string'
+              ? JSON.parse(proposta.condicoesData)
+              : proposta.condicoesData || {};
+
+            // Dados para criação do boleto
+            const boletoData = {
+              seuNumero: proposta.id,
+              valorNominal: condicoesData.valorTotalFinanciado || condicoesData.valor || 0,
+              dataVencimento: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 dias
+              cnpjCpfPagador: clienteData.cpf?.replace(/\D/g, ''),
+              nomePagador: clienteData.nome,
+              emailPagador: clienteData.email,
+              telefonePagador: clienteData.telefone?.replace(/\D/g, ''),
+              cepPagador: clienteData.cep?.replace(/\D/g, ''),
+              enderecoCompleto: clienteData.endereco || `${clienteData.logradouro || ''} ${clienteData.numero || ''} ${clienteData.complemento || ''}`.trim(),
+              mensagem: `Pagamento referente ao empréstimo - Proposta ${proposta.id}`,
+            };
+
+            // Criar cobrança no Inter Bank
+            const interCollection = await interBankService.createCollection(boletoData);
+            
+            // Salvar no banco de dados
+            await storage.createInterCollection({
+              propostaId: proposta.id,
+              codigoSolicitacao: interCollection.codigoSolicitacao,
+              seuNumero: boletoData.seuNumero,
+              valorNominal: String(boletoData.valorNominal),
+              dataVencimento: boletoData.dataVencimento,
+              situacao: interCollection.situacao,
+              dataSituacao: interCollection.dataSituacao,
+              nossoNumero: interCollection.nossoNumero,
+              codigoBarras: interCollection.codigoBarras,
+              linhaDigitavel: interCollection.linhaDigitavel,
+              pixTxid: interCollection.pix?.txid,
+              pixCopiaECola: interCollection.pix?.copiaECola,
+              dataEmissao: interCollection.dataEmissao,
+              isActive: true
+            });
+
+            console.log(`[CLICKSIGN → INTER] ✅ Boleto created successfully: ${interCollection.codigoSolicitacao}`);
+            
+            // Log da geração do boleto
+            await storage.createPropostaLog({
+              propostaId: proposta.id,
+              autorId: 'clicksign-webhook',
+              statusAnterior: proposta.status,
+              statusNovo: 'contratos_assinados',
+              observacao: `Boleto gerado automaticamente após assinatura CCB - Código: ${interCollection.codigoSolicitacao}`
+            });
+            
+          } else {
+            console.log(`[CLICKSIGN → INTER] Boleto already exists for proposal: ${proposta.id}`);
+          }
+          
+        } catch (boletoError) {
+          console.error(`[CLICKSIGN → INTER] ❌ Error generating boleto for proposal ${proposta.id}:`, boletoError);
+          
+          // Log do erro mas não bloquear o webhook
+          await storage.createPropostaLog({
+            propostaId: proposta.id,
+            autorId: 'clicksign-webhook',
+            statusAnterior: proposta.status,
+            statusNovo: 'contratos_assinados',
+            observacao: `Erro ao gerar boleto automaticamente: ${(boletoError as Error).message}`
+          });
+        }
+        
         break;
 
       case 'cancel':

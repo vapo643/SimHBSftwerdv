@@ -87,8 +87,9 @@ This is a full-stack TypeScript application for credit management called "Simpix
 - **Inter Bank Database Schema**: Added inter_collections, inter_webhooks, and inter_callbacks tables with proper relationships to propostas table for complete boleto lifecycle tracking
 - **Inter Bank API Routes**: Implemented comprehensive /api/inter routes with endpoints for collection management, webhook configuration, PDF generation, and payment simulation with JWT authentication and role-based access control
 - **Inter Bank Storage Integration**: Added complete storage layer methods for collection CRUD operations, webhook management, and callback processing with proper error handling and status tracking
-- **Automated Proposal-to-Boleto Workflow**: Created seamless integration allowing automatic boleto generation for approved proposals with client data mapping, configurable payment terms, and comprehensive error handling
+- **Automated ClickSign-to-Boleto Workflow**: Created seamless integration where boletos are automatically generated via Inter Bank API after CCB signature completion in ClickSign, ensuring proper contract execution before payment issuance
 - **Inter Bank Webhook System**: Implemented complete webhook infrastructure for real-time payment notifications with callback processing and retry mechanisms
+- **ClickSign-Inter Integration**: Modified ClickSign webhook to automatically trigger Inter Bank boleto generation after CCB signature completion, creating end-to-end automation from contract signature to payment issuance
 - **ID Format Simplified (January 29)**: Changed proposal ID format from "PROP-1753476064646-PRM20HF" to numeric-only format using timestamp (e.g., "1753476064646") for cleaner identification and better user experience
 - **System-Wide ID Update**: Updated proposal creation logic, tests, and all references to use new numeric ID format across the entire application
 - **CCB Template System Architecture Prepared (January 29)**: Transitioned from problematic generated PDFs to user-controlled template system for professional document creation
