@@ -1709,10 +1709,7 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
       const { eq } = await import("drizzle-orm");
       const { propostas, lojas, parceiros, produtos } = await import("../shared/schema");
 
-      // Buscar proposta com JOIN na tabela comercial para obter taxa de juros
-      const { tabelasComerciais } = await import("../shared/schema");
-      const { leftJoin } = await import("drizzle-orm");
-      
+      // Buscar proposta primeiro, depois tabela comercial separadamente para evitar JOIN complexo
       const proposta = await db
         .select({
           id: propostas.id,
@@ -1736,12 +1733,9 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
           valor: propostas.valor,
           prazo: propostas.prazo,
           tabelaComercialId: propostas.tabelaComercialId,
-          taxaJurosMensal: propostas.taxaJurosMensal,
-          // Taxa de juros da tabela comercial
-          taxaJurosTabela: tabelasComerciais.taxaJuros
+          taxaJurosMensal: propostas.taxaJurosMensal
         })
         .from(propostas)
-        .leftJoin(tabelasComerciais, eq(propostas.tabelaComercialId, tabelasComerciais.id))
         .where(eq(propostas.id, propostaId))
         .limit(1);
 
@@ -1757,6 +1751,25 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
         .from(propostaDocumentos)
         .where(eq(propostaDocumentos.propostaId, propostaId));
 
+      // Buscar taxa de juros da tabela comercial se existir
+      let taxaJurosTabela = null;
+      if (proposta[0].tabelaComercialId) {
+        try {
+          const { tabelasComerciais } = await import("../shared/schema");
+          const tabelaComercial = await db
+            .select({ taxaJuros: tabelasComerciais.taxaJuros })
+            .from(tabelasComerciais)
+            .where(eq(tabelasComerciais.id, proposta[0].tabelaComercialId))
+            .limit(1);
+          
+          if (tabelaComercial[0]) {
+            taxaJurosTabela = tabelaComercial[0].taxaJuros;
+          }
+        } catch (error) {
+          console.log('Aviso: Não foi possível buscar taxa de juros da tabela comercial:', error);
+        }
+      }
+
       // Parse dos dados JSONB antes de retornar
       const propostaProcessada = {
         ...proposta[0],
@@ -1768,7 +1781,9 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
           (typeof proposta[0].condicoesData === 'string' ? 
             JSON.parse(proposta[0].condicoesData) : proposta[0].condicoesData) : {},
         // Adicionar documentos
-        documentos: documentos
+        documentos: documentos,
+        // Adicionar taxa de juros da tabela comercial
+        taxaJurosTabela: taxaJurosTabela
       };
 
       console.log(`[${new Date().toISOString()}] Dados de formalização retornados para proposta ${propostaId}:`, {
