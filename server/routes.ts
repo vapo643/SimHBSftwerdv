@@ -759,7 +759,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .list(`proposta-${idParam}/`, { limit: 100 });
         
         if (bucketFiles) {
-          console.log(`🔍 [ANÁLISE] Arquivos no bucket para proposta-${idParam}/:`, bucketFiles.map(f => f.name));
+          console.log(`🔍 [ANÁLISE] ===== COMPARAÇÃO BUCKET vs BANCO =====`);
+          console.log(`🔍 [ANÁLISE] Arquivos no bucket (${bucketFiles.length}):`, bucketFiles.map(f => f.name));
+          console.log(`🔍 [ANÁLISE] Caminhos no banco (${documentos?.length || 0}):`, documentos?.map(d => d.caminho_arquivo));
+          console.log(`🔍 [ANÁLISE] ============================================`);
         } else {
           console.log(`🔍 [ANÁLISE] Erro ao listar arquivos no bucket:`, listError?.message);
         }
