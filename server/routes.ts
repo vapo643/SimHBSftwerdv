@@ -2411,11 +2411,22 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
         return res.status(404).json({ message: "Proposta não encontrada" });
       }
 
-      // Check permissions - only ATENDENTE of the same store can update
-      if (req.user.role !== 'ATENDENTE' || req.user.lojaId !== proposta.lojaId) {
-        return res.status(403).json({ 
-          message: "Apenas o atendente da loja pode atualizar as etapas de formalização" 
-        });
+      // Check permissions based on step and role
+      if (etapa === 'ccb_gerado') {
+        // CCB generation can be done by ANALISTA, GERENTE, ATENDENTE, or ADMINISTRADOR
+        const allowedRoles = ['ANALISTA', 'GERENTE', 'ATENDENTE', 'ADMINISTRADOR'];
+        if (!allowedRoles.includes(req.user.role)) {
+          return res.status(403).json({ 
+            message: "Você não tem permissão para gerar CCB" 
+          });
+        }
+      } else {
+        // Other steps (ClickSign, Biometry) only ATENDENTE of the same store
+        if (req.user.role !== 'ATENDENTE' || req.user.lojaId !== proposta.lojaId) {
+          return res.status(403).json({ 
+            message: "Apenas o atendente da loja pode atualizar as etapas de assinatura e biometria" 
+          });
+        }
       }
 
       // Build update object based on the step
@@ -2426,8 +2437,17 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
         
         // Automatically generate CCB when marked as complete
         if (concluida && !proposta.ccbGerado) {
-          // TODO: Integrate with CCB generation service
           console.log(`[${new Date().toISOString()}] Gerando CCB para proposta ${id}`);
+          
+          try {
+            const { generateCCB } = await import("../server/services/ccbGenerator");
+            const ccbPath = await generateCCB(id);
+            updateData.caminhoCcbAssinado = ccbPath;
+            console.log(`[${new Date().toISOString()}] CCB gerada com sucesso: ${ccbPath}`);
+          } catch (error) {
+            console.error(`[${new Date().toISOString()}] Erro ao gerar CCB:`, error);
+            // Don't fail the entire request if CCB generation fails
+          }
         }
       } else if (etapa === 'assinatura_eletronica') {
         updateData.assinaturaEletronicaConcluida = concluida;
