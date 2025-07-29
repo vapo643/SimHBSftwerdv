@@ -29,7 +29,7 @@ interface CondicoesData {
 
 export async function generateCCB(propostaId: string): Promise<string> {
   try {
-    console.log(`🔄 [CCB Generator] Iniciando geração de CCB simplificada para proposta ${propostaId}`);
+    console.log(`🔄 [CCB Generator] Iniciando geração de CCB organizada para proposta ${propostaId}`);
     
     const supabase = createServerSupabaseAdminClient();
     
@@ -58,15 +58,15 @@ export async function generateCCB(propostaId: string): Promise<string> {
     const clienteData = proposta.cliente_data as ClientData;
     const condicoesData = proposta.condicoes_data as CondicoesData;
     
-    // 2. Criar PDF ultra básico
+    // 2. Criar PDF com layout organizado
     const doc = new PDFDocument({ 
-      margin: 60, 
+      margin: 50, 
       size: 'A4',
       info: {
         Title: `CCB ${propostaId}`,
         Author: 'Sistema Simpix',
-        Subject: 'CCB',
-        Creator: 'Simpix',
+        Subject: 'Cedula de Credito Bancario',
+        Creator: 'Sistema Simpix',
         Producer: 'PDFKit',
         CreationDate: new Date(),
         ModDate: new Date()
@@ -76,163 +76,226 @@ export async function generateCCB(propostaId: string): Promise<string> {
     const chunks: Buffer[] = [];
     doc.on('data', (chunk: Buffer) => chunks.push(chunk));
     
+    // Configurações de layout
+    const pageWidth = 595.28 - 100; // A4 width minus margins
+    const leftMargin = 50;
+    const lineHeight = 16;
+    const sectionSpacing = 20;
+    
     // === CABEÇALHO ===
-    doc.fontSize(20).font('Helvetica-Bold').text('CÉDULA DE CRÉDITO BANCÁRIO', { align: 'center' });
-    doc.fontSize(12).font('Helvetica').text('(Lei nº 10.931/2004)', { align: 'center' });
-    doc.moveDown(2);
+    doc.fontSize(16).font('Helvetica-Bold')
+       .text('CÉDULA DE CRÉDITO BANCÁRIO', leftMargin, doc.y, { 
+         width: pageWidth, 
+         align: 'center' 
+       });
     
-    // === DADOS IDENTIFICADORES ===
+    doc.fontSize(10).font('Helvetica')
+       .text('(Lei nº 10.931/2004)', leftMargin, doc.y + 5, { 
+         width: pageWidth, 
+         align: 'center' 
+       });
+    
+    doc.y += sectionSpacing * 1.5;
+    
+    // === INFORMAÇÕES BÁSICAS ===
+    doc.fontSize(12).font('Helvetica-Bold')
+       .text('INFORMAÇÕES GERAIS', leftMargin, doc.y, { 
+         width: pageWidth, 
+         align: 'center' 
+       });
+    
+    doc.y += sectionSpacing;
+    
     doc.fontSize(10).font('Helvetica-Bold');
-    const startY = doc.y;
+    doc.text('Número da Cédula:', leftMargin, doc.y);
+    doc.font('Helvetica').text(propostaId, leftMargin + 120, doc.y);
     
-    // Linha superior de labels
-    doc.text('Nº da Cédula:', 60, startY, { width: 120 });
-    doc.text('Data de Emissão:', 240, startY, { width: 120 });
-    doc.text('Vencimento:', 420, startY, { width: 120 });
+    doc.y += lineHeight;
+    doc.font('Helvetica-Bold').text('Data de Emissão:', leftMargin, doc.y);
+    doc.font('Helvetica').text(new Date().toLocaleDateString('pt-BR'), leftMargin + 120, doc.y);
     
-    // Linha inferior de valores
-    doc.fontSize(10).font('Helvetica');
-    doc.text(propostaId, 60, startY + 15, { width: 120 });
-    doc.text(new Date().toLocaleDateString('pt-BR'), 240, startY + 15, { width: 120 });
-    const vencimento = new Date();
-    vencimento.setMonth(vencimento.getMonth() + (condicoesData.prazo || 12));
-    doc.text(vencimento.toLocaleDateString('pt-BR'), 420, startY + 15, { width: 120 });
+    doc.y += sectionSpacing;
     
-    doc.y = startY + 40;
-    doc.moveDown();
+    // === SEÇÃO I - DADOS DO CLIENTE ===
+    doc.fontSize(12).font('Helvetica-Bold')
+       .text('I. DADOS DO CLIENTE', leftMargin, doc.y, { 
+         width: pageWidth, 
+         align: 'center' 
+       });
     
-    // === SEÇÃO I - DEVEDOR ===
-    doc.fontSize(12).font('Helvetica-Bold').text('I. DEVEDOR (EMITENTE)', { underline: true });
-    doc.moveDown(0.5);
+    doc.y += sectionSpacing;
     
-    doc.fontSize(10).font('Helvetica');
-    const devedorY = doc.y;
+    doc.fontSize(10);
+    doc.font('Helvetica-Bold').text('Nome Completo:', leftMargin, doc.y);
+    doc.font('Helvetica').text(clienteData.nome, leftMargin + 120, doc.y, { width: pageWidth - 120 });
     
-    // Nome e CPF na mesma linha
-    doc.font('Helvetica-Bold').text('Nome/Razão Social:', 60, devedorY, { width: 150 });
-    doc.font('Helvetica').text(clienteData.nome, 220, devedorY, { width: 320 });
+    doc.y += lineHeight;
+    doc.font('Helvetica-Bold').text('CPF:', leftMargin, doc.y);
+    doc.font('Helvetica').text(clienteData.cpf, leftMargin + 120, doc.y);
     
-    doc.font('Helvetica-Bold').text('CPF/CNPJ:', 60, devedorY + 20, { width: 150 });
-    doc.font('Helvetica').text(clienteData.cpf, 220, devedorY + 20, { width: 320 });
+    doc.y += lineHeight;
+    doc.font('Helvetica-Bold').text('E-mail:', leftMargin, doc.y);
+    doc.font('Helvetica').text(clienteData.email, leftMargin + 120, doc.y, { width: pageWidth - 120 });
     
-    // Endereço
+    doc.y += lineHeight;
+    doc.font('Helvetica-Bold').text('Telefone:', leftMargin, doc.y);
+    doc.font('Helvetica').text(clienteData.telefone, leftMargin + 120, doc.y);
+    
     if (clienteData.endereco) {
-      doc.font('Helvetica-Bold').text('Endereço:', 60, devedorY + 40, { width: 150 });
-      doc.font('Helvetica').text(clienteData.endereco, 220, devedorY + 40, { width: 320 });
+      doc.y += lineHeight;
+      doc.font('Helvetica-Bold').text('Endereço:', leftMargin, doc.y);
+      doc.font('Helvetica').text(clienteData.endereco, leftMargin + 120, doc.y, { width: pageWidth - 120 });
     }
     
-    // Telefone e Email
-    doc.font('Helvetica-Bold').text('Telefone:', 60, devedorY + 60, { width: 150 });
-    doc.font('Helvetica').text(clienteData.telefone, 220, devedorY + 60, { width: 150 });
+    if (clienteData.cep) {
+      doc.y += lineHeight;
+      doc.font('Helvetica-Bold').text('CEP:', leftMargin, doc.y);
+      doc.font('Helvetica').text(clienteData.cep, leftMargin + 120, doc.y);
+    }
     
-    doc.font('Helvetica-Bold').text('Email:', 320, devedorY + 60, { width: 80 });
-    doc.font('Helvetica').text(clienteData.email, 370, devedorY + 60, { width: 170 });
+    doc.y += sectionSpacing;
     
-    doc.y = devedorY + 90;
-    doc.moveDown();
+    // === SEÇÃO II - CONDIÇÕES DO EMPRÉSTIMO ===
+    doc.fontSize(12).font('Helvetica-Bold')
+       .text('II. CONDIÇÕES DO EMPRÉSTIMO', leftMargin, doc.y, { 
+         width: pageWidth, 
+         align: 'center' 
+       });
     
-    // === SEÇÃO II - CREDOR ===
-    doc.fontSize(12).font('Helvetica-Bold').text('II. CREDOR ORIGINÁRIO', { underline: true });
-    doc.moveDown(0.5);
+    doc.y += sectionSpacing;
+    
+    doc.fontSize(10);
+    doc.font('Helvetica-Bold').text('Valor do Empréstimo:', leftMargin, doc.y);
+    doc.font('Helvetica').text(`R$ ${condicoesData.valor?.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) || '0,00'}`, leftMargin + 120, doc.y);
+    
+    doc.y += lineHeight;
+    doc.font('Helvetica-Bold').text('Prazo:', leftMargin, doc.y);
+    doc.font('Helvetica').text(`${condicoesData.prazo || 0} meses`, leftMargin + 120, doc.y);
+    
+    doc.y += lineHeight;
+    doc.font('Helvetica-Bold').text('Valor da Parcela:', leftMargin, doc.y);
+    doc.font('Helvetica').text(`R$ ${condicoesData.parcela?.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) || '0,00'}`, leftMargin + 120, doc.y);
+    
+    if (condicoesData.taxaJuros) {
+      doc.y += lineHeight;
+      doc.font('Helvetica-Bold').text('Taxa de Juros:', leftMargin, doc.y);
+      doc.font('Helvetica').text(`${condicoesData.taxaJuros.toFixed(2)}% ao mês`, leftMargin + 120, doc.y);
+    }
+    
+    if (condicoesData.valorTac) {
+      doc.y += lineHeight;
+      doc.font('Helvetica-Bold').text('TAC:', leftMargin, doc.y);
+      doc.font('Helvetica').text(`R$ ${condicoesData.valorTac.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, leftMargin + 120, doc.y);
+    }
+    
+    if (condicoesData.valorIof) {
+      doc.y += lineHeight;
+      doc.font('Helvetica-Bold').text('IOF:', leftMargin, doc.y);
+      doc.font('Helvetica').text(`R$ ${condicoesData.valorIof.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, leftMargin + 120, doc.y);
+    }
+    
+    if (condicoesData.finalidade) {
+      doc.y += lineHeight;
+      doc.font('Helvetica-Bold').text('Finalidade:', leftMargin, doc.y);
+      doc.font('Helvetica').text(condicoesData.finalidade, leftMargin + 120, doc.y, { width: pageWidth - 120 });
+    }
+    
+    doc.y += sectionSpacing;
+    
+    // === SEÇÃO III - FORMA DE PAGAMENTO ===
+    doc.fontSize(12).font('Helvetica-Bold')
+       .text('III. FORMA DE PAGAMENTO', leftMargin, doc.y, { 
+         width: pageWidth, 
+         align: 'center' 
+       });
+    
+    doc.y += sectionSpacing;
     
     doc.fontSize(10).font('Helvetica');
-    const credorY = doc.y;
+    doc.text('• Pagamento em parcelas mensais e consecutivas', leftMargin, doc.y, { width: pageWidth });
+    doc.y += lineHeight;
+    doc.text('• Primeira parcela vence 30 dias após a liberação do crédito', leftMargin, doc.y, { width: pageWidth });
+    doc.y += lineHeight;
+    doc.text(`• Demais parcelas vencem todo dia ${new Date().getDate()} de cada mês`, leftMargin, doc.y, { width: pageWidth });
     
-    doc.font('Helvetica-Bold').text('Razão Social:', 60, credorY, { width: 150 });
-    doc.font('Helvetica').text('Sistema Simpix - Gestão de Crédito', 220, credorY, { width: 320 });
+    doc.y += sectionSpacing;
     
-    doc.font('Helvetica-Bold').text('CNPJ:', 60, credorY + 20, { width: 150 });
-    doc.font('Helvetica').text('00.000.000/0001-00', 220, credorY + 20, { width: 320 });
+    // === SEÇÃO IV - CLÁUSULAS LEGAIS ===
+    doc.fontSize(12).font('Helvetica-Bold')
+       .text('IV. CLÁUSULAS LEGAIS', leftMargin, doc.y, { 
+         width: pageWidth, 
+         align: 'center' 
+       });
     
-    doc.y = credorY + 50;
-    doc.moveDown();
-    
-    // === SEÇÃO III - CONDIÇÕES DA OPERAÇÃO ===
-    doc.fontSize(12).font('Helvetica-Bold').text('III. CONDIÇÕES DA OPERAÇÃO DE CRÉDITO', { underline: true });
-    doc.moveDown(0.5);
-    
-    doc.fontSize(10).font('Helvetica');
-    const operacaoY = doc.y;
-    
-    // Coluna esquerda
-    doc.font('Helvetica-Bold').text('Valor Principal:', 60, operacaoY, { width: 150 });
-    doc.font('Helvetica').text(`R$ ${condicoesData.valor?.toFixed(2) || '0,00'}`, 220, operacaoY, { width: 150 });
-    
-    doc.font('Helvetica-Bold').text('Prazo:', 60, operacaoY + 20, { width: 150 });
-    doc.font('Helvetica').text(`${condicoesData.prazo || 0} meses`, 220, operacaoY + 20, { width: 150 });
-    
-    doc.font('Helvetica-Bold').text('Taxa de Juros:', 60, operacaoY + 40, { width: 150 });
-    doc.font('Helvetica').text(`${condicoesData.taxaJuros?.toFixed(2) || '0,00'}% a.m.`, 220, operacaoY + 40, { width: 150 });
-    
-    // Coluna direita
-    doc.font('Helvetica-Bold').text('Valor da Parcela:', 320, operacaoY, { width: 150 });
-    doc.font('Helvetica').text(`R$ ${condicoesData.parcela?.toFixed(2) || '0,00'}`, 480, operacaoY, { width: 100 });
-    
-    doc.font('Helvetica-Bold').text('TAC:', 320, operacaoY + 20, { width: 150 });
-    doc.font('Helvetica').text(`R$ ${condicoesData.valorTac?.toFixed(2) || '0,00'}`, 480, operacaoY + 20, { width: 100 });
-    
-    doc.font('Helvetica-Bold').text('IOF:', 320, operacaoY + 40, { width: 150 });
-    doc.font('Helvetica').text(`R$ ${condicoesData.valorIof?.toFixed(2) || '0,00'}`, 480, operacaoY + 40, { width: 100 });
-    
-    doc.y = operacaoY + 70;
-    doc.moveDown();
-    
-    // === SEÇÃO IV - FORMA DE PAGAMENTO ===
-    doc.fontSize(12).font('Helvetica-Bold').text('IV. FORMA DE PAGAMENTO', { underline: true });
-    doc.moveDown(0.5);
-    
-    doc.fontSize(10).font('Helvetica');
-    doc.text('• Parcelas mensais, fixas e consecutivas');
-    doc.text('• Vencimento da 1ª parcela: 30 dias após a liberação do crédito');
-    doc.text('• Vencimento das demais: todo dia ' + new Date().getDate() + ' dos meses subsequentes');
-    doc.moveDown();
-    
-    // === SEÇÃO V - CLÁUSULAS GERAIS ===
-    doc.fontSize(12).font('Helvetica-Bold').text('V. CLÁUSULAS GERAIS', { underline: true });
-    doc.moveDown(0.5);
+    doc.y += sectionSpacing;
     
     doc.fontSize(9).font('Helvetica');
     const clausulas = [
-      'VENCIMENTO ANTECIPADO: O não pagamento de qualquer parcela na data do vencimento acarretará o vencimento antecipado de toda a dívida.',
-      'JUROS DE MORA: Em caso de inadimplemento, serão cobrados juros de mora de 1% ao mês.',
-      'MULTA: Será aplicada multa de 2% sobre o valor da parcela em atraso.',
-      'FORO: Fica eleito o foro da comarca de São Paulo/SP para dirimir questões oriundas desta cédula.'
+      'Esta Cédula de Crédito Bancário é título executivo extrajudicial, regida pela Lei nº 10.931/2004.',
+      'O atraso no pagamento de qualquer parcela acarretará o vencimento antecipado de toda a dívida.',
+      'Em caso de inadimplemento, serão cobrados juros de mora de 1% ao mês sobre o valor em atraso.',
+      'Será aplicada multa de 2% sobre o valor da parcela em atraso.',
+      'Fica eleito o foro da comarca de São Paulo/SP para dirimir questões oriundas desta cédula.'
     ];
     
     clausulas.forEach((clausula, index) => {
-      doc.text(`${index + 1}. ${clausula}`, { width: 480, align: 'justify' });
-      doc.moveDown(0.3);
+      doc.text(`${index + 1}. ${clausula}`, leftMargin, doc.y, { 
+        width: pageWidth, 
+        align: 'justify' 
+      });
+      doc.y += lineHeight;
     });
     
-    doc.moveDown(2);
+    doc.y += sectionSpacing;
     
-    // === SEÇÃO VI - ASSINATURAS ===
-    doc.fontSize(12).font('Helvetica-Bold').text('VI. ASSINATURAS', { underline: true });
-    doc.moveDown();
+    // === SEÇÃO V - ASSINATURAS ===
+    doc.fontSize(12).font('Helvetica-Bold')
+       .text('V. ASSINATURAS', leftMargin, doc.y, { 
+         width: pageWidth, 
+         align: 'center' 
+       });
     
-    doc.fontSize(10).font('Helvetica');
-    doc.text('Local e Data: São Paulo/SP, ' + new Date().toLocaleDateString('pt-BR'));
-    doc.moveDown(3);
+    doc.y += sectionSpacing;
     
-    // Assinaturas lado a lado
-    const assinY = doc.y;
+    doc.fontSize(10).font('Helvetica')
+       .text(`São Paulo, ${new Date().toLocaleDateString('pt-BR')}`, leftMargin, doc.y, { 
+         width: pageWidth, 
+         align: 'center' 
+       });
     
-    // Devedor
-    doc.text('_'.repeat(35), 60, assinY);
-    doc.text('DEVEDOR', 60, assinY + 15, { width: 200 });
-    doc.font('Helvetica-Bold').text(clienteData.nome, 60, assinY + 30, { width: 200 });
-    doc.font('Helvetica').text(`CPF: ${clienteData.cpf}`, 60, assinY + 45, { width: 200 });
+    doc.y += sectionSpacing * 1.5;
     
-    // Credor
-    doc.text('_'.repeat(35), 320, assinY);
-    doc.text('CREDOR', 320, assinY + 15, { width: 200 });
-    doc.font('Helvetica-Bold').text('Sistema Simpix', 320, assinY + 30, { width: 200 });
-    doc.font('Helvetica').text('CNPJ: 00.000.000/0001-00', 320, assinY + 45, { width: 200 });
+    // Assinatura do Cliente (esquerda)
+    doc.text('_'.repeat(35), leftMargin, doc.y);
+    doc.y += lineHeight * 0.8;
+    doc.text('CLIENTE/DEVEDOR', leftMargin, doc.y);
+    doc.y += lineHeight * 0.6;
+    doc.text(clienteData.nome, leftMargin, doc.y);
+    doc.y += lineHeight * 0.6;
+    doc.text(`CPF: ${clienteData.cpf}`, leftMargin, doc.y);
     
-    // Finalizar
+    // Assinatura do Credor (direita)
+    const rightX = leftMargin + 280;
+    const signatureY = doc.y - (lineHeight * 2.8);
+    
+    doc.text('_'.repeat(35), rightX, signatureY);
+    doc.text('CREDOR', rightX, signatureY + (lineHeight * 0.8));
+    doc.text('Sistema Simpix', rightX, signatureY + (lineHeight * 1.4));
+    doc.text('Gestão de Crédito', rightX, signatureY + (lineHeight * 2));
+    
+    doc.y += sectionSpacing;
+    
+    // === RODAPÉ ===
+    doc.fontSize(8).font('Helvetica')
+       .text(`Documento gerado em ${new Date().toLocaleString('pt-BR')}`, leftMargin, doc.y, { 
+         width: pageWidth, 
+         align: 'center' 
+       });
+    
+    // Finalizar PDF
     doc.end();
     
-    // 3. Aguardar criação
+    // 3. Aguardar criação do PDF
     const pdfBuffer = await new Promise<Buffer>((resolve, reject) => {
       doc.on('end', () => {
         const buffer = Buffer.concat(chunks);
