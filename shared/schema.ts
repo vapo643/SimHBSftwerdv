@@ -130,6 +130,15 @@ export const propostas = pgTable("propostas", {
   biometriaConcluida: boolean("biometria_concluida").notNull().default(false),
   caminhoCcbAssinado: text("caminho_ccb_assinado"),
 
+  // ClickSign Integration Fields (January 29, 2025)
+  clicksignDocumentKey: text("clicksign_document_key"),
+  clicksignSignerKey: text("clicksign_signer_key"),
+  clicksignListKey: text("clicksign_list_key"),
+  clicksignStatus: text("clicksign_status"), // 'pending', 'signed', 'cancelled', 'expired'
+  clicksignSignUrl: text("clicksign_sign_url"),
+  clicksignSentAt: timestamp("clicksign_sent_at"),
+  clicksignSignedAt: timestamp("clicksign_signed_at"),
+
   // Campos JSONB legados (mantidos para compatibilidade)
   clienteData: text("cliente_data"),
   condicoesData: text("condicoes_data"),
@@ -199,6 +208,49 @@ export const propostaDocumentos = pgTable("proposta_documentos", {
   tamanho: integer("tamanho"), // tamanho em bytes
   tipo: text("tipo"), // application/pdf, image/jpeg, etc
   createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Banco Inter Integration Tables
+export const interCollections = pgTable("inter_collections", {
+  id: serial("id").primaryKey(),
+  propostaId: text("proposta_id").references(() => propostas.id).notNull(),
+  codigoSolicitacao: text("codigo_solicitacao").notNull().unique(), // Inter's unique ID
+  seuNumero: text("seu_numero").notNull(), // Our reference number
+  valorNominal: decimal("valor_nominal", { precision: 12, scale: 2 }).notNull(),
+  dataVencimento: text("data_vencimento").notNull(), // YYYY-MM-DD format
+  situacao: text("situacao").notNull().default("EM_PROCESSAMENTO"), // Inter status
+  dataSituacao: text("data_situacao"),
+  nossoNumero: text("nosso_numero"), // Bank reference number
+  codigoBarras: text("codigo_barras"), // Barcode for boleto
+  linhaDigitavel: text("linha_digitavel"), // Digitizable line
+  pixTxid: text("pix_txid"), // PIX transaction ID
+  pixCopiaECola: text("pix_copia_e_cola"), // PIX copy-paste code
+  valorTotalRecebido: decimal("valor_total_recebido", { precision: 12, scale: 2 }),
+  origemRecebimento: text("origem_recebimento"), // BOLETO or PIX
+  dataEmissao: text("data_emissao"),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const interWebhooks = pgTable("inter_webhooks", {
+  id: serial("id").primaryKey(),
+  url: text("url").notNull(),
+  eventos: text("eventos").array().notNull(), // Array of webhook events
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const interCallbacks = pgTable("inter_callbacks", {
+  id: serial("id").primaryKey(),
+  codigoSolicitacao: text("codigo_solicitacao").notNull(),
+  evento: text("evento").notNull(), // Type of event received
+  payload: text("payload").notNull(), // Full JSON payload
+  processado: boolean("processado").default(false).notNull(),
+  erro: text("erro"), // Error message if processing failed
+  createdAt: timestamp("created_at").defaultNow(),
+  processedAt: timestamp("processed_at"),
 });
 
 // Zod Schemas para validação
@@ -305,6 +357,30 @@ export const insertGerenteLojaSchema = createInsertSchema(gerenteLojas).omit({
   createdAt: true,
 });
 
+// Inter Bank schemas
+export const insertInterCollectionSchema = createInsertSchema(interCollections).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const updateInterCollectionSchema = createInsertSchema(interCollections).partial().omit({
+  id: true,
+  propostaId: true,
+  createdAt: true,
+});
+
+export const insertInterWebhookSchema = createInsertSchema(interWebhooks).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertInterCallbackSchema = createInsertSchema(interCallbacks).omit({
+  id: true,
+  createdAt: true,
+});
+
 // TypeScript Types
 export type InsertParceiro = z.infer<typeof insertParceiroSchema>;
 export type Parceiro = typeof parceiros.$inferSelect;
@@ -331,3 +407,12 @@ export type InsertGerenteLojas = z.infer<typeof insertGerenteLojaSchema>;
 export type GerenteLojas = typeof gerenteLojas.$inferSelect;
 export type InsertPropostaDocumento = z.infer<typeof insertPropostaDocumentoSchema>;
 export type PropostaDocumento = typeof propostaDocumentos.$inferSelect;
+
+// Inter Bank types
+export type InsertInterCollection = z.infer<typeof insertInterCollectionSchema>;
+export type UpdateInterCollection = z.infer<typeof updateInterCollectionSchema>;
+export type InterCollection = typeof interCollections.$inferSelect;
+export type InsertInterWebhook = z.infer<typeof insertInterWebhookSchema>;
+export type InterWebhook = typeof interWebhooks.$inferSelect;
+export type InsertInterCallback = z.infer<typeof insertInterCallbackSchema>;
+export type InterCallback = typeof interCallbacks.$inferSelect;

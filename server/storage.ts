@@ -1,9 +1,13 @@
 import {
   users,
   propostas,
+  propostaLogs,
   gerenteLojas,
   lojas,
   parceiros,
+  interCollections,
+  interWebhooks,
+  interCallbacks,
   type User,
   type InsertUser,
   type Proposta,
@@ -14,9 +18,16 @@ import {
   type Loja,
   type InsertLoja,
   type UpdateLoja,
+  type InterCollection,
+  type InsertInterCollection,
+  type UpdateInterCollection,
+  type InterWebhook,
+  type InsertInterWebhook,
+  type InterCallback,
+  type InsertInterCallback,
 } from "@shared/schema";
 import { db } from "./lib/supabase";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc, and, or } from "drizzle-orm";
 
 export interface IStorage {
   // Users
@@ -33,6 +44,11 @@ export interface IStorage {
   createProposta(proposta: InsertProposta): Promise<Proposta>;
   updateProposta(id: string | number, proposta: UpdateProposta): Promise<Proposta>;
   deleteProposta(id: string | number): Promise<void>;
+  
+  // ClickSign Integration Methods
+  getPropostaByClickSignKey(keyType: 'document' | 'list' | 'signer', key: string): Promise<Proposta | undefined>;
+  getCcbUrl(propostaId: string): Promise<string | null>;
+  createPropostaLog(log: { propostaId: string; autorId: string; statusAnterior?: string; statusNovo: string; observacao?: string }): Promise<any>;
 
   // Lojas
   getLojas(): Promise<Loja[]>;
@@ -48,6 +64,24 @@ export interface IStorage {
   getGerentesForLoja(lojaId: number): Promise<number[]>;
   addGerenteToLoja(relationship: InsertGerenteLojas): Promise<GerenteLojas>;
   removeGerenteFromLoja(gerenteId: number, lojaId: number): Promise<void>;
+
+  // Inter Bank Collections
+  createInterCollection(collection: InsertInterCollection): Promise<InterCollection>;
+  getInterCollectionByProposalId(propostaId: string): Promise<InterCollection | undefined>;
+  getInterCollectionByCodigoSolicitacao(codigoSolicitacao: string): Promise<InterCollection | undefined>;
+  updateInterCollection(codigoSolicitacao: string, updates: UpdateInterCollection): Promise<InterCollection>;
+  getInterCollections(): Promise<InterCollection[]>;
+
+  // Inter Bank Webhooks
+  createInterWebhook(webhook: InsertInterWebhook): Promise<InterWebhook>;
+  getActiveInterWebhook(): Promise<InterWebhook | undefined>;
+  updateInterWebhook(id: number, updates: Partial<InsertInterWebhook>): Promise<InterWebhook>;
+  deleteInterWebhook(id: number): Promise<void>;
+
+  // Inter Bank Callbacks
+  createInterCallback(callback: InsertInterCallback): Promise<InterCallback>;
+  getUnprocessedInterCallbacks(): Promise<InterCallback[]>;
+  markInterCallbackAsProcessed(id: number, erro?: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -461,6 +495,166 @@ export class DatabaseStorage implements IStorage {
         eq(gerenteLojas.gerenteId, gerenteId),
         eq(gerenteLojas.lojaId, lojaId)
       ));
+  }
+
+  // ClickSign Integration Methods Implementation
+  async getPropostaByClickSignKey(keyType: 'document' | 'list' | 'signer', key: string): Promise<Proposta | undefined> {
+    let whereCondition;
+    
+    switch (keyType) {
+      case 'document':
+        whereCondition = eq(propostas.clicksignDocumentKey, key);
+        break;
+      case 'list':
+        whereCondition = eq(propostas.clicksignListKey, key);
+        break;
+      case 'signer':
+        whereCondition = eq(propostas.clicksignSignerKey, key);
+        break;
+      default:
+        throw new Error(`Invalid keyType: ${keyType}`);
+    }
+
+    const result = await db.select().from(propostas).where(whereCondition).limit(1);
+    return result[0];
+  }
+
+  async getCcbUrl(propostaId: string): Promise<string | null> {
+    try {
+      const { createServerSupabaseAdminClient } = await import('./lib/supabase');
+      const supabase = createServerSupabaseAdminClient();
+
+      // Get proposal to find CCB file path
+      const proposta = await this.getPropostaById(propostaId);
+      if (!proposta || !proposta.caminhoCcbAssinado) {
+        console.log(`[CLICKSIGN] No CCB path found for proposal: ${propostaId}`);
+        return null;
+      }
+
+      // Generate signed URL for CCB document
+      const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+        .from('documents')
+        .createSignedUrl(proposta.caminhoCcbAssinado, 3600); // 1 hour expiry
+
+      if (signedUrlError) {
+        console.error(`[CLICKSIGN] Error generating signed URL for CCB:`, signedUrlError);
+        return null;
+      }
+
+      return signedUrlData.signedUrl;
+    } catch (error) {
+      console.error(`[CLICKSIGN] Error getting CCB URL:`, error);
+      return null;
+    }
+  }
+
+  async createPropostaLog(log: { 
+    propostaId: string; 
+    autorId: string; 
+    statusAnterior?: string; 
+    statusNovo: string; 
+    observacao?: string; 
+  }): Promise<any> {
+    const result = await db
+      .insert(propostaLogs)
+      .values({
+        propostaId: log.propostaId,
+        autorId: log.autorId,
+        statusAnterior: log.statusAnterior || null,
+        statusNovo: log.statusNovo,
+        observacao: log.observacao || null
+      })
+      .returning();
+    
+    return result[0];
+  }
+
+  // ====== INTER BANK METHODS ======
+
+  // Inter Bank Collections
+  async createInterCollection(collection: InsertInterCollection): Promise<InterCollection> {
+    const result = await db.insert(interCollections).values(collection).returning();
+    return result[0];
+  }
+
+  async getInterCollectionByProposalId(propostaId: string): Promise<InterCollection | undefined> {
+    const result = await db.select().from(interCollections)
+      .where(and(eq(interCollections.propostaId, propostaId), eq(interCollections.isActive, true)))
+      .limit(1);
+    return result[0];
+  }
+
+  async getInterCollectionByCodigoSolicitacao(codigoSolicitacao: string): Promise<InterCollection | undefined> {
+    const result = await db.select().from(interCollections)
+      .where(eq(interCollections.codigoSolicitacao, codigoSolicitacao))
+      .limit(1);
+    return result[0];
+  }
+
+  async updateInterCollection(codigoSolicitacao: string, updates: UpdateInterCollection): Promise<InterCollection> {
+    const result = await db.update(interCollections)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(interCollections.codigoSolicitacao, codigoSolicitacao))
+      .returning();
+    return result[0];
+  }
+
+  async getInterCollections(): Promise<InterCollection[]> {
+    return await db.select().from(interCollections)
+      .where(eq(interCollections.isActive, true))
+      .orderBy(desc(interCollections.createdAt));
+  }
+
+  // Inter Bank Webhooks
+  async createInterWebhook(webhook: InsertInterWebhook): Promise<InterWebhook> {
+    // Deactivate existing webhooks first
+    await db.update(interWebhooks).set({ isActive: false });
+    
+    const result = await db.insert(interWebhooks).values(webhook).returning();
+    return result[0];
+  }
+
+  async getActiveInterWebhook(): Promise<InterWebhook | undefined> {
+    const result = await db.select().from(interWebhooks)
+      .where(eq(interWebhooks.isActive, true))
+      .limit(1);
+    return result[0];
+  }
+
+  async updateInterWebhook(id: number, updates: Partial<InsertInterWebhook>): Promise<InterWebhook> {
+    const result = await db.update(interWebhooks)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(interWebhooks.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async deleteInterWebhook(id: number): Promise<void> {
+    await db.update(interWebhooks)
+      .set({ isActive: false })
+      .where(eq(interWebhooks.id, id));
+  }
+
+  // Inter Bank Callbacks
+  async createInterCallback(callback: InsertInterCallback): Promise<InterCallback> {
+    const result = await db.insert(interCallbacks).values(callback).returning();
+    return result[0];
+  }
+
+  async getUnprocessedInterCallbacks(): Promise<InterCallback[]> {
+    return await db.select().from(interCallbacks)
+      .where(eq(interCallbacks.processado, false))
+      .orderBy(interCallbacks.createdAt);
+  }
+
+  async markInterCallbackAsProcessed(id: number, erro?: string): Promise<void> {
+    await db.update(interCallbacks)
+      .set({ 
+        processado: true, 
+        processedAt: new Date(),
+        erro: erro || null
+      })
+      .where(eq(interCallbacks.id, id));
   }
 }
 

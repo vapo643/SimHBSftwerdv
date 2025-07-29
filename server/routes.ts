@@ -8,6 +8,8 @@ import { insertPropostaSchema, updatePropostaSchema, insertGerenteLojaSchema, in
 import { z } from "zod";
 import multer from "multer";
 import originationRoutes from "./routes/origination.routes";
+import { clickSignRouter } from "./routes/clicksign.js";
+import { interRoutes } from "./routes/inter.js";
 import { getBrasiliaDate, formatBrazilianDateTime, generateApprovalDate, getBrasiliaTimestamp } from "./lib/timezone";
 
 const upload = multer({ storage: multer.memoryStorage() });
@@ -3146,6 +3148,12 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
 
   // Register origination routes
   app.use('/api/origination', originationRoutes);
+
+  // Register ClickSign routes
+  app.use('/api/clicksign', clickSignRouter);
+
+  // Register Inter Bank routes
+  app.use('/api/inter', interRoutes);
 
   const httpServer = createServer(app);
   return httpServer;
