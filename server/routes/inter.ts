@@ -69,6 +69,41 @@ router.get('/test', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) =>
 });
 
 /**
+ * Debug endpoint to check Inter Bank credentials (temporary)
+ * GET /api/inter/debug-credentials
+ */
+router.get('/debug-credentials', async (req, res) => {
+  try {
+    const credentials = {
+      clientId: process.env.INTER_CLIENT_ID ? '✅ Present (' + process.env.INTER_CLIENT_ID.substring(0, 8) + '...)' : '❌ Missing',
+      clientSecret: process.env.INTER_CLIENT_SECRET ? '✅ Present (' + process.env.INTER_CLIENT_SECRET.substring(0, 8) + '...)' : '❌ Missing',
+      certificate: process.env.INTER_CERTIFICATE ? '✅ Present (' + process.env.INTER_CERTIFICATE.length + ' chars)' : '❌ Missing',
+      privateKey: process.env.INTER_PRIVATE_KEY ? '✅ Present (' + process.env.INTER_PRIVATE_KEY.length + ' chars)' : '❌ Missing',
+      contaCorrente: process.env.INTER_CONTA_CORRENTE ? '✅ Present (' + process.env.INTER_CONTA_CORRENTE + ')' : '❌ Missing',
+      environment: process.env.NODE_ENV === 'production' ? 'production' : 'sandbox',
+      apiUrl: process.env.NODE_ENV === 'production' 
+        ? 'https://cdpj.partners.bancointer.com.br'
+        : 'https://cdpj-sandbox.partners.uatinter.co'
+    };
+
+    // Test connection
+    const isConnected = await interBankService.testConnection();
+
+    res.json({
+      credentials,
+      connectionTest: isConnected,
+      timestamp: getBrasiliaTimestamp()
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      error: 'Failed to check credentials',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+/**
  * Create collection (boleto/PIX) for a proposal
  * POST /api/inter/collections
  */

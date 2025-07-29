@@ -150,20 +150,86 @@ class InterBankService {
 
       console.log('[INTER] 🔑 Requesting new access token...');
 
-      const tokenUrl = `${this.config.apiUrl}/oauth/v2/token`;
+      // Variação 1: Tentar endpoint sem v2
+      const tokenUrl = `${this.config.apiUrl}/oauth/token`;
       const credentials = Buffer.from(`${this.config.clientId}:${this.config.clientSecret}`).toString('base64');
+      
+      console.log(`[INTER] 🌐 Token URL (tentativa 1): ${tokenUrl}`);
+      console.log(`[INTER] 🔐 Using Basic Auth with Client ID: ${this.config.clientId}`);
 
-      const response = await fetch(tokenUrl, {
+      let response = await fetch(tokenUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
-          'Authorization': `Basic ${credentials}`
+          'Authorization': `Basic ${credentials}`,
+          'Accept': 'application/json'
         },
-        body: 'grant_type=client_credentials&scope=boleto-cobranca.read boleto-cobranca.write'
+        body: 'grant_type=client_credentials&scope=boleto-cobranca.read%20boleto-cobranca.write'
       });
+
+      console.log(`[INTER] 📡 Response status (tentativa 1): ${response.status}`);
+
+      // Se falhar, tentar endpoint com v2
+      if (!response.ok) {
+        console.log(`[INTER] ⚠️ Tentativa 1 falhou, tentando endpoint v2...`);
+        
+        const tokenUrlV2 = `${this.config.apiUrl}/oauth/v2/token`;
+        console.log(`[INTER] 🌐 Token URL (tentativa 2): ${tokenUrlV2}`);
+        
+        response = await fetch(tokenUrlV2, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Authorization': `Basic ${credentials}`,
+            'Accept': 'application/json'
+          },
+          body: 'grant_type=client_credentials&scope=boleto-cobranca.read%20boleto-cobranca.write'
+        });
+        
+        console.log(`[INTER] 📡 Response status (tentativa 2): ${response.status}`);
+      }
+
+      // Se ainda falhar, tentar formato form diferente
+      if (!response.ok) {
+        console.log(`[INTER] ⚠️ Tentativa 2 falhou, tentando formato form diferente...`);
+        
+        const tokenUrlV2 = `${this.config.apiUrl}/oauth/v2/token`;
+        const formBody = new URLSearchParams({
+          'grant_type': 'client_credentials',
+          'scope': 'boleto-cobranca.read boleto-cobranca.write'
+        });
+        
+        console.log(`[INTER] 🌐 Token URL (tentativa 3): ${tokenUrlV2}`);
+        console.log(`[INTER] 📝 Form body: ${formBody.toString()}`);
+        
+        response = await fetch(tokenUrlV2, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Authorization': `Basic ${credentials}`,
+            'Accept': 'application/json'
+          },
+          body: formBody.toString()
+        });
+        
+        console.log(`[INTER] 📡 Response status (tentativa 3): ${response.status}`);
+      }
+
+      console.log(`[INTER] 📡 Response status: ${response.status}`);
+      console.log(`[INTER] 📡 Response headers:`, Object.fromEntries(response.headers.entries()));
 
       if (!response.ok) {
         const errorText = await response.text();
+        console.log(`[INTER] ❌ Error response body: ${errorText}`);
+        
+        // Tentar parse JSON do erro
+        try {
+          const errorJson = JSON.parse(errorText);
+          console.log(`[INTER] ❌ Parsed error JSON:`, errorJson);
+        } catch (e) {
+          console.log(`[INTER] ❌ Error response is not JSON`);
+        }
+        
         throw new Error(`Token request failed: ${response.status} - ${errorText}`);
       }
 
@@ -240,6 +306,16 @@ class InterBankService {
    */
   async testConnection(): Promise<boolean> {
     try {
+      console.log('[INTER] 🔍 Testing connection...');
+      console.log('[INTER] 📋 Configuration check:');
+      console.log(`[INTER]   - Environment: ${this.config.environment}`);
+      console.log(`[INTER]   - API URL: ${this.config.apiUrl}`);
+      console.log(`[INTER]   - Client ID: ${this.config.clientId ? '✅ Present (' + this.config.clientId.substring(0, 8) + '...)' : '❌ Missing'}`);
+      console.log(`[INTER]   - Client Secret: ${this.config.clientSecret ? '✅ Present (' + this.config.clientSecret.substring(0, 8) + '...)' : '❌ Missing'}`);
+      console.log(`[INTER]   - Certificate: ${this.config.certificate ? '✅ Present (' + this.config.certificate.length + ' chars)' : '❌ Missing'}`);
+      console.log(`[INTER]   - Private Key: ${this.config.privateKey ? '✅ Present (' + this.config.privateKey.length + ' chars)' : '❌ Missing'}`);
+      console.log(`[INTER]   - Conta Corrente: ${this.config.contaCorrente ? '✅ Present (' + this.config.contaCorrente + ')' : '❌ Missing'}`);
+
       if (!this.config.clientId || !this.config.clientSecret) {
         console.log('[INTER] ❌ No client credentials configured');
         return false;
