@@ -183,11 +183,11 @@ function FormalizacaoList() {
       <DashboardLayout title="Formalização">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {[...Array(6)].map((_, index) => (
-            <Card key={index} className="animate-pulse">
+            <Card key={index} className="animate-pulse bg-gray-800 border-gray-700">
               <CardContent className="p-6">
-                <div className="mb-4 h-6 rounded bg-gray-200"></div>
-                <div className="mb-2 h-4 rounded bg-gray-200"></div>
-                <div className="h-4 w-3/4 rounded bg-gray-200"></div>
+                <div className="mb-4 h-6 rounded bg-gray-700"></div>
+                <div className="mb-2 h-4 rounded bg-gray-700"></div>
+                <div className="h-4 w-3/4 rounded bg-gray-700"></div>
               </CardContent>
             </Card>
           ))}
@@ -237,12 +237,12 @@ function FormalizacaoList() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">{getTitle()}</h1>
-            <p className="text-gray-600">
+            <h1 className="text-2xl font-bold text-white dark:text-white">{getTitle()}</h1>
+            <p className="text-gray-400 dark:text-gray-400">
               {getDescription()}
             </p>
             {user?.role === 'ATENDENTE' && (
-              <div className="mt-2 flex items-center gap-2 text-sm text-blue-600">
+              <div className="mt-2 flex items-center gap-2 text-sm text-blue-400">
                 <Shield className="h-4 w-4" />
                 <span>Visualização do Atendente - Ações Pendentes</span>
               </div>
@@ -250,8 +250,8 @@ function FormalizacaoList() {
           </div>
           <div className="flex items-center gap-4">
             <div className="text-right">
-              <p className="text-sm text-gray-600">Total em Formalização</p>
-              <p className="text-2xl font-bold text-blue-600">{filteredPropostas.length}</p>
+              <p className="text-sm text-gray-400">Total em Formalização</p>
+              <p className="text-2xl font-bold text-blue-400">{filteredPropostas.length}</p>
             </div>
           </div>
         </div>
@@ -268,13 +268,13 @@ function FormalizacaoList() {
           ].map(item => {
             const count = filteredPropostas.filter(p => p.status === item.status).length;
             return (
-              <Card key={item.status}>
+              <Card key={item.status} className="bg-gray-800 border-gray-700">
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div className={`h-3 w-3 rounded-full ${item.color}`}></div>
-                    <span className="text-2xl font-bold">{count}</span>
+                    <span className="text-2xl font-bold text-white">{count}</span>
                   </div>
-                  <p className="mt-1 text-sm text-gray-600">{item.label}</p>
+                  <p className="mt-1 text-sm text-gray-400">{item.label}</p>
                 </CardContent>
               </Card>
             );
@@ -284,10 +284,10 @@ function FormalizacaoList() {
         {/* Propostas List */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {filteredPropostas.map(proposta => (
-            <Card key={proposta.id} className="cursor-pointer transition-shadow hover:shadow-lg">
+            <Card key={proposta.id} className="cursor-pointer transition-shadow hover:shadow-lg bg-gray-800 border-gray-700">
               <CardContent className="p-6">
                 <div className="mb-4 flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-gray-900">#{proposta.id}</h3>
+                  <h3 className="text-lg font-semibold text-white">#{proposta.id}</h3>
                   <Badge className={`${getStatusColor(proposta.status)} text-white`}>
                     {getStatusText(proposta.status)}
                   </Badge>
@@ -295,22 +295,22 @@ function FormalizacaoList() {
 
                 <div className="space-y-3">
                   <div>
-                    <p className="text-sm text-gray-600">Cliente</p>
-                    <p className="font-medium text-gray-900">
+                    <p className="text-sm text-gray-400">Cliente</p>
+                    <p className="font-medium text-white">
                       {parseJsonbField(proposta.cliente_data, 'cliente_data', proposta.id)?.nome || 'Nome não informado'}
                     </p>
                   </div>
 
                   <div>
-                    <p className="text-sm text-gray-600">Valor Aprovado</p>
-                    <p className="font-bold text-green-600">
+                    <p className="text-sm text-gray-400">Valor Aprovado</p>
+                    <p className="font-bold text-green-400">
                       {formatCurrency(parseJsonbField(proposta.condicoes_data, 'condicoes_data', proposta.id)?.valor || 0)}
                     </p>
                   </div>
 
                   <div>
-                    <p className="text-sm text-gray-600">Data da Aprovação</p>
-                    <p className="text-gray-900">
+                    <p className="text-sm text-gray-400">Data da Aprovação</p>
+                    <p className="text-white">
                       {formatDate(proposta.data_aprovacao || proposta.created_at)}
                     </p>
                   </div>
@@ -543,11 +543,11 @@ export default function Formalizacao() {
       <DashboardLayout title="Acompanhamento da Formalização">
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           {[...Array(6)].map((_, index) => (
-            <Card key={index} className="animate-pulse">
+            <Card key={index} className="animate-pulse bg-gray-800 border-gray-700">
               <CardContent className="p-6">
-                <div className="mb-4 h-32 rounded bg-gray-200"></div>
-                <div className="mb-2 h-4 rounded bg-gray-200"></div>
-                <div className="h-4 w-3/4 rounded bg-gray-200"></div>
+                <div className="mb-4 h-32 rounded bg-gray-700"></div>
+                <div className="mb-2 h-4 rounded bg-gray-700"></div>
+                <div className="h-4 w-3/4 rounded bg-gray-700"></div>
               </CardContent>
             </Card>
           ))}
