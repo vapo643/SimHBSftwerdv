@@ -623,6 +623,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Debug: Testar PDF simples e limpo
+  app.get("/api/debug/test-pdf", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+    try {
+      const PDFDocument = (await import('pdfkit')).default;
+      
+      // Criar PDF extremamente simples
+      const doc = new PDFDocument({
+        margin: 50,
+        size: 'A4',
+        info: {
+          Title: 'Teste PDF Simples',
+          Author: 'Sistema Teste',
+          Subject: 'PDF de Teste',
+          Creator: 'Sistema Simpix',
+          Producer: 'PDFKit'
+        }
+      });
+      
+      const chunks: Buffer[] = [];
+      doc.on('data', chunk => chunks.push(chunk));
+      
+      // Conteúdo mínimo
+      doc.fontSize(16).text('DOCUMENTO DE TESTE');
+      doc.moveDown();
+      doc.fontSize(12).text('Este é um PDF de teste gerado pelo sistema.');
+      doc.text('Data: ' + new Date().toLocaleDateString('pt-BR'));
+      
+      doc.end();
+      
+      const pdfBuffer = await new Promise<Buffer>((resolve) => {
+        doc.on('end', () => resolve(Buffer.concat(chunks)));
+      });
+      
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', 'attachment; filename="teste-simples.pdf"');
+      res.send(pdfBuffer);
+      
+    } catch (error) {
+      console.error('Erro ao criar PDF teste:', error);
+      res.status(500).json({ error: 'Erro ao criar PDF teste' });
+    }
+  });
+
   // Debug: Listar arquivos no bucket documents
   app.get("/api/debug/storage-files", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     try {
