@@ -121,7 +121,12 @@ function FormalizacaoList() {
 
   // Função para parsing defensivo de dados JSONB
   const parseJsonbField = (field: any, fieldName: string, propostaId: string) => {
-    if (typeof field === 'string') {
+    // Se é null, undefined ou vazio, retornar objeto vazio
+    if (!field || field === 'null' || field === 'undefined') {
+      return {};
+    }
+    
+    if (typeof field === 'string' && field.trim() !== '') {
       try {
         return JSON.parse(field);
       } catch (e) {
@@ -129,7 +134,13 @@ function FormalizacaoList() {
         return {};
       }
     }
-    return field || {};
+    
+    // Se já é um objeto, retornar como está
+    if (typeof field === 'object') {
+      return field || {};
+    }
+    
+    return {};
   };
 
   const { data: propostas, isLoading, error } = useQuery<Proposta[]>({

@@ -1652,44 +1652,23 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
       const { eq } = await import("drizzle-orm");
       const { propostas, lojas, parceiros, produtos } = await import("../shared/schema");
 
-      // Get proposal with related data
+      // Usar abordagem mais simples sem joins complexos
       const proposta = await db
-        .select({
-          id: propostas.id,
-          status: propostas.status,
-          clienteData: propostas.clienteData,
-          condicoesData: propostas.condicoesData,
-          dataAprovacao: propostas.dataAprovacao,
-          documentosAdicionais: propostas.documentosAdicionais,
-          contratoGerado: propostas.contratoGerado,
-          contratoAssinado: propostas.contratoAssinado,
-          dataAssinatura: propostas.dataAssinatura,
-          dataPagamento: propostas.dataPagamento,
-          observacoesFormalização: propostas.observacoesFormalização,
-          // Novos campos de formalização
-          ccbGerado: propostas.ccbGerado,
-          assinaturaEletronicaConcluida: propostas.assinaturaEletronicaConcluida,
-          biometriaConcluida: propostas.biometriaConcluida,
-          caminhoCcbAssinado: propostas.caminhoCcbAssinado,
-          createdAt: propostas.createdAt,
-          updatedAt: propostas.updatedAt,
-          lojaId: propostas.lojaId,
-          lojaNome: lojas.nomeLoja,
-          parceiroRazaoSocial: parceiros.razaoSocial,
-          produtoNome: produtos.nomeProduto,
-        })
+        .select()
         .from(propostas)
-        .leftJoin(lojas, eq(propostas.lojaId, lojas.id))
-        .leftJoin(parceiros, eq(lojas.parceiroId, parceiros.id))
-        .leftJoin(produtos, eq(propostas.produtoId, produtos.id))
         .where(eq(propostas.id, propostaId))
         .limit(1);
 
       if (!proposta || proposta.length === 0) {
+        console.log(`[${new Date().toISOString()}] Proposta ${propostaId} não encontrada no banco`);
         return res.status(404).json({ message: "Proposta não encontrada" });
       }
 
-      console.log(`[${new Date().toISOString()}] Dados de formalização retornados para proposta ${propostaId}`);
+      console.log(`[${new Date().toISOString()}] Dados de formalização retornados para proposta ${propostaId}:`, {
+        id: proposta[0].id,
+        status: proposta[0].status,
+        ccbGerado: proposta[0].ccbGerado
+      });
       res.json(proposta[0]);
     } catch (error) {
       console.error("Erro ao buscar dados de formalização:", error);
