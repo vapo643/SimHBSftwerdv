@@ -104,6 +104,78 @@ router.get('/debug-credentials', async (req, res) => {
 });
 
 /**
+ * Debug endpoint to check certificate format
+ * GET /api/inter/debug-certificate-format
+ */
+router.get('/debug-certificate-format', async (req, res) => {
+  console.log('[INTER] 🔍 Debug certificate format endpoint called');
+  try {
+    const cert = process.env.INTER_CERTIFICATE || '';
+    const key = process.env.INTER_PRIVATE_KEY || '';
+    
+    // Check certificate format
+    const certInfo = {
+      length: cert.length,
+      first100Chars: cert.substring(0, 100),
+      last50Chars: cert.substring(cert.length - 50),
+      hasBeginCert: cert.includes('-----BEGIN CERTIFICATE-----'),
+      hasEndCert: cert.includes('-----END CERTIFICATE-----'),
+      hasBeginTag: cert.includes('-----BEGIN'),
+      hasNewlines: cert.includes('\n'),
+      isBase64: /^[A-Za-z0-9+/=]+$/.test(cert.replace(/\s/g, ''))
+    };
+    
+    // Check key format
+    const keyInfo = {
+      length: key.length,
+      first100Chars: key.substring(0, 100),
+      last50Chars: key.substring(key.length - 50),
+      hasBeginKey: key.includes('-----BEGIN') && key.includes('PRIVATE KEY'),
+      hasEndKey: key.includes('-----END') && key.includes('PRIVATE KEY'),
+      hasBeginTag: key.includes('-----BEGIN'),
+      hasNewlines: key.includes('\n'),
+      isBase64: /^[A-Za-z0-9+/=]+$/.test(key.replace(/\s/g, ''))
+    };
+    
+    // Try to decode from base64 to see what's inside
+    let decodedCertPreview = '';
+    let decodedKeyPreview = '';
+    
+    try {
+      if (certInfo.isBase64 && !certInfo.hasBeginTag) {
+        const decoded = Buffer.from(cert, 'base64').toString('utf-8');
+        decodedCertPreview = decoded.substring(0, 200);
+      }
+    } catch (e) {
+      decodedCertPreview = 'Failed to decode certificate from base64';
+    }
+    
+    try {
+      if (keyInfo.isBase64 && !keyInfo.hasBeginTag) {
+        const decoded = Buffer.from(key, 'base64').toString('utf-8');
+        decodedKeyPreview = decoded.substring(0, 200);
+      }
+    } catch (e) {
+      decodedKeyPreview = 'Failed to decode key from base64';
+    }
+    
+    res.json({
+      certificate: certInfo,
+      privateKey: keyInfo,
+      decodedCertPreview,
+      decodedKeyPreview,
+      timestamp: getBrasiliaTimestamp()
+    });
+  } catch (error) {
+    console.error('[INTER] Debug certificate format error:', error);
+    res.status(500).json({ 
+      error: 'Failed to check certificate format', 
+      details: (error as Error).message 
+    });
+  }
+});
+
+/**
  * Create collection (boleto/PIX) for a proposal
  * POST /api/inter/collections
  */

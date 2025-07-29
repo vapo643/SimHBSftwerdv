@@ -14,6 +14,8 @@
  * API Version: v3
  */
 
+import https from 'https';
+
 interface InterBankConfig {
   apiUrl: string;
   clientId: string;
@@ -150,69 +152,183 @@ class InterBankService {
 
       console.log('[INTER] 🔑 Requesting new access token...');
 
-      // Variação 1: Tentar endpoint sem v2
-      const tokenUrl = `${this.config.apiUrl}/oauth/token`;
-      const credentials = Buffer.from(`${this.config.clientId}:${this.config.clientSecret}`).toString('base64');
+      const tokenUrl = new URL(`${this.config.apiUrl}/oauth/v2/token`);
       
-      console.log(`[INTER] 🌐 Token URL (tentativa 1): ${tokenUrl}`);
-      console.log(`[INTER] 🔐 Using Basic Auth with Client ID: ${this.config.clientId}`);
+      console.log(`[INTER] 🌐 Token URL: ${tokenUrl.href}`);
+      console.log(`[INTER] 📄 Using form-based authentication per official docs`);
+      console.log(`[INTER] 🔓 Certificate configured: ${this.config.certificate ? '✅ Present' : '❌ Missing'}`);
+      console.log(`[INTER] 🔑 Private Key configured: ${this.config.privateKey ? '✅ Present' : '❌ Missing'}`);
 
-      let response = await fetch(tokenUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'Authorization': `Basic ${credentials}`,
-          'Accept': 'application/json'
-        },
-        body: 'grant_type=client_credentials&scope=boleto-cobranca.read%20boleto-cobranca.write'
+      // Follow official Inter Bank documentation format
+      // client_id and client_secret are REQUIRED per official docs
+      const formBody = new URLSearchParams({
+        'client_id': this.config.clientId,
+        'client_secret': this.config.clientSecret,
+        'grant_type': 'client_credentials',
+        'scope': 'cobv.write cobv.read' // Required scope for boleto/cobrança
       });
+      
+      console.log(`[INTER] 📝 Form parameters: client_id=${this.config.clientId.substring(0, 8)}..., grant_type=client_credentials, scope=cobv.write cobv.read`);
 
-      console.log(`[INTER] 📡 Response status (tentativa 1): ${response.status}`);
+      console.log(`[INTER] 📝 Form body: ${formBody.toString()}`);
+      console.log(`[INTER] 🔒 Using mTLS certificate authentication`);
 
-      // Se falhar, tentar endpoint com v2
-      if (!response.ok) {
-        console.log(`[INTER] ⚠️ Tentativa 1 falhou, tentando endpoint v2...`);
-        
-        const tokenUrlV2 = `${this.config.apiUrl}/oauth/v2/token`;
-        console.log(`[INTER] 🌐 Token URL (tentativa 2): ${tokenUrlV2}`);
-        
-        response = await fetch(tokenUrlV2, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'Authorization': `Basic ${credentials}`,
-            'Accept': 'application/json'
-          },
-          body: 'grant_type=client_credentials&scope=boleto-cobranca.read%20boleto-cobranca.write'
-        });
-        
-        console.log(`[INTER] 📡 Response status (tentativa 2): ${response.status}`);
+      // Prepare certificate and key in proper PEM format
+      let cert = this.config.certificate;
+      let key = this.config.privateKey;
+
+      // CRITICAL FIX: Add line breaks to PEM format certificates
+      // The certificates are valid PEM but in single line format
+      // Node.js requires proper line breaks in PEM format
+      
+      console.log('[INTER] 🔄 Formatting certificates with proper line breaks...');
+
+      // Fix certificate: Add line breaks after headers and every 64 characters
+      if (cert.includes('-----BEGIN CERTIFICATE-----') && !cert.includes('\n')) {
+        console.log('[INTER] 📋 Certificate is single-line PEM, adding line breaks...');
+        // Extract the base64 content between headers
+        const certMatch = cert.match(/-----BEGIN CERTIFICATE-----(.*?)-----END CERTIFICATE-----/);
+        if (certMatch && certMatch[1]) {
+          const base64Content = certMatch[1].trim();
+          // Add line breaks every 64 characters
+          const formattedContent = base64Content.match(/.{1,64}/g)?.join('\n') || base64Content;
+          cert = `-----BEGIN CERTIFICATE-----\n${formattedContent}\n-----END CERTIFICATE-----`;
+          console.log('[INTER] ✅ Certificate formatted with line breaks');
+        }
       }
 
-      // Se ainda falhar, tentar formato form diferente
-      if (!response.ok) {
-        console.log(`[INTER] ⚠️ Tentativa 2 falhou, tentando formato form diferente...`);
-        
-        const tokenUrlV2 = `${this.config.apiUrl}/oauth/v2/token`;
-        const formBody = new URLSearchParams({
-          'grant_type': 'client_credentials',
-          'scope': 'boleto-cobranca.read boleto-cobranca.write'
-        });
-        
-        console.log(`[INTER] 🌐 Token URL (tentativa 3): ${tokenUrlV2}`);
-        console.log(`[INTER] 📝 Form body: ${formBody.toString()}`);
-        
-        response = await fetch(tokenUrlV2, {
+      // Fix private key: Add line breaks after headers and every 64 characters
+      if (key.includes('-----BEGIN') && key.includes('KEY-----') && !key.includes('\n')) {
+        console.log('[INTER] 🔑 Private key is single-line PEM, adding line breaks...');
+        // Extract the base64 content between headers (works for both RSA and regular private keys)
+        const keyMatch = key.match(/-----BEGIN (.+?)-----(.*?)-----END (.+?)-----/);
+        if (keyMatch && keyMatch[2]) {
+          const keyType = keyMatch[1];
+          const base64Content = keyMatch[2].trim();
+          // Add line breaks every 64 characters
+          const formattedContent = base64Content.match(/.{1,64}/g)?.join('\n') || base64Content;
+          key = `-----BEGIN ${keyType}-----\n${formattedContent}\n-----END ${keyType}-----`;
+          console.log('[INTER] ✅ Private key formatted with line breaks');
+        }
+      }
+
+      console.log('[INTER] 🔐 Certificate final preview:', cert.substring(0, 80) + '...');
+      console.log('[INTER] 🔑 Private key final preview:', key.substring(0, 80) + '...');
+
+      // SANDBOX ONLY: Try alternative approach
+      if (this.config.environment === 'sandbox') {
+        console.log('[INTER] ⚠️ SANDBOX MODE: Using alternative HTTPS configuration');
+      }
+
+      // Create HTTPS agent with specific configuration
+      const httpsAgent = new https.Agent({
+        cert: cert,
+        key: key,
+        rejectUnauthorized: false,
+        requestCert: true,
+        keepAlive: false,
+        ciphers: 'ALL', // Allow all ciphers
+        secureProtocol: 'TLS_method' // Use automatic TLS version
+      });
+
+      console.log('[INTER] 🚀 Making mTLS request with custom agent...');
+
+      // Try using node fetch with custom agent
+      try {
+        const fetchResponse = await fetch(tokenUrl.toString(), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
-            'Authorization': `Basic ${credentials}`,
             'Accept': 'application/json'
+            // No Authorization header - credentials sent as form parameters per Inter docs
           },
-          body: formBody.toString()
+          body: formBody.toString(),
+          // @ts-ignore - agent is supported but not in types
+          agent: httpsAgent
         });
+
+        console.log(`[INTER] 📡 Response status: ${fetchResponse.status}`);
+        console.log(`[INTER] 📡 Response headers:`, fetchResponse.headers);
+
+        const response = {
+          ok: fetchResponse.ok,
+          status: fetchResponse.status,
+          headers: fetchResponse.headers,
+          text: async () => await fetchResponse.text(),
+          json: async () => await fetchResponse.json()
+        };
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.log(`[INTER] ❌ Error response body: ${errorText}`);
+          
+          // Try to parse error details
+          if (fetchResponse.status === 400) {
+            console.log('[INTER] 🔍 Bad Request - possible causes:');
+            console.log('[INTER]   - Invalid grant_type or scope');
+            console.log('[INTER]   - Invalid client credentials');
+            console.log('[INTER]   - Missing required parameters');
+            console.log('[INTER]   - Response headers:', Object.fromEntries(fetchResponse.headers.entries()));
+          }
+        }
+
+        return response;
+      } catch (fetchError) {
+        console.error(`[INTER] ❌ Fetch error: ${fetchError.message}`);
         
-        console.log(`[INTER] 📡 Response status (tentativa 3): ${response.status}`);
+        // Fallback to raw HTTPS request
+        console.log('[INTER] 🔄 Falling back to raw HTTPS request...');
+        
+        const response = await new Promise<any>((resolve, reject) => {
+          const options = {
+            hostname: tokenUrl.hostname,
+            port: tokenUrl.port || 443,
+            path: tokenUrl.pathname,
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+              'Accept': 'application/json',
+              'Content-Length': Buffer.byteLength(formBody.toString())
+              // No Authorization header - credentials sent as form parameters per Inter docs
+            },
+            cert: cert,
+            key: key,
+            rejectUnauthorized: false,
+            requestCert: true,
+            ciphers: 'ALL',
+            secureProtocol: 'TLS_method'
+          };
+
+          const req = https.request(options, (res) => {
+            let data = '';
+            res.on('data', (chunk) => { data += chunk; });
+            res.on('end', () => {
+              resolve({
+                ok: res.statusCode && res.statusCode >= 200 && res.statusCode < 300,
+                status: res.statusCode,
+                headers: res.headers,
+                text: async () => data,
+                json: async () => {
+                  try {
+                    return JSON.parse(data);
+                  } catch (e) {
+                    throw new Error('Invalid JSON response');
+                  }
+                }
+              });
+            });
+          });
+
+          req.on('error', (e) => {
+            console.error(`[INTER] ❌ Request error: ${e.message}`);
+            reject(e);
+          });
+
+          req.write(formBody.toString());
+          req.end();
+        });
+
+        return response;
       }
 
       console.log(`[INTER] 📡 Response status: ${response.status}`);
@@ -626,6 +742,7 @@ class InterBankService {
         pagador: {
           nome: proposalData.clienteData.nome,
           cpfCnpj: proposalData.clienteData.cpf.replace(/\D/g, ''), // Remove formatting
+          tipoPessoa: proposalData.clienteData.cpf.replace(/\D/g, '').length <= 11 ? 'FISICA' : 'JURIDICA',
           email: proposalData.clienteData.email,
           telefone: proposalData.clienteData.telefone || '',
           endereco: proposalData.clienteData.endereco,
