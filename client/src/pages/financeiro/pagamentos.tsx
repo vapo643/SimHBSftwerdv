@@ -13,7 +13,7 @@ import { Card, CardContent } from "@/components/ui/card";
 
 const mockData = [
   {
-    id: "PROP-098",
+    id: "1753800001234",
     data: "2025-07-17",
     cliente: "Empresa A",
     valor: "R$ 1.500,00",
@@ -21,7 +21,7 @@ const mockData = [
     status: "Pronto para Pagamento",
   },
   {
-    id: "PROP-101",
+    id: "1753800005678",
     data: "2025-07-16",
     cliente: "Empresa B",
     valor: "R$ 12.000,00",
@@ -29,7 +29,7 @@ const mockData = [
     status: "Aprovado",
   },
   {
-    id: "PROP-105",
+    id: "1753800009012",
     data: "2025-07-15",
     cliente: "Empresa C",
     valor: "R$ 8.250,00",

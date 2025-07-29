@@ -82,6 +82,8 @@ This is a full-stack TypeScript application for credit management called "Simpix
 
 ### January 2025
 
+- **ID Format Simplified (January 29)**: Changed proposal ID format from "PROP-1753476064646-PRM20HF" to numeric-only format using timestamp (e.g., "1753476064646") for cleaner identification and better user experience
+- **System-Wide ID Update**: Updated proposal creation logic, tests, and all references to use new numeric ID format across the entire application
 - **CCB Template System Architecture Prepared (January 29)**: Transitioned from problematic generated PDFs to user-controlled template system for professional document creation
 - **Critical Bug Fix - updated_at Field Error**: Resolved PGRST204 error preventing CCB generation by removing non-existent updated_at field from propostas table updates
 - **CCB Generator Workflow Restored**: Fixed automatic CCB generation trigger when proposals are approved, with successful file storage in Supabase Storage bucket

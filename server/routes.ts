@@ -1032,8 +1032,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
 
 
-      // Generate unique ID for the proposal
-      const proposalId = `PROP-${Date.now()}-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
+      // Generate unique numeric ID for the proposal
+      const proposalId = Date.now().toString();
       
       // Add the generated ID and userId to the request body
       const dataWithId = {
@@ -2451,9 +2451,9 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
   // Rota para fila de formalização
   app.get("/api/formalizacao/propostas", (req, res) => {
     const mockPropostas = [
-      { id: "PROP-098", cliente: "Empresa A", status: "Assinatura Pendente" },
-      { id: "PROP-101", cliente: "Empresa B", status: "Biometria Concluída" },
-      { id: "PROP-105", cliente: "Empresa C", status: "CCB Gerada" },
+      { id: "1753800001234", cliente: "Empresa A", status: "Assinatura Pendente" },
+      { id: "1753800005678", cliente: "Empresa B", status: "Biometria Concluída" },
+      { id: "1753800009012", cliente: "Empresa C", status: "CCB Gerada" },
     ];
     res.json(mockPropostas);
   });

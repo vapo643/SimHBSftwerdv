@@ -139,7 +139,7 @@ describe('Propostas API', () => {
       
       expect(response.status).toBe(201);
       expect(response.body).toMatchObject({
-        id: expect.stringMatching(/^PROP-\d+-[A-Z0-9]+$/),
+        id: expect.stringMatching(/^\d+$/),
         status: 'rascunho',
         clienteData: expect.objectContaining({
           nome: 'João Silva',
