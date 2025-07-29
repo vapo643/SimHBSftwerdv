@@ -875,8 +875,7 @@ export async function generateCCB(propostaId: string): Promise<string> {
             .from('propostas')
             .update({
               ccb_gerado: true,
-              caminho_ccb_assinado: filePath,
-              updated_at: getBrasiliaDate().toISOString()
+              caminho_ccb_assinado: filePath
             })
             .eq('id', propostaId);
           

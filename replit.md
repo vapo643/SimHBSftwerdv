@@ -82,6 +82,11 @@ This is a full-stack TypeScript application for credit management called "Simpix
 
 ### January 2025
 
+- **CCB Template System Architecture Prepared (January 29)**: Transitioned from problematic generated PDFs to user-controlled template system for professional document creation
+- **Critical Bug Fix - updated_at Field Error**: Resolved PGRST204 error preventing CCB generation by removing non-existent updated_at field from propostas table updates
+- **CCB Generator Workflow Restored**: Fixed automatic CCB generation trigger when proposals are approved, with successful file storage in Supabase Storage bucket
+- **Template-Based Approach Implementation**: Created ccbTemplateGenerator.ts infrastructure to accept user-provided PDF templates with field placeholders for professional document generation
+- **User-Controlled Layout Strategy**: User will create complete 9-page PDF template with perfect layout, agent will implement automatic field filling to eliminate text overlapping and positioning issues
 - **100% Backend Timezone Synchronization Completed (January 29)**: Achieved complete conversion of all `new Date()` instances in server/routes.ts to use Brasília timezone functions (`getBrasiliaDate()` and `getBrasiliaTimestamp()`)
 - **Complete System Timezone Consistency**: All audit logs, health checks, debug endpoints, console outputs, API responses, CCB generation, proposal approvals, and credit simulations now use America/Sao_Paulo timezone uniformly
 - **Enhanced Financial Reliability**: Total elimination of timezone inconsistencies ensures accurate date calculations for carência periods, payment schedules, and regulatory compliance with Brazilian financial operations
@@ -334,6 +339,7 @@ This is a full-stack TypeScript application for credit management called "Simpix
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+CCB Generation: User prefers to create complete PDF template with perfect layout rather than agent-generated formatting to ensure professional results without text overlapping.
 
 ## System Architecture
 
