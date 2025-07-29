@@ -328,6 +328,9 @@ export async function generateCCB(propostaId: string): Promise<string> {
     const fileName = `CCB-${propostaId}-${Date.now()}.pdf`;
     const filePath = `ccb/${fileName}`;
     
+    console.log(`🔄 [CCB Generator] Fazendo upload para bucket 'documents', caminho: ${filePath}`);
+    console.log(`🔄 [CCB Generator] Tamanho do buffer: ${pdfBuffer.length} bytes`);
+    
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('documents')
       .upload(filePath, pdfBuffer, {
@@ -336,8 +339,14 @@ export async function generateCCB(propostaId: string): Promise<string> {
       });
     
     if (uploadError) {
+      console.error(`❌ [CCB Generator] Erro no upload: ${uploadError.message}`);
+      console.error(`❌ [CCB Generator] Detalhes do erro:`, uploadError);
       throw new Error(`Erro ao fazer upload da CCB: ${uploadError.message}`);
     }
+    
+    console.log(`✅ [CCB Generator] Upload realizado com sucesso:`, uploadData);
+    console.log(`✅ [CCB Generator] Path final no storage: ${uploadData?.path}`);
+    console.log(`✅ [CCB Generator] Full path no storage: ${uploadData?.fullPath}`);
     
     // 5. Gerar URL assinada para acesso ao documento
     const { data: signedUrlData } = await supabase.storage

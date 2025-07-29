@@ -623,6 +623,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Debug: Listar arquivos no bucket documents
+  app.get("/api/debug/storage-files", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { createServerSupabaseAdminClient } = await import('./lib/supabase');
+      const supabase = createServerSupabaseAdminClient();
+      
+      const { data: files, error } = await supabase.storage
+        .from('documents')
+        .list('ccb', {
+          limit: 50,
+          sortBy: { column: 'created_at', order: 'desc' }
+        });
+      
+      if (error) {
+        console.error('Erro ao listar arquivos:', error);
+        return res.status(500).json({ error: error.message });
+      }
+      
+      res.json({ 
+        bucket: 'documents',
+        folder: 'ccb',
+        files: files || [],
+        count: files?.length || 0
+      });
+    } catch (error) {
+      console.error('Erro debug storage:', error);
+      res.status(500).json({ error: 'Erro interno' });
+    }
+  });
+
   // Get CCB signed URL
   app.get("/api/propostas/:id/ccb-url", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     try {

@@ -28,15 +28,46 @@ interface DocumentViewerProps {
 
 export function DocumentViewer({ propostaId, documents, ccbDocumentoUrl }: DocumentViewerProps) {
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
+  const [ccbRealUrl, setCcbRealUrl] = useState<string | null>(null);
+  const [ccbLoading, setCcbLoading] = useState(false);
+
+  // Fetch real CCB URL if we have a CCB endpoint URL
+  useEffect(() => {
+    const fetchCcbUrl = async () => {
+      if (ccbDocumentoUrl && ccbDocumentoUrl.startsWith('/api/propostas/')) {
+        setCcbLoading(true);
+        try {
+          const { api } = await import('@/lib/apiClient');
+          const response = await api.get(ccbDocumentoUrl);
+          setCcbRealUrl(response.url);
+        } catch (error) {
+          console.error('Erro ao buscar URL da CCB:', error);
+          setCcbRealUrl(null);
+        } finally {
+          setCcbLoading(false);
+        }
+      } else if (ccbDocumentoUrl) {
+        setCcbRealUrl(ccbDocumentoUrl);
+      }
+    };
+
+    fetchCcbUrl();
+  }, [ccbDocumentoUrl]);
 
   // Prepare all documents list including CCB
   const allDocuments: Document[] = [
     ...documents,
-    ...(ccbDocumentoUrl ? [{
+    ...(ccbRealUrl ? [{
       name: "CCB - Cédula de Crédito Bancário",
-      url: ccbDocumentoUrl,
+      url: ccbRealUrl,
       type: "application/pdf",
       uploadDate: "Sistema"
+    }] : []),
+    ...(ccbLoading ? [{
+      name: "CCB - Cédula de Crédito Bancário",
+      url: "#loading",
+      type: "application/pdf",
+      uploadDate: "Carregando..."
     }] : [])
   ];
 
