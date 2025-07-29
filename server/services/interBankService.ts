@@ -32,9 +32,11 @@ interface InterTokenResponse {
 }
 
 interface ClientData {
-  nome: string;
   cpfCnpj: string;
-  email: string;
+  tipoPessoa: 'FISICA' | 'JURIDICA';
+  nome: string;
+  email?: string;
+  ddd?: string;
   telefone?: string;
   endereco: string;
   numero: string;
@@ -185,7 +187,7 @@ class InterBankService {
   /**
    * Make authenticated request to Inter API
    */
-  private async makeRequest(endpoint: string, method: 'GET' | 'POST' | 'PATCH' | 'DELETE' = 'GET', data?: any): Promise<any> {
+  private async makeRequest(endpoint: string, method: 'GET' | 'POST' | 'PATCH' | 'DELETE' | 'PUT' = 'GET', data?: any): Promise<any> {
     try {
       const token = await this.getAccessToken();
       const url = `${this.config.apiUrl}${endpoint}`;
@@ -206,7 +208,7 @@ class InterBankService {
         headers
       };
 
-      if (data && (method === 'POST' || method === 'PATCH')) {
+      if (data && (method === 'POST' || method === 'PATCH' || method === 'PUT')) {
         options.body = JSON.stringify(data);
       }
 

@@ -95,7 +95,7 @@ router.post('/send-ccb/:propostaId', jwtAuthMiddleware, async (req, res) => {
       clicksignListKey: clickSignResult.listKey,
       clicksignStatus: 'pending',
       clicksignSignUrl: clickSignResult.signUrl,
-      clicksignSentAt: getBrasiliaTimestamp()
+      clicksignSentAt: new Date(getBrasiliaTimestamp())
     });
 
     console.log(`[CLICKSIGN] ✅ CCB sent successfully for proposal: ${propostaId}`);
@@ -114,7 +114,7 @@ router.post('/send-ccb/:propostaId', jwtAuthMiddleware, async (req, res) => {
     console.error(`[CLICKSIGN] ❌ Error sending CCB:`, error);
     res.status(500).json({ 
       error: 'Erro ao enviar CCB para ClickSign',
-      details: error.message 
+      details: (error as Error).message 
     });
   }
 });
@@ -234,42 +234,63 @@ router.post('/webhook', async (req, res) => {
               ? JSON.parse(proposta.condicoesData)
               : proposta.condicoesData || {};
 
-            // Dados para criação do boleto
+            // Dados para criação do boleto conforme API oficial Inter Bank
             const boletoData = {
-              seuNumero: proposta.id,
-              valorNominal: condicoesData.valorTotalFinanciado || condicoesData.valor || 0,
+              seuNumero: proposta.id.slice(0, 15), // Max 15 chars
+              valorNominal: parseFloat(String(condicoesData.valorTotalFinanciado || condicoesData.valor || 0)),
               dataVencimento: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 dias
-              cnpjCpfPagador: clienteData.cpf?.replace(/\D/g, ''),
-              nomePagador: clienteData.nome,
-              emailPagador: clienteData.email,
-              telefonePagador: clienteData.telefone?.replace(/\D/g, ''),
-              cepPagador: clienteData.cep?.replace(/\D/g, ''),
-              enderecoCompleto: clienteData.endereco || `${clienteData.logradouro || ''} ${clienteData.numero || ''} ${clienteData.complemento || ''}`.trim(),
-              mensagem: `Pagamento referente ao empréstimo - Proposta ${proposta.id}`,
+              numDiasAgenda: 60, // Cancelamento automático após 60 dias do vencimento
+              pagador: {
+                cpfCnpj: clienteData.cpf?.replace(/\D/g, '') || '',
+                tipoPessoa: 'FISICA' as const,
+                nome: clienteData.nome || '',
+                email: clienteData.email || '',
+                ddd: clienteData.telefone ? clienteData.telefone.replace(/\D/g, '').slice(0, 2) : '',
+                telefone: clienteData.telefone ? clienteData.telefone.replace(/\D/g, '').slice(2) : '',
+                endereco: clienteData.logradouro || clienteData.endereco || '',
+                numero: clienteData.numero || '',
+                complemento: clienteData.complemento || '',
+                bairro: clienteData.bairro || 'Centro',
+                cidade: clienteData.cidade || 'São Paulo',
+                uf: clienteData.uf || 'SP',
+                cep: clienteData.cep?.replace(/\D/g, '') || ''
+              },
+              mensagem: {
+                linha1: `Pagamento referente ao empréstimo`,
+                linha2: `Proposta: ${proposta.id}`,
+                linha3: `SIMPIX - Soluções Financeiras`
+              },
+              formasRecebimento: ['BOLETO', 'PIX'] as ('BOLETO' | 'PIX')[]
             };
 
-            // Criar cobrança no Inter Bank
-            const interCollection = await interBankService.createCollection(boletoData);
+            // Criar cobrança no Inter Bank usando método oficial
+            const createResponse = await interBankService.emitirCobranca(boletoData);
+            
+            // Aguardar um momento e consultar os detalhes completos
+            console.log(`[CLICKSIGN → INTER] Waiting for collection details: ${createResponse.codigoSolicitacao}`);
+            await new Promise(resolve => setTimeout(resolve, 2000)); // 2 segundos
+            
+            const interCollection = await interBankService.recuperarCobranca(createResponse.codigoSolicitacao);
             
             // Salvar no banco de dados
             await storage.createInterCollection({
               propostaId: proposta.id,
-              codigoSolicitacao: interCollection.codigoSolicitacao,
+              codigoSolicitacao: createResponse.codigoSolicitacao,
               seuNumero: boletoData.seuNumero,
               valorNominal: String(boletoData.valorNominal),
               dataVencimento: boletoData.dataVencimento,
-              situacao: interCollection.situacao,
-              dataSituacao: interCollection.dataSituacao,
-              nossoNumero: interCollection.nossoNumero,
-              codigoBarras: interCollection.codigoBarras,
-              linhaDigitavel: interCollection.linhaDigitavel,
-              pixTxid: interCollection.pix?.txid,
-              pixCopiaECola: interCollection.pix?.copiaECola,
-              dataEmissao: interCollection.dataEmissao,
+              situacao: interCollection.cobranca.situacao,
+              dataSituacao: interCollection.cobranca.dataSituacao,
+              nossoNumero: interCollection.boleto?.nossoNumero || '',
+              codigoBarras: interCollection.boleto?.codigoBarras || '',
+              linhaDigitavel: interCollection.boleto?.linhaDigitavel || '',
+              pixTxid: interCollection.pix?.txid || '',
+              pixCopiaECola: interCollection.pix?.pixCopiaECola || '',
+              dataEmissao: interCollection.cobranca.dataEmissao || new Date().toISOString().split('T')[0],
               isActive: true
             });
 
-            console.log(`[CLICKSIGN → INTER] ✅ Boleto created successfully: ${interCollection.codigoSolicitacao}`);
+            console.log(`[CLICKSIGN → INTER] ✅ Boleto created successfully: ${createResponse.codigoSolicitacao}`);
             
             // Log da geração do boleto
             await storage.createPropostaLog({
@@ -277,7 +298,7 @@ router.post('/webhook', async (req, res) => {
               autorId: 'clicksign-webhook',
               statusAnterior: proposta.status,
               statusNovo: 'contratos_assinados',
-              observacao: `Boleto gerado automaticamente após assinatura CCB - Código: ${interCollection.codigoSolicitacao}`
+              observacao: `Boleto gerado automaticamente após assinatura CCB - Código: ${createResponse.codigoSolicitacao}`
             });
             
           } else {
