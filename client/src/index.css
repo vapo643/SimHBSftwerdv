@@ -5,7 +5,7 @@
 @tailwind utilities;
 
 :root {
-  /* Tema Blackout - Fundo principal preto */
+  /* Tema Dark (Blackout) - Default */
   --background: hsl(0, 0%, 0%);
   --foreground: hsl(0, 0%, 98%);
   --muted: hsl(0, 0%, 8%);
@@ -28,7 +28,38 @@
   --radius: 0.5rem;
   --warning: hsl(38, 92%, 50%);
   --success: hsl(142, 76%, 36%);
-  /* Cores Simpix para o tema Blackout */
+  /* Cores Simpix */
+  --simpix-blue: hsl(220, 100%, 45%);
+  --simpix-green: hsl(120, 100%, 45%);
+  --simpix-blue-light: hsl(220, 100%, 55%);
+  --simpix-green-dark: hsl(120, 100%, 35%);
+}
+
+.light {
+  /* Tema Light */
+  --background: hsl(0, 0%, 100%);
+  --foreground: hsl(240, 10%, 3.9%);
+  --muted: hsl(240, 4.8%, 95.9%);
+  --muted-foreground: hsl(240, 3.8%, 46.1%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(240, 10%, 3.9%);
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(240, 10%, 3.9%);
+  --border: hsl(240, 5.9%, 90%);
+  --input: hsl(240, 5.9%, 90%);
+  --primary: hsl(220, 100%, 45%);
+  --primary-foreground: hsl(0, 0%, 100%);
+  --secondary: hsl(240, 4.8%, 95.9%);
+  --secondary-foreground: hsl(240, 5.9%, 10%);
+  --accent: hsl(120, 100%, 45%);
+  --accent-foreground: hsl(0, 0%, 100%);
+  --destructive: hsl(0, 84.2%, 60.2%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --ring: hsl(220, 100%, 45%);
+  --radius: 0.5rem;
+  --warning: hsl(38, 92%, 50%);
+  --success: hsl(142, 76%, 36%);
+  /* Cores Simpix para tema claro */
   --simpix-blue: hsl(220, 100%, 45%);
   --simpix-green: hsl(120, 100%, 45%);
   --simpix-blue-light: hsl(220, 100%, 55%);

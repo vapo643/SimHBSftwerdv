@@ -162,12 +162,14 @@ export default function GestãoProdutos() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
-          <p className="mt-2 text-sm text-gray-600">Carregando produtos...</p>
+      <DashboardLayout title="Gestão de Produtos">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+            <p className="mt-2 text-sm text-muted-foreground">Carregando produtos...</p>
+          </div>
         </div>
-      </div>
+      </DashboardLayout>
     );
   }
 
@@ -176,7 +178,7 @@ export default function GestãoProdutos() {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Gestão de Produtos</h1>
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">Gestão de Produtos</h1>
             <p className="text-muted-foreground">
               Gerencie os produtos de crédito disponíveis no sistema
             </p>
@@ -188,12 +190,12 @@ export default function GestãoProdutos() {
               Novo Produto
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="bg-card border-border">
             <DialogHeader>
-              <DialogTitle>
+              <DialogTitle className="text-card-foreground">
                 {editingProduct ? "Editar Produto" : "Novo Produto"}
               </DialogTitle>
-              <DialogDescription>
+              <DialogDescription className="text-muted-foreground">
                 {editingProduct
                   ? "Atualize as informações do produto"
                   : "Adicione um novo produto de crédito"}
@@ -201,7 +203,7 @@ export default function GestãoProdutos() {
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="nome">Nome do Produto</Label>
+                <Label htmlFor="nome" className="text-card-foreground">Nome do Produto</Label>
                 <Input
                   id="nome"
                   value={formData.nome}
@@ -209,23 +211,24 @@ export default function GestãoProdutos() {
                     setFormData({ ...formData, nome: e.target.value })
                   }
                   placeholder="Ex: Crédito Pessoal"
+                  className="bg-input border-border text-foreground"
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="status">Status</Label>
+                <Label htmlFor="status" className="text-card-foreground">Status</Label>
                 <Select
                   value={formData.status}
                   onValueChange={(value: "Ativo" | "Inativo") =>
                     setFormData({ ...formData, status: value })
                   }
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-input border-border text-foreground">
                     <SelectValue placeholder="Selecione o status" />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Ativo">Ativo</SelectItem>
-                    <SelectItem value="Inativo">Inativo</SelectItem>
+                  <SelectContent className="bg-card border-border">
+                    <SelectItem value="Ativo" className="text-card-foreground hover:bg-muted">Ativo</SelectItem>
+                    <SelectItem value="Inativo" className="text-card-foreground hover:bg-muted">Inativo</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -249,25 +252,25 @@ export default function GestãoProdutos() {
         </Dialog>
       </div>
 
-      <Card>
+      <Card className="bg-card border-border">
         <CardHeader>
-          <CardTitle>Produtos Cadastrados</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-card-foreground">Produtos Cadastrados</CardTitle>
+          <CardDescription className="text-muted-foreground">
             Lista de todos os produtos de crédito no sistema
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>Nome do Produto</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Ações</TableHead>
+              <TableRow className="border-border hover:bg-muted/50">
+                <TableHead className="text-card-foreground">Nome do Produto</TableHead>
+                <TableHead className="text-card-foreground">Status</TableHead>
+                <TableHead className="text-right text-card-foreground">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {produtos.length === 0 ? (
-                <TableRow>
+                <TableRow className="border-border hover:bg-muted/50">
                   <TableCell colSpan={3} className="text-center py-8">
                     <div className="text-muted-foreground">
                       <p>Nenhum produto encontrado</p>
@@ -277,8 +280,8 @@ export default function GestãoProdutos() {
                 </TableRow>
               ) : (
                 produtos.map((produto: Produto) => (
-                  <TableRow key={produto.id}>
-                    <TableCell className="font-medium">
+                  <TableRow key={produto.id} className="border-border hover:bg-muted/50">
+                    <TableCell className="font-medium text-card-foreground">
                       {produto.nomeProduto}
                     </TableCell>
                     <TableCell>
@@ -292,6 +295,7 @@ export default function GestãoProdutos() {
                           variant="outline"
                           size="sm"
                           onClick={() => handleEdit(produto)}
+                          className="border-border hover:bg-muted"
                         >
                           <Pencil className="h-4 w-4" />
                         </Button>
@@ -299,6 +303,7 @@ export default function GestãoProdutos() {
                           variant="outline" 
                           size="sm"
                           onClick={() => handleOpenDeleteDialog(produto)}
+                          className="border-border hover:bg-muted"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>

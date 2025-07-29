@@ -5,6 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import OfflineIndicator from "./OfflineIndicator";
+import { ThemeSelector } from "./ThemeSelector";
 import {
   LayoutDashboard,
   PlusCircle,
@@ -112,7 +113,7 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
       <OfflineIndicator variant="banner" />
       <div className="hidden border-r bg-card text-card-foreground lg:block">
         <div className="flex h-full max-h-screen flex-col gap-2">
-          <div className="flex h-16 items-center border-b px-6">
+          <div className="flex h-16 items-center justify-between border-b px-6">
             <Link to="/dashboard" className="flex items-center gap-2 font-semibold">
               <img 
                 src="https://dvglgxrvhmtsixaabxha.supabase.co/storage/v1/object/public/logosimpixblack//simpix-logo-png.png.png" 
@@ -120,6 +121,7 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
                 className="h-32 w-auto"
               />
             </Link>
+            <ThemeSelector />
           </div>
           <div className="flex-1 overflow-auto py-2">
             <nav className="grid items-start px-4 text-sm font-medium">
@@ -158,6 +160,7 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
           )}
           {/* Pilar 12 - Progressive Enhancement: Offline indicator in header */}
           <OfflineIndicator variant="icon-only" />
+          <ThemeSelector />
           <Button onClick={handleSignOut} variant="outline" size="icon">
             <LogOut className="h-5 w-5" />
           </Button>
