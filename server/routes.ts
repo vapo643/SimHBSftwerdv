@@ -1753,7 +1753,7 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
         
         const { data: tabelaComercial, error: tabelaError } = await supabase
           .from('tabelas_comerciais')
-          .select('taxa_juros, nome, parceiro_id')
+          .select('taxa_juros, nome_tabela, parceiro_id')
           .eq('id', proposta.tabela_comercial_id)
           .single();
           
@@ -1765,7 +1765,7 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
           
         if (tabelaComercial && !tabelaError) {
           taxaJurosTabela = tabelaComercial.taxa_juros;
-          console.log(`[${new Date().toISOString()}] ✅ Taxa de juros encontrada:`, taxaJurosTabela, `% da tabela "${tabelaComercial.nome}"`);
+          console.log(`[${new Date().toISOString()}] ✅ Taxa de juros encontrada:`, taxaJurosTabela, `% da tabela "${tabelaComercial.nome_tabela}"`);
         } else {
           console.log(`[${new Date().toISOString()}] ❌ Erro ao buscar tabela comercial:`, tabelaError?.message);
         }
