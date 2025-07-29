@@ -622,15 +622,15 @@ export default function Formalizacao() {
         </div>
 
         {/* Progress Overview */}
-        <Card>
+        <Card className="bg-gray-800 border-gray-700">
           <CardContent className="p-6">
             <div className="mb-4">
               <div className="mb-2 flex items-center justify-between">
-                <h3 className="flex items-center gap-2 text-lg font-semibold text-gray-900">
-                  <TrendingUp className="h-5 w-5 text-blue-600" />
+                <h3 className="flex items-center gap-2 text-lg font-semibold text-white">
+                  <TrendingUp className="h-5 w-5 text-blue-400" />
                   {user?.role === 'ATENDENTE' ? 'Sua Ação Necessária' : 'Progresso da Formalização'}
                 </h3>
-                <span className="text-sm font-medium text-gray-600">
+                <span className="text-sm font-medium text-gray-400">
                   {getStatusProgress(proposta.status)}% concluído
                 </span>
               </div>
@@ -640,16 +640,16 @@ export default function Formalizacao() {
         </Card>
 
         {/* Tabs Navigation */}
-        <Card>
+        <Card className="bg-gray-800 border-gray-700">
           <CardContent className="p-0">
-            <div className="border-b">
+            <div className="border-b border-gray-600">
               <div className="flex space-x-8 px-6 py-4">
                 <button
                   onClick={() => setActiveTab("timeline")}
                   className={`flex items-center gap-2 border-b-2 pb-2 text-sm font-medium ${
                     activeTab === "timeline"
-                      ? "border-blue-500 text-blue-600"
-                      : "border-transparent text-gray-500 hover:text-gray-700"
+                      ? "border-blue-400 text-blue-400"
+                      : "border-transparent text-gray-400 hover:text-gray-200"
                   }`}
                 >
                   <Activity className="h-4 w-4" />
@@ -659,8 +659,8 @@ export default function Formalizacao() {
                   onClick={() => setActiveTab("documents")}
                   className={`flex items-center gap-2 border-b-2 pb-2 text-sm font-medium ${
                     activeTab === "documents"
-                      ? "border-blue-500 text-blue-600"
-                      : "border-transparent text-gray-500 hover:text-gray-700"
+                      ? "border-blue-400 text-blue-400"
+                      : "border-transparent text-gray-400 hover:text-gray-200"
                   }`}
                 >
                   <FileText className="h-4 w-4" />
@@ -672,8 +672,8 @@ export default function Formalizacao() {
                     onClick={() => setActiveTab("contracts")}
                     className={`flex items-center gap-2 border-b-2 pb-2 text-sm font-medium ${
                       activeTab === "contracts"
-                        ? "border-blue-500 text-blue-600"
-                        : "border-transparent text-gray-500 hover:text-gray-700"
+                        ? "border-blue-400 text-blue-400"
+                        : "border-transparent text-gray-400 hover:text-gray-200"
                     }`}
                   >
                     <FileCheck className="h-4 w-4" />
@@ -690,10 +690,10 @@ export default function Formalizacao() {
           <div className="space-y-6 lg:col-span-2">
             {/* Timeline Tab */}
             {activeTab === "timeline" && (
-              <Card>
+              <Card className="bg-gray-800 border-gray-700">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Activity className="h-5 w-5" />
+                  <CardTitle className="flex items-center gap-2 text-white">
+                    <Activity className="h-5 w-5 text-blue-400" />
                     Timeline de Formalização
                   </CardTitle>
                 </CardHeader>
@@ -709,7 +709,7 @@ export default function Formalizacao() {
                           {index !== formalizationSteps.length - 1 && (
                             <div
                               className={`absolute left-4 top-8 h-16 w-0.5 ${
-                                isCompleted ? "bg-green-500" : "bg-gray-300"
+                                isCompleted ? "bg-green-500" : "bg-gray-600"
                               }`}
                             />
                           )}
@@ -721,7 +721,7 @@ export default function Formalizacao() {
                                   ? "bg-green-500 text-white"
                                   : isCurrent
                                     ? "bg-blue-500 text-white"
-                                    : "bg-gray-200 text-gray-500"
+                                    : "bg-gray-600 text-gray-400"
                               }`}
                             >
                               {isCompleted ? (
@@ -737,30 +737,30 @@ export default function Formalizacao() {
                               <div className="flex items-center justify-between">
                                 <h4
                                   className={`text-sm font-medium ${
-                                    isCompleted || isCurrent ? "text-gray-900" : "text-gray-500"
+                                    isCompleted || isCurrent ? "text-white" : "text-gray-400"
                                   }`}
                                 >
                                   {step.title}
                                 </h4>
-                                <span className="text-xs text-gray-500">{step.date}</span>
+                                <span className="text-xs text-gray-400">{step.date}</span>
                               </div>
                               <p
                                 className={`text-sm ${
-                                  isCompleted || isCurrent ? "text-gray-600" : "text-gray-400"
+                                  isCompleted || isCurrent ? "text-gray-300" : "text-gray-500"
                                 }`}
                               >
                                 {step.description}
                               </p>
 
                               {isCurrent && (
-                                <div className="mt-2 rounded-md bg-blue-50 p-3">
+                                <div className="mt-2 rounded-md bg-blue-900/30 border border-blue-700 p-3">
                                   <div className="flex items-center">
-                                    <AlertCircle className="mr-2 h-4 w-4 text-blue-600" />
-                                    <span className="text-sm font-medium text-blue-800">
+                                    <AlertCircle className="mr-2 h-4 w-4 text-blue-400" />
+                                    <span className="text-sm font-medium text-blue-300">
                                       Etapa atual em andamento
                                     </span>
                                   </div>
-                                  <p className="mt-1 text-sm text-blue-700">
+                                  <p className="mt-1 text-sm text-blue-200">
                                     Aguardando ação do cliente ou processamento interno.
                                   </p>
                                 </div>
@@ -935,40 +935,40 @@ export default function Formalizacao() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Proposal Summary */}
-            <Card>
+            <Card className="bg-gray-800 border-gray-700">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <User className="h-5 w-5" />
+                <CardTitle className="flex items-center gap-2 text-white">
+                  <User className="h-5 w-5 text-blue-400" />
                   Resumo da Proposta
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   <div>
-                    <Label className="text-sm font-medium text-gray-700">Cliente</Label>
-                    <p className="font-medium text-gray-900">{proposta.cliente_data?.nome || 'Nome não informado'}</p>
+                    <Label className="text-sm font-medium text-gray-400">Cliente</Label>
+                    <p className="font-medium text-white">{proposta.cliente_data?.nome || 'Nome não informado'}</p>
                   </div>
                   <div>
-                    <Label className="text-sm font-medium text-gray-700">Valor Aprovado</Label>
-                    <p className="text-2xl font-bold text-green-600">
+                    <Label className="text-sm font-medium text-gray-400">Valor Aprovado</Label>
+                    <p className="text-2xl font-bold text-green-400">
                       {formatCurrency(proposta.condicoes_data?.valor || 0)}
                     </p>
                   </div>
                   <div>
-                    <Label className="text-sm font-medium text-gray-700">Taxa de Juros</Label>
-                    <p className="flex items-center gap-1 font-medium text-gray-900">
+                    <Label className="text-sm font-medium text-gray-400">Taxa de Juros</Label>
+                    <p className="flex items-center gap-1 font-medium text-white">
                       <Percent className="h-4 w-4" />
                       {/* TODO: Adicionar taxa de juros */}
                       N/A% a.m.
                     </p>
                   </div>
                   <div>
-                    <Label className="text-sm font-medium text-gray-700">Prazo</Label>
-                    <p className="font-medium text-gray-900">{proposta.condicoes_data?.prazo || 0} meses</p>
+                    <Label className="text-sm font-medium text-gray-400">Prazo</Label>
+                    <p className="font-medium text-white">{proposta.condicoes_data?.prazo || 0} meses</p>
                   </div>
                   <div>
-                    <Label className="text-sm font-medium text-gray-700">Data da Aprovação</Label>
-                    <p className="flex items-center gap-1 text-gray-900">
+                    <Label className="text-sm font-medium text-gray-400">Data da Aprovação</Label>
+                    <p className="flex items-center gap-1 text-white">
                       <Calendar className="h-4 w-4" />
                       {formatDate(proposta.data_aprovacao || proposta.created_at)}
                     </p>
@@ -978,19 +978,19 @@ export default function Formalizacao() {
             </Card>
 
             {/* Status Management */}
-            <Card>
+            <Card className="bg-gray-800 border-gray-700">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Edit className="h-5 w-5" />
+                <CardTitle className="flex items-center gap-2 text-white">
+                  <Edit className="h-5 w-5 text-blue-400" />
                   Gerenciar Status
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                   <div>
-                    <Label htmlFor="status">Status Atual</Label>
+                    <Label htmlFor="status" className="text-gray-400">Status Atual</Label>
                     <select
-                      className="w-full rounded-md border p-2"
+                      className="w-full rounded-md border border-gray-600 bg-gray-700 text-white p-2"
                       value={form.watch("status") || proposta.status}
                       onChange={e => form.setValue("status", e.target.value as any)}
                     >
@@ -1004,11 +1004,12 @@ export default function Formalizacao() {
                   </div>
 
                   <div>
-                    <Label htmlFor="observacoes">Observações</Label>
+                    <Label htmlFor="observacoes" className="text-gray-400">Observações</Label>
                     <Textarea
                       id="observacoes"
                       rows={3}
                       placeholder="Adicione observações sobre o processo..."
+                      className="bg-gray-700 border-gray-600 text-white"
                       {...form.register("observacoesFormalização")}
                     />
                   </div>
@@ -1021,61 +1022,61 @@ export default function Formalizacao() {
             </Card>
 
             {/* Next Steps */}
-            <Card>
+            <Card className="bg-gray-800 border-gray-700">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <AlertCircle className="h-5 w-5" />
+                <CardTitle className="flex items-center gap-2 text-white">
+                  <AlertCircle className="h-5 w-5 text-blue-400" />
                   Próximos Passos
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   {proposta.status === "aprovado" && (
-                    <div className="rounded-md bg-blue-50 p-3">
-                      <p className="text-sm font-medium text-blue-800">
+                    <div className="rounded-md bg-blue-900/30 border border-blue-700 p-3">
+                      <p className="text-sm font-medium text-blue-300">
                         Aguardando documentos adicionais
                       </p>
-                      <p className="mt-1 text-sm text-blue-700">
+                      <p className="mt-1 text-sm text-blue-200">
                         Cliente deve enviar documentos complementares solicitados.
                       </p>
                     </div>
                   )}
                   {proposta.status === "documentos_enviados" && (
-                    <div className="rounded-md bg-purple-50 p-3">
-                      <p className="text-sm font-medium text-purple-800">Preparar contratos</p>
-                      <p className="mt-1 text-sm text-purple-700">
+                    <div className="rounded-md bg-purple-900/30 border border-purple-700 p-3">
+                      <p className="text-sm font-medium text-purple-300">Preparar contratos</p>
+                      <p className="mt-1 text-sm text-purple-200">
                         Gerar e preparar contratos para assinatura.
                       </p>
                     </div>
                   )}
                   {proposta.status === "contratos_preparados" && (
-                    <div className="rounded-md bg-indigo-50 p-3">
-                      <p className="text-sm font-medium text-indigo-800">Aguardando assinatura</p>
-                      <p className="mt-1 text-sm text-indigo-700">
+                    <div className="rounded-md bg-indigo-900/30 border border-indigo-700 p-3">
+                      <p className="text-sm font-medium text-indigo-300">Aguardando assinatura</p>
+                      <p className="mt-1 text-sm text-indigo-200">
                         Contratos enviados para assinatura do cliente.
                       </p>
                     </div>
                   )}
                   {proposta.status === "contratos_assinados" && (
-                    <div className="rounded-md bg-orange-50 p-3">
-                      <p className="text-sm font-medium text-orange-800">Preparar pagamento</p>
-                      <p className="mt-1 text-sm text-orange-700">
+                    <div className="rounded-md bg-orange-900/30 border border-orange-700 p-3">
+                      <p className="text-sm font-medium text-orange-300">Preparar pagamento</p>
+                      <p className="mt-1 text-sm text-orange-200">
                         Processar liberação do valor aprovado.
                       </p>
                     </div>
                   )}
                   {proposta.status === "pronto_pagamento" && (
-                    <div className="rounded-md bg-green-50 p-3">
-                      <p className="text-sm font-medium text-green-800">Liberar pagamento</p>
-                      <p className="mt-1 text-sm text-green-700">
+                    <div className="rounded-md bg-green-900/30 border border-green-700 p-3">
+                      <p className="text-sm font-medium text-green-300">Liberar pagamento</p>
+                      <p className="mt-1 text-sm text-green-200">
                         Valor pronto para ser liberado ao cliente.
                       </p>
                     </div>
                   )}
                   {proposta.status === "pago" && (
-                    <div className="rounded-md bg-green-50 p-3">
-                      <p className="text-sm font-medium text-green-800">Processo concluído</p>
-                      <p className="mt-1 text-sm text-green-700">
+                    <div className="rounded-md bg-green-900/30 border border-green-700 p-3">
+                      <p className="text-sm font-medium text-green-300">Processo concluído</p>
+                      <p className="mt-1 text-sm text-green-200">
                         Valor liberado com sucesso ao cliente.
                       </p>
                     </div>
