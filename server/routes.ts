@@ -8,6 +8,7 @@ import { insertPropostaSchema, updatePropostaSchema, insertGerenteLojaSchema, in
 import { z } from "zod";
 import multer from "multer";
 import originationRoutes from "./routes/origination.routes";
+import { getBrasiliaDate, formatBrazilianDateTime, generateApprovalDate, getBrasiliaTimestamp } from "./lib/timezone";
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -158,7 +159,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       })) || [];
       
       console.log(`🔍 [DEBUG] Transformed logs:`, JSON.stringify(transformedLogs, null, 2));
-      console.log(`[${new Date().toISOString()}] Retornando ${transformedLogs.length} logs de auditoria para proposta ${propostaId}`);
+      console.log(`[${getBrasiliaTimestamp()}] Retornando ${transformedLogs.length} logs de auditoria para proposta ${propostaId}`);
       
       res.json({ 
         logs: transformedLogs,
@@ -175,7 +176,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/health", (req, res) => {
     res.json({
       status: "ok",
-      timestamp: new Date().toISOString(),
+      timestamp: getBrasiliaTimestamp(),
       security: "enabled",
       rateLimit: "active"
     });
@@ -187,7 +188,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({
         message: "Debug endpoint - User profile from robust JWT middleware",
         user: req.user,
-        timestamp: new Date().toISOString()
+        timestamp: getBrasiliaTimestamp()
       });
     } catch (error) {
       console.error("Debug endpoint error:", error);
@@ -284,7 +285,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                            status ? ` com status ${status}` : 
                            atendenteId ? ` do atendente ${atendenteId}` : '';
       
-      console.log(`[${new Date().toISOString()}] Retornando ${mappedPropostas.length} propostas${filterDescription}`);
+      console.log(`[${getBrasiliaTimestamp()}] Retornando ${mappedPropostas.length} propostas${filterDescription}`);
       res.json(mappedPropostas);
     } catch (error) {
       console.error("Get propostas error:", error);
@@ -362,7 +363,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Only set analyst fields for analyst actions (not for attendant resubmission)
       if (userRole !== 'ATENDENTE') {
         updateData.analista_id = req.user?.id;
-        updateData.data_analise = new Date().toISOString();
+        updateData.data_analise = getBrasiliaTimestamp();
       }
       
       if (status === 'pendenciado' && motivoPendencia) {
@@ -376,8 +377,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // CORREÇÃO CRÍTICA: Definir data_aprovacao quando proposta é aprovada
       if (status === 'aprovado') {
-        updateData.data_aprovacao = new Date().toISOString();
-        console.log(`🎯 [APROVAÇÃO] Definindo data_aprovacao para proposta ${propostaId}`);
+        updateData.data_aprovacao = generateApprovalDate();
+        console.log(`🎯 [APROVAÇÃO] Definindo data_aprovacao para proposta ${propostaId} no horário de Brasília`);
         
         // NOVO: Geração automática da CCB ao aprovar proposta
         try {
@@ -432,7 +433,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const result = { success: true, statusAnterior: currentStatus, statusNovo: status };
       
       const actionBy = userRole === 'ATENDENTE' ? 'atendente' : 'analista';
-      console.log(`[${new Date().toISOString()}] Proposta ${propostaId} - status alterado de ${result.statusAnterior} para ${result.statusNovo} pelo ${actionBy} ${req.user?.id}`);
+      console.log(`[${getBrasiliaTimestamp()}] Proposta ${propostaId} - status alterado de ${result.statusAnterior} para ${result.statusNovo} pelo ${actionBy} ${req.user?.id}`);
       
       res.json({
         success: true,
@@ -556,7 +557,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         };
       });
 
-      console.log(`[${new Date().toISOString()}] Retornando ${formalizacaoPropostas.length} propostas em formalização via RLS`);
+      console.log(`[${getBrasiliaTimestamp()}] Retornando ${formalizacaoPropostas.length} propostas em formalização via RLS`);
       res.json(formalizacaoPropostas);
     } catch (error) {
       console.error("Erro ao buscar propostas de formalização:", error);
@@ -648,7 +649,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       doc.fontSize(16).text('DOCUMENTO DE TESTE');
       doc.moveDown();
       doc.fontSize(12).text('Este é um PDF de teste gerado pelo sistema.');
-      doc.text('Data: ' + new Date().toLocaleDateString('pt-BR'));
+      doc.text('Data: ' + formatBrazilianDateTime(getBrasiliaDate(), 'date'));
       
       doc.end();
       
@@ -1457,7 +1458,7 @@ app.get("/api/tabelas-comerciais-disponiveis", jwtAuthMiddleware, async (req: Au
       });
     }
 
-    console.log(`[${new Date().toISOString()}] Buscando tabelas comerciais para produto ${produtoIdNum} e parceiro ${parceiroIdNum}`);
+    console.log(`[${getBrasiliaTimestamp()}] Buscando tabelas comerciais para produto ${produtoIdNum} e parceiro ${parceiroIdNum}`);
 
     // Import database connection
     const { db } = await import("../server/lib/supabase");
@@ -1488,11 +1489,11 @@ app.get("/api/tabelas-comerciais-disponiveis", jwtAuthMiddleware, async (req: Au
 
     // STEP 2: Validação - Se encontrou tabelas personalizadas, retorna apenas elas
     if (tabelasPersonalizadas && tabelasPersonalizadas.length > 0) {
-      console.log(`[${new Date().toISOString()}] Encontradas ${tabelasPersonalizadas.length} tabelas personalizadas`);
+      console.log(`[${getBrasiliaTimestamp()}] Encontradas ${tabelasPersonalizadas.length} tabelas personalizadas`);
       return res.json(tabelasPersonalizadas);
     }
 
-    console.log(`[${new Date().toISOString()}] Nenhuma tabela personalizada encontrada, buscando tabelas gerais`);
+    console.log(`[${getBrasiliaTimestamp()}] Nenhuma tabela personalizada encontrada, buscando tabelas gerais`);
 
     // STEP 3: Busca Secundária - Tabelas Gerais (produto + parceiro nulo)
     // Usando JOIN com a nova estrutura N:N
@@ -1518,7 +1519,7 @@ app.get("/api/tabelas-comerciais-disponiveis", jwtAuthMiddleware, async (req: Au
 
     // STEP 4: Resultado Final
     const resultado = tabelasGerais || [];
-    console.log(`[${new Date().toISOString()}] Encontradas ${resultado.length} tabelas gerais`);
+    console.log(`[${getBrasiliaTimestamp()}] Encontradas ${resultado.length} tabelas gerais`);
 
     res.json(resultado);
   } catch (error) {
@@ -1558,7 +1559,7 @@ app.get("/api/tabelas-comerciais-disponiveis", jwtAuthMiddleware, async (req: Au
         })
       );
 
-      console.log(`[${new Date().toISOString()}] Retornando ${tabelasWithProducts.length} tabelas comerciais com produtos`);
+      console.log(`[${getBrasiliaTimestamp()}] Retornando ${tabelasWithProducts.length} tabelas comerciais com produtos`);
       res.json(tabelasWithProducts);
     } catch (error) {
       console.error("Erro ao buscar tabelas comerciais:", error);
@@ -1612,7 +1613,7 @@ app.get("/api/tabelas-comerciais-disponiveis", jwtAuthMiddleware, async (req: Au
         return newTabela;
       });
 
-      console.log(`[${new Date().toISOString()}] Nova tabela comercial criada com ${validatedData.produtoIds.length} produtos: ${result.id}`);
+      console.log(`[${getBrasiliaTimestamp()}] Nova tabela comercial criada com ${validatedData.produtoIds.length} produtos: ${result.id}`);
       res.status(201).json(result);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -1683,7 +1684,7 @@ app.get("/api/tabelas-comerciais-disponiveis", jwtAuthMiddleware, async (req: Au
         return updatedTabela;
       });
 
-      console.log(`[${new Date().toISOString()}] Tabela comercial atualizada com ${validatedData.produtoIds.length} produtos: ${result.id}`);
+      console.log(`[${getBrasiliaTimestamp()}] Tabela comercial atualizada com ${validatedData.produtoIds.length} produtos: ${result.id}`);
       res.json(result);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -1727,7 +1728,7 @@ app.get("/api/tabelas-comerciais-disponiveis", jwtAuthMiddleware, async (req: Au
         }
       });
 
-      console.log(`[${new Date().toISOString()}] Tabela comercial deletada: ${tabelaId}`);
+      console.log(`[${getBrasiliaTimestamp()}] Tabela comercial deletada: ${tabelaId}`);
       res.status(204).send();
     } catch (error) {
       if (error instanceof Error && error.message === "Tabela comercial não encontrada") {
@@ -1753,7 +1754,7 @@ app.get("/api/tabelas-comerciais-disponiveis", jwtAuthMiddleware, async (req: Au
       const { eq, gte, and, count } = await import("drizzle-orm");
 
       // Get current date and calculate date ranges
-      const now = new Date();
+      const now = getBrasiliaDate();
       const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       const weekStart = new Date(now);
       weekStart.setDate(now.getDate() - 7);
@@ -1811,7 +1812,7 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
     const { propostas } = await import("../shared/schema");
     const { eq, and, gte, count } = await import("drizzle-orm");
     
-    const now = new Date();
+    const now = getBrasiliaDate();
     const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const weekStart = new Date(now);
     weekStart.setDate(now.getDate() - 7);
@@ -1875,7 +1876,7 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
         .where(eq(propostas.status, 'pronto_pagamento'))
         .orderBy(desc(propostas.createdAt));
 
-      console.log(`[${new Date().toISOString()}] Retornando ${pagamentoPropostas.length} propostas prontas para pagamento`);
+      console.log(`[${getBrasiliaTimestamp()}] Retornando ${pagamentoPropostas.length} propostas prontas para pagamento`);
       res.json(pagamentoPropostas);
     } catch (error) {
       console.error("Erro ao buscar propostas para pagamento:", error);
@@ -1891,7 +1892,7 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
   app.get("/api/propostas/:id/formalizacao", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     try {
       const propostaId = req.params.id;
-      console.log(`[${new Date().toISOString()}] 🔍 INICIO - Buscando dados de formalização para proposta: ${propostaId}`);
+      console.log(`[${getBrasiliaTimestamp()}] 🔍 INICIO - Buscando dados de formalização para proposta: ${propostaId}`);
 
       if (!propostaId) {
         return res.status(400).json({ message: "ID da proposta é obrigatório" });
@@ -1901,7 +1902,7 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
       const { createServerSupabaseAdminClient } = await import('./lib/supabase');
       const supabase = createServerSupabaseAdminClient();
 
-      console.log(`[${new Date().toISOString()}] 🔍 STEP 1 - Fazendo query direta no Supabase...`);
+      console.log(`[${getBrasiliaTimestamp()}] 🔍 STEP 1 - Fazendo query direta no Supabase...`);
       
       // Buscar proposta usando Supabase diretamente
       const { data: proposta, error: propostaError } = await supabase
@@ -1910,8 +1911,8 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
         .eq('id', propostaId)
         .single();
 
-      console.log(`[${new Date().toISOString()}] 🔍 STEP 2 - Proposta encontrada:`, !!proposta);
-      console.log(`[${new Date().toISOString()}] 🔍 STEP 2.1 - Dados da proposta:`, {
+      console.log(`[${getBrasiliaTimestamp()}] 🔍 STEP 2 - Proposta encontrada:`, !!proposta);
+      console.log(`[${getBrasiliaTimestamp()}] 🔍 STEP 2.1 - Dados da proposta:`, {
         id: proposta?.id,
         status: proposta?.status,
         tabela_comercial_id: proposta?.tabela_comercial_id,
@@ -1920,11 +1921,11 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
       });
 
       if (propostaError || !proposta) {
-        console.log(`[${new Date().toISOString()}] ❌ Proposta ${propostaId} não encontrada:`, propostaError?.message);
+        console.log(`[${getBrasiliaTimestamp()}] ❌ Proposta ${propostaId} não encontrada:`, propostaError?.message);
         return res.status(404).json({ message: "Proposta não encontrada" });
       }
 
-      console.log(`[${new Date().toISOString()}] 🔍 STEP 3 - Buscando documentos...`);
+      console.log(`[${getBrasiliaTimestamp()}] 🔍 STEP 3 - Buscando documentos...`);
       
       // Buscar documentos da proposta
       const { data: documentos, error: docError } = await supabase
@@ -1932,13 +1933,13 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
         .select('*')
         .eq('proposta_id', propostaId);
 
-      console.log(`[${new Date().toISOString()}] 🔍 STEP 4 - Documentos encontrados:`, documentos?.length || 0);
-      console.log(`[${new Date().toISOString()}] 🔍 STEP 4.1 - Estrutura dos documentos:`, documentos);
+      console.log(`[${getBrasiliaTimestamp()}] 🔍 STEP 4 - Documentos encontrados:`, documentos?.length || 0);
+      console.log(`[${getBrasiliaTimestamp()}] 🔍 STEP 4.1 - Estrutura dos documentos:`, documentos);
 
       // STEP 4.2: Gerar URLs assinadas para visualização dos documentos
       let documentosComUrls = [];
       if (documentos && documentos.length > 0) {
-        console.log(`[${new Date().toISOString()}] 🔍 STEP 4.2 - Gerando URLs assinadas para ${documentos.length} documentos...`);
+        console.log(`[${getBrasiliaTimestamp()}] 🔍 STEP 4.2 - Gerando URLs assinadas para ${documentos.length} documentos...`);
         
         for (const doc of documentos) {
           try {
@@ -1979,10 +1980,10 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
                 // Manter campos originais também
                 url_visualizacao: signedUrlData.signedUrl
               });
-              console.log(`[${new Date().toISOString()}] ✅ URL gerada para documento: ${doc.nome_arquivo}`);
+              console.log(`[${getBrasiliaTimestamp()}] ✅ URL gerada para documento: ${doc.nome_arquivo}`);
             } else {
-              console.log(`[${new Date().toISOString()}] ❌ Erro ao gerar URL para documento ${doc.nome_arquivo}:`, urlError?.message);
-              console.log(`[${new Date().toISOString()}] ❌ Caminho tentado: ${filePath}`);
+              console.log(`[${getBrasiliaTimestamp()}] ❌ Erro ao gerar URL para documento ${doc.nome_arquivo}:`, urlError?.message);
+              console.log(`[${getBrasiliaTimestamp()}] ❌ Caminho tentado: ${filePath}`);
               documentosComUrls.push({
                 ...doc,
                 // Mesmo sem URL, mapear para formato esperado
@@ -1993,7 +1994,7 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
               }); // Adiciona sem URL em caso de erro
             }
           } catch (error) {
-            console.log(`[${new Date().toISOString()}] ❌ Erro ao processar documento ${doc.nome_arquivo}:`, error);
+            console.log(`[${getBrasiliaTimestamp()}] ❌ Erro ao processar documento ${doc.nome_arquivo}:`, error);
             documentosComUrls.push({
               ...doc,
               // Mesmo com erro, mapear para formato esperado
@@ -2008,10 +2009,10 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
 
       // Buscar taxa de juros da tabela comercial se existir
       let taxaJurosTabela = null;
-      console.log(`[${new Date().toISOString()}] 🔍 STEP 5 - Verificando tabela_comercial_id:`, proposta.tabela_comercial_id);
+      console.log(`[${getBrasiliaTimestamp()}] 🔍 STEP 5 - Verificando tabela_comercial_id:`, proposta.tabela_comercial_id);
       
       if (proposta.tabela_comercial_id) {
-        console.log(`[${new Date().toISOString()}] 🔍 STEP 5.1 - Buscando tabela comercial ID:`, proposta.tabela_comercial_id);
+        console.log(`[${getBrasiliaTimestamp()}] 🔍 STEP 5.1 - Buscando tabela comercial ID:`, proposta.tabela_comercial_id);
         
         const { data: tabelaComercial, error: tabelaError } = await supabase
           .from('tabelas_comerciais')
@@ -2019,7 +2020,7 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
           .eq('id', proposta.tabela_comercial_id)
           .single();
           
-        console.log(`[${new Date().toISOString()}] 🔍 STEP 5.2 - Resultado da consulta tabela comercial:`, {
+        console.log(`[${getBrasiliaTimestamp()}] 🔍 STEP 5.2 - Resultado da consulta tabela comercial:`, {
           data: tabelaComercial,
           error: tabelaError?.message,
           hasData: !!tabelaComercial
@@ -2027,15 +2028,15 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
           
         if (tabelaComercial && !tabelaError) {
           taxaJurosTabela = tabelaComercial.taxa_juros;
-          console.log(`[${new Date().toISOString()}] ✅ Taxa de juros encontrada:`, taxaJurosTabela, `% da tabela "${tabelaComercial.nome_tabela}"`);
+          console.log(`[${getBrasiliaTimestamp()}] ✅ Taxa de juros encontrada:`, taxaJurosTabela, `% da tabela "${tabelaComercial.nome_tabela}"`);
         } else {
-          console.log(`[${new Date().toISOString()}] ❌ Erro ao buscar tabela comercial:`, tabelaError?.message);
+          console.log(`[${getBrasiliaTimestamp()}] ❌ Erro ao buscar tabela comercial:`, tabelaError?.message);
         }
       } else {
-        console.log(`[${new Date().toISOString()}] ⚠️ AVISO: Proposta ${propostaId} não possui tabela_comercial_id`);
+        console.log(`[${getBrasiliaTimestamp()}] ⚠️ AVISO: Proposta ${propostaId} não possui tabela_comercial_id`);
       }
 
-      console.log(`[${new Date().toISOString()}] 🔍 STEP 6 - Processando dados JSONB...`);
+      console.log(`[${getBrasiliaTimestamp()}] 🔍 STEP 6 - Processando dados JSONB...`);
 
       // Parse dos dados JSONB antes de retornar
       const propostaProcessada = {
@@ -2056,7 +2057,7 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
         taxaJurosTabela: taxaJurosTabela
       };
 
-      console.log(`[${new Date().toISOString()}] ✅ SUCESSO - Dados de formalização retornados para proposta ${propostaId}:`, {
+      console.log(`[${getBrasiliaTimestamp()}] ✅ SUCESSO - Dados de formalização retornados para proposta ${propostaId}:`, {
         id: propostaProcessada.id,
         status: propostaProcessada.status,
         ccbGerado: propostaProcessada.ccbGerado,
@@ -2071,7 +2072,7 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
       
       res.json(propostaProcessada);
     } catch (error) {
-      console.error(`[${new Date().toISOString()}] ❌ ERRO ao buscar dados de formalização:`, error);
+      console.error(`[${getBrasiliaTimestamp()}] ❌ ERRO ao buscar dados de formalização:`, error);
       res.status(500).json({ message: "Erro ao buscar dados de formalização", error: error.message });
     }
   });
@@ -2394,7 +2395,7 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
   // Endpoint GET para simulação de crédito
   // Server time endpoint for reliable timestamp source
   app.get("/api/server-time", (req, res) => {
-    res.json({ now: new Date().toISOString() });
+    res.json({ now: getBrasiliaTimestamp() });
   });
 
   app.get("/api/simulacao", (req, res) => {
@@ -2408,7 +2409,7 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
     }
 
     // Correção Crítica: Usa a data do servidor como a "verdade"
-    const dataAtual = new Date();
+    const dataAtual = getBrasiliaDate();
     const primeiroVencimento = new Date(dataVencimento as string);
     const diasDiferenca = Math.ceil(
       (primeiroVencimento.getTime() - dataAtual.getTime()) / (1000 * 3600 * 24)
@@ -2543,15 +2544,15 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
         
         // Automatically generate CCB when marked as complete
         if (concluida && !proposta.ccbGerado) {
-          console.log(`[${new Date().toISOString()}] Gerando CCB para proposta ${id}`);
+          console.log(`[${getBrasiliaTimestamp()}] Gerando CCB para proposta ${id}`);
           
           try {
             const { generateCCB } = await import("../server/services/ccbGenerator");
             const ccbPath = await generateCCB(id);
             updateData.caminhoCcbAssinado = ccbPath;
-            console.log(`[${new Date().toISOString()}] CCB gerada com sucesso: ${ccbPath}`);
+            console.log(`[${getBrasiliaTimestamp()}] CCB gerada com sucesso: ${ccbPath}`);
           } catch (error) {
-            console.error(`[${new Date().toISOString()}] Erro ao gerar CCB:`, error);
+            console.error(`[${getBrasiliaTimestamp()}] Erro ao gerar CCB:`, error);
             // Don't fail the entire request if CCB generation fails
           }
         }
@@ -2560,7 +2561,7 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
         
         // TODO: Integrate with ClickSign when marked as complete
         if (concluida && !proposta.assinaturaEletronicaConcluida) {
-          console.log(`[${new Date().toISOString()}] Enviando para ClickSign - proposta ${id}`);
+          console.log(`[${getBrasiliaTimestamp()}] Enviando para ClickSign - proposta ${id}`);
         }
       } else if (etapa === 'biometria') {
         updateData.biometriaConcluida = concluida;
@@ -2568,7 +2569,7 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
         // Generate boletos when biometry is complete
         if (concluida && !proposta.biometriaConcluida) {
           // TODO: Generate payment boletos
-          console.log(`[${new Date().toISOString()}] Gerando boletos para proposta ${id}`);
+          console.log(`[${getBrasiliaTimestamp()}] Gerando boletos para proposta ${id}`);
         }
       }
 
@@ -2604,7 +2605,7 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
           })
           .where(eq(propostas.id, id));
 
-        console.log(`[${new Date().toISOString()}] Proposta ${id} pronta para pagamento`);
+        console.log(`[${getBrasiliaTimestamp()}] Proposta ${id} pronta para pagamento`);
       }
 
       res.json({
@@ -2657,7 +2658,7 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
           .update(propostas)
           .set({
             status: status as any,
-            dataAprovacao: status === 'aprovado' ? new Date() : undefined
+            dataAprovacao: status === 'aprovado' ? getBrasiliaDate() : undefined
           })
           .where(eq(propostas.id, id))
           .returning();
@@ -2668,7 +2669,7 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
         return updatedProposta;
       });
 
-      console.log(`[${new Date().toISOString()}] Status da proposta ${id} atualizado de ${result.status} para ${status}`);
+      console.log(`[${getBrasiliaTimestamp()}] Status da proposta ${id} atualizado de ${result.status} para ${status}`);
       res.json(result);
     } catch (error) {
       console.error("Update status error:", error);
@@ -3020,7 +3021,7 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
 
       res.json({
         status: 'healthy',
-        timestamp: new Date().toISOString(),
+        timestamp: getBrasiliaTimestamp(),
         checks: {
           getUsers: { status: 'ok', count: users.length },
           getLojas: { status: 'ok', count: lojas.length },
@@ -3031,7 +3032,7 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
       console.error('Storage health check failed:', error);
       res.status(500).json({
         status: 'unhealthy',
-        timestamp: new Date().toISOString(),
+        timestamp: getBrasiliaTimestamp(),
         error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
@@ -3069,14 +3070,14 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
 
       res.status(allHealthy ? 200 : 500).json({
         status: allHealthy ? 'healthy' : 'unhealthy',
-        timestamp: new Date().toISOString(),
+        timestamp: getBrasiliaTimestamp(),
         tables: checks
       });
     } catch (error) {
       console.error('Schema health check failed:', error);
       res.status(500).json({
         status: 'unhealthy',
-        timestamp: new Date().toISOString(),
+        timestamp: getBrasiliaTimestamp(),
         error: error instanceof Error ? error.message : 'Unknown error'
       });
     }

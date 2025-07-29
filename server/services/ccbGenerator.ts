@@ -1,5 +1,6 @@
 import PDFDocument from 'pdfkit';
 import { createServerSupabaseAdminClient } from '../lib/supabase';
+import { getBrasiliaDate, formatBrazilianDate, formatBrazilianDateTime } from '../lib/timezone';
 
 interface ClientData {
   nome: string;
@@ -68,8 +69,8 @@ export async function generateCCB(propostaId: string): Promise<string> {
         Subject: 'Cedula de Credito Bancario',
         Creator: 'Sistema Simpix',
         Producer: 'PDFKit',
-        CreationDate: new Date(),
-        ModDate: new Date()
+        CreationDate: getBrasiliaDate(),
+        ModDate: getBrasiliaDate()
       }
     });
     
@@ -112,7 +113,7 @@ export async function generateCCB(propostaId: string): Promise<string> {
     
     doc.y += lineHeight;
     doc.font('Helvetica-Bold').text('Data de Emissão:', leftMargin, doc.y);
-    doc.font('Helvetica').text(new Date().toLocaleDateString('pt-BR'), leftMargin + 120, doc.y);
+    doc.font('Helvetica').text(formatBrazilianDate(), leftMargin + 120, doc.y);
     
     doc.y += sectionSpacing;
     
@@ -216,7 +217,7 @@ export async function generateCCB(propostaId: string): Promise<string> {
     doc.y += lineHeight;
     doc.text('• Primeira parcela vence 30 dias após a liberação do crédito', leftMargin, doc.y, { width: pageWidth });
     doc.y += lineHeight;
-    doc.text(`• Demais parcelas vencem todo dia ${new Date().getDate()} de cada mês`, leftMargin, doc.y, { width: pageWidth });
+    doc.text(`• Demais parcelas vencem todo dia ${getBrasiliaDate().getDate()} de cada mês`, leftMargin, doc.y, { width: pageWidth });
     
     doc.y += sectionSpacing;
     
@@ -258,7 +259,7 @@ export async function generateCCB(propostaId: string): Promise<string> {
     doc.y += sectionSpacing;
     
     doc.fontSize(10).font('Helvetica')
-       .text(`São Paulo, ${new Date().toLocaleDateString('pt-BR')}`, leftMargin, doc.y, { 
+       .text(`São Paulo, ${formatBrazilianDate()}`, leftMargin, doc.y, { 
          width: pageWidth, 
          align: 'center' 
        });
@@ -287,7 +288,7 @@ export async function generateCCB(propostaId: string): Promise<string> {
     
     // === RODAPÉ ===
     doc.fontSize(8).font('Helvetica')
-       .text(`Documento gerado em ${new Date().toLocaleString('pt-BR')}`, leftMargin, doc.y, { 
+       .text(`Documento gerado em ${formatBrazilianDateTime()}`, leftMargin, doc.y, { 
          width: pageWidth, 
          align: 'center' 
        });
