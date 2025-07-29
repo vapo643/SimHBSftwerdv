@@ -1643,9 +1643,9 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
   // Endpoint for formalization data
   app.get("/api/propostas/:id/formalizacao", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     try {
-      const propostaId = parseInt(req.params.id);
-      if (isNaN(propostaId)) {
-        return res.status(400).json({ message: "ID da proposta inválido" });
+      const propostaId = req.params.id;
+      if (!propostaId) {
+        return res.status(400).json({ message: "ID da proposta é obrigatório" });
       }
 
       const { db } = await import("../server/lib/supabase");
@@ -1682,7 +1682,7 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
         .leftJoin(lojas, eq(propostas.lojaId, lojas.id))
         .leftJoin(parceiros, eq(lojas.parceiroId, parceiros.id))
         .leftJoin(produtos, eq(propostas.produtoId, produtos.id))
-        .where(eq(propostas.id, propostaId.toString()))
+        .where(eq(propostas.id, propostaId))
         .limit(1);
 
       if (!proposta || proposta.length === 0) {
