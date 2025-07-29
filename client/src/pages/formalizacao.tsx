@@ -913,7 +913,7 @@ export default function Formalizacao() {
                   {/* Usar DocumentViewer com popup modal como na análise */}
                   <DocumentViewer 
                     propostaId={proposta.id} 
-                    documents={proposta.documentos || []} 
+                    documents={[]} 
                     ccbDocumentoUrl={proposta.ccbGerado ? `/api/propostas/${proposta.id}/ccb-url` : undefined}
                   />
                 </CardContent>
@@ -1024,24 +1024,24 @@ export default function Formalizacao() {
                 <div className="space-y-4">
                   <div>
                     <Label className="text-sm font-medium text-gray-400">Cliente</Label>
-                    <p className="font-medium text-white">{proposta.clienteData?.nome || proposta.clienteNome || 'Nome não informado'}</p>
+                    <p className="font-medium text-white">{proposta.cliente_data?.nome || 'Nome não informado'}</p>
                   </div>
                   <div>
                     <Label className="text-sm font-medium text-gray-400">Valor Aprovado</Label>
                     <p className="text-2xl font-bold text-green-400">
-                      {formatCurrency(proposta.condicoesData?.valor || proposta.valor || 0)}
+                      {formatCurrency(proposta.condicoes_data?.valor || 0)}
                     </p>
                   </div>
                   <div>
                     <Label className="text-sm font-medium text-gray-400">Taxa de Juros</Label>
                     <p className="flex items-center gap-1 font-medium text-white">
                       <Percent className="h-4 w-4" />
-                      {proposta.taxaJurosTabela || proposta.condicoesData?.taxaJuros || proposta.condicoesData?.taxa || proposta.condicoesData?.taxaJurosMensal || 'N/A'}% a.m.
+                      {'N/A'}% a.m.
                     </p>
                   </div>
                   <div>
                     <Label className="text-sm font-medium text-gray-400">Prazo</Label>
-                    <p className="font-medium text-white">{proposta.condicoesData?.prazo || proposta.prazo || 0} meses</p>
+                    <p className="font-medium text-white">{proposta.condicoes_data?.prazo || 0} meses</p>
                   </div>
                   <div>
                     <Label className="text-sm font-medium text-gray-400">Data da Aprovação</Label>
