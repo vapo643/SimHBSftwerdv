@@ -753,6 +753,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         console.log(`🔍 [ANÁLISE] Documentos encontrados para proposta ${idParam}:`, documentos?.length || 0);
         
+        // DEBUG: Listar arquivos que existem no bucket para esta proposta
+        const { data: bucketFiles, error: listError } = await supabase.storage
+          .from('documents')
+          .list(`proposta-${idParam}/`, { limit: 100 });
+        
+        if (bucketFiles) {
+          console.log(`🔍 [ANÁLISE] Arquivos no bucket para proposta-${idParam}/:`, bucketFiles.map(f => f.name));
+        } else {
+          console.log(`🔍 [ANÁLISE] Erro ao listar arquivos no bucket:`, listError?.message);
+        }
+        
         // Gerar URLs assinadas para visualização dos documentos
         let documentosComUrls = [];
         if (documentos && documentos.length > 0) {
@@ -760,6 +771,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           for (const doc of documentos) {
             try {
+              console.log(`🔍 [ANÁLISE] Tentando gerar URL para documento:`, {
+                nome: doc.nome_arquivo,
+                caminho: doc.caminho_arquivo,
+                tipo: doc.tipo_documento,
+                proposta_id: doc.proposta_id
+              });
+
               const { data: signedUrlData, error: urlError } = await supabase.storage
                 .from('documents')
                 .createSignedUrl(doc.caminho_arquivo, 3600); // 1 hora
@@ -770,7 +788,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   // Mapeamento para formato esperado pelo DocumentViewer
                   name: doc.nome_arquivo,
                   url: signedUrlData.signedUrl,
-                  type: doc.tipo_documento,
+                  type: doc.tipo_documento || 'application/octet-stream', // fallback se tipo for null
                   uploadDate: doc.created_at,
                   // Manter campos originais também
                   url_visualizacao: signedUrlData.signedUrl
@@ -778,12 +796,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 console.log(`🔍 [ANÁLISE] ✅ URL gerada para documento: ${doc.nome_arquivo}`);
               } else {
                 console.log(`🔍 [ANÁLISE] ❌ Erro ao gerar URL para documento ${doc.nome_arquivo}:`, urlError?.message);
+                console.log(`🔍 [ANÁLISE] ❌ Caminho tentado: ${doc.caminho_arquivo}`);
                 documentosComUrls.push({
                   ...doc,
                   // Mesmo sem URL, mapear para formato esperado
                   name: doc.nome_arquivo,
                   url: '',
-                  type: doc.tipo_documento,
+                  type: doc.tipo_documento || 'application/octet-stream',
                   uploadDate: doc.created_at
                 }); // Adiciona sem URL em caso de erro
               }

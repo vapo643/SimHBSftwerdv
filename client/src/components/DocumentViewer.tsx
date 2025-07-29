@@ -15,7 +15,7 @@ import {
 interface Document {
   name: string;
   url: string;
-  type: string;
+  type?: string;
   size?: string;
   uploadDate?: string;
 }
@@ -40,20 +40,22 @@ export function DocumentViewer({ propostaId, documents, ccbDocumentoUrl }: Docum
     }] : [])
   ];
 
-  const getFileIcon = (type: string, name?: string) => {
+  const getFileIcon = (type?: string, name?: string) => {
     const nameExt = name?.toLowerCase() || '';
-    if (type.includes('pdf') || nameExt.endsWith('.pdf')) return <FileText className="h-4 w-4" />;
-    if (type.includes('image') || nameExt.endsWith('.jpg') || nameExt.endsWith('.jpeg') || nameExt.endsWith('.png')) 
+    const fileType = type?.toLowerCase() || '';
+    if (fileType.includes('pdf') || nameExt.endsWith('.pdf')) return <FileText className="h-4 w-4" />;
+    if (fileType.includes('image') || nameExt.endsWith('.jpg') || nameExt.endsWith('.jpeg') || nameExt.endsWith('.png')) 
       return <Image className="h-4 w-4" />;
     return <FileIcon className="h-4 w-4" />;
   };
 
-  const getFileTypeLabel = (type: string, name?: string) => {
+  const getFileTypeLabel = (type?: string, name?: string) => {
     const nameExt = name?.toLowerCase() || '';
-    if (type.includes('pdf') || nameExt.endsWith('.pdf')) return 'PDF';
-    if (type.includes('image') || nameExt.endsWith('.jpg') || nameExt.endsWith('.jpeg') || nameExt.endsWith('.png')) 
+    const fileType = type?.toLowerCase() || '';
+    if (fileType.includes('pdf') || nameExt.endsWith('.pdf')) return 'PDF';
+    if (fileType.includes('image') || nameExt.endsWith('.jpg') || nameExt.endsWith('.jpeg') || nameExt.endsWith('.png')) 
       return 'Imagem';
-    if (type.includes('doc')) return 'DOC';
+    if (fileType.includes('doc')) return 'DOC';
     return 'Arquivo';
   };
 
@@ -77,10 +79,11 @@ export function DocumentViewer({ propostaId, documents, ccbDocumentoUrl }: Docum
   const DocumentPreview = ({ document }: { document: Document }) => {
     const { url, type, name } = document;
     const nameExt = name?.toLowerCase() || '';
+    const fileType = type?.toLowerCase() || '';
 
     // Check both type and file extension
-    const isPDF = type.includes('pdf') || nameExt.endsWith('.pdf');
-    const isImage = type.includes('image') || 
+    const isPDF = fileType.includes('pdf') || nameExt.endsWith('.pdf');
+    const isImage = fileType.includes('image') || 
                    nameExt.endsWith('.jpg') || 
                    nameExt.endsWith('.jpeg') || 
                    nameExt.endsWith('.png');
