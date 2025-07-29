@@ -122,25 +122,25 @@ const Dashboard: React.FC = () => {
         {/* Métricas de Performance para Atendentes */}
         {user?.role === 'ATENDENTE' && metricas && (
           <div className="grid gap-4 md:grid-cols-3">
-            <Card className="card-harmonized">
+            <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-card-foreground">Propostas Hoje</CardTitle>
-                <Calendar className="h-4 w-4 text-primary" />
+                <CardTitle className="text-sm font-medium">Propostas Hoje</CardTitle>
+                <Calendar className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-card-foreground">{metricas.hoje || 0}</div>
+                <div className="text-2xl font-bold">{metricas.hoje || 0}</div>
                 <p className="text-xs text-muted-foreground">
                   Criadas nas últimas 24 horas
                 </p>
               </CardContent>
             </Card>
-            <Card className="card-harmonized">
+            <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-card-foreground">Propostas Esta Semana</CardTitle>
-                <Clock className="h-4 w-4 text-[hsl(var(--warning))]" />
+                <CardTitle className="text-sm font-medium">Propostas Esta Semana</CardTitle>
+                <Clock className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-card-foreground">{metricas.semana || 0}</div>
+                <div className="text-2xl font-bold">{metricas.semana || 0}</div>
                 <p className="text-xs text-muted-foreground">
                   Últimos 7 dias
                 </p>
