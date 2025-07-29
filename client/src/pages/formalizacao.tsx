@@ -398,7 +398,9 @@ export default function Formalizacao() {
       console.log(`🔍 [DEBUG] Cliente Data:`, response.clienteData);
       console.log(`🔍 [DEBUG] Condicoes Data:`, response.condicoesData);
       console.log(`🔍 [DEBUG] Data Aprovação:`, response.dataAprovacao);
-      console.log(`🔍 [DEBUG] Documentos:`, response.documentos);
+      console.log(`🔍 [DEBUG] Documentos - Total:`, response.documentos?.length || 0);
+      console.log(`🔍 [DEBUG] Documentos - Estrutura:`, response.documentos);
+      console.log(`🔍 [DEBUG] Primeiro documento:`, response.documentos?.[0]);
       return response;
     },
     enabled: !!propostaId,
@@ -914,8 +916,8 @@ export default function Formalizacao() {
                       <h4 className="mb-3 font-medium text-white">Documentos Originais</h4>
                       <div className="space-y-2">
                         {proposta.documentos && proposta.documentos.length > 0 ? (
-                          proposta.documentos.map((doc: any) => (
-                            <div key={doc.id} className="flex items-center justify-between rounded-lg bg-gray-700 border border-gray-600 p-3">
+                          proposta.documentos.map((doc: any, index: number) => (
+                            <div key={doc.id || index} className="flex items-center justify-between rounded-lg bg-gray-700 border border-gray-600 p-3">
                               <div className="flex items-center gap-3">
                                 <FileText className="h-5 w-5 text-blue-400" />
                                 <div>
