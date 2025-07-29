@@ -115,9 +115,7 @@ export const propostas = pgTable("propostas", {
   documentos: text("documentos").array(),
   ccbDocumentoUrl: text("ccb_documento_url"),
   
-  // Formalização
-  statusAssinatura: text("status_assinatura").default("pendente"),
-  statusBiometria: text("status_biometria").default("pendente"),
+  // Formalização - Enhanced fields
   dataAprovacao: timestamp("data_aprovacao"),
   documentosAdicionais: text("documentos_adicionais").array(),
   contratoGerado: boolean("contrato_gerado").default(false),
@@ -125,6 +123,12 @@ export const propostas = pgTable("propostas", {
   dataAssinatura: timestamp("data_assinatura"),
   dataPagamento: timestamp("data_pagamento"),
   observacoesFormalização: text("observacoes_formalizacao"),
+  
+  // New formalization tracking fields (January 29, 2025)
+  ccbGerado: boolean("ccb_gerado").notNull().default(false),
+  assinaturaEletronicaConcluida: boolean("assinatura_eletronica_concluida").notNull().default(false),
+  biometriaConcluida: boolean("biometria_concluida").notNull().default(false),
+  caminhoCcbAssinado: text("caminho_ccb_assinado"),
 
   // Campos JSONB legados (mantidos para compatibilidade)
   clienteData: text("cliente_data"),

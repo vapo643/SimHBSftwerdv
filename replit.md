@@ -82,6 +82,14 @@ This is a full-stack TypeScript application for credit management called "Simpix
 
 ### January 2025
 
+- **Database Schema Extension for Formalization Workflow (January 29)**: Successfully executed database migration to add formalization tracking columns to propostas table
+- **CCB and Electronic Signature Tracking**: Added ccb_gerado, assinatura_eletronica_concluida, biometria_concluida boolean fields with NOT NULL DEFAULT false constraints
+- **Document Path Storage**: Added caminho_ccb_assinado TEXT nullable field for storing signed CCB document links
+- **Drizzle Schema Sync**: Updated shared/schema.ts to reflect new database structure with proper TypeScript types
+- **Formalization Business Logic**: Prepared infrastructure for three-stage formalization process: CCB generation → Electronic signature → Biometry completion
+- **Complete Theme System Implementation**: Successfully implemented comprehensive theme management system with ThemeContext, ThemeSelector components, and CSS variables for dark, light, and system theme options
+- **Color Standardization**: Enhanced CSS theme variables with proper light/dark mode support and consistent color palette across all components
+- **Theme Integration**: Added ThemeProvider to App.tsx and ThemeSelector to DashboardLayout for system-wide theme support with user preference persistence
 - **Complete Formalization Queue Implementation (January 28)**: Successfully implemented end-to-end formalization queue system with backend endpoint, frontend integration, and proper RBAC navigation permissions
 - **Backend Endpoint Creation**: Built GET /api/propostas/formalizacao endpoint with JSONB parsing, authentication middleware, and proper status filtering for formalization workflow
 - **Frontend TypeScript Fixes**: Corrected property name mismatches between camelCase frontend and snake_case database schema (contrato_gerado, documentos_adicionais, etc.)
