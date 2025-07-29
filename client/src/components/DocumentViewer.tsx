@@ -39,7 +39,7 @@ export function DocumentViewer({ propostaId, documents, ccbDocumentoUrl }: Docum
         try {
           const { api } = await import('@/lib/apiClient');
           const response = await api.get(ccbDocumentoUrl);
-          setCcbRealUrl(response.url);
+          setCcbRealUrl(response.data?.url || response.url);
         } catch (error) {
           console.error('Erro ao buscar URL da CCB:', error);
           setCcbRealUrl(null);
@@ -57,17 +57,12 @@ export function DocumentViewer({ propostaId, documents, ccbDocumentoUrl }: Docum
   // Prepare all documents list including CCB
   const allDocuments: Document[] = [
     ...documents,
-    ...(ccbRealUrl ? [{
+    // Show loading state while fetching CCB URL, or show actual CCB when ready
+    ...(ccbDocumentoUrl ? [{
       name: "CCB - Cédula de Crédito Bancário",
-      url: ccbRealUrl,
+      url: ccbLoading ? "#loading" : (ccbRealUrl || "#error"),
       type: "application/pdf",
-      uploadDate: "Sistema"
-    }] : []),
-    ...(ccbLoading ? [{
-      name: "CCB - Cédula de Crédito Bancário",
-      url: "#loading",
-      type: "application/pdf",
-      uploadDate: "Carregando..."
+      uploadDate: ccbLoading ? "Carregando..." : "Sistema"
     }] : [])
   ];
 
@@ -206,9 +201,10 @@ export function DocumentViewer({ propostaId, documents, ccbDocumentoUrl }: Docum
                     variant="outline" 
                     size="sm"
                     onClick={() => setSelectedDocument(doc)}
+                    disabled={doc.url === "#loading" || doc.url === "#error"}
                   >
                     <Eye className="h-4 w-4 mr-1" />
-                    Visualizar
+                    {doc.url === "#loading" ? "Carregando..." : "Visualizar"}
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-4xl max-h-[90vh]">
@@ -222,6 +218,7 @@ export function DocumentViewer({ propostaId, documents, ccbDocumentoUrl }: Docum
                     <Button 
                       variant="outline"
                       onClick={() => handleDownload(doc.url, doc.name)}
+                      disabled={doc.url === "#loading" || doc.url === "#error"}
                     >
                       <Download className="h-4 w-4 mr-1" />
                       Baixar
@@ -229,6 +226,7 @@ export function DocumentViewer({ propostaId, documents, ccbDocumentoUrl }: Docum
                     <Button 
                       variant="outline"
                       onClick={() => window.open(doc.url, '_blank')}
+                      disabled={doc.url === "#loading" || doc.url === "#error"}
                     >
                       <ExternalLink className="h-4 w-4 mr-1" />
                       Abrir em Nova Aba
@@ -241,6 +239,7 @@ export function DocumentViewer({ propostaId, documents, ccbDocumentoUrl }: Docum
                 variant="ghost" 
                 size="sm"
                 onClick={() => handleDownload(doc.url, doc.name)}
+                disabled={doc.url === "#loading" || doc.url === "#error"}
               >
                 <Download className="h-4 w-4" />
               </Button>
