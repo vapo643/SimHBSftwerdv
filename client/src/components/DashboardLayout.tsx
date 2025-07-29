@@ -65,6 +65,7 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
     { name: "Parceiros", href: "/parceiros", icon: Building2 },
     { name: "Produtos", href: "/configuracoes/produtos", icon: Package },
     { name: "Lojas", href: "/admin/lojas", icon: Store },
+    { name: "Templates PDF", href: "/admin/templates", icon: FileText },
   ];
 
   // Build navigation based on user role
