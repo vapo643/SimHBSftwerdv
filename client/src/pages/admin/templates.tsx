@@ -29,8 +29,9 @@ export default function TemplatesPage() {
   const { data: templatesResponse, isLoading, error } = useQuery({
     queryKey: ['pdf-templates'],
     queryFn: async () => {
-      const { fetchWithToken } = await import('@/lib/apiClient');
-      return await fetchWithToken('/api/admin/pdf-templates');
+      const { api } = await import('@/lib/apiClient');
+      const response = await api.get('/api/admin/pdf-templates');
+      return response.data;
     },
   });
 
@@ -48,10 +49,9 @@ export default function TemplatesPage() {
   // Delete template mutation
   const deleteTemplateMutation = useMutation({
     mutationFn: async (templateId: string) => {
-      const { fetchWithToken } = await import('@/lib/apiClient');
-      return await fetchWithToken(`/api/admin/pdf-templates/${templateId}`, {
-        method: 'DELETE',
-      });
+      const { api } = await import('@/lib/apiClient');
+      const response = await api.delete(`/api/admin/pdf-templates/${templateId}`);
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pdf-templates'] });
@@ -72,14 +72,9 @@ export default function TemplatesPage() {
   // Duplicate template mutation
   const duplicateTemplateMutation = useMutation({
     mutationFn: async ({ templateId, name, description }: { templateId: string; name: string; description?: string }) => {
-      const { fetchWithToken } = await import('@/lib/apiClient');
-      return await fetchWithToken(`/api/admin/pdf-templates/${templateId}/duplicate`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name, description }),
-      });
+      const { api } = await import('@/lib/apiClient');
+      const response = await api.post(`/api/admin/pdf-templates/${templateId}/duplicate`, { name, description });
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pdf-templates'] });
@@ -99,33 +94,29 @@ export default function TemplatesPage() {
 
   const handlePreview = async (templateId: string) => {
     try {
-      const { fetchWithToken } = await import('@/lib/apiClient');
-      const response = await fetch(`/api/admin/pdf-templates/${templateId}/preview`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
+      const { api } = await import('@/lib/apiClient');
+      const response = await api.post(`/api/admin/pdf-templates/${templateId}/preview`);
+      
+      if (response.data instanceof Blob) {
+        const blob = response.data;
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `preview-template-${templateId}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
 
-      if (!response.ok) {
-        throw new Error('Erro ao gerar preview');
+        toast({
+          title: 'Sucesso',
+          description: 'Preview gerado com sucesso',
+        });
+      } else {
+        throw new Error('Resposta inválida do servidor');
       }
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `preview-template-${templateId}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-
-      toast({
-        title: 'Sucesso',
-        description: 'Preview gerado com sucesso',
-      });
     } catch (error) {
+      console.error('Error generating preview:', error);
       toast({
         title: 'Erro',
         description: 'Erro ao gerar preview',
@@ -310,14 +301,9 @@ function TemplateEditor({
 
   const saveTemplateMutation = useMutation({
     mutationFn: async (templateData: any) => {
-      const { fetchWithToken } = await import('@/lib/apiClient');
-      return await fetchWithToken('/api/admin/pdf-templates', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(templateData),
-      });
+      const { api } = await import('@/lib/apiClient');
+      const response = await api.post('/api/admin/pdf-templates', templateData);
+      return response.data;
     },
     onSuccess: () => {
       toast({
