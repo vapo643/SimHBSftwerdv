@@ -1721,6 +1721,13 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
         .single();
 
       console.log(`[${new Date().toISOString()}] 🔍 STEP 2 - Proposta encontrada:`, !!proposta);
+      console.log(`[${new Date().toISOString()}] 🔍 STEP 2.1 - Dados da proposta:`, {
+        id: proposta?.id,
+        status: proposta?.status,
+        tabela_comercial_id: proposta?.tabela_comercial_id,
+        produto_id: proposta?.produto_id,
+        atendente_id: proposta?.atendente_id
+      });
 
       if (propostaError || !proposta) {
         console.log(`[${new Date().toISOString()}] ❌ Proposta ${propostaId} não encontrada:`, propostaError?.message);
@@ -1739,19 +1746,31 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
 
       // Buscar taxa de juros da tabela comercial se existir
       let taxaJurosTabela = null;
+      console.log(`[${new Date().toISOString()}] 🔍 STEP 5 - Verificando tabela_comercial_id:`, proposta.tabela_comercial_id);
+      
       if (proposta.tabela_comercial_id) {
-        console.log(`[${new Date().toISOString()}] 🔍 STEP 5 - Buscando tabela comercial ID:`, proposta.tabela_comercial_id);
+        console.log(`[${new Date().toISOString()}] 🔍 STEP 5.1 - Buscando tabela comercial ID:`, proposta.tabela_comercial_id);
         
         const { data: tabelaComercial, error: tabelaError } = await supabase
           .from('tabelas_comerciais')
-          .select('taxa_juros')
+          .select('taxa_juros, nome, parceiro_id')
           .eq('id', proposta.tabela_comercial_id)
           .single();
           
+        console.log(`[${new Date().toISOString()}] 🔍 STEP 5.2 - Resultado da consulta tabela comercial:`, {
+          data: tabelaComercial,
+          error: tabelaError?.message,
+          hasData: !!tabelaComercial
+        });
+          
         if (tabelaComercial && !tabelaError) {
           taxaJurosTabela = tabelaComercial.taxa_juros;
-          console.log(`[${new Date().toISOString()}] 🔍 Taxa de juros encontrada:`, taxaJurosTabela);
+          console.log(`[${new Date().toISOString()}] ✅ Taxa de juros encontrada:`, taxaJurosTabela, `% da tabela "${tabelaComercial.nome}"`);
+        } else {
+          console.log(`[${new Date().toISOString()}] ❌ Erro ao buscar tabela comercial:`, tabelaError?.message);
         }
+      } else {
+        console.log(`[${new Date().toISOString()}] ⚠️ AVISO: Proposta ${propostaId} não possui tabela_comercial_id`);
       }
 
       console.log(`[${new Date().toISOString()}] 🔍 STEP 6 - Processando dados JSONB...`);
