@@ -1861,23 +1861,66 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
         
         for (const doc of documentos) {
           try {
+            console.log(`🔍 [FORMALIZAÇÃO] Tentando gerar URL para documento:`, {
+              nome: doc.nome_arquivo,
+              url: doc.url,
+              tipo: doc.tipo,
+              proposta_id: doc.proposta_id
+            });
+
+            // Extrair o caminho do arquivo a partir da URL salva
+            const documentsIndex = doc.url.indexOf('/documents/');
+            let filePath;
+            
+            if (documentsIndex !== -1) {
+              // Extrair caminho após '/documents/'
+              filePath = doc.url.substring(documentsIndex + '/documents/'.length);
+            } else {
+              // Fallback: construir caminho baseado no nome do arquivo
+              const fileName = doc.nome_arquivo;
+              filePath = `proposta-${propostaId}/${fileName}`;
+            }
+            
+            console.log(`🔍 [FORMALIZAÇÃO] Caminho extraído para URL assinada: ${filePath}`);
+
             const { data: signedUrlData, error: urlError } = await supabase.storage
               .from('documents')
-              .createSignedUrl(doc.caminho_arquivo, 3600); // 1 hora
+              .createSignedUrl(filePath, 3600); // 1 hora
 
             if (!urlError && signedUrlData) {
               documentosComUrls.push({
                 ...doc,
+                // Mapeamento para formato esperado pelo DocumentViewer
+                name: doc.nome_arquivo,
+                url: signedUrlData.signedUrl,
+                type: doc.tipo || 'application/octet-stream', // fallback se tipo for null
+                uploadDate: doc.created_at,
+                // Manter campos originais também
                 url_visualizacao: signedUrlData.signedUrl
               });
               console.log(`[${new Date().toISOString()}] ✅ URL gerada para documento: ${doc.nome_arquivo}`);
             } else {
               console.log(`[${new Date().toISOString()}] ❌ Erro ao gerar URL para documento ${doc.nome_arquivo}:`, urlError?.message);
-              documentosComUrls.push(doc); // Adiciona sem URL em caso de erro
+              console.log(`[${new Date().toISOString()}] ❌ Caminho tentado: ${filePath}`);
+              documentosComUrls.push({
+                ...doc,
+                // Mesmo sem URL, mapear para formato esperado
+                name: doc.nome_arquivo,
+                url: '',
+                type: doc.tipo || 'application/octet-stream',
+                uploadDate: doc.created_at
+              }); // Adiciona sem URL em caso de erro
             }
           } catch (error) {
             console.log(`[${new Date().toISOString()}] ❌ Erro ao processar documento ${doc.nome_arquivo}:`, error);
-            documentosComUrls.push(doc); // Adiciona sem URL em caso de erro
+            documentosComUrls.push({
+              ...doc,
+              // Mesmo com erro, mapear para formato esperado
+              name: doc.nome_arquivo,
+              url: '',
+              type: doc.tipo || 'application/octet-stream',
+              uploadDate: doc.created_at
+            }); // Adiciona sem URL em caso de erro
           }
         }
       }
