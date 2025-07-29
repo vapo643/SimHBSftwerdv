@@ -1697,96 +1697,85 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
 
 
 
-  // Endpoint for formalization data
+  // Endpoint for formalization data - Using Supabase direct to avoid Drizzle orderSelectedFields error
   app.get("/api/propostas/:id/formalizacao", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     try {
       const propostaId = req.params.id;
+      console.log(`[${new Date().toISOString()}] 🔍 INICIO - Buscando dados de formalização para proposta: ${propostaId}`);
+
       if (!propostaId) {
         return res.status(400).json({ message: "ID da proposta é obrigatório" });
       }
 
-      const { db } = await import("../server/lib/supabase");
-      const { eq } = await import("drizzle-orm");
-      const { propostas, lojas, parceiros, produtos } = await import("../shared/schema");
+      // Usar Supabase Admin Client diretamente para evitar problemas do Drizzle
+      const { createServerSupabaseAdminClient } = await import('./lib/supabase');
+      const supabase = createServerSupabaseAdminClient();
 
-      // Buscar proposta primeiro, depois tabela comercial separadamente para evitar JOIN complexo
-      const proposta = await db
-        .select({
-          id: propostas.id,
-          status: propostas.status,
-          clienteData: propostas.clienteData,
-          condicoesData: propostas.condicoesData,
-          dataAprovacao: propostas.dataAprovacao,
-          documentosAdicionais: propostas.documentosAdicionais,
-          contratoGerado: propostas.contratoGerado,
-          contratoAssinado: propostas.contratoAssinado,
-          dataAssinatura: propostas.dataAssinatura,
-          dataPagamento: propostas.dataPagamento,
-          observacoesFormalização: propostas.observacoesFormalização,
-          ccbGerado: propostas.ccbGerado,
-          assinaturaEletronicaConcluida: propostas.assinaturaEletronicaConcluida,
-          biometriaConcluida: propostas.biometriaConcluida,
-          caminhoCcbAssinado: propostas.caminhoCcbAssinado,
-          createdAt: propostas.createdAt,
-          lojaId: propostas.lojaId,
-          clienteNome: propostas.clienteNome,
-          valor: propostas.valor,
-          prazo: propostas.prazo,
-          tabelaComercialId: propostas.tabelaComercialId,
-          taxaJurosMensal: propostas.taxaJurosMensal
-        })
-        .from(propostas)
-        .where(eq(propostas.id, propostaId))
-        .limit(1);
+      console.log(`[${new Date().toISOString()}] 🔍 STEP 1 - Fazendo query direta no Supabase...`);
+      
+      // Buscar proposta usando Supabase diretamente
+      const { data: proposta, error: propostaError } = await supabase
+        .from('propostas')
+        .select('*')
+        .eq('id', propostaId)
+        .single();
 
-      if (!proposta || proposta.length === 0) {
-        console.log(`[${new Date().toISOString()}] Proposta ${propostaId} não encontrada no banco`);
+      console.log(`[${new Date().toISOString()}] 🔍 STEP 2 - Proposta encontrada:`, !!proposta);
+
+      if (propostaError || !proposta) {
+        console.log(`[${new Date().toISOString()}] ❌ Proposta ${propostaId} não encontrada:`, propostaError?.message);
         return res.status(404).json({ message: "Proposta não encontrada" });
       }
 
+      console.log(`[${new Date().toISOString()}] 🔍 STEP 3 - Buscando documentos...`);
+      
       // Buscar documentos da proposta
-      const { propostaDocumentos } = await import("../shared/schema");
-      const documentos = await db
-        .select()
-        .from(propostaDocumentos)
-        .where(eq(propostaDocumentos.propostaId, propostaId));
+      const { data: documentos, error: docError } = await supabase
+        .from('proposta_documentos')
+        .select('*')
+        .eq('proposta_id', propostaId);
+
+      console.log(`[${new Date().toISOString()}] 🔍 STEP 4 - Documentos encontrados:`, documentos?.length || 0);
 
       // Buscar taxa de juros da tabela comercial se existir
       let taxaJurosTabela = null;
-      if (proposta[0].tabelaComercialId) {
-        try {
-          const { tabelasComerciais } = await import("../shared/schema");
-          const tabelaComercial = await db
-            .select({ taxaJuros: tabelasComerciais.taxaJuros })
-            .from(tabelasComerciais)
-            .where(eq(tabelasComerciais.id, proposta[0].tabelaComercialId))
-            .limit(1);
+      if (proposta.tabela_comercial_id) {
+        console.log(`[${new Date().toISOString()}] 🔍 STEP 5 - Buscando tabela comercial ID:`, proposta.tabela_comercial_id);
+        
+        const { data: tabelaComercial, error: tabelaError } = await supabase
+          .from('tabelas_comerciais')
+          .select('taxa_juros')
+          .eq('id', proposta.tabela_comercial_id)
+          .single();
           
-          if (tabelaComercial[0]) {
-            taxaJurosTabela = tabelaComercial[0].taxaJuros;
-          }
-        } catch (error) {
-          console.log('Aviso: Não foi possível buscar taxa de juros da tabela comercial:', error);
+        if (tabelaComercial && !tabelaError) {
+          taxaJurosTabela = tabelaComercial.taxa_juros;
+          console.log(`[${new Date().toISOString()}] 🔍 Taxa de juros encontrada:`, taxaJurosTabela);
         }
       }
 
+      console.log(`[${new Date().toISOString()}] 🔍 STEP 6 - Processando dados JSONB...`);
+
       // Parse dos dados JSONB antes de retornar
       const propostaProcessada = {
-        ...proposta[0],
+        ...proposta,
         // Parse seguro dos dados JSONB
-        clienteData: proposta[0].clienteData ? 
-          (typeof proposta[0].clienteData === 'string' ? 
-            JSON.parse(proposta[0].clienteData) : proposta[0].clienteData) : {},
-        condicoesData: proposta[0].condicoesData ? 
-          (typeof proposta[0].condicoesData === 'string' ? 
-            JSON.parse(proposta[0].condicoesData) : proposta[0].condicoesData) : {},
+        clienteData: proposta.cliente_data || {},
+        condicoesData: proposta.condicoes_data || {},
+        // Converter snake_case para camelCase para compatibilidade frontend
+        ccbGerado: proposta.ccb_gerado || false,
+        dataAprovacao: proposta.data_aprovacao,
+        assinaturaEletronicaConcluida: proposta.assinatura_eletronica_concluida || false,
+        biometriaConcluida: proposta.biometria_concluida || false,
+        caminhoCcbAssinado: proposta.caminho_ccb_assinado,
+        createdAt: proposta.created_at,
         // Adicionar documentos
-        documentos: documentos,
+        documentos: documentos || [],
         // Adicionar taxa de juros da tabela comercial
         taxaJurosTabela: taxaJurosTabela
       };
 
-      console.log(`[${new Date().toISOString()}] Dados de formalização retornados para proposta ${propostaId}:`, {
+      console.log(`[${new Date().toISOString()}] ✅ SUCESSO - Dados de formalização retornados para proposta ${propostaId}:`, {
         id: propostaProcessada.id,
         status: propostaProcessada.status,
         ccbGerado: propostaProcessada.ccbGerado,
@@ -1796,14 +1785,13 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
         totalDocumentos: propostaProcessada.documentos?.length || 0,
         clienteNome: propostaProcessada.clienteData?.nome || 'Nome não informado',
         valorEmprestimo: propostaProcessada.condicoesData?.valor || 'Valor não informado',
-        taxaJuros: propostaProcessada.taxaJurosTabela || propostaProcessada.condicoesData?.taxaJuros || propostaProcessada.condicoesData?.taxa || propostaProcessada.condicoesData?.taxaJurosMensal || propostaProcessada.taxaJurosMensal || 'Taxa não informada',
-        clienteDataCompleto: propostaProcessada.clienteData,
-        condicoesDataCompleto: propostaProcessada.condicoesData
+        taxaJuros: propostaProcessada.taxaJurosTabela || propostaProcessada.condicoesData?.taxaJuros || 'Taxa não informada',
       });
+      
       res.json(propostaProcessada);
     } catch (error) {
-      console.error("Erro ao buscar dados de formalização:", error);
-      res.status(500).json({ message: "Erro ao buscar dados de formalização" });
+      console.error(`[${new Date().toISOString()}] ❌ ERRO ao buscar dados de formalização:`, error);
+      res.status(500).json({ message: "Erro ao buscar dados de formalização", error: error.message });
     }
   });
 
