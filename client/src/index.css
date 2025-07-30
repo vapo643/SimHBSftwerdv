@@ -4,15 +4,16 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom Modern Scrollbar Design */
+/* Custom Modern Scrollbar Design - Blackout Theme */
 ::-webkit-scrollbar {
   width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: hsl(var(--muted));
+  background: hsl(0, 0%, 8%);
   border-radius: 10px;
   margin: 4px;
+  border: 1px solid hsl(0, 0%, 15%);
 }
 
 ::-webkit-scrollbar-thumb {
@@ -31,7 +32,7 @@
 /* Firefox scrollbar */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #3b82f6 hsl(var(--muted));
+  scrollbar-color: #3b82f6 hsl(0, 0%, 8%);
 }
 
 :root {

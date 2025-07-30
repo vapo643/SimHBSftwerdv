@@ -281,25 +281,25 @@ export default function OWASPAssessment() {
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            <div className="flex items-center space-x-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+            <div className="flex items-center space-x-3 p-3 bg-green-900/20 border border-green-500/20 rounded-lg">
               <CheckCircle2 className="h-5 w-5 text-green-500" />
               <div>
-                <p className="font-medium text-green-700 dark:text-green-300">Sistema Totalmente Seguro</p>
-                <p className="text-sm text-green-600 dark:text-green-400">100% conformidade OWASP ASVS Level 1 atingida - Padrão bancário internacional</p>
+                <p className="font-medium text-green-300">Sistema Totalmente Seguro</p>
+                <p className="text-sm text-green-400">100% conformidade OWASP ASVS Level 1 atingida - Padrão bancário internacional</p>
               </div>
             </div>
-            <div className="flex items-center space-x-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+            <div className="flex items-center space-x-3 p-3 bg-blue-900/20 border border-blue-500/20 rounded-lg">
               <Clock className="h-5 w-5 text-blue-500" />
               <div>
-                <p className="font-medium text-blue-700 dark:text-blue-300">Monitoramento Ativo</p>
-                <p className="text-sm text-blue-600 dark:text-blue-400">Timeout de sessão ativo: 30min inatividade com aviso de 2min</p>
+                <p className="font-medium text-blue-300">Monitoramento Ativo</p>
+                <p className="text-sm text-blue-400">Timeout de sessão ativo: 30min inatividade com aviso de 2min</p>
               </div>
             </div>
-            <div className="flex items-center space-x-3 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+            <div className="flex items-center space-x-3 p-3 bg-purple-900/20 border border-purple-500/20 rounded-lg">
               <Shield className="h-5 w-5 text-purple-500" />
               <div>
-                <p className="font-medium text-purple-700 dark:text-purple-300">Blindagem Multi-Camada</p>
-                <p className="text-sm text-purple-600 dark:text-purple-400">JWT + RLS + Rate Limiting + XSS Protection + CSRF + Input Sanitization</p>
+                <p className="font-medium text-purple-300">Blindagem Multi-Camada</p>
+                <p className="text-sm text-purple-400">JWT + RLS + Rate Limiting + XSS Protection + CSRF + Input Sanitization</p>
               </div>
             </div>
           </div>
@@ -314,47 +314,47 @@ export default function OWASPAssessment() {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 border rounded-lg bg-green-50/50">
-                <span className="font-medium">JWT Authentication (520 bits entropia)</span>
-                <Badge variant="outline" className="bg-green-100 text-green-700 border-green-300">ATIVO ✓</Badge>
+              <div className="flex items-center justify-between p-3 border border-green-500/20 rounded-lg bg-green-900/10">
+                <span className="font-medium text-foreground">JWT Authentication (520 bits entropia)</span>
+                <Badge variant="outline" className="bg-green-900/20 text-green-300 border-green-500/30">ATIVO ✓</Badge>
               </div>
-              <div className="flex items-center justify-between p-3 border rounded-lg bg-green-50/50">
-                <span className="font-medium">Row Level Security (RLS)</span>
-                <Badge variant="outline" className="bg-green-100 text-green-700 border-green-300">ATIVO ✓</Badge>
+              <div className="flex items-center justify-between p-3 border border-green-500/20 rounded-lg bg-green-900/10">
+                <span className="font-medium text-foreground">Row Level Security (RLS)</span>
+                <Badge variant="outline" className="bg-green-900/20 text-green-300 border-green-500/30">ATIVO ✓</Badge>
               </div>
-              <div className="flex items-center justify-between p-3 border rounded-lg bg-green-50/50">
-                <span className="font-medium">Password Validation (30k+ senhas)</span>
-                <Badge variant="outline" className="bg-green-100 text-green-700 border-green-300">ATIVO ✓</Badge>
+              <div className="flex items-center justify-between p-3 border border-green-500/20 rounded-lg bg-green-900/10">
+                <span className="font-medium text-foreground">Password Validation (30k+ senhas)</span>
+                <Badge variant="outline" className="bg-green-900/20 text-green-300 border-green-500/30">ATIVO ✓</Badge>
               </div>
-              <div className="flex items-center justify-between p-3 border rounded-lg bg-green-50/50">
-                <span className="font-medium">Session Management</span>
-                <Badge variant="outline" className="bg-green-100 text-green-700 border-green-300">ATIVO ✓</Badge>
+              <div className="flex items-center justify-between p-3 border border-green-500/20 rounded-lg bg-green-900/10">
+                <span className="font-medium text-foreground">Session Management</span>
+                <Badge variant="outline" className="bg-green-900/20 text-green-300 border-green-500/30">ATIVO ✓</Badge>
               </div>
-              <div className="flex items-center justify-between p-3 border rounded-lg bg-green-50/50">
-                <span className="font-medium">Email Change Security</span>
-                <Badge variant="outline" className="bg-green-100 text-green-700 border-green-300">ATIVO ✓</Badge>
+              <div className="flex items-center justify-between p-3 border border-green-500/20 rounded-lg bg-green-900/10">
+                <span className="font-medium text-foreground">Email Change Security</span>
+                <Badge variant="outline" className="bg-green-900/20 text-green-300 border-green-500/30">ATIVO ✓</Badge>
               </div>
             </div>
             <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 border rounded-lg bg-green-50/50">
-                <span className="font-medium">Input Sanitization</span>
-                <Badge variant="outline" className="bg-green-100 text-green-700 border-green-300">ATIVO ✓</Badge>
+              <div className="flex items-center justify-between p-3 border border-green-500/20 rounded-lg bg-green-900/10">
+                <span className="font-medium text-foreground">Input Sanitization</span>
+                <Badge variant="outline" className="bg-green-900/20 text-green-300 border-green-500/30">ATIVO ✓</Badge>
               </div>
-              <div className="flex items-center justify-between p-3 border rounded-lg bg-green-50/50">
-                <span className="font-medium">CSRF Protection</span>
-                <Badge variant="outline" className="bg-green-100 text-green-700 border-green-300">ATIVO ✓</Badge>
+              <div className="flex items-center justify-between p-3 border border-green-500/20 rounded-lg bg-green-900/10">
+                <span className="font-medium text-foreground">CSRF Protection</span>
+                <Badge variant="outline" className="bg-green-900/20 text-green-300 border-green-500/30">ATIVO ✓</Badge>
               </div>
-              <div className="flex items-center justify-between p-3 border rounded-lg bg-green-50/50">
-                <span className="font-medium">XSS Protection</span>
-                <Badge variant="outline" className="bg-green-100 text-green-700 border-green-300">ATIVO ✓</Badge>
+              <div className="flex items-center justify-between p-3 border border-green-500/20 rounded-lg bg-green-900/10">
+                <span className="font-medium text-foreground">XSS Protection</span>
+                <Badge variant="outline" className="bg-green-900/20 text-green-300 border-green-500/30">ATIVO ✓</Badge>
               </div>
-              <div className="flex items-center justify-between p-3 border rounded-lg bg-green-50/50">
-                <span className="font-medium">Security Event Logging</span>
-                <Badge variant="outline" className="bg-green-100 text-green-700 border-green-300">ATIVO ✓</Badge>
+              <div className="flex items-center justify-between p-3 border border-green-500/20 rounded-lg bg-green-900/10">
+                <span className="font-medium text-foreground">Security Event Logging</span>
+                <Badge variant="outline" className="bg-green-900/20 text-green-300 border-green-500/30">ATIVO ✓</Badge>
               </div>
-              <div className="flex items-center justify-between p-3 border rounded-lg bg-green-50/50">
-                <span className="font-medium">Token Blacklist System</span>
-                <Badge variant="outline" className="bg-green-100 text-green-700 border-green-300">ATIVO ✓</Badge>
+              <div className="flex items-center justify-between p-3 border border-green-500/20 rounded-lg bg-green-900/10">
+                <span className="font-medium text-foreground">Token Blacklist System</span>
+                <Badge variant="outline" className="bg-green-900/20 text-green-300 border-green-500/30">ATIVO ✓</Badge>
               </div>
             </div>
           </div>
@@ -375,19 +375,19 @@ export default function OWASPAssessment() {
           <CardContent className="space-y-3">
             <div className="flex justify-between items-center">
               <span className="text-sm">Tentativas de SQL Injection:</span>
-              <Badge className="bg-green-100 text-green-700">0 bloqueadas</Badge>
+              <Badge className="bg-green-900/20 text-green-300 border-green-500/30">0 bloqueadas</Badge>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm">Ataques XSS detectados:</span>
-              <Badge className="bg-green-100 text-green-700">0 bloqueados</Badge>
+              <Badge className="bg-green-900/20 text-green-300 border-green-500/30">0 bloqueados</Badge>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm">Brute Force:</span>
-              <Badge className="bg-green-100 text-green-700">0 tentativas</Badge>
+              <Badge className="bg-green-900/20 text-green-300 border-green-500/30">0 tentativas</Badge>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm">Rate Limit Violations:</span>
-              <Badge className="bg-green-100 text-green-700">0 violações</Badge>
+              <Badge className="bg-green-900/20 text-green-300 border-green-500/30">0 violações</Badge>
             </div>
           </CardContent>
         </Card>
@@ -403,19 +403,19 @@ export default function OWASPAssessment() {
           <CardContent className="space-y-3">
             <div className="flex justify-between items-center">
               <span className="text-sm">Logins hoje:</span>
-              <Badge className="bg-blue-100 text-blue-700">1 sucesso</Badge>
+              <Badge className="bg-blue-900/20 text-blue-300 border-blue-500/30">1 sucesso</Badge>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm">Tentativas falhadas:</span>
-              <Badge className="bg-green-100 text-green-700">0 tentativas</Badge>
+              <Badge className="bg-green-900/20 text-green-300 border-green-500/30">0 tentativas</Badge>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm">Sessões ativas:</span>
-              <Badge className="bg-blue-100 text-blue-700">1 usuário</Badge>
+              <Badge className="bg-blue-900/20 text-blue-300 border-blue-500/30">1 usuário</Badge>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm">Tokens JWT válidos:</span>
-              <Badge className="bg-blue-100 text-blue-700">1 ativo</Badge>
+              <Badge className="bg-blue-900/20 text-blue-300 border-blue-500/30">1 ativo</Badge>
             </div>
           </CardContent>
         </Card>
@@ -431,19 +431,19 @@ export default function OWASPAssessment() {
           <CardContent className="space-y-3">
             <div className="flex justify-between items-center">
               <span className="text-sm">Auth Response Time:</span>
-              <Badge className="bg-green-100 text-green-700">&lt; 50ms</Badge>
+              <Badge className="bg-green-900/20 text-green-300 border-green-500/30">&lt; 50ms</Badge>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm">RLS Query Time:</span>
-              <Badge className="bg-green-100 text-green-700">&lt; 30ms</Badge>
+              <Badge className="bg-green-900/20 text-green-300 border-green-500/30">&lt; 30ms</Badge>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm">Rate Limit Check:</span>
-              <Badge className="bg-green-100 text-green-700">&lt; 5ms</Badge>
+              <Badge className="bg-green-900/20 text-green-300 border-green-500/30">&lt; 5ms</Badge>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm">Security Headers:</span>
-              <Badge className="bg-green-100 text-green-700">Otimizado</Badge>
+              <Badge className="bg-green-900/20 text-green-300 border-green-500/30">Otimizado</Badge>
             </div>
           </CardContent>
         </Card>
@@ -459,63 +459,63 @@ export default function OWASPAssessment() {
         </CardHeader>
         <CardContent>
           <div className="space-y-2 max-h-80 overflow-y-auto">
-            <div className="flex items-center justify-between p-3 border-l-4 border-green-500 bg-green-50/50 rounded-r-lg">
+            <div className="flex items-center justify-between p-3 border-l-4 border-green-500 bg-green-900/20 rounded-r-lg">
               <div className="flex-1">
                 <div className="flex items-center space-x-2">
                   <CheckCircle2 className="h-4 w-4 text-green-500" />
-                  <p className="text-sm font-medium">LOGIN_SUCCESS</p>
-                  <Badge variant="outline" className="bg-green-100 text-green-700 text-xs">NORMAL</Badge>
+                  <p className="text-sm font-medium text-foreground">LOGIN_SUCCESS</p>
+                  <Badge variant="outline" className="bg-green-900/20 text-green-300 border-green-500/30 text-xs">NORMAL</Badge>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">gabrielserri238@gmail.com - IP: 127.0.0.1 - 18:31:00</p>
-                <p className="text-xs text-blue-600">JWT Token gerado com 520 bits de entropia - Sessão válida por 1h</p>
+                <p className="text-xs text-blue-300">JWT Token gerado com 520 bits de entropia - Sessão válida por 1h</p>
               </div>
             </div>
 
-            <div className="flex items-center justify-between p-3 border-l-4 border-blue-500 bg-blue-50/50 rounded-r-lg">
+            <div className="flex items-center justify-between p-3 border-l-4 border-blue-500 bg-blue-900/20 rounded-r-lg">
               <div className="flex-1">
                 <div className="flex items-center space-x-2">
                   <Shield className="h-4 w-4 text-blue-500" />
-                  <p className="text-sm font-medium">SECURITY_AUDIT_COMPLETED</p>
-                  <Badge variant="outline" className="bg-blue-100 text-blue-700 text-xs">INFO</Badge>
+                  <p className="text-sm font-medium text-foreground">SECURITY_AUDIT_COMPLETED</p>
+                  <Badge variant="outline" className="bg-blue-900/20 text-blue-300 border-blue-500/30 text-xs">INFO</Badge>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">Sistema auditado automaticamente - 18:30:00</p>
-                <p className="text-xs text-green-600">✓ 100% OWASP ASVS Level 1 compliance verificada</p>
+                <p className="text-xs text-green-300">✓ 100% OWASP ASVS Level 1 compliance verificada</p>
               </div>
             </div>
 
-            <div className="flex items-center justify-between p-3 border-l-4 border-purple-500 bg-purple-50/50 rounded-r-lg">
+            <div className="flex items-center justify-between p-3 border-l-4 border-purple-500 bg-purple-900/20 rounded-r-lg">
               <div className="flex-1">
                 <div className="flex items-center space-x-2">
                   <Shield className="h-4 w-4 text-purple-500" />
-                  <p className="text-sm font-medium">RLS_POLICY_ACTIVE</p>
-                  <Badge variant="outline" className="bg-purple-100 text-purple-700 text-xs">SECURITY</Badge>
+                  <p className="text-sm font-medium text-foreground">RLS_POLICY_ACTIVE</p>
+                  <Badge variant="outline" className="bg-purple-900/20 text-purple-300 border-purple-500/30 text-xs">SECURITY</Badge>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">Row Level Security enforcement ativo - 18:30:00</p>
-                <p className="text-xs text-purple-600">Multi-tenant data isolation funcionando perfeitamente</p>
+                <p className="text-xs text-purple-300">Multi-tenant data isolation funcionando perfeitamente</p>
               </div>
             </div>
 
-            <div className="flex items-center justify-between p-3 border-l-4 border-orange-500 bg-orange-50/50 rounded-r-lg">
+            <div className="flex items-center justify-between p-3 border-l-4 border-orange-500 bg-orange-900/20 rounded-r-lg">
               <div className="flex-1">
                 <div className="flex items-center space-x-2">
                   <AlertTriangle className="h-4 w-4 text-orange-500" />
-                  <p className="text-sm font-medium">RATE_LIMIT_NEAR_THRESHOLD</p>
-                  <Badge variant="outline" className="bg-orange-100 text-orange-700 text-xs">WARNING</Badge>
+                  <p className="text-sm font-medium text-foreground">RATE_LIMIT_NEAR_THRESHOLD</p>
+                  <Badge variant="outline" className="bg-orange-900/20 text-orange-300 border-orange-500/30 text-xs">WARNING</Badge>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">Rate limiting funcionando - threshold 80% - 18:25:00</p>
-                <p className="text-xs text-orange-600">Sistema preparado para bloquear em caso de sobrecarga</p>
+                <p className="text-xs text-orange-300">Sistema preparado para bloquear em caso de sobrecarga</p>
               </div>
             </div>
 
-            <div className="flex items-center justify-between p-3 border-l-4 border-green-500 bg-green-50/50 rounded-r-lg">
+            <div className="flex items-center justify-between p-3 border-l-4 border-green-500 bg-green-900/20 rounded-r-lg">
               <div className="flex-1">
                 <div className="flex items-center space-x-2">
                   <CheckCircle2 className="h-4 w-4 text-green-500" />
-                  <p className="text-sm font-medium">INPUT_SANITIZATION_ACTIVE</p>
-                  <Badge variant="outline" className="bg-green-100 text-green-700 text-xs">SUCCESS</Badge>
+                  <p className="text-sm font-medium text-foreground">INPUT_SANITIZATION_ACTIVE</p>
+                  <Badge variant="outline" className="bg-green-900/20 text-green-300 border-green-500/30 text-xs">SUCCESS</Badge>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">Sanitização de entrada processando todas requisições - 18:20:00</p>
-                <p className="text-xs text-green-600">XSS e SQL Injection bloqueados preventivamente</p>
+                <p className="text-xs text-green-300">XSS e SQL Injection bloqueados preventivamente</p>
               </div>
             </div>
           </div>
@@ -532,24 +532,24 @@ export default function OWASPAssessment() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="text-center p-4 border rounded-lg bg-green-50/50">
+            <div className="text-center p-4 border border-green-500/20 rounded-lg bg-green-900/10">
               <CheckCircle2 className="h-8 w-8 text-green-500 mx-auto mb-2" />
-              <div className="font-semibold text-green-700">RLS Ativo</div>
+              <div className="font-semibold text-green-300">RLS Ativo</div>
               <div className="text-sm text-muted-foreground">Isolamento perfeito</div>
             </div>
-            <div className="text-center p-4 border rounded-lg bg-blue-50/50">
+            <div className="text-center p-4 border border-blue-500/20 rounded-lg bg-blue-900/10">
               <Shield className="h-8 w-8 text-blue-500 mx-auto mb-2" />
-              <div className="font-semibold text-blue-700">Conexões Seguras</div>
+              <div className="font-semibold text-blue-300">Conexões Seguras</div>
               <div className="text-sm text-muted-foreground">SSL/TLS ativo</div>
             </div>
-            <div className="text-center p-4 border rounded-lg bg-purple-50/50">
+            <div className="text-center p-4 border border-purple-500/20 rounded-lg bg-purple-900/10">
               <Users className="h-8 w-8 text-purple-500 mx-auto mb-2" />
-              <div className="font-semibold text-purple-700">Multi-tenant</div>
+              <div className="font-semibold text-purple-300">Multi-tenant</div>
               <div className="text-sm text-muted-foreground">Dados isolados</div>
             </div>
-            <div className="text-center p-4 border rounded-lg bg-green-50/50">
+            <div className="text-center p-4 border border-green-500/20 rounded-lg bg-green-900/10">
               <CheckCircle2 className="h-8 w-8 text-green-500 mx-auto mb-2" />
-              <div className="font-semibold text-green-700">Backups</div>
+              <div className="font-semibold text-green-300">Backups</div>
               <div className="text-sm text-muted-foreground">Automático 24h</div>
             </div>
           </div>
@@ -566,19 +566,19 @@ export default function OWASPAssessment() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="text-center p-4 border rounded-lg bg-green-50/50">
-              <div className="text-2xl font-bold text-green-600 mb-2">0</div>
-              <p className="text-sm font-medium">Vulnerabilidades Críticas</p>
+            <div className="text-center p-4 border border-green-500/20 rounded-lg bg-green-900/10">
+              <div className="text-2xl font-bold text-green-300 mb-2">0</div>
+              <p className="text-sm font-medium text-foreground">Vulnerabilidades Críticas</p>
               <p className="text-xs text-muted-foreground">Sistema blindado</p>
             </div>
-            <div className="text-center p-4 border rounded-lg bg-green-50/50">
-              <div className="text-2xl font-bold text-green-600 mb-2">100%</div>
+            <div className="text-center p-4 border border-green-500/20 rounded-lg bg-green-900/10">
+              <div className="text-2xl font-bold text-green-300 mb-2">100%</div>
               <p className="text-sm font-medium">Uptime Segurança</p>
               <p className="text-xs text-muted-foreground">Últimos 30 dias</p>
             </div>
-            <div className="text-center p-4 border rounded-lg bg-blue-50/50">
-              <div className="text-2xl font-bold text-blue-600 mb-2">&lt; 50ms</div>
-              <p className="text-sm font-medium">Tempo Resposta Auth</p>
+            <div className="text-center p-4 border border-blue-500/20 rounded-lg bg-blue-900/10">
+              <div className="text-2xl font-bold text-blue-300 mb-2">&lt; 50ms</div>
+              <p className="text-sm font-medium text-foreground">Tempo Resposta Auth</p>
               <p className="text-xs text-muted-foreground">Performance otimizada</p>
             </div>
           </div>
@@ -602,28 +602,28 @@ export default function OWASPAssessment() {
                 <span className="text-sm">ASVS Level 1 (Banking Standard):</span>
                 <div className="flex items-center space-x-2">
                   <Progress value={100} className="w-20 h-2" />
-                  <Badge className="bg-green-100 text-green-700">100%</Badge>
+                  <Badge className="bg-green-900/20 text-green-300 border-green-500/30">100%</Badge>
                 </div>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm">SAMM Maturity Model:</span>
                 <div className="flex items-center space-x-2">
                   <Progress value={51} className="w-20 h-2" />
-                  <Badge className="bg-blue-100 text-blue-700">51%</Badge>
+                  <Badge className="bg-blue-900/20 text-blue-300 border-blue-500/30">51%</Badge>
                 </div>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm">OWASP Top 10 (2021/2024):</span>
                 <div className="flex items-center space-x-2">
                   <Progress value={100} className="w-20 h-2" />
-                  <Badge className="bg-green-100 text-green-700">Protegido</Badge>
+                  <Badge className="bg-green-900/20 text-green-300 border-green-500/30">Protegido</Badge>
                 </div>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm">Security Headers (NIST):</span>
                 <div className="flex items-center space-x-2">
                   <Progress value={100} className="w-20 h-2" />
-                  <Badge className="bg-green-100 text-green-700">Completo</Badge>
+                  <Badge className="bg-green-900/20 text-green-300 border-green-500/30">Completo</Badge>
                 </div>
               </div>
             </div>
@@ -640,26 +640,26 @@ export default function OWASPAssessment() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
-              <div className="text-center p-3 border rounded-lg bg-green-50/50">
-                <div className="text-2xl font-bold text-green-600">0</div>
-                <div className="text-xs font-medium">Críticas</div>
+              <div className="text-center p-3 border border-green-500/20 rounded-lg bg-green-900/10">
+                <div className="text-2xl font-bold text-green-300">0</div>
+                <div className="text-xs font-medium text-foreground">Críticas</div>
               </div>
-              <div className="text-center p-3 border rounded-lg bg-green-50/50">
-                <div className="text-2xl font-bold text-green-600">0</div>
-                <div className="text-xs font-medium">Altas</div>
+              <div className="text-center p-3 border border-green-500/20 rounded-lg bg-green-900/10">
+                <div className="text-2xl font-bold text-green-300">0</div>
+                <div className="text-xs font-medium text-foreground">Altas</div>
               </div>
-              <div className="text-center p-3 border rounded-lg bg-green-50/50">
-                <div className="text-2xl font-bold text-green-600">0</div>
-                <div className="text-xs font-medium">Médias</div>
+              <div className="text-center p-3 border border-green-500/20 rounded-lg bg-green-900/10">
+                <div className="text-2xl font-bold text-green-300">0</div>
+                <div className="text-xs font-medium text-foreground">Médias</div>
               </div>
-              <div className="text-center p-3 border rounded-lg bg-green-50/50">
-                <div className="text-2xl font-bold text-green-600">0</div>
-                <div className="text-xs font-medium">Baixas</div>
+              <div className="text-center p-3 border border-green-500/20 rounded-lg bg-green-900/10">
+                <div className="text-2xl font-bold text-green-300">0</div>
+                <div className="text-xs font-medium text-foreground">Baixas</div>
               </div>
             </div>
-            <div className="text-center p-2 bg-green-100 rounded-lg">
-              <p className="text-sm font-medium text-green-700">✓ Sistema totalmente seguro</p>
-              <p className="text-xs text-green-600">Última verificação: 30/01/2025 18:30</p>
+            <div className="text-center p-2 bg-green-900/20 border border-green-500/20 rounded-lg">
+              <p className="text-sm font-medium text-green-300">✓ Sistema totalmente seguro</p>
+              <p className="text-xs text-green-400">Última verificação: 30/01/2025 18:30</p>
             </div>
           </CardContent>
         </Card>
@@ -678,69 +678,69 @@ export default function OWASPAssessment() {
             
             {/* Network Protection */}
             <div className="space-y-3">
-              <h4 className="font-medium text-blue-700">Proteção de Rede</h4>
+              <h4 className="font-medium text-blue-300">Proteção de Rede</h4>
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <span className="text-sm">Firewall Status:</span>
-                  <Badge className="bg-green-100 text-green-700">ATIVO</Badge>
+                  <Badge className="bg-green-900/20 text-green-300 border-green-500/30">ATIVO</Badge>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm">DDoS Protection:</span>
-                  <Badge className="bg-green-100 text-green-700">ATIVO</Badge>
+                  <Badge className="bg-green-900/20 text-green-300 border-green-500/30">ATIVO</Badge>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm">SSL/TLS Grade:</span>
-                  <Badge className="bg-green-100 text-green-700">A+</Badge>
+                  <Badge className="bg-green-900/20 text-green-300 border-green-500/30">A+</Badge>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm">HSTS Enabled:</span>
-                  <Badge className="bg-green-100 text-green-700">SIM</Badge>
+                  <Badge className="bg-green-900/20 text-green-300 border-green-500/30">SIM</Badge>
                 </div>
               </div>
             </div>
 
             {/* Data Protection */}
             <div className="space-y-3">
-              <h4 className="font-medium text-purple-700">Proteção de Dados</h4>
+              <h4 className="font-medium text-purple-300">Proteção de Dados</h4>
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <span className="text-sm">Encryption at Rest:</span>
-                  <Badge className="bg-green-100 text-green-700">AES-256</Badge>
+                  <Badge className="bg-green-900/20 text-green-300 border-green-500/30">AES-256</Badge>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm">Encryption in Transit:</span>
-                  <Badge className="bg-green-100 text-green-700">TLS 1.3</Badge>
+                  <Badge className="bg-green-900/20 text-green-300 border-green-500/30">TLS 1.3</Badge>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm">Backup Encryption:</span>
-                  <Badge className="bg-green-100 text-green-700">ATIVO</Badge>
+                  <Badge className="bg-green-900/20 text-green-300 border-green-500/30">ATIVO</Badge>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm">LGPD Compliance:</span>
-                  <Badge className="bg-green-100 text-green-700">100%</Badge>
+                  <Badge className="bg-green-900/20 text-green-300 border-green-500/30">100%</Badge>
                 </div>
               </div>
             </div>
 
             {/* Monitoring & Logs */}
             <div className="space-y-3">
-              <h4 className="font-medium text-orange-700">Monitoramento</h4>
+              <h4 className="font-medium text-orange-300">Monitoramento</h4>
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <span className="text-sm">Security Logging:</span>
-                  <Badge className="bg-green-100 text-green-700">ATIVO</Badge>
+                  <Badge className="bg-green-900/20 text-green-300 border-green-500/30">ATIVO</Badge>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm">Audit Trail:</span>
-                  <Badge className="bg-green-100 text-green-700">COMPLETO</Badge>
+                  <Badge className="bg-green-900/20 text-green-300 border-green-500/30">COMPLETO</Badge>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm">Intrusion Detection:</span>
-                  <Badge className="bg-green-100 text-green-700">ATIVO</Badge>
+                  <Badge className="bg-green-900/20 text-green-300 border-green-500/30">ATIVO</Badge>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm">Log Retention:</span>
-                  <Badge className="bg-blue-100 text-blue-700">365 dias</Badge>
+                  <Badge className="bg-blue-900/20 text-blue-300 border-blue-500/30">365 dias</Badge>
                 </div>
               </div>
             </div>
@@ -760,27 +760,27 @@ export default function OWASPAssessment() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             
             {/* System Updates */}
-            <div className="text-center p-4 border rounded-lg bg-green-50/50">
+            <div className="text-center p-4 border border-green-500/20 rounded-lg bg-green-900/10">
               <CheckCircle2 className="h-8 w-8 text-green-500 mx-auto mb-2" />
-              <div className="font-semibold text-green-700">Sistema Atualizado</div>
+              <div className="font-semibold text-green-300">Sistema Atualizado</div>
               <div className="text-sm text-muted-foreground mb-2">Última atualização: Hoje</div>
-              <Badge className="bg-green-100 text-green-700">Patches aplicados</Badge>
+              <Badge className="bg-green-900/20 text-green-300 border-green-500/30">Patches aplicados</Badge>
             </div>
 
             {/* Dependencies */}
-            <div className="text-center p-4 border rounded-lg bg-green-50/50">
+            <div className="text-center p-4 border border-green-500/20 rounded-lg bg-green-900/10">
               <Shield className="h-8 w-8 text-green-500 mx-auto mb-2" />
-              <div className="font-semibold text-green-700">Dependências Seguras</div>
+              <div className="font-semibold text-green-300">Dependências Seguras</div>
               <div className="text-sm text-muted-foreground mb-2">0 vulnerabilidades conhecidas</div>
-              <Badge className="bg-green-100 text-green-700">Atualizadas</Badge>
+              <Badge className="bg-green-900/20 text-green-300 border-green-500/30">Atualizadas</Badge>
             </div>
 
             {/* Security Database */}
-            <div className="text-center p-4 border rounded-lg bg-blue-50/50">
+            <div className="text-center p-4 border border-blue-500/20 rounded-lg bg-blue-900/10">
               <Target className="h-8 w-8 text-blue-500 mx-auto mb-2" />
-              <div className="font-semibold text-blue-700">Base de Ameaças</div>
+              <div className="font-semibold text-blue-300">Base de Ameaças</div>
               <div className="text-sm text-muted-foreground mb-2">Última sync: 18:30 hoje</div>
-              <Badge className="bg-blue-100 text-blue-700">Atualizada</Badge>
+              <Badge className="bg-blue-900/20 text-blue-300 border-blue-500/30">Atualizada</Badge>
             </div>
           </div>
         </CardContent>
