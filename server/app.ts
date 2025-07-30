@@ -8,6 +8,8 @@ import { setupSecurityHeaders, additionalSecurityHeaders } from "./lib/security-
 import { inputSanitizerMiddleware } from "./lib/input-sanitizer";
 import { securityLogger, SecurityEventType, getClientIP } from "./lib/security-logger";
 import { urlTokenValidator } from "./middleware/url-token-validator";
+import { csrfProtection } from "./middleware/csrfProtection";
+import { strictCSP } from "./middleware/strictCSP";
 
 export async function createApp() {
   const app = express();
@@ -22,7 +24,13 @@ export async function createApp() {
   if (config.security.enableHelmet) {
     app.use(setupSecurityHeaders());
     app.use(additionalSecurityHeaders);
-    log("🔒 [SECURITY] Enhanced security headers activated");
+    // Temporarily disable CSP in development to fix blank screen issue
+    if (process.env.NODE_ENV !== 'development') {
+      app.use(strictCSP);
+      log("🔒 [SECURITY] Enhanced security headers and strict CSP activated");
+    } else {
+      log("🔧 [DEV] CSP disabled in development mode for debugging");
+    }
   }
   
   // Input Sanitization Middleware - OWASP A03: Injection Prevention
@@ -32,6 +40,10 @@ export async function createApp() {
   // URL Token Validation Middleware - OWASP ASVS V7.1.1
   app.use(urlTokenValidator);
   log("🔒 [SECURITY] URL token validation middleware activated - ASVS V7.1.1");
+
+  // CSRF Protection Middleware - OWASP Cheat Sheet Series
+  app.use(csrfProtection);
+  log("🔒 [SECURITY] CSRF protection middleware activated - OWASP Cheat Sheet");
 
   // Rate Limiting (only in production/staging)
   if (process.env.NODE_ENV !== 'test') {

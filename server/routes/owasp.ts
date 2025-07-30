@@ -3,6 +3,7 @@ import { Router } from 'express';
 import { jwtAuthMiddleware, AuthenticatedRequest } from '../lib/jwt-auth-middleware.js';
 import { OWASPAssessmentService } from '../services/owaspAssessmentService.js';
 import { SAMMUrlProcessor } from '../services/sammUrlProcessor.js';
+import { OwaspCheatSheetService } from '../services/owaspCheatSheetService.js';
 import multer from 'multer';
 import path from 'path';
 
@@ -250,6 +251,81 @@ router.post('/samm/process-pdf', requireAdmin, async (req: AuthenticatedRequest,
     res.status(500).json({
       success: false,
       error: 'Erro ao processar PDF do SAMM'
+    });
+  }
+});
+
+// GET /api/owasp/cheatsheets - OWASP Cheat Sheets Analysis
+router.get('/cheatsheets', requireAdmin, async (req: AuthenticatedRequest, res) => {
+  try {
+    const cheatsheets = await owaspCheatSheetService.processCheatSheets();
+    res.json({
+      success: true,
+      data: {
+        totalCheatSheets: cheatsheets.length,
+        processedCheatSheets: cheatsheets.filter(cs => cs.status === 'processed').length,
+        cheatsheets,
+        summary: {
+          totalRecommendations: cheatsheets.reduce((sum, cs) => sum + (cs.recommendations?.length || 0), 0),
+          criticalRecommendations: cheatsheets.reduce((sum, cs) => 
+            sum + (cs.recommendations?.filter(r => r.priority === 'critical').length || 0), 0),
+          implementedItems: cheatsheets.reduce((sum, cs) => 
+            sum + (cs.recommendations?.filter(r => r.currentStatus === 'implemented').length || 0), 0)
+        }
+      },
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('[OWASP CHEAT SHEETS] Analysis error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Erro ao processar Cheat Sheets OWASP'
+    });
+  }
+});
+
+// GET /api/owasp/cheatsheets/recommendations - Get All Security Recommendations
+router.get('/cheatsheets/recommendations', requireAdmin, async (req: AuthenticatedRequest, res) => {
+  try {
+    const cheatsheets = await owaspCheatSheetService.processCheatSheets();
+    const allRecommendations = cheatsheets.flatMap(cs => cs.recommendations || []);
+    
+    // Group by category and priority
+    const byCategory = allRecommendations.reduce((acc, rec) => {
+      if (!acc[rec.category]) acc[rec.category] = [];
+      acc[rec.category].push(rec);
+      return acc;
+    }, {} as Record<string, any[]>);
+    
+    const byPriority = allRecommendations.reduce((acc, rec) => {
+      if (!acc[rec.priority]) acc[rec.priority] = [];
+      acc[rec.priority].push(rec);
+      return acc;
+    }, {} as Record<string, any[]>);
+    
+    res.json({
+      success: true,
+      data: {
+        totalRecommendations: allRecommendations.length,
+        byCategory,
+        byPriority,
+        summary: {
+          critical: byPriority.critical?.length || 0,
+          high: byPriority.high?.length || 0,
+          medium: byPriority.medium?.length || 0,
+          low: byPriority.low?.length || 0,
+          implemented: allRecommendations.filter(r => r.currentStatus === 'implemented').length,
+          partial: allRecommendations.filter(r => r.currentStatus === 'partial').length,
+          notImplemented: allRecommendations.filter(r => r.currentStatus === 'not_implemented').length
+        }
+      },
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('[OWASP RECOMMENDATIONS] Analysis error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Erro ao processar recomendações de segurança'
     });
   }
 });
