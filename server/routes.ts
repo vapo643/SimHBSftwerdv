@@ -3184,7 +3184,27 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
           formErrors: flatErrors.formErrors,
           issues: error.issues
         });
-        return res.status(400).json({ message: "Dados de entrada inválidos", errors: flatErrors });
+        
+        // Enhanced error message for password issues
+        let errorMessage = "Dados de entrada inválidos";
+        if (flatErrors.fieldErrors.password) {
+          errorMessage = "Erro de validação de senha - Verifique os requisitos de segurança";
+        } else if (flatErrors.fieldErrors.role) {
+          errorMessage = "Perfil de usuário inválido";
+        }
+        
+        return res.status(400).json({ 
+          message: errorMessage, 
+          errors: flatErrors,
+          suggestions: flatErrors.fieldErrors.password ? {
+            password: [
+              "Use pelo menos 8 caracteres",
+              "Combine letras maiúsculas e minúsculas", 
+              "Inclua números e símbolos",
+              "Evite senhas comuns como '12345678' ou 'password'"
+            ]
+          } : undefined
+        });
       }
       if (error.name === 'ConflictError') {
         return res.status(409).json({ message: error.message });

@@ -70,6 +70,45 @@ const UsuariosPage: React.FC = () => {
       setSelectedUser(null);
     },
     onError: (error: any) => {
+      console.error('❌ [USER CREATE ERROR]:', error);
+      
+      // Handle password validation errors specifically
+      if (error.response?.data?.errors?.fieldErrors?.password) {
+        const passwordErrors = error.response.data.errors.fieldErrors.password;
+        let description = "Problema com a senha:\n";
+        
+        if (passwordErrors.includes('This is a top-10 common password')) {
+          description += "• Senha muito comum/simples\n";
+          description += "\nSugestões:\n";
+          description += "• Use pelo menos 8 caracteres\n";
+          description += "• Combine letras maiúsculas e minúsculas\n";
+          description += "• Inclua números e símbolos (@, #, !, etc.)\n";
+          description += "• Evite sequências como '12345678'\n";
+          description += "• Exemplo: MinhaSenh@123";
+        } else {
+          description += passwordErrors.join(', ');
+        }
+        
+        toast({
+          title: "Senha rejeitada por segurança",
+          description: description,
+          variant: "destructive",
+          duration: 8000, // 8 seconds to read suggestions
+        });
+        return;
+      }
+      
+      // Handle role validation errors
+      if (error.response?.data?.errors?.fieldErrors?.role) {
+        toast({
+          title: "Erro no perfil do usuário",
+          description: "Perfil selecionado não é válido. Tente novamente.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Generic error handling
       toast({
         title: "Erro",
         description: error.message || "Erro ao criar usuário",
