@@ -10,6 +10,7 @@ import multer from "multer";
 import originationRoutes from "./routes/origination.routes";
 import { clickSignRouter } from "./routes/clicksign.js";
 import { interRoutes } from "./routes/inter.js";
+import { setupSecurityRoutes } from "./routes/security.js";
 import { getBrasiliaDate, formatBrazilianDateTime, generateApprovalDate, getBrasiliaTimestamp } from "./lib/timezone";
 
 const upload = multer({ storage: multer.memoryStorage() });
@@ -3154,6 +3155,9 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
 
   // Register Inter Bank routes
   app.use('/api/inter', interRoutes);
+
+  // Register Security routes - OWASP Compliance Monitoring
+  setupSecurityRoutes(app);
 
   const httpServer = createServer(app);
   return httpServer;

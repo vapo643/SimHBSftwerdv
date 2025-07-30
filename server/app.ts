@@ -4,6 +4,9 @@ import rateLimit from "express-rate-limit";
 import { registerRoutes } from "./routes";
 import { config } from "./lib/config";
 import { log } from "./vite";
+import { setupSecurityHeaders, additionalSecurityHeaders } from "./lib/security-headers";
+import { inputSanitizerMiddleware } from "./lib/input-sanitizer";
+import { securityLogger, SecurityEventType, getClientIP } from "./lib/security-logger";
 
 export async function createApp() {
   const app = express();
@@ -14,29 +17,16 @@ export async function createApp() {
   // Form-encoded middleware
   app.use(express.urlencoded({ extended: true }));
 
-  // Helmet Security Headers (Conditional)
+  // Enhanced OWASP Security Headers
   if (config.security.enableHelmet) {
-    app.use(helmet({
-      contentSecurityPolicy: process.env.NODE_ENV === "development" ? false : {
-        directives: {
-          defaultSrc: ["'self'"],
-          styleSrc: ["'self'", "'unsafe-inline'", "https:"],
-          scriptSrc: ["'self'", "'unsafe-eval'", "'unsafe-inline'"],
-          imgSrc: ["'self'", "data:", "https:"],
-          connectSrc: ["'self'", "ws:", "wss:", "http:", "https:"],
-          fontSrc: ["'self'", "https:"],
-          objectSrc: ["'none'"],
-          mediaSrc: ["'self'"],
-          frameSrc: ["'none'"],
-        },
-      },
-      crossOriginResourcePolicy: { policy: "cross-origin" },
-      frameguard: { action: 'deny' },
-      noSniff: true,
-      referrerPolicy: { policy: "same-origin" },
-      xssFilter: true,
-    }));
+    app.use(setupSecurityHeaders());
+    app.use(additionalSecurityHeaders);
+    log("🔒 [SECURITY] Enhanced security headers activated");
   }
+  
+  // Input Sanitization Middleware - OWASP A03: Injection Prevention
+  app.use(inputSanitizerMiddleware);
+  log("🔒 [SECURITY] Input sanitization middleware activated");
 
   // Rate Limiting (only in production/staging)
   if (process.env.NODE_ENV !== 'test') {
@@ -49,6 +39,21 @@ export async function createApp() {
       },
       standardHeaders: true,
       legacyHeaders: false,
+      handler: (req, res) => {
+        securityLogger.logEvent({
+          type: SecurityEventType.RATE_LIMIT_EXCEEDED,
+          severity: "MEDIUM",
+          ipAddress: getClientIP(req),
+          userAgent: req.headers['user-agent'],
+          endpoint: req.originalUrl,
+          success: false,
+          details: { type: 'general_api' }
+        });
+        res.status(429).json({
+          error: "Muitas requisições da API. Tente novamente em 15 minutos.",
+          retryAfter: "15 minutos"
+        });
+      }
     });
 
     const authLimiter = rateLimit({
@@ -59,6 +64,21 @@ export async function createApp() {
         error: "Muitas tentativas de autenticação. Tente novamente em 15 minutos.",
         retryAfter: "15 minutos"
       },
+      handler: (req, res) => {
+        securityLogger.logEvent({
+          type: SecurityEventType.BRUTE_FORCE_DETECTED,
+          severity: "HIGH",
+          ipAddress: getClientIP(req),
+          userAgent: req.headers['user-agent'],
+          endpoint: req.originalUrl,
+          success: false,
+          details: { type: 'authentication_brute_force' }
+        });
+        res.status(429).json({
+          error: "Muitas tentativas de autenticação. Tente novamente em 15 minutos.",
+          retryAfter: "15 minutos"
+        });
+      }
     });
 
     app.use("/api/", generalApiLimiter);

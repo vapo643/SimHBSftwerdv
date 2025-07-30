@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { createServerSupabaseClient } from '../../client/src/lib/supabase';
+import { securityLogger, SecurityEventType, getClientIP } from './security-logger';
 
 export interface AuthenticatedRequest extends Request {
   user?: {
@@ -24,6 +25,15 @@ export async function jwtAuthMiddleware(
     // Step a: Validate JWT token
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      securityLogger.logEvent({
+        type: SecurityEventType.TOKEN_INVALID,
+        severity: "MEDIUM",
+        ipAddress: getClientIP(req),
+        userAgent: req.headers['user-agent'],
+        endpoint: req.originalUrl,
+        success: false,
+        details: { reason: 'Missing or invalid authorization header' }
+      });
       return res.status(401).json({ message: 'Token de acesso requerido' });
     }
 
@@ -34,6 +44,15 @@ export async function jwtAuthMiddleware(
     const { data, error } = await supabase.auth.getUser(token);
     
     if (error || !data.user) {
+      securityLogger.logEvent({
+        type: error?.message?.includes('expired') ? SecurityEventType.TOKEN_EXPIRED : SecurityEventType.TOKEN_INVALID,
+        severity: "MEDIUM",
+        ipAddress: getClientIP(req),
+        userAgent: req.headers['user-agent'],
+        endpoint: req.originalUrl,
+        success: false,
+        details: { reason: error?.message || 'Invalid token' }
+      });
       return res.status(401).json({ message: 'Token inválido ou expirado' });
     }
 
@@ -54,6 +73,17 @@ export async function jwtAuthMiddleware(
     // Step d: Security fallback - Block orphaned users (no profile)
     if (profileError || !profile) {
       console.error('Profile query failed:', profileError);
+      securityLogger.logEvent({
+        type: SecurityEventType.ACCESS_DENIED,
+        severity: "HIGH",
+        userId,
+        userEmail,
+        ipAddress: getClientIP(req),
+        userAgent: req.headers['user-agent'],
+        endpoint: req.originalUrl,
+        success: false,
+        details: { reason: 'Orphaned user - no profile found', error: profileError?.message }
+      });
       return res.status(403).json({ 
         message: 'Acesso negado. Perfil de usuário não encontrado.',
         code: 'ORPHANED_USER'
