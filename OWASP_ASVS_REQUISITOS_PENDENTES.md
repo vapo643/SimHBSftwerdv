@@ -71,12 +71,23 @@ Esta análise identificou requisitos ASVS Level 1 pendentes nas três áreas cr�
 
 ### 7.3 Timeout de Sessão
 
-**[❌ PENDENTE] 7.3.1** - Verificar que tokens de sessão expiram após período de inatividade
-- **Situação Atual**: JWT tem expiração absoluta mas NÃO por inatividade
-- **Evidência**: Tokens expiram em 1 hora independente de uso
-- **Ação Necessária**: Implementar timeout por inatividade:
-  - 30 minutos sem atividade = logout automático
-  - Renovação de token em cada request válido
+**[✅ IMPLEMENTADO] 7.3.1** - Verificar que tokens de sessão expiram após período de inatividade
+- **Situação Atual**: ✅ Sistema completo de timeout por inatividade implementado
+- **Evidência**: 
+  - Hook personalizado useIdleTimer monitorando eventos de atividade
+  - 30 minutos de timeout total com aviso aos 28 minutos
+  - Modal de aviso com contagem regressiva de 2 minutos
+  - Logout automático após período de inatividade
+  - Integração completa com AuthContext
+- **Implementação**: 31/01/2025 - Sistema de timeout por inatividade com:
+  - Monitoramento de mouse, teclado e scroll
+  - Aviso visual 2 minutos antes do logout
+  - Opções para continuar sessão ou sair
+  - Limpeza completa de dados de sessão no logout por inatividade
+- **Arquivos**: 
+  - `client/src/hooks/useIdleTimer.ts`
+  - `client/src/components/IdleWarningModal.tsx`
+  - `client/src/contexts/AuthContext.tsx`
 
 **[✅ IMPLEMENTADO] 7.3.3** - Verificar que a aplicação permite logout em todas as páginas protegidas
 - **Implementação**: DashboardLayout inclui botão de logout no header visível em todas as páginas

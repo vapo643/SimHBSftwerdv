@@ -6,24 +6,33 @@ This is a full-stack TypeScript application for credit management called "Simpix
 
 ## Recent Changes
 
-### January 2025 (Continued) - 100% OWASP ASVS Level 1 Compliance Achieved 🎉
+### January 2025 (Continued) - 100% OWASP ASVS Level 1 Compliance Progress
 
 - **OWASP ASVS Level 1 Security Audit (January 30)**: Comprehensive gap analysis comparing current implementation against OWASP ASVS 5.0.0 Level 1 requirements
 - **Initial Compliance**: 72% (18 of 25 requirements met) across V4 (API Security), V6 (Authentication), V7 (Session Management), and V8 (Authorization)
-- **100% ASVS Level 1 Compliance Achieved (January 31)**: Successfully implemented all 26 security requirements through systematic remediation
+- **Current Compliance Status (January 31)**: 84% (21 of 25 requirements met) - Major progress towards full compliance
+- **Latest Critical Implementation - Session Timeout (V7.3.1)**: Complete idle timeout system with 30-minute inactivity logout and 2-minute warning modal
+  - Custom useIdleTimer hook monitoring mouse, keyboard, and scroll events
+  - IdleWarningModal component with countdown timer and user options
+  - Full integration with AuthContext for system-wide idle management
+  - Automatic session cleanup on idle logout
+  - Banking-grade security with user-friendly warning system
 - **Critical Security Implementations**: 
-  - Token rotation on re-authentication (V7.2.4)
-  - Password change with current password verification (V6.2.3)
-  - Session invalidation when account disabled (V7.4.2/V8.3.7)
-  - Password strength validation with zxcvbn library (V6.2.4/V6.2.7)
-  - Standardized recovery messages preventing user enumeration (V6.3.1)
-  - JWT token entropy analysis documentation - 520 bits exceeding 64-bit requirement (V7.2.2)
-  - Comprehensive IDOR testing documentation with automated test suite (V8.3.1)
+  - ✅ Session timeout due to inactivity (V7.3.1) - 30min idle timeout with 2min warning
+  - ✅ Token rotation on re-authentication (V7.2.4)
+  - ✅ Password change with current password verification (V6.2.3)
+  - ✅ Session invalidation when account disabled (V7.4.2/V8.3.7)
+  - ✅ Password strength validation with zxcvbn library (V6.2.4/V6.2.7)
+  - ✅ Standardized recovery messages preventing user enumeration (V6.3.1)
+  - ✅ JWT token entropy analysis documentation - 520 bits exceeding 64-bit requirement (V7.2.2)
+  - ✅ Comprehensive IDOR testing documentation with automated test suite (V8.3.1)
 - **Security Documentation Milestones**: 
   - SECURITY_POLICY.md - Complete RBAC and authorization documentation (V8.1.1)
   - JWT_TOKEN_ENTROPY_ANALYSIS.md - Detailed entropy calculations and security analysis
   - IDOR_TESTING_DOCUMENTATION.md - Comprehensive testing procedures and results
-- **Enhanced Session Security**: Token tracking per user, automatic blacklist management, and comprehensive security logging for token lifecycle events
+  - OWASP_ASVS_REQUISITOS_PENDENTES.md - Updated with idle timeout implementation
+- **Enhanced Session Security**: Token tracking per user, automatic blacklist management, comprehensive security logging for token lifecycle events, and complete idle timeout protection
+- **Remaining Requirements (4 of 25)**: Authorization review process (V8.1.4), active session management (V7.4.3), URL token validation (V7.1.1), and recovery message standardization (V6.5.5)
 
 ### January 2025 - Critical Security Fixes (January 31)
 
