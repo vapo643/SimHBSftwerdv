@@ -145,8 +145,8 @@ class TokenManager {
           const payload = JSON.parse(atob(tokenParts[1]));
           this.tokenExpiry = payload.exp;
         } catch {
-          // If we can't decode, set a conservative expiry (5 minutes from now)
-          this.tokenExpiry = Math.floor(Date.now() / 1000) + 300;
+          // If we can't decode, set a conservative expiry (30 minutes from now)
+          this.tokenExpiry = Math.floor(Date.now() / 1000) + 1800;
         }
       }
 
