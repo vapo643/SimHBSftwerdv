@@ -12,6 +12,20 @@ export interface AuthenticatedRequest extends Request {
   };
 }
 
+// Token blacklist para segurança aprimorada (SAMM Optimization)
+const tokenBlacklist = new Set<string>();
+const TOKEN_BLACKLIST_CLEANUP_INTERVAL = 60 * 60 * 1000; // 1 hora
+
+// Rate limiting por usuário (SAMM Optimization)
+const userAuthAttempts = new Map<string, { count: number; resetTime: number }>();
+const MAX_AUTH_ATTEMPTS = 10;
+const AUTH_WINDOW_MS = 15 * 60 * 1000; // 15 minutos
+
+// Limpar blacklist periodicamente
+setInterval(() => {
+  tokenBlacklist.clear();
+}, TOKEN_BLACKLIST_CLEANUP_INTERVAL);
+
 /**
  * Middleware de autenticação JWT robusto com fallback de segurança
  * Implementa validação completa e bloqueia usuários órfãos
@@ -38,6 +52,20 @@ export async function jwtAuthMiddleware(
     }
 
     const token = authHeader.substring(7); // Remove 'Bearer ' prefix
+
+    // SAMM Optimization: Check token blacklist
+    if (tokenBlacklist.has(token)) {
+      securityLogger.logEvent({
+        type: SecurityEventType.TOKEN_INVALID,
+        severity: "HIGH",
+        ipAddress: getClientIP(req),
+        userAgent: req.headers['user-agent'],
+        endpoint: req.originalUrl,
+        success: false,
+        details: { reason: 'Token is blacklisted' }
+      });
+      return res.status(401).json({ message: 'Token inválido' });
+    }
 
     // Validate token and extract user ID
     const supabase = createServerSupabaseClient();
