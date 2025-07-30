@@ -1,0 +1,134 @@
+[
+  {
+    "domain": "Governance",
+    "practice": "Strategy & Metrics",
+    "currentLevel": 2,
+    "targetLevel": 3,
+    "gap": 1,
+    "priority": "MEDIUM",
+    "recommendations": [
+      "Implementar dashboard executivo de métricas de segurança seguindo SAMM Stream A",
+      "Estabelecer KPIs de segurança mensuráveis alinhados com SAMM Stream B",
+      "Criar relatórios automáticos de compliance baseados no modelo SAMM v1.5",
+      "Integrar métricas com as 52 URLs do SAMM para monitoramento contínuo"
+    ]
+  },
+  {
+    "domain": "Governance",
+    "practice": "Policy & Compliance",
+    "currentLevel": 2,
+    "targetLevel": 3,
+    "gap": 1,
+    "priority": "HIGH",
+    "recommendations": [
+      "Formalizar políticas de segurança documentadas seguindo SAMM v1.5 guidelines",
+      "Implementar processo de revisão de compliance baseado em Policy Stream A",
+      "Estabelecer auditoria contínua usando Compliance Management Stream B",
+      "Documentar todos os 4 business functions do SAMM: Governance, Construction, Verification, Operations"
+    ]
+  },
+  {
+    "domain": "Governance",
+    "practice": "Education & Guidance",
+    "currentLevel": 1,
+    "targetLevel": 2,
+    "gap": 1,
+    "priority": "MEDIUM",
+    "recommendations": [
+      "Criar programa de treinamento em segurança",
+      "Desenvolver guidelines de codificação segura",
+      "Implementar processo de onboarding de segurança"
+    ]
+  },
+  {
+    "domain": "Design",
+    "practice": "Threat Assessment",
+    "currentLevel": 1,
+    "targetLevel": 3,
+    "gap": 2,
+    "priority": "HIGH",
+    "recommendations": [
+      "Implementar threat modeling sistemático",
+      "Criar biblioteca de ameaças para fintech",
+      "Estabelecer processo de revisão de ameaças"
+    ]
+  },
+  {
+    "domain": "Design",
+    "practice": "Security Requirements",
+    "currentLevel": 2,
+    "targetLevel": 3,
+    "gap": 1,
+    "priority": "HIGH",
+    "recommendations": [
+      "Completar implementação ASVS Level 2",
+      "Documentar todos os requisitos de segurança",
+      "Implementar rastreabilidade de requisitos"
+    ]
+  },
+  {
+    "domain": "Design",
+    "practice": "Security Architecture",
+    "currentLevel": 2,
+    "targetLevel": 3,
+    "gap": 1,
+    "priority": "MEDIUM",
+    "recommendations": [
+      "Documentar arquitetura de segurança completa",
+      "Implementar revisões arquiteturais",
+      "Estabelecer padrões de segurança"
+    ]
+  },
+  {
+    "domain": "Implementation",
+    "practice": "Secure Build",
+    "currentLevel": 2,
+    "targetLevel": 3,
+    "gap": 1,
+    "priority": "MEDIUM",
+    "recommendations": [
+      "Integrar SAST/DAST no pipeline",
+      "Implementar dependency scanning",
+      "Estabelecer security gates no build"
+    ]
+  },
+  {
+    "domain": "Implementation",
+    "practice": "Secure Deployment",
+    "currentLevel": 2,
+    "targetLevel": 3,
+    "gap": 1,
+    "priority": "MEDIUM",
+    "recommendations": [
+      "Implementar infrastructure as code",
+      "Estabelecer configuração segura por padrão",
+      "Implementar secrets management avançado"
+    ]
+  },
+  {
+    "domain": "Verification",
+    "practice": "Security Testing",
+    "currentLevel": 1,
+    "targetLevel": 2,
+    "gap": 1,
+    "priority": "HIGH",
+    "recommendations": [
+      "Implementar testes de segurança automatizados",
+      "Estabelecer testes de penetração regulares",
+      "Criar suite de testes OWASP WSTG"
+    ]
+  },
+  {
+    "domain": "Operations",
+    "practice": "Incident Management",
+    "currentLevel": 1,
+    "targetLevel": 2,
+    "gap": 1,
+    "priority": "HIGH",
+    "recommendations": [
+      "Implementar SIEM/SOC capabilities",
+      "Estabelecer playbooks de resposta a incidentes",
+      "Criar processo de forensics básico"
+    ]
+  }
+]

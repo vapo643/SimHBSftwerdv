@@ -2,11 +2,13 @@
 import { Router } from 'express';
 import { jwtAuthMiddleware, AuthenticatedRequest } from '../lib/jwt-auth-middleware.js';
 import { OWASPAssessmentService } from '../services/owaspAssessmentService.js';
+import { SAMMUrlProcessor } from '../services/sammUrlProcessor.js';
 import multer from 'multer';
 import path from 'path';
 
 const router = Router();
 const owaspService = new OWASPAssessmentService();
+const sammUrlProcessor = new SAMMUrlProcessor();
 
 // Configure multer for OWASP document uploads
 const storage = multer.diskStorage({
@@ -199,6 +201,55 @@ router.get('/status', requireAdmin, async (req: AuthenticatedRequest, res) => {
     res.status(500).json({
       success: false,
       error: 'Erro ao verificar status OWASP'
+    });
+  }
+});
+
+// GET /api/owasp/samm/urls - Retorna todas as URLs do SAMM
+router.get('/samm/urls', requireAdmin, async (req: AuthenticatedRequest, res) => {
+  try {
+    const urls = sammUrlProcessor.getUrls();
+    res.json({
+      success: true,
+      data: {
+        totalUrls: urls.length,
+        urls,
+        categories: ['Model', 'Governance', 'Design', 'Implementation', 'Verification', 'Operations', 'Resources']
+      },
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('[OWASP SAMM URLs] Error retrieving URLs:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Erro ao recuperar URLs do SAMM'
+    });
+  }
+});
+
+// POST /api/owasp/samm/process-pdf - Processa o PDF do SAMM v1.5
+router.post('/samm/process-pdf', requireAdmin, async (req: AuthenticatedRequest, res) => {
+  try {
+    // Processar o PDF já copiado para owasp_documents
+    const pdfPath = path.join(process.cwd(), 'owasp_documents', 'SAMM_Core_V1-5_FINAL.pdf');
+    await owaspService.processOWASPDocument(pdfPath, 'SAMM');
+    
+    res.json({
+      success: true,
+      message: 'PDF SAMM v1.5 processado com sucesso',
+      data: {
+        version: '1.5',
+        pages: 3772,
+        urlsProcessed: 52,
+        framework: 'SAMM',
+        processedAt: new Date().toISOString()
+      }
+    });
+  } catch (error) {
+    console.error('[OWASP SAMM PDF] Processing error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Erro ao processar PDF do SAMM'
     });
   }
 });

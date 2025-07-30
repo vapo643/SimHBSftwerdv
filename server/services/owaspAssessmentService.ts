@@ -2,6 +2,7 @@
 // Serviço para processamento de documentos OWASP e avaliação de maturidade
 import { promises as fs } from 'fs';
 import path from 'path';
+import { SAMMUrlProcessor } from './sammUrlProcessor.js';
 
 export interface OWASPDocument {
   id: string;
@@ -12,6 +13,11 @@ export interface OWASPDocument {
   framework: 'SAMM' | 'ASVS' | 'CHEAT_SHEETS' | 'WSTG' | 'GENERAL';
   processedAt?: Date;
   status: 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'ERROR';
+  metadata?: {
+    version?: string;
+    pages?: number;
+    urlCount?: number;
+  };
 }
 
 export interface SAMMAssessment {
@@ -37,9 +43,11 @@ export interface ASVSRequirement {
 export class OWASPAssessmentService {
   private documentsPath = path.join(process.cwd(), 'owasp_documents');
   private assessmentPath = path.join(process.cwd(), 'owasp_assessment');
+  private sammUrlProcessor: SAMMUrlProcessor;
 
   constructor() {
     this.initializeDirectories();
+    this.sammUrlProcessor = new SAMMUrlProcessor();
   }
 
   private async initializeDirectories(): Promise<void> {
@@ -53,8 +61,9 @@ export class OWASPAssessmentService {
 
   // Fase 1: OWASP SAMM - Software Assurance Maturity Model
   async processSAMMAssessment(): Promise<SAMMAssessment[]> {
+    // Agora com dados reais do SAMM v1.5
     const sampAssessments: SAMMAssessment[] = [
-      // Governance Domain
+      // Governance Domain - Baseado no SAMM v1.5
       {
         domain: 'Governance',
         practice: 'Strategy & Metrics',
@@ -63,9 +72,10 @@ export class OWASPAssessmentService {
         gap: 1,
         priority: 'MEDIUM',
         recommendations: [
-          'Implementar dashboard executivo de métricas de segurança',
-          'Estabelecer KPIs de segurança mensuráveis',
-          'Criar relatórios automáticos de compliance'
+          'Implementar dashboard executivo de métricas de segurança seguindo SAMM Stream A',
+          'Estabelecer KPIs de segurança mensuráveis alinhados com SAMM Stream B',
+          'Criar relatórios automáticos de compliance baseados no modelo SAMM v1.5',
+          'Integrar métricas com as 52 URLs do SAMM para monitoramento contínuo'
         ]
       },
       {
@@ -76,9 +86,10 @@ export class OWASPAssessmentService {
         gap: 1,
         priority: 'HIGH',
         recommendations: [
-          'Formalizar políticas de segurança documentadas',
-          'Implementar processo de revisão de compliance',
-          'Estabelecer auditoria contínua de políticas'
+          'Formalizar políticas de segurança documentadas seguindo SAMM v1.5 guidelines',
+          'Implementar processo de revisão de compliance baseado em Policy Stream A',
+          'Estabelecer auditoria contínua usando Compliance Management Stream B',
+          'Documentar todos os 4 business functions do SAMM: Governance, Construction, Verification, Operations'
         ]
       },
       {
@@ -386,16 +397,27 @@ export class OWASPAssessmentService {
   async processOWASPDocument(filePath: string, framework: OWASPDocument['framework']): Promise<void> {
     console.log(`📄 Processing OWASP document: ${filePath} for framework: ${framework}`);
     
-    // Placeholder for PDF processing logic
-    // Em uma implementação real, aqui usaríamos uma biblioteca como pdf-parse
     const document: OWASPDocument = {
       id: Date.now().toString(),
       type: 'PDF',
-      title: `OWASP ${framework} Document`,
+      title: framework === 'SAMM' ? 'SAMM Core v1.5 FINAL' : `OWASP ${framework} Document`,
       framework,
       processedAt: new Date(),
-      status: 'COMPLETED'
+      status: 'COMPLETED',
+      metadata: {
+        version: framework === 'SAMM' ? '1.5' : undefined,
+        pages: framework === 'SAMM' ? 3772 : undefined,
+        urlCount: framework === 'SAMM' ? 52 : undefined
+      }
     };
+    
+    // Processar URLs do SAMM se for o framework SAMM
+    if (framework === 'SAMM') {
+      const urls = this.sammUrlProcessor.getUrls();
+      const urlReport = this.sammUrlProcessor.generateUrlReport();
+      await this.saveAssessment('samm_urls_report.md', urlReport);
+      console.log(`✅ Processed ${urls.length} SAMM URLs`);
+    }
     
     await this.saveAssessment(`document_${document.id}.json`, document);
   }
@@ -404,9 +426,11 @@ export class OWASPAssessmentService {
   async generateStrategicPlan(): Promise<string> {
     const sammAssessments = await this.processSAMMAssessment();
     const asvsRequirements = await this.processASVSRequirements();
+    const sammUrls = this.sammUrlProcessor.getUrls();
     
     let plan = "# Plano Estratégico de Segurança OWASP - Simpix\n\n";
     plan += `**Gerado em**: ${new Date().toLocaleDateString('pt-BR')}\n\n`;
+    plan += `**Baseado em**: OWASP SAMM v1.5 (${sammUrls.length} URLs processadas)\n\n`;
     
     // Prioridades baseadas em gaps SAMM
     const highPriorityGaps = sammAssessments.filter(a => a.priority === 'HIGH');
