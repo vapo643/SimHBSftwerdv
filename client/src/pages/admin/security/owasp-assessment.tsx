@@ -329,7 +329,7 @@ export default function OWASPAssessment() {
                 <div className="flex justify-center py-8">
                   <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
                 </div>
-              ) : sammAssessment ? (
+              ) : sammAssessment && Array.isArray(sammAssessment) && sammAssessment.length > 0 ? (
                 <div className="space-y-6">
                   {Array.from(new Set(sammAssessment.map(a => a.domain))).map(domain => (
                     <div key={domain} className="space-y-2">
@@ -349,9 +349,11 @@ export default function OWASPAssessment() {
                           </div>
                           <div className="space-y-1">
                             <h5 className="text-sm font-medium">Recomendações:</h5>
-                            {assessment.recommendations.map((rec, i) => (
+                            {Array.isArray(assessment.recommendations) ? assessment.recommendations.map((rec, i) => (
                               <div key={i} className="text-sm text-muted-foreground">• {rec}</div>
-                            ))}
+                            )) : (
+                              <div className="text-sm text-muted-foreground">• Sem recomendações disponíveis</div>
+                            )}
                           </div>
                         </Card>
                       ))}
@@ -379,7 +381,7 @@ export default function OWASPAssessment() {
                 <div className="flex justify-center py-8">
                   <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
                 </div>
-              ) : asvsRequirements ? (
+              ) : asvsRequirements && Array.isArray(asvsRequirements) && asvsRequirements.length > 0 ? (
                 <div className="space-y-4">
                   {asvsRequirements.map((requirement, index) => (
                     <Card key={index} className="p-4">
