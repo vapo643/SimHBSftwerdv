@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { getSupabase } from '../lib/supabase';
 import { fetchWithToken } from '../lib/fetchWithToken';
 
@@ -66,6 +66,8 @@ async function fetchUserProfile(): Promise<UserProfile | null> {
 }
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  console.log('AuthProvider render');
+  
   const [authState, setAuthState] = useState<AuthState>({
     user: null,
     profile: null,
@@ -73,20 +75,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isLoading: true
   });
 
+  // Simplified - removed all callbacks to test
   const refetchProfile = async () => {
+    console.log('AuthContext: Refetching profile...');
     const profile = await fetchUserProfile();
+    console.log('AuthContext: Profile fetched:', profile);
     setAuthState(prev => ({ ...prev, profile }));
   };
 
   useEffect(() => {
+    console.log('AuthContext useEffect running');
     const supabase = getSupabase();
     
     // Initial session check
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('AuthContext: Initial session check:', session ? 'authenticated' : 'not authenticated');
+      
       if (session) {
-        setAuthState(prev => ({ ...prev, user: session.user, isAuthenticated: true }));
         fetchUserProfile().then(profile => {
-          setAuthState(prev => ({ ...prev, profile, isLoading: false }));
+          console.log('AuthContext: Initial profile loaded:', profile);
+          setAuthState({
+            user: session.user,
+            profile,
+            isAuthenticated: true,
+            isLoading: false
+          });
         });
       } else {
         setAuthState({ user: null, profile: null, isAuthenticated: false, isLoading: false });
@@ -99,10 +112,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.log('Auth state changed:', event);
         
         if (session) {
-          setAuthState(prev => ({ ...prev, user: session.user, isAuthenticated: true, isLoading: true }));
-          
           // Fetch profile data
           const profile = await fetchUserProfile();
+          console.log('AuthContext: Profile after auth change:', profile);
           
           setAuthState({
             user: session.user,
@@ -122,11 +134,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     );
 
     return () => {
+      console.log('AuthContext cleanup');
       authListener.subscription.unsubscribe();
     };
   }, []);
 
-  // Role checking helpers
+  // Simplified - no callbacks for testing
   const hasRole = (role: Role): boolean => authState.profile?.role === role;
   const isAdmin = (): boolean => authState.profile?.role === 'ADMINISTRADOR';
   const isAtendente = (): boolean => authState.profile?.role === 'ATENDENTE';
@@ -134,7 +147,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const isGerente = (): boolean => authState.profile?.role === 'GERENTE';
   const isFinanceiro = (): boolean => authState.profile?.role === 'FINANCEIRO';
 
-  // Permission checking helpers
+  // Simplified - no callbacks for testing
   const canAccessAdmin = (): boolean => isAdmin();
   const canAccessPayments = (): boolean => isFinanceiro() || isAdmin();
   const canAccessAnalysis = (): boolean => isAnalista() || isGerente() || isAdmin();
