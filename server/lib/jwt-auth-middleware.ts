@@ -137,19 +137,13 @@ export async function jwtAuthMiddleware(
     const userId = data.user.id;
     const userEmail = data.user.email || '';
 
-    // Step c: Query profiles table for complete user profile
-    const { createServerSupabaseAdminClient } = await import('./supabase');
-    const supabaseAdmin = createServerSupabaseAdminClient();
-    
-    const { data: profile, error: profileError } = await supabaseAdmin
-      .from('profiles')
-      .select('id, full_name, role, loja_id')
-      .eq('id', userId)
-      .single();
+    // Step c: Query profiles table for complete user profile with enriched data
+    const { storage } = await import('../storage');
+    const profile = await storage.getUserProfileWithDetails(userId);
 
     // Step d: Security fallback - Block orphaned users (no profile)
-    if (profileError || !profile) {
-      console.error('Profile query failed:', profileError);
+    if (!profile) {
+      console.error('Profile not found for user:', userId);
       securityLogger.logEvent({
         type: SecurityEventType.ACCESS_DENIED,
         severity: "HIGH",
@@ -159,7 +153,7 @@ export async function jwtAuthMiddleware(
         userAgent: req.headers['user-agent'],
         endpoint: req.originalUrl,
         success: false,
-        details: { reason: 'Orphaned user - no profile found', error: profileError?.message }
+        details: { reason: 'Orphaned user - no profile found' }
       });
       return res.status(403).json({ 
         message: 'Acesso negado. Perfil de usuário não encontrado.',
@@ -167,20 +161,25 @@ export async function jwtAuthMiddleware(
       });
     }
 
+    // Step e: Set user context in PostgreSQL for RLS
+    await storage.setUserContext({
+      userId: profile.id,
+      role: profile.role,
+      lojaId: profile.loja_id
+    });
+
     // Track the current token for this user (for token rotation)
     trackUserToken(userId, token);
     
-    // Step e: Attach complete and valid profile to req.user
+    // Step f: Attach complete and enriched profile to req.user
     req.user = {
       id: userId,
       email: userEmail,
       role: profile.role,
       full_name: profile.full_name || null,
-      loja_id: profile.loja_id || null
+      loja_id: profile.loja_id || null,
+      profile: profile // Include the full enriched profile data
     };
-
-    // Track this token for potential invalidation
-    trackUserToken(userId, token);
 
     next();
   } catch (error) {

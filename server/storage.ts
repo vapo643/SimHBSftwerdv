@@ -36,6 +36,8 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
   getUsers(): Promise<User[]>;
   getUsersWithDetails(): Promise<any[]>;
+  getUserProfileWithDetails(userId: string): Promise<any>;
+  setUserContext(context: { userId: string; role: string; lojaId: string | null }): Promise<void>;
 
   // Propostas
   getPropostas(): Promise<any[]>;
@@ -655,6 +657,62 @@ export class DatabaseStorage implements IStorage {
         erro: erro || null
       })
       .where(eq(interCallbacks.id, id));
+  }
+
+  // Auth Profile Methods
+  async getUserProfileWithDetails(userId: string): Promise<any> {
+    const { createServerSupabaseAdminClient } = await import('./lib/supabase');
+    const supabase = createServerSupabaseAdminClient();
+    
+    try {
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select(`
+          id,
+          full_name,
+          email,
+          role,
+          loja_id,
+          loja:lojas!left(
+            id,
+            nome_loja,
+            parceiro_id,
+            parceiro:parceiros!left(
+              id,
+              razao_social
+            )
+          )
+        `)
+        .eq('id', userId)
+        .single();
+
+      if (error) {
+        console.error('Error fetching user profile with details:', error);
+        return null;
+      }
+
+      return profile;
+    } catch (error) {
+      console.error('Error in getUserProfileWithDetails:', error);
+      return null;
+    }
+  }
+
+  async setUserContext(context: { userId: string; role: string; lojaId: string | null }): Promise<void> {
+    const { createServerSupabaseAdminClient } = await import('./lib/supabase');
+    const supabase = createServerSupabaseAdminClient();
+    
+    try {
+      // Set the user context in PostgreSQL for RLS
+      await supabase.rpc('set_user_context', {
+        p_user_id: context.userId,
+        p_role: context.role,
+        p_loja_id: context.lojaId
+      });
+    } catch (error) {
+      console.error('Error setting user context:', error);
+      throw error;
+    }
   }
 }
 
