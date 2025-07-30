@@ -3159,6 +3159,10 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
   // Register Security routes - OWASP Compliance Monitoring
   setupSecurityRoutes(app);
 
+  // Register OWASP Assessment routes
+  const owaspRoutes = (await import('./routes/owasp.js')).default;
+  app.use('/api/owasp', owaspRoutes);
+
   const httpServer = createServer(app);
   return httpServer;
 }

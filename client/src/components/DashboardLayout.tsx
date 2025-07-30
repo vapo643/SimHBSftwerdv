@@ -20,6 +20,7 @@ import {
   Building2, // Adicionando o ícone para parceiros
   Package, // Adicionando o ícone para produtos
   Store, // Adicionando o ícone para lojas
+  Shield, // Adicionando o ícone para segurança OWASP
 } from "lucide-react";
 
 interface DashboardLayoutProps {
@@ -65,6 +66,7 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
     { name: "Parceiros", href: "/parceiros", icon: Building2 },
     { name: "Produtos", href: "/configuracoes/produtos", icon: Package },
     { name: "Lojas", href: "/admin/lojas", icon: Store },
+    { name: "Segurança OWASP", href: "/admin/security/owasp", icon: Shield },
   ];
 
   // Build navigation based on user role
