@@ -9,6 +9,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Download, Shield, Target, CheckCircle2, AlertTriangle, Clock, Users } from 'lucide-react';
 import { fetchWithToken } from '@/lib/apiClient';
 import { useToast } from '@/hooks/use-toast';
+import DashboardLayout from '@/components/DashboardLayout';
 
 interface SAMMAssessment {
   domain: string;
@@ -114,20 +115,23 @@ export default function OWASPAssessment() {
 
   if (statusLoading) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center space-x-2">
-          <Shield className="h-6 w-6" />
-          <h1 className="text-2xl font-bold">Avaliação OWASP</h1>
+      <DashboardLayout title="Avaliação OWASP">
+        <div className="space-y-6">
+          <div className="flex items-center space-x-2">
+            <Shield className="h-6 w-6" />
+            <h1 className="text-2xl font-bold">Avaliação OWASP</h1>
+          </div>
+          <div className="flex items-center justify-center h-64">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
         </div>
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        </div>
-      </div>
+      </DashboardLayout>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <DashboardLayout title="Avaliação Estratégica OWASP">
+      <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <Shield className="h-6 w-6" />
@@ -1029,6 +1033,7 @@ export default function OWASPAssessment() {
           </div>
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 }
