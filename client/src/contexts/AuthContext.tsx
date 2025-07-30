@@ -51,14 +51,14 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 async function fetchUserProfile(): Promise<UserProfile | null> {
   try {
-    const response = await fetchWithToken('/api/debug/me');
+    const response = await fetchWithToken('/api/auth/profile');
     if (!response.ok) {
       console.error('Failed to fetch user profile:', response.status);
       return null;
     }
     
     const data = await response.json();
-    return data.profile || null;
+    return data; // O endpoint já retorna diretamente os dados do perfil
   } catch (error) {
     console.error('Error fetching user profile:', error);
     return null;
