@@ -67,14 +67,21 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
     { name: "Pagamentos", href: "/financeiro/pagamentos", icon: CreditCard },
   ];
 
-  // Administrative navigation items - only visible to ADMINISTRADOR role
+  // Administrative navigation items - organized by categories
   const adminNavigation = [
-    { name: "Tabelas Comerciais", href: "/configuracoes/tabelas", icon: Settings },
-    { name: "Usuários", href: "/admin/usuarios", icon: Users },
-    { name: "Parceiros", href: "/parceiros", icon: Building2 },
-    { name: "Produtos", href: "/configuracoes/produtos", icon: Package },
-    { name: "Lojas", href: "/admin/lojas", icon: Store },
-    { name: "Segurança OWASP", href: "/admin/security/owasp", icon: Shield },
+    // Gestão de Usuários e Acesso
+    { name: "👥 Usuários", href: "/admin/usuarios", icon: Users, category: "Gestão de Acesso" },
+    
+    // Configurações do Sistema  
+    { name: "⚙️ Tabelas Comerciais", href: "/configuracoes/tabelas", icon: Settings, category: "Configurações" },
+    { name: "📦 Produtos", href: "/configuracoes/produtos", icon: Package, category: "Configurações" },
+    
+    // Gestão Comercial
+    { name: "🏢 Parceiros", href: "/parceiros", icon: Building2, category: "Gestão Comercial" },
+    { name: "🏪 Lojas", href: "/admin/lojas", icon: Store, category: "Gestão Comercial" },
+    
+    // Segurança e Compliance
+    { name: "🛡️ OWASP Dashboard", href: "/admin/security/owasp", icon: Shield, category: "Segurança" },
   ];
 
   // Build navigation based on user role
@@ -180,7 +187,7 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>
                 <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">{user?.nome || user?.email}</p>
+                  <p className="text-sm font-medium leading-none">{user?.email}</p>
                   <p className="text-xs leading-none text-muted-foreground">{user?.email}</p>
                 </div>
               </DropdownMenuLabel>
