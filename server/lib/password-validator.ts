@@ -75,16 +75,20 @@ export function validatePassword(password: string, userInputs: string[] = []): P
 }
 
 // Create Zod schema for password validation that can be used in routes
+// ✅ OTIMIZAÇÃO: Cache validation result to avoid calling validatePassword() twice
+const validationCache = new Map<string, PasswordValidationResult>();
+
 export const passwordSchema = z.string().min(8).refine(
   (password) => {
     const validation = validatePassword(password);
+    validationCache.set(password, validation); // Cache result
     return validation.isValid;
   },
   (password) => {
-    const validation = validatePassword(password);
-    return {
-      message: validation.message
-    };
+    // Use cached result if available, otherwise validate again
+    const validation = validationCache.get(password) || validatePassword(password);
+    validationCache.delete(password); // Clean up cache
+    return { message: validation.message }; // ✅ CORREÇÃO: Retorna objeto { message: string }
   }
 );
 
