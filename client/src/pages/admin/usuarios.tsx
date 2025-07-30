@@ -50,6 +50,8 @@ const UsuariosPage: React.FC = () => {
         lojaId: userData.perfil === 'ATENDENTE' && userData.lojaId ? parseInt(userData.lojaId) : null,
         lojaIds: userData.perfil === 'GERENTE' && userData.lojaIds ? userData.lojaIds.map((id: string) => parseInt(id)) : null,
       };
+      
+      console.log('🔍 [USER CREATE] Sending data:', apiData);
 
       const response = await api.post('/api/admin/users', apiData);
       return response.data; // Retorna o corpo da resposta da API

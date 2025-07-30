@@ -3170,11 +3170,15 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
 
   app.post("/api/admin/users", jwtAuthMiddleware, requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
+      console.log('📝 [USER CREATE] Request body:', req.body);
+      console.log('📝 [USER CREATE] User role:', req.user?.role);
+      
       const validatedData = UserDataSchema.parse(req.body);
       const newUser = await createUser(validatedData);
       return res.status(201).json(newUser);
     } catch (error: any) {
       if (error instanceof z.ZodError) {
+        console.error('❌ [USER CREATE] Validation error:', error.flatten());
         return res.status(400).json({ message: "Dados de entrada inválidos", errors: error.flatten() });
       }
       if (error.name === 'ConflictError') {
