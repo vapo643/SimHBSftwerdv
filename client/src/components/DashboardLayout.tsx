@@ -147,7 +147,7 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
               <div className="space-y-2">
                 <div className="px-3 pb-2">
                   <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    ⚡ Workflow Principal
+                    Workflow Principal
                   </h3>
                 </div>
                 {[
@@ -188,7 +188,7 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
                 <div className="space-y-2">
                   <div className="px-3 pb-2">
                     <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                      💰 Área Financeira
+                      Área Financeira
                     </h3>
                   </div>
                   <Link 
@@ -213,7 +213,7 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
                   <div className="space-y-2">
                     <div className="px-3 pb-2">
                       <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                        👥 Gestão de Acesso
+                        Gestão de Acesso
                       </h3>
                     </div>
                     <Link 
@@ -234,7 +234,7 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
                   <div className="space-y-2">
                     <div className="px-3 pb-2">
                       <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                        ⚙️ Configurações
+                        Configurações
                       </h3>
                     </div>
                     {[
@@ -265,7 +265,7 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
                   <div className="space-y-2">
                     <div className="px-3 pb-2">
                       <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                        🏢 Gestão Comercial
+                        Gestão Comercial
                       </h3>
                     </div>
                     {[
@@ -296,7 +296,7 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
                   <div className="space-y-2">
                     <div className="px-3 pb-2">
                       <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                        🛡️ Segurança & Compliance
+                        Segurança & Compliance
                       </h3>
                     </div>
                     <Link 

@@ -4,6 +4,36 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Custom Modern Scrollbar Design */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+  border-radius: 10px;
+  margin: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #3b82f6 0%, #10b981 100%);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #059669 100%);
+  box-shadow: 0 2px 12px rgba(59, 130, 246, 0.3);
+  transform: scale(1.1);
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #3b82f6 hsl(var(--muted));
+}
+
 :root {
   /* Tema Dark (Blackout) - Default */
   --background: hsl(0, 0%, 0%);
