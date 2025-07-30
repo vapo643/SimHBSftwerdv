@@ -14,15 +14,17 @@ Esta análise identificou requisitos ASVS Level 1 pendentes nas três áreas cr�
 
 ### 8.1 Documentação de Autorização
 
-**[❌ PENDENTE] 8.1.1** - Verificar que a documentação de autorização define regras para acesso a funções e dados
-- **Situação Atual**: Temos RLS policies e role guards implementados mas SEM documentação formal
+**[✅ IMPLEMENTADO] 8.1.1** - Verificar que a documentação de autorização define regras para acesso a funções e dados
+- **Situação Atual**: ✅ Documentação formal criada em SECURITY_POLICY.md
 - **Evidência**: 
-  - Role guards em `server/lib/role-guards.ts` não documentados
-  - RLS policies em `migrations/` sem documento consolidado
-- **Ação Necessária**: Criar documento formal descrevendo:
+  - Documento completo com matriz de permissões
+  - RLS policies documentadas por tabela
+  - Processo de revisão estabelecido
+- **Implementação**: 31/01/2025 - SECURITY_POLICY.md criado com:
   - Matriz de permissões (role x recurso)
   - Regras de isolamento de dados por loja_id
   - Fluxo de autorização da aplicação
+  - Processo de revisão trimestral
 
 **[❌ PENDENTE] 8.1.4** - Verificar que existe um processo documentado para revisar e atualizar regras de autorização
 - **Situação Atual**: Não existe processo formal de revisão

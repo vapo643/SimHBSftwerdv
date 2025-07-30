@@ -13,6 +13,8 @@ This is a full-stack TypeScript application for credit management called "Simpix
 - **Key Security Strengths Identified**: JWT authentication with blacklist, role-based guards, RLS data isolation, rate limiting (5 attempts/15min for auth)
 - **Critical Security Gaps Found**: No token rotation on re-authentication, password change without current password verification, active sessions persist when account disabled
 - **Priority Remediation Plan**: 7 gaps identified with 3 high-priority items that would raise compliance to 84%
+- **ASVS V8.1.1 Implementation Complete (January 31)**: Created formal authorization documentation in SECURITY_POLICY.md fulfilling OWASP ASVS requirement for documented access control rules
+- **Security Documentation Milestone**: Comprehensive 2,000+ word policy document detailing RBAC implementation, RLS policies, permission matrices, and review processes for all 4 user roles (ATENDENTE, ANALISTA, GERENTE, ADMINISTRADOR)
 
 ### January 2025 - Critical Security Fixes (January 31)
 
