@@ -141,25 +141,180 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
             <ThemeSelector />
           </div>
           <div className="flex-1 overflow-auto py-2">
-            <nav className="grid items-start px-4 text-sm font-medium">
-              {navigation.map(item => {
-                const Icon = item.icon;
-                const isActive = location === item.href;
-                return (
+            <nav className="px-4 space-y-6">
+              
+              {/* Workflow Principal */}
+              <div className="space-y-2">
+                <div className="px-3 pb-2">
+                  <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    ⚡ Workflow Principal
+                  </h3>
+                </div>
+                {[
+                  { name: "📊 Dashboard", href: "/dashboard", icon: LayoutDashboard, gradient: "from-blue-500 to-purple-600" },
+                  { name: "➕ Nova Proposta", href: "/propostas/nova", icon: PlusCircle, gradient: "from-green-500 to-emerald-600" },
+                  { name: "📋 Fila de Análise", href: "/credito/fila", icon: List, gradient: "from-orange-500 to-red-600" },
+                  { name: "📄 Formalização", href: "/formalizacao", icon: FileText, gradient: "from-indigo-500 to-blue-600" },
+                ].filter(item => 
+                  (user?.role === 'ATENDENTE' && ['📊 Dashboard', '➕ Nova Proposta', '📋 Fila de Análise', '📄 Formalização'].includes(item.name)) ||
+                  (user?.role === 'ANALISTA' && ['📋 Fila de Análise'].includes(item.name)) ||
+                  (user?.role === 'GERENTE' && ['📊 Dashboard', '➕ Nova Proposta', '📋 Fila de Análise', '📄 Formalização'].includes(item.name)) ||
+                  (user?.role === 'FINANCEIRO' && ['📊 Dashboard', '➕ Nova Proposta', '📋 Fila de Análise', '📄 Formalização'].includes(item.name)) ||
+                  (user?.role === 'ADMINISTRADOR' && ['📊 Dashboard', '➕ Nova Proposta', '📋 Fila de Análise', '📄 Formalização'].includes(item.name))
+                ).map(item => {
+                  const Icon = item.icon;
+                  const isActive = location === item.href;
+                  return (
+                    <Link 
+                      key={item.name} 
+                      href={item.href}
+                      className={`group flex items-center gap-3 rounded-xl px-3 py-3 transition-all duration-200 ${
+                        isActive
+                          ? `bg-gradient-to-r ${item.gradient} text-white shadow-lg transform scale-105`
+                          : "text-muted-foreground hover:text-foreground hover:bg-accent/50 hover:scale-102"
+                      }`}
+                    >
+                      <div className={`p-2 rounded-lg ${isActive ? 'bg-white/20' : 'bg-accent/30 group-hover:bg-accent'} transition-colors`}>
+                        <Icon className="h-4 w-4" />
+                      </div>
+                      <span className={`font-medium ${isActive ? 'text-white' : ''}`}>{item.name}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+
+              {/* Área Financeira */}
+              {(user?.role === 'FINANCEIRO' || user?.role === 'ADMINISTRADOR') && (
+                <div className="space-y-2">
+                  <div className="px-3 pb-2">
+                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                      💰 Área Financeira
+                    </h3>
+                  </div>
                   <Link 
-                    key={item.name} 
-                    href={item.href}
-                    className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all ${
-                      isActive
-                        ? "bg-primary text-primary-foreground"
-                        : "text-muted-foreground hover:text-primary"
+                    href="/financeiro/pagamentos"
+                    className={`group flex items-center gap-3 rounded-xl px-3 py-3 transition-all duration-200 ${
+                      location === "/financeiro/pagamentos"
+                        ? "bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg transform scale-105"
+                        : "text-muted-foreground hover:text-foreground hover:bg-accent/50 hover:scale-102"
                     }`}
                   >
-                    <Icon className="h-4 w-4" />
-                    {item.name}
+                    <div className={`p-2 rounded-lg ${location === "/financeiro/pagamentos" ? 'bg-white/20' : 'bg-accent/30 group-hover:bg-accent'} transition-colors`}>
+                      <CreditCard className="h-4 w-4" />
+                    </div>
+                    <span className={`font-medium ${location === "/financeiro/pagamentos" ? 'text-white' : ''}`}>💳 Pagamentos</span>
                   </Link>
-                );
-              })}
+                </div>
+              )}
+
+              {/* Gestão Administrativa */}
+              {user?.role === 'ADMINISTRADOR' && (
+                <>
+                  <div className="space-y-2">
+                    <div className="px-3 pb-2">
+                      <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                        👥 Gestão de Acesso
+                      </h3>
+                    </div>
+                    <Link 
+                      href="/admin/usuarios"
+                      className={`group flex items-center gap-3 rounded-xl px-3 py-3 transition-all duration-200 ${
+                        location === "/admin/usuarios"
+                          ? "bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-lg transform scale-105"
+                          : "text-muted-foreground hover:text-foreground hover:bg-accent/50 hover:scale-102"
+                      }`}
+                    >
+                      <div className={`p-2 rounded-lg ${location === "/admin/usuarios" ? 'bg-white/20' : 'bg-accent/30 group-hover:bg-accent'} transition-colors`}>
+                        <Users className="h-4 w-4" />
+                      </div>
+                      <span className={`font-medium ${location === "/admin/usuarios" ? 'text-white' : ''}`}>👤 Usuários & Perfis</span>
+                    </Link>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="px-3 pb-2">
+                      <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                        ⚙️ Configurações
+                      </h3>
+                    </div>
+                    {[
+                      { name: "🔧 Tabelas Comerciais", href: "/configuracoes/tabelas", icon: Settings, gradient: "from-slate-500 to-gray-600" },
+                      { name: "📦 Produtos de Crédito", href: "/configuracoes/produtos", icon: Package, gradient: "from-cyan-500 to-blue-600" },
+                    ].map(item => {
+                      const Icon = item.icon;
+                      const isActive = location === item.href;
+                      return (
+                        <Link 
+                          key={item.name} 
+                          href={item.href}
+                          className={`group flex items-center gap-3 rounded-xl px-3 py-3 transition-all duration-200 ${
+                            isActive
+                              ? `bg-gradient-to-r ${item.gradient} text-white shadow-lg transform scale-105`
+                              : "text-muted-foreground hover:text-foreground hover:bg-accent/50 hover:scale-102"
+                          }`}
+                        >
+                          <div className={`p-2 rounded-lg ${isActive ? 'bg-white/20' : 'bg-accent/30 group-hover:bg-accent'} transition-colors`}>
+                            <Icon className="h-4 w-4" />
+                          </div>
+                          <span className={`font-medium ${isActive ? 'text-white' : ''}`}>{item.name}</span>
+                        </Link>
+                      );
+                    })}
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="px-3 pb-2">
+                      <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                        🏢 Gestão Comercial
+                      </h3>
+                    </div>
+                    {[
+                      { name: "🏢 Parceiros", href: "/parceiros", icon: Building2, gradient: "from-amber-500 to-orange-600" },
+                      { name: "🏪 Lojas & Filiais", href: "/admin/lojas", icon: Store, gradient: "from-pink-500 to-rose-600" },
+                    ].map(item => {
+                      const Icon = item.icon;
+                      const isActive = location === item.href;
+                      return (
+                        <Link 
+                          key={item.name} 
+                          href={item.href}
+                          className={`group flex items-center gap-3 rounded-xl px-3 py-3 transition-all duration-200 ${
+                            isActive
+                              ? `bg-gradient-to-r ${item.gradient} text-white shadow-lg transform scale-105`
+                              : "text-muted-foreground hover:text-foreground hover:bg-accent/50 hover:scale-102"
+                          }`}
+                        >
+                          <div className={`p-2 rounded-lg ${isActive ? 'bg-white/20' : 'bg-accent/30 group-hover:bg-accent'} transition-colors`}>
+                            <Icon className="h-4 w-4" />
+                          </div>
+                          <span className={`font-medium ${isActive ? 'text-white' : ''}`}>{item.name}</span>
+                        </Link>
+                      );
+                    })}
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="px-3 pb-2">
+                      <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                        🛡️ Segurança & Compliance
+                      </h3>
+                    </div>
+                    <Link 
+                      href="/admin/security/owasp"
+                      className={`group flex items-center gap-3 rounded-xl px-3 py-3 transition-all duration-200 ${
+                        location === "/admin/security/owasp"
+                          ? "bg-gradient-to-r from-red-500 to-pink-600 text-white shadow-lg transform scale-105"
+                          : "text-muted-foreground hover:text-foreground hover:bg-accent/50 hover:scale-102"
+                      }`}
+                    >
+                      <div className={`p-2 rounded-lg ${location === "/admin/security/owasp" ? 'bg-white/20' : 'bg-accent/30 group-hover:bg-accent'} transition-colors`}>
+                        <Shield className="h-4 w-4" />
+                      </div>
+                      <span className={`font-medium ${location === "/admin/security/owasp" ? 'text-white' : ''}`}>🔐 Dashboard OWASP</span>
+                    </Link>
+                  </div>
+                </>
+              )}
             </nav>
           </div>
         </div>
