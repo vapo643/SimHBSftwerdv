@@ -71,10 +71,11 @@ const UsuariosPage: React.FC = () => {
     },
     onError: (error: any) => {
       console.error('❌ [USER CREATE ERROR]:', error);
+      console.error('❌ [ERROR DATA]:', error.data);
       
-      // Handle password validation errors specifically
-      if (error.response?.data?.errors?.fieldErrors?.password) {
-        const passwordErrors = error.response.data.errors.fieldErrors.password;
+      // Handle password validation errors specifically - use error.data from ApiError
+      if (error.data?.errors?.fieldErrors?.password) {
+        const passwordErrors = error.data.errors.fieldErrors.password;
         let description = "Problema com a senha:\n";
         
         if (passwordErrors.includes('This is a top-10 common password')) {
@@ -99,7 +100,7 @@ const UsuariosPage: React.FC = () => {
       }
       
       // Handle role validation errors
-      if (error.response?.data?.errors?.fieldErrors?.role) {
+      if (error.data?.errors?.fieldErrors?.role) {
         toast({
           title: "Erro no perfil do usuário",
           description: "Perfil selecionado não é válido. Tente novamente.",

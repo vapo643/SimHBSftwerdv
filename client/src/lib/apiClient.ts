@@ -45,18 +45,21 @@ export enum ApiErrorCode {
 export class ApiError extends Error {
   public readonly code: ApiErrorCode;
   public readonly isRetryable: boolean;
+  public readonly data?: any; // Store full response data
 
   constructor(
     message: string,
     public status: number,
     public statusText: string,
     public response?: Response,
-    code?: ApiErrorCode
+    code?: ApiErrorCode,
+    data?: any // Add data parameter
   ) {
     super(message);
     this.name = 'ApiError';
     this.code = code || this.inferCodeFromStatus(status);
     this.isRetryable = this.determineRetryability();
+    this.data = data; // Store the full response data
   }
 
   private inferCodeFromStatus(status: number): ApiErrorCode {
@@ -414,12 +417,14 @@ export async function apiClient<T = any>(
         }
       }
 
-      // PASSO 5.5: Use enhanced ApiError class
+      // PASSO 5.5: Use enhanced ApiError class with full response data
       throw new ApiError(
         (data as any)?.message || (data as string) || `HTTP Error ${response.status}`,
         response.status,
         response.statusText,
-        response
+        response,
+        undefined, // code will be inferred
+        data // Pass full response data
       );
     }
 
