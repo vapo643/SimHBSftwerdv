@@ -51,7 +51,7 @@ const UsuariosPage: React.FC = () => {
         lojaIds: userData.perfil === 'GERENTE' && userData.lojaIds ? userData.lojaIds.map((id: string) => parseInt(id)) : null,
       };
       
-      console.log('🔍 [USER CREATE] Sending data:', apiData);
+      console.log('🔍 [USER CREATE] Sending data:', JSON.stringify(apiData, null, 2));
 
       const response = await api.post('/api/admin/users', apiData);
       return response.data; // Retorna o corpo da resposta da API

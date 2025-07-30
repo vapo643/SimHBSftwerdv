@@ -3178,8 +3178,13 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
       return res.status(201).json(newUser);
     } catch (error: any) {
       if (error instanceof z.ZodError) {
-        console.error('❌ [USER CREATE] Validation error:', error.flatten());
-        return res.status(400).json({ message: "Dados de entrada inválidos", errors: error.flatten() });
+        const flatErrors = error.flatten();
+        console.error('❌ [USER CREATE] Validation error:', {
+          fieldErrors: flatErrors.fieldErrors,
+          formErrors: flatErrors.formErrors,
+          issues: error.issues
+        });
+        return res.status(400).json({ message: "Dados de entrada inválidos", errors: flatErrors });
       }
       if (error.name === 'ConflictError') {
         return res.status(409).json({ message: error.message });
