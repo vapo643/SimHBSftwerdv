@@ -1,0 +1,114 @@
+[
+  {
+    "category": "V1.1 Secure Software Development Lifecycle",
+    "requirement": "Verify the use of a secure software development lifecycle",
+    "level": 2,
+    "implemented": true,
+    "compliance": "COMPLIANT",
+    "evidence": "Git flow, CI/CD pipeline, code review process implemented"
+  },
+  {
+    "category": "V1.2 Authentication Architecture",
+    "requirement": "Verify that authentication architecture is documented",
+    "level": 2,
+    "implemented": true,
+    "compliance": "COMPLIANT",
+    "evidence": "JWT + Supabase auth architecture documented"
+  },
+  {
+    "category": "V2.1 Password Security",
+    "requirement": "Verify that passwords are stored in a form that is resistant to offline attacks",
+    "level": 2,
+    "implemented": true,
+    "compliance": "COMPLIANT",
+    "evidence": "Supabase handles password hashing with bcrypt"
+  },
+  {
+    "category": "V2.2 Multi-Factor Authentication",
+    "requirement": "Verify that multi-factor authentication is enforced",
+    "level": 2,
+    "implemented": false,
+    "compliance": "NON_COMPLIANT",
+    "remediation": "Implement MFA for all user accounts, especially ADMINISTRADOR role"
+  },
+  {
+    "category": "V3.1 Session Management",
+    "requirement": "Verify that sessions are invalidated when the user logs out",
+    "level": 2,
+    "implemented": true,
+    "compliance": "COMPLIANT",
+    "evidence": "Supabase session management handles logout properly"
+  },
+  {
+    "category": "V3.2 Session Timeout",
+    "requirement": "Verify that sessions timeout after a period of inactivity",
+    "level": 2,
+    "implemented": true,
+    "compliance": "COMPLIANT",
+    "evidence": "JWT tokens have 1-hour expiration with refresh mechanism"
+  },
+  {
+    "category": "V4.1 Access Control Design",
+    "requirement": "Verify that access control rules are enforced on the server side",
+    "level": 2,
+    "implemented": true,
+    "compliance": "COMPLIANT",
+    "evidence": "RBAC + RLS policies implemented at database level"
+  },
+  {
+    "category": "V4.2 Operation Level Access Control",
+    "requirement": "Verify that access controls fail securely",
+    "level": 2,
+    "implemented": true,
+    "compliance": "COMPLIANT",
+    "evidence": "Default deny principle implemented in RLS policies"
+  },
+  {
+    "category": "V5.1 Input Validation",
+    "requirement": "Verify that input validation is performed on the server side",
+    "level": 2,
+    "implemented": true,
+    "compliance": "COMPLIANT",
+    "evidence": "Zod validation + input sanitization middleware implemented"
+  },
+  {
+    "category": "V5.3 Output Encoding",
+    "requirement": "Verify that output encoding is performed",
+    "level": 2,
+    "implemented": true,
+    "compliance": "COMPLIANT",
+    "evidence": "XSS protection via Helmet and CSP headers"
+  },
+  {
+    "category": "V7.1 Error Handling",
+    "requirement": "Verify that error messages do not reveal sensitive information",
+    "level": 2,
+    "implemented": true,
+    "compliance": "COMPLIANT",
+    "evidence": "Generic error messages implemented, detailed logging separated"
+  },
+  {
+    "category": "V7.2 Logging",
+    "requirement": "Verify that security events are logged",
+    "level": 2,
+    "implemented": true,
+    "compliance": "COMPLIANT",
+    "evidence": "Security logger tracks auth attempts, rate limits, anomalies"
+  },
+  {
+    "category": "V9.1 HTTPS",
+    "requirement": "Verify that TLS is used for all connections",
+    "level": 2,
+    "implemented": true,
+    "compliance": "COMPLIANT",
+    "evidence": "HSTS headers enforced, TLS termination at Replit level"
+  },
+  {
+    "category": "V9.2 Certificate Validation",
+    "requirement": "Verify that certificate validation is performed",
+    "level": 2,
+    "implemented": true,
+    "compliance": "COMPLIANT",
+    "evidence": "Standard HTTPS certificate validation in place"
+  }
+]
