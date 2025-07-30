@@ -1,181 +1,155 @@
-import React, { createContext, useState, useEffect, useCallback, useMemo } from 'react';
-import { getSupabase } from '../lib/supabase';
-import { fetchWithToken } from '../lib/fetchWithToken';
+import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { getSupabase } from '@/lib/supabase';
+import { api } from '@/lib/apiClient';
+import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
 
-export type Role = 'ADMINISTRADOR' | 'GERENTE' | 'ATENDENTE' | 'ANALISTA' | 'FINANCEIRO';
-
-export interface UserProfile {
+interface User {
   id: string;
-  full_name: string | null;
   email: string;
-  role: Role;
-  loja_id: string | null;
-  loja?: {
-    id: string;
-    nome_loja: string;
-    parceiro_id: string;
-    parceiro?: {
-      id: string;
-      razao_social: string;
-    };
-  };
+  role: string | null;
+  full_name?: string | null;
+  loja_id?: number | null;
 }
 
-export interface AuthState {
-  user: any | null; // Supabase User object
-  profile: UserProfile | null;
-  isAuthenticated: boolean;
+interface AuthContextType {
+  user: User | null;
+  session: Session | null;
+  accessToken: string | null;
   isLoading: boolean;
-}
-
-interface AuthContextType extends AuthState {
-  // Helper methods for role checking
-  hasRole: (role: Role) => boolean;
-  isAdmin: () => boolean;
-  isAtendente: () => boolean;
-  isAnalista: () => boolean;
-  isGerente: () => boolean;
-  isFinanceiro: () => boolean;
-  
-  // Permission checking
-  canAccessAdmin: () => boolean;
-  canAccessPayments: () => boolean;
-  canAccessAnalysis: () => boolean;
-  canAccessFormalization: () => boolean;
-  
-  // Actions
-  refetchProfile: () => Promise<void>;
+  error: Error | null;
+  refetchUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-async function fetchUserProfile(): Promise<UserProfile | null> {
-  try {
-    const response = await fetchWithToken('/api/auth/profile');
-    if (!response.ok) {
-      console.error('Failed to fetch user profile:', response.status);
-      return null;
-    }
-    
-    const data = await response.json();
-    return data; // O endpoint já retorna diretamente os dados do perfil
-  } catch (error) {
-    console.error('Error fetching user profile:', error);
-    return null;
-  }
+interface AuthProviderProps {
+  children: ReactNode;
 }
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  console.log('AuthProvider render');
-  
-  const [authState, setAuthState] = useState<AuthState>({
-    user: null,
-    profile: null,
-    isAuthenticated: false,
-    isLoading: true
-  });
+export function AuthProvider({ children }: AuthProviderProps) {
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
-  // Simplified - removed all callbacks to test
-  const refetchProfile = async () => {
-    console.log('AuthContext: Refetching profile...');
-    const profile = await fetchUserProfile();
-    console.log('AuthContext: Profile fetched:', profile);
-    setAuthState(prev => ({ ...prev, profile }));
+  const fetchUserProfile = async (currentSession: Session | null) => {
+    try {
+      if (currentSession?.user) {
+        try {
+          // Fetch complete user profile from debug endpoint
+          const response = await api.get<{
+            message: string;
+            user: User;
+            timestamp: string;
+          }>('/api/debug/me');
+          
+          if (response.data.user) {
+            console.log('🔐 [AUTH RESTORED] User profile loaded with valid token');
+            setUser(response.data.user);
+            setError(null);
+          } else {
+            throw new Error('Invalid user data received');
+          }
+        } catch (apiError) {
+          console.error('Error fetching profile data:', apiError);
+          setError(apiError as Error);
+          setUser(null);
+        }
+      } else {
+        setUser(null);
+        setError(null);
+      }
+    } catch (authError) {
+      console.error('Error checking authentication:', authError);
+      setError(authError as Error);
+      setUser(null);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Conservative refetch strategy: maintain old data while fetching new
+  const refetchUser = async () => {
+    // Don't set loading to true to maintain current user data
+    try {
+      const supabase = getSupabase();
+      const { data: currentUser } = await supabase.auth.getUser();
+      
+      if (currentUser.user) {
+        const response = await api.get<{
+          message: string;
+          user: User;
+          timestamp: string;
+        }>('/api/debug/me');
+        
+        if (response.data.user) {
+          setUser(response.data.user);
+          setError(null);
+        }
+      } else {
+        setUser(null);
+        setError(null);
+      }
+    } catch (err) {
+      console.error('Error refetching user:', err);
+      setError(err as Error);
+      // Keep existing user data on error (conservative strategy)
+    }
   };
 
   useEffect(() => {
-    console.log('AuthContext useEffect running');
     const supabase = getSupabase();
     
-    // Initial session check
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('AuthContext: Initial session check:', session ? 'authenticated' : 'not authenticated');
-      
-      if (session) {
-        fetchUserProfile().then(profile => {
-          console.log('AuthContext: Initial profile loaded:', profile);
-          setAuthState({
-            user: session.user,
-            profile,
-            isAuthenticated: true,
-            isLoading: false
-          });
-        });
-      } else {
-        setAuthState({ user: null, profile: null, isAuthenticated: false, isLoading: false });
-      }
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
+      setSession(initialSession);
+      setAccessToken(initialSession?.access_token || null);
+      fetchUserProfile(initialSession);
     });
 
-    // Listen for auth state changes
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('Auth state changed:', event);
+    // Set up reactive auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event: AuthChangeEvent, currentSession: Session | null) => {
+        console.log(`🔐 [AUTH EVENT] ${event}`, { 
+          hasSession: !!currentSession, 
+          tokenLength: currentSession?.access_token?.length 
+        });
         
-        if (session) {
-          // Fetch profile data
-          const profile = await fetchUserProfile();
-          console.log('AuthContext: Profile after auth change:', profile);
-          
-          setAuthState({
-            user: session.user,
-            profile,
-            isAuthenticated: true,
-            isLoading: false
-          });
-        } else {
-          setAuthState({
-            user: null,
-            profile: null,
-            isAuthenticated: false,
-            isLoading: false
-          });
+        setSession(currentSession);
+        setAccessToken(currentSession?.access_token || null);
+        
+        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+          fetchUserProfile(currentSession);
+        } else if (event === 'SIGNED_OUT') {
+          setUser(null);
+          setError(null);
+          setIsLoading(false);
         }
       }
     );
 
     return () => {
-      console.log('AuthContext cleanup');
-      authListener.subscription.unsubscribe();
+      subscription?.unsubscribe();
     };
   }, []);
 
-  // Simplified - no callbacks for testing
-  const hasRole = (role: Role): boolean => authState.profile?.role === role;
-  const isAdmin = (): boolean => authState.profile?.role === 'ADMINISTRADOR';
-  const isAtendente = (): boolean => authState.profile?.role === 'ATENDENTE';
-  const isAnalista = (): boolean => authState.profile?.role === 'ANALISTA';
-  const isGerente = (): boolean => authState.profile?.role === 'GERENTE';
-  const isFinanceiro = (): boolean => authState.profile?.role === 'FINANCEIRO';
-
-  // Simplified - no callbacks for testing
-  const canAccessAdmin = (): boolean => isAdmin();
-  const canAccessPayments = (): boolean => isFinanceiro() || isAdmin();
-  const canAccessAnalysis = (): boolean => isAnalista() || isGerente() || isAdmin();
-  const canAccessFormalization = (): boolean => isAtendente() || isGerente() || isFinanceiro() || isAdmin();
-
-  const contextValue: AuthContextType = {
-    ...authState,
-    hasRole,
-    isAdmin,
-    isAtendente,
-    isAnalista,
-    isGerente,
-    isFinanceiro,
-    canAccessAdmin,
-    canAccessPayments,
-    canAccessAnalysis,
-    canAccessFormalization,
-    refetchProfile
+  const value = {
+    user,
+    session,
+    accessToken,
+    isLoading,
+    error,
+    refetchUser,
   };
 
-  return (
-    <AuthContext.Provider value={contextValue}>
-      {children}
-    </AuthContext.Provider>
-  );
-};
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
 
-export default AuthContext;
-
-// Also export the hook for convenience
-export { useAuth } from '../hooks/useAuth';
+export function useAuth(): AuthContextType {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+}

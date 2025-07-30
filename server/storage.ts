@@ -36,8 +36,6 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
   getUsers(): Promise<User[]>;
   getUsersWithDetails(): Promise<any[]>;
-  getUserProfileWithDetails(userId: string): Promise<any>;
-  setUserContext(context: { userId: string; role: string; lojaId: string | null }): Promise<void>;
 
   // Propostas
   getPropostas(): Promise<any[]>;
@@ -119,8 +117,8 @@ export class DatabaseStorage implements IStorage {
           role,
           loja_id,
           auth_user:auth.users!inner(email),
-          loja:lojas!profiles_loja_id_fkey(id, nome_loja, parceiro_id, parceiro:parceiros(id, razao_social)),
-          gerente_lojas!gerente_lojas_gerente_id_fkey(loja_id, loja:lojas!gerente_lojas_loja_id_fkey(id, nome_loja, parceiro_id, parceiro:parceiros(id, razao_social)))
+          loja:lojas(id, nome_loja, parceiro_id, parceiro:parceiros(id, razao_social)),
+          gerente_lojas(loja_id, loja:lojas(id, nome_loja, parceiro_id, parceiro:parceiros(id, razao_social)))
         `);
 
       if (error) {
@@ -657,63 +655,6 @@ export class DatabaseStorage implements IStorage {
         erro: erro || null
       })
       .where(eq(interCallbacks.id, id));
-  }
-
-  // Auth Profile Methods
-  async getUserProfileWithDetails(userId: string): Promise<any> {
-    const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-    const supabase = createServerSupabaseAdminClient();
-    
-    try {
-      // Use the specific foreign key relationship to avoid ambiguity
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select(`
-          id,
-          full_name,
-          email,
-          role,
-          loja_id,
-          loja:lojas!profiles_loja_id_fkey(
-            id,
-            nome_loja,
-            parceiro_id,
-            parceiro:parceiros(
-              id,
-              razao_social
-            )
-          )
-        `)
-        .eq('id', userId)
-        .single();
-
-      if (error) {
-        console.error('Error fetching user profile with details:', error);
-        return null;
-      }
-
-      return profile;
-    } catch (error) {
-      console.error('Error in getUserProfileWithDetails:', error);
-      return null;
-    }
-  }
-
-  async setUserContext(context: { userId: string; role: string; lojaId: string | null }): Promise<void> {
-    const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-    const supabase = createServerSupabaseAdminClient();
-    
-    try {
-      // Set the user context in PostgreSQL for RLS
-      await supabase.rpc('set_user_context', {
-        p_user_id: context.userId,
-        p_role: context.role,
-        p_loja_id: context.lojaId
-      });
-    } catch (error) {
-      console.error('Error setting user context:', error);
-      throw error;
-    }
   }
 }
 

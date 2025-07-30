@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { signOut } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import OfflineIndicator from "./OfflineIndicator";
 import { ThemeSelector } from "./ThemeSelector";
@@ -32,7 +32,7 @@ interface DashboardLayoutProps {
 export default function DashboardLayout({ children, title, actions }: DashboardLayoutProps) {
   const [location] = useLocation();
   const { toast } = useToast();
-  const { profile } = useAuth();
+  const { user } = useAuth();
 
   // Base navigation items - varies by role
   const attendantNavigation = [
@@ -72,7 +72,7 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
   // Build navigation based on user role
   let navigation = [];
   
-  switch (profile?.role) {
+  switch (user?.role) {
     case 'ATENDENTE':
       navigation = attendantNavigation;
       break;

@@ -12,20 +12,14 @@ export function setupSecurityHeaders() {
       "'unsafe-inline'", // Necessário para React em dev
       "'unsafe-eval'", // Necessário para Vite em dev
       "https://cdnjs.cloudflare.com", // Para bibliotecas externas
-      "https://unpkg.com",
-      "https://replit.com", // Para scripts do Replit
-      "https://*.replit.com" // Para subdomínios do Replit
+      "https://unpkg.com"
     ],
     styleSrc: [
       "'self'", 
       "'unsafe-inline'", // Necessário para styled components
       "https://fonts.googleapis.com"
     ],
-    fontSrc: [
-      "'self'", 
-      "https://fonts.gstatic.com",
-      "data:" // Permite fontes data: URI (inline fonts)
-    ],
+    fontSrc: ["'self'", "https://fonts.gstatic.com"],
     imgSrc: ["'self'", "data:", "https:", "blob:"],
     connectSrc: [
       "'self'",
@@ -33,11 +27,7 @@ export function setupSecurityHeaders() {
       "https://cdn.inter.co", // Banco Inter
       "https://api.clicksign.com", // ClickSign
       "wss://*.supabase.co", // WebSocket Supabase
-      "https://*.replit.com", // Replit APIs
-      "wss://*.replit.com", // Replit WebSockets
-      process.env.NODE_ENV === 'development' ? "ws://localhost:*" : "",
-      process.env.NODE_ENV === 'development' ? "ws://*" : "",
-      process.env.NODE_ENV === 'development' ? "wss://*" : ""
+      process.env.NODE_ENV === 'development' ? "ws://localhost:*" : ""
     ].filter(Boolean),
     mediaSrc: ["'none'"],
     objectSrc: ["'none'"],
