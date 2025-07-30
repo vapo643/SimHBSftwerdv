@@ -8,6 +8,8 @@ import {
   decimal,
   pgEnum,
   primaryKey,
+  varchar,
+  uuid
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -39,6 +41,20 @@ export const users = pgTable("users", {
   password: text("password").notNull(),
   role: text("role").notNull().default("user"), // admin, analyst, user
   createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Tabela para rastrear sessões ativas dos usuários
+export const userSessions = pgTable("user_sessions", {
+  id: varchar("id", { length: 255 }).primaryKey(), // Session ID (token)
+  userId: uuid("user_id").notNull().references(() => profiles.id, { onDelete: 'cascade' }),
+  token: varchar("token", { length: 2048 }).notNull(),
+  ipAddress: varchar("ip_address", { length: 45 }),
+  userAgent: text("user_agent"),
+  device: varchar("device", { length: 255 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  lastActivityAt: timestamp("last_activity_at").defaultNow().notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
 });
 
 // Tabela de junção para relacionamento muitos-para-muitos Gerentes x Lojas

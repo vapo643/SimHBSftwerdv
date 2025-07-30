@@ -7,6 +7,7 @@ import { log } from "./vite";
 import { setupSecurityHeaders, additionalSecurityHeaders } from "./lib/security-headers";
 import { inputSanitizerMiddleware } from "./lib/input-sanitizer";
 import { securityLogger, SecurityEventType, getClientIP } from "./lib/security-logger";
+import { urlTokenValidator } from "./middleware/url-token-validator";
 
 export async function createApp() {
   const app = express();
@@ -27,6 +28,10 @@ export async function createApp() {
   // Input Sanitization Middleware - OWASP A03: Injection Prevention
   app.use(inputSanitizerMiddleware);
   log("🔒 [SECURITY] Input sanitization middleware activated");
+
+  // URL Token Validation Middleware - OWASP ASVS V7.1.1
+  app.use(urlTokenValidator);
+  log("🔒 [SECURITY] URL token validation middleware activated - ASVS V7.1.1");
 
   // Rate Limiting (only in production/staging)
   if (process.env.NODE_ENV !== 'test') {

@@ -1,5 +1,6 @@
 import {
   users,
+  userSessions,
   propostas,
   propostaLogs,
   gerenteLojas,
@@ -27,7 +28,7 @@ import {
   type InsertInterCallback,
 } from "@shared/schema";
 import { db } from "./lib/supabase";
-import { eq, desc, and, or } from "drizzle-orm";
+import { eq, desc, and, or, not } from "drizzle-orm";
 
 export interface IStorage {
   // Users
@@ -82,6 +83,28 @@ export interface IStorage {
   createInterCallback(callback: InsertInterCallback): Promise<InterCallback>;
   getUnprocessedInterCallbacks(): Promise<InterCallback[]>;
   markInterCallbackAsProcessed(id: number, erro?: string): Promise<void>;
+
+  // User Sessions
+  createSession(session: {
+    id: string;
+    userId: string;
+    ipAddress?: string;
+    userAgent?: string;
+    expiresAt: Date;
+  }): Promise<void>;
+  getUserSessions(userId: string): Promise<Array<{
+    id: string;
+    userId: string;
+    ipAddress: string | null;
+    userAgent: string | null;
+    createdAt: Date;
+    expiresAt: Date;
+    lastActivityAt: Date;
+    isActive: boolean;
+  }>>;
+  deleteSession(sessionId: string): Promise<void>;
+  deleteAllUserSessions(userId: string, exceptSessionId?: string): Promise<void>;
+  updateSessionActivity(sessionId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -655,6 +678,96 @@ export class DatabaseStorage implements IStorage {
         erro: erro || null
       })
       .where(eq(interCallbacks.id, id));
+  }
+
+  // User Sessions Management
+  async createSession(session: {
+    id: string;
+    userId: string;
+    token: string;
+    ipAddress?: string;
+    userAgent?: string;
+    device?: string;
+    expiresAt: Date;
+  }): Promise<void> {
+    await db.insert(userSessions).values({
+      id: session.id,
+      userId: session.userId,
+      token: session.token,
+      ipAddress: session.ipAddress || null,
+      userAgent: session.userAgent || null,
+      device: session.device || null,
+      expiresAt: session.expiresAt,
+      lastActivityAt: new Date(),
+      isActive: true,
+    });
+  }
+
+  async getUserSessions(userId: string): Promise<Array<{
+    id: string;
+    userId: string;
+    token: string;
+    ipAddress: string | null;
+    userAgent: string | null;
+    device: string | null;
+    createdAt: Date;
+    expiresAt: Date;
+    lastActivityAt: Date;
+    isActive: boolean;
+  }>> {
+    const sessions = await db
+      .select()
+      .from(userSessions)
+      .where(
+        and(
+          eq(userSessions.userId, userId),
+          eq(userSessions.isActive, true)
+        )
+      )
+      .orderBy(desc(userSessions.lastActivityAt));
+    
+    return sessions;
+  }
+
+  async deleteSession(sessionId: string): Promise<void> {
+    await db
+      .update(userSessions)
+      .set({ isActive: false })
+      .where(eq(userSessions.id, sessionId));
+  }
+
+  async deleteAllUserSessions(userId: string, exceptSessionId?: string): Promise<void> {
+    if (exceptSessionId) {
+      // Delete all sessions except the specified one
+      await db
+        .update(userSessions)
+        .set({ isActive: false })
+        .where(
+          and(
+            eq(userSessions.userId, userId),
+            eq(userSessions.isActive, true),
+            not(eq(userSessions.id, exceptSessionId))
+          )
+        );
+    } else {
+      // Delete all sessions
+      await db
+        .update(userSessions)
+        .set({ isActive: false })
+        .where(
+          and(
+            eq(userSessions.userId, userId),
+            eq(userSessions.isActive, true)
+          )
+        );
+    }
+  }
+
+  async updateSessionActivity(sessionId: string): Promise<void> {
+    await db
+      .update(userSessions)
+      .set({ lastActivityAt: new Date() })
+      .where(eq(userSessions.id, sessionId));
   }
 }
 

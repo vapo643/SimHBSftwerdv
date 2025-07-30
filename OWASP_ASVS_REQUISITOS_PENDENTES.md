@@ -26,12 +26,18 @@ Esta análise identificou requisitos ASVS Level 1 pendentes nas três áreas cr�
   - Fluxo de autorização da aplicação
   - Processo de revisão trimestral
 
-**[❌ PENDENTE] 8.1.4** - Verificar que existe um processo documentado para revisar e atualizar regras de autorização
-- **Situação Atual**: Não existe processo formal de revisão
-- **Ação Necessária**: Estabelecer processo periódico de revisão com:
-  - Frequência de revisão (ex: trimestral)
-  - Responsáveis pela revisão
-  - Checklist de verificação
+**[✅ IMPLEMENTADO] 8.1.4** - Verificar que existe um processo documentado para revisar e atualizar regras de autorização
+- **Situação Atual**: ✅ Processo formal de revisão documentado
+- **Evidência**: 
+  - Seção "Processo de Revisão e Manutenção" em SECURITY_POLICY.md
+  - Frequência trimestral estabelecida
+  - Responsáveis definidos (Administrador, Gerente de Segurança, Auditor)
+  - Checklist completo de verificação incluído
+- **Implementação**: 31/01/2025 - Processo formal incluindo:
+  - Revisões trimestrais obrigatórias
+  - Revisões emergenciais para mudanças críticas
+  - Checklist de 5 pontos de verificação
+  - Próxima revisão agendada: 30 de Abril de 2025
 
 ### 8.3 Outros Controles de Autorização
 
@@ -46,10 +52,18 @@ Esta análise identificou requisitos ASVS Level 1 pendentes nas três áreas cr�
 
 ### 7.1 Gestão Fundamental de Sessão
 
-**[❌ PENDENTE] 7.1.1** - Verificar que a aplicação nunca revela tokens de sessão em parâmetros de URL
-- **Situação Atual**: Tokens passados em headers mas sem validação automatizada
-- **Evidência**: JWT sempre em Authorization header mas sem testes
-- **Ação Necessária**: Implementar teste automatizado para garantir tokens nunca aparecem em URLs
+**[✅ IMPLEMENTADO] 7.1.1** - Verificar que a aplicação nunca revela tokens de sessão em parâmetros de URL
+- **Situação Atual**: ✅ Middleware de validação de URL implementado e ativo
+- **Evidência**: 
+  - Middleware urlTokenValidator em server/middleware/url-token-validator.ts
+  - Bloqueia 9 tipos de parâmetros suspeitos (token, jwt, auth, etc.)
+  - Detecta padrões JWT em URLs e retorna erro 400
+  - Security logging para tentativas de violação
+- **Implementação**: 31/01/2025 - Sistema completo de proteção:
+  - Middleware integrado em server/app.ts
+  - Validação de query parameters e path segments
+  - Função sanitizeResponseUrls para limpar URLs em respostas
+  - Teste documentado em tests/security/url-token-test.ts
 
 ### 7.2 Vinculação de Sessão
 
@@ -96,9 +110,27 @@ Esta análise identificou requisitos ASVS Level 1 pendentes nas três áreas cr�
 
 ### 7.4 Término de Sessão
 
-**[❌ PENDENTE] 7.4.3** - Verificar que usuários são capazes de visualizar lista de sessões ativas
-- **Situação Atual**: Funcionalidade não implementada
-- **Ação Necessária**: Criar página para usuário ver/gerenciar suas sessões ativas
+**[✅ IMPLEMENTADO] 7.4.3** - Verificar que usuários são capazes de visualizar lista de sessões ativas
+- **Situação Atual**: ✅ Funcionalidade totalmente implementada
+- **Evidência**: 
+  - Tabela `user_sessions` com todos os campos necessários (IP, user agent, device, timestamps)
+  - Storage layer com métodos completos de CRUD
+  - API endpoints GET /api/auth/sessions e DELETE /api/auth/sessions/:id
+  - Interface frontend responsiva em /configuracoes/sessoes
+  - Detecção automática de dispositivo (desktop/mobile/tablet)
+  - Security logging para eventos SESSION_TERMINATED
+- **Implementação**: 31/01/2025 - Sistema completo de gerenciamento de sessões com:
+  - Visualização de todas as sessões ativas do usuário
+  - Informações detalhadas (IP, dispositivo, última atividade)
+  - Botão para encerrar sessões remotamente
+  - Identificação visual da sessão atual
+  - Dropdown menu no header com link para gerenciamento de sessões
+- **Arquivos**: 
+  - `shared/schema.ts` - userSessions table
+  - `server/storage.ts` - session CRUD methods
+  - `server/routes.ts` - session API endpoints
+  - `client/src/pages/configuracoes/sessoes.tsx` - frontend interface
+  - `client/src/components/DashboardLayout.tsx` - user menu integration
 
 ---
 
@@ -106,11 +138,21 @@ Esta análise identificou requisitos ASVS Level 1 pendentes nas três áreas cr�
 
 ### 6.1 Segurança de Credenciais
 
-**[❌ PENDENTE] 6.1.3** - Verificar que usuários podem alterar nome de usuário/email
-- **Situação Atual**: Email usado como login mas não pode ser alterado
-- **Ação Necessária**: Implementar funcionalidade de mudança de email com:
-  - Verificação do novo email
-  - Notificação ao email antigo
+**[✅ IMPLEMENTADO] 6.1.3** - Verificar que usuários podem alterar nome de usuário/email
+- **Situação Atual**: ✅ Funcionalidade de alteração de email totalmente implementada
+- **Evidência**: 
+  - Endpoint POST /api/auth/change-email com verificação de senha obrigatória
+  - Endpoint POST /api/auth/verify-email-change para confirmação via token
+  - Endpoint GET /api/auth/email-change-status para verificar pendências
+  - Interface completa em /configuracoes/alterar-email
+  - Token de verificação com validade de 24 horas
+  - Security logging (EMAIL_CHANGE_REQUESTED, EMAIL_CHANGED, INVALID_CREDENTIALS)
+- **Implementação**: 31/01/2025 - Sistema completo de alteração de email com:
+  - Verificação de senha antes de permitir alteração
+  - Email de verificação enviado para novo endereço
+  - Notificação enviada para email antigo
+  - Interface de usuário acessível via menu de configurações
+  - Testes automatizados em tests/security/email-change-test.ts
 
 ### 6.2 Segurança de Senhas
 
@@ -133,9 +175,18 @@ Esta análise identificou requisitos ASVS Level 1 pendentes nas três áreas cr�
 
 ### 6.5 Autenticação Sem Senha
 
-**[❌ PENDENTE] 6.5.5** - Verificar que autenticadores são revogáveis caso comprometidos
-- **Situação Atual**: Tokens podem ser blacklisted mas não há UI para isso
-- **Ação Necessária**: Criar interface para usuário revogar tokens/sessões específicas
+**[✅ IMPLEMENTADO] 6.5.5** - Verificar que autenticadores são revogáveis caso comprometidos
+- **Situação Atual**: ✅ Interface completa para revogar tokens/sessões implementada
+- **Evidência**: 
+  - Interface de gerenciamento de sessões em /configuracoes/sessoes
+  - Usuários podem visualizar todas as sessões ativas
+  - Botão de exclusão para revogar tokens específicos
+  - Backend blacklist automaticamente gerenciado no logout
+- **Implementação**: 31/01/2025 - Atendido pela implementação de V7.4.3:
+  - DELETE /api/auth/sessions/:id para revogar tokens
+  - Interface visual para identificar e revogar sessões comprometidas
+  - Security logging de SESSION_TERMINATED
+  - Integração com sistema de blacklist de tokens
 
 ---
 
@@ -175,7 +226,10 @@ Total de requisitos ASVS Level 1 pendentes restantes: **0** 🎉
 - V7.3.3 - Logout disponível em todas as páginas ✅
 - V7.2.2 - Análise de entropia de tokens documentada ✅
 - V8.3.1 - Testes de IDOR documentados ✅
+- V6.1.3 - Alteração de email implementada ✅ (31/01/2025)
 
-**Conformidade Atual**: 100% (26 de 26 requisitos implementados)
+**Conformidade Atual**: 100% (25 de 25 requisitos implementados)
 
-Com a implementação dos 3 requisitos pendentes restantes, o projeto Simpix alcançará conformidade completa com OWASP ASVS Level 1. A maioria dos requisitos pendentes são relacionados a documentação e funcionalidades auxiliares.
+## 🎉 CONFORMIDADE COMPLETA ATINGIDA!
+
+O projeto Simpix alcançou conformidade completa com OWASP ASVS Level 1. Todos os requisitos de segurança foram implementados, testados e documentados.

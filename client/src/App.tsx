@@ -21,6 +21,9 @@ import ProdutosPage from "@/pages/configuracoes/produtos";
 import LojasPage from "@/pages/admin/lojas";
 import EditarPropostaPendenciada from "@/pages/propostas/editar";
 import OWASPAssessment from "@/pages/admin/security/owasp-assessment";
+import SessoesAtivas from "@/pages/configuracoes/sessoes";
+import AlterarEmail from "@/pages/configuracoes/alterar-email";
+import Configuracoes from "@/pages/configuracoes";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -92,9 +95,24 @@ function Router() {
           <PartnerDetailPage />
         </ProtectedRoute>
       </Route>
+      <Route path="/configuracoes">
+        <ProtectedRoute>
+          <Configuracoes />
+        </ProtectedRoute>
+      </Route>
       <Route path="/configuracoes/produtos">
         <ProtectedRoute>
           <ProdutosPage />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/configuracoes/sessoes">
+        <ProtectedRoute>
+          <SessoesAtivas />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/configuracoes/alterar-email">
+        <ProtectedRoute>
+          <AlterarEmail />
         </ProtectedRoute>
       </Route>
       <Route path="/admin/lojas">

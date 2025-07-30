@@ -11,6 +11,7 @@ import originationRoutes from "./routes/origination.routes";
 import { clickSignRouter } from "./routes/clicksign.js";
 import { interRoutes } from "./routes/inter.js";
 import { setupSecurityRoutes } from "./routes/security.js";
+import emailChangeRoutes from "./routes/email-change";
 import { getBrasiliaDate, formatBrazilianDateTime, generateApprovalDate, getBrasiliaTimestamp } from "./lib/timezone";
 import { securityLogger, SecurityEventType, getClientIP } from './lib/security-logger';
 import { passwordSchema, validatePassword } from "./lib/password-validator";
@@ -43,6 +44,42 @@ export const UserDataSchema = z.object({
 });
 
 // Admin middleware is now replaced by requireAdmin guard
+
+// Helper function to parse user agent and extract device information
+function parseUserAgent(userAgent: string): string {
+  if (!userAgent) return 'Dispositivo desconhecido';
+  
+  // Check for mobile devices
+  if (/mobile/i.test(userAgent)) {
+    if (/android/i.test(userAgent)) return 'Android Mobile';
+    if (/iphone/i.test(userAgent)) return 'iPhone';
+    if (/ipad/i.test(userAgent)) return 'iPad';
+    return 'Mobile Device';
+  }
+  
+  // Check for desktop browsers
+  if (/windows/i.test(userAgent)) {
+    if (/edge/i.test(userAgent)) return 'Windows - Edge';
+    if (/chrome/i.test(userAgent)) return 'Windows - Chrome';
+    if (/firefox/i.test(userAgent)) return 'Windows - Firefox';
+    return 'Windows PC';
+  }
+  
+  if (/macintosh/i.test(userAgent)) {
+    if (/safari/i.test(userAgent) && !/chrome/i.test(userAgent)) return 'Mac - Safari';
+    if (/chrome/i.test(userAgent)) return 'Mac - Chrome';
+    if (/firefox/i.test(userAgent)) return 'Mac - Firefox';
+    return 'Mac';
+  }
+  
+  if (/linux/i.test(userAgent)) {
+    if (/chrome/i.test(userAgent)) return 'Linux - Chrome';
+    if (/firefox/i.test(userAgent)) return 'Linux - Firefox';
+    return 'Linux';
+  }
+  
+  return 'Dispositivo desconhecido';
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Authentication routes
@@ -84,6 +121,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (data.session?.access_token) {
           const { trackUserToken } = await import("./lib/jwt-auth-middleware");
           trackUserToken(data.user.id, data.session.access_token);
+          
+          // ASVS 7.4.3 - Create session record for active session management
+          try {
+            const { storage } = await import("./storage");
+            const ipAddress = getClientIP(req);
+            const userAgent = req.headers['user-agent'] || 'Unknown';
+            
+            // Session expires when JWT expires (1 hour from now)
+            const expiresAt = new Date();
+            expiresAt.setHours(expiresAt.getHours() + 1);
+            
+            await storage.createSession({
+              id: data.session.access_token,
+              userId: data.user.id,
+              ipAddress,
+              userAgent,
+              expiresAt
+            });
+          } catch (sessionError) {
+            console.error("Failed to create session record:", sessionError);
+            // Don't fail login if session tracking fails
+          }
         }
       }
 
@@ -310,6 +369,87 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ 
         message: "Se um email válido foi fornecido, instruções de recuperação foram enviadas." 
       });
+    }
+  });
+
+  // ASVS 7.4.3 - Get active sessions for the current user
+  app.get("/api/auth/sessions", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+    try {
+      if (!req.user?.id) {
+        return res.status(401).json({ message: "Usuário não autenticado" });
+      }
+
+      const { storage } = await import("./storage");
+      const sessions = await storage.getUserSessions(req.user.id);
+
+      // Format sessions for frontend display
+      const formattedSessions = sessions.map(session => ({
+        id: session.id,
+        ipAddress: session.ipAddress || 'Desconhecido',
+        userAgent: session.userAgent || 'Desconhecido',
+        createdAt: session.createdAt,
+        lastActivityAt: session.lastActivityAt,
+        expiresAt: session.expiresAt,
+        isActive: session.isActive,
+        // Parse user agent for better display
+        device: parseUserAgent(session.userAgent || ''),
+        isCurrent: session.id === req.headers.authorization?.replace('Bearer ', '')
+      }));
+
+      res.json({ sessions: formattedSessions });
+    } catch (error) {
+      console.error("Error fetching user sessions:", error);
+      res.status(500).json({ message: "Erro ao buscar sessões" });
+    }
+  });
+
+  // ASVS 7.4.3 - Delete a specific session
+  app.delete("/api/auth/sessions/:sessionId", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+    try {
+      if (!req.user?.id) {
+        return res.status(401).json({ message: "Usuário não autenticado" });
+      }
+
+      const { sessionId } = req.params;
+      const { storage } = await import("./storage");
+      
+      // First verify the session belongs to the current user
+      const sessions = await storage.getUserSessions(req.user.id);
+      const sessionToDelete = sessions.find(s => s.id === sessionId);
+      
+      if (!sessionToDelete) {
+        return res.status(404).json({ message: "Sessão não encontrada" });
+      }
+
+      // Delete the session
+      await storage.deleteSession(sessionId);
+      
+      // Also invalidate the token if it's not the current session
+      const currentToken = req.headers.authorization?.replace('Bearer ', '');
+      if (sessionId !== currentToken) {
+        const { invalidateToken } = await import("./lib/jwt-auth-middleware");
+        invalidateToken(sessionId);
+      }
+
+      securityLogger.logEvent({
+        type: SecurityEventType.SESSION_TERMINATED,
+        severity: "MEDIUM",
+        userId: req.user.id,
+        userEmail: req.user.email,
+        ipAddress: getClientIP(req),
+        userAgent: req.headers['user-agent'],
+        endpoint: req.originalUrl,
+        success: true,
+        details: { 
+          sessionId,
+          terminatedByUser: true 
+        }
+      });
+
+      res.json({ message: "Sessão encerrada com sucesso" });
+    } catch (error) {
+      console.error("Error deleting session:", error);
+      res.status(500).json({ message: "Erro ao encerrar sessão" });
     }
   });
 
@@ -3498,6 +3638,9 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
 
   // Register Security routes - OWASP Compliance Monitoring
   setupSecurityRoutes(app);
+  
+  // Register Email Change routes - OWASP V6.1.3 Compliance
+  app.use('/api/auth', emailChangeRoutes);
 
   // Register OWASP Assessment routes
   const owaspRoutes = (await import('./routes/owasp.js')).default;
