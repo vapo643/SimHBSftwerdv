@@ -12,6 +12,7 @@ import { clickSignRouter } from "./routes/clicksign.js";
 import { interRoutes } from "./routes/inter.js";
 import { setupSecurityRoutes } from "./routes/security.js";
 import { getBrasiliaDate, formatBrazilianDateTime, generateApprovalDate, getBrasiliaTimestamp } from "./lib/timezone";
+import { securityLogger, SecurityEventType, getClientIP } from './lib/security-logger';
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -49,14 +50,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { email, password } = req.body;
 
       const supabase = createServerSupabaseClient();
+      
+      // PASSO 1 - ASVS 7.1.3: Token Rotation on Re-authentication
+      // First, check if user already has active sessions
+      const { data: { user: existingUser } } = await supabase.auth.getUser();
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
+        securityLogger.logEvent({
+          type: SecurityEventType.LOGIN_FAILED,
+          severity: "MEDIUM",
+          userEmail: email,
+          ipAddress: getClientIP(req),
+          userAgent: req.headers['user-agent'],
+          endpoint: req.originalUrl,
+          success: false,
+          details: { reason: error.message }
+        });
         return res.status(401).json({ message: error.message });
       }
+
+      // Invalidate all previous tokens for this user
+      if (data.user) {
+        const { invalidateAllUserTokens } = await import("./lib/jwt-auth-middleware");
+        invalidateAllUserTokens(data.user.id);
+        
+        // Track the new token
+        if (data.session?.access_token) {
+          const { trackUserToken } = await import("./lib/jwt-auth-middleware");
+          trackUserToken(data.user.id, data.session.access_token);
+        }
+      }
+
+      securityLogger.logEvent({
+        type: SecurityEventType.LOGIN_SUCCESS,
+        severity: "INFO",
+        userId: data.user?.id,
+        userEmail: email,
+        ipAddress: getClientIP(req),
+        userAgent: req.headers['user-agent'],
+        endpoint: req.originalUrl,
+        success: true,
+        details: { 
+          tokenRotated: true,
+          message: 'Previous tokens invalidated' 
+        }
+      });
 
       res.json({
         user: data.user,
@@ -110,6 +153,104 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Logout error:", error);
       res.status(500).json({ message: "Logout failed" });
+    }
+  });
+
+  // PASSO 2 - ASVS 6.2.3: Change Password with Current Password Verification
+  app.post("/api/auth/change-password", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { currentPassword, newPassword, confirmPassword } = req.body;
+
+      // Validate input
+      if (!currentPassword || !newPassword || !confirmPassword) {
+        return res.status(400).json({ 
+          message: "Senha atual, nova senha e confirmação são obrigatórias" 
+        });
+      }
+
+      if (newPassword !== confirmPassword) {
+        return res.status(400).json({ 
+          message: "Nova senha e confirmação não coincidem" 
+        });
+      }
+
+      if (newPassword.length < 8) {
+        return res.status(400).json({ 
+          message: "Nova senha deve ter pelo menos 8 caracteres" 
+        });
+      }
+
+      if (!req.user?.email) {
+        return res.status(401).json({ 
+          message: "Usuário não autenticado corretamente" 
+        });
+      }
+
+      // Step 1: Verify current password
+      const supabase = createServerSupabaseClient();
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: req.user.email,
+        password: currentPassword
+      });
+
+      if (signInError) {
+        securityLogger.logEvent({
+          type: SecurityEventType.PASSWORD_CHANGE_FAILED,
+          severity: "HIGH",
+          userId: req.user.id,
+          userEmail: req.user.email,
+          ipAddress: getClientIP(req),
+          userAgent: req.headers['user-agent'],
+          endpoint: req.originalUrl,
+          success: false,
+          details: { reason: 'Invalid current password' }
+        });
+        return res.status(401).json({ 
+          message: "Senha atual incorreta" 
+        });
+      }
+
+      // Step 2: Update password using admin client
+      const { createServerSupabaseAdminClient } = await import("./lib/supabase");
+      const supabaseAdmin = createServerSupabaseAdminClient();
+      
+      const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
+        req.user.id,
+        { password: newPassword }
+      );
+
+      if (updateError) {
+        console.error("Password update error:", updateError);
+        return res.status(500).json({ 
+          message: "Erro ao atualizar senha. Tente novamente." 
+        });
+      }
+
+      // Step 3: Invalidate all existing tokens (force re-login)
+      const { invalidateAllUserTokens } = await import("./lib/jwt-auth-middleware");
+      invalidateAllUserTokens(req.user.id);
+
+      securityLogger.logEvent({
+        type: SecurityEventType.PASSWORD_CHANGED,
+        severity: "HIGH",
+        userId: req.user.id,
+        userEmail: req.user.email,
+        ipAddress: getClientIP(req),
+        userAgent: req.headers['user-agent'],
+        endpoint: req.originalUrl,
+        success: true,
+        details: { 
+          message: 'Password changed successfully, all sessions invalidated' 
+        }
+      });
+
+      res.json({ 
+        message: "Senha alterada com sucesso. Por favor, faça login novamente.",
+        requiresRelogin: true 
+      });
+    } catch (error) {
+      console.error("Change password error:", error);
+      res.status(500).json({ message: "Erro ao alterar senha" });
     }
   });
 
@@ -2842,6 +2983,146 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
       }
       console.error("Erro ao criar usuário:", error.message);
       return res.status(500).json({ message: "Erro interno do servidor." });
+    }
+  });
+
+  // PASSO 3 - ASVS 8.3.7: Deactivate User Account and Invalidate All Sessions
+  app.put("/api/admin/users/:id/deactivate", jwtAuthMiddleware, requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = req.params.id;
+      
+      if (!userId) {
+        return res.status(400).json({ 
+          message: "ID do usuário é obrigatório" 
+        });
+      }
+
+      // Prevent self-deactivation
+      if (userId === req.user?.id) {
+        return res.status(400).json({ 
+          message: "Você não pode desativar sua própria conta" 
+        });
+      }
+
+      // Step 1: Get user info from profiles
+      const { createServerSupabaseAdminClient } = await import("./lib/supabase");
+      const supabaseAdmin = createServerSupabaseAdminClient();
+      
+      const { data: profile, error: profileError } = await supabaseAdmin
+        .from('profiles')
+        .select('id, full_name, role')
+        .eq('id', userId)
+        .single();
+
+      if (profileError || !profile) {
+        return res.status(404).json({ 
+          message: "Usuário não encontrado" 
+        });
+      }
+
+      // Step 2: Deactivate the account in auth.users
+      const { error: deactivateError } = await supabaseAdmin.auth.admin.updateUserById(
+        userId,
+        { 
+          email_confirmed: false,
+          ban_duration: '876000h' // 100 years effectively permanent ban
+        }
+      );
+
+      if (deactivateError) {
+        console.error("User deactivation error:", deactivateError);
+        return res.status(500).json({ 
+          message: "Erro ao desativar usuário" 
+        });
+      }
+
+      // Step 3: Invalidate all user tokens
+      const { invalidateAllUserTokens } = await import("./lib/jwt-auth-middleware");
+      invalidateAllUserTokens(userId);
+
+      // Step 4: Log the deactivation
+      securityLogger.logEvent({
+        type: SecurityEventType.USER_DEACTIVATED,
+        severity: "HIGH",
+        userId,
+        adminId: req.user?.id,
+        adminEmail: req.user?.email,
+        ipAddress: getClientIP(req),
+        userAgent: req.headers['user-agent'],
+        endpoint: req.originalUrl,
+        success: true,
+        details: { 
+          deactivatedUserRole: profile.role,
+          deactivatedUserName: profile.full_name,
+          message: 'User account deactivated and all sessions invalidated' 
+        }
+      });
+
+      res.json({ 
+        message: "Usuário desativado com sucesso. Todas as sessões foram invalidadas.",
+        deactivatedUser: {
+          id: userId,
+          name: profile.full_name,
+          role: profile.role
+        }
+      });
+    } catch (error) {
+      console.error("Deactivate user error:", error);
+      res.status(500).json({ message: "Erro ao desativar usuário" });
+    }
+  });
+
+  // Reactivate User Account
+  app.put("/api/admin/users/:id/reactivate", jwtAuthMiddleware, requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = req.params.id;
+      
+      if (!userId) {
+        return res.status(400).json({ 
+          message: "ID do usuário é obrigatório" 
+        });
+      }
+
+      const { createServerSupabaseAdminClient } = await import("./lib/supabase");
+      const supabaseAdmin = createServerSupabaseAdminClient();
+      
+      // Reactivate the account
+      const { error: reactivateError } = await supabaseAdmin.auth.admin.updateUserById(
+        userId,
+        { 
+          email_confirmed: true,
+          ban_duration: 'none'
+        }
+      );
+
+      if (reactivateError) {
+        console.error("User reactivation error:", reactivateError);
+        return res.status(500).json({ 
+          message: "Erro ao reativar usuário" 
+        });
+      }
+
+      securityLogger.logEvent({
+        type: SecurityEventType.USER_REACTIVATED,
+        severity: "HIGH",
+        userId,
+        adminId: req.user?.id,
+        adminEmail: req.user?.email,
+        ipAddress: getClientIP(req),
+        userAgent: req.headers['user-agent'],
+        endpoint: req.originalUrl,
+        success: true,
+        details: { 
+          message: 'User account reactivated' 
+        }
+      });
+
+      res.json({ 
+        message: "Usuário reativado com sucesso."
+      });
+    } catch (error) {
+      console.error("Reactivate user error:", error);
+      res.status(500).json({ message: "Erro ao reativar usuário" });
     }
   });
 

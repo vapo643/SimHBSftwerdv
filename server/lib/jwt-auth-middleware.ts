@@ -21,10 +21,58 @@ const userAuthAttempts = new Map<string, { count: number; resetTime: number }>()
 const MAX_AUTH_ATTEMPTS = 10;
 const AUTH_WINDOW_MS = 15 * 60 * 1000; // 15 minutos
 
+// User token tracking for invalidation on account deactivation
+const userTokens = new Map<string, Set<string>>(); // userId -> Set of tokens
+
 // Limpar blacklist periodicamente
 setInterval(() => {
   tokenBlacklist.clear();
+  userTokens.clear();
 }, TOKEN_BLACKLIST_CLEANUP_INTERVAL);
+
+/**
+ * Adiciona um token ao blacklist (ASVS 7.1.3 - Token Rotation)
+ */
+export function addToBlacklist(token: string): void {
+  tokenBlacklist.add(token);
+  securityLogger.logEvent({
+    type: SecurityEventType.TOKEN_BLACKLISTED,
+    severity: "INFO",
+    success: true,
+    details: { reason: 'Token added to blacklist' }
+  });
+}
+
+/**
+ * Invalida todos os tokens de um usuário (ASVS 8.3.7 - Account Deactivation)
+ */
+export function invalidateAllUserTokens(userId: string): void {
+  const tokens = userTokens.get(userId);
+  if (tokens) {
+    tokens.forEach(token => tokenBlacklist.add(token));
+    userTokens.delete(userId);
+    securityLogger.logEvent({
+      type: SecurityEventType.TOKEN_BLACKLISTED,
+      severity: "HIGH",
+      userId,
+      success: true,
+      details: { 
+        reason: 'All user tokens invalidated', 
+        tokenCount: tokens.size 
+      }
+    });
+  }
+}
+
+/**
+ * Rastreia um token para um usuário
+ */
+export function trackUserToken(userId: string, token: string): void {
+  if (!userTokens.has(userId)) {
+    userTokens.set(userId, new Set());
+  }
+  userTokens.get(userId)!.add(token);
+}
 
 /**
  * Middleware de autenticação JWT robusto com fallback de segurança
@@ -126,6 +174,9 @@ export async function jwtAuthMiddleware(
       full_name: profile.full_name || null,
       loja_id: profile.loja_id || null
     };
+
+    // Track this token for potential invalidation
+    trackUserToken(userId, token);
 
     next();
   } catch (error) {

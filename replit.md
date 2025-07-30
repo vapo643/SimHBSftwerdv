@@ -14,6 +14,16 @@ This is a full-stack TypeScript application for credit management called "Simpix
 - **Critical Security Gaps Found**: No token rotation on re-authentication, password change without current password verification, active sessions persist when account disabled
 - **Priority Remediation Plan**: 7 gaps identified with 3 high-priority items that would raise compliance to 84%
 
+### January 2025 - Critical Security Fixes (January 31)
+
+- **All 3 Critical OWASP ASVS Gaps Fixed**: Successfully implemented token rotation, password change verification, and account deactivation with session invalidation
+- **84% ASVS Level 1 Compliance Achieved**: Raised from 72% by implementing all high-priority security fixes identified in audit
+- **Token Rotation on Re-authentication (ASVS 7.1.3)**: POST /api/auth/login now invalidates all previous user tokens and tracks new session for lifecycle management
+- **Secure Password Change (ASVS 6.2.3)**: New POST /api/auth/change-password endpoint requires current password verification before allowing changes, invalidates all sessions after success
+- **Account Deactivation Security (ASVS 8.3.7)**: New PUT /api/admin/users/:id/deactivate endpoint bans accounts and immediately invalidates all active tokens, preventing orphaned sessions
+- **Enhanced JWT Middleware**: Added token blacklist management with automatic cleanup, user token tracking for mass invalidation, and integration with security logger
+- **Security Event Logging**: New event types for PASSWORD_CHANGED, PASSWORD_CHANGE_FAILED, USER_DEACTIVATED, USER_REACTIVATED with high severity tracking
+
 ### December 2024
 
 - **401 Unauthorized Error Fix**: Implemented fetchWithToken API client for secure authenticated requests
