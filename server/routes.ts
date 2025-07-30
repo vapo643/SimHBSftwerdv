@@ -13,6 +13,7 @@ import { interRoutes } from "./routes/inter.js";
 import { setupSecurityRoutes } from "./routes/security.js";
 import { getBrasiliaDate, formatBrazilianDateTime, generateApprovalDate, getBrasiliaTimestamp } from "./lib/timezone";
 import { securityLogger, SecurityEventType, getClientIP } from './lib/security-logger';
+import { passwordSchema, validatePassword } from "./lib/password-validator";
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -20,7 +21,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 export const UserDataSchema = z.object({
   fullName: z.string().min(3, "Nome completo é obrigatório"),
   email: z.string().email("Formato de email inválido"),
-  password: z.string().min(8, "Senha deve ter pelo menos 8 caracteres"),
+  password: passwordSchema, // ASVS 6.2.4 & 6.2.7 - Enhanced password validation
   role: z.enum(['ADMINISTRADOR', 'GERENTE', 'ATENDENTE']),
   lojaId: z.number().int().nullable().optional(),
   lojaIds: z.array(z.number().int()).nullable().optional(),
@@ -62,7 +63,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (error) {
         securityLogger.logEvent({
-          type: SecurityEventType.LOGIN_FAILED,
+          type: SecurityEventType.LOGIN_FAILURE,
           severity: "MEDIUM",
           userEmail: email,
           ipAddress: getClientIP(req),
@@ -88,7 +89,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       securityLogger.logEvent({
         type: SecurityEventType.LOGIN_SUCCESS,
-        severity: "INFO",
+        severity: "LOW",
         userId: data.user?.id,
         userEmail: email,
         ipAddress: getClientIP(req),
@@ -114,6 +115,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/auth/register", async (req, res) => {
     try {
       const { email, password, name } = req.body;
+
+      // ASVS 6.2.4 & 6.2.7 - Enhanced password validation
+      const passwordValidation = validatePassword(password, [email, name || '']);
+      if (!passwordValidation.isValid) {
+        return res.status(400).json({ 
+          message: passwordValidation.message,
+          suggestions: passwordValidation.suggestions
+        });
+      }
 
       const supabase = createServerSupabaseClient();
       const { data, error } = await supabase.auth.signUp({
@@ -174,9 +184,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      if (newPassword.length < 8) {
+      // ASVS 6.2.4 & 6.2.7 - Enhanced password validation
+      const passwordValidation = validatePassword(newPassword, [req.user.email, req.user.name || '']);
+      if (!passwordValidation.isValid) {
         return res.status(400).json({ 
-          message: "Nova senha deve ter pelo menos 8 caracteres" 
+          message: passwordValidation.message,
+          suggestions: passwordValidation.suggestions
         });
       }
 
@@ -251,6 +264,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Change password error:", error);
       res.status(500).json({ message: "Erro ao alterar senha" });
+    }
+  });
+
+  // ASVS 6.3.1 - Standardized password recovery messages
+  app.post("/api/auth/forgot-password", async (req, res) => {
+    try {
+      const { email } = req.body;
+
+      if (!email) {
+        return res.status(400).json({ 
+          message: "Email é obrigatório" 
+        });
+      }
+
+      const supabase = createServerSupabaseClient();
+      
+      // Always return the same message regardless of whether the email exists
+      // This prevents user enumeration attacks
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${process.env.VITE_APP_URL || 'http://localhost:5000'}/reset-password`,
+      });
+
+      // Log the attempt for security monitoring
+      securityLogger.logEvent({
+        type: SecurityEventType.PASSWORD_RESET_REQUEST,
+        severity: "MEDIUM",
+        userEmail: email,
+        ipAddress: getClientIP(req),
+        userAgent: req.headers['user-agent'],
+        endpoint: req.originalUrl,
+        success: !error,
+        details: { 
+          message: error ? 'Password reset failed' : 'Password reset email sent if account exists'
+        }
+      });
+
+      // ASVS 6.3.1 - Always return the same generic message
+      res.json({ 
+        message: "Se um email válido foi fornecido, instruções de recuperação foram enviadas." 
+      });
+    } catch (error) {
+      console.error("Forgot password error:", error);
+      // Even on error, return generic message to prevent information disclosure
+      res.json({ 
+        message: "Se um email válido foi fornecido, instruções de recuperação foram enviadas." 
+      });
     }
   });
 

@@ -37,18 +37,19 @@ export function addToBlacklist(token: string): void {
   tokenBlacklist.add(token);
   securityLogger.logEvent({
     type: SecurityEventType.TOKEN_BLACKLISTED,
-    severity: "INFO",
+    severity: "LOW",
     success: true,
     details: { reason: 'Token added to blacklist' }
   });
 }
 
 /**
- * Invalida todos os tokens de um usuário (ASVS 8.3.7 - Account Deactivation)
+ * Invalida todos os tokens de um usuário (ASVS 7.2.4 - Token Rotation on Login)
+ * Também usado para ASVS 8.3.7 - Account Deactivation
  */
 export function invalidateAllUserTokens(userId: string): void {
   const tokens = userTokens.get(userId);
-  if (tokens) {
+  if (tokens && tokens.size > 0) {
     tokens.forEach(token => tokenBlacklist.add(token));
     userTokens.delete(userId);
     securityLogger.logEvent({
@@ -57,7 +58,7 @@ export function invalidateAllUserTokens(userId: string): void {
       userId,
       success: true,
       details: { 
-        reason: 'All user tokens invalidated', 
+        reason: 'All user tokens invalidated - token rotation', 
         tokenCount: tokens.size 
       }
     });
@@ -166,6 +167,9 @@ export async function jwtAuthMiddleware(
       });
     }
 
+    // Track the current token for this user (for token rotation)
+    trackUserToken(userId, token);
+    
     // Step e: Attach complete and valid profile to req.user
     req.user = {
       id: userId,

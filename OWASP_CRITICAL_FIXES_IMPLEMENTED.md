@@ -54,9 +54,43 @@ if (data.user) {
 
 ### 3. ASVS 8.3.7 - Desativação de Conta com Invalidação de Sessões ✅
 
-**Arquivo**: `server/routes.ts` - Novos endpoints:
-- `/api/admin/users/:id/deactivate`
-- `/api/admin/users/:id/reactivate`
+**Arquivo**: `server/routes.ts` - Endpoints `/api/admin/users/:id/deactivate` e `/api/admin/users/:id/reactivate`
+
+**Implementação**:
+```javascript
+// Desativação
+app.put("/api/admin/users/:id/deactivate", jwtAuthMiddleware, requireAdmin, async (req, res) => {
+  // Previne auto-desativação
+  if (userId === req.user?.id) {
+    return res.status(400).json({ 
+      message: "Você não pode desativar sua própria conta" 
+    });
+  }
+  
+  // Desativa no Supabase Auth
+  await supabaseAdmin.auth.admin.updateUserById(userId, { 
+    email_confirmed: false,
+    ban_duration: '876000h' // 100 anos = ban permanente
+  });
+  
+  // Invalida todos os tokens
+  invalidateAllUserTokens(userId);
+  
+  // Log de segurança
+  securityLogger.logEvent({
+    type: SecurityEventType.USER_DEACTIVATED,
+    severity: "HIGH",
+    // ...
+  });
+});
+```
+
+**Funcionalidades**:
+- Previne auto-desativação do administrador
+- Ban permanente via Supabase Auth (100 anos)
+- Invalida todos os tokens JWT do usuário
+- Log de segurança de alta severidade
+- Endpoint de reativação também disponível
 
 **Funcionalidades de Desativação**:
 - Apenas ADMINISTRADOR pode desativar contas
