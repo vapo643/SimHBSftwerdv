@@ -119,8 +119,8 @@ export class DatabaseStorage implements IStorage {
           role,
           loja_id,
           auth_user:auth.users!inner(email),
-          loja:lojas(id, nome_loja, parceiro_id, parceiro:parceiros(id, razao_social)),
-          gerente_lojas(loja_id, loja:lojas(id, nome_loja, parceiro_id, parceiro:parceiros(id, razao_social)))
+          loja:lojas!profiles_loja_id_fkey(id, nome_loja, parceiro_id, parceiro:parceiros(id, razao_social)),
+          gerente_lojas!gerente_lojas_gerente_id_fkey(loja_id, loja:lojas!gerente_lojas_loja_id_fkey(id, nome_loja, parceiro_id, parceiro:parceiros(id, razao_social)))
         `);
 
       if (error) {
@@ -665,6 +665,7 @@ export class DatabaseStorage implements IStorage {
     const supabase = createServerSupabaseAdminClient();
     
     try {
+      // Use the specific foreign key relationship to avoid ambiguity
       const { data: profile, error } = await supabase
         .from('profiles')
         .select(`
@@ -673,11 +674,11 @@ export class DatabaseStorage implements IStorage {
           email,
           role,
           loja_id,
-          loja:lojas!left(
+          loja:lojas!profiles_loja_id_fkey(
             id,
             nome_loja,
             parceiro_id,
-            parceiro:parceiros!left(
+            parceiro:parceiros(
               id,
               razao_social
             )
