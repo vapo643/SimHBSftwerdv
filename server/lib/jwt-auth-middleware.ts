@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { createServerSupabaseClient } from '../../client/src/lib/supabase';
+// Import dinâmico para usar função correta com Service Role Key
 import { securityLogger, SecurityEventType, getClientIP } from './security-logger';
 
 export interface AuthenticatedRequest extends Request {
@@ -116,11 +116,23 @@ export async function jwtAuthMiddleware(
       return res.status(401).json({ message: 'Token inválido' });
     }
 
-    // Validate token and extract user ID
-    const supabase = createServerSupabaseClient();
+    // Validate token and extract user ID usando Service Role Key
+    const { createServerSupabaseAdminClient } = await import('./supabase');
+    const supabase = createServerSupabaseAdminClient();
     const { data, error } = await supabase.auth.getUser(token);
     
+    // Debug logging detalhado
+    console.log('🔐 JWT VALIDATION DEBUG:', {
+      hasError: !!error,
+      errorMessage: error?.message,
+      hasUser: !!data?.user,
+      tokenLength: token.length,
+      userId: data?.user?.id,
+      timestamp: new Date().toISOString()
+    });
+    
     if (error || !data.user) {
+      console.error('JWT validation failed:', error);
       securityLogger.logEvent({
         type: error?.message?.includes('expired') ? SecurityEventType.TOKEN_EXPIRED : SecurityEventType.TOKEN_INVALID,
         severity: "MEDIUM",
@@ -138,7 +150,6 @@ export async function jwtAuthMiddleware(
     const userEmail = data.user.email || '';
 
     // Step c: Query profiles table for complete user profile
-    const { createServerSupabaseAdminClient } = await import('./supabase');
     const supabaseAdmin = createServerSupabaseAdminClient();
     
     const { data: profile, error: profileError } = await supabaseAdmin
