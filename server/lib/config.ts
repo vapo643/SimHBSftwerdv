@@ -86,7 +86,8 @@ export function loadConfig(): AppConfig {
       },
       security: {
         enableRateLimit: process.env.NODE_ENV === "production" || !!process.env.DATABASE_URL,
-        enableHelmet: process.env.NODE_ENV === "production",
+        // Helmet habilitado em todos os ambientes para máxima segurança
+        enableHelmet: true, // Sempre ativo para proteção completa
       },
     };
   } catch (error) {

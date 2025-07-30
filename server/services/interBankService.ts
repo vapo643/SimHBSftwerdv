@@ -154,7 +154,7 @@ class InterBankService {
 
       const tokenUrl = new URL(`${this.config.apiUrl}/oauth/v2/token`);
       
-      console.log(`[INTER] 🌐 Token URL: ${tokenUrl.href}`);
+      console.log(`[INTER] 🌐 Token URL: ${tokenUrl.hostname}${tokenUrl.pathname}`);
       console.log(`[INTER] 📄 Using form-based authentication per official docs`);
       console.log(`[INTER] 🔓 Certificate configured: ${this.config.certificate ? '✅ Present' : '❌ Missing'}`);
       console.log(`[INTER] 🔑 Private Key configured: ${this.config.privateKey ? '✅ Present' : '❌ Missing'}`);
@@ -168,9 +168,9 @@ class InterBankService {
         'scope': 'cobv.write cobv.read' // Required scope for boleto/cobrança
       });
       
-      console.log(`[INTER] 📝 Form parameters: client_id=${this.config.clientId.substring(0, 8)}..., grant_type=client_credentials, scope=cobv.write cobv.read`);
+      console.log(`[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=cobv.write cobv.read`);
 
-      console.log(`[INTER] 📝 Form body: ${formBody.toString()}`);
+      // Não logar o form body pois contém credenciais
       console.log(`[INTER] 🔒 Using mTLS certificate authentication`);
 
       // Prepare certificate and key in proper PEM format
@@ -212,8 +212,8 @@ class InterBankService {
         }
       }
 
-      console.log('[INTER] 🔐 Certificate final preview:', cert.substring(0, 80) + '...');
-      console.log('[INTER] 🔑 Private key final preview:', key.substring(0, 80) + '...');
+      // Não logar previews de certificados por segurança
+      console.log('[INTER] ✅ Certificates formatted and ready');
 
       // SANDBOX ONLY: Try alternative approach
       if (this.config.environment === 'sandbox') {
