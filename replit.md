@@ -6,6 +6,14 @@ This is a full-stack TypeScript application for credit management called "Simpix
 
 ## Recent Changes
 
+### January 2025 (Continued)
+
+- **OWASP ASVS Level 1 Security Audit (January 30)**: Comprehensive gap analysis comparing current implementation against OWASP ASVS 5.0.0 Level 1 requirements
+- **72% ASVS Level 1 Compliance**: 18 of 25 requirements met across V4 (API Security), V6 (Authentication), V7 (Session Management), and V8 (Authorization)
+- **Key Security Strengths Identified**: JWT authentication with blacklist, role-based guards, RLS data isolation, rate limiting (5 attempts/15min for auth)
+- **Critical Security Gaps Found**: No token rotation on re-authentication, password change without current password verification, active sessions persist when account disabled
+- **Priority Remediation Plan**: 7 gaps identified with 3 high-priority items that would raise compliance to 84%
+
 ### December 2024
 
 - **401 Unauthorized Error Fix**: Implemented fetchWithToken API client for secure authenticated requests
