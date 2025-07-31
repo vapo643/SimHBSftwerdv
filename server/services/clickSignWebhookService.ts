@@ -15,49 +15,27 @@ import { interBankService } from './interBankService.js';
 import { getBrasiliaTimestamp } from '../lib/timezone.js';
 
 interface WebhookEvent {
-  event: {
-    type: string;
-    created_at: string;
-    data: {
-      envelope?: {
-        id: string;
-        name: string;
-        status: string;
-        created_at: string;
-        updated_at: string;
-        finished_at?: string;
-        documents?: Array<{
-          id: string;
-          filename: string;
-          signed_at?: string;
-        }>;
-        signers?: Array<{
-          id: string;
-          name: string;
-          email: string;
-          signed_at?: string;
-          refused_at?: string;
-        }>;
-      };
-      document?: {
-        id: string;
-        envelope_id: string;
-        filename: string;
-        status: string;
-      };
-      signer?: {
-        id: string;
-        envelope_id: string;
-        name: string;
-        email: string;
-        documentation: string;
-        sign_at?: string;
-        refuse_at?: string;
-        view_at?: string;
-      };
+  event: string;
+  data: {
+    document?: {
+      key: string;
+      filename?: string;
+      status?: string;
+      created_at?: string;
+      finished_at?: string;
+    };
+    signer?: {
+      email: string;
+      name?: string;
+      sign_at?: string;
+      viewed_at?: string;
+    };
+    list?: {
+      key: string;
+      status?: string;
     };
   };
-  hmac?: string;
+  occurred_at?: string;
 }
 
 interface WebhookSecurityHeaders {
@@ -138,147 +116,86 @@ class ClickSignWebhookService {
   }
 
   /**
-   * Process webhook event (API v3)
+   * Process webhook event (API v1/v2)
    */
-  async processEvent(event: WebhookEvent): Promise<{ processed: boolean; reason?: string; proposalId?: any; status?: string; envelopeId?: string }> {
-    const eventType = event.event.type;
-    const eventData = event.event.data;
+  async processEvent(event: WebhookEvent): Promise<{ processed: boolean; reason?: string; proposalId?: any; status?: string; documentKey?: string }> {
+    const eventType = event.event;
+    const eventData = event.data;
     
-    console.log(`[CLICKSIGN WEBHOOK v3] Processing event: ${eventType}`, {
-      envelopeId: eventData.envelope?.id,
-      envelopeStatus: eventData.envelope?.status,
-      documentId: eventData.document?.id,
-      signerId: eventData.signer?.id,
-      occurredAt: event.event.created_at
+    console.log(`[CLICKSIGN WEBHOOK] Processing event: ${eventType}`, {
+      documentKey: eventData.document?.key,
+      listKey: eventData.list?.key,
+      signerEmail: eventData.signer?.email,
+      occurredAt: event.occurred_at
     });
 
     // Find related proposal
     const proposta = await this.findProposal(eventData);
     
     if (!proposta) {
-      console.warn('[CLICKSIGN WEBHOOK v3] No proposal found for event');
+      console.warn('[CLICKSIGN WEBHOOK] No proposal found for event');
       return { processed: false, reason: 'Proposal not found' };
     }
 
-    // Process based on event type (API v3)
+    // Process based on event type (API v1/v2)
     switch (eventType) {
-      // Envelope events
-      case 'envelope.created':
-        return await this.handleEnvelopeCreated(proposta, eventData);
+      case 'auto_close':
+        return await this.handleAutoClose(proposta, eventData);
         
-      case 'envelope.updated':
-        return await this.handleEnvelopeUpdated(proposta, eventData);
+      case 'document_closed':
+        return await this.handleDocumentClosed(proposta, eventData);
         
-      case 'envelope.finished':
-        return await this.handleEnvelopeFinished(proposta, eventData);
+      case 'cancel':
+        return await this.handleCancel(proposta, eventData);
         
-      case 'envelope.cancelled':
-        return await this.handleEnvelopeCancelled(proposta, eventData);
+      case 'deadline':
+        return await this.handleDeadline(proposta, eventData);
         
-      case 'envelope.expired':
-        return await this.handleEnvelopeExpired(proposta, eventData);
+      case 'upload':
+        return await this.handleUpload(proposta, eventData);
         
-      // Document events
-      case 'document.created':
-        return await this.handleDocumentCreated(proposta, eventData);
+      case 'sign':
+        return await this.handleSign(proposta, eventData);
         
-      case 'document.signed':
-        return await this.handleDocumentSigned(proposta, eventData);
-        
-      case 'document.refused':
-        return await this.handleDocumentRefused(proposta, eventData);
-        
-      // Signer events  
-      case 'signer.signed':
-        return await this.handleSignerSigned(proposta, eventData);
-        
-      case 'signer.refused':
-        return await this.handleSignerRefused(proposta, eventData);
-        
-      case 'signer.updated':
-        return await this.handleSignerUpdated(proposta, eventData);
+      case 'refusal':
+        return await this.handleRefusal(proposta, eventData);
         
       default:
-        console.log(`[CLICKSIGN WEBHOOK v3] Unhandled event type: ${eventType}`);
+        console.log(`[CLICKSIGN WEBHOOK] Unhandled event type: ${eventType}`);
         return { processed: true, reason: 'Event type not handled' };
     }
   }
 
   /**
-   * Find proposal by ClickSign IDs (API v3)
+   * Find proposal by ClickSign keys (API v1/v2)
    */
-  private async findProposal(data: WebhookEvent['event']['data']) {
-    // For v3, we need to look for envelope ID
-    const envelopeId = data.envelope?.id;
-    const documentId = data.document?.id;
+  private async findProposal(data: WebhookEvent['data']) {
+    const documentKey = data.document?.key;
+    const listKey = data.list?.key;
     
-    // Extract proposal ID from envelope name if possible
-    if (data.envelope?.name) {
-      const match = data.envelope.name.match(/Proposta\s+(\w+-\w+-\w+-\w+-\w+)/);
-      if (match) {
-        return await storage.getPropostaById(match[1]);
-      }
-    }
-    
-    // Try to find by stored envelope/document IDs
-    // Note: This requires updating the proposal table to store envelopeId
-    if (envelopeId) {
-      return await storage.getPropostaByClickSignKey('envelope', envelopeId);
-    } else if (documentId) {
-      return await storage.getPropostaByClickSignKey('document', documentId);
+    if (documentKey) {
+      return await storage.getPropostaByClickSignKey('document', documentKey);
+    } else if (listKey) {
+      return await storage.getPropostaByClickSignKey('list', listKey);
     }
     
     return null;
   }
 
   /**
-   * Handle envelope created event (v3)
+   * Handle auto_close event - MOST IMPORTANT
    */
-  private async handleEnvelopeCreated(proposta: any, data: WebhookEvent['event']['data']) {
-    console.log(`[CLICKSIGN WEBHOOK v3] Envelope created for proposal: ${proposta.id}`);
+  private async handleAutoClose(proposta: any, data: WebhookEvent['data']) {
+    console.log(`[CLICKSIGN WEBHOOK] 🎉 AUTO_CLOSE for proposal: ${proposta.id}`);
     
-    await storage.createPropostaLog({
-      propostaId: proposta.id,
-      autorId: 'clicksign-webhook',
-      statusAnterior: proposta.status,
-      statusNovo: proposta.status,
-      observacao: 'Envelope criado no ClickSign'
-    });
-    
-    return { processed: true, proposalId: proposta.id, envelopeId: data.envelope?.id };
-  }
-
-  /**
-   * Handle envelope updated event (v3)
-   */
-  private async handleEnvelopeUpdated(proposta: any, data: WebhookEvent['event']['data']) {
-    console.log(`[CLICKSIGN WEBHOOK v3] Envelope updated for proposal: ${proposta.id}`);
-    
-    await storage.createPropostaLog({
-      propostaId: proposta.id,
-      autorId: 'clicksign-webhook',
-      statusAnterior: proposta.status,
-      statusNovo: proposta.status,
-      observacao: `Envelope atualizado - Status: ${data.envelope?.status}`
-    });
-    
-    return { processed: true, proposalId: proposta.id, envelopeId: data.envelope?.id };
-  }
-
-  /**
-   * Handle envelope finished event (v3) - MOST IMPORTANT
-   */
-  private async handleEnvelopeFinished(proposta: any, data: WebhookEvent['event']['data']) {
-    console.log(`[CLICKSIGN WEBHOOK v3] 🎉 Envelope FINISHED for proposal: ${proposta.id}`);
-    
-    const finishedAt = data.envelope?.finished_at || getBrasiliaTimestamp();
+    const now = getBrasiliaTimestamp();
     
     // Update proposal with signature completion
     const updateData = {
       clicksignStatus: 'finished',
-      clicksignSignedAt: new Date(finishedAt),
+      clicksignSignedAt: new Date(now),
       assinaturaEletronicaConcluida: true,
-      dataAssinatura: new Date(finishedAt),
+      dataAssinatura: new Date(now),
       status: 'contratos_assinados' as const
     };
     
@@ -289,7 +206,7 @@ class ClickSignWebhookService {
       autorId: 'clicksign-webhook',
       statusAnterior: proposta.status,
       statusNovo: 'contratos_assinados',
-      observacao: '✅ CCB assinado com sucesso - Todos os signatários completaram'
+      observacao: '✅ CCB assinado com sucesso - Finalização automática'
     });
     
     // CRITICAL: Trigger automatic boleto generation
@@ -300,15 +217,32 @@ class ClickSignWebhookService {
       processed: true, 
       proposalId: proposta.id, 
       status: 'finished',
-      envelopeId: data.envelope?.id 
+      documentKey: data.document?.key 
     };
   }
 
   /**
-   * Handle envelope cancelled event (v3)
+   * Handle document_closed event
    */
-  private async handleEnvelopeCancelled(proposta: any, data: WebhookEvent['event']['data']) {
-    console.log(`[CLICKSIGN WEBHOOK v3] Envelope cancelled for proposal: ${proposta.id}`);
+  private async handleDocumentClosed(proposta: any, data: WebhookEvent['data']) {
+    console.log(`[CLICKSIGN WEBHOOK] Document closed for proposal: ${proposta.id}`);
+    
+    await storage.createPropostaLog({
+      propostaId: proposta.id,
+      autorId: 'clicksign-webhook',
+      statusAnterior: proposta.status,
+      statusNovo: proposta.status,
+      observacao: '📄 Documento finalizado e pronto para download'
+    });
+    
+    return { processed: true, proposalId: proposta.id, documentKey: data.document?.key };
+  }
+
+  /**
+   * Handle cancel event
+   */
+  private async handleCancel(proposta: any, data: WebhookEvent['data']) {
+    console.log(`[CLICKSIGN WEBHOOK] Document cancelled for proposal: ${proposta.id}`);
     
     await storage.updateProposta(proposta.id, {
       clicksignStatus: 'cancelled'
@@ -319,20 +253,75 @@ class ClickSignWebhookService {
       autorId: 'clicksign-webhook',
       statusAnterior: proposta.status,
       statusNovo: proposta.status,
-      observacao: '❌ Envelope cancelado no ClickSign'
+      observacao: '❌ Documento cancelado no ClickSign'
     });
     
     return { processed: true, proposalId: proposta.id, status: 'cancelled' };
   }
 
   /**
-   * Handle envelope expired event (v3)
+   * Handle deadline event
    */
-  private async handleEnvelopeExpired(proposta: any, data: WebhookEvent['event']['data']) {
-    console.log(`[CLICKSIGN WEBHOOK v3] Envelope expired for proposal: ${proposta.id}`);
+  private async handleDeadline(proposta: any, data: WebhookEvent['data']) {
+    console.log(`[CLICKSIGN WEBHOOK] ⏰ Deadline alert for proposal: ${proposta.id}`);
+    
+    await storage.createPropostaLog({
+      propostaId: proposta.id,
+      autorId: 'clicksign-webhook',
+      statusAnterior: proposta.status,
+      statusNovo: proposta.status,
+      observacao: '⏰ Alerta de prazo - Documento próximo do vencimento'
+    });
+    
+    return { processed: true, proposalId: proposta.id, documentKey: data.document?.key };
+  }
+
+  /**
+   * Handle upload event
+   */
+  private async handleUpload(proposta: any, data: WebhookEvent['data']) {
+    console.log(`[CLICKSIGN WEBHOOK] 📤 Document uploaded for proposal: ${proposta.id}`);
+    
+    await storage.createPropostaLog({
+      propostaId: proposta.id,
+      autorId: 'clicksign-webhook',
+      statusAnterior: proposta.status,
+      statusNovo: proposta.status,
+      observacao: '📤 Documento carregado no ClickSign com sucesso'
+    });
+    
+    return { processed: true, proposalId: proposta.id, documentKey: data.document?.key };
+  }
+
+  /**
+   * Handle sign event
+   */
+  private async handleSign(proposta: any, data: WebhookEvent['data']) {
+    console.log(`[CLICKSIGN WEBHOOK] ✍️ Document signed for proposal: ${proposta.id}`);
+    
+    const signerInfo = data.signer ? ` por ${data.signer.name || data.signer.email}` : '';
+    
+    await storage.createPropostaLog({
+      propostaId: proposta.id,
+      autorId: 'clicksign-webhook',
+      statusAnterior: proposta.status,
+      statusNovo: proposta.status,
+      observacao: `✍️ Documento assinado${signerInfo}`
+    });
+    
+    return { processed: true, proposalId: proposta.id, documentKey: data.document?.key };
+  }
+
+  /**
+   * Handle refusal event
+   */
+  private async handleRefusal(proposta: any, data: WebhookEvent['data']) {
+    console.log(`[CLICKSIGN WEBHOOK] ❌ Document refused for proposal: ${proposta.id}`);
+    
+    const signerInfo = data.signer ? ` por ${data.signer.name || data.signer.email}` : '';
     
     await storage.updateProposta(proposta.id, {
-      clicksignStatus: 'expired'
+      clicksignStatus: 'refused'
     });
     
     await storage.createPropostaLog({
@@ -340,10 +329,10 @@ class ClickSignWebhookService {
       autorId: 'clicksign-webhook',
       statusAnterior: proposta.status,
       statusNovo: proposta.status,
-      observacao: '⏰ Envelope expirado - prazo para assinatura excedido'
+      observacao: `❌ Documento recusado${signerInfo}`
     });
     
-    return { processed: true, proposalId: proposta.id, status: 'expired' };
+    return { processed: true, proposalId: proposta.id, status: 'refused' };
   }
 
   /**

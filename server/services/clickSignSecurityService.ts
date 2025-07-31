@@ -35,18 +35,25 @@ const PDFValidationSchema = z.object({
   content: z.instanceof(Buffer)
 });
 
-// Webhook validation schemas
+// Webhook validation schemas (v1/v2 format)
 const WebhookEventSchema = z.object({
-  event: z.object({
-    type: z.string(),
-    created_at: z.string(),
-    data: z.object({
-      envelope: z.object({
-        id: z.string(),
-        status: z.string()
-      }).optional()
-    })
+  event: z.string(),
+  data: z.object({
+    document: z.object({
+      key: z.string(),
+      filename: z.string().optional(),
+      status: z.string().optional()
+    }).optional(),
+    signer: z.object({
+      email: z.string().email(),
+      name: z.string().optional()
+    }).optional(),
+    list: z.object({
+      key: z.string(),
+      status: z.string().optional()
+    }).optional()
   }),
+  occurred_at: z.string().optional(),
   hmac: z.string().optional()
 });
 

@@ -246,15 +246,15 @@ router.post('/webhook', async (req, res) => {
       }
     }
 
-    // Extract event data from v3 structure
-    const eventData = req.body;
+    // Extract event data from v1/v2 structure
+    const eventData = validatedEvent;
     
-    if (!eventData.event || !eventData.event.type || !eventData.event.data) {
+    if (!eventData.event || !eventData.data) {
       return res.status(400).json({ error: 'Invalid webhook payload' });
     }
 
-    // Check for duplicate events
-    const eventId = `${eventData.event.type}_${eventData.event.data.envelope?.id || eventData.event.data.document?.id || ''}_${eventData.event.created_at || Date.now()}`;
+    // Check for duplicate events  
+    const eventId = `${eventData.event}_${eventData.data.document?.key || eventData.data.list?.key || ''}_${eventData.occurred_at || Date.now()}`;
     if (clickSignWebhookService.isDuplicateEvent(eventId)) {
       console.log('[CLICKSIGN WEBHOOK] Duplicate event detected, skipping');
       return res.json({ success: true, message: 'Duplicate event skipped' });
@@ -268,13 +268,45 @@ router.post('/webhook', async (req, res) => {
       return res.status(404).json({ error: result.reason });
     }
 
-    console.log(`[CLICKSIGN WEBHOOK] ✅ Event processed successfully:`, result);
+    console.log(`[CLICKSIGN WEBHOOK] ✅ Event ${eventData.event} processed successfully:`, result);
     res.json({ success: true, message: 'Webhook processed successfully', result });
 
   } catch (error) {
     console.error(`[CLICKSIGN WEBHOOK] ❌ Error processing webhook:`, error);
     res.status(500).json({ 
       error: 'Erro ao processar webhook ClickSign',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+/**
+ * Test webhook endpoint (dev only)
+ * POST /api/clicksign/webhook-test
+ */
+router.post('/webhook-test', async (req, res) => {
+  if (process.env.NODE_ENV === 'production') {
+    return res.status(404).json({ error: 'Not found' });
+  }
+  
+  try {
+    console.log(`[CLICKSIGN WEBHOOK TEST] Received event:`, req.body);
+    
+    // Process event directly without validation
+    const result = await clickSignWebhookService.processEvent(req.body);
+    
+    if (!result.processed) {
+      console.log(`[CLICKSIGN WEBHOOK TEST] Event not processed: ${result.reason}`);
+      return res.status(404).json({ error: result.reason });
+    }
+
+    console.log(`[CLICKSIGN WEBHOOK TEST] ✅ Event processed successfully:`, result);
+    res.json({ success: true, message: 'Webhook processed successfully', result });
+
+  } catch (error) {
+    console.error(`[CLICKSIGN WEBHOOK TEST] ❌ Error:`, error);
+    res.status(500).json({ 
+      error: 'Erro ao processar webhook teste',
       details: error instanceof Error ? error.message : 'Unknown error'
     });
   }
