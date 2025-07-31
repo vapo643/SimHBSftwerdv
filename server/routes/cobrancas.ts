@@ -155,16 +155,20 @@ router.get('/', jwtAuthMiddleware, roleGuard(['FINANCEIRO', 'ADMINISTRADOR', 'DI
           documentos.ccb = proposta.ccbUrl;
         }
         
+        // Usar estrutura JSONB correta
+        const clienteData = proposta.cliente_data || proposta.clienteData || {};
+        const condicoesData = proposta.condicoes_data || proposta.condicoesData || {};
+        
         return {
           id: proposta.id,
           numeroContrato: proposta.numeroContrato || proposta.id.substring(0, 8).toUpperCase(),
-          nomeCliente: proposta.dadosPessoais.nomeCompleto,
-          cpfCliente: proposta.dadosPessoais.cpf,
-          telefoneCliente: proposta.dadosPessoais.telefone,
-          emailCliente: proposta.dadosPessoais.email,
-          valorTotal: proposta.dadosFinanciamento.valorTotal,
-          valorFinanciado: proposta.dadosFinanciamento.valorSolicitado,
-          quantidadeParcelas: proposta.dadosFinanciamento.prazo,
+          nomeCliente: clienteData.nome || clienteData.nomeCompleto || 'Cliente não informado',
+          cpfCliente: clienteData.cpf || '000.000.000-00',
+          telefoneCliente: clienteData.telefone || 'Não informado',
+          emailCliente: clienteData.email || 'email@exemplo.com',
+          valorTotal: condicoesData.valorTotal || condicoesData.valor || 0,
+          valorFinanciado: condicoesData.valor || condicoesData.valorSolicitado || 0,
+          quantidadeParcelas: condicoesData.prazo || 0,
           parcelasPagas,
           parcelasPendentes,
           parcelasVencidas,

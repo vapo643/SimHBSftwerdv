@@ -27,7 +27,6 @@ import {
   RefreshCw,
   CheckCircle2,
   XCircle,
-  PendingIcon as Pending,
   Banknote
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -185,7 +184,7 @@ const Dashboard: React.FC = () => {
     }, {} as Record<string, number>);
 
     // Unique partners
-    const parceiros = [...new Set(propostasData.map(p => p.parceiro?.razaoSocial).filter(Boolean))];
+    const parceiros = Array.from(new Set(propostasData.map(p => p.parceiro?.razaoSocial).filter(Boolean)));
 
     return {
       total,
