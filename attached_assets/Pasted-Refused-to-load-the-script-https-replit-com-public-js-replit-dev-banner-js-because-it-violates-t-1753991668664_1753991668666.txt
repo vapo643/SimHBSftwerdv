@@ -1,0 +1,112 @@
+Refused to load the script 'https://replit.com/public/js/replit-dev-banner.js' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://unpkg.com". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+Understand this error
+content-script.js:2 safeParseJson "undefined" is not valid JSON
+client:536 WebSocket connection to 'wss://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/?token=f56Me71Rhgvs' failed: 
+setupWebSocket @ client:536Understand this error
+client:536 Uncaught (in promise) SyntaxError: Failed to construct 'WebSocket': The URL 'wss://localhost:undefined/?token=f56Me71Rhgvs' is invalid.
+    at setupWebSocket (client:536:19)
+    at fallback (client:509:16)
+    at WebSocket.<anonymous> (client:555:7)Understand this error
+chunk-276SZO74.js?v=397f22c1:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+content-script.js:22 Document already loaded, running initialization immediately
+content-script.js:4 Attempting to initialize AdUnit
+content-script.js:6 AdUnit initialized successfully
+webcomponents-ce.js:33 Uncaught Error: A custom element with name 'mce-autosize-textarea' has already been defined.
+    at Aa (webcomponents-ce.js:33:363)
+    at m.define (webcomponents-ce.js:33:133)
+    at overlay_bundle.js:147:5559
+    at D (overlay_bundle.js:44:680)
+    at overlay_bundle.js:158:392Understand this error
+content.js:208 Object
+AuthContext.tsx:161 🔐 [AUTH EVENT] SIGNED_IN Object
+AuthContext.tsx:161 🔐 [AUTH EVENT] INITIAL_SESSION Object
+apiClient.ts:157 🔐 [TOKEN MANAGER] Fresh token obtained, length: 767
+apiClient.ts:333 [PASSO 3 - ENVIO] Object
+apiClient.ts:333 [PASSO 3 - ENVIO] Object
+apiClient.ts:333 [PASSO 3 - ENVIO] Object
+chunk-276SZO74.js?v=397f22c1:521 Warning: React has detected a change in the order of Hooks called by Dashboard. This will lead to bugs and errors if not fixed. For more information, read the Rules of Hooks: https://reactjs.org/link/rules-of-hooks
+
+   Previous render            Next render
+   ------------------------------------------------------
+1. useContext                 useContext
+2. useContext                 useContext
+3. useSyncExternalStore       useSyncExternalStore
+4. useRef                     useRef
+5. useInsertionEffect         useInsertionEffect
+6. useContext                 useContext
+7. useState                   useState
+8. useState                   useState
+9. useState                   useState
+10. useState                  useState
+11. useContext                useContext
+12. useContext                useContext
+13. useContext                useContext
+14. useEffect                 useEffect
+15. useState                  useState
+16. useCallback               useCallback
+17. useSyncExternalStore      useSyncExternalStore
+18. useEffect                 useEffect
+19. useContext                useContext
+20. useContext                useContext
+21. useContext                useContext
+22. useEffect                 useEffect
+23. useState                  useState
+24. useCallback               useCallback
+25. useSyncExternalStore      useSyncExternalStore
+26. useEffect                 useEffect
+27. useEffect                 useEffect
+28. undefined                 useMemo
+   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    at Dashboard (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/dashboard.tsx:134:20)
+    at ProtectedRoute (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ProtectedRoute.tsx:21:42)
+    at Route (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=397f22c1:323:16)
+    at Switch (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=397f22c1:379:17)
+    at Router
+    at Provider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-3RXG37ZK.js?v=397f22c1:38:15)
+    at TooltipProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=397f22c1:61:5)
+    at AuthProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/AuthContext.tsx:24:32)
+    at ThemeProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ThemeContext.tsx:20:33)
+    at QueryClientProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=397f22c1:2805:3)
+    at App
+printWarning @ chunk-276SZO74.js?v=397f22c1:521Understand this error
+2chunk-276SZO74.js?v=397f22c1:11678 Uncaught Error: Rendered more hooks than during the previous render.
+    at updateWorkInProgressHook (chunk-276SZO74.js?v=397f22c1:11678:21)
+    at updateMemo (chunk-276SZO74.js?v=397f22c1:12199:22)
+    at Object.useMemo (chunk-276SZO74.js?v=397f22c1:12726:24)
+    at useMemo (chunk-ZMLY2J2T.js?v=397f22c1:1094:29)
+    at Dashboard (dashboard.tsx:155:30)
+    at renderWithHooks (chunk-276SZO74.js?v=397f22c1:11548:26)
+    at updateFunctionComponent (chunk-276SZO74.js?v=397f22c1:14582:28)
+    at beginWork (chunk-276SZO74.js?v=397f22c1:15924:22)
+    at HTMLUnknownElement.callCallback2 (chunk-276SZO74.js?v=397f22c1:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-276SZO74.js?v=397f22c1:3699:24)Understand this error
+chunk-276SZO74.js?v=397f22c1:14032 The above error occurred in the <Dashboard> component:
+
+    at Dashboard (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/dashboard.tsx:134:20)
+    at ProtectedRoute (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ProtectedRoute.tsx:21:42)
+    at Route (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=397f22c1:323:16)
+    at Switch (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=397f22c1:379:17)
+    at Router
+    at Provider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-3RXG37ZK.js?v=397f22c1:38:15)
+    at TooltipProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=397f22c1:61:5)
+    at AuthProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/AuthContext.tsx:24:32)
+    at ThemeProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ThemeContext.tsx:20:33)
+    at QueryClientProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=397f22c1:2805:3)
+    at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+logCapturedError @ chunk-276SZO74.js?v=397f22c1:14032Understand this error
+chunk-276SZO74.js?v=397f22c1:9129 Uncaught Error: Rendered more hooks than during the previous render.
+    at updateWorkInProgressHook (chunk-276SZO74.js?v=397f22c1:11678:21)
+    at updateMemo (chunk-276SZO74.js?v=397f22c1:12199:22)
+    at Object.useMemo (chunk-276SZO74.js?v=397f22c1:12726:24)
+    at useMemo (chunk-ZMLY2J2T.js?v=397f22c1:1094:29)
+    at Dashboard (dashboard.tsx:155:30)
+    at renderWithHooks (chunk-276SZO74.js?v=397f22c1:11548:26)
+    at updateFunctionComponent (chunk-276SZO74.js?v=397f22c1:14582:28)
+    at beginWork (chunk-276SZO74.js?v=397f22c1:15924:22)
+    at beginWork$1 (chunk-276SZO74.js?v=397f22c1:19753:22)
+    at performUnitOfWork (chunk-276SZO74.js?v=397f22c1:19198:20)Understand this error
+2AuthContext.tsx:95 🔐 [AUTH RESTORED] User profile loaded with valid token

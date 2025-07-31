@@ -128,30 +128,10 @@ const Dashboard: React.FC = () => {
     }
   }, [user?.role, setLocation]);
 
-  if (isLoading) {
-    return (
-      <DashboardLayout title="Dashboard de Propostas">
-        <div className="flex items-center justify-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
-        </div>
-      </DashboardLayout>
-    );
-  }
-
-  if (error) {
-    return (
-      <DashboardLayout title="Dashboard de Propostas">
-        <Alert variant="destructive">
-          <AlertDescription>
-            Erro ao carregar propostas. Por favor, tente novamente.
-          </AlertDescription>
-        </Alert>
-      </DashboardLayout>
-    );
-  }
+  // IMPORTANTE: Sempre definir dados e hooks ANTES dos returns condicionais
   const propostasData = propostas || [];
 
-  // Filtrar propostas
+  // Filtrar propostas - HOOK SEMPRE EXECUTADO
   const propostasFiltradas = useMemo(() => {
     return propostasData.filter(proposta => {
       const matchesSearch = proposta.nomeCliente?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -167,7 +147,7 @@ const Dashboard: React.FC = () => {
     });
   }, [propostasData, searchTerm, statusFilter, parceiroFilter]);
 
-  // Estatísticas computadas
+  // Estatísticas computadas - HOOK SEMPRE EXECUTADO
   const estatisticas = useMemo(() => {
     const total = propostasData.length;
     const aprovadas = propostasData.filter(p => p.status === 'aprovado').length;
@@ -206,6 +186,29 @@ const Dashboard: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['/api/propostas/metricas'] });
     }
   };
+
+  // Agora sim os returns condicionais - DEPOIS de todos os hooks
+  if (isLoading) {
+    return (
+      <DashboardLayout title="Dashboard de Propostas">
+        <div className="flex items-center justify-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <DashboardLayout title="Dashboard de Propostas">
+        <Alert variant="destructive">
+          <AlertDescription>
+            Erro ao carregar propostas. Por favor, tente novamente.
+          </AlertDescription>
+        </Alert>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout title="Dashboard de Propostas">
