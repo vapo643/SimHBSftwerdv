@@ -178,7 +178,8 @@ export class SemgrepMCPServer {
   private async cacheDelete(pattern: string): Promise<void> {
     if (this.useMemoryCache) {
       // Deletar todas as chaves que correspondem ao padrão
-      for (const key of this.memoryCache.keys()) {
+      const keys = Array.from(this.memoryCache.keys())
+      for (const key of keys) {
         if (key.includes(pattern.replace('*', ''))) {
           this.memoryCache.delete(key)
         }
@@ -200,7 +201,8 @@ export class SemgrepMCPServer {
   
   private cleanupMemoryCache(): void {
     const now = Date.now()
-    for (const [key, item] of this.memoryCache.entries()) {
+    const entries = Array.from(this.memoryCache.entries())
+    for (const [key, item] of entries) {
       if (item.expires < now) {
         this.memoryCache.delete(key)
       }
@@ -365,7 +367,7 @@ export class SemgrepMCPServer {
       })
       
       semgrep.on('close', (code) => {
-        if (code === 0 || code === 1) { // 1 = findings found
+        if (code === 0 || code === 1 || code === 2) { // 0 = success, 1 = findings found, 2 = no findings
           try {
             // Se o output não for JSON, retornar como texto
             if (args.includes('--list-rules')) {

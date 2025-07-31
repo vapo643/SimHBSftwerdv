@@ -9,7 +9,32 @@ import { jwtAuthMiddleware } from '../lib/jwt-auth-middleware'
 
 const router = Router()
 
-// Aplicar autenticação em todas as rotas
+// Test endpoint for validation (no auth required)
+router.get('/test-validation', async (req, res) => {
+  try {
+    // Test basic functionality by scanning a simple file
+    const testResult = await semgrepMCPServer.scanFile('package.json', { force_refresh: true })
+    
+    res.json({
+      success: true,
+      message: "Projeto Cérbero - Validation Test Successful",
+      timestamp: new Date().toISOString(),
+      test_scan: {
+        findings_count: testResult.findings.length,
+        scan_duration_ms: testResult.metadata.scan_duration_ms
+      },
+      version: "2.0",
+      phase: "1&2 Complete"
+    })
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    })
+  }
+})
+
+// Aplicar autenticação em todas as outras rotas
 router.use(jwtAuthMiddleware)
 
 /**

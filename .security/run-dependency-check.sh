@@ -16,7 +16,7 @@ pip install -q pyyaml || {
 }
 
 # Executar script de análise
-python3 .security/dependency-check-with-exceptions.py
+python3 dependency-check-with-exceptions.py
 
 # Capturar código de saída
 EXIT_CODE=$?
