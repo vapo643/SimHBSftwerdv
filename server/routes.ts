@@ -3258,8 +3258,9 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
         .single();
 
       if (profileError || !profile) {
+        // Generic error message - OWASP ASVS V3.2.3
         return res.status(404).json({ 
-          message: "Usuário não encontrado" 
+          message: "Operação não permitida" 
         });
       }
 

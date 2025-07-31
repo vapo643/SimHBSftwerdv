@@ -77,8 +77,9 @@ router.post('/change-email', jwtAuthMiddleware, async (req: AuthenticatedRequest
         details: { reason: 'Invalid password for email change' }
       });
 
+      // Generic error message - OWASP ASVS V3.2.3
       return res.status(401).json({
-        error: 'Senha incorreta'
+        error: 'Credenciais inválidas'
       });
     }
 

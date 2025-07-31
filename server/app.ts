@@ -15,6 +15,9 @@ import { strictCSP } from "./middleware/strictCSP";
 export async function createApp() {
   const app = express();
 
+  // Disable X-Powered-By header - OWASP ASVS V14.4.1
+  app.disable('x-powered-by');
+
   // Configure trust proxy for rate limiting
   app.set('trust proxy', process.env.NODE_ENV === 'production' ? 1 : ['127.0.0.1', '::1']);
 
@@ -86,6 +89,15 @@ export async function createApp() {
       message: {
         error: "Muitas tentativas de autenticação. Tente novamente em 15 minutos.",
         retryAfter: "15 minutos"
+      },
+      keyGenerator: (req) => {
+        // Advanced key generation - OWASP ASVS V11.1.1
+        const email = req.body?.email || 'anonymous';
+        const userAgent = req.headers['user-agent'] || 'unknown';
+        const fingerprint = `${req.ip}:${email}:${userAgent}`;
+        // Hash the fingerprint to protect privacy
+        const crypto = require('crypto');
+        return crypto.createHash('sha256').update(fingerprint).digest('hex');
       },
       handler: (req, res) => {
         securityLogger.logEvent({
