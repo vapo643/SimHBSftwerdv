@@ -2,10 +2,21 @@
 
 ## 🌐 URL do Webhook
 
-Sua URL de webhook para configurar no ClickSign é:
+**⚠️ IMPORTANTE: URL TEMPORÁRIA DE DESENVOLVIMENTO**
 
+Durante o desenvolvimento, use esta URL temporária:
 ```
 https://workspace.gabrielserri238.repl.co/api/clicksign/webhook
+```
+
+**🏢 PARA PRODUÇÃO, configure a URL do domínio oficial:**
+```
+https://seudominiooficial.com.br/api/clicksign/webhook
+```
+
+**Exemplo para Eleeve:**
+```
+https://sistema.eleeve.com.br/api/clicksign/webhook
 ```
 
 ## 🔐 Informações Necessárias para Configuração
@@ -16,9 +27,10 @@ Acesse: **Configurações → Webhooks → Adicionar Webhook**
 
 **Preencha os seguintes campos:**
 
-1. **URL do Webhook**: 
+1. **URL do Webhook** (use o domínio oficial em produção): 
    ```
-   https://workspace.gabrielserri238.repl.co/api/clicksign/webhook
+   DESENVOLVIMENTO: https://workspace.gabrielserri238.repl.co/api/clicksign/webhook
+   PRODUÇÃO: https://seudominiooficial.com.br/api/clicksign/webhook
    ```
 
 2. **Eventos para Monitorar** (marque todos estes):

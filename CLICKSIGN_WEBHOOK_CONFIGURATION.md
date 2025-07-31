@@ -2,9 +2,19 @@
 
 ## 1️⃣ URL do Webhook
 
-Copie esta URL para configurar no ClickSign:
+**⚠️ Para desenvolvimento (teste):**
 ```
 https://workspace.gabrielserri238.repl.co/api/clicksign/webhook
+```
+
+**🏢 Para produção (use o domínio oficial):**
+```
+https://seudominiooficial.com.br/api/clicksign/webhook
+```
+
+**Exemplo para Eleeve:**
+```
+https://sistema.eleeve.com.br/api/clicksign/webhook
 ```
 
 ## 2️⃣ No Painel ClickSign
