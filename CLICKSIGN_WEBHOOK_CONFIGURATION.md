@@ -26,14 +26,17 @@ https://sistema.eleeve.com.br/api/clicksign/webhook
    - **Método**: POST
    - **Formato**: JSON
 
-3. **Eventos Obrigatórios** (marque estes):
-   - ✅ `envelope.finished` ⭐ **MAIS IMPORTANTE**
-   - ✅ `envelope.created`
-   - ✅ `envelope.updated`
-   - ✅ `envelope.cancelled`
-   - ✅ `envelope.expired`
-   - ✅ `signer.signed`
-   - ✅ `signer.refused`
+3. **Eventos ESSENCIAIS** (marque apenas estes):
+   
+   **🎯 CRÍTICOS (obrigatórios):**
+   - ✅ `envelope.finished` ⭐ **DISPARA BOLETO AUTOMÁTICO**
+   - ✅ `envelope.cancelled` - Para cancelar proposta
+   - ✅ `envelope.expired` - Para marcar como expirado
+   
+   **📊 INFORMATIVOS (recomendados):**
+   - ✅ `envelope.created` - Log de criação
+   - ✅ `signer.signed` - Log individual de assinatura
+   - ✅ `signer.refused` - Log de recusa
 
 4. **Após salvar**, o ClickSign vai mostrar:
    - **Webhook Secret** - Copie este valor!
@@ -67,8 +70,11 @@ Você verá nos logs:
 ## ✅ Pronto!
 
 O webhook está configurado para:
-- Receber notificações quando CCB for assinado
-- Disparar geração automática de boleto no Inter
-- Atualizar status da proposta em tempo real
+- **`envelope.finished`** → Dispara boleto automático no Inter
+- **`envelope.cancelled`** → Cancela a proposta
+- **`envelope.expired`** → Marca como expirado
+- Logs detalhados de todo o processo
+
+**⚠️ IMPORTANTE**: O evento `envelope.finished` é o mais crítico - é ele que dispara a geração do boleto automaticamente.
 
 **Status**: Sistema 100% pronto para receber webhooks!
