@@ -365,22 +365,22 @@ const PartnersPage: React.FC = () => {
                   <Card key={partner.id} className="border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-200 hover:border-cyan-300 dark:hover:border-cyan-600">
                     <CardHeader className="pb-3">
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg">
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                          <div className="p-2 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg flex-shrink-0">
                             <Building2 className="h-5 w-5 text-white" />
                           </div>
-                          <div>
-                            <h3 className="font-semibold text-gray-900 dark:text-gray-100 truncate">
+                          <div className="min-w-0 flex-1">
+                            <h3 className="font-semibold text-gray-900 dark:text-gray-100 truncate text-sm">
                               {partner.razaoSocial}
                             </h3>
                           </div>
                         </div>
-                        <div className="flex gap-2">
+                        <div className="flex gap-1 flex-shrink-0">
                           <Link to={`/parceiros/detalhe/${partner.id}`}>
                             <Button
                               variant="outline"
                               size="sm"
-                              className="h-8 w-8 p-0 border-gray-300 hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950"
+                              className="h-7 w-7 p-0 border-gray-300 hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950"
                             >
                               <Eye className="h-3 w-3 text-gray-600 hover:text-blue-600" />
                             </Button>
@@ -390,7 +390,7 @@ const PartnersPage: React.FC = () => {
                             size="sm"
                             onClick={() => handleEdit(partner)}
                             disabled={updateMutation.isPending}
-                            className="h-8 w-8 p-0 border-gray-300 hover:border-cyan-400 hover:bg-cyan-50 dark:hover:bg-cyan-950"
+                            className="h-7 w-7 p-0 border-gray-300 hover:border-cyan-400 hover:bg-cyan-50 dark:hover:bg-cyan-950"
                           >
                             <Edit className="h-3 w-3 text-gray-600 hover:text-cyan-600" />
                           </Button>
@@ -399,7 +399,7 @@ const PartnersPage: React.FC = () => {
                             size="sm"
                             onClick={() => handleDelete(partner)}
                             disabled={deleteMutation.isPending}
-                            className="h-8 w-8 p-0 border-gray-300 hover:border-red-400 hover:bg-red-50 dark:hover:bg-red-950"
+                            className="h-7 w-7 p-0 border-gray-300 hover:border-red-400 hover:bg-red-50 dark:hover:bg-red-950"
                           >
                             <Trash2 className="h-3 w-3 text-gray-600 hover:text-red-600" />
                           </Button>
