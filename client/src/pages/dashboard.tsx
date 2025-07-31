@@ -1,43 +1,93 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { Link, useLocation } from "wouter";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableHead,
-  TableRow,
-  TableCell,
-} from "@/components/ui/table";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Loader2, FileText, Clock, Calendar, TrendingUp, AlertCircle, Edit } from "lucide-react";
+import { 
+  Loader2, 
+  FileText, 
+  Clock, 
+  Calendar, 
+  TrendingUp, 
+  AlertCircle, 
+  Edit,
+  Search,
+  Filter,
+  Eye,
+  Users,
+  DollarSign,
+  BarChart3,
+  Briefcase,
+  PlusCircle,
+  RefreshCw,
+  CheckCircle2,
+  XCircle,
+  PendingIcon as Pending,
+  Banknote
+} from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from "@/contexts/AuthContext";
-import RefreshButton from "@/components/RefreshButton";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
-const getStatusClass = (status: string) => {
+const getStatusColor = (status: string) => {
   switch (status.toLowerCase()) {
     case "aprovado":
-      return "status-approved";
+      return "bg-green-100 text-green-800 border-green-200";
+    case "em_analise":
+      return "bg-blue-100 text-blue-800 border-blue-200";
+    case "aguardando_analise":
+      return "bg-yellow-100 text-yellow-800 border-yellow-200";
+    case "pendenciado":
+      return "bg-orange-100 text-orange-800 border-orange-200";
+    case "rejeitado":
+      return "bg-red-100 text-red-800 border-red-200";
+    case "pago":
+      return "bg-emerald-100 text-emerald-800 border-emerald-200";
+    case "pronto_pagamento":
+      return "bg-purple-100 text-purple-800 border-purple-200";
+    case "rascunho":
+      return "bg-gray-100 text-gray-800 border-gray-200";
+    case "cancelado":
+      return "bg-slate-100 text-slate-800 border-slate-200";
+    default:
+      return "bg-gray-100 text-gray-800 border-gray-200";
+  }
+};
+
+const getStatusText = (status: string) => {
+  switch (status.toLowerCase()) {
+    case "aguardando_analise":
+      return "Aguardando Análise";
+    case "em_analise":
+      return "Em Análise";
+    case "pronto_pagamento":
+      return "Pronto para Pagamento";
+    default:
+      return status.replace(/_/g, ' ').replace(/^\w/, (c: string) => c.toUpperCase());
+  }
+};
+
+const getStatusIcon = (status: string) => {
+  switch (status.toLowerCase()) {
+    case "aprovado":
+      return <CheckCircle2 className="h-4 w-4" />;
+    case "rejeitado":
+      return <XCircle className="h-4 w-4" />;
     case "em_analise":
     case "aguardando_analise":
-      return "status-pending";
+      return <Clock className="h-4 w-4" />;
     case "pendenciado":
-      return "status-warning"; // Destaque especial para pendenciadas
-    case "rejeitado":
-      return "status-rejected";
+      return <AlertCircle className="h-4 w-4" />;
     case "pago":
-      return "status-approved";
-    case "pronto_pagamento":
-      return "status-pending";
-    case "rascunho":
-      return "status-draft";
-    case "cancelado":
-      return "status-rejected";
+      return <Banknote className="h-4 w-4" />;
     default:
-      return "status-pending";
+      return <FileText className="h-4 w-4" />;
   }
 };
 
@@ -52,9 +102,13 @@ const Dashboard: React.FC = () => {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("todos");
+  const [parceiroFilter, setParceiroFilter] = useState<string>("todos");
+  const [viewMode, setViewMode] = useState<"cards" | "table">("cards");
   
   // Fetch real proposals data
-  const { data: propostas, isLoading, error } = useQuery<any[]>({
+  const { data: propostas, isLoading, error, refetch } = useQuery<any[]>({
     queryKey: ['/api/propostas'],
   });
 
@@ -98,6 +152,55 @@ const Dashboard: React.FC = () => {
   }
   const propostasData = propostas || [];
 
+  // Filtrar propostas
+  const propostasFiltradas = useMemo(() => {
+    return propostasData.filter(proposta => {
+      const matchesSearch = proposta.nomeCliente?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           proposta.id.includes(searchTerm) ||
+                           proposta.cpfCliente?.includes(searchTerm);
+      
+      const matchesStatus = statusFilter === 'todos' || proposta.status === statusFilter;
+      
+      const matchesParceiro = parceiroFilter === 'todos' || 
+                             proposta.parceiro?.razaoSocial === parceiroFilter;
+      
+      return matchesSearch && matchesStatus && matchesParceiro;
+    });
+  }, [propostasData, searchTerm, statusFilter, parceiroFilter]);
+
+  // Estatísticas computadas
+  const estatisticas = useMemo(() => {
+    const total = propostasData.length;
+    const aprovadas = propostasData.filter(p => p.status === 'aprovado').length;
+    const pendentes = propostasData.filter(p => p.status === 'aguardando_analise' || p.status === 'em_analise').length;
+    const rejeitadas = propostasData.filter(p => p.status === 'rejeitado').length;
+    const pendenciadas = propostasData.filter(p => p.status === 'pendenciado').length;
+    const valorTotal = propostasData.reduce((acc, p) => acc + (p.valorSolicitado || 0), 0);
+    const valorMedio = total > 0 ? valorTotal / total : 0;
+
+    // Status distribution
+    const statusCounts = propostasData.reduce((acc, p) => {
+      acc[p.status] = (acc[p.status] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    // Unique partners
+    const parceiros = [...new Set(propostasData.map(p => p.parceiro?.razaoSocial).filter(Boolean))];
+
+    return {
+      total,
+      aprovadas,
+      pendentes,
+      rejeitadas,
+      pendenciadas,
+      valorTotal,
+      valorMedio,
+      statusCounts,
+      parceiros,
+      taxaAprovacao: total > 0 ? ((aprovadas / total) * 100).toFixed(1) : '0'
+    };
+  }, [propostasData]);
+
   const handleRefresh = () => {
     queryClient.invalidateQueries({ queryKey: ['/api/propostas'] });
     if (user?.role === 'ATENDENTE') {
@@ -106,133 +209,274 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    <DashboardLayout 
-      title="Dashboard de Propostas"
-      actions={
-        <RefreshButton 
-          onRefresh={handleRefresh}
-          isLoading={isLoading}
-          showLabel={true}
-          label="Atualizar"
-          variant="outline"
-        />
-      }
-    >
+    <DashboardLayout title="Dashboard de Propostas">
       <div className="space-y-6">
+        {/* Estatísticas Gerais */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">Total de Propostas</CardTitle>
+              <FileText className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{estatisticas.total}</div>
+              <div className="text-xs text-muted-foreground">
+                {estatisticas.pendenciadas > 0 && (
+                  <span className="text-orange-600">
+                    {estatisticas.pendenciadas} pendências
+                  </span>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">Taxa de Aprovação</CardTitle>
+              <BarChart3 className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-600">{estatisticas.taxaAprovacao}%</div>
+              <div className="text-xs text-muted-foreground">
+                {estatisticas.aprovadas} de {estatisticas.total} aprovadas
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">Valor Total</CardTitle>
+              <DollarSign className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {formatCurrency(estatisticas.valorTotal)}
+              </div>
+              <div className="text-xs text-muted-foreground">
+                Média: {formatCurrency(estatisticas.valorMedio)}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">Em Análise</CardTitle>
+              <Clock className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-blue-600">{estatisticas.pendentes}</div>
+              <div className="text-xs text-muted-foreground">
+                Aguardando processamento
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Métricas de Performance para Atendentes */}
         {user?.role === 'ATENDENTE' && metricas && (
-          <div className="grid gap-4 md:grid-cols-3">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Propostas Hoje</CardTitle>
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{metricas.hoje || 0}</div>
-                <p className="text-xs text-muted-foreground">
-                  Criadas nas últimas 24 horas
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Propostas Esta Semana</CardTitle>
-                <Clock className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{metricas.semana || 0}</div>
-                <p className="text-xs text-muted-foreground">
-                  Últimos 7 dias
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Propostas Este Mês</CardTitle>
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{metricas.mes || 0}</div>
-                <p className="text-xs text-muted-foreground">
-                  Desde o início do mês
-                </p>
-              </CardContent>
-            </Card>
-          </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>Suas Métricas</CardTitle>
+              <CardDescription>Performance individual no período</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 md:grid-cols-3">
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+                  <Calendar className="h-8 w-8 text-blue-500" />
+                  <div>
+                    <p className="text-2xl font-bold">{metricas.hoje || 0}</p>
+                    <p className="text-sm text-muted-foreground">Hoje</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+                  <Clock className="h-8 w-8 text-green-500" />
+                  <div>
+                    <p className="text-2xl font-bold">{metricas.semana || 0}</p>
+                    <p className="text-sm text-muted-foreground">Esta Semana</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+                  <TrendingUp className="h-8 w-8 text-purple-500" />
+                  <div>
+                    <p className="text-2xl font-bold">{metricas.mes || 0}</p>
+                    <p className="text-sm text-muted-foreground">Este Mês</p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         )}
 
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl text-gradient-simpix">
-            {user?.role === 'ATENDENTE' ? 'Minhas Propostas' : 'Propostas'}
-          </h1>
-          <Link to="/propostas/nova">
-            <Button className="btn-simpix-accent">Criar Nova Proposta</Button>
-          </Link>
-        </div>
-        <Card className="card-simpix">
-          <CardContent className="p-6">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>ID</TableHead>
-                  <TableHead>Cliente</TableHead>
-                  <TableHead>Valor</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {propostasData.map((proposta: any) => (
-                  <TableRow key={proposta.id} className={proposta.status === 'pendenciado' ? 'bg-yellow-950/20' : ''}>
-                    <TableCell className="font-mono">#{proposta.id}</TableCell>
-                    <TableCell>
-                      <div>
-                        <div>{proposta.nomeCliente || 'Sem nome'}</div>
+        {/* Controles e Filtros */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>
+                  {user?.role === 'ATENDENTE' ? 'Minhas Propostas' : 'Propostas'}
+                </CardTitle>
+                <CardDescription>
+                  Gerencie e acompanhe todas as propostas de crédito
+                </CardDescription>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => refetch()}
+                  disabled={isLoading}
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Atualizar
+                </Button>
+                <Link to="/propostas/nova">
+                  <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
+                    <PlusCircle className="h-4 w-4 mr-2" />
+                    Nova Proposta
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="flex gap-4 mb-4">
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    placeholder="Buscar por nome, CPF ou ID..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todos">Todos os Status</SelectItem>
+                  <SelectItem value="rascunho">Rascunho</SelectItem>
+                  <SelectItem value="aguardando_analise">Aguardando Análise</SelectItem>
+                  <SelectItem value="em_analise">Em Análise</SelectItem>
+                  <SelectItem value="aprovado">Aprovado</SelectItem>
+                  <SelectItem value="rejeitado">Rejeitado</SelectItem>
+                  <SelectItem value="pendenciado">Pendenciado</SelectItem>
+                  <SelectItem value="pago">Pago</SelectItem>
+                </SelectContent>
+              </Select>
+              {estatisticas.parceiros.length > 0 && (
+                <Select value={parceiroFilter} onValueChange={setParceiroFilter}>
+                  <SelectTrigger className="w-[200px]">
+                    <SelectValue placeholder="Parceiro" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="todos">Todos os Parceiros</SelectItem>
+                    {estatisticas.parceiros.map((parceiro) => (
+                      <SelectItem key={parceiro} value={parceiro}>
+                        {parceiro}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Lista de Propostas */}
+        <div className="space-y-4">
+          {isLoading ? (
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-center">
+                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                  <span className="ml-2 text-muted-foreground">Carregando propostas...</span>
+                </div>
+              </CardContent>
+            </Card>
+          ) : propostasFiltradas.length === 0 ? (
+            <Card>
+              <CardContent className="p-6">
+                <div className="text-center text-muted-foreground">
+                  <FileText className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+                  <h3 className="text-lg font-medium mb-2">Nenhuma proposta encontrada</h3>
+                  <p>Nenhuma proposta corresponde aos filtros aplicados</p>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            propostasFiltradas.map((proposta: any) => (
+              <Card key={proposta.id} className="overflow-hidden hover:shadow-md transition-shadow">
+                <CardContent className="p-0">
+                  <div className="flex items-center justify-between p-6">
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-muted">
+                        {getStatusIcon(proposta.status)}
+                      </div>
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-4">
+                          <h3 className="font-semibold text-lg">
+                            {proposta.nomeCliente || 'Cliente não informado'}
+                          </h3>
+                          <Badge className={`${getStatusColor(proposta.status)} border`}>
+                            {getStatusText(proposta.status)}
+                          </Badge>
+                          {proposta.status === 'pendenciado' && (
+                            <Badge variant="outline" className="gap-1 border-orange-200 text-orange-700">
+                              <AlertCircle className="h-3 w-3" />
+                              Ação Necessária
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          ID: #{proposta.id} | CPF: {proposta.cpfCliente || 'Não informado'}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          Criado em: {format(new Date(proposta.createdAt), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
+                          {proposta.parceiro?.razaoSocial && (
+                            <span className="ml-2">| Parceiro: {proposta.parceiro.razaoSocial}</span>
+                          )}
+                        </div>
                         {proposta.status === 'pendenciado' && proposta.motivo_pendencia && (
-                          <div className="flex items-start gap-1 mt-1">
-                            <AlertCircle className="h-3 w-3 text-yellow-500 mt-0.5" />
-                            <span className="text-xs text-yellow-500">
+                          <div className="flex items-center gap-2 mt-2 p-2 bg-orange-50 rounded-md border border-orange-200">
+                            <AlertCircle className="h-4 w-4 text-orange-600" />
+                            <span className="text-sm text-orange-700">
                               Pendência: {proposta.motivo_pendencia}
                             </span>
                           </div>
                         )}
                       </div>
-                    </TableCell>
-                    <TableCell>{formatCurrency(proposta.valorSolicitado || 0)}</TableCell>
-                    <TableCell>
-                      <span className={getStatusClass(proposta.status)}>
-                        {proposta.status.replace(/_/g, ' ').replace(/^\w/, (c: string) => c.toUpperCase())}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      {proposta.status === 'pendenciado' ? (
-                        <Link to={`/propostas/editar/${proposta.id}`}>
-                          <Button size="sm" variant="outline" className="flex items-center gap-1">
-                            <Edit className="h-3 w-3" />
-                            Corrigir
-                          </Button>
-                        </Link>
-                      ) : (
-                        <Link to={`/credito/analise/${proposta.id}`}>
-                          <Button size="sm" variant="ghost" className="text-gray-400">
-                            Visualizar
-                          </Button>
-                        </Link>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {propostasData.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={4} className="text-center text-gray-500">
-                      Nenhuma proposta encontrada
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+                    </div>
+                    
+                    <div className="text-right space-y-1">
+                      <div className="text-2xl font-bold text-green-600">
+                        {formatCurrency(proposta.valorSolicitado || 0)}
+                      </div>
+                      <div className="flex gap-2 justify-end">
+                        {proposta.status === 'pendenciado' ? (
+                          <Link to={`/propostas/editar/${proposta.id}`}>
+                            <Button size="sm" variant="outline" className="flex items-center gap-1">
+                              <Edit className="h-4 w-4" />
+                              Corrigir
+                            </Button>
+                          </Link>
+                        ) : (
+                          <Link to={`/credito/analise/${proposta.id}`}>
+                            <Button size="sm" variant="outline">
+                              <Eye className="h-4 w-4 mr-1" />
+                              Visualizar
+                            </Button>
+                          </Link>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          )}
+        </div>
       </div>
     </DashboardLayout>
   );
