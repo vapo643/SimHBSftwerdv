@@ -68,8 +68,8 @@ jobs:
         run: |
           mkdir -p tools
           cd tools
-          wget https://github.com/jeremylong/DependencyCheck/releases/download/v8.4.3/dependency-check-8.4.3-release.zip
-          unzip dependency-check-8.4.3-release.zip
+          wget https://github.com/dependency-check/DependencyCheck/releases/download/v12.1.0/dependency-check-12.1.0-release.zip
+          unzip dependency-check-12.1.0-release.zip
           echo "$PWD/dependency-check/bin" >> $GITHUB_PATH
           cd ..
         

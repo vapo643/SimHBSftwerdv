@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-Projeto Cérbero - OWASP Dependency Check Integration with Exception Management
+Projeto Cérbero - OWASP Dependency Check v12.1.0 Integration with Exception Management
 Executa scan de vulnerabilidades e aplica exceções documentadas
+Compatível com OWASP Dependency-Check v12.1.0
 """
 
 import yaml
