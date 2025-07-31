@@ -1,6 +1,66 @@
 rules:
   # Projeto Cérbero - Regras customizadas para Sistema de Crédito Simpix
   
+  # RED TEAM TEST RULES - Detectar vulnerabilidades propositais
+  - id: hardcoded-secrets
+    pattern-either:
+      - pattern: |
+          const $VAR = 'password123'
+      - pattern: |
+          const $VAR = 'sk-$...'
+      - pattern: |
+          console.log(..., "admin123", ...)
+      - pattern: |
+          console.log(..., "$CARDNUM", ...)
+      - pattern: |
+          $VAR = 'password123'
+    message: |
+      Hardcoded secret or password detected. Never store secrets in source code.
+    languages: [typescript, javascript]
+    severity: ERROR
+    metadata:
+      category: security
+      cwe:
+        - "CWE-798: Use of Hard-coded Credentials"
+      owasp:
+        - "A07:2021 - Identification and Authentication Failures"
+        
+  - id: sql-injection-direct
+    pattern-either:
+      - pattern: |
+          const $QUERY = `SELECT * FROM $TABLE WHERE $FIELD = ${$INPUT}`
+      - pattern: |
+          $VAR = `... ${$INPUT} ...`
+      - pattern: |
+          query = `... ${req.query.$PARAM} ...`
+    message: |
+      Direct SQL injection vulnerability detected. Use parameterized queries.
+    languages: [typescript, javascript]
+    severity: ERROR
+    metadata:
+      category: security
+      cwe:
+        - "CWE-89: SQL Injection"
+      owasp:
+        - "A03:2021 - Injection"
+        
+  - id: xss-direct-output
+    pattern-either:
+      - pattern: |
+          res.send(`<div>${$INPUT}</div>`)
+      - pattern: |
+          res.send(`<$TAG>${$INPUT}</$TAG>`)
+    message: |
+      XSS vulnerability - unsanitized user input in HTML output
+    languages: [typescript, javascript]  
+    severity: ERROR
+    metadata:
+      category: security
+      cwe:
+        - "CWE-79: Cross-site Scripting"
+      owasp:
+        - "A03:2021 - Injection"
+  
   # Detecção de informações sensíveis de crédito
   - id: simpix-credit-data-exposure
     pattern-either:

@@ -1,8 +1,8 @@
 {
-  "reportDate": "2025-07-31T16:53:20.423439Z",
+  "reportDate": "2025-07-31T16:58:05.353393Z",
   "projectInfo": {
     "name": "Simpix Credit Management System",
-    "reportDate": "2025-07-31T16:53:20.423448Z",
+    "reportDate": "2025-07-31T16:58:05.353402Z",
     "credits": {
       "NVD": "This product uses data from the NVD API but is not endorsed or certified by the NVD."
     }
@@ -31,6 +31,19 @@
           },
           "severity": "HIGH",
           "description": "Regular expression denial of service vulnerability"
+        }
+      ]
+    },
+    {
+      "fileName": "node_modules/axios",
+      "vulnerabilities": [
+        {
+          "name": "CVE-2021-3749",
+          "cvssv3": {
+            "baseScore": 7.5
+          },
+          "severity": "HIGH",
+          "description": "axios 0.21.1 - Regular Expression Denial of Service vulnerability"
         }
       ]
     },

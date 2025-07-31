@@ -38,7 +38,7 @@ def create_sample_report():
         "dependencies": []
     }
     
-    # Add some realistic vulnerabilities
+    # Add some realistic vulnerabilities (including axios vulnerability from Red Team test)
     sample_vulnerabilities = [
         {
             "fileName": "node_modules/express",
@@ -59,6 +59,17 @@ def create_sample_report():
                     "cvssv3": {"baseScore": 7.5},
                     "severity": "HIGH", 
                     "description": "Regular expression denial of service vulnerability"
+                }
+            ]
+        },
+        {
+            "fileName": "node_modules/axios",
+            "vulnerabilities": [
+                {
+                    "name": "CVE-2021-3749",
+                    "cvssv3": {"baseScore": 7.5},
+                    "severity": "HIGH",
+                    "description": "axios 0.21.1 - Regular Expression Denial of Service vulnerability"
                 }
             ]
         }
