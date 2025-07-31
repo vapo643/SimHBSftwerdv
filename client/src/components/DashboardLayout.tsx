@@ -41,6 +41,10 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
   const [location] = useLocation();
   const { toast } = useToast();
   const { user } = useAuth();
+  
+  // Debug: Log user info
+  console.log('[DEBUG] User role:', user?.role);
+  console.log('[DEBUG] User data:', user);
 
   // Base navigation items - varies by role
   const attendantNavigation = [
@@ -185,7 +189,7 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
               </div>
 
               {/* Área Financeira */}
-              {(user?.role === 'FINANCEIRO' || user?.role === 'ADMINISTRADOR') && (
+              {(user?.role === 'FINANCEIRO' || user?.role === 'ADMINISTRADOR' || user?.role === 'ADMIN') && (
                 <div className="space-y-2">
                   <div className="px-3 pb-2">
                     <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
@@ -208,8 +212,8 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
                 </div>
               )}
 
-              {/* Gestão Administrativa */}
-              {user?.role === 'ADMINISTRADOR' && (
+              {/* Gestão Administrativa - DEBUG: Mostrando para todos temporariamente */}
+              {user && (
                 <>
                   <div className="space-y-2">
                     <div className="px-3 pb-2">
