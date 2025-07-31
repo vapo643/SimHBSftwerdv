@@ -1,0 +1,322 @@
+📚 CLICKSIGN DEVELOPERS - DOCUMENTAÇÃO COMPLETA
+https://developers.clicksign.com/docs/ - Todos os URLs Extraídos
+🏠 Páginas Principais (5 URLs)
+https://developers.clicksign.com/
+
+https://developers.clicksign.com/docs/
+
+https://developers.clicksign.com/reference/
+
+https://developers.clicksign.com/recipes
+
+https://developers.clicksign.com/page/atualizações
+
+📖 Documentação Principal (2 URLs)
+https://developers.clicksign.com/docs/introducao-a-documentacao
+
+https://developers.clicksign.com/reference/comece-agora
+
+🔧 API Envelope (v3) (6 URLs)
+https://developers.clicksign.com/reference/criar-envelope
+
+https://developers.clicksign.com/reference/visualizar-envelope
+
+https://developers.clicksign.com/reference/atualizar-envelope
+
+https://developers.clicksign.com/reference/excluir-envelope
+
+https://developers.clicksign.com/reference/listar-envelopes
+
+https://developers.clicksign.com/reference/finalizar-envelope
+
+📄 Documentos (5 URLs)
+https://developers.clicksign.com/reference/adicionar-documento
+
+https://developers.clicksign.com/reference/visualizar-documento
+
+https://developers.clicksign.com/reference/excluir-documento
+
+https://developers.clicksign.com/reference/listar-documentos
+
+https://developers.clicksign.com/reference/criar-documento-modelo
+
+👥 Signatários (5 URLs)
+https://developers.clicksign.com/reference/adicionar-signatario
+
+https://developers.clicksign.com/reference/visualizar-signatario
+
+https://developers.clicksign.com/reference/atualizar-signatario
+
+https://developers.clicksign.com/reference/excluir-signatario
+
+https://developers.clicksign.com/reference/listar-signatarios
+
+📋 Requisitos (5 URLs)
+https://developers.clicksign.com/reference/adicionar-requisito
+
+https://developers.clicksign.com/reference/visualizar-requisito
+
+https://developers.clicksign.com/reference/atualizar-requisito
+
+https://developers.clicksign.com/reference/excluir-requisito
+
+https://developers.clicksign.com/reference/listar-requisitos
+
+📝 Modelos (5 URLs)
+https://developers.clicksign.com/reference/criar-modelo
+
+https://developers.clicksign.com/reference/visualizar-modelo
+
+https://developers.clicksign.com/reference/atualizar-modelo
+
+https://developers.clicksign.com/reference/excluir-modelo
+
+https://developers.clicksign.com/reference/listar-modelos
+
+🔔 Notificações (3 URLs)
+https://developers.clicksign.com/reference/enviar-notificacao-email
+
+https://developers.clicksign.com/reference/enviar-notificacao-sms
+
+https://developers.clicksign.com/reference/enviar-notificacao-whatsapp
+
+📊 Eventos (3 URLs)
+https://developers.clicksign.com/reference/listar-eventos
+
+https://developers.clicksign.com/reference/listar-eventos-envelope
+
+https://developers.clicksign.com/reference/listar-eventos-documento
+
+👀 Observadores (4 URLs)
+https://developers.clicksign.com/reference/adicionar-observador
+
+https://developers.clicksign.com/reference/visualizar-observador
+
+https://developers.clicksign.com/reference/excluir-observador
+
+https://developers.clicksign.com/reference/listar-observadores
+
+📁 Pastas (5 URLs)
+https://developers.clicksign.com/reference/criar-pasta
+
+https://developers.clicksign.com/reference/visualizar-pasta
+
+https://developers.clicksign.com/reference/atualizar-pasta
+
+https://developers.clicksign.com/reference/excluir-pasta
+
+https://developers.clicksign.com/reference/listar-pastas
+
+🔗 Webhooks (6 URLs)
+https://developers.clicksign.com/docs/webhooks
+
+https://developers.clicksign.com/reference/cadastrar-webhook
+
+https://developers.clicksign.com/reference/visualizar-webhook
+
+https://developers.clicksign.com/reference/atualizar-webhook
+
+https://developers.clicksign.com/reference/excluir-webhook
+
+https://developers.clicksign.com/reference/listar-webhooks
+
+📱 WhatsApp (2 URLs)
+https://developers.clicksign.com/docs/aceite-via-whatsapp
+
+https://developers.clicksign.com/reference/aceite-whatsapp
+
+🖼️ Widget Embedded (2 URLs)
+https://developers.clicksign.com/docs/widget-embedded
+
+https://developers.clicksign.com/reference/widget-embedded
+
+🔐 Single Sign On (SAML) (2 URLs)
+https://developers.clicksign.com/docs/single-sign-on-via-saml
+
+https://developers.clicksign.com/reference/saml-config
+
+🏢 Assinatura Presencial (2 URLs)
+https://developers.clicksign.com/docs/assinatura-presencial
+
+https://developers.clicksign.com/reference/assinatura-presencial-config
+
+📚 Recipes (Exemplos) (3 URLs)
+https://developers.clicksign.com/recipes/criacao-configuracao-envelope
+
+https://developers.clicksign.com/recipes/adicionar-documento-envelope
+
+https://developers.clicksign.com/recipes/criando-documento-modelo
+
+🔄 Versões Anteriores (4 URLs)
+https://developers.clicksign.com/v1.0/docs/introducao-a-documentacao
+
+https://developers.clicksign.com/v1.0/reference/
+
+https://developers.clicksign.com/v2.0/docs/
+
+https://developers.clicksign.com/v2.0/reference/
+
+🔗 Endpoints Base (8 URLs)
+https://sandbox.clicksign.com/api/v3/
+
+https://app.clicksign.com/api/v3/
+
+https://sandbox.clicksign.com/api/v3/envelopes
+
+https://app.clicksign.com/api/v3/envelopes
+
+https://sandbox.clicksign.com/api/v3/documents
+
+https://app.clicksign.com/api/v3/documents
+
+https://sandbox.clicksign.com/api/v3/signers
+
+https://app.clicksign.com/api/v3/signers
+
+🌐 Links Externos (3 URLs)
+https://www.clicksign.com
+
+https://ajuda.clicksign.com
+
+mailto:ajuda@clicksign.com
+
+🎯 ESTRUTURA COMPLETA DA API v3
+📦 Envelope API v3
+POST /api/v3/envelopes - Criar envelope
+
+GET /api/v3/envelopes/{id} - Visualizar envelope
+
+PATCH /api/v3/envelopes/{id} - Atualizar envelope
+
+DELETE /api/v3/envelopes/{id} - Excluir envelope
+
+GET /api/v3/envelopes - Listar envelopes
+
+POST /api/v3/envelopes/{id}/actions/close - Finalizar envelope
+
+📄 Documents API
+POST /api/v3/envelopes/{id}/documents - Adicionar documento
+
+GET /api/v3/envelopes/{envelope_id}/documents/{id} - Visualizar documento
+
+DELETE /api/v3/envelopes/{envelope_id}/documents/{id} - Excluir documento
+
+GET /api/v3/envelopes/{id}/documents - Listar documentos
+
+POST /api/v3/envelopes/{id}/documents/templates - Criar por modelo
+
+👥 Signers API
+POST /api/v3/envelopes/{id}/signers - Adicionar signatário
+
+GET /api/v3/envelopes/{envelope_id}/signers/{id} - Visualizar signatário
+
+PATCH /api/v3/envelopes/{envelope_id}/signers/{id} - Atualizar signatário
+
+DELETE /api/v3/envelopes/{envelope_id}/signers/{id} - Excluir signatário
+
+GET /api/v3/envelopes/{id}/signers - Listar signatários
+
+📋 Requirements API
+POST /api/v3/envelopes/{id}/requirements - Adicionar requisito
+
+GET /api/v3/envelopes/{envelope_id}/requirements/{id} - Visualizar requisito
+
+PATCH /api/v3/envelopes/{envelope_id}/requirements/{id} - Atualizar requisito
+
+DELETE /api/v3/envelopes/{envelope_id}/requirements/{id} - Excluir requisito
+
+GET /api/v3/envelopes/{id}/requirements - Listar requisitos
+
+📝 Templates API
+POST /api/v3/templates - Criar modelo
+
+GET /api/v3/templates/{id} - Visualizar modelo
+
+PATCH /api/v3/templates/{id} - Atualizar modelo
+
+DELETE /api/v3/templates/{id} - Excluir modelo
+
+GET /api/v3/templates - Listar modelos
+
+🔔 Notifications API
+POST /api/v3/envelopes/{id}/notifications/email - Notificação email
+
+POST /api/v3/envelopes/{id}/notifications/sms - Notificação SMS
+
+POST /api/v3/envelopes/{id}/notifications/whatsapp - Notificação WhatsApp
+
+📊 Events API
+GET /api/v3/events - Listar todos eventos
+
+GET /api/v3/envelopes/{id}/events - Eventos do envelope
+
+GET /api/v3/envelopes/{envelope_id}/documents/{id}/events - Eventos do documento
+
+🔗 Webhooks API
+POST /api/v3/webhooks - Cadastrar webhook
+
+GET /api/v3/webhooks/{id} - Visualizar webhook
+
+PATCH /api/v3/webhooks/{id} - Atualizar webhook
+
+DELETE /api/v3/webhooks/{id} - Excluir webhook
+
+GET /api/v3/webhooks - Listar webhooks
+
+📊 RESUMO FINAL DEVELOPERS.CLICKSIGN.COM
+🔢 URLs Totais: 80 links completos
+
+📂 Seções Principais: 20 categorias organizadas
+
+🔗 Endpoints API: 37 endpoints disponíveis
+
+📦 Categorias API: 8 módulos principais
+
+🔗 URLs DE AMBIENTE
+🚀 Produção:
+
+Base URL: https://app.clicksign.com/api/v3/
+
+Authorization: Bearer {access_token}
+
+🧪 Sandbox (Testes):
+
+Base URL: https://sandbox.clicksign.com/api/v3/
+
+Authorization: Bearer {access_token}
+
+🎯 PRINCIPAIS RECURSOS DA DOCUMENTAÇÃO
+📖 Documentação Completa
+Introdução: Conceitos e primeiros passos
+
+API Reference: Especificação técnica completa
+
+Recipes: Exemplos práticos de implementação
+
+Versioning: Compatibilidade com versões anteriores
+
+🔧 Funcionalidades Avançadas
+Envelope System: Agrupamento de documentos e signatários
+
+Webhook Integration: Notificações em tempo real
+
+Widget Embedded: Integração frontend
+
+SAML SSO: Single Sign-On corporativo
+
+WhatsApp Integration: Aceite via WhatsApp
+
+Assinatura Presencial: Validação física
+
+🛠️ Ferramentas de Desenvolvimento
+Sandbox Environment: Ambiente de testes
+
+Code Examples: Exemplos em múltiplas linguagens
+
+API Postman Collection: Coleção para testes
+
+Rate Limiting: Controle de requisições
+
+Error Handling: Tratamento padronizado de erros
+
+✅ Documentação técnica completa da Clicksign Developers API v3 extraída com sucesso para integração e desenvolvimento!

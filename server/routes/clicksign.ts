@@ -5,6 +5,7 @@
 
 import express from 'express';
 import { clickSignService } from '../services/clickSignService.js';
+import { clickSignWebhookService } from '../services/clickSignWebhookService.js';
 import { interBankService } from '../services/interBankService.js';
 import { storage } from '../storage.js';
 import { jwtAuthMiddleware, type AuthenticatedRequest } from '../lib/jwt-auth-middleware.js';
@@ -173,10 +174,36 @@ router.get('/status/:propostaId', jwtAuthMiddleware, async (req, res) => {
 /**
  * Webhook endpoint for ClickSign notifications
  * POST /api/clicksign/webhook
+ * 
+ * Security features:
+ * - HMAC signature validation
+ * - Timestamp validation
+ * - Event deduplication
  */
 router.post('/webhook', async (req, res) => {
   try {
-    console.log(`[CLICKSIGN WEBHOOK] Received notification:`, req.body);
+    console.log(`[CLICKSIGN WEBHOOK] Received notification:`, {
+      headers: {
+        'x-clicksign-signature': req.headers['x-clicksign-signature'],
+        'x-clicksign-timestamp': req.headers['x-clicksign-timestamp'],
+        'x-clicksign-event': req.headers['x-clicksign-event']
+      },
+      body: req.body
+    });
+
+    // Validate signature if secret is configured
+    const signature = req.headers['x-clicksign-signature'] as string;
+    const timestamp = req.headers['x-clicksign-timestamp'] as string;
+    
+    if (signature && timestamp) {
+      const payload = JSON.stringify(req.body);
+      const isValid = clickSignWebhookService.validateSignature(payload, signature, timestamp);
+      
+      if (!isValid) {
+        console.error('[CLICKSIGN WEBHOOK] ❌ Invalid signature or expired timestamp');
+        return res.status(401).json({ error: 'Invalid webhook signature' });
+      }
+    }
 
     const { event, data } = req.body;
     
@@ -184,172 +211,23 @@ router.post('/webhook', async (req, res) => {
       return res.status(400).json({ error: 'Invalid webhook payload' });
     }
 
-    // Find proposal by ClickSign document or list key
-    const documentKey = data.document?.key;
-    const listKey = data.list?.key;
+    // Check for duplicate events
+    const eventId = `${event}_${data.document?.key || data.list?.key || ''}_${req.body.occurred_at || Date.now()}`;
+    if (clickSignWebhookService.isDuplicateEvent(eventId)) {
+      console.log('[CLICKSIGN WEBHOOK] Duplicate event detected, skipping');
+      return res.json({ success: true, message: 'Duplicate event skipped' });
+    }
+
+    // Process event using webhook service
+    const result = await clickSignWebhookService.processEvent(req.body);
     
-    let proposta = null;
-    if (documentKey) {
-      proposta = await storage.getPropostaByClickSignKey('document', documentKey);
-    } else if (listKey) {
-      proposta = await storage.getPropostaByClickSignKey('list', listKey);
+    if (!result.processed) {
+      console.log(`[CLICKSIGN WEBHOOK] Event not processed: ${result.reason}`);
+      return res.status(404).json({ error: result.reason });
     }
 
-    if (!proposta) {
-      console.log(`[CLICKSIGN WEBHOOK] Proposal not found for keys: doc=${documentKey}, list=${listKey}`);
-      return res.status(404).json({ error: 'Proposal not found' });
-    }
-
-    console.log(`[CLICKSIGN WEBHOOK] Processing event '${event}' for proposal: ${proposta.id}`);
-
-    // Process different events
-    const updateData: any = {};
-    
-    switch (event) {
-      case 'sign':
-        updateData.clicksignStatus = 'signed';
-        updateData.clicksignSignedAt = getBrasiliaTimestamp();
-        updateData.assinaturaEletronicaConcluida = true;
-        updateData.dataAssinatura = getBrasiliaTimestamp();
-        
-        // Move to next stage (biometry)
-        updateData.status = 'contratos_assinados';
-        
-        console.log(`[CLICKSIGN WEBHOOK] ✅ Document signed for proposal: ${proposta.id}`);
-        
-        // 🚀 NOVO: Gerar boleto automaticamente após assinatura da CCB
-        try {
-          console.log(`[CLICKSIGN → INTER] Generating boleto for signed CCB: ${proposta.id}`);
-          
-          // Verificar se já existe cobrança para esta proposta
-          const existingCollection = await storage.getInterCollectionByProposalId(proposta.id);
-          if (!existingCollection) {
-            
-            // Obter dados do cliente da proposta
-            const clienteData = typeof proposta.clienteData === 'string' 
-              ? JSON.parse(proposta.clienteData) 
-              : proposta.clienteData || {};
-            
-            const condicoesData = typeof proposta.condicoesData === 'string'
-              ? JSON.parse(proposta.condicoesData)
-              : proposta.condicoesData || {};
-
-            // Dados para criação do boleto conforme API oficial Inter Bank
-            const boletoData = {
-              seuNumero: proposta.id.slice(0, 15), // Max 15 chars
-              valorNominal: parseFloat(String(condicoesData.valorTotalFinanciado || condicoesData.valor || 0)),
-              dataVencimento: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 dias
-              numDiasAgenda: 60, // Cancelamento automático após 60 dias do vencimento
-              pagador: {
-                cpfCnpj: clienteData.cpf?.replace(/\D/g, '') || '',
-                tipoPessoa: 'FISICA' as const,
-                nome: clienteData.nome || '',
-                email: clienteData.email || '',
-                ddd: clienteData.telefone ? clienteData.telefone.replace(/\D/g, '').slice(0, 2) : '',
-                telefone: clienteData.telefone ? clienteData.telefone.replace(/\D/g, '').slice(2) : '',
-                endereco: clienteData.logradouro || clienteData.endereco || '',
-                numero: clienteData.numero || '',
-                complemento: clienteData.complemento || '',
-                bairro: clienteData.bairro || 'Centro',
-                cidade: clienteData.cidade || 'São Paulo',
-                uf: clienteData.uf || 'SP',
-                cep: clienteData.cep?.replace(/\D/g, '') || ''
-              },
-              mensagem: {
-                linha1: `Pagamento referente ao empréstimo`,
-                linha2: `Proposta: ${proposta.id}`,
-                linha3: `SIMPIX - Soluções Financeiras`
-              },
-              formasRecebimento: ['BOLETO', 'PIX'] as ('BOLETO' | 'PIX')[]
-            };
-
-            // Criar cobrança no Inter Bank usando método oficial
-            const createResponse = await interBankService.emitirCobranca(boletoData);
-            
-            // Aguardar um momento e consultar os detalhes completos
-            console.log(`[CLICKSIGN → INTER] Waiting for collection details: ${createResponse.codigoSolicitacao}`);
-            await new Promise(resolve => setTimeout(resolve, 2000)); // 2 segundos
-            
-            const interCollection = await interBankService.recuperarCobranca(createResponse.codigoSolicitacao);
-            
-            // Salvar no banco de dados
-            await storage.createInterCollection({
-              propostaId: proposta.id,
-              codigoSolicitacao: createResponse.codigoSolicitacao,
-              seuNumero: boletoData.seuNumero,
-              valorNominal: String(boletoData.valorNominal),
-              dataVencimento: boletoData.dataVencimento,
-              situacao: interCollection.cobranca.situacao,
-              dataSituacao: interCollection.cobranca.dataSituacao,
-              nossoNumero: interCollection.boleto?.nossoNumero || '',
-              codigoBarras: interCollection.boleto?.codigoBarras || '',
-              linhaDigitavel: interCollection.boleto?.linhaDigitavel || '',
-              pixTxid: interCollection.pix?.txid || '',
-              pixCopiaECola: interCollection.pix?.pixCopiaECola || '',
-              dataEmissao: interCollection.cobranca.dataEmissao || new Date().toISOString().split('T')[0],
-              isActive: true
-            });
-
-            console.log(`[CLICKSIGN → INTER] ✅ Boleto created successfully: ${createResponse.codigoSolicitacao}`);
-            
-            // Log da geração do boleto
-            await storage.createPropostaLog({
-              propostaId: proposta.id,
-              autorId: 'clicksign-webhook',
-              statusAnterior: proposta.status,
-              statusNovo: 'contratos_assinados',
-              observacao: `Boleto gerado automaticamente após assinatura CCB - Código: ${createResponse.codigoSolicitacao}`
-            });
-            
-          } else {
-            console.log(`[CLICKSIGN → INTER] Boleto already exists for proposal: ${proposta.id}`);
-          }
-          
-        } catch (boletoError) {
-          console.error(`[CLICKSIGN → INTER] ❌ Error generating boleto for proposal ${proposta.id}:`, boletoError);
-          
-          // Log do erro mas não bloquear o webhook
-          await storage.createPropostaLog({
-            propostaId: proposta.id,
-            autorId: 'clicksign-webhook',
-            statusAnterior: proposta.status,
-            statusNovo: 'contratos_assinados',
-            observacao: `Erro ao gerar boleto automaticamente: ${(boletoError as Error).message}`
-          });
-        }
-        
-        break;
-
-      case 'cancel':
-        updateData.clicksignStatus = 'cancelled';
-        console.log(`[CLICKSIGN WEBHOOK] ❌ Signature cancelled for proposal: ${proposta.id}`);
-        break;
-
-      case 'deadline':
-        updateData.clicksignStatus = 'expired';
-        console.log(`[CLICKSIGN WEBHOOK] ⏰ Signature expired for proposal: ${proposta.id}`);
-        break;
-
-      default:
-        console.log(`[CLICKSIGN WEBHOOK] Unhandled event: ${event}`);
-        break;
-    }
-
-    // Update proposal with new status
-    if (Object.keys(updateData).length > 0) {
-      await storage.updateProposta(proposta.id, updateData);
-      
-      // Log the status change
-      await storage.createPropostaLog({
-        propostaId: proposta.id,
-        autorId: 'clicksign-webhook',
-        statusAnterior: proposta.status,
-        statusNovo: updateData.status || proposta.status,
-        observacao: `ClickSign webhook: ${event} - ${data.message || 'Status updated'}`
-      });
-    }
-
-    res.json({ success: true, message: 'Webhook processed successfully' });
+    console.log(`[CLICKSIGN WEBHOOK] ✅ Event processed successfully:`, result);
+    res.json({ success: true, message: 'Webhook processed successfully', result });
 
   } catch (error) {
     console.error(`[CLICKSIGN WEBHOOK] ❌ Error processing webhook:`, error);
