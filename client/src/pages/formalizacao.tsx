@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import React from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -385,6 +386,8 @@ export default function Formalizacao() {
   const { user } = useAuth();
   const [ccbUrl, setCcbUrl] = useState<string | null>(null);
   const [showCcbViewer, setShowCcbViewer] = useState(false);
+  const [clickSignData, setClickSignData] = useState<any>(null);
+  const [loadingClickSign, setLoadingClickSign] = useState(false);
   
   const propostaId = params?.id;
 
@@ -507,11 +510,71 @@ export default function Formalizacao() {
       console.error('Erro ao visualizar CCB:', error);
       toast({
         title: "Erro",
-        description: "CCB ainda não foi gerada ou erro ao obter URL",
+        description: "Erro ao visualizar CCB. Tente novamente.",
         variant: "destructive",
       });
     }
   };
+
+  // Função para enviar CCB para ClickSign
+  const sendToClickSign = async (propostaId: string) => {
+    setLoadingClickSign(true);
+    try {
+      toast({
+        title: "Enviando para ClickSign",
+        description: "Preparando CCB para assinatura eletrônica...",
+      });
+      
+      const response = await apiRequest(`/api/clicksign/send-ccb/${propostaId}`, {
+        method: "POST"
+      });
+      
+      if (response.success) {
+        toast({
+          title: "Sucesso",
+          description: "CCB enviada para ClickSign! Link de assinatura gerado.",
+        });
+        // Atualizar dados ClickSign
+        await checkClickSignStatus(propostaId);
+        refetch();
+      }
+    } catch (error: any) {
+      console.error('Erro ao enviar para ClickSign:', error);
+      toast({
+        title: "Erro",
+        description: error.message || "Erro ao enviar CCB para ClickSign.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingClickSign(false);
+    }
+  };
+
+  // Função para consultar status ClickSign  
+  const checkClickSignStatus = async (propostaId: string) => {
+    try {
+      const response = await apiRequest(`/api/clicksign/status/${propostaId}`);
+      setClickSignData(response);
+      return response;
+    } catch (error) {
+      console.error('Erro ao consultar status ClickSign:', error);
+      return null;
+    }
+  };
+
+  // Carregar status ClickSign na inicialização
+  const { data: initialClickSignData } = useQuery({
+    queryKey: ["/api/clicksign/status", propostaId],
+    queryFn: () => checkClickSignStatus(propostaId!),
+    enabled: !!propostaId && !!proposta?.ccbGerado,
+  });
+
+  // Atualizar clickSignData quando initialClickSignData mudar
+  React.useEffect(() => {
+    if (initialClickSignData) {
+      setClickSignData(initialClickSignData);
+    }
+  }, [initialClickSignData]);
 
   const getStatusProgress = (status: string) => {
     const statusMap = {
@@ -866,27 +929,133 @@ export default function Formalizacao() {
                                 </div>
                               )}
 
-                              {/* Botões para CCB */}
+                              {/* Botões para CCB e ClickSign */}
                               {step.id === 2 && (
-                                <div className="mt-2 space-x-2">
-                                  {!proposta.ccbGerado ? (
-                                    <Button
-                                      variant="default"
-                                      size="sm"
-                                      onClick={() => generateCCB(proposta.id)}
-                                    >
-                                      <FileText className="mr-2 h-4 w-4" />
-                                      Gerar CCB
-                                    </Button>
-                                  ) : (
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() => viewCCB(proposta.id)}
-                                    >
-                                      <Eye className="mr-2 h-4 w-4" />
-                                      Visualizar CCB
-                                    </Button>
+                                <div className="mt-4 space-y-3">
+                                  {/* Seção CCB */}
+                                  <div className="flex gap-2">
+                                    {!proposta.ccbGerado ? (
+                                      <Button
+                                        variant="default"
+                                        size="sm"
+                                        onClick={() => generateCCB(proposta.id)}
+                                      >
+                                        <FileText className="mr-2 h-4 w-4" />
+                                        Gerar CCB
+                                      </Button>
+                                    ) : (
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => viewCCB(proposta.id)}
+                                      >
+                                        <Eye className="mr-2 h-4 w-4" />
+                                        Visualizar CCB
+                                      </Button>
+                                    )}
+                                  </div>
+
+                                  {/* Seção ClickSign - só aparece se CCB foi gerado */}
+                                  {proposta.ccbGerado && (
+                                    <div className="p-3 bg-gray-700 rounded-lg border border-gray-600">
+                                      <div className="flex items-center gap-2 mb-2">
+                                        <Signature className="h-4 w-4 text-blue-400" />
+                                        <span className="text-sm font-medium text-blue-400">Assinatura Eletrônica</span>
+                                      </div>
+                                      
+                                      {!clickSignData?.clickSignData?.documentKey && !initialClickSignData?.clickSignData?.documentKey ? (
+                                        // Não enviado ainda
+                                        <div className="space-y-2">
+                                          <p className="text-xs text-gray-400">CCB pronta para assinatura eletrônica</p>
+                                          <Button
+                                            variant="default"
+                                            size="sm"
+                                            onClick={() => sendToClickSign(proposta.id)}
+                                            disabled={loadingClickSign}
+                                            className="bg-blue-600 hover:bg-blue-700"
+                                          >
+                                            {loadingClickSign ? (
+                                              <>
+                                                <Clock className="mr-2 h-4 w-4 animate-spin" />
+                                                Enviando...
+                                              </>
+                                            ) : (
+                                              <>
+                                                <Send className="mr-2 h-4 w-4" />
+                                                Enviar para ClickSign
+                                              </>
+                                            )}
+                                          </Button>
+                                        </div>
+                                      ) : (
+                                        // Já enviado - mostrar status e link
+                                        <div className="space-y-2">
+                                          {(() => {
+                                            const data = clickSignData?.clickSignData || initialClickSignData?.clickSignData;
+                                            const status = data?.status;
+                                            const signUrl = data?.signUrl;
+                                            
+                                            return (
+                                              <>
+                                                <div className="flex items-center gap-2">
+                                                  <div className={`w-2 h-2 rounded-full ${
+                                                    status === 'signed' || status === 'finished' ? 'bg-green-500' :
+                                                    status === 'pending' ? 'bg-yellow-500' :
+                                                    status === 'cancelled' ? 'bg-red-500' : 'bg-gray-500'
+                                                  }`} />
+                                                  <span className="text-xs text-gray-300">
+                                                    Status: {
+                                                      status === 'signed' || status === 'finished' ? 'Assinado' :
+                                                      status === 'pending' ? 'Aguardando Assinatura' :
+                                                      status === 'cancelled' ? 'Cancelado' : 'Processando'
+                                                    }
+                                                  </span>
+                                                </div>
+                                                
+                                                {signUrl && status === 'pending' && (
+                                                  <div className="flex gap-2">
+                                                    <Button
+                                                      variant="outline"
+                                                      size="sm"
+                                                      onClick={() => {
+                                                        navigator.clipboard.writeText(signUrl);
+                                                        toast({
+                                                          title: "Link Copiado",
+                                                          description: "Link de assinatura copiado para a área de transferência",
+                                                        });
+                                                      }}
+                                                      className="text-xs"
+                                                    >
+                                                      <MessageSquare className="mr-1 h-3 w-3" />
+                                                      Copiar Link
+                                                    </Button>
+                                                    <Button
+                                                      variant="outline"
+                                                      size="sm"
+                                                      onClick={() => window.open(signUrl, '_blank')}
+                                                      className="text-xs"
+                                                    >
+                                                      <Eye className="mr-1 h-3 w-3" />
+                                                      Abrir Link
+                                                    </Button>
+                                                  </div>
+                                                )}
+                                                
+                                                <Button
+                                                  variant="ghost"
+                                                  size="sm"
+                                                  onClick={() => checkClickSignStatus(proposta.id)}
+                                                  className="text-xs"
+                                                >
+                                                  <Activity className="mr-1 h-3 w-3" />
+                                                  Atualizar Status
+                                                </Button>
+                                              </>
+                                            );
+                                          })()}
+                                        </div>
+                                      )}
+                                    </div>
                                   )}
                                 </div>
                               )}
