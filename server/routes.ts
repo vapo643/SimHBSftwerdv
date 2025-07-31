@@ -3748,6 +3748,10 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
   // Register OWASP Assessment routes
   const owaspRoutes = (await import('./routes/owasp.js')).default;
   app.use('/api/owasp', owaspRoutes);
+  
+  // Security Scanners routes (SCA & SAST)
+  const securityScannersRoutes = (await import('./routes/security-scanners.js')).default;
+  app.use('/api/security-scanners', securityScannersRoutes);
 
   const httpServer = createServer(app);
   return httpServer;

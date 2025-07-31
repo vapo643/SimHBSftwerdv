@@ -6,7 +6,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Download, Shield, Target, CheckCircle2, AlertTriangle, Clock, Users, FileText, Activity, Lock, AlertCircle, RefreshCw } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Download, Shield, Target, CheckCircle2, AlertTriangle, Clock, Users, FileText, Activity, Lock, AlertCircle, RefreshCw, Search, Package, Code } from 'lucide-react';
 import { fetchWithToken } from '@/lib/apiClient';
 import { useToast } from '@/hooks/use-toast';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -47,9 +48,22 @@ interface OWASPStatus {
   lastUpdated: string;
 }
 
+interface SASTResult {
+  file: string;
+  line: number;
+  column: number;
+  message: string;
+  severity: 'ERROR' | 'WARNING' | 'INFO';
+  rule_id: string;
+  category: string;
+}
+
 export default function OWASPAssessment() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [sastFilePath, setSastFilePath] = useState('');
+  const [sastScanning, setSastScanning] = useState(false);
+  const [sastResults, setSastResults] = useState<SASTResult[] | null>(null);
 
   // Queries para dados OWASP
   const { data: owaspStatus, isLoading: statusLoading } = useQuery({
@@ -80,6 +94,54 @@ export default function OWASPAssessment() {
     queryFn: () => fetchWithToken('/api/security-monitoring/performance').then(res => res.data),
     refetchInterval: 60000 // Atualiza a cada 60 segundos
   });
+  
+  // Query para dados do SCA (Dependency Check)
+  const { data: scaData, isLoading: scaLoading, refetch: refetchSCA } = useQuery({
+    queryKey: ['/api/security-scanners/sca/latest'],
+    queryFn: () => fetchWithToken('/api/security-scanners/sca/latest').then(res => res.data)
+  });
+  
+  // Mutation para rodar análise SCA
+  const runSCAMutation = useMutation({
+    mutationFn: () => fetchWithToken('/api/security-scanners/sca/run', {
+      method: 'POST'
+    }),
+    onSuccess: () => {
+      toast({ title: 'Análise de dependências iniciada' });
+      setTimeout(() => refetchSCA(), 5000); // Refetch após 5 segundos
+    },
+    onError: () => {
+      toast({ title: 'Erro ao iniciar análise', variant: 'destructive' });
+    }
+  });
+  
+  // Função para escanear arquivo com SAST
+  const scanWithSAST = async () => {
+    if (!sastFilePath.trim()) {
+      toast({ title: 'Por favor, insira o caminho do arquivo', variant: 'destructive' });
+      return;
+    }
+    
+    setSastScanning(true);
+    setSastResults(null); // Clear previous results
+    try {
+      const response = await fetchWithToken(`/api/security/mcp/scan/${encodeURIComponent(sastFilePath)}`);
+      
+      if (response.success) {
+        setSastResults(response.data.results);
+        toast({ 
+          title: 'Análise concluída',
+          description: `${response.data.results.length} problemas encontrados`
+        });
+      } else {
+        toast({ title: 'Erro na análise', variant: 'destructive' });
+      }
+    } catch (error) {
+      toast({ title: 'Erro ao conectar com Semgrep', variant: 'destructive' });
+    } finally {
+      setSastScanning(false);
+    }
+  };
 
   const downloadReport = async (type: 'samm' | 'strategic-plan') => {
     try {
@@ -1173,6 +1235,196 @@ export default function OWASPAssessment() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* FASE 1: Análise de Dependências (SCA) */}
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Package className="h-5 w-5 text-orange-500" />
+            <span>Análise de Dependências (SCA)</span>
+            <Button 
+              size="sm" 
+              variant="outline"
+              onClick={() => runSCAMutation.mutate()}
+              disabled={runSCAMutation.isPending}
+            >
+              <RefreshCw className={`h-4 w-4 mr-2 ${runSCAMutation.isPending ? 'animate-spin' : ''}`} />
+              Executar Análise
+            </Button>
+          </CardTitle>
+          <CardDescription>
+            OWASP Dependency-Check v12.1.0 - Software Composition Analysis
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {scaLoading ? (
+            <div className="text-center py-8">
+              <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-2 text-muted-foreground" />
+              <p className="text-muted-foreground">Carregando dados de vulnerabilidades...</p>
+            </div>
+          ) : scaData?.reportFound === false ? (
+            <Alert>
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                {scaData.message}
+              </AlertDescription>
+            </Alert>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+              <div className="text-center p-4 border border-red-500/20 rounded-lg bg-red-900/10">
+                <AlertTriangle className="h-8 w-8 text-red-500 mx-auto mb-2" />
+                <div className="text-2xl font-bold text-red-300">{scaData?.vulnerabilities?.critical || 0}</div>
+                <div className="text-sm text-muted-foreground">Críticas</div>
+              </div>
+              
+              <div className="text-center p-4 border border-orange-500/20 rounded-lg bg-orange-900/10">
+                <AlertCircle className="h-8 w-8 text-orange-500 mx-auto mb-2" />
+                <div className="text-2xl font-bold text-orange-300">{scaData?.vulnerabilities?.high || 0}</div>
+                <div className="text-sm text-muted-foreground">Altas</div>
+              </div>
+              
+              <div className="text-center p-4 border border-yellow-500/20 rounded-lg bg-yellow-900/10">
+                <AlertCircle className="h-8 w-8 text-yellow-500 mx-auto mb-2" />
+                <div className="text-2xl font-bold text-yellow-300">{scaData?.vulnerabilities?.medium || 0}</div>
+                <div className="text-sm text-muted-foreground">Médias</div>
+              </div>
+              
+              <div className="text-center p-4 border border-blue-500/20 rounded-lg bg-blue-900/10">
+                <AlertCircle className="h-8 w-8 text-blue-500 mx-auto mb-2" />
+                <div className="text-2xl font-bold text-blue-300">{scaData?.vulnerabilities?.low || 0}</div>
+                <div className="text-sm text-muted-foreground">Baixas</div>
+              </div>
+              
+              <div className="text-center p-4 border border-gray-500/20 rounded-lg bg-gray-900/10">
+                <Package className="h-8 w-8 text-gray-500 mx-auto mb-2" />
+                <div className="text-2xl font-bold text-gray-300">{scaData?.vulnerabilities?.total || 0}</div>
+                <div className="text-sm text-muted-foreground">Total</div>
+              </div>
+            </div>
+          )}
+          
+          {scaData?.lastScan && (
+            <div className="mt-4 text-sm text-muted-foreground text-center">
+              Última análise: {new Date(scaData.lastScan).toLocaleString('pt-BR')}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* FASE 2: Análise de Código Estático (SAST) */}
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Code className="h-5 w-5 text-purple-500" />
+            <span>Análise de Código Estático (SAST)</span>
+          </CardTitle>
+          <CardDescription>
+            Semgrep MCP Server - Real-time Static Application Security Testing
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="flex space-x-2">
+              <Input 
+                placeholder="Digite o caminho do arquivo (ex: server/routes.ts)"
+                value={sastFilePath}
+                onChange={(e) => setSastFilePath(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && scanWithSAST()}
+                className="flex-1"
+              />
+              <Button 
+                onClick={scanWithSAST}
+                disabled={sastScanning}
+              >
+                <Search className={`h-4 w-4 mr-2 ${sastScanning ? 'animate-pulse' : ''}`} />
+                {sastScanning ? 'Escaneando...' : 'Escanear'}
+              </Button>
+            </div>
+            
+            <Alert>
+              <Shield className="h-4 w-4" />
+              <AlertDescription>
+                O Semgrep MCP Server realiza análise em tempo real com mais de 10 regras de segurança customizadas
+                para sistemas de crédito. Digite o caminho de um arquivo para iniciar a análise.
+              </AlertDescription>
+            </Alert>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="p-4 border border-purple-500/20 rounded-lg bg-purple-900/10">
+                <h4 className="font-medium text-purple-300 mb-2">Capacidades de Detecção</h4>
+                <ul className="space-y-1 text-sm text-muted-foreground">
+                  <li>• SQL Injection</li>
+                  <li>• Cross-Site Scripting (XSS)</li>
+                  <li>• Authentication Issues</li>
+                  <li>• PII Data Exposure</li>
+                  <li>• Weak Cryptography</li>
+                </ul>
+              </div>
+              
+              <div className="p-4 border border-purple-500/20 rounded-lg bg-purple-900/10">
+                <h4 className="font-medium text-purple-300 mb-2">Performance</h4>
+                <ul className="space-y-1 text-sm text-muted-foreground">
+                  <li>• Análise sub-segundo</li>
+                  <li>• Cache dual-layer</li>
+                  <li>• File watching real-time</li>
+                  <li>• MCP Protocol para IA</li>
+                  <li>• CWE Integration</li>
+                </ul>
+              </div>
+            </div>
+            
+            {/* SAST Results Display */}
+            {sastResults && sastResults.length > 0 && (
+              <div className="mt-4 space-y-2">
+                <h4 className="font-medium text-sm">Resultados da Análise:</h4>
+                <div className="max-h-64 overflow-y-auto space-y-2">
+                  {sastResults.map((result, index) => (
+                    <div 
+                      key={index} 
+                      className={`p-3 rounded-lg border-l-4 ${
+                        result.severity === 'ERROR' 
+                          ? 'border-red-500 bg-red-900/20' 
+                          : result.severity === 'WARNING'
+                          ? 'border-yellow-500 bg-yellow-900/20'
+                          : 'border-blue-500 bg-blue-900/20'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-2">
+                            <Badge 
+                              variant={result.severity === 'ERROR' ? 'destructive' : result.severity === 'WARNING' ? 'secondary' : 'outline'}
+                              className="text-xs"
+                            >
+                              {result.severity}
+                            </Badge>
+                            <span className="text-xs text-muted-foreground">
+                              Linha {result.line}, Coluna {result.column}
+                            </span>
+                          </div>
+                          <p className="text-sm mt-1">{result.message}</p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Regra: {result.rule_id} | Categoria: {result.category}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {sastResults && sastResults.length === 0 && (
+              <Alert className="mt-4">
+                <CheckCircle2 className="h-4 w-4" />
+                <AlertDescription>
+                  Nenhuma vulnerabilidade encontrada neste arquivo. O código está seguro!
+                </AlertDescription>
+              </Alert>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Additional Security Monitoring Sections - Future Expansion */}
       <Card className="mt-6">
