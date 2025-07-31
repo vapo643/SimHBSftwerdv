@@ -1,39 +1,121 @@
 #!/bin/bash
 
-# Test Inter Bank OAuth with mTLS using curl
+# Teste de OAuth 2.0 - Banco Inter API
+# Este script testa a autenticação diretamente
 
-echo "Testing Inter Bank OAuth..."
+echo "========================================="
+echo "🏦 TESTE OAUTH 2.0 - BANCO INTER"
+echo "========================================="
+echo ""
 
-# Certificate and key files
-CERT_FILE="inter-cert.pem"
-KEY_FILE="inter-key.pem"
+# Verificar variáveis
+if [ -z "$INTER_CLIENT_ID" ] || [ -z "$INTER_CLIENT_SECRET" ]; then
+    echo "❌ Erro: Variáveis INTER_CLIENT_ID e INTER_CLIENT_SECRET não definidas"
+    exit 1
+fi
 
-# Save certificates to files
-echo "-----BEGIN CERTIFICATE-----
-MIIEgzCCA2ugAwIBAgIRAMtzP6bsLkBn3V+P9gJK9V4wDQYJKoZIhvcNAQELBQAweTELMAkGA1UEBhMCQlIxEzARBgNVBAoTCklDUC1CcmFzaWwxPjA8BgNVBAsTNUF1dG9yaWRhZGUgQ2VydGlmaWNhZG9yYSBkZSBSZWNlaXRhIEZlZGVyYWwgZG8gQnJhc2lsIHYyMRUwEwYDVQQDEwxBQyBSRkIgRzIgVDEwHhcNMjQxMjE3MTI0MjU3WhcNMjUxMjE3MTI0MjU3WjCBjDELMAkGA1UEBhMCQlIxEzARBgNVBAoTCklDUC1CcmFzaWwxGDAWBgNVBAsTD0FDIFJGQiBHMiBUMSBTU0wxJDAiBgNVBAsTG0F1dGVudGljYWRvIGRvIE91dGJ1bmQgU1NMIzEoMCYGA1UEAxMfZGV2ZWxvcGVycy5pbnRlci5jbzo4OEU2MEI1NzU0MDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAN8ys7yMYgGXqyBsjGbbjgrvFXSJcfkdJXr7kHzGQnhClJjL4m+RCb7jrX1rJOD0N8e7gGwlxQaAVMsDUE+4zrfcYiUiYSy/VoT8xdCcxSyqZQPMFPFjjMEOJa7j5ohBvBUbwFtSX2L4hOuNNGCNBg9W9r8V9OXL2JIcJlJ5v3JCGf8/KcyXsKo3h8YFHH1bgA/YYQ3+AqWJx9qOL8PeP8Mdr1CdGJTojZn6U5lHijeRJdcdAYLPnKXNEZ2DdtF8hXKOCpRBLhxdEINLfn9xF0KhOa7xQxZWM5oJvhZMYM6P4E0xKP3XEb3nCQFh+78eDhU7v7xr7pjLSVRMqhY2EVECAwEAAaOB8jCB7zAfBgNVHSMEGDAWgBSKKTZjYJM6RuKnhUYyQNHi8CCJSDBJBgNVHR8EQjBAMD6gPKA6hjhodHRwOi8vcmVwb3NpdG9yaW8uYWNyZmIuY29tLmJyL2xjci9hYy1yZmItZzItdDEtY3JsLmNybDAdBgNVHQ4EFgQUOcQMRLYqQD/6wqJm7pFOVo2JxDgwDgYDVR0PAQH/BAQDAgTwMA0GA1UdEQQGMASCAlBFME0GCCsGAQUFBwEBBEEwPzA9BggrBgEFBQcwAoYxaHR0cDovL3JlcG9zaXRvcmlvLmFjcmZiLmNvbS5ici9hYy9hYy1yZmItZzItdDEuY3J0MA0GCSqGSIb3DQEBCwUAA4IBAQBiD9pL8/hvI0XAXZA3oPiH0HKy0Ue+D9vZHJhBq5e5z5JJaIELXzAqtCPSg8rOOhjqaZDJ3i3FeEGEkOz2Rj4K0Ff0h7EXhBuWD5wWhUJx0c9EBfgIK8Yp1qw3GVoJlLMNJ0/OaBCU8gfC7h5E6yN7F0/K6LDBqBdL9IG6Y0uRJgJHJlm2xlcKmx3PbuJG8wOkkxCYM2D7zTCyoQdV6G1qj/eNFBd8sqLR+Ek8aXXMb3u5/jkYCT+VlJIvN2mwTgodI0gnzJovQ1dqJdT7i5QD8G5B8A7bnOo1mKDbgH8eMH8/VRAw8CQpxrFROVHoZL1/rBXKSOwPU1NCe5K7
------END CERTIFICATE-----" > "$CERT_FILE"
+# URL do ambiente sandbox
+OAUTH_URL="https://cdpj-sandbox.partners.uatinter.co/oauth/v2/token"
 
-echo "-----BEGIN PRIVATE KEY-----
-MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDfMrO8jGIBl6sgbIxm244K7xV0iXH5HSV6+5B8xkJ4QpSYy+JvkQm+4619ayTg9DfHu4BsJcUGgFTLA1BPuM633GIlImEsv1aE/MXQnMUsqmUDzBTxY4zBDiWu4+aIQbwVG8BbUl9i+ITrjTRgjQYPVva/FfTly9iSHCZSeb9yQhn/PynMl7CqN4fGBRx9W4AP2GEN/gKlicfaji/D3j/DHa9QnRiU6I2Z+lOZR4o3kSXXHQGCz5ylzRGdg3bRfIVyjgqUQS4cXRCDS35/cRdCoTmu8UMWVjOaCb4WTGDP6BMcSj91xG95wkBYfu+Hg4VO7+8a+6Yy0lUTKoWNhFRAgMBAAECggEABJi2WBezuvW7fJqhY/4+MEL3JJQv8vBMdJRuiidxJ2KFMnOSv3Vf0yBHCKGzGKHCfBOOTpD7e7n9YfAmNVhIH3C1Kk+d4jJW7Y1v2L1GlmLq1FVSXjgmuoQ39BhzCRNO2m8j6GNrV5HgD+WU6gX9BEkCXImuKoIqVV8VyQDQ5qKfJSdx0K5f8UMCRAQrKdGvYgXqC1YMVKqUBMgdF/Ogt1VqBGaHOZ3fOu8UuwqIgzIKf9z+gX5fCeXD9rlRtfhB1HXJQVjXXRzCcROGJxdGhsqdaQPl1Qhbc6MRh/x5YBzENyrvCR7QWvs3LQBe9JJ6gQbW7vXJU9lP8pXHgQKBgQDz9M0gXzonodbGODU+c6WFCXN7H9ILKLvWz/mrbCgBCbpHfGHHNyuPxJ7qVgxlN9RBuQJOm4CYyXtEsf6Gn7HoYU8owXvdcq+E2cOQYcOT1vQnelJbdcrMV5VBnqCa6S0fhhDXBjKGW5UqKjstmJJV/xNczUtOYJPWtgODbGnz8QKBgQDqJJCvhqSP8GWyqSojuLX2gJfHhIRKcvkHu4s2dQZCsVW1f+HxxcaEznOgTzH2kFEUXXhLRiJ3AqcZUIlTvdyM9NMRvdFJQoO6hRQLJQBWGc3HrMRrRFgjMu1VJjrJWeBz/xfqNhqBL8A4SdcJ1O11yJlSE9pbNPiHsJ7qvVlmUQKBgQCQKJqfCmcGvjZgKmUbiJpQGRQqk/8zr9IKa0WD3+VjJkdbxP/0GlJxLdh0dDdVRJ0eOWaUlCUxfKFLGZzOmCFYNsL/A3CRNwJIRMaKJ/CROJWbz/mN8TcbQqoxyLCaxGdVMsB6mqMCEFYQQ8EgtjYP8wOIaD+D8qRfWkc5XH8T0QKBgAQojJYiPsjxZ4nPXOuJgVNHKfMJhZCON8R5vdD3LJWmUa3Ig3ZU5vRQGLbAo8lWOHihOvOVdBmEy3mbPDOSxJgTQAEJAqGnVYM9xJiYoQ8vKNGNLg3nH8jRzJQxo6Suw8h3SPKWhBRp9yJ3gQkzxMG7/LTm7pZQ6x9fHyBJcn5hAoGAJNlQgxtH3S8Dc77x6gCm8m5BSsOpWOIhc1/eHhtNKoMFdUiS3aaJg72OXvwqtWvX1HOgW4Q5Iy+GNy0uHQ/jOCJoEKtJu3THKGQfzUOOQb1BKCLXiKIMGGVhDiMJJaKRhvR0z7VwetgHABEp7UKJv6QU8J8m8q4VzZhmRMRIkWs=
------END PRIVATE KEY-----" > "$KEY_FILE"
+echo "📋 Configuração:"
+echo "   - URL: $OAUTH_URL"
+echo "   - Client ID: ${INTER_CLIENT_ID:0:10}..."
+echo "   - Ambiente: Sandbox"
+echo ""
 
-# OAuth endpoint
-URL="https://cdpj-sandbox.partners.uatinter.co/oauth/v2/token"
+echo "🔑 Tentando autenticação..."
 
-# Form data
-DATA="client_id=385d7748-a537-4e0b-8c81-b8b28b2c231e&client_secret=9f2f3521-19d8-4638-b61f-da79a04e3563&grant_type=client_credentials&scope=cobv.write+cobv.read"
-
-# Make request with curl
-echo "Making OAuth request..."
-curl -v \
-  --cert "$CERT_FILE" \
-  --key "$KEY_FILE" \
-  --insecure \
-  -X POST \
+# Fazer requisição OAuth sem certificado (teste básico)
+RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "$OAUTH_URL" \
   -H "Content-Type: application/x-www-form-urlencoded" \
-  -H "Accept: application/json" \
-  -d "$DATA" \
-  "$URL"
+  -d "client_id=$INTER_CLIENT_ID" \
+  -d "client_secret=$INTER_CLIENT_SECRET" \
+  -d "grant_type=client_credentials" \
+  -d "scope=cobv.write cobv.read")
 
-# Clean up
-rm -f "$CERT_FILE" "$KEY_FILE"
+HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+BODY=$(echo "$RESPONSE" | sed '$d')
+
+echo ""
+echo "📡 Resposta HTTP: $HTTP_CODE"
+
+if [ "$HTTP_CODE" = "200" ]; then
+    echo "✅ Autenticação bem-sucedida!"
+    echo ""
+    echo "📄 Token recebido:"
+    echo "$BODY" | jq '.'
+else
+    echo "❌ Erro na autenticação"
+    echo ""
+    echo "📄 Resposta do servidor:"
+    echo "$BODY"
+    
+    echo ""
+    echo "💡 Possíveis causas:"
+    echo "   - Credenciais inválidas ou expiradas"
+    echo "   - Certificado mTLS obrigatório"
+    echo "   - Ambiente sandbox indisponível"
+fi
+
+echo ""
+echo "========================================="
+echo "🔍 TESTE ADICIONAL - COM CERTIFICADO"
+echo "========================================="
+echo ""
+
+# Verificar se temos certificado
+if [ -n "$INTER_CERTIFICATE" ] && [ -n "$INTER_PRIVATE_KEY" ]; then
+    echo "✅ Certificado e chave privada encontrados"
+    
+    # Criar arquivos temporários
+    CERT_FILE=$(mktemp)
+    KEY_FILE=$(mktemp)
+    
+    # Escrever certificado e chave
+    echo "$INTER_CERTIFICATE" > "$CERT_FILE"
+    echo "$INTER_PRIVATE_KEY" > "$KEY_FILE"
+    
+    echo "🔐 Tentando com certificado mTLS..."
+    
+    # Fazer requisição com certificado
+    RESPONSE_CERT=$(curl -s -w "\n%{http_code}" -X POST "$OAUTH_URL" \
+      --cert "$CERT_FILE" \
+      --key "$KEY_FILE" \
+      -H "Content-Type: application/x-www-form-urlencoded" \
+      -d "client_id=$INTER_CLIENT_ID" \
+      -d "client_secret=$INTER_CLIENT_SECRET" \
+      -d "grant_type=client_credentials" \
+      -d "scope=cobv.write cobv.read" 2>&1)
+    
+    HTTP_CODE_CERT=$(echo "$RESPONSE_CERT" | tail -n1)
+    
+    echo ""
+    echo "📡 Resposta com mTLS: $HTTP_CODE_CERT"
+    
+    # Limpar arquivos temporários
+    rm -f "$CERT_FILE" "$KEY_FILE"
+    
+    if [[ "$RESPONSE_CERT" == *"SSL"* ]] || [[ "$RESPONSE_CERT" == *"certificate"* ]]; then
+        echo "⚠️  Problema com certificado SSL detectado"
+        echo "💡 O certificado pode estar em formato incorreto ou expirado"
+    fi
+else
+    echo "❌ Certificado ou chave privada não encontrados"
+fi
+
+echo ""
+echo "========================================="
+echo "📊 RESUMO"
+echo "========================================="
+
+if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE_CERT" = "200" ]; then
+    echo "✅ API do Banco Inter está FUNCIONANDO!"
+    echo "✅ Autenticação OAuth 2.0 validada"
+else
+    echo "❌ API do Banco Inter com PROBLEMAS"
+    echo ""
+    echo "🔧 Ações necessárias:"
+    echo "1. Verificar se as credenciais sandbox ainda são válidas"
+    echo "2. Confirmar formato correto do certificado"
+    echo "3. Contatar suporte Banco Inter se problema persistir"
+fi
