@@ -3858,6 +3858,10 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
   const securityScannersRoutes = (await import('./routes/security-scanners.js')).default;
   app.use('/api/security-scanners', securityScannersRoutes);
 
+  // Security API routes (Projeto Cérbero)
+  const securityApiRoutes = (await import('./routes/security-api.js')).default;
+  app.use('/api/security', securityApiRoutes);
+
   const httpServer = createServer(app);
   return httpServer;
 }

@@ -9,7 +9,8 @@ import {
   pgEnum,
   primaryKey,
   varchar,
-  uuid
+  uuid,
+  jsonb
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -426,6 +427,21 @@ export const insertInterWebhookSchema = createInsertSchema(interWebhooks).omit({
 export const insertInterCallbackSchema = createInsertSchema(interCallbacks).omit({
   id: true,
   createdAt: true,
+});
+
+// Security logs table for autonomous monitoring
+export const security_logs = pgTable("security_logs", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  eventType: text("event_type").notNull(),
+  severity: text("severity").notNull(), // LOW, MEDIUM, HIGH, CRITICAL
+  ipAddress: text("ip_address"),
+  userId: uuid("user_id"),
+  userAgent: text("user_agent"),
+  endpoint: text("endpoint"),
+  statusCode: integer("status_code"),
+  success: boolean("success").default(true),
+  details: jsonb("details"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 // TypeScript Types

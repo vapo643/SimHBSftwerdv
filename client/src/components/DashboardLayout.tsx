@@ -82,6 +82,7 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
     
     // Segurança e Compliance
     { name: "🛡️ OWASP Dashboard", href: "/admin/security/owasp", icon: Shield, category: "Segurança" },
+    { name: "🚀 Projeto Cérbero", href: "/admin/security/dashboard", icon: Shield, category: "Segurança" },
   ];
 
   // Build navigation based on user role

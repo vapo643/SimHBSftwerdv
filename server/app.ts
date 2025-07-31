@@ -90,15 +90,8 @@ export async function createApp() {
         error: "Muitas tentativas de autenticação. Tente novamente em 15 minutos.",
         retryAfter: "15 minutos"
       },
-      keyGenerator: (req) => {
-        // Advanced key generation - OWASP ASVS V11.1.1
-        const email = req.body?.email || 'anonymous';
-        const userAgent = req.headers['user-agent'] || 'unknown';
-        const fingerprint = `${req.ip}:${email}:${userAgent}`;
-        // Hash the fingerprint to protect privacy
-        const crypto = require('crypto');
-        return crypto.createHash('sha256').update(fingerprint).digest('hex');
-      },
+      standardHeaders: true,
+      legacyHeaders: false,
       handler: (req, res) => {
         securityLogger.logEvent({
           type: SecurityEventType.BRUTE_FORCE_DETECTED,

@@ -9,6 +9,38 @@ import { registerRoutes } from "./routes";
   // Register routes and get server instance
   const server = await registerRoutes(app);
 
+  // Setup Security WebSocket
+  const { setupSecurityWebSocket } = await import('./lib/security-websocket');
+  const securityWS = setupSecurityWebSocket(server);
+  log('🔐 Security WebSocket initialized');
+
+  // Initialize autonomous security scanners
+  const { getSecurityScanner } = await import('./lib/autonomous-security-scanner');
+  const { getVulnerabilityDetector } = await import('./lib/vulnerability-detector');
+  const { getDependencyScanner } = await import('./lib/dependency-scanner');
+  const { getSemgrepScanner } = await import('./lib/semgrep-scanner');
+  
+  // Start security monitoring if configured
+  if (process.env.ENABLE_SECURITY_MONITORING === 'true') {
+    log('🚀 Starting autonomous security monitoring...');
+    
+    const scanner = getSecurityScanner();
+    scanner.start();
+    
+    const vulnDetector = getVulnerabilityDetector();
+    vulnDetector.start();
+    
+    const depScanner = getDependencyScanner();
+    depScanner.start();
+    
+    const semgrepScanner = getSemgrepScanner();
+    semgrepScanner.start();
+    
+    log('✅ All security scanners started');
+  } else {
+    log('ℹ️  Security monitoring disabled. Set ENABLE_SECURITY_MONITORING=true to enable');
+  }
+
   // Setup Vite or static serving based on environment
   if (app.get("env") === "development") {
     await setupVite(app, server);
