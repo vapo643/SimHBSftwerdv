@@ -3866,6 +3866,10 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
   const cobrancasRoutes = (await import('./routes/cobrancas.js')).default;
   app.use('/api/cobrancas', cobrancasRoutes);
 
+  // Pagamentos routes
+  const pagamentosRoutes = (await import('./routes/pagamentos.js')).default;
+  app.use('/api/financeiro/pagamentos', pagamentosRoutes);
+
   const httpServer = createServer(app);
   return httpServer;
 }

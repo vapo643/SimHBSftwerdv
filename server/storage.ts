@@ -183,7 +183,7 @@ export class DatabaseStorage implements IStorage {
           )
         )
       `)
-      .is('deleted_at', null)  // Filter out soft-deleted records
+      // .is('deleted_at', null)  // Filter out soft-deleted records - coluna não existe ainda
       .order('created_at', { ascending: false });
     
     if (error) {
@@ -264,7 +264,7 @@ export class DatabaseStorage implements IStorage {
         )
       `)
       .eq('id', String(id))
-      .is('deleted_at', null)  // Filter out soft-deleted records
+      // .is('deleted_at', null)  // Filter out soft-deleted records - coluna não existe ainda
       .single();
     
     if (error || !data) {
