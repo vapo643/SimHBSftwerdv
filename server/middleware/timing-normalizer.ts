@@ -28,6 +28,7 @@ class TimingNormalizer {
     this.setConfig('/api/propostas/:id/status', { baselineMs: 30, jitterRange: 5 });
     this.setConfig('/api/auth/*', { baselineMs: 100, jitterRange: 20 });
     this.setConfig('/api/admin/*', { baselineMs: 20, jitterRange: 4 });
+    this.setConfig('/api/test/*', { baselineMs: 25, jitterRange: 5 });  // Test endpoints
     this.setConfig('default', { baselineMs: 15, jitterRange: 3 });
   }
 
@@ -152,7 +153,10 @@ class TimingNormalizer {
     return async (req: Request, res: Response, next: NextFunction) => {
       const config = this.getConfigForEndpoint(req.method, req.path);
       
+      console.log(`🚀 [TIMING MIDDLEWARE] ${req.method} ${req.path} - Config: baseline=${config.baselineMs}ms, jitter=±${config.jitterRange}ms, enabled=${config.enabled}`);
+      
       if (!config.enabled) {
+        console.log(`⏭️ [TIMING MIDDLEWARE] Skipping ${req.path} - disabled`);
         return next();
       }
 
@@ -191,8 +195,10 @@ class TimingNormalizer {
 // Singleton instance
 export const timingNormalizer = new TimingNormalizer();
 
-// Export middleware function
+// Debug: Create middleware instance with logging
+console.log('🚀 [TIMING MIDDLEWARE] Creating middleware instance...');
 export const timingNormalizerMiddleware = timingNormalizer.middleware();
+console.log('🚀 [TIMING MIDDLEWARE] Middleware instance created and exported');
 
 // Export para debugging/monitoring
 export { TimingNormalizer, TimingConfig, TimingMetrics };

@@ -3677,6 +3677,22 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
   // Register Timing Security routes - CRITICAL TIMING ATTACK MITIGATION
   app.use('/api/timing-security', timingSecurityRoutes);
   
+  // 🧪 TEST ENDPOINTS: Timing middleware validation (NO AUTH for testing)
+  app.get("/api/test/timing-valid", (req, res, next) => {
+    console.log('🧪 [TEST ENDPOINT] /api/test/timing-valid hit, applying timing middleware...');
+    timingNormalizerMiddleware(req, res, next);
+  }, async (req, res) => {
+    console.log('🧪 [TEST ENDPOINT] /api/test/timing-valid processing request...');
+    // Simulate database lookup delay for valid ID
+    await new Promise(resolve => setTimeout(resolve, 5));
+    res.json({ message: "Valid test response", timestamp: new Date().toISOString() });
+  });
+
+  app.get("/api/test/timing-invalid", timingNormalizerMiddleware, async (req, res) => {
+    // Immediate response for invalid ID  
+    res.status(404).json({ message: "Invalid test response", timestamp: new Date().toISOString() });
+  });
+  
   // Register Email Change routes - OWASP V6.1.3 Compliance
   app.use('/api/auth', emailChangeRoutes);
 
