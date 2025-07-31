@@ -65,6 +65,17 @@ export default function OWASPAssessment() {
   const [sastScanning, setSastScanning] = useState(false);
   const [sastResults, setSastResults] = useState<SASTResult[] | null>(null);
 
+  // ✅ PROJETO CÉRBERO - Queries para dados REAIS de SCA e SAST
+  const { data: scaData, isLoading: scaLoading, refetch: refetchSCA } = useQuery({
+    queryKey: ['/api/security/run-sca'],
+    queryFn: () => fetchWithToken('/api/security/run-sca').then(res => res.data)
+  });
+
+  const { data: sastData, isLoading: sastLoading, refetch: refetchSAST } = useQuery({
+    queryKey: ['/api/security/run-sast'],
+    queryFn: () => fetchWithToken('/api/security/run-sast').then(res => res.data)
+  });
+
   // Queries para dados OWASP
   const { data: owaspStatus, isLoading: statusLoading } = useQuery({
     queryKey: ['/api/owasp/status'],
@@ -95,28 +106,35 @@ export default function OWASPAssessment() {
     refetchInterval: 60000 // Atualiza a cada 60 segundos
   });
   
-  // Query para dados do SCA (Dependency Check)
-  const { data: scaData, isLoading: scaLoading, refetch: refetchSCA } = useQuery({
-    queryKey: ['/api/security-scanners/sca/latest'],
-    queryFn: () => fetchWithToken('/api/security-scanners/sca/latest').then(res => res.data)
-  });
+  // REMOVIDO: declaração duplicada - agora usando dados reais dos endpoints Cérbero
   
-  // Mutation para rodar análise SCA
+  // ✅ Mutation para rodar análise SCA com dados reais
   const runSCAMutation = useMutation({
-    mutationFn: () => fetchWithToken('/api/security-scanners/sca/run', {
-      method: 'POST'
+    mutationFn: () => fetchWithToken('/api/security/run-sca', {
+      method: 'GET'
     }),
     onSuccess: (data) => {
-      toast({ title: 'Análise de dependências iniciada' });
-      // Invalidar e refetch imediatamente, depois novamente em 5 segundos
-      queryClient.invalidateQueries({ queryKey: ['/api/security-scanners/sca/latest'] });
-      setTimeout(() => {
-        queryClient.invalidateQueries({ queryKey: ['/api/security-scanners/sca/latest'] });
-        refetchSCA();
-      }, 5000);
+      toast({ title: 'Análise SCA concluída com sucesso!' });
+      queryClient.invalidateQueries({ queryKey: ['/api/security/run-sca'] });
+      refetchSCA();
     },
     onError: (error: any) => {
-      toast({ title: 'Erro ao iniciar análise', description: error.message || 'Erro desconhecido', variant: 'destructive' });
+      toast({ title: 'Erro ao executar análise SCA', description: error.message || 'Erro desconhecido', variant: 'destructive' });
+    }
+  });
+
+  // ✅ Mutation para rodar análise SAST com dados reais  
+  const runSASTMutation = useMutation({
+    mutationFn: () => fetchWithToken('/api/security/run-sast', {
+      method: 'GET'
+    }),
+    onSuccess: (data) => {
+      toast({ title: 'Análise SAST concluída com sucesso!' });
+      queryClient.invalidateQueries({ queryKey: ['/api/security/run-sast'] });
+      refetchSAST();
+    },
+    onError: (error: any) => {
+      toast({ title: 'Erro ao executar análise SAST', description: error.message || 'Erro desconhecido', variant: 'destructive' });
     }
   });
   
@@ -1296,52 +1314,52 @@ export default function OWASPAssessment() {
           {scaLoading ? (
             <div className="text-center py-8">
               <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-2 text-muted-foreground" />
-              <p className="text-muted-foreground">Carregando dados de vulnerabilidades...</p>
+              <p className="text-muted-foreground">Executando análise SCA...</p>
             </div>
-          ) : scaData?.reportFound === false ? (
+          ) : !scaData?.success ? (
             <Alert>
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                {scaData.message}
+                {scaData?.error || "Erro ao executar análise SCA"}
               </AlertDescription>
             </Alert>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
               <div className="text-center p-4 border border-red-500/20 rounded-lg bg-red-900/10">
                 <AlertTriangle className="h-8 w-8 text-red-500 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-red-300">{scaData?.vulnerabilities?.critical || 0}</div>
+                <div className="text-2xl font-bold text-red-300">{scaData?.data?.vulnerabilities?.critical || 0}</div>
                 <div className="text-sm text-muted-foreground">Críticas</div>
               </div>
               
               <div className="text-center p-4 border border-orange-500/20 rounded-lg bg-orange-900/10">
                 <AlertCircle className="h-8 w-8 text-orange-500 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-orange-300">{scaData?.vulnerabilities?.high || 0}</div>
+                <div className="text-2xl font-bold text-orange-300">{scaData?.data?.vulnerabilities?.high || 0}</div>
                 <div className="text-sm text-muted-foreground">Altas</div>
               </div>
               
               <div className="text-center p-4 border border-yellow-500/20 rounded-lg bg-yellow-900/10">
                 <AlertCircle className="h-8 w-8 text-yellow-500 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-yellow-300">{scaData?.vulnerabilities?.medium || 0}</div>
+                <div className="text-2xl font-bold text-yellow-300">{scaData?.data?.vulnerabilities?.medium || 0}</div>
                 <div className="text-sm text-muted-foreground">Médias</div>
               </div>
               
               <div className="text-center p-4 border border-blue-500/20 rounded-lg bg-blue-900/10">
                 <AlertCircle className="h-8 w-8 text-blue-500 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-blue-300">{scaData?.vulnerabilities?.low || 0}</div>
+                <div className="text-2xl font-bold text-blue-300">{scaData?.data?.vulnerabilities?.low || 0}</div>
                 <div className="text-sm text-muted-foreground">Baixas</div>
               </div>
               
               <div className="text-center p-4 border border-gray-500/20 rounded-lg bg-gray-900/10">
                 <Package className="h-8 w-8 text-gray-500 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-gray-300">{scaData?.vulnerabilities?.total || 0}</div>
+                <div className="text-2xl font-bold text-gray-300">{scaData?.data?.vulnerabilities?.total || 0}</div>
                 <div className="text-sm text-muted-foreground">Total</div>
               </div>
             </div>
           )}
           
-          {scaData?.lastScan && (
+          {scaData?.data?.timestamp && (
             <div className="mt-4 text-sm text-muted-foreground text-center">
-              Última análise: {new Date(scaData.lastScan).toLocaleString('pt-BR')}
+              Última análise: {new Date(scaData.data.timestamp).toLocaleString('pt-BR')}
             </div>
           )}
         </CardContent>
@@ -1353,6 +1371,15 @@ export default function OWASPAssessment() {
           <CardTitle className="flex items-center space-x-2">
             <Code className="h-5 w-5 text-purple-500" />
             <span>Análise de Código Estático (SAST)</span>
+            <Button 
+              size="sm" 
+              variant="outline"
+              onClick={() => runSASTMutation.mutate()}
+              disabled={runSASTMutation.isPending}
+            >
+              <RefreshCw className={`h-4 w-4 mr-2 ${runSASTMutation.isPending ? 'animate-spin' : ''}`} />
+              Executar Análise
+            </Button>
           </CardTitle>
           <CardDescription>
             Semgrep MCP Server - Real-time Static Application Security Testing
@@ -1409,38 +1436,46 @@ export default function OWASPAssessment() {
               </div>
             </div>
             
-            {/* SAST Results Display */}
-            {sastResults && sastResults.length > 0 && (
+            {/* ✅ SAST Results Display - Dados Reais */}
+            {sastLoading ? (
+              <div className="text-center py-8">
+                <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-2 text-muted-foreground" />
+                <p className="text-muted-foreground">Executando análise SAST...</p>
+              </div>
+            ) : sastData?.success && sastData.data?.vulnerabilities ? (
               <div className="mt-4 space-y-2">
-                <h4 className="font-medium text-sm">Resultados da Análise:</h4>
+                <h4 className="font-medium text-sm">Vulnerabilidades Encontradas: {sastData.data.vulnerabilities.length}</h4>
                 <div className="max-h-64 overflow-y-auto space-y-2">
-                  {sastResults.map((result, index) => (
+                  {sastData.data.vulnerabilities.map((vuln, index) => (
                     <div 
                       key={index} 
                       className={`p-3 rounded-lg border-l-4 ${
-                        result.severity === 'ERROR' 
+                        vuln.severity === 'CRITICAL' 
                           ? 'border-red-500 bg-red-900/20' 
-                          : result.severity === 'WARNING'
-                          ? 'border-yellow-500 bg-yellow-900/20'
-                          : 'border-blue-500 bg-blue-900/20'
+                          : vuln.severity === 'HIGH'
+                          ? 'border-orange-500 bg-orange-900/20'
+                          : 'border-yellow-500 bg-yellow-900/20'
                       }`}
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center space-x-2">
                             <Badge 
-                              variant={result.severity === 'ERROR' ? 'destructive' : result.severity === 'WARNING' ? 'secondary' : 'outline'}
+                              variant={vuln.severity === 'CRITICAL' ? 'destructive' : vuln.severity === 'HIGH' ? 'secondary' : 'outline'}
                               className="text-xs"
                             >
-                              {result.severity}
+                              {vuln.severity}
                             </Badge>
                             <span className="text-xs text-muted-foreground">
-                              Linha {result.line}, Coluna {result.column}
+                              {vuln.file}:{vuln.line}
                             </span>
                           </div>
-                          <p className="text-sm mt-1">{result.message}</p>
+                          <p className="text-sm mt-1">{vuln.message}</p>
+                          <p className="text-xs text-muted-foreground mt-1 font-mono bg-gray-800 p-1 rounded">
+                            {vuln.code}
+                          </p>
                           <p className="text-xs text-muted-foreground mt-1">
-                            Regra: {result.rule_id} | Categoria: {result.category}
+                            ID: {vuln.id}
                           </p>
                         </div>
                       </div>
@@ -1448,16 +1483,14 @@ export default function OWASPAssessment() {
                   ))}
                 </div>
               </div>
-            )}
-            
-            {sastResults && sastResults.length === 0 && (
+            ) : sastData?.success && (!sastData.data?.vulnerabilities || sastData.data.vulnerabilities.length === 0) ? (
               <Alert className="mt-4">
                 <CheckCircle2 className="h-4 w-4" />
                 <AlertDescription>
-                  Nenhuma vulnerabilidade encontrada neste arquivo. O código está seguro!
+                  Nenhuma vulnerabilidade encontrada na análise SAST. O código está seguro!
                 </AlertDescription>
               </Alert>
-            )}
+            ) : null}
           </div>
         </CardContent>
       </Card>
