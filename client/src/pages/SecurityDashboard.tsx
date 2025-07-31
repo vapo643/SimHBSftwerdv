@@ -22,6 +22,7 @@ import {
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Shield,
   AlertTriangle,
@@ -64,6 +65,24 @@ interface SecurityMetrics {
   averageResponseTime: number;
   errorRate: number;
   anomalyScore: number;
+  blockedIPs: number;
+  trend: Array<{
+    time: string;
+    securityScore: number;
+    threats: number;
+  }>;
+  attacks?: {
+    sql: number;
+    xss: number;
+    bruteforce: number;
+    pathTraversal: number;
+  };
+  blocked?: {
+    sql: number;
+    xss: number;
+    bruteforce: number;
+    pathTraversal: number;
+  };
 }
 
 interface VulnerabilityReport {
@@ -97,27 +116,27 @@ export default function SecurityDashboard() {
   const [autoRefresh, setAutoRefresh] = useState(true);
   
   // Dados em tempo real
-  const { data: metrics } = useQuery({
+  const { data: metrics, isLoading: metricsLoading } = useQuery<SecurityMetrics>({
     queryKey: ['/api/security/metrics', selectedTimeRange],
     refetchInterval: autoRefresh ? 10000 : false, // 10 segundos
   });
   
-  const { data: vulnerabilities } = useQuery({
+  const { data: vulnerabilities, isLoading: vulnerabilitiesLoading } = useQuery<VulnerabilityReport[]>({
     queryKey: ['/api/security/vulnerabilities'],
     refetchInterval: autoRefresh ? 30000 : false, // 30 segundos
   });
   
-  const { data: anomalies } = useQuery({
+  const { data: anomalies, isLoading: anomaliesLoading } = useQuery<AnomalyDetection[]>({
     queryKey: ['/api/security/anomalies'],
     refetchInterval: autoRefresh ? 10000 : false,
   });
   
-  const { data: dependencyScans } = useQuery({
+  const { data: dependencyScans, isLoading: dependencyLoading } = useQuery({
     queryKey: ['/api/security/dependency-scan'],
     refetchInterval: autoRefresh ? 300000 : false, // 5 minutos
   });
   
-  const { data: semgrepFindings } = useQuery({
+  const { data: semgrepFindings, isLoading: semgrepLoading } = useQuery({
     queryKey: ['/api/security/semgrep-findings'],
     refetchInterval: autoRefresh ? 60000 : false, // 1 minuto
   });
@@ -255,31 +274,42 @@ export default function SecurityDashboard() {
       
       {/* Estatísticas Rápidas */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <StatsCard
-          title="Vulnerabilidades"
-          value={stats.totalVulnerabilities}
-          icon={<Bug className="h-8 w-8" />}
-          trend={-15}
-          critical={stats.criticalVulnerabilities}
-        />
-        <StatsCard
-          title="Anomalias/Hora"
-          value={stats.recentAnomalies}
-          icon={<AlertTriangle className="h-8 w-8" />}
-          trend={25}
-        />
-        <StatsCard
-          title="IPs Bloqueados"
-          value={metrics?.blockedIPs || 0}
-          icon={<Lock className="h-8 w-8" />}
-          trend={10}
-        />
-        <StatsCard
-          title="Taxa de Erro"
-          value={`${(metrics?.errorRate || 0).toFixed(2)}%`}
-          icon={<XCircle className="h-8 w-8" />}
-          trend={-5}
-        />
+        {metricsLoading ? (
+          <>
+            <Skeleton className="h-32 w-full" />
+            <Skeleton className="h-32 w-full" />
+            <Skeleton className="h-32 w-full" />
+            <Skeleton className="h-32 w-full" />
+          </>
+        ) : (
+          <>
+            <StatsCard
+              title="Vulnerabilidades"
+              value={stats.totalVulnerabilities}
+              icon={<Bug className="h-8 w-8" />}
+              trend={-15}
+              critical={stats.criticalVulnerabilities}
+            />
+            <StatsCard
+              title="Anomalias/Hora"
+              value={stats.recentAnomalies}
+              icon={<AlertTriangle className="h-8 w-8" />}
+              trend={25}
+            />
+            <StatsCard
+              title="IPs Bloqueados"
+              value={metrics?.blockedIPs || 0}
+              icon={<Lock className="h-8 w-8" />}
+              trend={10}
+            />
+            <StatsCard
+              title="Taxa de Erro"
+              value={`${(metrics?.errorRate || 0).toFixed(2)}%`}
+              icon={<XCircle className="h-8 w-8" />}
+              trend={-5}
+            />
+          </>
+        )}
       </div>
       
       {/* Alertas Críticos */}
@@ -314,23 +344,43 @@ export default function SecurityDashboard() {
         </TabsList>
         
         <TabsContent value="vulnerabilities" className="space-y-4">
-          <VulnerabilitiesPanel vulnerabilities={vulnerabilities} />
+          {vulnerabilitiesLoading ? (
+            <Skeleton className="h-64 w-full" />
+          ) : (
+            <VulnerabilitiesPanel vulnerabilities={vulnerabilities} />
+          )}
         </TabsContent>
         
         <TabsContent value="anomalies" className="space-y-4">
-          <AnomaliesPanel anomalies={anomalies} />
+          {anomaliesLoading ? (
+            <Skeleton className="h-64 w-full" />
+          ) : (
+            <AnomaliesPanel anomalies={anomalies} />
+          )}
         </TabsContent>
         
         <TabsContent value="attacks" className="space-y-4">
-          <AttacksPanel metrics={metrics} />
+          {metricsLoading ? (
+            <Skeleton className="h-64 w-full" />
+          ) : (
+            <AttacksPanel metrics={metrics} />
+          )}
         </TabsContent>
         
         <TabsContent value="dependencies" className="space-y-4">
-          <DependenciesPanel scans={dependencyScans} />
+          {dependencyLoading ? (
+            <Skeleton className="h-64 w-full" />
+          ) : (
+            <DependenciesPanel scans={dependencyScans} />
+          )}
         </TabsContent>
         
         <TabsContent value="code" className="space-y-4">
-          <CodeAnalysisPanel findings={semgrepFindings} />
+          {semgrepLoading ? (
+            <Skeleton className="h-64 w-full" />
+          ) : (
+            <CodeAnalysisPanel findings={semgrepFindings} />
+          )}
         </TabsContent>
       </Tabs>
       
