@@ -15,36 +15,49 @@ import { interBankService } from './interBankService.js';
 import { getBrasiliaTimestamp } from '../lib/timezone.js';
 
 interface WebhookEvent {
-  event: string;
-  data: {
-    document?: {
-      key: string;
-      status: string;
-      finished_at?: string;
+  event: {
+    type: string;
+    created_at: string;
+    data: {
+      envelope?: {
+        id: string;
+        name: string;
+        status: string;
+        created_at: string;
+        updated_at: string;
+        finished_at?: string;
+        documents?: Array<{
+          id: string;
+          filename: string;
+          signed_at?: string;
+        }>;
+        signers?: Array<{
+          id: string;
+          name: string;
+          email: string;
+          signed_at?: string;
+          refused_at?: string;
+        }>;
+      };
+      document?: {
+        id: string;
+        envelope_id: string;
+        filename: string;
+        status: string;
+      };
+      signer?: {
+        id: string;
+        envelope_id: string;
+        name: string;
+        email: string;
+        documentation: string;
+        sign_at?: string;
+        refuse_at?: string;
+        view_at?: string;
+      };
     };
-    list?: {
-      key: string;
-      status: string;
-    };
-    signer?: {
-      key: string;
-      email: string;
-      name: string;
-      documentation: string;
-      sign_at?: string;
-      reject_at?: string;
-      viewed_at?: string;
-    };
-    user?: {
-      email: string;
-      name: string;
-    };
-    account?: {
-      key: string;
-    };
-    message?: string;
   };
-  occurred_at: string;
+  hmac?: string;
 }
 
 interface WebhookSecurityHeaders {

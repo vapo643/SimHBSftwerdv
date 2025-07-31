@@ -79,5 +79,10 @@ Production Timeline: Software to be deployed at Eleeve loan stores by next week 
 - **OWASP ZAP**: Dynamic Application Security Testing (DAST).
 - **Semgrep**: Static Application Security Testing (SAST).
 - **OWASP Dependency-Check**: Software Composition Analysis (SCA).
-- **ClickSign**: For electronic signature integration - ✅ PRODUCTION READY (API configured, CCB workflow active)
+- **ClickSign**: For electronic signature integration - ✅ PRODUCTION READY (API v3 mastered, webhooks implemented, full documentation)
+  - Complete webhook system with HMAC validation, timestamp validation, and event deduplication
+  - Automatic workflow: CCB signature → boleto generation via Inter Bank
+  - API v3 implementation ready (Envelopes instead of Lists)
+  - Critical points documented: CPF formatting, rate limits, flow order, HMAC validation
+  - 130 API endpoints fully documented and understood
 - **Banco Inter API**: For automated boleto/PIX payment generation and tracking - ✅ PRODUCTION READY (mTLS configured, full workflow active)
