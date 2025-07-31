@@ -15,6 +15,8 @@ import emailChangeRoutes from "./routes/email-change";
 import { getBrasiliaDate, formatBrazilianDateTime, generateApprovalDate, getBrasiliaTimestamp } from "./lib/timezone";
 import { securityLogger, SecurityEventType, getClientIP } from './lib/security-logger';
 import { passwordSchema, validatePassword } from "./lib/password-validator";
+import { timingNormalizerMiddleware } from "./middleware/timing-normalizer";
+import timingSecurityRoutes from "./routes/timing-security";
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -637,7 +639,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // NEW ENDPOINT: PUT /api/propostas/:id/status - ANALYST WORKFLOW ENGINE
-  app.put("/api/propostas/:id/status", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+  app.put("/api/propostas/:id/status", jwtAuthMiddleware, timingNormalizerMiddleware, async (req: AuthenticatedRequest, res) => {
     // Dynamic role validation based on the status change requested
     const { status } = req.body;
     const userRole = req.user?.role;
@@ -1088,7 +1090,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/propostas/:id", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+  app.get("/api/propostas/:id", jwtAuthMiddleware, timingNormalizerMiddleware, async (req: AuthenticatedRequest, res) => {
     try {
       const idParam = req.params.id;
       const user = req.user;
@@ -2486,7 +2488,7 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
   });
 
   // API endpoint for partners - GET by ID
-  app.get("/api/parceiros/:id", async (req, res) => {
+  app.get("/api/parceiros/:id", timingNormalizerMiddleware, async (req, res) => {
     try {
       const { db } = await import("../server/lib/supabase");
       const { parceiros } = await import("../shared/schema");
@@ -3411,7 +3413,7 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
   });
 
   // GET loja by ID
-  app.get("/api/lojas/:id", async (req, res) => {
+  app.get("/api/lojas/:id", timingNormalizerMiddleware, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
@@ -3671,6 +3673,9 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
   // Registrar rotas de monitoramento de segurança em tempo real
   const { securityMonitoringRouter } = await import('./routes/security-monitoring.js');
   app.use('/api/security-monitoring', securityMonitoringRouter);
+  
+  // Register Timing Security routes - CRITICAL TIMING ATTACK MITIGATION
+  app.use('/api/timing-security', timingSecurityRoutes);
   
   // Register Email Change routes - OWASP V6.1.3 Compliance
   app.use('/api/auth', emailChangeRoutes);
