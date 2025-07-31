@@ -7,6 +7,7 @@
  */
 
 import { getBrasiliaTimestamp } from '../lib/timezone.js';
+import { clickSignSecurityService } from './clickSignSecurityService.js';
 
 interface ClickSignV3Config {
   apiUrl: string;
@@ -302,6 +303,16 @@ class ClickSignServiceV3 {
     }
   ) {
     try {
+      // Validate and sanitize client data
+      const validatedClientData = clickSignSecurityService.validateClientData(clientData);
+      
+      // Create audit log for signature request
+      const auditLog = clickSignSecurityService.createAuditLog(
+        'CLICKSIGN_V3_SEND_CCB',
+        { proposalId, clientEmail: validatedClientData.email }
+      );
+      console.log('[CLICKSIGN V3 AUDIT]', auditLog);
+
       console.log(`[CLICKSIGN V3] 🚀 Starting CCB signature flow for proposal: ${proposalId}`);
 
       // 1. Create envelope

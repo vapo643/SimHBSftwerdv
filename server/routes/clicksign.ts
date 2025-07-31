@@ -6,6 +6,7 @@
 import express from 'express';
 import { clickSignService } from '../services/clickSignService.js';
 import { clickSignWebhookService } from '../services/clickSignWebhookService.js';
+import { clickSignSecurityService } from '../services/clickSignSecurityService.js';
 import { interBankService } from '../services/interBankService.js';
 import { storage } from '../storage.js';
 import { jwtAuthMiddleware, type AuthenticatedRequest } from '../lib/jwt-auth-middleware.js';
@@ -17,7 +18,7 @@ const router = express.Router();
  * Send CCB to ClickSign for electronic signature
  * POST /api/clicksign/send-ccb/:propostaId
  */
-router.post('/send-ccb/:propostaId', jwtAuthMiddleware, async (req, res) => {
+router.post('/send-ccb/:propostaId', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const { propostaId } = req.params;
     
@@ -60,26 +61,45 @@ router.post('/send-ccb/:propostaId', jwtAuthMiddleware, async (req, res) => {
     }
     const ccbBuffer = Buffer.from(await ccbResponse.arrayBuffer());
 
-    // 3. Prepare client data
+    // 3. Prepare and validate client data with security
     const clienteData = JSON.parse(proposta.clienteData || '{}');
-    const clientData = {
+    const rawClientData = {
       name: clienteData.nomeCompleto || proposta.clienteNome,
       email: clienteData.email || proposta.clienteEmail,
       cpf: clienteData.cpf || proposta.clienteCpf,
       phone: clienteData.telefone || proposta.clienteTelefone
     };
 
-    // Validate required client data
-    if (!clientData.name || !clientData.email || !clientData.cpf) {
+    // Validate and sanitize client data
+    let clientData;
+    try {
+      clientData = clickSignSecurityService.validateClientData(rawClientData);
+    } catch (error) {
+      console.error('[CLICKSIGN SECURITY] Client data validation failed:', error);
       return res.status(400).json({ 
-        error: 'Dados do cliente incompletos para envio ao ClickSign',
-        missingFields: {
-          name: !clientData.name,
-          email: !clientData.email,
-          cpf: !clientData.cpf
-        }
+        error: 'Dados do cliente inválidos',
+        details: (error as Error).message
       });
     }
+
+    // Validate PDF security
+    try {
+      clickSignSecurityService.validatePDF(ccbBuffer, filename);
+    } catch (error) {
+      console.error('[CLICKSIGN SECURITY] PDF validation failed:', error);
+      return res.status(400).json({ 
+        error: 'Arquivo PDF inválido',
+        details: (error as Error).message
+      });
+    }
+
+    // Create audit log
+    const auditLog = clickSignSecurityService.createAuditLog(
+      'CLICKSIGN_SEND_CCB',
+      { proposalId: propostaId, clientEmail: clientData.email },
+      req.user?.id
+    );
+    console.log('[CLICKSIGN AUDIT]', auditLog);
 
     // 4. Send to ClickSign
     const filename = `CCB-${propostaId}-${Date.now()}.pdf`;
@@ -182,14 +202,35 @@ router.get('/status/:propostaId', jwtAuthMiddleware, async (req, res) => {
  */
 router.post('/webhook', async (req, res) => {
   try {
-    console.log(`[CLICKSIGN WEBHOOK] Received notification:`, {
-      headers: {
-        'x-clicksign-signature': req.headers['x-clicksign-signature'],
-        'x-clicksign-timestamp': req.headers['x-clicksign-timestamp'],
-        'x-clicksign-event': req.headers['x-clicksign-event']
-      },
-      body: req.body
-    });
+    // Security: IP validation and rate limiting
+    const clientIP = req.ip || req.connection.remoteAddress || '';
+    
+    if (!clickSignSecurityService.validateWebhookIP(clientIP)) {
+      console.error('[CLICKSIGN WEBHOOK] Blocked request from unauthorized IP:', clientIP);
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+
+    if (!clickSignSecurityService.checkWebhookRateLimit(clientIP)) {
+      console.error('[CLICKSIGN WEBHOOK] Rate limit exceeded for IP:', clientIP);
+      return res.status(429).json({ error: 'Too many requests' });
+    }
+
+    // Security: Validate event structure
+    let validatedEvent;
+    try {
+      validatedEvent = clickSignSecurityService.validateWebhookEvent(req.body);
+    } catch (error) {
+      console.error('[CLICKSIGN WEBHOOK] Invalid event structure:', error);
+      return res.status(400).json({ error: 'Invalid webhook format' });
+    }
+
+    // Security: Log sanitized event
+    const auditLog = clickSignSecurityService.createAuditLog(
+      'CLICKSIGN_WEBHOOK_RECEIVED',
+      validatedEvent,
+      'webhook'
+    );
+    console.log('[CLICKSIGN WEBHOOK AUDIT]', auditLog);
 
     // Validate signature if secret is configured
     const signature = req.headers['x-clicksign-signature'] as string;
