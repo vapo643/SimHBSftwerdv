@@ -563,7 +563,7 @@ export class OwaspCheatSheetService {
         {
           id: 'pwd-store-01',
           cheatSheetName: 'Password Storage',
-          category: 'crypto',
+          category: 'cryptography',
           priority: 'critical',
           title: 'Use Argon2id for Password Hashing',
           description: 'Argon2id with minimum 19 MiB memory, 2 iterations, 1 parallelism',
@@ -576,7 +576,7 @@ export class OwaspCheatSheetService {
         {
           id: 'pwd-store-02',
           cheatSheetName: 'Password Storage',
-          category: 'crypto',
+          category: 'cryptography',
           priority: 'high',
           title: 'Password Pepper Implementation',
           description: 'Additional layer of protection using peppers stored separately',
@@ -589,7 +589,7 @@ export class OwaspCheatSheetService {
         {
           id: 'pwd-store-03',
           cheatSheetName: 'Password Storage',
-          category: 'crypto',
+          category: 'cryptography',
           priority: 'medium',
           title: 'Work Factor Upgrading',
           description: 'Automatically upgrade password work factors over time',
@@ -612,7 +612,7 @@ export class OwaspCheatSheetService {
         {
           id: 'log-01',
           cheatSheetName: 'Logging',
-          category: 'logging',
+          category: 'monitoring',
           priority: 'critical',
           title: 'Security Event Logging',
           description: 'Log authentication, authorization, input validation, and security events',
@@ -625,7 +625,7 @@ export class OwaspCheatSheetService {
         {
           id: 'log-02',
           cheatSheetName: 'Logging',
-          category: 'logging',
+          category: 'monitoring',
           priority: 'high',
           title: 'Log Data Protection',
           description: 'Secure storage, access controls, and tamper protection for logs',
@@ -638,7 +638,7 @@ export class OwaspCheatSheetService {
         {
           id: 'log-03',
           cheatSheetName: 'Logging',
-          category: 'logging',
+          category: 'monitoring',
           priority: 'medium',
           title: 'Log Format Standardization',
           description: 'Use standard formats like CEF or CLFS for log integration',
@@ -710,7 +710,7 @@ export class OwaspCheatSheetService {
         {
           id: 'crypto-01',
           cheatSheetName: 'Cryptographic Storage',
-          category: 'crypto',
+          category: 'cryptography',
           priority: 'critical',
           title: 'AES-256 Encryption for Data at Rest',
           description: 'Use AES-256 with secure modes (GCM/CCM) for encrypting sensitive data',
@@ -723,7 +723,7 @@ export class OwaspCheatSheetService {
         {
           id: 'crypto-02',
           cheatSheetName: 'Cryptographic Storage',
-          category: 'crypto',
+          category: 'cryptography',
           priority: 'high',
           title: 'Key Management Best Practices',
           description: 'Implement proper key generation, rotation, and storage practices',
@@ -736,7 +736,7 @@ export class OwaspCheatSheetService {
         {
           id: 'crypto-03',
           cheatSheetName: 'Cryptographic Storage',
-          category: 'crypto',
+          category: 'cryptography',
           priority: 'medium',
           title: 'Secure Random Number Generation',
           description: 'Use CSPRNG for all security-critical random number generation',
@@ -759,7 +759,7 @@ export class OwaspCheatSheetService {
         {
           id: 'secrets-01',
           cheatSheetName: 'Secrets Management',
-          category: 'infrastructure',
+          category: 'configuration',
           priority: 'critical',
           title: 'Centralized Secrets Management',
           description: 'Use centralized secrets management system instead of hardcoded secrets',
@@ -772,7 +772,7 @@ export class OwaspCheatSheetService {
         {
           id: 'secrets-02',
           cheatSheetName: 'Secrets Management',
-          category: 'infrastructure',
+          category: 'configuration',
           priority: 'high',
           title: 'Secrets Rotation and Lifecycle',
           description: 'Implement automated secrets rotation and proper lifecycle management',
@@ -785,7 +785,7 @@ export class OwaspCheatSheetService {
         {
           id: 'secrets-03',
           cheatSheetName: 'Secrets Management',
-          category: 'infrastructure',
+          category: 'configuration',
           priority: 'medium',
           title: 'Secrets Auditing and Monitoring',
           description: 'Log and monitor all secrets access and usage patterns',
@@ -808,7 +808,7 @@ export class OwaspCheatSheetService {
         {
           id: 'tls-01',
           cheatSheetName: 'Transport Layer Security',
-          category: 'other',
+          category: 'communication',
           priority: 'critical',
           title: 'TLS 1.3 Only Configuration',
           description: 'Configure servers to use only TLS 1.3 (or TLS 1.2 minimum)',
@@ -821,7 +821,7 @@ export class OwaspCheatSheetService {
         {
           id: 'tls-02',
           cheatSheetName: 'Transport Layer Security',
-          category: 'other',
+          category: 'communication',
           priority: 'high',
           title: 'Strong Cipher Suites',
           description: 'Use only strong cipher suites and disable weak ciphers',
@@ -834,7 +834,7 @@ export class OwaspCheatSheetService {
         {
           id: 'tls-03',
           cheatSheetName: 'Transport Layer Security',
-          category: 'other',
+          category: 'communication',
           priority: 'medium',
           title: 'HSTS Implementation',
           description: 'Implement HTTP Strict Transport Security headers',
@@ -1004,7 +1004,7 @@ export class OwaspCheatSheetService {
         {
           id: 'authz-01',
           cheatSheetName: 'Authorization',
-          category: 'authorization',
+          category: 'access_control',
           priority: 'critical',
           title: 'Enforce Least Privileges',
           description: 'Apply principle of least privilege both horizontally and vertically',
@@ -1017,7 +1017,7 @@ export class OwaspCheatSheetService {
         {
           id: 'authz-02',
           cheatSheetName: 'Authorization',
-          category: 'authorization',
+          category: 'access_control',
           priority: 'critical',
           title: 'Deny by Default',
           description: 'Configure application to deny access by default when no rules match',
@@ -1030,7 +1030,7 @@ export class OwaspCheatSheetService {
         {
           id: 'authz-03',
           cheatSheetName: 'Authorization',
-          category: 'authorization',
+          category: 'access_control',
           priority: 'critical',
           title: 'Validate Permissions on Every Request',
           description: 'Check permissions on every request using middleware or filters',
@@ -1373,7 +1373,7 @@ export class OwaspCheatSheetService {
         {
           id: 'logging-01',
           cheatSheetName: 'Logging',
-          category: 'logging',
+          category: 'monitoring',
           priority: 'high',
           title: 'Security Event Logging',
           description: 'Log authentication successes, failures, and authorization events',
@@ -1386,7 +1386,7 @@ export class OwaspCheatSheetService {
         {
           id: 'logging-02',
           cheatSheetName: 'Logging',
-          category: 'logging',
+          category: 'monitoring',
           priority: 'high',
           title: 'Input/Output Validation Failures',
           description: 'Log all input validation failures and output encoding issues',
@@ -1399,7 +1399,7 @@ export class OwaspCheatSheetService {
         {
           id: 'logging-03',
           cheatSheetName: 'Logging',
-          category: 'logging',
+          category: 'monitoring',
           priority: 'medium',
           title: 'Log Data Protection',
           description: 'Store logs securely with appropriate access controls and retention',
@@ -1412,7 +1412,7 @@ export class OwaspCheatSheetService {
         {
           id: 'logging-04',
           cheatSheetName: 'Logging',
-          category: 'logging',
+          category: 'monitoring',
           priority: 'high',
           title: 'Comprehensive Event Attributes',
           description: 'Include when, where, who, and what for each security event',
@@ -1478,7 +1478,7 @@ export class OwaspCheatSheetService {
           priority: 'high',
           title: 'Attribute-Based Access Control',
           description: 'Consider ABAC over simple RBAC for complex authorization requirements',
-          currentStatus: 'partial',
+          currentStatus: 'partially_implemented',
           recommendation: 'Current RBAC system could benefit from attribute-based enhancements',
           implementation: 'Current: Role-based only. Enhancement: Add user attributes and context-aware policies',
           avsvMapping: ['V4.2.1'],
@@ -1497,7 +1497,7 @@ export class OwaspCheatSheetService {
         {
           id: 'tls-01',
           cheatSheetName: 'Transport Layer Security',
-          category: 'crypto',
+          category: 'encryption',
           priority: 'critical',
           title: 'Strong TLS Protocol Support',
           description: 'Support only TLS 1.3 with TLS 1.2 fallback, disable legacy protocols',
@@ -1510,7 +1510,7 @@ export class OwaspCheatSheetService {
         {
           id: 'tls-02',
           cheatSheetName: 'Transport Layer Security',
-          category: 'crypto',
+          category: 'encryption',
           priority: 'high',
           title: 'Strong Cipher Suites',
           description: 'Use only strong cipher suites, disable weak and export ciphers',
@@ -1523,7 +1523,7 @@ export class OwaspCheatSheetService {
         {
           id: 'tls-03',
           cheatSheetName: 'Transport Layer Security',
-          category: 'crypto',
+          category: 'encryption',
           priority: 'high',
           title: 'Certificate Validation',
           description: 'Use proper certificate validation with correct domain names and strong keys',
@@ -1536,7 +1536,7 @@ export class OwaspCheatSheetService {
         {
           id: 'tls-04',
           cheatSheetName: 'Transport Layer Security',
-          category: 'crypto',
+          category: 'encryption',
           priority: 'medium',
           title: 'TLS Compression Disable',
           description: 'Disable TLS compression to prevent CRIME attack vulnerabilities',
@@ -1559,7 +1559,7 @@ export class OwaspCheatSheetService {
         {
           id: 'error-01',
           cheatSheetName: 'Error Handling',
-          category: 'other',
+          category: 'information_disclosure',
           priority: 'high',
           title: 'Generic Error Messages',
           description: 'Return generic error messages to prevent information disclosure to attackers',
@@ -1572,7 +1572,7 @@ export class OwaspCheatSheetService {
         {
           id: 'error-02',
           cheatSheetName: 'Error Handling',
-          category: 'other',
+          category: 'information_disclosure',
           priority: 'high',
           title: 'Server-Side Error Logging',
           description: 'Log detailed error information server-side while returning generic client responses',
@@ -1585,7 +1585,7 @@ export class OwaspCheatSheetService {
         {
           id: 'error-03',
           cheatSheetName: 'Error Handling',
-          category: 'other',
+          category: 'information_disclosure',
           priority: 'medium',
           title: 'Error Response Headers',
           description: 'Use appropriate HTTP status codes and headers for error responses',
@@ -1657,7 +1657,7 @@ export class OwaspCheatSheetService {
         {
           id: 'xss-01',
           cheatSheetName: 'Cross Site Scripting Prevention',
-          category: 'web',
+          category: 'output_encoding',
           priority: 'critical',
           title: 'Output Encoding for HTML Context',
           description: 'Properly encode data when inserting into HTML context',
@@ -1670,7 +1670,7 @@ export class OwaspCheatSheetService {
         {
           id: 'xss-02',
           cheatSheetName: 'Cross Site Scripting Prevention',
-          category: 'web',
+          category: 'content_security_policy',
           priority: 'critical',
           title: 'Content Security Policy Implementation',
           description: 'Implement strict CSP to prevent XSS attack execution',
@@ -1683,7 +1683,7 @@ export class OwaspCheatSheetService {
         {
           id: 'xss-03',
           cheatSheetName: 'Cross Site Scripting Prevention',
-          category: 'input_validation',
+          category: 'input_sanitization',
           priority: 'high',
           title: 'Input Sanitization for Rich Content',
           description: 'Sanitize HTML input when rich content is required',
@@ -1696,7 +1696,7 @@ export class OwaspCheatSheetService {
         {
           id: 'xss-04',
           cheatSheetName: 'Cross Site Scripting Prevention',
-          category: 'web',
+          category: 'framework_security',
           priority: 'high',
           title: 'Framework Security Features',
           description: 'Leverage React security features and avoid dangerous patterns',
@@ -1781,11 +1781,11 @@ export class OwaspCheatSheetService {
         {
           id: 'crypto-01',
           cheatSheetName: 'Cryptographic Storage',
-          category: 'crypto',
+          category: 'encryption',
           priority: 'critical',
           title: 'Use AES-256 for Symmetric Encryption',
           description: 'Use AES-256 with secure modes like GCM for data encryption',
-          currentStatus: 'partial',
+          currentStatus: 'partially_implemented',
           recommendation: 'Current system should implement AES-256-GCM for sensitive data encryption',
           implementation: 'Enhancement needed: Implement AES-256-GCM for encrypting sensitive financial data',
           avsvMapping: ['V6.2.1', 'V6.2.3'],
@@ -1794,7 +1794,7 @@ export class OwaspCheatSheetService {
         {
           id: 'crypto-02',
           cheatSheetName: 'Cryptographic Storage',
-          category: 'crypto',
+          category: 'key_management',
           priority: 'critical',
           title: 'Secure Key Management',
           description: 'Implement proper key generation, storage, and rotation procedures',
@@ -1807,7 +1807,7 @@ export class OwaspCheatSheetService {
         {
           id: 'crypto-03',
           cheatSheetName: 'Cryptographic Storage',
-          category: 'crypto',
+          category: 'random_generation',
           priority: 'high',
           title: 'Cryptographically Secure Random Number Generation',
           description: 'Use CSPRNG for all security-critical random values',
@@ -1820,7 +1820,7 @@ export class OwaspCheatSheetService {
         {
           id: 'crypto-04',
           cheatSheetName: 'Cryptographic Storage',
-          category: 'crypto',
+          category: 'data_protection',
           priority: 'high',
           title: 'Minimize Storage of Sensitive Information',
           description: 'Avoid storing sensitive information when possible',
@@ -1856,7 +1856,7 @@ export class OwaspCheatSheetService {
         {
           id: 'rest-02',
           cheatSheetName: 'REST Security',
-          category: 'authorization',
+          category: 'access_control',
           priority: 'critical',
           title: 'JWT Token Validation',
           description: 'Properly validate JWT tokens with signature verification',
@@ -1892,7 +1892,7 @@ export class OwaspCheatSheetService {
         {
           id: 'db-01',
           cheatSheetName: 'Database Security',
-          category: 'infrastructure',
+          category: 'database_security',
           priority: 'critical',
           title: 'Encrypted Database Connections',
           description: 'Use TLS encryption for all database connections',
@@ -1905,7 +1905,7 @@ export class OwaspCheatSheetService {
         {
           id: 'db-02',
           cheatSheetName: 'Database Security',
-          category: 'authorization',
+          category: 'access_control',
           priority: 'critical',
           title: 'Principle of Least Privilege',
           description: 'Database accounts should have minimal required permissions',
@@ -1918,7 +1918,7 @@ export class OwaspCheatSheetService {
         {
           id: 'db-03',
           cheatSheetName: 'Database Security',
-          category: 'infrastructure',
+          category: 'database_security',
           priority: 'high',
           title: 'Row Level Security',
           description: 'Implement row-level security for multi-tenant data isolation',
@@ -1941,7 +1941,7 @@ export class OwaspCheatSheetService {
         {
           id: 'upload-01',
           cheatSheetName: 'File Upload Security',
-          category: 'api_security',
+          category: 'file_security',
           priority: 'critical',
           title: 'File Type Validation',
           description: 'Validate file types and extensions with allow-list approach',
@@ -1954,7 +1954,7 @@ export class OwaspCheatSheetService {
         {
           id: 'upload-02',
           cheatSheetName: 'File Upload Security',
-          category: 'api_security',
+          category: 'file_security',
           priority: 'critical',
           title: 'File Storage Outside Webroot',
           description: 'Store uploaded files outside web-accessible directories',
@@ -1967,7 +1967,7 @@ export class OwaspCheatSheetService {
         {
           id: 'upload-03',
           cheatSheetName: 'File Upload Security',
-          category: 'api_security',
+          category: 'file_security',
           priority: 'high',
           title: 'File Size Limits',
           description: 'Enforce file size limits to prevent DoS attacks',
@@ -1990,7 +1990,7 @@ export class OwaspCheatSheetService {
         {
           id: 'secrets-01',
           cheatSheetName: 'Secrets Management',
-          category: 'infrastructure',
+          category: 'secrets_management',
           priority: 'critical',
           title: 'Centralized Secrets Storage',
           description: 'Use centralized secrets management with environment variables',
@@ -2003,7 +2003,7 @@ export class OwaspCheatSheetService {
         {
           id: 'secrets-02',
           cheatSheetName: 'Secrets Management',
-          category: 'infrastructure',
+          category: 'secrets_management',
           priority: 'critical',
           title: 'Secrets Access Control',
           description: 'Implement least privilege access to secrets',
@@ -2016,7 +2016,7 @@ export class OwaspCheatSheetService {
         {
           id: 'secrets-03',
           cheatSheetName: 'Secrets Management',
-          category: 'logging',
+          category: 'audit_logging',
           priority: 'high',
           title: 'Secrets Usage Auditing',
           description: 'Audit all access and usage of secrets',
@@ -2024,2149 +2024,6 @@ export class OwaspCheatSheetService {
           recommendation: 'Current system logs authentication and API key usage',
           implementation: 'SecurityLogger tracks all authentication attempts and API key usage',
           avsvMapping: ['V7.1.3', 'V7.1.4'],
-          processedAt: new Date()
-        }
-      ]
-    });
-
-    // XML Security Analysis
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/XML_Security_Cheat_Sheet.html',
-      name: 'XML Security',
-      status: 'processed',
-      processedAt: new Date(),
-      recommendations: [
-        {
-          id: 'xml-01',
-          cheatSheetName: 'XML Security',
-          category: 'input_validation',
-          priority: 'critical',
-          title: 'XML External Entity (XXE) Prevention',
-          description: 'Disable XML external entity processing to prevent XXE attacks',
-          currentStatus: 'implemented',
-          recommendation: 'Current system disables XXE in all XML parsers',
-          implementation: 'XML parsers configured with external entity processing disabled',
-          avsvMapping: ['V5.5.2', 'V5.5.3'],
-          processedAt: new Date()
-        },
-        {
-          id: 'xml-02',
-          cheatSheetName: 'XML Security',
-          category: 'input_validation',
-          priority: 'critical',
-          title: 'XML Bomb Protection',
-          description: 'Protect against billion laughs and other XML bomb attacks',
-          currentStatus: 'implemented',
-          recommendation: 'Current system implements XML parsing limits',
-          implementation: 'XML size limits and entity expansion limits enforced',
-          avsvMapping: ['V5.5.1'],
-          processedAt: new Date()
-        },
-        {
-          id: 'xml-03',
-          cheatSheetName: 'XML Security',
-          category: 'input_validation',
-          priority: 'high',
-          title: 'XML Schema Validation',
-          description: 'Validate XML against strict schemas with type restrictions',
-          currentStatus: 'not_applicable',
-          recommendation: 'System primarily uses JSON, minimal XML processing',
-          implementation: 'JSON Schema validation used instead of XML',
-          avsvMapping: ['V5.5.4'],
-          processedAt: new Date()
-        }
-      ]
-    });
-
-    // Web Service Security Analysis
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/Web_Service_Security_Cheat_Sheet.html',
-      name: 'Web Service Security',
-      status: 'processed',
-      processedAt: new Date(),
-      recommendations: [
-        {
-          id: 'ws-01',
-          cheatSheetName: 'Web Service Security',
-          category: 'api_security',
-          priority: 'critical',
-          title: 'Transport Layer Security',
-          description: 'All web service communication must use TLS with proper configuration',
-          currentStatus: 'implemented',
-          recommendation: 'Current system enforces HTTPS with HSTS headers',
-          implementation: 'TLS 1.3 with strong ciphers and HSTS enforcement',
-          avsvMapping: ['V9.1.1', 'V9.1.2'],
-          processedAt: new Date()
-        },
-        {
-          id: 'ws-02',
-          cheatSheetName: 'Web Service Security',
-          category: 'api_security',
-          priority: 'critical',
-          title: 'Message Size Limits',
-          description: 'Limit SOAP/REST message sizes to prevent DoS attacks',
-          currentStatus: 'implemented',
-          recommendation: 'Current system enforces request size limits',
-          implementation: 'Express body parser with 10MB limit for JSON payloads',
-          avsvMapping: ['V13.1.4'],
-          processedAt: new Date()
-        },
-        {
-          id: 'ws-03',
-          cheatSheetName: 'Web Service Security',
-          category: 'input_validation',
-          priority: 'high',
-          title: 'Schema Validation',
-          description: 'Validate all web service inputs against strict schemas',
-          currentStatus: 'implemented',
-          recommendation: 'Current system uses Zod for comprehensive input validation',
-          implementation: 'All API endpoints validate with Zod schemas',
-          avsvMapping: ['V5.1.1', 'V5.1.2'],
-          processedAt: new Date()
-        }
-      ]
-    });
-
-    // User Privacy Protection Analysis
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/User_Privacy_Protection_Cheat_Sheet.html',
-      name: 'User Privacy Protection',
-      status: 'processed',
-      processedAt: new Date(),
-      recommendations: [
-        {
-          id: 'privacy-01',
-          cheatSheetName: 'User Privacy Protection',
-          category: 'crypto',
-          priority: 'critical',
-          title: 'Strong Cryptography for User Data',
-          description: 'Encrypt user data in transit and at rest with strong algorithms',
-          currentStatus: 'implemented',
-          recommendation: 'Current system uses TLS 1.3 and AES-256 encryption',
-          implementation: 'HTTPS for transit, encrypted database for storage',
-          avsvMapping: ['V6.1.1', 'V6.1.2'],
-          processedAt: new Date()
-        },
-        {
-          id: 'privacy-02',
-          cheatSheetName: 'User Privacy Protection',
-          category: 'session',
-          priority: 'high',
-          title: 'Remote Session Invalidation',
-          description: 'Allow users to view and invalidate active sessions remotely',
-          currentStatus: 'implemented',
-          recommendation: 'Current system provides active session management',
-          implementation: 'Users can view and invalidate sessions from account settings',
-          avsvMapping: ['V7.4.3'],
-          processedAt: new Date()
-        },
-        {
-          id: 'privacy-03',
-          cheatSheetName: 'User Privacy Protection',
-          category: 'other',
-          priority: 'medium',
-          title: 'IP Address Leakage Prevention',
-          description: 'Prevent leakage of user IP addresses through third-party content',
-          currentStatus: 'partial',
-          recommendation: 'Consider implementing content proxy for external resources',
-          implementation: 'External content limited but not fully proxied',
-          avsvMapping: ['V14.3.3'],
-          processedAt: new Date()
-        }
-      ]
-    });
-
-    // Threat Modeling Analysis
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/Threat_Modeling_Cheat_Sheet.html',
-      name: 'Threat Modeling',
-      status: 'processed',
-      processedAt: new Date(),
-      recommendations: [
-        {
-          id: 'threat-01',
-          cheatSheetName: 'Threat Modeling',
-          category: 'business_logic',
-          priority: 'critical',
-          title: 'System Modeling with Data Flow Diagrams',
-          description: 'Create and maintain DFDs showing trust boundaries and data flows',
-          currentStatus: 'partial',
-          recommendation: 'Implement comprehensive threat modeling with DFDs',
-          implementation: 'Basic security architecture documented, DFDs needed',
-          avsvMapping: ['V1.1.1', 'V1.1.2'],
-          processedAt: new Date()
-        },
-        {
-          id: 'threat-02',
-          cheatSheetName: 'Threat Modeling',
-          category: 'business_logic',
-          priority: 'high',
-          title: 'STRIDE Threat Analysis',
-          description: 'Apply STRIDE methodology to identify and categorize threats',
-          currentStatus: 'partial',
-          recommendation: 'Conduct formal STRIDE analysis for credit system',
-          implementation: 'Security controls address STRIDE categories informally',
-          avsvMapping: ['V1.1.3', 'V1.1.4'],
-          processedAt: new Date()
-        },
-        {
-          id: 'threat-03',
-          cheatSheetName: 'Threat Modeling',
-          category: 'business_logic',
-          priority: 'medium',
-          title: 'Threat Model Maintenance',
-          description: 'Update threat model alongside system changes',
-          currentStatus: 'not_implemented',
-          recommendation: 'Establish threat model update process in SDLC',
-          implementation: 'Create living threat model document updated with changes',
-          avsvMapping: ['V1.1.5', 'V1.1.6'],
-          processedAt: new Date()
-        }
-      ]
-    });
-
-    // Vulnerable Dependency Management Analysis
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/Vulnerable_Dependency_Management_Cheat_Sheet.html',
-      name: 'Vulnerable Dependency Management',
-      status: 'processed',
-      processedAt: new Date(),
-      recommendations: [
-        {
-          id: 'vuln-dep-01',
-          cheatSheetName: 'Vulnerable Dependency Management',
-          category: 'infrastructure',
-          priority: 'critical',
-          title: 'Automated Dependency Scanning',
-          description: 'Implement automated scanning for vulnerable dependencies from project inception',
-          currentStatus: 'partial',
-          recommendation: 'Enhance current npm audit with additional SAST/DAST tools',
-          implementation: 'npm audit in CI/CD pipeline, consider adding Snyk or OWASP Dependency Check',
-          avsvMapping: ['V14.2.1', 'V14.2.2'],
-          processedAt: new Date()
-        },
-        {
-          id: 'vuln-dep-02',
-          cheatSheetName: 'Vulnerable Dependency Management',
-          category: 'infrastructure',
-          priority: 'high',
-          title: 'Responsible Disclosure Handling',
-          description: 'Process for handling CVEs and security disclosures in dependencies',
-          currentStatus: 'implemented',
-          recommendation: 'Current process monitors CVE databases and npm advisories',
-          implementation: 'Automated alerts for new CVEs, patch management process in place',
-          avsvMapping: ['V14.2.3'],
-          processedAt: new Date()
-        },
-        {
-          id: 'vuln-dep-03',
-          cheatSheetName: 'Vulnerable Dependency Management',
-          category: 'infrastructure',
-          priority: 'medium',
-          title: 'Risk-Based Decision Framework',
-          description: 'CRO/CISO approval process for accepting dependency risks',
-          currentStatus: 'partial',
-          recommendation: 'Formalize risk acceptance process with security team',
-          implementation: 'Basic CVSS scoring in place, need formal approval workflow',
-          avsvMapping: ['V14.2.5'],
-          processedAt: new Date()
-        }
-      ]
-    });
-
-    // Kubernetes Security Analysis
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/Kubernetes_Security_Cheat_Sheet.html',
-      name: 'Kubernetes Security',
-      status: 'processed',
-      processedAt: new Date(),
-      recommendations: [
-        {
-          id: 'k8s-01',
-          cheatSheetName: 'Kubernetes Security',
-          category: 'infrastructure',
-          priority: 'critical',
-          title: 'etcd Access Restrictions',
-          description: 'Restrict access to etcd datastore with mutual TLS authentication',
-          currentStatus: 'not_applicable',
-          recommendation: 'Application runs on Replit infrastructure, not self-managed K8s',
-          implementation: 'Replit handles Kubernetes security at platform level',
-          avsvMapping: ['V14.1.3'],
-          processedAt: new Date()
-        },
-        {
-          id: 'k8s-02',
-          cheatSheetName: 'Kubernetes Security',
-          category: 'infrastructure',
-          priority: 'high',
-          title: 'RBAC Implementation',
-          description: 'Role-Based Access Control for Kubernetes resources',
-          currentStatus: 'not_applicable',
-          recommendation: 'Platform manages Kubernetes RBAC, focus on application-level RBAC',
-          implementation: 'Application implements comprehensive RBAC at API level',
-          avsvMapping: ['V4.1.1'],
-          processedAt: new Date()
-        },
-        {
-          id: 'k8s-03',
-          cheatSheetName: 'Kubernetes Security',
-          category: 'infrastructure',
-          priority: 'medium',
-          title: 'Network Policies',
-          description: 'Implement network segmentation and policies',
-          currentStatus: 'partial',
-          recommendation: 'Ensure application firewall rules align with K8s best practices',
-          implementation: 'Application uses environment-based network restrictions',
-          avsvMapping: ['V14.1.2'],
-          processedAt: new Date()
-        }
-      ]
-    });
-
-    // Microservices Security Analysis
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/Microservices_Security_Cheat_Sheet.html',
-      name: 'Microservices Security',
-      status: 'processed',
-      processedAt: new Date(),
-      recommendations: [
-        {
-          id: 'micro-01',
-          cheatSheetName: 'Microservices Security',
-          category: 'authorization',
-          priority: 'critical',
-          title: 'Service-Level Authorization',
-          description: 'Each microservice enforces its own authorization policies',
-          currentStatus: 'implemented',
-          recommendation: 'Current monolithic architecture implements fine-grained authorization',
-          implementation: 'All endpoints validate JWT and enforce role-based access control',
-          avsvMapping: ['V4.1.3', 'V4.2.1'],
-          processedAt: new Date()
-        },
-        {
-          id: 'micro-02',
-          cheatSheetName: 'Microservices Security',
-          category: 'authentication',
-          priority: 'critical',
-          title: 'External Entity Identity Propagation',
-          description: 'Secure propagation of user identity across services',
-          currentStatus: 'implemented',
-          recommendation: 'JWT tokens carry user context throughout the application',
-          implementation: 'Signed JWTs with user roles and permissions in claims',
-          avsvMapping: ['V3.2.1', 'V3.2.2'],
-          processedAt: new Date()
-        },
-        {
-          id: 'micro-03',
-          cheatSheetName: 'Microservices Security',
-          category: 'api_security',
-          priority: 'high',
-          title: 'Service Mesh Security',
-          description: 'mTLS and service mesh for inter-service communication',
-          currentStatus: 'not_applicable',
-          recommendation: 'Monolithic architecture doesn\'t require service mesh',
-          implementation: 'Future consideration if migrating to microservices',
-          avsvMapping: ['V9.2.1'],
-          processedAt: new Date()
-        }
-      ]
-    });
-
-    // GraphQL Security Analysis
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/GraphQL_Cheat_Sheet.html',
-      name: 'GraphQL Security',
-      status: 'processed',
-      processedAt: new Date(),
-      recommendations: [
-        {
-          id: 'graphql-01',
-          cheatSheetName: 'GraphQL Security',
-          category: 'api_security',
-          priority: 'critical',
-          title: 'Query Depth Limiting',
-          description: 'Prevent deeply nested queries that can cause DoS',
-          currentStatus: 'not_applicable',
-          recommendation: 'Application uses REST API, not GraphQL',
-          implementation: 'REST endpoints have natural depth limits',
-          avsvMapping: ['V13.2.1'],
-          processedAt: new Date()
-        },
-        {
-          id: 'graphql-02',
-          cheatSheetName: 'GraphQL Security',
-          category: 'input_validation',
-          priority: 'critical',
-          title: 'Input Validation for GraphQL',
-          description: 'Strict input validation using GraphQL type system',
-          currentStatus: 'implemented',
-          recommendation: 'REST API uses Zod schemas for comprehensive validation',
-          implementation: 'All endpoints validate with Zod schemas before processing',
-          avsvMapping: ['V5.1.1', 'V5.1.2'],
-          processedAt: new Date()
-        },
-        {
-          id: 'graphql-03',
-          cheatSheetName: 'GraphQL Security',
-          category: 'api_security',
-          priority: 'high',
-          title: 'Query Cost Analysis',
-          description: 'Analyze and limit query complexity to prevent resource exhaustion',
-          currentStatus: 'partial',
-          recommendation: 'Consider implementing request cost analysis for REST endpoints',
-          implementation: 'Rate limiting in place, could add complexity scoring',
-          avsvMapping: ['V13.1.4'],
-          processedAt: new Date()
-        }
-      ]
-    });
-
-    // Docker Security Analysis
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html',
-      name: 'Docker Security',
-      status: 'processed',
-      processedAt: new Date(),
-      recommendations: [
-        {
-          id: 'docker-01',
-          cheatSheetName: 'Docker Security',
-          category: 'infrastructure',
-          priority: 'critical',
-          title: 'Never Expose Docker Daemon Socket',
-          description: 'Docker socket /var/run/docker.sock gives root access to host',
-          currentStatus: 'not_applicable',
-          recommendation: 'Application runs on Replit infrastructure, not direct Docker',
-          implementation: 'Replit manages container security at platform level',
-          avsvMapping: ['V14.1.1'],
-          processedAt: new Date()
-        },
-        {
-          id: 'docker-02',
-          cheatSheetName: 'Docker Security',
-          category: 'infrastructure',
-          priority: 'critical',
-          title: 'Run Containers as Non-Root User',
-          description: 'Prevent privilege escalation by using unprivileged users',
-          currentStatus: 'implemented',
-          recommendation: 'Application runs with non-root user in Replit environment',
-          implementation: 'Replit enforces non-root container execution',
-          avsvMapping: ['V14.1.4'],
-          processedAt: new Date()
-        },
-        {
-          id: 'docker-03',
-          cheatSheetName: 'Docker Security',
-          category: 'infrastructure',
-          priority: 'high',
-          title: 'Read-Only Filesystem',
-          description: 'Mount containers with read-only filesystem where possible',
-          currentStatus: 'partial',
-          recommendation: 'Consider read-only mounts for static assets',
-          implementation: 'Application uses writable filesystem for necessary operations only',
-          avsvMapping: ['V14.1.5'],
-          processedAt: new Date()
-        }
-      ]
-    });
-
-    // Secrets Management Analysis
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html',
-      name: 'Secrets Management',
-      status: 'processed',
-      processedAt: new Date(),
-      recommendations: [
-        {
-          id: 'secrets-01',
-          cheatSheetName: 'Secrets Management',
-          category: 'infrastructure',
-          priority: 'critical',
-          title: 'Centralized Secrets Storage',
-          description: 'Centralize storage, provisioning, auditing, and rotation of secrets',
-          currentStatus: 'implemented',
-          recommendation: 'Current use of environment variables is appropriate for platform',
-          implementation: 'Secrets stored in Replit environment variables, never in code',
-          avsvMapping: ['V2.10.1', 'V2.10.2'],
-          processedAt: new Date()
-        },
-        {
-          id: 'secrets-02',
-          cheatSheetName: 'Secrets Management',
-          category: 'infrastructure',
-          priority: 'critical',
-          title: 'Automated Secret Rotation',
-          description: 'Implement automated rotation for all secrets and credentials',
-          currentStatus: 'partial',
-          recommendation: 'Implement JWT rotation policy and API key rotation schedule',
-          implementation: 'JWT tokens rotate on re-authentication, API keys manual rotation',
-          avsvMapping: ['V2.10.3'],
-          processedAt: new Date()
-        },
-        {
-          id: 'secrets-03',
-          cheatSheetName: 'Secrets Management',
-          category: 'infrastructure',
-          priority: 'high',
-          title: 'Secrets in Memory Protection',
-          description: 'Minimize time secrets remain in plaintext in memory',
-          currentStatus: 'partial',
-          recommendation: 'Consider implementing memory zeroing for sensitive operations',
-          implementation: 'JavaScript garbage collection handles most cases, manual clearing for critical paths',
-          avsvMapping: ['V6.2.6'],
-          processedAt: new Date()
-        }
-      ]
-    });
-
-    // Infrastructure as Code Security Analysis
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/Infrastructure_as_Code_Security_Cheat_Sheet.html',
-      name: 'Infrastructure as Code Security',
-      status: 'processed',
-      processedAt: new Date(),
-      recommendations: [
-        {
-          id: 'iac-01',
-          cheatSheetName: 'Infrastructure as Code Security',
-          category: 'infrastructure',
-          priority: 'critical',
-          title: 'Secret Management in IaC',
-          description: 'Never store secrets in IaC code, use secret management tools',
-          currentStatus: 'implemented',
-          recommendation: 'Continue using environment variables for secrets, never commit to code',
-          implementation: 'All secrets managed through Replit environment variables',
-          avsvMapping: ['V2.10.1'],
-          processedAt: new Date()
-        },
-        {
-          id: 'iac-02',
-          cheatSheetName: 'Infrastructure as Code Security',
-          category: 'infrastructure',
-          priority: 'high',
-          title: 'Static Analysis of IaC',
-          description: 'Scan IaC files for misconfigurations and vulnerabilities',
-          currentStatus: 'partial',
-          recommendation: 'Consider implementing IaC scanning in CI/CD pipeline',
-          implementation: 'Manual code reviews performed, automated scanning recommended',
-          avsvMapping: ['V10.3.1'],
-          processedAt: new Date()
-        }
-      ]
-    });
-
-    // Certificate Pinning Analysis
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/Pinning_Cheat_Sheet.html',
-      name: 'Certificate Pinning',
-      status: 'processed',
-      processedAt: new Date(),
-      recommendations: [
-        {
-          id: 'pin-01',
-          cheatSheetName: 'Certificate Pinning',
-          category: 'crypto',
-          priority: 'low',
-          title: 'Certificate Pinning for Mobile Apps',
-          description: 'Pin certificates for mobile applications only',
-          currentStatus: 'not_applicable',
-          recommendation: 'Web applications should not implement pinning due to outage risks',
-          implementation: 'Not applicable for web application architecture',
-          avsvMapping: ['V9.2.1'],
-          processedAt: new Date()
-        },
-        {
-          id: 'pin-02',
-          cheatSheetName: 'Certificate Pinning',
-          category: 'crypto',
-          priority: 'high',
-          title: 'Trust Certificate Authorities',
-          description: 'Rely on CA trust model for web applications',
-          currentStatus: 'implemented',
-          recommendation: 'Continue using standard CA trust model with proper TLS',
-          implementation: 'Application uses standard HTTPS with trusted CAs',
-          avsvMapping: ['V9.1.1'],
-          processedAt: new Date()
-        }
-      ]
-    });
-
-    // Transport Layer Security Analysis
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Security_Cheat_Sheet.html',
-      name: 'Transport Layer Security',
-      status: 'processed',
-      processedAt: new Date(),
-      recommendations: [
-        {
-          id: 'tls-01',
-          cheatSheetName: 'Transport Layer Security',
-          category: 'crypto',
-          priority: 'critical',
-          title: 'Support Only TLS 1.2 and 1.3',
-          description: 'Disable all legacy SSL and early TLS versions',
-          currentStatus: 'implemented',
-          recommendation: 'Platform enforces modern TLS versions automatically',
-          implementation: 'Replit infrastructure provides TLS 1.2+ by default',
-          avsvMapping: ['V9.1.2'],
-          processedAt: new Date()
-        },
-        {
-          id: 'tls-02',
-          cheatSheetName: 'Transport Layer Security',
-          category: 'crypto',
-          priority: 'critical',
-          title: 'Use Strong Cipher Suites',
-          description: 'Enable only GCM ciphers and disable weak ciphers',
-          currentStatus: 'implemented',
-          recommendation: 'Platform handles cipher suite configuration securely',
-          implementation: 'Replit infrastructure uses strong cipher suites',
-          avsvMapping: ['V9.1.3'],
-          processedAt: new Date()
-        },
-        {
-          id: 'tls-03',
-          cheatSheetName: 'Transport Layer Security',
-          category: 'crypto',
-          priority: 'high',
-          title: 'HSTS Header Configuration',
-          description: 'Enable HTTP Strict Transport Security',
-          currentStatus: 'implemented',
-          recommendation: 'HSTS already configured in Helmet middleware',
-          implementation: 'Helmet HSTS with 1 year max-age and includeSubDomains',
-          avsvMapping: ['V9.1.1'],
-          processedAt: new Date()
-        }
-      ]
-    });
-
-    // AJAX Security Analysis
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/AJAX_Security_Cheat_Sheet.html',
-      name: 'AJAX Security',
-      status: 'processed',
-      processedAt: new Date(),
-      recommendations: [
-        {
-          id: 'ajax-01',
-          cheatSheetName: 'AJAX Security',
-          category: 'frontend',
-          priority: 'critical',
-          title: 'Never Use innerHTML with Dynamic Data',
-          description: 'Avoid innerHTML with untrusted data to prevent XSS',
-          currentStatus: 'implemented',
-          recommendation: 'Continue using textContent and React JSX for safe rendering',
-          implementation: 'React automatically escapes dynamic content, no innerHTML usage',
-          avsvMapping: ['V5.3.3'],
-          processedAt: new Date()
-        },
-        {
-          id: 'ajax-02',
-          cheatSheetName: 'AJAX Security',
-          category: 'backend',
-          priority: 'high',
-          title: 'JSON Response Security',
-          description: 'Always return JSON with object wrapper, never arrays at root',
-          currentStatus: 'implemented',
-          recommendation: 'All API responses return objects with data property',
-          implementation: 'API consistently returns {data: [...]} format',
-          avsvMapping: ['V8.3.2'],
-          processedAt: new Date()
-        }
-      ]
-    });
-
-    // Security Questions Analysis (Deprecated)
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/Choosing_and_Using_Security_Questions_Cheat_Sheet.html',
-      name: 'Security Questions',
-      status: 'processed',
-      processedAt: new Date(),
-      recommendations: [
-        {
-          id: 'secq-01',
-          cheatSheetName: 'Security Questions',
-          category: 'authentication',
-          priority: 'critical',
-          title: 'NIST Deprecated Security Questions',
-          description: 'Security questions no longer acceptable per NIST SP 800-63',
-          currentStatus: 'implemented',
-          recommendation: 'Continue using modern authentication without security questions',
-          implementation: 'System uses JWT tokens, no security questions implemented',
-          avsvMapping: ['V2.5.1'],
-          processedAt: new Date()
-        }
-      ]
-    });
-
-    // DOM-based XSS Prevention Analysis
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html',
-      name: 'DOM-based XSS Prevention',
-      status: 'processed',
-      processedAt: new Date(),
-      recommendations: [
-        {
-          id: 'domxss-01',
-          cheatSheetName: 'DOM-based XSS Prevention',
-          category: 'frontend',
-          priority: 'critical',
-          title: 'HTML and JavaScript Encoding',
-          description: 'Double encode when inserting data into HTML via JavaScript',
-          currentStatus: 'implemented',
-          recommendation: 'React framework handles encoding automatically',
-          implementation: 'React JSX prevents DOM XSS by design',
-          avsvMapping: ['V5.3.3'],
-          processedAt: new Date()
-        },
-        {
-          id: 'domxss-02',
-          cheatSheetName: 'DOM-based XSS Prevention',
-          category: 'frontend',
-          priority: 'critical',
-          title: 'Avoid eval() and new Function()',
-          description: 'Never use dynamic code evaluation with untrusted data',
-          currentStatus: 'implemented',
-          recommendation: 'No eval() or new Function() usage in codebase',
-          implementation: 'ESLint rules prevent eval usage',
-          avsvMapping: ['V5.2.4'],
-          processedAt: new Date()
-        }
-      ]
-    });
-
-    // HTML5 Security Analysis
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/HTML5_Security_Cheat_Sheet.html',
-      name: 'HTML5 Security',
-      status: 'processed',
-      processedAt: new Date(),
-      recommendations: [
-        {
-          id: 'html5-01',
-          cheatSheetName: 'HTML5 Security',
-          category: 'frontend',
-          priority: 'high',
-          title: 'PostMessage Origin Validation',
-          description: 'Always validate origin in postMessage handlers',
-          currentStatus: 'not_applicable',
-          recommendation: 'No cross-origin messaging used in application',
-          implementation: 'Application does not use window.postMessage',
-          avsvMapping: ['V13.2.1'],
-          processedAt: new Date()
-        },
-        {
-          id: 'html5-02',
-          cheatSheetName: 'HTML5 Security',
-          category: 'frontend',
-          priority: 'critical',
-          title: 'Local Storage Security',
-          description: 'Never store sensitive data in localStorage',
-          currentStatus: 'implemented',
-          recommendation: 'Continue storing only non-sensitive theme preferences',
-          implementation: 'Only theme preference stored in localStorage, tokens in httpOnly cookies',
-          avsvMapping: ['V8.2.3'],
-          processedAt: new Date()
-        },
-        {
-          id: 'html5-03',
-          cheatSheetName: 'HTML5 Security',
-          category: 'frontend',
-          priority: 'high',
-          title: 'Tabnabbing Prevention',
-          description: 'Use rel="noopener noreferrer" on external links',
-          currentStatus: 'partial',
-          recommendation: 'Add noopener noreferrer to all external links',
-          implementation: 'Internal links safe, external links need review',
-          avsvMapping: ['V5.2.6'],
-          processedAt: new Date()
-        }
-      ]
-    });
-
-    // Web Service Security Analysis
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/Web_Service_Security_Cheat_Sheet.html',
-      name: 'Web Service Security',
-      status: 'processed',
-      processedAt: new Date(),
-      recommendations: [
-        {
-          id: 'websvc-01',
-          cheatSheetName: 'Web Service Security',
-          category: 'backend',
-          priority: 'critical',
-          title: 'TLS for All Web Service Communications',
-          description: 'All web service communications must use TLS',
-          currentStatus: 'implemented',
-          recommendation: 'Platform enforces HTTPS for all communications',
-          implementation: 'Replit infrastructure provides TLS by default',
-          avsvMapping: ['V9.1.1'],
-          processedAt: new Date()
-        },
-        {
-          id: 'websvc-02',
-          cheatSheetName: 'Web Service Security',
-          category: 'backend',
-          priority: 'high',
-          title: 'Schema Validation for SOAP/REST',
-          description: 'Validate all input against strict schemas',
-          currentStatus: 'implemented',
-          recommendation: 'Continue using Zod schemas for API validation',
-          implementation: 'All API endpoints use Zod schema validation',
-          avsvMapping: ['V5.1.1'],
-          processedAt: new Date()
-        }
-      ]
-    });
-
-    // XML External Entity Prevention Analysis
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html',
-      name: 'XML External Entity Prevention',
-      status: 'processed',
-      processedAt: new Date(),
-      recommendations: [
-        {
-          id: 'xxe-01',
-          cheatSheetName: 'XML External Entity Prevention',
-          category: 'backend',
-          priority: 'critical',
-          title: 'Disable DTDs Completely',
-          description: 'Disable DTDs to prevent XXE attacks',
-          currentStatus: 'not_applicable',
-          recommendation: 'Application uses JSON, not XML',
-          implementation: 'System designed with JSON APIs only',
-          avsvMapping: ['V5.5.2'],
-          processedAt: new Date()
-        }
-      ]
-    });
-
-    // XML Security Analysis
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/XML_Security_Cheat_Sheet.html',
-      name: 'XML Security',
-      status: 'processed',
-      processedAt: new Date(),
-      recommendations: [
-        {
-          id: 'xmlsec-01',
-          cheatSheetName: 'XML Security',
-          category: 'backend',
-          priority: 'low',
-          title: 'XML Processing Security',
-          description: 'Secure XML processing against malformed documents',
-          currentStatus: 'not_applicable',
-          recommendation: 'JSON-only architecture avoids XML vulnerabilities',
-          implementation: 'No XML processing in application',
-          avsvMapping: ['V5.5.1'],
-          processedAt: new Date()
-        }
-      ]
-    });
-
-    // Vulnerable Dependency Management Analysis
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/Vulnerable_Dependency_Management_Cheat_Sheet.html',
-      name: 'Vulnerable Dependency Management',
-      status: 'processed',
-      processedAt: new Date(),
-      recommendations: [
-        {
-          id: 'vuln-dep-01',
-          cheatSheetName: 'Vulnerable Dependency Management',
-          category: 'infrastructure',
-          priority: 'critical',
-          title: 'Automated Dependency Scanning',
-          description: 'Scan dependencies for known vulnerabilities',
-          currentStatus: 'partial',
-          recommendation: 'Implement automated npm audit in CI/CD',
-          implementation: 'Manual npm audit performed, automation needed',
-          avsvMapping: ['V14.2.1'],
-          processedAt: new Date()
-        },
-        {
-          id: 'vuln-dep-02',
-          cheatSheetName: 'Vulnerable Dependency Management',
-          category: 'infrastructure',
-          priority: 'high',
-          title: 'Dependency Update Strategy',
-          description: 'Regular updates of dependencies with security patches',
-          currentStatus: 'implemented',
-          recommendation: 'Continue monthly dependency reviews',
-          implementation: 'Regular package updates performed',
-          avsvMapping: ['V14.2.3'],
-          processedAt: new Date()
-        }
-      ]
-    });
-
-    // Virtual Patching Analysis
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/Virtual_Patching_Cheat_Sheet.html',
-      name: 'Virtual Patching',
-      status: 'processed',
-      processedAt: new Date(),
-      recommendations: [
-        {
-          id: 'vp-01',
-          cheatSheetName: 'Virtual Patching',
-          category: 'infrastructure',
-          priority: 'medium',
-          title: 'WAF Virtual Patching',
-          description: 'Use WAF rules to mitigate vulnerabilities quickly',
-          currentStatus: 'partial',
-          recommendation: 'Consider Replit WAF features for critical issues',
-          implementation: 'Platform provides basic protection, custom rules possible',
-          avsvMapping: ['V14.4.7'],
-          processedAt: new Date()
-        },
-        {
-          id: 'vp-02',
-          cheatSheetName: 'Virtual Patching',
-          category: 'operations',
-          priority: 'high',
-          title: 'Incident Response Preparation',
-          description: 'Have virtual patching ready for emergencies',
-          currentStatus: 'partial',
-          recommendation: 'Document virtual patching procedures',
-          implementation: 'Basic incident response exists, virtual patching procedures needed',
-          avsvMapping: ['V14.4.1'],
-          processedAt: new Date()
-        }
-      ]
-    });
-
-    // Docker Security Analysis
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html',
-      name: 'Docker Security',
-      status: 'processed',
-      processedAt: new Date(),
-      recommendations: [
-        {
-          id: 'docker-01',
-          cheatSheetName: 'Docker Security',
-          category: 'infrastructure',
-          priority: 'critical',
-          title: 'Non-root Container Execution',
-          description: 'Never run containers as root user',
-          currentStatus: 'not_applicable',
-          recommendation: 'Replit manages container security',
-          implementation: 'Platform handles container runtime security',
-          avsvMapping: ['V14.1.1'],
-          processedAt: new Date()
-        },
-        {
-          id: 'docker-02',
-          cheatSheetName: 'Docker Security',
-          category: 'infrastructure',
-          priority: 'high',
-          title: 'Container Resource Limits',
-          description: 'Set memory and CPU limits on containers',
-          currentStatus: 'implemented',
-          recommendation: 'Platform enforces resource limits',
-          implementation: 'Replit enforces container resource constraints',
-          avsvMapping: ['V14.1.3'],
-          processedAt: new Date()
-        }
-      ]
-    });
-
-    // Database Security Analysis
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/Database_Security_Cheat_Sheet.html',
-      name: 'Database Security',
-      status: 'processed',
-      processedAt: new Date(),
-      recommendations: [
-        {
-          id: 'db-sec-01',
-          cheatSheetName: 'Database Security',
-          category: 'backend',
-          priority: 'critical',
-          title: 'Database Connection Encryption',
-          description: 'Use TLS for all database connections',
-          currentStatus: 'implemented',
-          recommendation: 'Continue using TLS database connections',
-          implementation: 'PostgreSQL connections use TLS by default',
-          avsvMapping: ['V9.1.3'],
-          processedAt: new Date()
-        },
-        {
-          id: 'db-sec-02',
-          cheatSheetName: 'Database Security',
-          category: 'backend',
-          priority: 'critical',
-          title: 'Least Privilege Database Access',
-          description: 'Database accounts with minimal permissions',
-          currentStatus: 'implemented',
-          recommendation: 'Application uses restricted database user',
-          implementation: 'Database user has only necessary permissions',
-          avsvMapping: ['V1.4.3'],
-          processedAt: new Date()
-        }
-      ]
-    });
-
-    // Microservices Security Analysis
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/Microservices_Security_Cheat_Sheet.html',
-      name: 'Microservices Security',
-      status: 'processed',
-      processedAt: new Date(),
-      recommendations: [
-        {
-          id: 'micro-01',
-          cheatSheetName: 'Microservices Security',
-          category: 'architecture',
-          priority: 'high',
-          title: 'Service-Level Authorization',
-          description: 'Each service enforces its own authorization',
-          currentStatus: 'implemented',
-          recommendation: 'Monolithic app with service-level checks',
-          implementation: 'Authorization enforced at API and route levels',
-          avsvMapping: ['V8.1.1'],
-          processedAt: new Date()
-        },
-        {
-          id: 'micro-02',
-          cheatSheetName: 'Microservices Security',
-          category: 'architecture',
-          priority: 'medium',
-          title: 'Service Communication Security',
-          description: 'Secure inter-service communication',
-          currentStatus: 'partial',
-          recommendation: 'Consider service mesh for future microservices',
-          implementation: 'Currently monolithic, plan for future needs',
-          avsvMapping: ['V9.1.1'],
-          processedAt: new Date()
-        }
-      ]
-    });
-
-    // CI/CD Security Analysis
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/CI_CD_Security_Cheat_Sheet.html',
-      name: 'CI/CD Security',
-      status: 'processed',
-      processedAt: new Date(),
-      recommendations: [
-        {
-          id: 'cicd-01',
-          cheatSheetName: 'CI/CD Security',
-          category: 'infrastructure',
-          priority: 'critical',
-          title: 'Secure Secrets Management',
-          description: 'Never hardcode secrets in CI/CD pipelines',
-          currentStatus: 'implemented',
-          recommendation: 'Continue using environment variables',
-          implementation: 'Secrets stored in Replit environment variables',
-          avsvMapping: ['V14.3.2'],
-          processedAt: new Date()
-        },
-        {
-          id: 'cicd-02',
-          cheatSheetName: 'CI/CD Security',
-          category: 'infrastructure',
-          priority: 'high',
-          title: 'Pipeline Security Scanning',
-          description: 'Include security scanning in CI/CD pipeline',
-          currentStatus: 'partial',
-          recommendation: 'Add automated security scanning to CI/CD',
-          implementation: 'Manual security checks, automation needed',
-          avsvMapping: ['V14.2.1'],
-          processedAt: new Date()
-        }
-      ]
-    });
-
-    // Denial of Service Analysis
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/Denial_of_Service_Cheat_Sheet.html',
-      name: 'Denial of Service',
-      status: 'processed',
-      processedAt: new Date(),
-      recommendations: [
-        {
-          id: 'dos-01',
-          cheatSheetName: 'Denial of Service',
-          category: 'infrastructure',
-          priority: 'critical',
-          title: 'Rate Limiting Implementation',
-          description: 'Implement rate limiting to prevent DoS',
-          currentStatus: 'implemented',
-          recommendation: 'Continue using express-rate-limit',
-          implementation: 'Multiple rate limiters configured',
-          avsvMapping: ['V11.1.4'],
-          processedAt: new Date()
-        },
-        {
-          id: 'dos-02',
-          cheatSheetName: 'Denial of Service',
-          category: 'backend',
-          priority: 'high',
-          title: 'Resource Consumption Limits',
-          description: 'Limit file uploads and request sizes',
-          currentStatus: 'implemented',
-          recommendation: 'File size limits configured',
-          implementation: 'Multer configured with 10MB file limit',
-          avsvMapping: ['V11.1.2'],
-          processedAt: new Date()
-        }
-      ]
-    });
-
-    // Kubernetes Security Analysis
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/Kubernetes_Security_Cheat_Sheet.html',
-      name: 'Kubernetes Security',
-      status: 'processed',
-      processedAt: new Date(),
-      recommendations: [
-        {
-          id: 'k8s-01',
-          cheatSheetName: 'Kubernetes Security',
-          category: 'infrastructure',
-          priority: 'critical',
-          title: 'Secure etcd Access',
-          description: 'Restrict access to etcd as it stores all cluster data',
-          currentStatus: 'not_applicable',
-          recommendation: 'Replit manages Kubernetes infrastructure',
-          implementation: 'Platform handles container orchestration security',
-          avsvMapping: ['V14.1.1'],
-          processedAt: new Date()
-        },
-        {
-          id: 'k8s-02',
-          cheatSheetName: 'Kubernetes Security',
-          category: 'infrastructure',
-          priority: 'high',
-          title: 'RBAC Implementation',
-          description: 'Use Role-Based Access Control for Kubernetes resources',
-          currentStatus: 'not_applicable',
-          recommendation: 'Platform manages Kubernetes RBAC',
-          implementation: 'Replit handles container permissions',
-          avsvMapping: ['V8.1.1'],
-          processedAt: new Date()
-        }
-      ]
-    });
-
-    // Mass Assignment Analysis
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/Mass_Assignment_Cheat_Sheet.html',
-      name: 'Mass Assignment',
-      status: 'processed',
-      processedAt: new Date(),
-      recommendations: [
-        {
-          id: 'mass-01',
-          cheatSheetName: 'Mass Assignment',
-          category: 'backend',
-          priority: 'critical',
-          title: 'Allow-list Bindable Fields',
-          description: 'Only allow specific fields to be set by users',
-          currentStatus: 'implemented',
-          recommendation: 'Continue using Zod schemas for validation',
-          implementation: 'All APIs use Zod schemas to validate input',
-          avsvMapping: ['V4.1.1'],
-          processedAt: new Date()
-        },
-        {
-          id: 'mass-02',
-          cheatSheetName: 'Mass Assignment',
-          category: 'backend',
-          priority: 'high',
-          title: 'Use DTOs',
-          description: 'Use Data Transfer Objects for input validation',
-          currentStatus: 'implemented',
-          recommendation: 'TypeScript interfaces serve as DTOs',
-          implementation: 'All endpoints use typed request bodies',
-          avsvMapping: ['V4.1.3'],
-          processedAt: new Date()
-        }
-      ]
-    });
-
-    // LDAP Injection Prevention Analysis
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/LDAP_Injection_Prevention_Cheat_Sheet.html',
-      name: 'LDAP Injection Prevention',
-      status: 'processed',
-      processedAt: new Date(),
-      recommendations: [
-        {
-          id: 'ldap-01',
-          cheatSheetName: 'LDAP Injection Prevention',
-          category: 'backend',
-          priority: 'critical',
-          title: 'LDAP Input Escaping',
-          description: 'Escape all LDAP query inputs',
-          currentStatus: 'not_applicable',
-          recommendation: 'Application does not use LDAP',
-          implementation: 'Using Supabase Auth instead of LDAP',
-          avsvMapping: ['V5.3.1'],
-          processedAt: new Date()
-        },
-        {
-          id: 'ldap-02',
-          cheatSheetName: 'LDAP Injection Prevention',
-          category: 'backend',
-          priority: 'medium',
-          title: 'Alternative Authentication',
-          description: 'Use secure authentication systems',
-          currentStatus: 'implemented',
-          recommendation: 'Continue using Supabase Auth',
-          implementation: 'JWT-based auth without LDAP',
-          avsvMapping: ['V6.1.1'],
-          processedAt: new Date()
-        }
-      ]
-    });
-
-    // Credential Stuffing Prevention Analysis
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/Credential_Stuffing_Prevention_Cheat_Sheet.html',
-      name: 'Credential Stuffing Prevention',
-      status: 'processed',
-      processedAt: new Date(),
-      recommendations: [
-        {
-          id: 'cred-stuff-01',
-          cheatSheetName: 'Credential Stuffing Prevention',
-          category: 'authentication',
-          priority: 'critical',
-          title: 'Multi-Factor Authentication',
-          description: 'Implement MFA to prevent credential stuffing',
-          currentStatus: 'partial',
-          recommendation: 'Consider adding TOTP or SMS-based MFA',
-          implementation: 'Basic auth only, MFA not yet implemented',
-          avsvMapping: ['V6.5.1'],
-          processedAt: new Date()
-        },
-        {
-          id: 'cred-stuff-02',
-          cheatSheetName: 'Credential Stuffing Prevention',
-          category: 'infrastructure',
-          priority: 'high',
-          title: 'Rate Limiting on Login',
-          description: 'Implement aggressive rate limiting on auth endpoints',
-          currentStatus: 'implemented',
-          recommendation: 'Continue using express-rate-limit',
-          implementation: 'Auth endpoints limited to 5 attempts/15min',
-          avsvMapping: ['V11.1.4'],
-          processedAt: new Date()
-        }
-      ]
-    });
-
-    // Forgot Password Analysis
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/Forgot_Password_Cheat_Sheet.html',
-      name: 'Forgot Password',
-      status: 'processed',
-      processedAt: new Date(),
-      recommendations: [
-        {
-          id: 'forgot-pw-01',
-          cheatSheetName: 'Forgot Password',
-          category: 'authentication',
-          priority: 'critical',
-          title: 'Consistent Messages',
-          description: 'Return same message for valid/invalid accounts',
-          currentStatus: 'implemented',
-          recommendation: 'Standardized recovery messages prevent enumeration',
-          implementation: 'Password reset returns generic success message',
-          avsvMapping: ['V6.3.1'],
-          processedAt: new Date()
-        },
-        {
-          id: 'forgot-pw-02',
-          cheatSheetName: 'Forgot Password',
-          category: 'authentication',
-          priority: 'high',
-          title: 'Secure Reset Tokens',
-          description: 'Use cryptographically secure reset tokens',
-          currentStatus: 'implemented',
-          recommendation: 'Continue using Supabase secure tokens',
-          implementation: 'Supabase handles secure password reset flow',
-          avsvMapping: ['V6.4.1'],
-          processedAt: new Date()
-        }
-      ]
-    });
-
-    // Prototype Pollution Prevention Analysis
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/Prototype_Pollution_Prevention_Cheat_Sheet.html',
-      name: 'Prototype Pollution Prevention',
-      status: 'processed',
-      processedAt: new Date(),
-      recommendations: [
-        {
-          id: 'proto-poll-01',
-          cheatSheetName: 'Prototype Pollution Prevention',
-          category: 'frontend',
-          priority: 'critical',
-          title: 'Use Map/Set Instead of Objects',
-          description: 'Use new Map() or new Set() instead of object literals',
-          currentStatus: 'partial',
-          recommendation: 'Consider using Map/Set for user inputs',
-          implementation: 'TypeScript provides type safety against most pollution',
-          avsvMapping: ['V5.3.1'],
-          processedAt: new Date()
-        },
-        {
-          id: 'proto-poll-02',
-          cheatSheetName: 'Prototype Pollution Prevention',
-          category: 'backend',
-          priority: 'high',
-          title: 'Object.create(null)',
-          description: 'Create objects without prototype chain',
-          currentStatus: 'partial',
-          recommendation: 'Use Object.create(null) for untrusted data',
-          implementation: 'Consider for API request parsing',
-          avsvMapping: ['V5.3.2'],
-          processedAt: new Date()
-        }
-      ]
-    });
-
-    // AJAX Security Analysis
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/AJAX_Security_Cheat_Sheet.html',
-      name: 'AJAX Security',
-      status: 'processed',
-      processedAt: new Date(),
-      recommendations: [
-        {
-          id: 'ajax-01',
-          cheatSheetName: 'AJAX Security',
-          category: 'frontend',
-          priority: 'critical',
-          title: 'Avoid innerHTML',
-          description: 'Never use innerHTML with untrusted data',
-          currentStatus: 'implemented',
-          recommendation: 'Continue using React for safe rendering',
-          implementation: 'React escapes content by default',
-          avsvMapping: ['V5.1.3'],
-          processedAt: new Date()
-        },
-        {
-          id: 'ajax-02',
-          cheatSheetName: 'AJAX Security',
-          category: 'frontend',
-          priority: 'high',
-          title: 'Use textContent',
-          description: 'Use textContent for text-only updates',
-          currentStatus: 'implemented',
-          recommendation: 'React handles this automatically',
-          implementation: 'Framework prevents XSS by default',
-          avsvMapping: ['V5.1.4'],
-          processedAt: new Date()
-        }
-      ]
-    });
-
-    // GraphQL Analysis
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/GraphQL_Cheat_Sheet.html',
-      name: 'GraphQL',
-      status: 'processed',
-      processedAt: new Date(),
-      recommendations: [
-        {
-          id: 'graphql-01',
-          cheatSheetName: 'GraphQL',
-          category: 'backend',
-          priority: 'high',
-          title: 'Query Depth Limiting',
-          description: 'Limit query depth to prevent DoS',
-          currentStatus: 'not_applicable',
-          recommendation: 'Application uses REST API, not GraphQL',
-          implementation: 'Consider if migrating to GraphQL',
-          avsvMapping: ['V11.1.2'],
-          processedAt: new Date()
-        },
-        {
-          id: 'graphql-02',
-          cheatSheetName: 'GraphQL',
-          category: 'backend',
-          priority: 'medium',
-          title: 'Input Validation',
-          description: 'Validate all GraphQL inputs',
-          currentStatus: 'implemented',
-          recommendation: 'REST API uses Zod validation',
-          implementation: 'All endpoints validated with schemas',
-          avsvMapping: ['V4.1.1'],
-          processedAt: new Date()
-        }
-      ]
-    });
-
-    // JSON Web Token Analysis
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/JSON_Web_Token_for_Java_Cheat_Sheet.html',
-      name: 'JSON Web Token for Java',
-      status: 'processed',
-      processedAt: new Date(),
-      recommendations: [
-        {
-          id: 'jwt-java-01',
-          cheatSheetName: 'JSON Web Token for Java',
-          category: 'authentication',
-          priority: 'critical',
-          title: 'Prevent None Algorithm',
-          description: 'Explicitly verify expected algorithm',
-          currentStatus: 'implemented',
-          recommendation: 'Using Supabase JWT with HS256',
-          implementation: 'Supabase prevents none algorithm attacks',
-          avsvMapping: ['V7.2.2'],
-          processedAt: new Date()
-        },
-        {
-          id: 'jwt-java-02',
-          cheatSheetName: 'JSON Web Token for Java',
-          category: 'authentication',
-          priority: 'high',
-          title: 'Token Sidejacking Prevention',
-          description: 'Add user context to tokens',
-          currentStatus: 'partial',
-          recommendation: 'Consider adding device fingerprinting',
-          implementation: 'Basic JWT implementation without fingerprinting',
-          avsvMapping: ['V7.1.4'],
-          processedAt: new Date()
-        }
-      ]
-    });
-
-    // Insecure Direct Object Reference Prevention Analysis
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/Insecure_Direct_Object_Reference_Prevention_Cheat_Sheet.html',
-      name: 'Insecure Direct Object Reference Prevention',
-      status: 'processed',
-      processedAt: new Date(),
-      recommendations: [
-        {
-          id: 'idor-01',
-          cheatSheetName: 'Insecure Direct Object Reference Prevention',
-          category: 'backend',
-          priority: 'critical',
-          title: 'Access Control Checks',
-          description: 'Verify user permission for each object access',
-          currentStatus: 'implemented',
-          recommendation: 'Continue using RLS and role checks',
-          implementation: 'RLS policies enforce object-level security',
-          avsvMapping: ['V8.3.1'],
-          processedAt: new Date()
-        },
-        {
-          id: 'idor-02',
-          cheatSheetName: 'Insecure Direct Object Reference Prevention',
-          category: 'backend',
-          priority: 'high',
-          title: 'Use Complex Identifiers',
-          description: 'Use UUIDs instead of sequential IDs',
-          currentStatus: 'partial',
-          recommendation: 'Consider UUIDs for sensitive resources',
-          implementation: 'Using timestamp-based IDs for proposals',
-          avsvMapping: ['V8.3.3'],
-          processedAt: new Date()
-        }
-      ]
-    });
-
-    // User Privacy Protection Analysis
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/User_Privacy_Protection_Cheat_Sheet.html',
-      name: 'User Privacy Protection',
-      status: 'processed',
-      processedAt: new Date(),
-      recommendations: [
-        {
-          id: 'privacy-01',
-          cheatSheetName: 'User Privacy Protection',
-          category: 'privacy',
-          priority: 'critical',
-          title: 'Strong Cryptography',
-          description: 'Use strong encryption for user data',
-          currentStatus: 'implemented',
-          recommendation: 'Continue using Supabase encryption and TLS',
-          implementation: 'AES-256 at rest, TLS 1.3 in transit',
-          avsvMapping: ['V1.6.2'],
-          processedAt: new Date()
-        },
-        {
-          id: 'privacy-02',
-          cheatSheetName: 'User Privacy Protection',
-          category: 'privacy',
-          priority: 'high',
-          title: 'Support HSTS',
-          description: 'Enable HTTP Strict Transport Security',
-          currentStatus: 'implemented',
-          recommendation: 'HSTS enabled in Helmet configuration',
-          implementation: 'HSTS header with max-age=31536000',
-          avsvMapping: ['V7.1.2'],
-          processedAt: new Date()
-        }
-      ]
-    });
-
-    // Pinning Analysis
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/Pinning_Cheat_Sheet.html',
-      name: 'Pinning',
-      status: 'processed',
-      processedAt: new Date(),
-      recommendations: [
-        {
-          id: 'pinning-01',
-          cheatSheetName: 'Pinning',
-          category: 'network',
-          priority: 'medium',
-          title: 'Certificate Pinning',
-          description: 'Pin certificates for critical connections',
-          currentStatus: 'not_implemented',
-          recommendation: 'Consider for mobile apps only',
-          implementation: 'Web app uses standard CA validation',
-          avsvMapping: ['V7.3.3'],
-          processedAt: new Date()
-        },
-        {
-          id: 'pinning-02',
-          cheatSheetName: 'Pinning',
-          category: 'network',
-          priority: 'low',
-          title: 'Avoid Pinning for Web',
-          description: 'Pinning can cause outages in web apps',
-          currentStatus: 'implemented',
-          recommendation: 'Continue using CA-based validation',
-          implementation: 'Standard TLS without pinning',
-          avsvMapping: ['V7.3.2'],
-          processedAt: new Date()
-        }
-      ]
-    });
-
-    // SAML Security Analysis
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/SAML_Security_Cheat_Sheet.html',
-      name: 'SAML Security',
-      status: 'processed',
-      processedAt: new Date(),
-      recommendations: [
-        {
-          id: 'saml-01',
-          cheatSheetName: 'SAML Security',
-          category: 'authentication',
-          priority: 'high',
-          title: 'Validate Signatures',
-          description: 'Always validate SAML signatures',
-          currentStatus: 'not_applicable',
-          recommendation: 'App uses JWT instead of SAML',
-          implementation: 'Consider for future enterprise SSO',
-          avsvMapping: ['V6.5.2'],
-          processedAt: new Date()
-        },
-        {
-          id: 'saml-02',
-          cheatSheetName: 'SAML Security',
-          category: 'authentication',
-          priority: 'medium',
-          title: 'XML Signature Wrapping',
-          description: 'Prevent XML signature wrapping attacks',
-          currentStatus: 'not_applicable',
-          recommendation: 'Using JSON-based auth avoids XML issues',
-          implementation: 'JWT with Supabase Auth',
-          avsvMapping: ['V5.1.5'],
-          processedAt: new Date()
-        }
-      ]
-    });
-
-    // Secrets Management Analysis
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html',
-      name: 'Secrets Management',
-      status: 'processed',
-      processedAt: new Date(),
-      recommendations: [
-        {
-          id: 'secrets-01',
-          cheatSheetName: 'Secrets Management',
-          category: 'backend',
-          priority: 'critical',
-          title: 'Centralize Secrets',
-          description: 'Use centralized secrets management',
-          currentStatus: 'implemented',
-          recommendation: 'Continue using environment variables',
-          implementation: 'Replit secrets for sensitive data',
-          avsvMapping: ['V2.10.1'],
-          processedAt: new Date()
-        },
-        {
-          id: 'secrets-02',
-          cheatSheetName: 'Secrets Management',
-          category: 'backend',
-          priority: 'high',
-          title: 'Automate Rotation',
-          description: 'Automate secret rotation',
-          currentStatus: 'partial',
-          recommendation: 'Consider automated key rotation',
-          implementation: 'Manual rotation currently',
-          avsvMapping: ['V2.10.4'],
-          processedAt: new Date()
-        }
-      ]
-    });
-
-    // Choosing and Using Security Questions Analysis
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/Choosing_and_Using_Security_Questions_Cheat_Sheet.html',
-      name: 'Choosing and Using Security Questions',
-      status: 'processed',
-      processedAt: new Date(),
-      recommendations: [
-        {
-          id: 'sec-questions-01',
-          cheatSheetName: 'Choosing and Using Security Questions',
-          category: 'authentication',
-          priority: 'critical',
-          title: 'Avoid Security Questions',
-          description: 'NIST recommends against security questions',
-          currentStatus: 'implemented',
-          recommendation: 'App uses email-based recovery instead',
-          implementation: 'No security questions in app',
-          avsvMapping: ['V6.1.1'],
-          processedAt: new Date()
-        },
-        {
-          id: 'sec-questions-02',
-          cheatSheetName: 'Choosing and Using Security Questions',
-          category: 'authentication',
-          priority: 'high',
-          title: 'Alternative Recovery',
-          description: 'Use email-based recovery instead',
-          currentStatus: 'implemented',
-          recommendation: 'Continue using secure email recovery',
-          implementation: 'Password reset via email link',
-          avsvMapping: ['V6.3.1'],
-          processedAt: new Date()
-        }
-      ]
-    });
-
-    // Denial of Service Analysis
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/Denial_of_Service_Cheat_Sheet.html',
-      name: 'Denial of Service',
-      status: 'processed',
-      processedAt: new Date(),
-      recommendations: [
-        {
-          id: 'dos-01',
-          cheatSheetName: 'Denial of Service',
-          category: 'backend',
-          priority: 'critical',
-          title: 'Rate Limiting',
-          description: 'Implement rate limiting on all endpoints',
-          currentStatus: 'implemented',
-          recommendation: 'Continue using express-rate-limit',
-          implementation: 'Rate limiting on all API endpoints',
-          avsvMapping: ['V11.1.4'],
-          processedAt: new Date()
-        },
-        {
-          id: 'dos-02',
-          cheatSheetName: 'Denial of Service',
-          category: 'backend',
-          priority: 'high',
-          title: 'Input Validation',
-          description: 'Validate all inputs to prevent resource exhaustion',
-          currentStatus: 'implemented',
-          recommendation: 'Continue using Zod validation',
-          implementation: 'All endpoints use Zod schemas',
-          avsvMapping: ['V4.1.1'],
-          processedAt: new Date()
-        }
-      ]
-    });
-
-    // C-Based Toolchain Hardening Analysis
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/C-Based_Toolchain_Hardening_Cheat_Sheet.html',
-      name: 'C-Based Toolchain Hardening',
-      status: 'processed',
-      processedAt: new Date(),
-      recommendations: [
-        {
-          id: 'c-toolchain-01',
-          cheatSheetName: 'C-Based Toolchain Hardening',
-          category: 'infrastructure',
-          priority: 'low',
-          title: 'Compiler Flags',
-          description: 'Use hardening compiler flags',
-          currentStatus: 'not_applicable',
-          recommendation: 'App uses TypeScript not C/C++',
-          implementation: 'Consider for native extensions',
-          avsvMapping: ['V14.2.1'],
-          processedAt: new Date()
-        },
-        {
-          id: 'c-toolchain-02',
-          cheatSheetName: 'C-Based Toolchain Hardening',
-          category: 'infrastructure',
-          priority: 'low',
-          title: 'ASLR and DEP',
-          description: 'Enable memory protections',
-          currentStatus: 'partial',
-          recommendation: 'Node.js provides some protections',
-          implementation: 'Runtime environment handles this',
-          avsvMapping: ['V14.2.2'],
-          processedAt: new Date()
-        }
-      ]
-    });
-
-    // PHP Configuration Analysis
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/PHP_Configuration_Cheat_Sheet.html',
-      name: 'PHP Configuration',
-      status: 'processed',
-      processedAt: new Date(),
-      recommendations: [
-        {
-          id: 'php-config-01',
-          cheatSheetName: 'PHP Configuration',
-          category: 'infrastructure',
-          priority: 'low',
-          title: 'PHP Settings',
-          description: 'Secure PHP configuration',
-          currentStatus: 'not_applicable',
-          recommendation: 'App uses Node.js not PHP',
-          implementation: 'Not using PHP stack',
-          avsvMapping: ['V14.1.1'],
-          processedAt: new Date()
-        },
-        {
-          id: 'php-config-02',
-          cheatSheetName: 'PHP Configuration',
-          category: 'infrastructure',
-          priority: 'low',
-          title: 'Error Handling',
-          description: 'Disable error display in production',
-          currentStatus: 'implemented',
-          recommendation: 'Similar approach in Node.js',
-          implementation: 'Production errors logged not displayed',
-          avsvMapping: ['V7.4.1'],
-          processedAt: new Date()
-        }
-      ]
-    });
-
-    // Ruby on Rails Analysis
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/Ruby_on_Rails_Cheat_Sheet.html',
-      name: 'Ruby on Rails',
-      status: 'processed',
-      processedAt: new Date(),
-      recommendations: [
-        {
-          id: 'rails-01',
-          cheatSheetName: 'Ruby on Rails',
-          category: 'framework',
-          priority: 'medium',
-          title: 'Mass Assignment',
-          description: 'Prevent mass assignment vulnerabilities',
-          currentStatus: 'implemented',
-          recommendation: 'Using Zod schemas prevents this',
-          implementation: 'Explicit field validation in all APIs',
-          avsvMapping: ['V4.1.3'],
-          processedAt: new Date()
-        },
-        {
-          id: 'rails-02',
-          cheatSheetName: 'Ruby on Rails',
-          category: 'framework',
-          priority: 'high',
-          title: 'CSRF Protection',
-          description: 'Enable CSRF protection',
-          currentStatus: 'implemented',
-          recommendation: 'Continue using CSRF middleware',
-          implementation: 'CSRF tokens on state-changing ops',
-          avsvMapping: ['V4.2.2'],
-          processedAt: new Date()
-        }
-      ]
-    });
-
-    // Deserialization Analysis
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/Deserialization_Cheat_Sheet.html',
-      name: 'Deserialization',
-      status: 'processed',
-      processedAt: new Date(),
-      recommendations: [
-        {
-          id: 'deserialization-01',
-          cheatSheetName: 'Deserialization',
-          category: 'backend',
-          priority: 'critical',
-          title: 'Avoid Native Serialization',
-          description: 'Use JSON instead of native serialization',
-          currentStatus: 'implemented',
-          recommendation: 'Continue using JSON for all APIs',
-          implementation: 'All APIs use JSON not native serialization',
-          avsvMapping: ['V5.2.1'],
-          processedAt: new Date()
-        },
-        {
-          id: 'deserialization-02',
-          cheatSheetName: 'Deserialization',
-          category: 'backend',
-          priority: 'high',
-          title: 'Input Validation',
-          description: 'Validate all deserialized data',
-          currentStatus: 'implemented',
-          recommendation: 'Continue using Zod schemas',
-          implementation: 'All inputs validated with Zod',
-          avsvMapping: ['V5.2.2'],
-          processedAt: new Date()
-        }
-      ]
-    });
-
-    // Laravel Analysis
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/Laravel_Cheat_Sheet.html',
-      name: 'Laravel',
-      status: 'processed',
-      processedAt: new Date(),
-      recommendations: [
-        {
-          id: 'laravel-01',
-          cheatSheetName: 'Laravel',
-          category: 'framework',
-          priority: 'medium',
-          title: 'Debug Mode',
-          description: 'Disable debug mode in production',
-          currentStatus: 'implemented',
-          recommendation: 'Similar approach in Node.js',
-          implementation: 'NODE_ENV controls debug mode',
-          avsvMapping: ['V7.4.1'],
-          processedAt: new Date()
-        },
-        {
-          id: 'laravel-02',
-          cheatSheetName: 'Laravel',
-          category: 'authentication',
-          priority: 'high',
-          title: 'Session Security',
-          description: 'Configure secure session settings',
-          currentStatus: 'implemented',
-          recommendation: 'Continue using secure session config',
-          implementation: 'HttpOnly, Secure, SameSite configured',
-          avsvMapping: ['V7.1.1'],
-          processedAt: new Date()
-        }
-      ]
-    });
-
-    // Securing Cascading Style Sheets Analysis
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/Securing_Cascading_Style_Sheets_Cheat_Sheet.html',
-      name: 'Securing Cascading Style Sheets',
-      status: 'processed',
-      processedAt: new Date(),
-      recommendations: [
-        {
-          id: 'css-security-01',
-          cheatSheetName: 'Securing Cascading Style Sheets',
-          category: 'frontend',
-          priority: 'medium',
-          title: 'CSS Isolation',
-          description: 'Isolate CSS by access control level',
-          currentStatus: 'partial',
-          recommendation: 'Consider role-based CSS isolation',
-          implementation: 'Single CSS bundle for all users',
-          avsvMapping: ['V4.3.2'],
-          processedAt: new Date()
-        },
-        {
-          id: 'css-security-02',
-          cheatSheetName: 'Securing Cascading Style Sheets',
-          category: 'frontend',
-          priority: 'low',
-          title: 'Obfuscate Selectors',
-          description: 'Use non-descriptive CSS class names',
-          currentStatus: 'partial',
-          recommendation: 'Consider CSS modules or minification',
-          implementation: 'Using readable class names currently',
-          avsvMapping: ['V4.3.3'],
-          processedAt: new Date()
-        }
-      ]
-    });
-
-    // HTTP Headers Analysis
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Headers_Cheat_Sheet.html',
-      name: 'HTTP Headers',
-      status: 'processed',
-      processedAt: new Date(),
-      recommendations: [
-        {
-          id: 'http-headers-01',
-          cheatSheetName: 'HTTP Headers',
-          category: 'backend',
-          priority: 'critical',
-          title: 'Security Headers',
-          description: 'Implement all security headers',
-          currentStatus: 'implemented',
-          recommendation: 'Continue using Helmet.js',
-          implementation: 'All headers configured via Helmet',
-          avsvMapping: ['V14.4.1'],
-          processedAt: new Date()
-        },
-        {
-          id: 'http-headers-02',
-          cheatSheetName: 'HTTP Headers',
-          category: 'backend',
-          priority: 'high',
-          title: 'HSTS',
-          description: 'Enable Strict-Transport-Security',
-          currentStatus: 'implemented',
-          recommendation: 'Continue with current HSTS config',
-          implementation: 'HSTS enabled with max-age and includeSubDomains',
-          avsvMapping: ['V14.4.2'],
-          processedAt: new Date()
-        }
-      ]
-    });
-
-    // NodeJS Security - Document 404 Error
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/NodeJS_Security_Cheat_Sheet.html',
-      name: 'NodeJS Security',
-      status: 'error',
-      error: '404 - Page not found',
-      processedAt: new Date(),
-      recommendations: []
-    });
-
-    // GraphQL Analysis
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/GraphQL_Cheat_Sheet.html',
-      name: 'GraphQL',
-      status: 'processed',
-      processedAt: new Date(),
-      recommendations: [
-        {
-          id: 'graphql-01',
-          cheatSheetName: 'GraphQL',
-          category: 'backend',
-          priority: 'high',
-          title: 'Query Depth Limiting',
-          description: 'Limit query depth to prevent DoS',
-          currentStatus: 'not_applicable',
-          recommendation: 'Consider if moving to GraphQL',
-          implementation: 'Currently using REST APIs',
-          avsvMapping: ['V11.1.4'],
-          processedAt: new Date()
-        },
-        {
-          id: 'graphql-02',
-          cheatSheetName: 'GraphQL',
-          category: 'backend',
-          priority: 'critical',
-          title: 'Input Validation',
-          description: 'Validate all GraphQL inputs',
-          currentStatus: 'implemented',
-          recommendation: 'Similar approach used for REST',
-          implementation: 'All inputs validated with Zod',
-          avsvMapping: ['V4.1.1'],
-          processedAt: new Date()
-        }
-      ]
-    });
-
-    // LDAP Injection Prevention Analysis
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/LDAP_Injection_Prevention_Cheat_Sheet.html',
-      name: 'LDAP Injection Prevention',
-      status: 'processed',
-      processedAt: new Date(),
-      recommendations: [
-        {
-          id: 'ldap-01',
-          cheatSheetName: 'LDAP Injection Prevention',
-          category: 'backend',
-          priority: 'low',
-          title: 'LDAP Encoding',
-          description: 'Escape LDAP queries properly',
-          currentStatus: 'not_applicable',
-          recommendation: 'No LDAP integration used',
-          implementation: 'Using PostgreSQL not LDAP',
-          avsvMapping: ['V5.3.1'],
-          processedAt: new Date()
-        },
-        {
-          id: 'ldap-02',
-          cheatSheetName: 'LDAP Injection Prevention',
-          category: 'authentication',
-          priority: 'low',
-          title: 'Alternative Auth',
-          description: 'Using modern auth instead of LDAP',
-          currentStatus: 'implemented',
-          recommendation: 'Continue using JWT/Supabase',
-          implementation: 'Modern auth stack implemented',
-          avsvMapping: ['V2.1.1'],
-          processedAt: new Date()
-        }
-      ]
-    });
-
-    // OS Command Injection Defense Analysis
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/OS_Command_Injection_Defense_Cheat_Sheet.html',
-      name: 'OS Command Injection Defense',
-      status: 'processed',
-      processedAt: new Date(),
-      recommendations: [
-        {
-          id: 'os-cmd-01',
-          cheatSheetName: 'OS Command Injection Defense',
-          category: 'backend',
-          priority: 'critical',
-          title: 'Avoid OS Commands',
-          description: 'Avoid calling OS commands directly',
-          currentStatus: 'implemented',
-          recommendation: 'Continue using safe APIs',
-          implementation: 'No OS command execution in app',
-          avsvMapping: ['V5.2.4'],
-          processedAt: new Date()
-        },
-        {
-          id: 'os-cmd-02',
-          cheatSheetName: 'OS Command Injection Defense',
-          category: 'backend',
-          priority: 'high',
-          title: 'Input Validation',
-          description: 'Validate all inputs strictly',
-          currentStatus: 'implemented',
-          recommendation: 'Continue with Zod validation',
-          implementation: 'All inputs validated before use',
-          avsvMapping: ['V5.2.1'],
-          processedAt: new Date()
-        }
-      ]
-    });
-
-    // Query Parameterization Analysis
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/Query_Parameterization_Cheat_Sheet.html',
-      name: 'Query Parameterization',
-      status: 'processed',
-      processedAt: new Date(),
-      recommendations: [
-        {
-          id: 'query-param-01',
-          cheatSheetName: 'Query Parameterization',
-          category: 'database',
-          priority: 'critical',
-          title: 'Parameterized Queries',
-          description: 'Use parameterized queries always',
-          currentStatus: 'implemented',
-          recommendation: 'Continue using Drizzle ORM',
-          implementation: 'Drizzle ORM prevents SQL injection',
-          avsvMapping: ['V5.3.4'],
-          processedAt: new Date()
-        },
-        {
-          id: 'query-param-02',
-          cheatSheetName: 'Query Parameterization',
-          category: 'database',
-          priority: 'high',
-          title: 'Avoid String Concatenation',
-          description: 'Never build SQL with concatenation',
-          currentStatus: 'implemented',
-          recommendation: 'ORM handles query building',
-          implementation: 'No raw SQL concatenation used',
-          avsvMapping: ['V5.3.5'],
-          processedAt: new Date()
-        }
-      ]
-    });
-
-    // Server Side Request Forgery Prevention Analysis
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/Server_Side_Request_Forgery_Prevention_Cheat_Sheet.html',
-      name: 'Server Side Request Forgery Prevention',
-      status: 'processed',
-      processedAt: new Date(),
-      recommendations: [
-        {
-          id: 'ssrf-01',
-          cheatSheetName: 'Server Side Request Forgery Prevention',
-          category: 'backend',
-          priority: 'high',
-          title: 'URL Validation',
-          description: 'Validate all URLs before fetching',
-          currentStatus: 'partial',
-          recommendation: 'Add URL allowlist for webhooks',
-          implementation: 'Basic URL validation in place',
-          avsvMapping: ['V5.2.6'],
-          processedAt: new Date()
-        },
-        {
-          id: 'ssrf-02',
-          cheatSheetName: 'Server Side Request Forgery Prevention',
-          category: 'backend',
-          priority: 'medium',
-          title: 'Network Segmentation',
-          description: 'Isolate external requests',
-          currentStatus: 'partial',
-          recommendation: 'Consider network isolation',
-          implementation: 'Relying on cloud provider security',
-          avsvMapping: ['V1.14.5'],
-          processedAt: new Date()
-        }
-      ]
-    });
-
-    // Infrastructure as Code Security Analysis
-    results.push({
-      url: 'https://cheatsheetseries.owasp.org/cheatsheets/Infrastructure_as_Code_Security_Cheat_Sheet.html',
-      name: 'Infrastructure as Code Security',
-      status: 'processed',
-      processedAt: new Date(),
-      recommendations: [
-        {
-          id: 'iac-01',
-          cheatSheetName: 'Infrastructure as Code Security',
-          category: 'devops',
-          priority: 'high',
-          title: 'Secrets Management',
-          description: 'Never hardcode secrets in IaC',
-          currentStatus: 'implemented',
-          recommendation: 'Continue using environment variables',
-          implementation: 'Using .env files and Replit secrets',
-          avsvMapping: ['V6.4.1'],
-          processedAt: new Date()
-        },
-        {
-          id: 'iac-02',
-          cheatSheetName: 'Infrastructure as Code Security',
-          category: 'devops',
-          priority: 'medium',
-          title: 'Version Control',
-          description: 'Track IaC changes in git',
-          currentStatus: 'implemented',
-          recommendation: 'Continue version control practices',
-          implementation: 'All code tracked in git',
-          avsvMapping: ['V1.10.3'],
           processedAt: new Date()
         }
       ]
