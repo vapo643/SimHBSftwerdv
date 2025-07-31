@@ -165,7 +165,7 @@ router.get('/status/:propostaId', jwtAuthMiddleware, async (req, res) => {
     console.error(`[CLICKSIGN] Error getting status:`, error);
     res.status(500).json({ 
       error: 'Erro ao consultar status ClickSign',
-      details: error.message 
+      details: error instanceof Error ? error.message : 'Unknown error'
     });
   }
 });
@@ -355,7 +355,7 @@ router.post('/webhook', async (req, res) => {
     console.error(`[CLICKSIGN WEBHOOK] ❌ Error processing webhook:`, error);
     res.status(500).json({ 
       error: 'Erro ao processar webhook ClickSign',
-      details: error.message 
+      details: error instanceof Error ? error.message : 'Unknown error'
     });
   }
 });
@@ -378,7 +378,7 @@ router.get('/test', jwtAuthMiddleware, async (req, res) => {
     console.error(`[CLICKSIGN] Connection test error:`, error);
     res.status(500).json({ 
       error: 'Erro ao testar conexão ClickSign',
-      details: error.message 
+      details: error instanceof Error ? error.message : 'Unknown error'
     });
   }
 });
