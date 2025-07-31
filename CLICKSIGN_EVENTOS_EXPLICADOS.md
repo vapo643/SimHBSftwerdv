@@ -2,75 +2,91 @@
 
 ## 🎯 EVENTOS ESSENCIAIS (Configure estes)
 
-### ⭐ `envelope.finished` - MAIS IMPORTANTE
-**O que é**: Disparado quando TODOS os signatários assinaram
+### ⭐ `auto_close` - MAIS IMPORTANTE
+**O que é**: Disparado quando documento é finalizado automaticamente após última assinatura
 **O que faz no sistema**:
 - ✅ Marca proposta como "contratos_assinados"
 - ✅ **DISPARA BOLETO AUTOMÁTICO no Banco Inter**
 - ✅ Atualiza data de assinatura
 - ✅ Log: "CCB assinado com sucesso"
 
-### 🚫 `envelope.cancelled`
-**O que é**: Disparado quando envelope é cancelado
+### 📄 `document_closed`
+**O que é**: Disparado quando documento assinado está pronto para download
+**O que faz no sistema**:
+- 📄 Confirma que documento está finalizado
+- 📝 Log: "Documento pronto para download"
+
+### 🚫 `cancel`
+**O que é**: Disparado quando documento é cancelado manualmente
 **O que faz no sistema**:
 - ❌ Marca proposta como cancelada
-- 📝 Log: "Envelope cancelado no ClickSign"
+- 📝 Log: "Documento cancelado no ClickSign"
 
-### ⏰ `envelope.expired` 
-**O que é**: Disparado quando prazo de assinatura expira
+### ⏰ `deadline` 
+**O que é**: Disparado quando data limite é atingida
 **O que faz no sistema**:
-- ⏰ Marca como expirado
+- ⏰ Marca como expirado se não foi assinado
+- ⏰ Finaliza se tem pelo menos uma assinatura
 - 📝 Log: "Prazo para assinatura excedido"
 
 ## 📊 EVENTOS INFORMATIVOS (Opcionais mas úteis)
 
-### 📄 `envelope.created`
-**O que é**: Disparado quando envelope é criado
-**O que faz**: Apenas log informativo
+### 📤 `upload`
+**O que é**: Disparado quando documento é enviado
+**O que faz**: Log de upload do CCB
 
-### ✍️ `signer.signed`
+### ✍️ `sign`
 **O que é**: Disparado quando UMA pessoa assina (individual)
 **O que faz**: Log de quem assinou e quando
 
-### ❌ `signer.refused`
-**O que é**: Disparado quando alguém recusa assinar
+### ❌ `refusal`
+**O que é**: Disparado quando documento é recusado
 **O que faz**: Log de recusa + marca proposta
+
+### 👥 `add_signer`
+**O que é**: Disparado quando signatários são adicionados
+**O que faz**: Log informativo
 
 ## ❌ EVENTOS DESNECESSÁRIOS (Não configure)
 
-- `envelope.updated` - Muitos disparos desnecessários
-- `document.created` - Redundante
-- `document.signed` - Use `signer.signed` 
-- `signer.updated` - Pouco relevante
+- `add_image` - Não relevante para CCB
+- `remove_signer` - Raramente usado
+- `close` - Use `auto_close` 
+- `update_deadline` - Pouco relevante
+- `update_auto_close` - Configuração, não negócio
+- `custom` - Específico demais
+- Todos os eventos de WhatsApp/Biometria (se não usar)
 
 ## 🎯 CONFIGURAÇÃO RECOMENDADA
 
 **Para começar (mínimo):**
 ```
-✅ envelope.finished
-✅ envelope.cancelled  
-✅ envelope.expired
+✅ auto_close
+✅ cancel  
+✅ deadline
 ```
 
 **Para monitoramento completo:**
 ```
-✅ envelope.finished
-✅ envelope.cancelled
-✅ envelope.expired
-✅ envelope.created
-✅ signer.signed
-✅ signer.refused
+✅ auto_close
+✅ document_closed
+✅ cancel
+✅ deadline
+✅ upload
+✅ sign
+✅ refusal
 ```
 
 ## 🔄 FLUXO TÍPICO
 
-1. **Cliente assina CCB** → `signer.signed` (informativo)
-2. **Todos assinaram** → `envelope.finished` ⭐ **DISPARA BOLETO**
-3. **Sistema atualiza** → Proposta vira "contratos_assinados"
-4. **Boleto gerado** → Cliente recebe para pagamento
+1. **Cliente assina CCB** → `sign` (informativo)
+2. **Todos assinaram** → `auto_close` ⭐ **DISPARA BOLETO**
+3. **Documento pronto** → `document_closed` (confirmação)
+4. **Sistema atualiza** → Proposta vira "contratos_assinados"
+5. **Boleto gerado** → Cliente recebe para pagamento
 
 ## ⚡ RESUMO
 
-**O evento mais importante é `envelope.finished`** - é ele que faz toda a mágica acontecer automaticamente. Os outros são para logs e controle.
+**O evento mais importante é `auto_close`** - é ele que faz toda a mágica acontecer automaticamente. Os outros são para logs e controle.
 
 Configure pelo menos os 3 essenciais, e o sistema vai funcionar perfeitamente!
