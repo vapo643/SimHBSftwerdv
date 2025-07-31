@@ -4,7 +4,9 @@ import { produtos, tabelasComerciais, produtoTabelaComercial } from '../../share
 import { eq, desc } from 'drizzle-orm';
 
 export const buscarTodosProdutos = async () => {
+  const { isNull } = await import("drizzle-orm");
   return await db.query.produtos.findMany({
+    where: isNull(produtos.deletedAt),
     orderBy: [desc(produtos.id)],
   });
 };
@@ -36,7 +38,7 @@ export const verificarProdutoEmUso = async (id: string) => {
     return dependencias.length > 0;
 };
 
-export const deletarProduto = async (id: string) => {
+export const deletarProduto = async (id: string, deletedBy?: string) => {
     const produtoId = parseInt(id);
     
     // Check for dependencies first
@@ -45,6 +47,8 @@ export const deletarProduto = async (id: string) => {
         throw new Error('Este produto não pode ser excluído pois está a ser utilizado por uma ou mais Tabelas Comerciais.');
     }
     
-    // Hard delete if no dependencies
-    await db.delete(produtos).where(eq(produtos.id, produtoId));
+    // Soft delete implementation - set deleted_at timestamp
+    await db.update(produtos)
+        .set({ deletedAt: new Date() })
+        .where(eq(produtos.id, produtoId));
 };

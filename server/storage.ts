@@ -6,6 +6,10 @@ import {
   gerenteLojas,
   lojas,
   parceiros,
+  produtos,
+  tabelasComerciais,
+  profiles,
+  auditDeleteLog,
   interCollections,
   interWebhooks,
   interCallbacks,
@@ -28,7 +32,7 @@ import {
   type InsertInterCallback,
 } from "@shared/schema";
 import { db } from "./lib/supabase";
-import { eq, desc, and, or, not } from "drizzle-orm";
+import { eq, desc, and, or, not, isNull } from "drizzle-orm";
 
 export interface IStorage {
   // Users
@@ -44,7 +48,7 @@ export interface IStorage {
   getPropostasByStatus(status: string): Promise<Proposta[]>;
   createProposta(proposta: InsertProposta): Promise<Proposta>;
   updateProposta(id: string | number, proposta: UpdateProposta): Promise<Proposta>;
-  deleteProposta(id: string | number): Promise<void>;
+  deleteProposta(id: string | number, deletedBy?: string): Promise<void>;
   
   // ClickSign Integration Methods
   getPropostaByClickSignKey(keyType: 'document' | 'list' | 'signer', key: string): Promise<Proposta | undefined>;
@@ -56,7 +60,7 @@ export interface IStorage {
   getLojaById(id: number): Promise<Loja | undefined>;
   createLoja(loja: InsertLoja): Promise<Loja>;
   updateLoja(id: number, loja: UpdateLoja): Promise<Loja>;
-  deleteLoja(id: number): Promise<void>;
+  deleteLoja(id: number, deletedBy?: string): Promise<void>;
   checkLojaDependencies(id: number): Promise<{ hasUsers: boolean; hasPropostas: boolean; hasGerentes: boolean }>;
 
   // Gerente-Lojas Relationships
@@ -179,6 +183,7 @@ export class DatabaseStorage implements IStorage {
           )
         )
       `)
+      .is('deleted_at', null)  // Filter out soft-deleted records
       .order('created_at', { ascending: false });
     
     if (error) {
@@ -259,6 +264,7 @@ export class DatabaseStorage implements IStorage {
         )
       `)
       .eq('id', String(id))
+      .is('deleted_at', null)  // Filter out soft-deleted records
       .single();
     
     if (error || !data) {
@@ -375,7 +381,10 @@ export class DatabaseStorage implements IStorage {
     return await db
       .select()
       .from(propostas)
-      .where(eq(propostas.status, status as any))
+      .where(and(
+        eq(propostas.status, status as any),
+        isNull(propostas.deletedAt)  // Filter out soft-deleted records
+      ))
       .orderBy(desc(propostas.createdAt));
   }
 
@@ -427,17 +436,31 @@ export class DatabaseStorage implements IStorage {
     return result[0];
   }
 
-  async deleteProposta(id: string | number): Promise<void> {
-    await db.delete(propostas).where(eq(propostas.id, String(id)));
+  async deleteProposta(id: string | number, deletedBy?: string): Promise<void> {
+    // Soft delete - set deleted_at timestamp
+    await db.update(propostas)
+      .set({ deletedAt: new Date() })
+      .where(eq(propostas.id, String(id)));
   }
 
   // Lojas CRUD implementation
   async getLojas(): Promise<Loja[]> {
-    return await db.select().from(lojas).where(eq(lojas.isActive, true)).orderBy(lojas.nomeLoja);
+    return await db.select().from(lojas)
+      .where(and(
+        eq(lojas.isActive, true),
+        isNull(lojas.deletedAt)  // Exclude soft-deleted records
+      ))
+      .orderBy(lojas.nomeLoja);
   }
 
   async getLojaById(id: number): Promise<Loja | undefined> {
-    const result = await db.select().from(lojas).where(and(eq(lojas.id, id), eq(lojas.isActive, true))).limit(1);
+    const result = await db.select().from(lojas)
+      .where(and(
+        eq(lojas.id, id), 
+        eq(lojas.isActive, true),
+        isNull(lojas.deletedAt)  // Exclude soft-deleted records
+      ))
+      .limit(1);
     return result[0];
   }
 
@@ -455,14 +478,26 @@ export class DatabaseStorage implements IStorage {
     return result[0];
   }
 
-  async deleteLoja(id: number): Promise<void> {
-    await db.update(lojas).set({ isActive: false }).where(eq(lojas.id, id));
+  async deleteLoja(id: number, deletedBy?: string): Promise<void> {
+    // Soft delete - set both isActive to false AND deleted_at timestamp
+    await db.update(lojas)
+      .set({ 
+        isActive: false,
+        deletedAt: new Date() 
+      })
+      .where(eq(lojas.id, id));
   }
 
   async checkLojaDependencies(id: number): Promise<{ hasUsers: boolean; hasPropostas: boolean; hasGerentes: boolean }> {
     try {
-      // Check if there are proposals associated with this store
-      const propostasCount = await db.select({ id: propostas.id }).from(propostas).where(eq(propostas.lojaId, id)).limit(1);
+      // Check if there are proposals associated with this store (excluding soft-deleted)
+      const propostasCount = await db.select({ id: propostas.id })
+        .from(propostas)
+        .where(and(
+          eq(propostas.lojaId, id),
+          isNull(propostas.deletedAt)
+        ))
+        .limit(1);
       
       // Check if there are manager-store relationships
       const gerentesCount = await db.select({ id: gerenteLojas.gerenteId }).from(gerenteLojas).where(eq(gerenteLojas.lojaId, id)).limit(1);

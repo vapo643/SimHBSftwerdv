@@ -22,6 +22,7 @@ export const parceiros = pgTable("parceiros", {
   comissaoPadrao: decimal("comissao_padrao"),
   tabelaComercialPadraoId: integer("tabela_comercial_padrao_id"),
   createdAt: timestamp("created_at").defaultNow(),
+  deletedAt: timestamp("deleted_at"), // Soft delete column
 });
 
 export const lojas = pgTable("lojas", {
@@ -31,9 +32,21 @@ export const lojas = pgTable("lojas", {
   endereco: text("endereco").notNull(),
   isActive: boolean("is_active").default(true).notNull(),
   createdAt: timestamp("created_at").defaultNow(),
+  deletedAt: timestamp("deleted_at"), // Soft delete column
 });
 
-// Usuários e Perfis
+// Profiles table (Supabase auth integration)
+export const profiles = pgTable("profiles", {
+  id: uuid("id").primaryKey(),
+  fullName: text("full_name"),
+  role: text("role"),
+  lojaId: integer("loja_id").references(() => lojas.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  deletedAt: timestamp("deleted_at"), // Soft delete column
+});
+
+// Usuários e Perfis (legacy table)
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   email: text("email").notNull().unique(),
@@ -162,6 +175,7 @@ export const propostas = pgTable("propostas", {
   // Auditoria
   userId: text("user_id"),
   createdAt: timestamp("created_at").defaultNow(),
+  deletedAt: timestamp("deleted_at"), // Soft delete column
 });
 
 // Tabelas Comerciais (estrutura N:N)
@@ -173,6 +187,7 @@ export const tabelasComerciais = pgTable("tabelas_comerciais", {
   parceiroId: integer("parceiro_id").references(() => parceiros.id),
   comissao: decimal("comissao", { precision: 5, scale: 2 }).notNull().default("0.00"),
   createdAt: timestamp("created_at").defaultNow(),
+  deletedAt: timestamp("deleted_at"), // Soft delete column
 });
 
 // Tabela de Junção N:N - Produtos <-> Tabelas Comerciais
@@ -191,6 +206,7 @@ export const produtos = pgTable("produtos", {
   tacValor: decimal("tac_valor", { precision: 10, scale: 2 }).default("0"),
   tacTipo: text("tac_tipo").notNull().default("fixo"),
   createdAt: timestamp("created_at").defaultNow(),
+  deletedAt: timestamp("deleted_at"), // Soft delete column
 });
 
 // Logs de Comunicação - Multi-tenant  
@@ -224,6 +240,21 @@ export const propostaDocumentos = pgTable("proposta_documentos", {
   tamanho: integer("tamanho"), // tamanho em bytes
   tipo: text("tipo"), // application/pdf, image/jpeg, etc
   createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Audit Delete Log Table (Financial Compliance)
+export const auditDeleteLog = pgTable("audit_delete_log", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  tableName: text("table_name").notNull(),
+  recordId: text("record_id").notNull(),
+  deletedBy: uuid("deleted_by").notNull().references(() => profiles.id),
+  deletedAt: timestamp("deleted_at").notNull().defaultNow(),
+  deletionReason: text("deletion_reason"),
+  recordData: text("record_data").notNull(), // JSONB stored as text
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  restoredAt: timestamp("restored_at"),
+  restoredBy: uuid("restored_by").references(() => profiles.id),
 });
 
 // Banco Inter Integration Tables

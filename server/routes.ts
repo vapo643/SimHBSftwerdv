@@ -1883,10 +1883,12 @@ app.get("/api/tabelas-comerciais-disponiveis", jwtAuthMiddleware, async (req: Au
       const { desc, eq } = await import("drizzle-orm");
       const { tabelasComerciais, produtoTabelaComercial } = await import("../shared/schema");
 
-      // Get all commercial tables ordered by creation date
+      // Get all commercial tables ordered by creation date (excluding soft-deleted)
+      const { isNull } = await import("drizzle-orm");
       const tabelas = await db
         .select()
         .from(tabelasComerciais)
+        .where(isNull(tabelasComerciais.deletedAt))
         .orderBy(desc(tabelasComerciais.createdAt));
 
       // For each table, get associated products
@@ -2062,9 +2064,10 @@ app.get("/api/tabelas-comerciais-disponiveis", jwtAuthMiddleware, async (req: Au
           .delete(produtoTabelaComercial)
           .where(eq(produtoTabelaComercial.tabelaComercialId, tabelaId));
 
-        // Step 2: Delete the commercial table
+        // Step 2: Soft delete the commercial table
         const result = await tx
-          .delete(tabelasComerciais)
+          .update(tabelasComerciais)
+          .set({ deletedAt: new Date() })
           .where(eq(tabelasComerciais.id, tabelaId))
           .returning();
 
@@ -2479,7 +2482,8 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
       const { db } = await import("../server/lib/supabase");
       const { parceiros } = await import("../shared/schema");
       
-      const allParceiros = await db.select().from(parceiros);
+      const { isNull } = await import("drizzle-orm");
+      const allParceiros = await db.select().from(parceiros).where(isNull(parceiros.deletedAt));
       res.json(allParceiros);
     } catch (error) {
       console.error("Erro ao buscar parceiros:", error);
@@ -2574,18 +2578,21 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
     try {
       const { db } = await import("../server/lib/supabase");
       const { parceiros, lojas } = await import("../shared/schema");
-      const { eq } = await import("drizzle-orm");
+      const { eq, and, isNull } = await import("drizzle-orm");
       
       const parceiroId = parseInt(req.params.id);
       if (isNaN(parceiroId)) {
         return res.status(400).json({ message: "ID do parceiro inválido" });
       }
       
-      // Regra de negócio crítica: verificar se existem lojas associadas
+      // Regra de negócio crítica: verificar se existem lojas associadas (excluindo soft-deleted)
       const lojasAssociadas = await db
         .select()
         .from(lojas)
-        .where(eq(lojas.parceiroId, parceiroId));
+        .where(and(
+          eq(lojas.parceiroId, parceiroId),
+          isNull(lojas.deletedAt)
+        ));
       
       if (lojasAssociadas.length > 0) {
         return res.status(409).json({ 
@@ -2593,18 +2600,23 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
         });
       }
       
-      // Verificar se o parceiro existe antes de excluir
+      // Verificar se o parceiro existe antes de excluir (excluindo soft-deleted)
       const [parceiroExistente] = await db
         .select()
         .from(parceiros)
-        .where(eq(parceiros.id, parceiroId));
+        .where(and(
+          eq(parceiros.id, parceiroId),
+          isNull(parceiros.deletedAt)
+        ));
       
       if (!parceiroExistente) {
         return res.status(404).json({ message: "Parceiro não encontrado" });
       }
       
-      // Proceder com a exclusão
-      await db.delete(parceiros).where(eq(parceiros.id, parceiroId));
+      // Soft delete - set deleted_at timestamp
+      await db.update(parceiros)
+        .set({ deletedAt: new Date() })
+        .where(eq(parceiros.id, parceiroId));
       
       res.status(204).send();
     } catch (error) {
@@ -3365,7 +3377,8 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
       const { lojas } = await import("../shared/schema");
       const { count } = await import("drizzle-orm");
       
-      const result = await db.select({ count: count() }).from(lojas);
+      const { isNull } = await import("drizzle-orm");
+      const result = await db.select({ count: count() }).from(lojas).where(isNull(lojas.deletedAt));
       const totalLojas = result[0]?.count || 0;
       
       res.json({ totalLojas });
