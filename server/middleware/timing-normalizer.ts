@@ -158,9 +158,9 @@ class TimingNormalizer {
 
       const startTime = process.hrtime.bigint();
       
-      // Interceptar o final da resposta
-      const originalSend = res.send;
-      res.send = function(this: Response, body: any) {
+      // Interceptar o final da resposta usando res.end (mais confiável)
+      const originalEnd = res.end;
+      res.end = function(this: Response, chunk?: any, encoding?: BufferEncoding | (() => void), cb?: () => void) {
         const endTime = process.hrtime.bigint();
         const actualTimeMs = Number(endTime - startTime) / 1_000_000; // Convert to milliseconds
         
@@ -169,14 +169,16 @@ class TimingNormalizer {
         const targetTime = config.baselineMs + jitter;
         const delayNeeded = Math.max(0, targetTime - actualTimeMs);
         
-        // Aplicar delay artificial de forma assíncrona
-        timingNormalizer.artificialDelay(delayNeeded).then(() => {
+        console.log(`🕐 [TIMING] ${req.method} ${req.path}: actual=${actualTimeMs.toFixed(2)}ms, target=${targetTime.toFixed(2)}ms, delay=${delayNeeded.toFixed(2)}ms`);
+        
+        // Aplicar delay artificial ANTES de enviar resposta
+        setTimeout(() => {
           // Registrar métricas
           timingNormalizer.recordMetrics(req, res, actualTimeMs, delayNeeded);
           
-          // Enviar resposta original
-          originalSend.call(this, body);
-        });
+          // Enviar resposta original com delay aplicado
+          originalEnd.call(this, chunk, encoding as BufferEncoding, cb as (() => void));
+        }, Math.round(delayNeeded));
         
         return this;
       };
