@@ -3668,6 +3668,10 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
   // Register Security routes - OWASP Compliance Monitoring
   setupSecurityRoutes(app);
   
+  // Registrar rotas de monitoramento de segurança em tempo real
+  const { securityMonitoringRouter } = await import('./routes/security-monitoring.js');
+  app.use('/api/security-monitoring', securityMonitoringRouter);
+  
   // Register Email Change routes - OWASP V6.1.3 Compliance
   app.use('/api/auth', emailChangeRoutes);
 
