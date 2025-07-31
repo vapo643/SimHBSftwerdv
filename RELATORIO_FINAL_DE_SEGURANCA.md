@@ -330,8 +330,8 @@ for i in range(1753476064000, 1753476065000):
 ### 5.2 Média Severidade
 
 4. **Missing Audit Trail:** Tabela profiles sem campos updated_at/updated_by
-5. **Weak ID Generation:** IDs previsíveis baseados em timestamp
-6. **No Soft Delete:** Violação de compliance para dados financeiros
+5. **Weak ID Generation:** ✅ **RESOLVIDO** - Migrado para UUIDs criptograficamente seguros (31/01 - 14:25)
+6. **No Soft Delete:** ✅ **RESOLVIDO** - Implementado soft delete completo com audit trail (31/01 - 14:20)
 
 ---
 
@@ -354,11 +354,11 @@ Para alcançar prontidão de produção, é MANDATÓRIO:
 
 1. **[P0 - 2 semanas]** ✅ **RESOLVIDO** - Timing attack corrigido com response padding (31/01 - 14:00)
 2. **[P0 - 1 semana]** ✅ **RESOLVIDO** - Magic number validation implementada (31/01 - 14:15)
-3. **[P1 - 3 semanas]** ⏳ **PENDENTE** - Adicionar soft delete com audit trail completo  
-4. **[P1 - 2 semanas]** ⏳ **PENDENTE** - Migrar para UUIDs ou IDs não-sequenciais
+3. **[P1 - 3 semanas]** ✅ **RESOLVIDO** - Soft delete implementado com audit trail completo (31/01 - 14:20)
+4. **[P1 - 2 semanas]** ✅ **RESOLVIDO** - Migrado para UUIDs criptograficamente seguros (31/01 - 14:25)
 5. **[P2 - 4 semanas]** ⏳ **PENDENTE** - Implementar SAST/DAST no pipeline
 
-### ✅ **PROGRESSO CRÍTICO: 2 DE 5 VULNERABILIDADES RESOLVIDAS**
+### ✅ **PROGRESSO CRÍTICO: 4 DE 5 VULNERABILIDADES RESOLVIDAS**
 
 **Vulnerabilidades P0 (Críticas) - STATUS: 100% RESOLVIDAS**
 - ✅ Timing Attack: Eliminated com 1.12ms timing difference (ASVS Level 3)

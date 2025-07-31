@@ -1375,10 +1375,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/propostas", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     try {
+      const { v4: uuidv4 } = await import('uuid');
 
-
-      // Generate unique numeric ID for the proposal
-      const proposalId = Date.now().toString();
+      // Generate cryptographically secure UUID for the proposal
+      const proposalId = uuidv4();
       
       // Add the generated ID and userId to the request body
       const dataWithId = {
@@ -1727,9 +1727,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { createServerSupabaseAdminClient } = await import('./lib/supabase');
       const supabase = createServerSupabaseAdminClient();
       
-      // Generate unique filename with timestamp
-      const timestamp = Date.now();
-      const fileName = req.body.filename || `${timestamp}-${file.originalname}`;
+      // Generate unique filename with UUID
+      const { v4: uuidv4 } = await import('uuid');
+      const uniqueId = uuidv4().split('-')[0]; // Use first segment of UUID for shorter filename
+      const fileName = req.body.filename || `${uniqueId}-${file.originalname}`;
       const filePath = `proposta-${proposalId}/${fileName}`;
       
       console.log(`[DEBUG] Fazendo upload de ${file.originalname} para ${filePath}`);
@@ -3630,8 +3631,10 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
       const { createServerSupabaseAdminClient } = await import('./lib/supabase');
       const supabase = createServerSupabaseAdminClient();
       
-      // Usar filename do body ou gerar um timestamp
-      const fileName = req.body.filename || `${Date.now()}-${file.originalname}`;
+      // Usar filename do body ou gerar um UUID
+      const { v4: uuidv4 } = await import('uuid');
+      const uniqueId = uuidv4().split('-')[0]; // Use first segment of UUID for shorter filename
+      const fileName = req.body.filename || `${uniqueId}-${file.originalname}`;
       const filePath = `proposta-${proposalId}/${fileName}`;
       
       console.log(`[DEBUG] Fazendo upload de ${file.originalname} para ${filePath}`);
