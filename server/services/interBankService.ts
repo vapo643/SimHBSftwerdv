@@ -165,7 +165,7 @@ class InterBankService {
         'client_id': this.config.clientId,
         'client_secret': this.config.clientSecret,
         'grant_type': 'client_credentials',
-        'scope': 'cobv.write cobv.read' // Required scope for boleto/cobrança
+        'scope': 'boleto-cobranca.read boleto-cobranca.write webhook.write webhook.read' // Official scopes from documentation
       });
       
       console.log(`[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=cobv.write cobv.read`);
