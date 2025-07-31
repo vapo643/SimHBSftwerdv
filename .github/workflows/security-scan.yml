@@ -63,6 +63,23 @@ jobs:
           npm audit --audit-level=moderate
         continue-on-error: true
 
+      # OWASP Dependency-Check with Exception Management
+      - name: Setup OWASP Dependency-Check
+        run: |
+          mkdir -p tools
+          cd tools
+          wget https://github.com/jeremylong/DependencyCheck/releases/download/v8.4.3/dependency-check-8.4.3-release.zip
+          unzip dependency-check-8.4.3-release.zip
+          echo "$PWD/dependency-check/bin" >> $GITHUB_PATH
+          cd ..
+        
+      - name: Run OWASP Dependency-Check with Exceptions
+        run: |
+          pip install pyyaml
+          .security/run-dependency-check.sh
+        id: dependency_check
+        continue-on-error: false
+
       # Trivy vulnerability scanner
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master

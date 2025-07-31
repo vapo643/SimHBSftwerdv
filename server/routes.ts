@@ -3688,6 +3688,10 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
   // Register Inter Bank routes
   app.use('/api/inter', interRoutes);
 
+  // Register Semgrep MCP routes - Projeto Cérbero
+  const securityMCPRoutes = (await import('./routes/security-mcp.js')).default;
+  app.use('/api/security/mcp', securityMCPRoutes);
+
   // Register Security routes - OWASP Compliance Monitoring
   setupSecurityRoutes(app);
   

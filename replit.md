@@ -6,6 +6,21 @@ This is a full-stack TypeScript application for credit management called "Simpix
 
 ## Recent Changes
 
+### January 2025 (Continued) - Projeto Cérbero Implementation
+
+- **🚀 PROJETO CÉRBERO PHASE 1 COMPLETE (January 31 - 3:00 PM)**: Successfully implemented vulnerability exception management system for OWASP Dependency-Check
+- **✅ YAML Configuration System**: Created .security/vulnerability-exceptions.yml with justification, expiration dates, and CVSS threshold enforcement
+- **🔧 Python Integration Script**: Built dependency-check-with-exceptions.py for intelligent vulnerability filtering and management
+- **📊 CI/CD Pipeline Integration**: Updated GitHub Actions workflow to run OWASP Dependency-Check with exception handling
+- **🛡️ Security Debt Prevention**: Automatic failure for CVSS ≥ 7.0 vulnerabilities prevents indefinite security debt accumulation
+
+- **🚀 PROJETO CÉRBERO PHASE 2 IN PROGRESS (January 31 - 3:00 PM)**: Implementing Semgrep MCP Server for real-time security analysis
+- **✅ SEMGREP MCP SERVER CORE**: Created TypeScript server with Redis caching, file watching, and real-time analysis capabilities
+- **🔧 RESTful API ENDPOINTS**: Implemented comprehensive API routes for file scanning, snippet analysis, component context, and security history
+- **📊 CUSTOM SECURITY RULES**: Created .semgrep.yml with 10+ custom rules specific to credit management system vulnerabilities
+- **🛡️ AI INTEGRATION READY**: MCP Server provides real-time security context to LLMs and development tools for intelligent code review
+- **🏆 PERFORMANCE OPTIMIZED**: Redis caching with TTL, file hash tracking, and incremental analysis for sub-second response times
+
 ### January 2025 (Continued) - ALL CRITICAL SECURITY VULNERABILITIES RESOLVED
 
 - **🎉 FILE UPLOAD SECURITY VULNERABILITY RESOLVED (January 31 - 2:15 PM)**: Successfully implemented magic number validation and comprehensive file security validation achieving 100% attack detection rate

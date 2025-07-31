@@ -1,0 +1,190 @@
+rules:
+  # Projeto Cérbero - Regras customizadas para Sistema de Crédito Simpix
+  
+  # Detecção de informações sensíveis de crédito
+  - id: simpix-credit-data-exposure
+    pattern-either:
+      - pattern: |
+          $DATA = {
+            ...,
+            cpf: $CPF,
+            ...
+          }
+      - pattern: |
+          $DATA = {
+            ...,
+            cnpj: $CNPJ,
+            ...
+          }
+      - pattern: console.log(..., $CPF, ...)
+      - pattern: console.log(..., $CNPJ, ...)
+    message: |
+      Possível exposição de dados sensíveis de crédito (CPF/CNPJ). Evite logs de dados PII.
+    languages: [typescript, javascript]
+    severity: ERROR
+    metadata:
+      category: security
+      cwe:
+        - "CWE-359: Exposure of Private Information"
+      owasp:
+        - "A09:2021 - Security Logging and Monitoring Failures"
+      
+  # Validação de taxa de juros
+  - id: simpix-interest-rate-validation
+    pattern-either:
+      - pattern: |
+          $RATE = $VALUE
+          ...
+          if ($RATE > 100) { ... }
+      - pattern: |
+          taxaJuros = $VALUE
+    message: |
+      Validação de taxa de juros necessária. Garanta que taxas estão dentro dos limites legais.
+    languages: [typescript, javascript]
+    severity: WARNING
+    fix: |
+      if (taxaJuros < 0 || taxaJuros > MAX_TAXA_LEGAL) {
+        throw new Error('Taxa de juros fora dos limites permitidos');
+      }
+      
+  # SQL Injection em queries de propostas
+  - id: simpix-proposal-sql-injection
+    pattern-either:
+      - pattern: |
+          db.query(`SELECT * FROM propostas WHERE $FIELD = ${$USER_INPUT}`)
+      - pattern: |
+          supabase.from('propostas').select().eq($FIELD, $USER_INPUT)
+    message: |
+      Possível SQL Injection em queries de propostas. Use prepared statements ou ORM.
+    languages: [typescript, javascript]
+    severity: ERROR
+    metadata:
+      category: security
+      cwe:
+        - "CWE-89: SQL Injection"
+      owasp:
+        - "A03:2021 - Injection"
+        
+  # Falta de validação em uploads de documentos
+  - id: simpix-insecure-file-upload
+    pattern-either:
+      - pattern: |
+          upload.single(...).(..., (req, res) => {
+            ...
+            !req.file.mimetype
+            ...
+          })
+      - pattern: |
+          const $FILE = req.file
+          ...
+          !$FILE.originalname.match(...)
+    message: |
+      Upload de arquivo sem validação adequada. Implemente validação de tipo MIME e extensão.
+    languages: [typescript, javascript]
+    severity: ERROR
+    fix: |
+      const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png'];
+      if (!allowedTypes.includes(req.file.mimetype)) {
+        return res.status(400).json({ error: 'Tipo de arquivo não permitido' });
+      }
+      
+  # Autenticação fraca em endpoints de admin
+  - id: simpix-admin-auth-bypass
+    pattern-either:
+      - pattern: |
+          app.$METHOD('/api/admin/...', (req, res) => {
+            ...
+          })
+      - pattern: |
+          router.$METHOD('/admin/...', async (req, res) => {
+            ...
+          })
+    message: |
+      Endpoint administrativo sem middleware de autenticação. Adicione verificação de role.
+    languages: [typescript, javascript]
+    severity: ERROR
+    fix: |
+      router.$METHOD('/admin/...', jwtAuthMiddleware, requireAdmin, async (req, res) => {
+        // código do handler
+      })
+      
+  # Exposição de stack trace em produção
+  - id: simpix-error-stack-exposure
+    pattern-either:
+      - pattern: |
+          res.status(...).json({
+            ...,
+            stack: $ERROR.stack,
+            ...
+          })
+      - pattern: |
+          res.send($ERROR.stack)
+    message: |
+      Stack trace exposto em resposta. Remova em produção para evitar vazamento de informações.
+    languages: [typescript, javascript]
+    severity: WARNING
+    fix: |
+      res.status(500).json({
+        error: process.env.NODE_ENV === 'production' ? 'Internal Server Error' : error.message
+      })
+      
+  # Falta de rate limiting em endpoints críticos
+  - id: simpix-missing-rate-limit
+    pattern-either:
+      - pattern: |
+          app.post('/api/auth/login', async (req, res) => {
+            ...
+          })
+      - pattern: |
+          app.post('/api/propostas', async (req, res) => {
+            ...
+          })
+    message: |
+      Endpoint crítico sem rate limiting. Adicione proteção contra brute force.
+    languages: [typescript, javascript]
+    severity: WARNING
+    
+  # Validação de CEP insegura
+  - id: simpix-unsafe-cep-validation
+    pattern: |
+      cep.replace(/\D/g, '')
+    message: |
+      Validação de CEP incompleta. Verifique também o comprimento (8 dígitos).
+    languages: [typescript, javascript]
+    severity: INFO
+    fix: |
+      const cepLimpo = cep.replace(/\D/g, '');
+      if (cepLimpo.length !== 8) {
+        throw new Error('CEP inválido');
+      }
+      
+  # Uso inseguro de Math.random para IDs
+  - id: simpix-weak-id-generation
+    pattern-either:
+      - pattern: Math.random().toString(36)
+      - pattern: Date.now() + Math.random()
+    message: |
+      Geração de ID previsível. Use crypto.randomUUID() ou biblioteca UUID.
+    languages: [typescript, javascript]
+    severity: ERROR
+    fix: |
+      import { v4 as uuidv4 } from 'uuid';
+      const id = uuidv4();
+      
+  # Hardcoded secrets
+  - id: simpix-hardcoded-secrets
+    pattern-either:
+      - pattern: |
+          const $SECRET = "$VALUE"
+      - pattern: |
+          SUPABASE_SERVICE_ROLE_KEY = "$VALUE"
+    message: |
+      Possível secret hardcoded. Use variáveis de ambiente.
+    languages: [typescript, javascript]
+    severity: ERROR
+    metadata:
+      category: security
+      cwe:
+        - "CWE-798: Use of Hard-coded Credentials"
+      owasp:
+        - "A07:2021 - Identification and Authentication Failures"
