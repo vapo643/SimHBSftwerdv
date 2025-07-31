@@ -23,7 +23,7 @@ import LojasPage from "@/pages/admin/lojas";
 import EditarPropostaPendenciada from "@/pages/propostas/editar";
 import OWASPAssessment from "@/pages/admin/security/owasp-assessment";
 import { WstgPage } from "@/pages/admin/security/wstg";
-import SecurityDashboard from "@/pages/SecurityDashboard";
+import MonitoramentoAvancadoPage from "@/pages/admin/security/dashboard";
 import SessoesAtivas from "@/pages/configuracoes/sessoes";
 import AlterarEmail from "@/pages/configuracoes/alterar-email";
 import Configuracoes from "@/pages/configuracoes";
@@ -140,7 +140,7 @@ function Router() {
       </Route>
       <Route path="/admin/security/dashboard">
         <ProtectedRoute>
-          <SecurityDashboard />
+          <MonitoramentoAvancadoPage />
         </ProtectedRoute>
       </Route>
       <Route path="/">
