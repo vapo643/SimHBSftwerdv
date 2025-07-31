@@ -4,6 +4,7 @@ import { jwtAuthMiddleware, AuthenticatedRequest } from '../lib/jwt-auth-middlew
 import { OWASPAssessmentService } from '../services/owaspAssessmentService.js';
 import { SAMMUrlProcessor } from '../services/sammUrlProcessor.js';
 import { OwaspCheatSheetService } from '../services/owaspCheatSheetService.js';
+import { OwaspWstgService } from '../services/owaspWstgService.js';
 import multer from 'multer';
 import path from 'path';
 
@@ -326,6 +327,63 @@ router.get('/cheatsheets/recommendations', requireAdmin, async (req: Authenticat
     res.status(500).json({
       success: false,
       error: 'Erro ao processar recomendações de segurança'
+    });
+  }
+});
+
+// POST /api/owasp/wstg/process - Process WSTG URLs
+router.post('/wstg/process', requireAdmin, async (req: AuthenticatedRequest, res) => {
+  try {
+    const wstgData = await import('../data/wstg-urls.json');
+    const allUrls: string[] = [];
+    
+    // Extract all URLs from the JSON structure
+    Object.values(wstgData.categories).forEach((category: any) => {
+      if (category.urls) {
+        allUrls.push(...category.urls);
+      }
+      if (category.complementary) {
+        allUrls.push(...category.complementary);
+      }
+    });
+    
+    console.log(`[WSTG] Processing ${allUrls.length} URLs...`);
+    
+    // Process URLs using the WSTG service
+    const results = await OwaspWstgService.processWstgUrls(allUrls);
+    
+    res.json({
+      success: true,
+      data: {
+        totalProcessed: results.length,
+        testCases: results,
+        summary: OwaspWstgService.getComplianceStatus()
+      },
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('[WSTG] Processing error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Erro ao processar URLs WSTG'
+    });
+  }
+});
+
+// GET /api/owasp/wstg/status - Get WSTG compliance status
+router.get('/wstg/status', requireAdmin, async (req: AuthenticatedRequest, res) => {
+  try {
+    const status = OwaspWstgService.getComplianceStatus();
+    res.json({
+      success: true,
+      data: status,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('[WSTG] Status error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Erro ao obter status WSTG'
     });
   }
 });
