@@ -124,9 +124,15 @@ function generateRequestId(): string {
 
 // Configuração CORS segura
 export function setupCORS() {
+  // In development, allow Replit preview URLs and localhost
   const allowedOrigins = process.env.NODE_ENV === 'production' 
     ? [process.env.FRONTEND_URL || 'https://simpix.com.br']
-    : ['http://localhost:5000', 'http://localhost:3000'];
+    : ['http://localhost:5000', 'http://localhost:3000', 'http://127.0.0.1:5000'];
+    
+  // Allow any Replit URL in development
+  const isReplitUrl = (origin: string) => {
+    return origin.includes('.replit.dev') || origin.includes('.repl.co');
+  };
     
   return {
     origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
@@ -135,9 +141,11 @@ export function setupCORS() {
         return callback(null, true);
       }
       
-      if (allowedOrigins.includes(origin)) {
+      // Allow configured origins or any Replit URL in development
+      if (allowedOrigins.includes(origin) || (process.env.NODE_ENV !== 'production' && isReplitUrl(origin))) {
         callback(null, true);
       } else {
+        console.warn(`[CORS] Blocked origin: ${origin}`);
         callback(new Error('CORS não permitido para esta origem'));
       }
     },

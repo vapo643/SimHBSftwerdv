@@ -125,7 +125,7 @@ export async function jwtAuthMiddleware(
     if (process.env.NODE_ENV === 'development') {
       console.log('🔐 JWT VALIDATION:', {
         hasError: !!error,
-        errorType: error?.type || null,
+        errorType: error?.message || null,
         hasUser: !!data?.user,
         userId: data?.user?.id,
         timestamp: new Date().toISOString()
@@ -208,14 +208,14 @@ export async function jwtAuthMiddleware(
  */
 export async function extractRoleFromToken(authToken: string): Promise<string | null> {
   try {
-    const supabase = createServerSupabaseClient();
+    const { createServerSupabaseAdminClient } = await import('./supabase');
+    const supabase = createServerSupabaseAdminClient();
     const { data, error } = await supabase.auth.getUser(authToken);
     
     if (error || !data.user) {
       return null;
     }
 
-    const { createServerSupabaseAdminClient } = await import('./supabase');
     const supabaseAdmin = createServerSupabaseAdminClient();
     
     const { data: profile } = await supabaseAdmin
