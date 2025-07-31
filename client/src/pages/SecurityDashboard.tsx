@@ -91,7 +91,7 @@ const SEVERITY_COLORS = {
   LOW: '#10b981',
 };
 
-export function SecurityDashboard() {
+export default function SecurityDashboard() {
   const queryClient = useQueryClient();
   const [selectedTimeRange, setSelectedTimeRange] = useState('1h');
   const [autoRefresh, setAutoRefresh] = useState(true);
@@ -267,14 +267,14 @@ export function SecurityDashboard() {
       </div>
       
       {/* Alertas Críticos */}
-      {vulnerabilities?.filter((v: VulnerabilityReport) => v.severity === 'CRITICAL').length > 0 && (
+      {Array.isArray(vulnerabilities) && (vulnerabilities as VulnerabilityReport[]).filter((v: VulnerabilityReport) => v.severity === 'CRITICAL').length > 0 && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Atenção: Vulnerabilidades Críticas Detectadas</AlertTitle>
           <AlertDescription>
             {stats.criticalVulnerabilities} vulnerabilidades críticas requerem ação imediata.
             <div className="mt-2 space-y-1">
-              {vulnerabilities
+              {Array.isArray(vulnerabilities) && (vulnerabilities as VulnerabilityReport[])
                 .filter((v: VulnerabilityReport) => v.severity === 'CRITICAL')
                 .slice(0, 3)
                 .map((vuln: VulnerabilityReport) => (
@@ -531,7 +531,7 @@ function DependenciesPanel({ scans }: any) {
                   <Badge variant="outline">{dep.cve}</Badge>
                   <Badge 
                     style={{ 
-                      backgroundColor: SEVERITY_COLORS[dep.severity],
+                      backgroundColor: SEVERITY_COLORS[dep.severity as keyof typeof SEVERITY_COLORS] || '#10b981',
                       color: 'white'
                     }}
                   >
@@ -696,5 +696,3 @@ function showCriticalAlert(data: any) {
   // Implementar notificação do navegador ou toast
   console.error('ALERTA CRÍTICO:', data);
 }
-
-export default SecurityDashboard;
