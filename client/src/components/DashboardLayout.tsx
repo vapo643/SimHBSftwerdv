@@ -42,11 +42,7 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
   const { toast } = useToast();
   const { user } = useAuth();
   
-  // Debug: Log user info
-  console.log('[DEBUG] User role:', user?.role);
-  console.log('[DEBUG] User data:', user);
-  console.log('[DEBUG] Should show admin menu:', user && true);
-  console.log('[DEBUG] Location:', location);
+
 
   // Base navigation items - varies by role
   const attendantNavigation = [
@@ -111,7 +107,7 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
       navigation = [...managerNavigation, ...financeNavigation, ...adminNavigation];
       break;
     default:
-      navigation = attendantNavigation;
+      navigation = [];
   }
 
   const handleSignOut = async () => {
@@ -191,7 +187,7 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
               </div>
 
               {/* Área Financeira */}
-              {(user?.role === 'FINANCEIRO' || user?.role === 'ADMINISTRADOR' || user?.role === 'ADMIN') && (
+              {(user?.role === 'FINANCEIRO' || user?.role === 'ADMINISTRADOR') && (
                 <div className="space-y-2">
                   <div className="px-3 pb-2">
                     <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
@@ -214,20 +210,8 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
                 </div>
               )}
 
-              {/* DEBUG: Forçar exibição do menu */}
-              <div className="space-y-2">
-                <div className="px-3 pb-2">
-                  <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    DEBUG - Teste Menu
-                  </h3>
-                </div>
-                <div className="text-xs text-red-500 px-3">
-                  User: {user?.email} | Role: {user?.role} | ID: {user?.id}
-                </div>
-              </div>
-
-              {/* Gestão Administrativa - DEBUG: Mostrando para todos temporariamente */}
-              {user && (
+              {/* Gestão Administrativa */}
+              {user?.role === 'ADMINISTRADOR' && (
                 <>
                   <div className="space-y-2">
                     <div className="px-3 pb-2">
