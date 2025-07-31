@@ -246,21 +246,22 @@ router.post('/webhook', async (req, res) => {
       }
     }
 
-    const { event, data } = req.body;
+    // Extract event data from v3 structure
+    const eventData = req.body;
     
-    if (!event || !data) {
+    if (!eventData.event || !eventData.event.type || !eventData.event.data) {
       return res.status(400).json({ error: 'Invalid webhook payload' });
     }
 
     // Check for duplicate events
-    const eventId = `${event}_${data.document?.key || data.list?.key || ''}_${req.body.occurred_at || Date.now()}`;
+    const eventId = `${eventData.event.type}_${eventData.event.data.envelope?.id || eventData.event.data.document?.id || ''}_${eventData.event.created_at || Date.now()}`;
     if (clickSignWebhookService.isDuplicateEvent(eventId)) {
       console.log('[CLICKSIGN WEBHOOK] Duplicate event detected, skipping');
       return res.json({ success: true, message: 'Duplicate event skipped' });
     }
 
     // Process event using webhook service
-    const result = await clickSignWebhookService.processEvent(req.body);
+    const result = await clickSignWebhookService.processEvent(eventData);
     
     if (!result.processed) {
       console.log(`[CLICKSIGN WEBHOOK] Event not processed: ${result.reason}`);
