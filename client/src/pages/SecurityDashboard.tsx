@@ -159,11 +159,11 @@ export function SecurityDashboard() {
   // Calcular estatísticas
   const stats = {
     securityScore: calculateSecurityScore(metrics, vulnerabilities),
-    totalVulnerabilities: vulnerabilities?.length || 0,
-    criticalVulnerabilities: vulnerabilities?.filter((v: VulnerabilityReport) => v.severity === 'CRITICAL').length || 0,
-    recentAnomalies: anomalies?.filter((a: AnomalyDetection) => 
+    totalVulnerabilities: Array.isArray(vulnerabilities) ? vulnerabilities.length : 0,
+    criticalVulnerabilities: Array.isArray(vulnerabilities) ? vulnerabilities.filter((v: VulnerabilityReport) => v.severity === 'CRITICAL').length : 0,
+    recentAnomalies: Array.isArray(anomalies) ? anomalies.filter((a: AnomalyDetection) => 
       new Date(a.timestamp).getTime() > Date.now() - 3600000
-    ).length || 0,
+    ).length : 0,
   };
   
   return (
@@ -173,7 +173,7 @@ export function SecurityDashboard() {
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <Shield className="h-8 w-8 text-primary" />
-            Dashboard de Segurança - Projeto Cérbero
+            Monitoramento Avançado de Segurança
           </h1>
           <p className="text-muted-foreground">
             Sistema autônomo de detecção e prevenção de vulnerabilidades

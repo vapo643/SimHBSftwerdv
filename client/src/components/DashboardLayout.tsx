@@ -82,7 +82,7 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
     
     // Segurança e Compliance
     { name: "🛡️ OWASP Dashboard", href: "/admin/security/owasp", icon: Shield, category: "Segurança" },
-    { name: "🚀 Projeto Cérbero", href: "/admin/security/dashboard", icon: Shield, category: "Segurança" },
+    { name: "🔒 Monitoramento Avançado", href: "/admin/security/dashboard", icon: Shield, category: "Segurança" },
   ];
 
   // Build navigation based on user role
@@ -300,19 +300,29 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
                         Segurança & Compliance
                       </h3>
                     </div>
-                    <Link 
-                      href="/admin/security/owasp"
-                      className={`group flex items-center gap-3 rounded-xl px-3 py-3 transition-all duration-200 ${
-                        location === "/admin/security/owasp"
-                          ? "bg-gradient-to-r from-red-500 to-pink-600 text-white shadow-lg transform scale-105"
-                          : "text-muted-foreground hover:text-foreground hover:bg-accent/50 hover:scale-102"
-                      }`}
-                    >
-                      <div className={`p-2 rounded-lg ${location === "/admin/security/owasp" ? 'bg-white/20' : 'bg-accent/30 group-hover:bg-accent'} transition-colors`}>
-                        <Shield className="h-4 w-4" />
-                      </div>
-                      <span className={`font-medium ${location === "/admin/security/owasp" ? 'text-white' : ''}`}>🔐 Dashboard OWASP</span>
-                    </Link>
+                    {[
+                      { name: "🔐 Dashboard OWASP", href: "/admin/security/owasp", icon: Shield, gradient: "from-red-500 to-pink-600" },
+                      { name: "🔒 Monitoramento Avançado", href: "/admin/security/dashboard", icon: Shield, gradient: "from-purple-500 to-indigo-600" },
+                    ].map(item => {
+                      const Icon = item.icon;
+                      const isActive = location === item.href;
+                      return (
+                        <Link 
+                          key={item.name} 
+                          href={item.href}
+                          className={`group flex items-center gap-3 rounded-xl px-3 py-3 transition-all duration-200 ${
+                            isActive
+                              ? `bg-gradient-to-r ${item.gradient} text-white shadow-lg transform scale-105`
+                              : "text-muted-foreground hover:text-foreground hover:bg-accent/50 hover:scale-102"
+                          }`}
+                        >
+                          <div className={`p-2 rounded-lg ${isActive ? 'bg-white/20' : 'bg-accent/30 group-hover:bg-accent'} transition-colors`}>
+                            <Icon className="h-4 w-4" />
+                          </div>
+                          <span className={`font-medium ${isActive ? 'text-white' : ''}`}>{item.name}</span>
+                        </Link>
+                      );
+                    })}
                   </div>
                 </>
               )}
