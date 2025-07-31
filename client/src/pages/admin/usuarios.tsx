@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Table,
   TableHeader,
@@ -19,7 +21,7 @@ import { useToast } from "@/hooks/use-toast";
 import { api } from "@/lib/apiClient";
 import { queryKeys, invalidationPatterns } from "@/hooks/queries/queryKeys";
 import type { User } from "@shared/schema";
-import { Users, Edit, UserX, UserCheck, Loader2 } from "lucide-react";
+import { Users, Edit, UserX, UserCheck, Loader2, Shield, UserPlus, Activity, BarChart3, TrendingUp, Mail, Calendar, Settings } from "lucide-react";
 
 const UsuariosPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -171,122 +173,310 @@ const UsuariosPage: React.FC = () => {
   if (loadingUsers) {
     return (
       <DashboardLayout title="Gestão de Usuários e Perfis">
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <Users className="h-8 w-8 text-blue-500" />
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Gestão de Usuários</h1>
+        <div className="space-y-8">
+          {/* Header Section Loading */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl shadow-lg">
+                <Users className="h-8 w-8 text-white" />
+              </div>
+              <div>
+                <Skeleton className="h-9 w-64 mb-2" />
+                <Skeleton className="h-4 w-80" />
+              </div>
             </div>
-            <Skeleton className="h-10 w-32" />
+            <Skeleton className="h-12 w-40" />
           </div>
-        </div>
 
-        <div className="bg-black border border-gray-800 rounded-lg shadow">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nome</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Perfil</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {[...Array(5)].map((_, i) => (
-                <TableRow key={i}>
-                  <TableCell><Skeleton className="h-4 w-32" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-48" /></TableCell>
-                  <TableCell><Skeleton className="h-6 w-20" /></TableCell>
-                  <TableCell><Skeleton className="h-6 w-16" /></TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Skeleton className="h-8 w-8" />
-                      <Skeleton className="h-8 w-8" />
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          {/* Statistics Cards Loading */}
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            {[...Array(4)].map((_, i) => (
+              <Card key={i} className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 border-gray-200 dark:border-gray-700">
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-4 w-4" />
+                </CardHeader>
+                <CardContent>
+                  <Skeleton className="h-8 w-12 mb-1" />
+                  <Skeleton className="h-3 w-16" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Users Table Loading */}
+          <Card className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border-gray-200 dark:border-gray-700 shadow-xl">
+            <CardHeader className="border-b border-gray-200 dark:border-gray-700">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                Lista de Usuários
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="border-b border-gray-200 dark:border-gray-700">
+                      <TableHead className="font-semibold text-gray-900 dark:text-white">Usuário</TableHead>
+                      <TableHead className="font-semibold text-gray-900 dark:text-white">Email</TableHead>
+                      <TableHead className="font-semibold text-gray-900 dark:text-white">Perfil</TableHead>
+                      <TableHead className="font-semibold text-gray-900 dark:text-white">Status</TableHead>
+                      <TableHead className="font-semibold text-gray-900 dark:text-white text-center">Ações</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {[...Array(5)].map((_, i) => (
+                      <TableRow key={i} className="border-b border-gray-100 dark:border-gray-700">
+                        <TableCell className="py-4">
+                          <div className="flex items-center gap-3">
+                            <Skeleton className="h-10 w-10 rounded-full" />
+                            <div>
+                              <Skeleton className="h-5 w-32 mb-1" />
+                              <Skeleton className="h-3 w-24" />
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="py-4">
+                          <div className="flex items-center gap-2">
+                            <Skeleton className="h-4 w-4" />
+                            <Skeleton className="h-4 w-48" />
+                          </div>
+                        </TableCell>
+                        <TableCell className="py-4">
+                          <Skeleton className="h-6 w-20 rounded-full" />
+                        </TableCell>
+                        <TableCell className="py-4">
+                          <div className="flex items-center gap-2">
+                            <Skeleton className="h-2 w-2 rounded-full" />
+                            <Skeleton className="h-6 w-16 rounded-full" />
+                          </div>
+                        </TableCell>
+                        <TableCell className="py-4">
+                          <div className="flex items-center justify-center gap-2">
+                            <Skeleton className="h-9 w-9" />
+                            <Skeleton className="h-9 w-9" />
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </DashboardLayout>
     );
   }
 
+  // Calcular estatísticas dos usuários
+  const userStats = {
+    total: users.length,
+    administradores: users.filter(u => u.role === 'ADMINISTRADOR').length,
+    analistas: users.filter(u => u.role === 'ANALISTA').length,
+    atendentes: users.filter(u => u.role === 'ATENDENTE').length,
+    gerentes: users.filter(u => u.role === 'GERENTE').length,
+    financeiro: users.filter(u => u.role === 'FINANCEIRO').length,
+    ativosPercentual: users.length > 0 ? ((users.length / (users.length + 0)) * 100).toFixed(1) : '0'
+  };
+
   return (
     <DashboardLayout title="Gestão de Usuários e Perfis">
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <Users className="h-8 w-8 text-blue-500" />
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Gestão de Usuários</h1>
+      <div className="space-y-8">
+        {/* Header Section */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl shadow-lg">
+              <Users className="h-8 w-8 text-white" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+                Gestão de Usuários
+              </h1>
+              <p className="text-gray-600 dark:text-gray-400 mt-1">
+                Controle completo de usuários e permissões do sistema
+              </p>
+            </div>
           </div>
-          <Button onClick={openNewModal} className="bg-blue-600 hover:bg-blue-700">
-            <Users className="h-4 w-4 mr-2" />
+          <Button 
+            onClick={openNewModal} 
+            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+            size="lg"
+          >
+            <UserPlus className="h-5 w-5 mr-2" />
             Novo Usuário
           </Button>
         </div>
-      </div>
 
-      <div className="bg-black border border-gray-800 rounded-lg shadow">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Nome</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Perfil</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
+        {/* Statistics Cards */}
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900 border-blue-200 dark:border-blue-800">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-blue-700 dark:text-blue-300">Total de Usuários</CardTitle>
+              <Activity className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-blue-900 dark:text-blue-100">{userStats.total}</div>
+              <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                {userStats.ativosPercentual}% ativos
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900 border-green-200 dark:border-green-800">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-green-700 dark:text-green-300">Administradores</CardTitle>
+              <Shield className="h-4 w-4 text-green-600 dark:text-green-400" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-900 dark:text-green-100">{userStats.administradores}</div>
+              <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+                Acesso total
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950 dark:to-purple-900 border-purple-200 dark:border-purple-800">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-purple-700 dark:text-purple-300">Analistas</CardTitle>
+              <BarChart3 className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-purple-900 dark:text-purple-100">{userStats.analistas}</div>
+              <p className="text-xs text-purple-600 dark:text-purple-400 mt-1">
+                Análise de crédito
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-950 dark:to-orange-900 border-orange-200 dark:border-orange-800">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-orange-700 dark:text-orange-300">Atendentes</CardTitle>
+              <Users className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-orange-900 dark:text-orange-100">{userStats.atendentes}</div>
+              <p className="text-xs text-orange-600 dark:text-orange-400 mt-1">
+                Atendimento direto
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Users Table */}
+        <Card className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border-gray-200 dark:border-gray-700 shadow-xl">
+          <CardHeader className="border-b border-gray-200 dark:border-gray-700">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              Lista de Usuários
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
             {users.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={5} className="text-center py-8 text-gray-500">
+              <div className="text-center py-12">
+                <Users className="h-16 w-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
                   Nenhum usuário encontrado
-                </TableCell>
-              </TableRow>
+                </h3>
+                <p className="text-gray-500 dark:text-gray-400">
+                  Comece criando o primeiro usuário do sistema
+                </p>
+              </div>
             ) : (
-              users.map(user => (
-                <TableRow key={user.id}>
-                  <TableCell className="font-medium">{user.name}</TableCell>
-                  <TableCell>{user.email}</TableCell>
-                  <TableCell>
-                    <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
-                      {user.role}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
-                      Ativo
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => openEditModal(user)}
-                        className="h-8 w-8 p-0"
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => toggleUserStatus(user.id)}
-                        className="h-8 w-8 p-0"
-                      >
-                        <UserX className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="border-b border-gray-200 dark:border-gray-700">
+                      <TableHead className="font-semibold text-gray-900 dark:text-white">Usuário</TableHead>
+                      <TableHead className="font-semibold text-gray-900 dark:text-white">Email</TableHead>
+                      <TableHead className="font-semibold text-gray-900 dark:text-white">Perfil</TableHead>
+                      <TableHead className="font-semibold text-gray-900 dark:text-white">Status</TableHead>
+                      <TableHead className="font-semibold text-gray-900 dark:text-white text-center">Ações</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {users.map(user => {
+                      const initials = user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+                      const roleColor = {
+                        'ADMINISTRADOR': 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900 dark:text-red-200',
+                        'ANALISTA': 'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900 dark:text-purple-200',
+                        'ATENDENTE': 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900 dark:text-blue-200',
+                        'GERENTE': 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900 dark:text-green-200',
+                        'FINANCEIRO': 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900 dark:text-yellow-200',
+                        'DIRETOR': 'bg-indigo-100 text-indigo-800 border-indigo-200 dark:bg-indigo-900 dark:text-indigo-200'
+                      }[user.role] || 'bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-900 dark:text-gray-200';
+
+                      return (
+                        <TableRow 
+                          key={user.id} 
+                          className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                        >
+                          <TableCell className="py-4">
+                            <div className="flex items-center gap-3">
+                              <Avatar className="h-10 w-10 border-2 border-white dark:border-gray-700 shadow-md">
+                                <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold">
+                                  {initials}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <div className="font-semibold text-gray-900 dark:text-white">{user.name}</div>
+                                <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                                  <Calendar className="h-3 w-3" />
+                                  Criado em {new Date(user.createdAt || Date.now()).toLocaleDateString('pt-BR')}
+                                </div>
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell className="py-4">
+                            <div className="flex items-center gap-2">
+                              <Mail className="h-4 w-4 text-gray-400" />
+                              <span className="text-gray-600 dark:text-gray-300">{user.email}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="py-4">
+                            <Badge className={`px-3 py-1 text-xs font-semibold border ${roleColor}`}>
+                              {user.role}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="py-4">
+                            <div className="flex items-center gap-2">
+                              <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
+                              <Badge className="px-3 py-1 text-xs font-semibold bg-green-100 text-green-800 border-green-200 dark:bg-green-900 dark:text-green-200">
+                                Ativo
+                              </Badge>
+                            </div>
+                          </TableCell>
+                          <TableCell className="py-4">
+                            <div className="flex items-center justify-center gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => openEditModal(user)}
+                                className="h-9 w-9 p-0 border-blue-200 hover:bg-blue-50 hover:border-blue-300 dark:border-blue-700 dark:hover:bg-blue-900/20"
+                                title="Editar usuário"
+                              >
+                                <Edit className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => toggleUserStatus(user.id)}
+                                className="h-9 w-9 p-0 border-red-200 hover:bg-red-50 hover:border-red-300 dark:border-red-700 dark:hover:bg-red-900/20"
+                                title="Desativar usuário"
+                              >
+                                <UserX className="h-4 w-4 text-red-600 dark:text-red-400" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
             )}
-          </TableBody>
-        </Table>
+          </CardContent>
+        </Card>
       </div>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
