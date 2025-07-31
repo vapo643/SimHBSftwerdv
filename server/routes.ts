@@ -3598,9 +3598,14 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
   });
 
   // ====================================
+  // IMPORT SECURE FILE VALIDATION MIDDLEWARE
+  // ====================================
+  const { secureFileValidationMiddleware } = await import('./middleware/file-validation.js');
+  
+  // ====================================
   // ENDPOINT DE UPLOAD DE DOCUMENTOS
   // ====================================
-  app.post("/api/upload", upload.single('file'), jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+  app.post("/api/upload", upload.single('file'), secureFileValidationMiddleware, jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     try {
       const file = req.file;
       const proposalId = req.body.proposalId || req.body.filename?.split('-')[0] || 'temp';
@@ -3691,6 +3696,30 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
   app.get("/api/test/timing-invalid", timingNormalizerMiddleware, async (req, res) => {
     // Immediate response for invalid ID  
     res.status(404).json({ message: "Invalid test response", timestamp: new Date().toISOString() });
+  });
+
+  // 🛡️ TEST ENDPOINT: File validation (NO AUTH for testing)
+  app.post("/api/test/file-validation", upload.single('file'), secureFileValidationMiddleware, async (req, res) => {
+    console.log('🛡️ [TEST ENDPOINT] File validation passed, file is safe');
+    res.json({ 
+      message: "File validation passed", 
+      filename: req.file?.originalname,
+      size: req.file?.size,
+      type: req.file?.mimetype,
+      timestamp: new Date().toISOString() 
+    });
+  });
+
+  // 🛡️ TEST ENDPOINT: File validation (NO AUTH for testing)
+  app.post("/api/test/file-validation", upload.single('file'), secureFileValidationMiddleware, async (req, res) => {
+    console.log('🛡️ [TEST ENDPOINT] File validation passed, file is safe');
+    res.json({ 
+      message: "File validation passed", 
+      filename: req.file?.originalname,
+      size: req.file?.size,
+      type: req.file?.mimetype,
+      timestamp: new Date().toISOString() 
+    });
   });
   
   // Register Email Change routes - OWASP V6.1.3 Compliance
