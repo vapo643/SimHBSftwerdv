@@ -1,0 +1,8 @@
+{
+  "scripts": {
+    "build:clean-comments": "node scripts/remove-comments.js",
+    "build:production": "NODE_ENV=production npm run build && npm run build:clean-comments",
+    "prebuild": "echo '🔐 Building secure production bundle...'",
+    "postbuild": "echo '✅ Production build complete with security enhancements'"
+  }
+}
