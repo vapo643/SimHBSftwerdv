@@ -21,6 +21,7 @@ import {
   Package, // Adicionando o ícone para produtos
   Store, // Adicionando o ícone para lojas
   Shield, // Adicionando o ícone para segurança OWASP
+  Receipt, // Adicionando o ícone para cobranças
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -67,6 +68,7 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
   // Financial navigation items - only visible to FINANCEIRO role
   const financeNavigation = [
     { name: "Pagamentos", href: "/financeiro/pagamentos", icon: CreditCard },
+    { name: "Cobranças", href: "/financeiro/cobrancas", icon: Receipt },
   ];
 
   // Administrative navigation items - organized by categories
@@ -101,7 +103,10 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
       navigation = managerNavigation;
       break;
     case 'FINANCEIRO':
-      navigation = [...managerNavigation, ...financeNavigation];
+      navigation = financeNavigation;
+      break;
+    case 'DIRETOR':
+      navigation = [...managerNavigation, ...financeNavigation, ...adminNavigation];
       break;
     case 'ADMINISTRADOR':
       navigation = [...managerNavigation, ...financeNavigation, ...adminNavigation];
@@ -187,7 +192,7 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
               </div>
 
               {/* Área Financeira */}
-              {(user?.role === 'FINANCEIRO' || user?.role === 'ADMINISTRADOR') && (
+              {(user?.role === 'FINANCEIRO' || user?.role === 'ADMINISTRADOR' || user?.role === 'DIRETOR') && (
                 <div className="space-y-2">
                   <div className="px-3 pb-2">
                     <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
@@ -207,11 +212,24 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
                     </div>
                     <span className={`font-medium ${location === "/financeiro/pagamentos" ? 'text-white' : ''}`}>💳 Pagamentos</span>
                   </Link>
+                  <Link 
+                    href="/financeiro/cobrancas"
+                    className={`group flex items-center gap-3 rounded-xl px-3 py-3 transition-all duration-200 ${
+                      location === "/financeiro/cobrancas"
+                        ? "bg-gradient-to-r from-purple-500 to-pink-600 text-white shadow-lg transform scale-105"
+                        : "text-muted-foreground hover:text-foreground hover:bg-accent/50 hover:scale-102"
+                    }`}
+                  >
+                    <div className={`p-2 rounded-lg ${location === "/financeiro/cobrancas" ? 'bg-white/20' : 'bg-accent/30 group-hover:bg-accent'} transition-colors`}>
+                      <Receipt className="h-4 w-4" />
+                    </div>
+                    <span className={`font-medium ${location === "/financeiro/cobrancas" ? 'text-white' : ''}`}>📑 Cobranças</span>
+                  </Link>
                 </div>
               )}
 
               {/* Gestão Administrativa */}
-              {user?.role === 'ADMINISTRADOR' && (
+              {(user?.role === 'ADMINISTRADOR' || user?.role === 'DIRETOR') && (
                 <>
                   <div className="space-y-2">
                     <div className="px-3 pb-2">
