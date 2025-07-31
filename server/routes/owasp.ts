@@ -258,7 +258,7 @@ router.post('/samm/process-pdf', requireAdmin, async (req: AuthenticatedRequest,
 // GET /api/owasp/cheatsheets - OWASP Cheat Sheets Analysis
 router.get('/cheatsheets', requireAdmin, async (req: AuthenticatedRequest, res) => {
   try {
-    const cheatsheets = await owaspCheatSheetService.processCheatSheets();
+    const cheatsheets = await owaspCheatSheetService.processAllCheatSheets();
     res.json({
       success: true,
       data: {
