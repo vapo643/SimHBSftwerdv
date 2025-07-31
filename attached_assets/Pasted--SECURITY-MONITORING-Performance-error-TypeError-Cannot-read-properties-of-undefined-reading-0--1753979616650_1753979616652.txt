@@ -1,0 +1,75 @@
+[SECURITY MONITORING] Performance error: TypeError: Cannot read properties of undefined (reading '0')
+    at <anonymous> (/home/runner/workspace/server/routes/security-monitoring.ts:177:33)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+🔐 JWT VALIDATION DEBUG: {
+  hasError: false,
+  errorMessage: undefined,
+  hasUser: true,
+  tokenLength: 767,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-07-31T16:31:47.519Z'
+}
+🔐 JWT VALIDATION DEBUG: {
+  hasError: false,
+  errorMessage: undefined,
+  hasUser: true,
+  tokenLength: 767,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-07-31T16:32:01.311Z'
+}
+🔐 JWT VALIDATION DEBUG: {
+  hasError: false,
+  errorMessage: undefined,
+  hasUser: true,
+  tokenLength: 767,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-07-31T16:32:05.013Z'
+}
+[MCP API] Scan request for: server/routes.ts
+[SEMGREP MCP] Scanning file: server/routes.ts
+🔐 JWT VALIDATION DEBUG: {
+  hasError: false,
+  errorMessage: undefined,
+  hasUser: true,
+  tokenLength: 767,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-07-31T16:32:19.539Z'
+}
+🔐 JWT VALIDATION DEBUG: {
+  hasError: false,
+  errorMessage: undefined,
+  hasUser: true,
+  tokenLength: 767,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-07-31T16:32:21.015Z'
+}
+[MCP API] Scan request for: server/routes.ts
+[SEMGREP MCP] Scanning file: server/routes.ts
+🔐 JWT VALIDATION DEBUG: {
+  hasError: false,
+  errorMessage: undefined,
+  hasUser: true,
+  tokenLength: 767,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-07-31T16:32:38.106Z'
+}
+[MCP API] Scan request for: server/routes.ts
+[SEMGREP MCP] Scanning file: server/routes.ts
+🔐 JWT VALIDATION DEBUG: {
+  hasError: false,
+  errorMessage: undefined,
+  hasUser: true,
+  tokenLength: 767,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-07-31T16:32:56.266Z'
+}
+🔐 JWT VALIDATION DEBUG: {
+  hasError: false,
+  errorMessage: undefined,
+  hasUser: true,
+  tokenLength: 767,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-07-31T16:33:01.874Z'
+}
+[MCP API] Scan request for: server/routes.ts
+[SEMGREP MCP] Cache hit for server/routes.ts

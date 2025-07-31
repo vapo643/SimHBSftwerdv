@@ -132,12 +132,12 @@ router.get('/alerts', async (req: AuthenticatedRequest, res) => {
     // Por enquanto, retornar alertas simulados baseados em atividade real
     const recentActivity = await db
       .select({
-        user_id: propostas.criado_por,
-        created_at: propostas.created_at,
+        user_id: propostas.atendenteId,
+        created_at: propostas.createdAt,
         status: propostas.status
       })
       .from(propostas)
-      .orderBy(desc(propostas.created_at))
+      .orderBy(desc(propostas.createdAt))
       .limit(10);
 
     const alerts = recentActivity.map((activity, index) => ({
@@ -174,7 +174,7 @@ router.get('/performance', async (req: AuthenticatedRequest, res) => {
         (SELECT count(*) FROM information_schema.tables WHERE table_schema = 'public') as table_count
     `);
 
-    const stats = databaseStats.rows[0] as any;
+    const stats = databaseStats && databaseStats[0] ? databaseStats[0] as any : {};
 
     res.json({
       success: true,

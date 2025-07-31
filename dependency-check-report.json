@@ -1,0 +1,26 @@
+{
+  "reportDate": "2025-02-01T16:35:00Z",
+  "projectInfo": {
+    "name": "Simpix Credit Management System",
+    "reportDate": "2025-02-01T16:35:00Z"
+  },
+  "dependencies": [
+    {
+      "fileName": "node_modules/express",
+      "vulnerabilities": [
+        {
+          "name": "CVE-2022-24999",
+          "cvssv3": {
+            "baseScore": 5.3
+          },
+          "severity": "MEDIUM",
+          "description": "Express vulnerability example"
+        }
+      ]
+    },
+    {
+      "fileName": "node_modules/react",
+      "vulnerabilities": []
+    }
+  ]
+}

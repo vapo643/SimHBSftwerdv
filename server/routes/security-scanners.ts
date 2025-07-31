@@ -138,37 +138,36 @@ router.get('/sca/latest', requireAdmin, async (req: AuthenticatedRequest, res) =
  */
 router.post('/sca/run', requireAdmin, async (req: AuthenticatedRequest, res) => {
   try {
-    const { spawn } = await import('child_process')
+    // Check if script exists first
+    const scriptPath = join(process.cwd(), '.security/run-dependency-check.sh')
     
-    // Run dependency check script
-    const script = spawn('bash', ['.security/run-dependency-check.sh'], {
+    try {
+      await fs.access(scriptPath)
+    } catch (e) {
+      return res.status(500).json({
+        success: false,
+        error: 'Script de análise não encontrado'
+      })
+    }
+    
+    const { exec } = await import('child_process')
+    const { promisify } = await import('util')
+    const execAsync = promisify(exec)
+    
+    // Send immediate response
+    res.json({
+      success: true,
+      message: 'Análise de dependências iniciada. Verifique novamente em alguns segundos.'
+    })
+    
+    // Run analysis in background
+    execAsync('bash .security/run-dependency-check.sh', {
       cwd: process.cwd()
-    })
-    
-    let output = ''
-    let error = ''
-    
-    script.stdout.on('data', (data) => {
-      output += data.toString()
-    })
-    
-    script.stderr.on('data', (data) => {
-      error += data.toString()
-    })
-    
-    script.on('close', (code) => {
-      if (code === 0) {
-        res.json({
-          success: true,
-          message: 'Análise de dependências iniciada com sucesso',
-          output
-        })
-      } else {
-        res.status(500).json({
-          success: false,
-          error: `Script falhou com código ${code}: ${error}`
-        })
-      }
+    }).then(({ stdout, stderr }) => {
+      console.log('[SCA] Analysis completed:', stdout)
+      if (stderr) console.error('[SCA] Warnings:', stderr)
+    }).catch(error => {
+      console.error('[SCA] Analysis failed:', error)
     })
     
   } catch (error) {

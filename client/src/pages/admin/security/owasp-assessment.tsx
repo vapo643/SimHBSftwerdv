@@ -127,17 +127,29 @@ export default function OWASPAssessment() {
     try {
       const response = await fetchWithToken(`/api/security/mcp/scan/${encodeURIComponent(sastFilePath)}`);
       
-      if (response.success) {
-        setSastResults(response.data.results);
+      if (response.success && response.analysis) {
+        // Adaptar o formato da resposta
+        const findings = response.analysis.findings || [];
+        const formattedResults = findings.map((finding: any) => ({
+          file: sastFilePath,
+          line: finding.location?.start?.line || 0,
+          column: finding.location?.start?.column || 0,
+          message: finding.message || 'Sem descrição',
+          severity: finding.severity || 'INFO',
+          rule_id: finding.rule_id || 'unknown',
+          category: finding.metadata?.category || 'security'
+        }));
+        
+        setSastResults(formattedResults);
         toast({ 
           title: 'Análise concluída',
-          description: `${response.data.results.length} problemas encontrados`
+          description: `${formattedResults.length} problema${formattedResults.length !== 1 ? 's' : ''} encontrado${formattedResults.length !== 1 ? 's' : ''}`
         });
       } else {
-        toast({ title: 'Erro na análise', variant: 'destructive' });
+        toast({ title: 'Erro na análise', description: response.error || 'Erro desconhecido', variant: 'destructive' });
       }
-    } catch (error) {
-      toast({ title: 'Erro ao conectar com Semgrep', variant: 'destructive' });
+    } catch (error: any) {
+      toast({ title: 'Erro ao conectar com Semgrep', description: error.message || 'Erro de conexão', variant: 'destructive' });
     } finally {
       setSastScanning(false);
     }
