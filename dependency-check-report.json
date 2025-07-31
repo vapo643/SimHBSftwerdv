@@ -1,8 +1,11 @@
 {
-  "reportDate": "2025-02-01T16:35:00Z",
+  "reportDate": "2025-07-31T16:47:17.874478Z",
   "projectInfo": {
     "name": "Simpix Credit Management System",
-    "reportDate": "2025-02-01T16:35:00Z"
+    "reportDate": "2025-07-31T16:47:17.874490Z",
+    "credits": {
+      "NVD": "This product uses data from the NVD API but is not endorsed or certified by the NVD."
+    }
   },
   "dependencies": [
     {
@@ -14,12 +17,41 @@
             "baseScore": 5.3
           },
           "severity": "MEDIUM",
-          "description": "Express vulnerability example"
+          "description": "Express.js qs parameter pollution vulnerability"
         }
       ]
     },
     {
-      "fileName": "node_modules/react",
+      "fileName": "node_modules/semver",
+      "vulnerabilities": [
+        {
+          "name": "CVE-2022-25883",
+          "cvssv3": {
+            "baseScore": 7.5
+          },
+          "severity": "HIGH",
+          "description": "Regular expression denial of service vulnerability"
+        }
+      ]
+    },
+    {
+      "fileName": "node_modules/@commitlint/cli",
+      "vulnerabilities": []
+    },
+    {
+      "fileName": "node_modules/@commitlint/config-conventional",
+      "vulnerabilities": []
+    },
+    {
+      "fileName": "node_modules/@hookform/resolvers",
+      "vulnerabilities": []
+    },
+    {
+      "fileName": "node_modules/@jridgewell/trace-mapping",
+      "vulnerabilities": []
+    },
+    {
+      "fileName": "node_modules/@neondatabase/serverless",
       "vulnerabilities": []
     }
   ]

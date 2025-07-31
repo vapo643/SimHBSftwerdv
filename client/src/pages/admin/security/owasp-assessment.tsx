@@ -106,12 +106,17 @@ export default function OWASPAssessment() {
     mutationFn: () => fetchWithToken('/api/security-scanners/sca/run', {
       method: 'POST'
     }),
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast({ title: 'Análise de dependências iniciada' });
-      setTimeout(() => refetchSCA(), 5000); // Refetch após 5 segundos
+      // Invalidar e refetch imediatamente, depois novamente em 5 segundos
+      queryClient.invalidateQueries({ queryKey: ['/api/security-scanners/sca/latest'] });
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['/api/security-scanners/sca/latest'] });
+        refetchSCA();
+      }, 5000);
     },
-    onError: () => {
-      toast({ title: 'Erro ao iniciar análise', variant: 'destructive' });
+    onError: (error: any) => {
+      toast({ title: 'Erro ao iniciar análise', description: error.message || 'Erro desconhecido', variant: 'destructive' });
     }
   });
   
@@ -124,12 +129,17 @@ export default function OWASPAssessment() {
     
     setSastScanning(true);
     setSastResults(null); // Clear previous results
+    
     try {
+      console.log(`🔍 Iniciando scan SAST para: ${sastFilePath}`);
+      
       const response = await fetchWithToken(`/api/security/mcp/scan/${encodeURIComponent(sastFilePath)}`);
       
-      if (response.success && response.analysis) {
+      console.log('📊 Resposta do scan SAST:', response);
+      
+      if (response && (response as any).success && (response as any).analysis) {
         // Adaptar o formato da resposta
-        const findings = response.analysis.findings || [];
+        const findings = (response as any).analysis.findings || [];
         const formattedResults = findings.map((finding: any) => ({
           file: sastFilePath,
           line: finding.location?.start?.line || 0,
@@ -141,15 +151,29 @@ export default function OWASPAssessment() {
         }));
         
         setSastResults(formattedResults);
+        
         toast({ 
-          title: 'Análise concluída',
+          title: 'Análise SAST concluída',
           description: `${formattedResults.length} problema${formattedResults.length !== 1 ? 's' : ''} encontrado${formattedResults.length !== 1 ? 's' : ''}`
         });
+        
+        console.log(`✅ SAST concluído: ${formattedResults.length} problemas encontrados`);
+        
       } else {
-        toast({ title: 'Erro na análise', description: response.error || 'Erro desconhecido', variant: 'destructive' });
+        console.error('❌ Erro na resposta SAST:', response);
+        toast({ 
+          title: 'Erro na análise', 
+          description: (response as any).error || 'Nenhum resultado retornado', 
+          variant: 'destructive' 
+        });
       }
     } catch (error: any) {
-      toast({ title: 'Erro ao conectar com Semgrep', description: error.message || 'Erro de conexão', variant: 'destructive' });
+      console.error('❌ Erro ao executar SAST:', error);
+      toast({ 
+        title: 'Erro ao conectar com Semgrep', 
+        description: error.message || 'Erro de conexão', 
+        variant: 'destructive' 
+      });
     } finally {
       setSastScanning(false);
     }
@@ -1142,7 +1166,7 @@ export default function OWASPAssessment() {
                           </div>
                           <div className="space-y-1">
                             <h5 className="text-sm font-medium">Recomendações:</h5>
-                            {Array.isArray(assessment.recommendations) ? assessment.recommendations.map((rec, i) => (
+                            {Array.isArray(assessment.recommendations) ? assessment.recommendations.map((rec: string, i: number) => (
                               <div key={i} className="text-sm text-muted-foreground">• {rec}</div>
                             )) : (
                               <div className="text-sm text-muted-foreground">• Sem recomendações disponíveis</div>
