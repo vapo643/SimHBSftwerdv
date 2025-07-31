@@ -82,6 +82,9 @@ router.post('/send-ccb/:propostaId', jwtAuthMiddleware, async (req: Authenticate
       });
     }
 
+    // Generate filename for ClickSign
+    const filename = `CCB-${propostaId}-${Date.now()}.pdf`;
+
     // Validate PDF security
     try {
       clickSignSecurityService.validatePDF(ccbBuffer, filename);
@@ -102,7 +105,6 @@ router.post('/send-ccb/:propostaId', jwtAuthMiddleware, async (req: Authenticate
     console.log('[CLICKSIGN AUDIT]', auditLog);
 
     // 4. Send to ClickSign
-    const filename = `CCB-${propostaId}-${Date.now()}.pdf`;
     const clickSignResult = await clickSignService.sendCCBForSignature(
       ccbBuffer,
       filename,
