@@ -125,7 +125,19 @@ export default function SecurityDashboard() {
   // WebSocket para eventos em tempo real
   useEffect(() => {
     try {
-      const ws = new WebSocket(`${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws/security`);
+      // Get the correct port from window.location
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const host = window.location.hostname;
+      const port = window.location.port || (window.location.protocol === 'https:' ? '443' : '80');
+      const wsUrl = `${protocol}//${host}:${port}/ws/security`;
+      
+      console.log('🔌 [SecurityDashboard] Connecting to WebSocket:', wsUrl);
+      
+      const ws = new WebSocket(wsUrl);
+      
+      ws.onopen = () => {
+        console.log('🔌 [SecurityDashboard] WebSocket connected successfully');
+      };
       
       ws.onmessage = (event) => {
         const data = JSON.parse(event.data);
@@ -145,14 +157,18 @@ export default function SecurityDashboard() {
       };
       
       ws.onerror = (error) => {
-        console.error('WebSocket error:', error);
+        console.error('🔌 [SecurityDashboard] WebSocket error:', error);
+      };
+      
+      ws.onclose = (event) => {
+        console.log('🔌 [SecurityDashboard] WebSocket closed:', event.code, event.reason);
       };
       
       return () => {
         ws.close();
       };
     } catch (error) {
-      console.error('Failed to create WebSocket connection:', error);
+      console.error('🔌 [SecurityDashboard] Failed to create WebSocket connection:', error);
     }
   }, [queryClient]);
   
