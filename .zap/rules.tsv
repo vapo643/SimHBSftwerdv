@@ -1,0 +1,41 @@
+# OWASP ZAP Custom Rules Configuration
+# Format: Rule_ID	Rule_Name	Threshold	Strength
+# Threshold: OFF, LOW, MEDIUM, HIGH
+# Strength: LOW, MEDIUM, HIGH, INSANE
+
+# SQL Injection
+40018	SQL Injection	HIGH	HIGH
+40019	SQL Injection - MySQL	HIGH	HIGH
+40020	SQL Injection - Hypersonic	HIGH	HIGH
+40021	SQL Injection - Oracle	HIGH	HIGH
+40022	SQL Injection - PostgreSQL	HIGH	HIGH
+40024	SQL Injection - SQLite	HIGH	HIGH
+
+# Cross Site Scripting
+40012	Cross Site Scripting (Reflected)	HIGH	HIGH
+40014	Cross Site Scripting (Persistent)	HIGH	HIGH
+40016	Cross Site Scripting (Persistent) - Prime	HIGH	HIGH
+40017	Cross Site Scripting (Persistent) - Spider	HIGH	HIGH
+
+# Authentication
+10011	Cookie Without Secure Flag	MEDIUM	MEDIUM
+10015	Incomplete or No Cache-control Header Set	MEDIUM	MEDIUM
+10017	Cross-Domain JavaScript Source File Inclusion	MEDIUM	MEDIUM
+10019	Content-Type Header Missing	LOW	LOW
+10020	Anti-clickjacking Header	MEDIUM	MEDIUM
+10021	X-Content-Type-Options Header Missing	MEDIUM	MEDIUM
+10023	Information Disclosure - Debug Error Messages	MEDIUM	MEDIUM
+10024	Information Disclosure - Sensitive Information in URL	MEDIUM	MEDIUM
+10025	Information Disclosure - Sensitive Information in HTTP Referrer Header	MEDIUM	MEDIUM
+10027	Information Disclosure - Suspicious Comments	LOW	LOW
+
+# OWASP Top 10 specific rules
+90001	Insecure JSF ViewState	HIGH	HIGH
+90011	Charset Mismatch	LOW	LOW
+90022	Application Error Disclosure	MEDIUM	MEDIUM
+90033	Loosely Scoped Cookie	MEDIUM	MEDIUM
+
+# Disable false positive prone rules for APIs
+10015	Incomplete or No Cache-control Header Set	OFF	LOW
+10049	Storable and Cacheable Content	OFF	LOW
+10050	Retrieved from Cache	OFF	LOW

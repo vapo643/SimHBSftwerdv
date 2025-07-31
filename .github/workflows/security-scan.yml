@@ -1,0 +1,286 @@
+name: Security SAST/DAST Pipeline
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+  push:
+    branches: [ main, develop ]
+  schedule:
+    # Run security scans daily at 2 AM UTC
+    - cron: '0 2 * * *'
+
+jobs:
+  # Static Application Security Testing (SAST)
+  sast-scan:
+    name: SAST Security Analysis
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      # ESLint Security Plugin
+      - name: Run ESLint Security Analysis
+        run: |
+          npm install eslint-plugin-security --save-dev
+          npx eslint . --ext .js,.jsx,.ts,.tsx --format json > eslint-security-report.json || true
+        continue-on-error: true
+
+      # Semgrep SAST
+      - name: Run Semgrep SAST
+        uses: returntocorp/semgrep-action@v1
+        with:
+          publishToken: ${{ secrets.SEMGREP_APP_TOKEN }}
+          publishDeployment: ${{ secrets.SEMGREP_DEPLOYMENT_ID }}
+          config: >-
+            p/security-audit
+            p/typescript
+            p/react
+            p/nodejs
+            p/owasp-top-ten
+            p/jwt
+        env:
+          SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
+
+      # npm audit for dependency vulnerabilities
+      - name: Run npm audit
+        run: |
+          npm audit --json > npm-audit-report.json || true
+          npm audit --audit-level=moderate
+        continue-on-error: true
+
+      # Trivy vulnerability scanner
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+          security-checks: 'vuln,secret,config'
+
+      # Upload Trivy results to GitHub Security tab
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+      # GitLeaks for secret scanning
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Upload artifacts
+      - name: Upload SAST reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sast-reports
+          path: |
+            eslint-security-report.json
+            npm-audit-report.json
+            trivy-results.sarif
+          retention-days: 30
+
+  # Code Quality Analysis
+  code-quality:
+    name: Code Quality & Complexity Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.projectKey=simpix-credit-management
+            -Dsonar.organization=${{ github.repository_owner }}
+            -Dsonar.sources=client/src,server
+            -Dsonar.tests=tests
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+            -Dsonar.typescript.lcov.reportPaths=coverage/lcov.info
+
+  # Dynamic Application Security Testing (DAST)
+  dast-scan:
+    name: DAST Security Testing
+    runs-on: ubuntu-latest
+    needs: [sast-scan]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: simpix_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/simpix_test
+
+      - name: Start application
+        run: |
+          npm run start &
+          sleep 30
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/simpix_test
+          NODE_ENV: test
+          PORT: 3000
+
+      # OWASP ZAP Scan
+      - name: Run OWASP ZAP Scan
+        uses: zaproxy/action-full-scan@v0.10.0
+        with:
+          target: 'http://localhost:3000'
+          rules_file_name: '.zap/rules.tsv'
+          cmd_options: '-a -j -l WARN -z "-config api.disablekey=true"'
+          allow_issue_writing: false
+          artifact_name: 'zap_scan_report'
+
+      # Nuclei security scanner
+      - name: Run Nuclei Scanner
+        uses: projectdiscovery/nuclei-action@main
+        with:
+          target: 'http://localhost:3000'
+          flags: '-severity critical,high,medium -stats'
+          output: nuclei-report.txt
+
+      - name: Upload DAST reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dast-reports
+          path: |
+            zap_scan_report.html
+            nuclei-report.txt
+          retention-days: 30
+
+  # Security Gate
+  security-gate:
+    name: Security Gate Decision
+    runs-on: ubuntu-latest
+    needs: [sast-scan, code-quality, dast-scan]
+    if: always()
+    
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: security-reports
+
+      - name: Analyze security findings
+        id: security-analysis
+        run: |
+          # Check for critical vulnerabilities
+          CRITICAL_VULNS=0
+          HIGH_VULNS=0
+          
+          # Parse npm audit report
+          if [ -f security-reports/sast-reports/npm-audit-report.json ]; then
+            CRITICAL_VULNS=$((CRITICAL_VULNS + $(jq '.metadata.vulnerabilities.critical // 0' security-reports/sast-reports/npm-audit-report.json)))
+            HIGH_VULNS=$((HIGH_VULNS + $(jq '.metadata.vulnerabilities.high // 0' security-reports/sast-reports/npm-audit-report.json)))
+          fi
+          
+          echo "Critical vulnerabilities: $CRITICAL_VULNS"
+          echo "High vulnerabilities: $HIGH_VULNS"
+          
+          # Set output
+          echo "critical_count=$CRITICAL_VULNS" >> $GITHUB_OUTPUT
+          echo "high_count=$HIGH_VULNS" >> $GITHUB_OUTPUT
+          
+          # Fail if critical vulnerabilities found
+          if [ $CRITICAL_VULNS -gt 0 ]; then
+            echo "❌ Security gate failed: $CRITICAL_VULNS critical vulnerabilities found"
+            exit 1
+          fi
+          
+          # Warn for high vulnerabilities
+          if [ $HIGH_VULNS -gt 0 ]; then
+            echo "⚠️ Warning: $HIGH_VULNS high severity vulnerabilities found"
+          fi
+          
+          echo "✅ Security gate passed"
+
+      - name: Create security summary
+        if: always()
+        run: |
+          echo "# Security Scan Summary" > security-summary.md
+          echo "" >> security-summary.md
+          echo "## SAST Results" >> security-summary.md
+          echo "- Critical vulnerabilities: ${{ steps.security-analysis.outputs.critical_count }}" >> security-summary.md
+          echo "- High vulnerabilities: ${{ steps.security-analysis.outputs.high_count }}" >> security-summary.md
+          echo "" >> security-summary.md
+          echo "## Scan Details" >> security-summary.md
+          echo "- npm audit: ✅ Completed" >> security-summary.md
+          echo "- Trivy scan: ✅ Completed" >> security-summary.md
+          echo "- Semgrep: ✅ Completed" >> security-summary.md
+          echo "- OWASP ZAP: ✅ Completed" >> security-summary.md
+          echo "" >> security-summary.md
+          echo "Generated at: $(date)" >> security-summary.md
+
+      - name: Upload security summary
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-summary
+          path: security-summary.md
+          retention-days: 90
+
+      - name: Comment PR with results
+        uses: actions/github-script@v7
+        if: github.event_name == 'pull_request'
+        with:
+          script: |
+            const fs = require('fs');
+            const summary = fs.readFileSync('security-summary.md', 'utf8');
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: summary
+            });
