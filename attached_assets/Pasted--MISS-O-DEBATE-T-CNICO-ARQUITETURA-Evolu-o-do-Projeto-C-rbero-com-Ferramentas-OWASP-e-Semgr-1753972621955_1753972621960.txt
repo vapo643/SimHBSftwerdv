@@ -1,0 +1,32 @@
+# MISSÃO: DEBATE TÉCNICO (ARQUITETURA) - Evolução do "Projeto Cérbero" com Ferramentas OWASP e Semgrep
+
+**CONTEXTO ESTRATÉGICO E INTENÇÃO:**
+Olá, Assistente. A nossa missão de implementar um sistema de monitoramento contínuo de vulnerabilidades, o "Projeto Cérbero", evoluiu. Recebemos nova inteligência que aponta para ferramentas mais poderosas e padrão de mercado do que as que havíamos considerado (`bandit` e `safety`).
+
+As nossas novas ferramentas de eleição são:
+1.  **OWASP Dependency-Check:** Para a Análise de Composição de Software (SCA).
+2.  **Semgrep:** Para a Análise de Código Estático (SAST), com o potencial de atuar como um "MCP Server" para fornecer contexto de segurança a outras IAs.
+
+A nossa intenção permanece a mesma: criar o "sistema imunitário" do nosso software. Mas agora, faremos isso com as melhores armas disponíveis.
+
+**SUA TAREFA (ASSISTENTE):**
+A sua tarefa é atuar como um Arquiteto de DevSecOps e propor um **plano de implementação** para estas duas novas ferramentas no nosso ambiente Replit. Esta será a nossa **Interação 1 de 3**.
+
+---
+### **Interação 1: Proposta de Arquitetura de Integração**
+
+Por favor, analise as ferramentas e o nosso ambiente e responda com a sua proposta para os seguintes pontos:
+
+**1. Estratégia para o OWASP Dependency-Check (SCA):**
+* **Análise:** Como podemos integrar o "Dependency-Check" (seja a versão de linha de comando ou outra) no nosso projeto?
+* **Proposta:** Descreva os passos para o configurar no nosso pipeline de CI/CD (ex: num ficheiro de GitHub Actions ou no `.replit`) para que ele escaneie as nossas dependências a cada "commit" e falhe o "build" se encontrar vulnerabilidades de alta criticidade.
+
+**2. Estratégia para o Semgrep (SAST + MCP):**
+* **Análise:** A ideia é usar o Semgrep não apenas como um scanner, mas como um "MCP Server" para fornecer contexto de segurança do nosso código a uma LLM.
+* **Proposta:** Descreva, em alto nível, a arquitetura para esta solução. Como configuraríamos o Semgrep para analisar o nosso código com as regras apropriadas? Como ele exporia os seus resultados de uma forma que um "MCP Client" (como o Cursor ou uma função que nós mesmos escreveríamos) pudesse consumir para fazer perguntas sobre a segurança do nosso código?
+
+**3. Sinergia e Fluxo de Trabalho:**
+* **Análise:** Como estas duas ferramentas trabalhariam em conjunto no nosso dia a dia?
+* **Proposta:** Descreva o fluxo de trabalho ideal para um desenvolvedor. Por exemplo: "O desenvolvedor faz um 'commit', o Dependency-Check valida as dependências no pipeline, e o Semgrep analisa o código, publicando os resultados num local que a nossa IA de revisão de código pode consultar".
+
+---
