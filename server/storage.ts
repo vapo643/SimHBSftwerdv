@@ -196,6 +196,15 @@ export class DatabaseStorage implements IStorage {
       const clienteData = p.cliente_data || {};
       const condicoesData = p.condicoes_data || {};
       
+      // Debug: log raw data for first few proposals
+      if (data && data.indexOf(p) < 3) {
+        console.log(`[DEBUG] Proposta ${p.id}:`, {
+          condicoesData,
+          valorRaw: condicoesData.valor,
+          valorParsed: parseFloat(condicoesData.valor) || 0
+        });
+      }
+      
       return {
         id: p.id,
         status: p.status,
@@ -203,7 +212,7 @@ export class DatabaseStorage implements IStorage {
         cpfCliente: clienteData.cpf,
         emailCliente: clienteData.email,
         telefoneCliente: clienteData.telefone,
-        valorSolicitado: condicoesData.valor || 0,
+        valorSolicitado: parseFloat(condicoesData.valor) || 0,
         prazo: condicoesData.prazo,
         lojaId: p.loja_id,
         createdAt: p.created_at,

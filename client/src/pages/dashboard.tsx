@@ -154,7 +154,20 @@ const Dashboard: React.FC = () => {
     const pendentes = propostasData.filter(p => p.status === 'aguardando_analise' || p.status === 'em_analise').length;
     const rejeitadas = propostasData.filter(p => p.status === 'rejeitado').length;
     const pendenciadas = propostasData.filter(p => p.status === 'pendenciado').length;
-    const valorTotal = propostasData.reduce((acc, p) => acc + (p.valorSolicitado || 0), 0);
+    // Debug: log first few values to understand the data structure
+    console.log('DEBUG - First 3 proposals values:', propostasData.slice(0, 3).map(p => ({
+      id: p.id,
+      valorSolicitado: p.valorSolicitado,
+      type: typeof p.valorSolicitado
+    })));
+    
+    // Convert to numbers safely and filter out invalid values
+    const valorTotal = propostasData.reduce((acc, p) => {
+      const valor = typeof p.valorSolicitado === 'string' 
+        ? parseFloat(p.valorSolicitado.replace(/[^\d,.-]/g, '').replace(',', '.'))
+        : Number(p.valorSolicitado) || 0;
+      return acc + valor;
+    }, 0);
     const valorMedio = total > 0 ? valorTotal / total : 0;
 
     // Status distribution
