@@ -121,15 +121,17 @@ export async function jwtAuthMiddleware(
     const supabase = createServerSupabaseAdminClient();
     const { data, error } = await supabase.auth.getUser(token);
     
-    // Debug logging detalhado
-    console.log('🔐 JWT VALIDATION DEBUG:', {
-      hasError: !!error,
-      errorMessage: error?.message,
-      hasUser: !!data?.user,
-      tokenLength: token.length,
-      userId: data?.user?.id,
-      timestamp: new Date().toISOString()
-    });
+    // Security-aware logging - OWASP ASVS V7.1.1
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔐 JWT VALIDATION:', {
+        hasError: !!error,
+        errorType: error?.type || null,
+        hasUser: !!data?.user,
+        userId: data?.user?.id,
+        timestamp: new Date().toISOString()
+        // Never log sensitive token data
+      });
+    }
     
     if (error || !data.user) {
       console.error('JWT validation failed:', error);

@@ -1,10 +1,11 @@
 import express, { type Request, Response, NextFunction } from "express";
 import helmet from "helmet";
+import cors from "cors";
 import rateLimit from "express-rate-limit";
 import { registerRoutes } from "./routes";
 import { config } from "./lib/config";
 import { log } from "./vite";
-import { setupSecurityHeaders, additionalSecurityHeaders } from "./lib/security-headers";
+import { setupSecurityHeaders, additionalSecurityHeaders, setupCORS } from "./lib/security-headers";
 import { inputSanitizerMiddleware } from "./lib/input-sanitizer";
 import { securityLogger, SecurityEventType, getClientIP } from "./lib/security-logger";
 import { urlTokenValidator } from "./middleware/url-token-validator";
@@ -16,6 +17,11 @@ export async function createApp() {
 
   // Configure trust proxy for rate limiting
   app.set('trust proxy', process.env.NODE_ENV === 'production' ? 1 : ['127.0.0.1', '::1']);
+
+  // Configure CORS - OWASP ASVS V13.2.1
+  const corsOptions = setupCORS();
+  app.use(cors(corsOptions));
+  log("🔒 [SECURITY] CORS protection configured - ASVS V13.2.1");
 
   // Form-encoded middleware
   app.use(express.urlencoded({ extended: true }));
