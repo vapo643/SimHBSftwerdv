@@ -9,6 +9,7 @@ import { clickSignServiceV3 } from '../services/clickSignServiceV3.js';
 import { getBrasiliaTimestamp } from '../lib/timezone.js';
 import fs from 'fs/promises';
 import path from 'path';
+import { createServerSupabaseAdminClient } from '../lib/supabase.js';
 
 const router = express.Router();
 
@@ -30,6 +31,9 @@ router.post('/propostas/:id/clicksign/regenerar', jwtAuthMiddleware, async (req:
         message: 'Apenas atendentes e administradores podem regenerar links de assinatura'
       });
     }
+
+    // Create Supabase client for storage operations
+    const supabase = createServerSupabaseAdminClient();
 
     // Import database dependencies
     const { db } = await import("../lib/supabase");
@@ -87,25 +91,34 @@ router.post('/propostas/:id/clicksign/regenerar', jwtAuthMiddleware, async (req:
         .set({ caminhoCcbAssinado: ccbPath })
         .where(eq(propostas.id, propostaId));
       
-      // Read the newly generated CCB
-      const fs = await import('fs/promises');
-      const path = await import('path');
-      const fullCcbPath = path.join(process.cwd(), ccbPath);
-      const ccbBuffer = await fs.readFile(fullCcbPath);
+      // Read the newly generated CCB from Supabase Storage
+      const { data: ccbData, error: downloadError } = await supabase.storage
+        .from('documents')
+        .download(ccbPath);
+      
+      if (downloadError || !ccbData) {
+        throw new Error(`Erro ao baixar CCB: ${downloadError?.message || 'Unknown error'}`);
+      }
+      
+      const ccbBuffer = Buffer.from(await ccbData.arrayBuffer());
       pdfBase64 = ccbBuffer.toString('base64');
       
       console.log(`[CLICKSIGN] ✅ New CCB generated: ${ccbPath}`);
     } else {
-      // Try to read existing CCB file
+      // Try to read existing CCB from Supabase Storage
       try {
-        const fs = await import('fs/promises');
-        const path = await import('path');
+        const { data: ccbData, error: downloadError } = await supabase.storage
+          .from('documents')
+          .download(proposta.caminhoCcbAssinado);
         
-        const ccbPath = path.join(process.cwd(), proposta.caminhoCcbAssinado);
-        const ccbBuffer = await fs.readFile(ccbPath);
+        if (downloadError || !ccbData) {
+          throw new Error(`Erro ao baixar CCB: ${downloadError?.message || 'File not found'}`);
+        }
+        
+        const ccbBuffer = Buffer.from(await ccbData.arrayBuffer());
         pdfBase64 = ccbBuffer.toString('base64');
         
-        console.log(`[CLICKSIGN] ✅ Using existing CCB: ${proposta.caminhoCcbAssinado}`);
+        console.log(`[CLICKSIGN] ✅ Using existing CCB from Supabase: ${proposta.caminhoCcbAssinado}`);
       } catch (fileError) {
         console.log(`[CLICKSIGN] ⚠️ Existing CCB file not found, generating new one: ${fileError.message}`);
         
@@ -119,11 +132,16 @@ router.post('/propostas/:id/clicksign/regenerar', jwtAuthMiddleware, async (req:
           .set({ caminhoCcbAssinado: ccbPath })
           .where(eq(propostas.id, propostaId));
         
-        // Read the newly generated CCB
-        const fs = await import('fs/promises');
-        const path = await import('path');
-        const fullCcbPath = path.join(process.cwd(), ccbPath);
-        const ccbBuffer = await fs.readFile(fullCcbPath);
+        // Read the newly generated CCB from Supabase Storage
+        const { data: ccbData, error: downloadError } = await supabase.storage
+          .from('documents')
+          .download(ccbPath);
+        
+        if (downloadError || !ccbData) {
+          throw new Error(`Erro ao baixar CCB regenerada: ${downloadError?.message || 'Unknown error'}`);
+        }
+        
+        const ccbBuffer = Buffer.from(await ccbData.arrayBuffer());
         pdfBase64 = ccbBuffer.toString('base64');
         
         console.log(`[CLICKSIGN] ✅ New CCB regenerated: ${ccbPath}`);
