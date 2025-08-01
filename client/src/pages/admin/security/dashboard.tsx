@@ -5,13 +5,8 @@
  * anomalias e métricas de segurança para o sistema Simpix.
  */
 
-import DashboardLayout from "@/components/DashboardLayout";
 import SecurityDashboard from "@/pages/SecurityDashboard";
 
 export default function MonitoramentoAvancadoPage() {
-  return (
-    <DashboardLayout title="Monitoramento Avançado">
-      <SecurityDashboard />
-    </DashboardLayout>
-  );
+  return <SecurityDashboard />;
 }

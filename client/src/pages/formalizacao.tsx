@@ -213,11 +213,11 @@ function FormalizacaoList() {
       <DashboardLayout title="Formalização">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {[...Array(6)].map((_, index) => (
-            <Card key={index} className="animate-pulse bg-gray-800 border-gray-700">
+            <Card key={index} className="animate-pulse bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700">
               <CardContent className="p-6">
-                <div className="mb-4 h-6 rounded bg-gray-700"></div>
-                <div className="mb-2 h-4 rounded bg-gray-700"></div>
-                <div className="h-4 w-3/4 rounded bg-gray-700"></div>
+                <div className="mb-4 h-6 rounded bg-gray-300 dark:bg-gray-700"></div>
+                <div className="mb-2 h-4 rounded bg-gray-300 dark:bg-gray-700"></div>
+                <div className="h-4 w-3/4 rounded bg-gray-300 dark:bg-gray-700"></div>
               </CardContent>
             </Card>
           ))}
@@ -233,9 +233,13 @@ function FormalizacaoList() {
   // Filtrar propostas baseado no papel do usuário
   const filteredPropostas = user?.role === 'ATENDENTE' 
     ? formalizacaoPropostas.filter(p => 
-        // ATENDENTE só vê propostas que precisam de sua ação
+        // ATENDENTE vê propostas aceitas por ele ou que precisam de sua ação
+        p.status === 'aceito_atendente' || 
         p.status === 'aprovado' || 
         p.status === 'documentos_enviados' ||
+        p.status === 'contratos_preparados' ||
+        p.status === 'contratos_assinados' ||
+        p.status === 'pronto_pagamento' ||
         (p.loja_id === user.loja_id) // Suas próprias propostas
       )
     : formalizacaoPropostas; // ANALISTA vê todas
@@ -267,8 +271,8 @@ function FormalizacaoList() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-white dark:text-white">{getTitle()}</h1>
-            <p className="text-gray-400 dark:text-gray-400">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{getTitle()}</h1>
+            <p className="text-gray-600 dark:text-gray-400">
               {getDescription()}
             </p>
             {user?.role === 'ATENDENTE' && (
@@ -280,7 +284,7 @@ function FormalizacaoList() {
           </div>
           <div className="flex items-center gap-4">
             <div className="text-right">
-              <p className="text-sm text-gray-400">Total em Formalização</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Total em Formalização</p>
               <p className="text-2xl font-bold text-blue-400">{filteredPropostas.length}</p>
             </div>
           </div>
@@ -299,13 +303,13 @@ function FormalizacaoList() {
           ].map(item => {
             const count = filteredPropostas.filter(p => p.status === item.status).length;
             return (
-              <Card key={item.status} className="bg-gray-800 border-gray-700">
+              <Card key={item.status} className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div className={`h-3 w-3 rounded-full ${item.color}`}></div>
-                    <span className="text-2xl font-bold text-white">{count}</span>
+                    <span className="text-2xl font-bold text-gray-900 dark:text-white">{count}</span>
                   </div>
-                  <p className="mt-1 text-sm text-gray-400">{item.label}</p>
+                  <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">{item.label}</p>
                 </CardContent>
               </Card>
             );
@@ -315,10 +319,10 @@ function FormalizacaoList() {
         {/* Propostas List */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {filteredPropostas.map(proposta => (
-            <Card key={proposta.id} className="cursor-pointer transition-shadow hover:shadow-lg bg-gray-800 border-gray-700">
+            <Card key={proposta.id} className="cursor-pointer transition-shadow hover:shadow-lg bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
               <CardContent className="p-6">
                 <div className="mb-4 flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-white">#{proposta.id}</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">#{proposta.id}</h3>
                   <Badge className={`${getStatusColor(proposta.status)} text-white`}>
                     {getStatusText(proposta.status)}
                   </Badge>
@@ -326,22 +330,22 @@ function FormalizacaoList() {
 
                 <div className="space-y-3">
                   <div>
-                    <p className="text-sm text-gray-400">Cliente</p>
-                    <p className="font-medium text-white">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Cliente</p>
+                    <p className="font-medium text-gray-900 dark:text-white">
                       {parseJsonbField(proposta.cliente_data, 'cliente_data', proposta.id)?.nome || 'Nome não informado'}
                     </p>
                   </div>
 
                   <div>
-                    <p className="text-sm text-gray-400">Valor Aprovado</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Valor Aprovado</p>
                     <p className="font-bold text-green-400">
                       {formatCurrency(parseJsonbField(proposta.condicoes_data, 'condicoes_data', proposta.id)?.valor || 0)}
                     </p>
                   </div>
 
                   <div>
-                    <p className="text-sm text-gray-400">Data da Aprovação</p>
-                    <p className="text-white">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Data da Aprovação</p>
+                    <p className="text-gray-900 dark:text-white">
                       {formatDate(proposta.data_aprovacao || proposta.created_at)}
                     </p>
                   </div>
