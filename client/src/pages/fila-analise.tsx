@@ -158,13 +158,13 @@ export default function FilaAnalise() {
     return (
       <DashboardLayout title="Fila de Análise de Crédito">
         <div className="space-y-6">
-          <Card>
+          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <CardContent className="p-6">
               <div className="animate-pulse space-y-4">
-                <div className="h-4 w-1/4 rounded bg-muted"></div>
+                <div className="h-4 w-1/4 rounded bg-gray-200 dark:bg-gray-700"></div>
                 <div className="grid grid-cols-4 gap-4">
                   {[1, 2, 3, 4].map(i => (
-                    <div key={i} className="h-10 rounded bg-muted"></div>
+                    <div key={i} className="h-10 rounded bg-gray-200 dark:bg-gray-700"></div>
                   ))}
                 </div>
               </div>
@@ -181,11 +181,11 @@ export default function FilaAnalise() {
         {/* Statistics Cards */}
         {stats && (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Card>
+            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-muted-foreground">Aguardando Análise</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Aguardando Análise</p>
                     <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">{stats.aguardando}</p>
                   </div>
                   <Clock className="h-8 w-8 text-orange-600 dark:text-orange-400" />
@@ -193,11 +193,11 @@ export default function FilaAnalise() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-muted-foreground">Em Análise</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Em Análise</p>
                     <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{stats.emAnalise}</p>
                   </div>
                   <AlertCircle className="h-8 w-8 text-blue-600 dark:text-blue-400" />
@@ -205,11 +205,11 @@ export default function FilaAnalise() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-muted-foreground">Aprovadas</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Aprovadas</p>
                     <p className="text-2xl font-bold text-green-600 dark:text-green-400">{stats.aprovadas}</p>
                   </div>
                   <CheckCircle className="h-8 w-8 text-green-600 dark:text-green-400" />
@@ -217,11 +217,11 @@ export default function FilaAnalise() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-muted-foreground">Rejeitadas</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Rejeitadas</p>
                     <p className="text-2xl font-bold text-red-600 dark:text-red-400">{stats.rejeitadas}</p>
                   </div>
                   <XCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
@@ -232,9 +232,9 @@ export default function FilaAnalise() {
         )}
 
         {/* Filters */}
-        <Card>
+        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
               <Filter className="h-5 w-5" />
               Filtros e Ordenação
             </CardTitle>
@@ -324,7 +324,7 @@ export default function FilaAnalise() {
             </div>
 
             <div className="mt-4 flex items-center justify-between">
-              <div className="text-sm text-muted-foreground">
+              <div className="text-sm text-gray-600 dark:text-gray-400">
                 {filteredPropostas
                   ? `${filteredPropostas.length} de ${propostas?.length || 0} propostas`
                   : ""}
@@ -339,15 +339,15 @@ export default function FilaAnalise() {
         </Card>
 
         {/* Proposals Table */}
-        <Card>
+        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
           <CardHeader>
-            <CardTitle className="flex items-center justify-between">
+            <CardTitle className="flex items-center justify-between text-gray-900 dark:text-white">
               <span className="flex items-center gap-2">
                 <TrendingUp className="h-5 w-5" />
                 Propostas para Análise
               </span>
               {stats && (
-                <div className="text-sm text-muted-foreground">
+                <div className="text-sm text-gray-600 dark:text-gray-400">
                   Valor Total: {formatCurrency(stats.valorTotal.toString())} | Média:{" "}
                   {formatCurrency(stats.valorMedio.toString())}
                 </div>
@@ -356,53 +356,53 @@ export default function FilaAnalise() {
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-border">
-                <thead className="bg-muted">
+              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead className="bg-gray-50 dark:bg-gray-700">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-300">
                       ID
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-300">
                       Cliente
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-300">
                       Valor
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-300">
                       Prazo
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-300">
                       Status
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-300">
                       Prioridade
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-300">
                       Data
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-300">
                       Ações
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border bg-background">
+                <tbody className="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800">
                   {filteredPropostas && filteredPropostas.length > 0 ? (
                     filteredPropostas.map(proposta => {
                       const statusInfo = getStatusBadge(proposta.status);
                       const priorityInfo = getPriorityBadge(proposta.valor);
 
                       return (
-                        <tr key={proposta.id} className="hover:bg-muted/50">
-                          <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-foreground">
+                        <tr key={proposta.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                          <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">
                             #{proposta.id}
                           </td>
-                          <td className="whitespace-nowrap px-6 py-4 text-sm text-foreground">
+                          <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900 dark:text-white">
                             {proposta.clienteNome}
                           </td>
-                          <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-foreground">
+                          <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">
                             {formatCurrency(proposta.valor)}
                           </td>
-                          <td className="whitespace-nowrap px-6 py-4 text-sm text-muted-foreground">
+                          <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
                             {proposta.prazo} meses
                           </td>
                           <td className="whitespace-nowrap px-6 py-4">
@@ -411,7 +411,7 @@ export default function FilaAnalise() {
                           <td className="whitespace-nowrap px-6 py-4">
                             <Badge variant={priorityInfo.variant}>{priorityInfo.label}</Badge>
                           </td>
-                          <td className="whitespace-nowrap px-6 py-4 text-sm text-muted-foreground">
+                          <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
                             {new Date(proposta.createdAt).toLocaleDateString("pt-BR")}
                           </td>
                           <td className="whitespace-nowrap px-6 py-4 text-sm font-medium">
@@ -434,9 +434,9 @@ export default function FilaAnalise() {
                     })
                   ) : (
                     <tr>
-                      <td colSpan={8} className="px-6 py-12 text-center text-muted-foreground">
+                      <td colSpan={8} className="px-6 py-12 text-center text-gray-600 dark:text-gray-400">
                         <div className="flex flex-col items-center">
-                          <Search className="mb-2 h-8 w-8 text-muted-foreground" />
+                          <Search className="mb-2 h-8 w-8 text-gray-600 dark:text-gray-400" />
                           <p>Nenhuma proposta encontrada</p>
                           <p className="text-sm">
                             Tente ajustar os filtros ou criar uma nova proposta
