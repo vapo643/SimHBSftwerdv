@@ -881,29 +881,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // New endpoint for formalization proposals (filtered by status)
   app.get("/api/propostas/formalizacao", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     try {
-      const { supabase } = await import("../server/lib/supabase");
-
-      // 🔐 CORREÇÃO CRÍTICA: Usar cliente Supabase para respeitar políticas RLS
-      // O token JWT já foi validado pelo middleware jwtAuthMiddleware
-      // Criar cliente Supabase com contexto do usuário autenticado
-      const userToken = req.headers.authorization?.replace('Bearer ', '');
-      if (!userToken) {
-        return res.status(401).json({ message: "Token de autenticação necessário" });
-      }
-
-      // Criar cliente Supabase personalizado com o token do usuário para RLS
-      const { createClient } = await import('@supabase/supabase-js');
-      const userSupabase = createClient(
-        process.env.SUPABASE_URL!,
-        process.env.SUPABASE_ANON_KEY!,
-        {
-          global: {
-            headers: {
-              Authorization: `Bearer ${userToken}`
-            }
-          }
-        }
-      );
+      const { createServerSupabaseAdminClient } = await import('./lib/supabase');
+      const supabase = createServerSupabaseAdminClient();
 
       // Formalization statuses according to business logic
       const formalizationStatuses = [
@@ -915,15 +894,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'pronto_pagamento'
       ];
 
-      console.log(`🔐 [FORMALIZATION] Querying for user ${req.user?.id} with role ${req.user?.role}`);
+      const userId = req.user?.id;
+      const userRole = req.user?.role;
+      const userLojaId = req.user?.loja_id;
 
-      // 🔧 CORREÇÃO: Query simplificada para evitar recursão RLS
-      // Remover JOINs complexos que causam "infinite recursion" nas políticas RLS
-      const { data: rawPropostas, error } = await userSupabase
+      console.log(`🔐 [FORMALIZATION] Querying for user ${userId} with role ${userRole} from loja ${userLojaId}`);
+
+      // Build query based on user role
+      let query = supabase
         .from('propostas')
         .select('*')
-        .in('status', formalizationStatuses)
-        .order('created_at', { ascending: false });
+        .in('status', formalizationStatuses);
+
+      // Apply role-based filtering
+      if (userRole === 'ATENDENTE') {
+        // ATENDENTE sees only proposals they created
+        query = query.eq('user_id', userId);
+        console.log(`🔐 [FORMALIZATION] ATENDENTE filter: user_id = ${userId}`);
+      } else if (userRole === 'GERENTE') {
+        // GERENTE sees all proposals from their store
+        query = query.eq('loja_id', userLojaId);
+        console.log(`🔐 [FORMALIZATION] GERENTE filter: loja_id = ${userLojaId}`);
+      }
+      // For other roles (ADMINISTRADOR, ANALISTA, etc.), no additional filtering
+
+      const { data: rawPropostas, error } = await query.order('created_at', { ascending: false });
 
       if (error) {
         console.error('🚨 [FORMALIZATION] Supabase error:', error);
@@ -931,11 +926,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       if (!rawPropostas || rawPropostas.length === 0) {
-        console.log(`🔐 [FORMALIZATION] No proposals found for user ${req.user?.id} with role ${req.user?.role}`);
+        console.log(`🔐 [FORMALIZATION] No proposals found for user ${userId} with role ${userRole}`);
         return res.json([]);
       }
 
-      console.log(`🔐 [FORMALIZATION] Found ${rawPropostas.length} proposals for user ${req.user?.id}`);
+      console.log(`🔐 [FORMALIZATION] Found ${rawPropostas.length} proposals for user ${userId}`);
       console.log('🔐 [FORMALIZATION] First proposal:', rawPropostas[0]?.id, rawPropostas[0]?.status);
 
       // CORREÇÃO CRÍTICA: Parse JSONB fields e mapear snake_case para frontend

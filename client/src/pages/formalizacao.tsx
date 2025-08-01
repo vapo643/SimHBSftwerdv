@@ -205,7 +205,7 @@ function FormalizacaoList() {
     return statusTexts[status as keyof typeof statusTexts] || status;
   };
 
-  // No need to filter since backend already filters by formalization statuses
+  // Backend already handles all permission filtering
   const formalizacaoPropostas = propostas || [];
 
   if (isLoading) {
@@ -230,30 +230,20 @@ function FormalizacaoList() {
     queryClient.invalidateQueries({ queryKey: ['/api/propostas/formalizacao'] });
   };
 
-  // Filtrar propostas baseado no papel do usuário
-  const filteredPropostas = user?.role === 'ATENDENTE' 
-    ? formalizacaoPropostas.filter(p => 
-        // ATENDENTE vê propostas aceitas por ele ou que precisam de sua ação
-        p.status === 'aceito_atendente' || 
-        p.status === 'aprovado' || 
-        p.status === 'documentos_enviados' ||
-        p.status === 'contratos_preparados' ||
-        p.status === 'contratos_assinados' ||
-        p.status === 'pronto_pagamento' ||
-        (p.loja_id === user.loja_id) // Suas próprias propostas
-      )
-    : formalizacaoPropostas; // ANALISTA vê todas
-
   const getTitle = () => {
     return user?.role === 'ATENDENTE' 
       ? "Minhas Propostas - Formalização"
-      : "Formalização - Visão Geral";
+      : user?.role === 'GERENTE' 
+        ? "Formalização - Minha Loja"
+        : "Formalização - Visão Geral";
   };
 
   const getDescription = () => {
     return user?.role === 'ATENDENTE'
-      ? "Propostas que precisam da sua ação para prosseguir na formalização"
-      : "Acompanhe o processo de formalização das propostas aprovadas";
+      ? "Suas propostas em processo de formalização"
+      : user?.role === 'GERENTE'
+        ? "Propostas de todos os atendentes da sua loja"
+        : "Acompanhe o processo de formalização das propostas aprovadas";
   };
 
   return (
@@ -285,7 +275,7 @@ function FormalizacaoList() {
           <div className="flex items-center gap-4">
             <div className="text-right">
               <p className="text-sm text-gray-600 dark:text-gray-400">Total em Formalização</p>
-              <p className="text-2xl font-bold text-blue-400">{filteredPropostas.length}</p>
+              <p className="text-2xl font-bold text-blue-400">{formalizacaoPropostas.length}</p>
             </div>
           </div>
         </div>
@@ -301,7 +291,7 @@ function FormalizacaoList() {
             { status: "pronto_pagamento", label: "Pronto Pag.", color: "bg-orange-500" },
             { status: "pago", label: "Pago", color: "bg-green-600" },
           ].map(item => {
-            const count = filteredPropostas.filter(p => p.status === item.status).length;
+            const count = formalizacaoPropostas.filter(p => p.status === item.status).length;
             return (
               <Card key={item.status} className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
                 <CardContent className="p-4">
@@ -318,7 +308,7 @@ function FormalizacaoList() {
 
         {/* Propostas List */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {filteredPropostas.map(proposta => (
+          {formalizacaoPropostas.map(proposta => (
             <Card key={proposta.id} className="cursor-pointer transition-shadow hover:shadow-lg bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
               <CardContent className="p-6">
                 <div className="mb-4 flex items-center justify-between">
@@ -369,7 +359,7 @@ function FormalizacaoList() {
           ))}
         </div>
 
-        {filteredPropostas.length === 0 && (
+        {formalizacaoPropostas.length === 0 && (
           <div className="py-12 text-center">
             <FileText className="mx-auto mb-4 h-16 w-16 text-gray-400" />
             <p className="text-lg text-gray-500">Nenhuma proposta em formalização</p>
