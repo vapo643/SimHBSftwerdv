@@ -655,9 +655,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (userRole !== 'ANALISTA') {
           whereConditions.push(inArray(propostas.status, ['aguardando_analise', 'em_analise']));
         }
-      } else if (status && userRole === 'ADMINISTRADOR') {
-        // Apenas ADMIN pode filtrar por status específico
-        whereConditions.push(eq(propostas.status, status as string));
+      } else if (status) {
+        // ADMIN pode filtrar por qualquer status, ATENDENTE pode filtrar apenas suas próprias propostas por status
+        if (userRole === 'ADMINISTRADOR' || userRole === 'ATENDENTE') {
+          whereConditions.push(eq(propostas.status, status as string));
+          console.log(`🔍 [STATUS FILTER] ${userRole} filtrando por status: ${status}`);
+        }
       }
       
       if (atendenteId && ['GERENTE', 'ADMINISTRADOR'].includes(userRole!)) {
@@ -721,18 +724,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const { status } = req.body;
     const userRole = req.user?.role;
     
-    // ATENDENTE can only change pendenciado -> aguardando_analise
+    // ATENDENTE can change:
+    // - pendenciado -> aguardando_analise (resubmit)
+    // - aguardando_aceite_atendente -> aceito_atendente (accept)
+    // - aguardando_aceite_atendente -> cancelado (cancel)
     if (userRole === 'ATENDENTE') {
-      if (status !== 'aguardando_analise') {
+      const allowedAttendenteTransitions = ['aguardando_analise', 'aceito_atendente', 'cancelado'];
+      if (!allowedAttendenteTransitions.includes(status)) {
         return res.status(403).json({ 
-          message: 'Atendentes só podem reenviar propostas pendentes para análise.' 
+          message: 'Atendentes só podem reenviar propostas para análise, aceitar ou cancelar propostas.' 
         });
       }
     }
     // ANALISTA and ADMINISTRADOR can make all status changes
     else if (!userRole || !['ANALISTA', 'ADMINISTRADOR'].includes(userRole)) {
       return res.status(403).json({ 
-        message: 'Acesso negado. Apenas analistas, administradores e atendentes (para reenvio) podem alterar status.' 
+        message: 'Acesso negado. Apenas analistas, administradores e atendentes podem alterar status.' 
       });
     }
     try {
@@ -784,10 +791,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status
       };
       
-      // Only set analyst fields for analyst actions (not for attendant resubmission)
+      // Only set analyst fields for analyst actions (not for attendant resubmission or aceite actions)
       if (userRole !== 'ATENDENTE') {
         updateData.analista_id = req.user?.id;
         updateData.data_analise = getBrasiliaTimestamp();
+      }
+      
+      // Set aceite fields for attendant acceptance
+      if (userRole === 'ATENDENTE' && status === 'aceito_atendente') {
+        updateData.data_aceite_atendente = getBrasiliaTimestamp();
+        console.log(`✅ [ACEITE] Atendente ${req.user?.id} aceitou proposta ${propostaId}`);
       }
       
       if (status === 'pendenciado' && motivoPendencia) {
