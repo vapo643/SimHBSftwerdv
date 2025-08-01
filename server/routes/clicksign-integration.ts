@@ -371,7 +371,7 @@ router.post('/propostas/:id/clicksign/enviar', jwtAuthMiddleware, async (req: Au
 
     const documentData = {
       type: 'upload' as const,
-      content: base64Content,
+      content_base64: base64Content,
       filename: `CCB-${propostaId}.pdf`
     };
 
