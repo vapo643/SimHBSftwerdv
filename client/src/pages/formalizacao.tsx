@@ -1026,11 +1026,26 @@ export default function Formalizacao() {
                                             description: "Novo link de assinatura gerado com sucesso!",
                                           });
                                         } catch (error: any) {
-                                          toast({
-                                            title: "Erro",
-                                            description: error.response?.data?.error || "Erro ao regenerar link",
-                                            variant: "destructive",
-                                          });
+                                          // Tratamento específico para erro de token ClickSign
+                                          if (error.response?.status === 401 && error.response?.data?.action === 'UPDATE_CLICKSIGN_TOKEN') {
+                                            toast({
+                                              title: "Token ClickSign Inválido",
+                                              description: error.response.data.details || "Token do ClickSign precisa ser atualizado. Entre em contato com o administrador.",
+                                              variant: "destructive",
+                                            });
+                                          } else if (error.response?.status === 400 && error.response?.data?.action === 'CHECK_CLICKSIGN_SERVICE') {
+                                            toast({
+                                              title: "Erro na API ClickSign",
+                                              description: error.response.data.details || "Problema com o serviço ClickSign. Tente novamente em alguns minutos.",
+                                              variant: "destructive",
+                                            });
+                                          } else {
+                                            toast({
+                                              title: "Erro",
+                                              description: error.response?.data?.error || "Erro ao regenerar link",
+                                              variant: "destructive",
+                                            });
+                                          }
                                         } finally {
                                           setLoadingClickSign(false);
                                         }

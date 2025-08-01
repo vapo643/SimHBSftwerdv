@@ -186,8 +186,28 @@ router.post('/propostas/:id/clicksign/regenerar', jwtAuthMiddleware, async (req:
 
   } catch (error) {
     console.error('[CLICKSIGN] ❌ Error regenerating signature link:', error);
+    
+    // Tratamento específico para erro de autenticação
+    if (error instanceof Error && error.message.includes('401')) {
+      return res.status(401).json({
+        error: 'Token do ClickSign inválido ou expirado',
+        details: 'O token de API do ClickSign precisa ser atualizado. Entre em contato com o administrador do sistema.',
+        action: 'UPDATE_CLICKSIGN_TOKEN'
+      });
+    }
+    
+    // Outros erros da API do ClickSign
+    if (error instanceof Error && error.message.includes('API error')) {
+      return res.status(400).json({
+        error: 'Erro na API do ClickSign',
+        details: error.message,
+        action: 'CHECK_CLICKSIGN_SERVICE'
+      });
+    }
+    
+    // Erro genérico
     res.status(500).json({
-      error: 'Erro ao gerar novo link de assinatura',
+      error: 'Erro interno ao gerar novo link de assinatura',
       details: error instanceof Error ? error.message : 'Unknown error'
     });
   }
