@@ -422,6 +422,33 @@ export function ClientDataStep() {
             />
             {errors.rendaMensal && <p className="mt-1 text-sm text-red-500">{errors.rendaMensal}</p>}
           </div>
+
+          <div className="md:col-span-2">
+            <Label htmlFor="telefoneEmpresa">Telefone da Empresa *</Label>
+            <InputMask
+              mask="(99) 9999-9999"
+              value={clientData.telefoneEmpresa}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                updateClient({ telefoneEmpresa: e.target.value });
+                if (!e.target.value.replace(/\D/g, '')) {
+                  setError('telefoneEmpresa', 'Telefone da empresa é obrigatório');
+                } else {
+                  clearError('telefoneEmpresa');
+                }
+              }}
+            >
+              {(inputProps: any) => (
+                <Input
+                  {...inputProps}
+                  id="telefoneEmpresa"
+                  type="tel"
+                  placeholder="(11) 3456-7890"
+                  className={errors.telefoneEmpresa ? "border-red-500 focus:border-red-500" : ""}
+                />
+              )}
+            </InputMask>
+            {errors.telefoneEmpresa && <p className="mt-1 text-sm text-red-500">{errors.telefoneEmpresa}</p>}
+          </div>
         </CardContent>
       </Card>
     </div>

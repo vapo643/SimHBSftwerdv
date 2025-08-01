@@ -33,6 +33,7 @@ import {
 import { ClientDataStep } from "@/components/propostas/ClientDataStep";
 import { LoanConditionsStep } from "@/components/propostas/LoanConditionsStep";
 import { DocumentsStep } from "@/components/propostas/DocumentsStep";
+import { PersonalReferencesStep } from "@/components/propostas/PersonalReferencesStep";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -97,6 +98,10 @@ function ProposalForm() {
         clienteCep: state.clientData.cep,
         clienteEndereco: state.clientData.endereco,
         clienteOcupacao: state.clientData.ocupacao,
+        clienteTelefoneEmpresa: state.clientData.telefoneEmpresa,
+        
+        // Personal references
+        referenciaPessoal: state.personalReferences,
         
         // Loan data
         produtoId: state.loanData.produtoId,
@@ -220,34 +225,43 @@ function ProposalForm() {
   const handleStepChange = (value: string) => {
     const stepMap: Record<string, number> = {
       'dados-cliente': 0,
-      'condicoes-emprestimo': 1,
-      'anexo-documentos': 2,
+      'referencias-pessoais': 1,
+      'condicoes-emprestimo': 2,
+      'anexo-documentos': 3,
     };
     setStep(stepMap[value] || 0);
   };
 
-  const currentTabValue = ['dados-cliente', 'condicoes-emprestimo', 'anexo-documentos'][state.currentStep];
+  const currentTabValue = ['dados-cliente', 'referencias-pessoais', 'condicoes-emprestimo', 'anexo-documentos'][state.currentStep];
 
   return (
     <Tabs value={currentTabValue} onValueChange={handleStepChange} className="w-full">
-      <TabsList className="grid w-full grid-cols-3">
+      <TabsList className="grid w-full grid-cols-4">
         <TabsTrigger value="dados-cliente">
           <User className="h-4 w-4 mr-2" />
           Dados do Cliente
         </TabsTrigger>
+        <TabsTrigger value="referencias-pessoais">
+          <User className="h-4 w-4 mr-2" />
+          Referências
+        </TabsTrigger>
         <TabsTrigger value="condicoes-emprestimo">
           <DollarSign className="h-4 w-4 mr-2" />
-          Condições do Empréstimo
+          Empréstimo
         </TabsTrigger>
         <TabsTrigger value="anexo-documentos">
           <FileText className="h-4 w-4 mr-2" />
-          Anexo de Documentos
+          Documentos
         </TabsTrigger>
       </TabsList>
 
       <div className="mt-6">
         <TabsContent value="dados-cliente">
           <ClientDataStep />
+        </TabsContent>
+
+        <TabsContent value="referencias-pessoais">
+          <PersonalReferencesStep />
         </TabsContent>
 
         <TabsContent value="condicoes-emprestimo">
@@ -269,7 +283,7 @@ function ProposalForm() {
           Voltar
         </Button>
 
-        {state.currentStep < 2 ? (
+        {state.currentStep < 3 ? (
           <Button
             type="button"
             onClick={() => setStep(state.currentStep + 1)}

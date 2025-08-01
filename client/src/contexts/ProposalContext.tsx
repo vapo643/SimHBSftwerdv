@@ -74,6 +74,7 @@ interface ClientData {
   // Dados profissionais
   ocupacao: string;
   rendaMensal: string;
+  telefoneEmpresa: string;
 }
 
 // Loan data interface
@@ -107,6 +108,13 @@ interface Document {
   file: File;
 }
 
+// Personal reference interface
+interface PersonalReference {
+  nomeCompleto: string;
+  grauParentesco: string;
+  telefone: string;
+}
+
 // Proposal state interface
 interface ProposalState {
   context: OriginationContext | null;
@@ -114,6 +122,7 @@ interface ProposalState {
   loanData: LoanData;
   simulation: SimulationResult | null;
   documents: Document[];
+  personalReferences: PersonalReference[];
   currentStep: number;
   errors: Record<string, string>;
   isLoading: boolean;
@@ -130,6 +139,9 @@ type ProposalAction =
   | { type: 'CLEAR_SIMULATION' }
   | { type: 'ADD_DOCUMENT'; payload: Document }
   | { type: 'REMOVE_DOCUMENT'; payload: string }
+  | { type: 'ADD_REFERENCE'; payload: PersonalReference }
+  | { type: 'UPDATE_REFERENCE'; payload: { index: number; reference: PersonalReference } }
+  | { type: 'REMOVE_REFERENCE'; payload: number }
   | { type: 'SET_STEP'; payload: number }
   | { type: 'SET_ERROR'; payload: { field: string; message: string } }
   | { type: 'CLEAR_ERRORS' }
@@ -159,6 +171,7 @@ const initialState: ProposalState = {
     estado: '',
     ocupacao: '',
     rendaMensal: '',
+    telefoneEmpresa: '',
   },
   loanData: {
     produtoId: null,
@@ -170,6 +183,7 @@ const initialState: ProposalState = {
   },
   simulation: null,
   documents: [],
+  personalReferences: [],
   currentStep: 0,
   errors: {},
   isLoading: false,
@@ -246,6 +260,26 @@ function proposalReducer(state: ProposalState, action: ProposalAction): Proposal
       return {
         ...state,
         documents: state.documents.filter(doc => doc.id !== action.payload),
+      };
+
+    case 'ADD_REFERENCE':
+      return {
+        ...state,
+        personalReferences: [...state.personalReferences, action.payload],
+      };
+
+    case 'UPDATE_REFERENCE':
+      return {
+        ...state,
+        personalReferences: state.personalReferences.map((ref, index) =>
+          index === action.payload.index ? action.payload.reference : ref
+        ),
+      };
+
+    case 'REMOVE_REFERENCE':
+      return {
+        ...state,
+        personalReferences: state.personalReferences.filter((_, index) => index !== action.payload),
       };
 
     case 'SET_STEP':
@@ -346,6 +380,15 @@ export function useProposalActions() {
     
     removeDocument: (documentId: string) => 
       dispatch({ type: 'REMOVE_DOCUMENT', payload: documentId }),
+    
+    addReference: (reference: PersonalReference) =>
+      dispatch({ type: 'ADD_REFERENCE', payload: reference }),
+    
+    updateReference: (index: number, reference: PersonalReference) =>
+      dispatch({ type: 'UPDATE_REFERENCE', payload: { index, reference } }),
+    
+    removeReference: (index: number) =>
+      dispatch({ type: 'REMOVE_REFERENCE', payload: index }),
     
     setStep: (step: number) => 
       dispatch({ type: 'SET_STEP', payload: step }),

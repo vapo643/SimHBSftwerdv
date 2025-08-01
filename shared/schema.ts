@@ -126,6 +126,9 @@ export const propostas = pgTable("propostas", {
   prazo: integer("prazo"),
   finalidade: text("finalidade"),
   garantia: text("garantia"),
+  
+  // Novo campo para telefone da empresa
+  clienteTelefoneEmpresa: text("cliente_telefone_empresa"),
 
   // Valores calculados
   valorTac: decimal("valor_tac", { precision: 10, scale: 2 }),
@@ -256,6 +259,16 @@ export const auditDeleteLog = pgTable("audit_delete_log", {
   userAgent: text("user_agent"),
   restoredAt: timestamp("restored_at"),
   restoredBy: uuid("restored_by").references(() => profiles.id),
+});
+
+// Referências Pessoais - Nova tabela para armazenar referências dos clientes
+export const referenciaPessoal = pgTable("referencia_pessoal", {
+  id: serial("id").primaryKey(),
+  propostaId: text("proposta_id").references(() => propostas.id, { onDelete: 'cascade' }).notNull(),
+  nomeCompleto: text("nome_completo").notNull(),
+  grauParentesco: text("grau_parentesco").notNull(), // Mãe, Pai, Irmão, Amigo, etc.
+  telefone: text("telefone").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 // Banco Inter Integration Tables
@@ -424,6 +437,18 @@ export const insertInterWebhookSchema = createInsertSchema(interWebhooks).omit({
   updatedAt: true,
 });
 
+// Schema para referências pessoais
+export const insertReferenciaPessoalSchema = createInsertSchema(referenciaPessoal).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertReferenciaPessoalBase = z.object({
+  nomeCompleto: z.string().min(3, "Nome completo é obrigatório"),
+  grauParentesco: z.string().min(2, "Grau de parentesco é obrigatório"),
+  telefone: z.string().min(10, "Telefone é obrigatório"),
+});
+
 export const insertInterCallbackSchema = createInsertSchema(interCallbacks).omit({
   id: true,
   createdAt: true,
@@ -479,3 +504,7 @@ export type InsertInterWebhook = z.infer<typeof insertInterWebhookSchema>;
 export type InterWebhook = typeof interWebhooks.$inferSelect;
 export type InsertInterCallback = z.infer<typeof insertInterCallbackSchema>;
 export type InterCallback = typeof interCallbacks.$inferSelect;
+
+// Referência Pessoal types
+export type InsertReferenciaPessoal = z.infer<typeof insertReferenciaPessoalSchema>;
+export type ReferenciaPessoal = typeof referenciaPessoal.$inferSelect;

@@ -1486,7 +1486,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           nacionalidade: dataWithId.clienteNacionalidade,
           cep: dataWithId.clienteCep,
           endereco: dataWithId.clienteEndereco,
-          ocupacao: dataWithId.clienteOcupacao
+          ocupacao: dataWithId.clienteOcupacao,
+          telefoneEmpresa: dataWithId.clienteTelefoneEmpresa
         },
         
         // Store loan conditions as JSONB (as object, not string)
@@ -1502,7 +1503,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // Additional fields
         produtoId: dataWithId.produtoId,
-        tabelaComercialId: dataWithId.tabelaComercialId
+        tabelaComercialId: dataWithId.tabelaComercialId,
+        
+        // Personal references (store as JSONB)
+        referenciaPessoal: dataWithId.referenciaPessoal || []
       };
       
       // Create the proposal
