@@ -408,11 +408,9 @@ class ClickSignServiceV3 {
         block_after_refusal: true
       });
 
-      // 2. Add document with Data URI format
-      const dataUriContent = `data:application/pdf;base64,${pdfBase64}`;
-      
+      // 2. Add document - pdfBase64 já vem com Data URI format
       const document = await this.addDocumentToEnvelope(envelope.id, {
-        content_base64: dataUriContent,
+        content_base64: pdfBase64,
         filename: `ccb_proposta_${proposalId}.pdf`
       });
 
