@@ -128,9 +128,6 @@ export const propostas = pgTable("propostas", {
   prazo: integer("prazo"),
   finalidade: text("finalidade"),
   garantia: text("garantia"),
-  
-  // Novo campo para telefone da empresa
-  clienteTelefoneEmpresa: text("cliente_telefone_empresa"),
 
   // Valores calculados
   valorTac: decimal("valor_tac", { precision: 10, scale: 2 }),
