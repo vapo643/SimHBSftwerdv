@@ -14,6 +14,62 @@ import { createServerSupabaseAdminClient } from '../lib/supabase.js';
 const router = express.Router();
 
 /**
+ * Test ClickSign API Token
+ * GET /api/clicksign/test-token
+ */
+router.get('/clicksign/test-token', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+  try {
+    const userRole = req.user?.role;
+    
+    // Only ADMINISTRADOR can test tokens
+    if (userRole !== 'ADMINISTRADOR') {
+      return res.status(403).json({
+        message: 'Apenas administradores podem testar tokens ClickSign'
+      });
+    }
+
+    // Test token using official ClickSign documentation method
+    const testUrl = process.env.NODE_ENV === 'production' 
+      ? `https://app.clicksign.com/api/v3/envelopes?access_token=${process.env.CLICKSIGN_API_TOKEN}`
+      : `https://sandbox.clicksign.com/api/v3/envelopes?access_token=${process.env.CLICKSIGN_API_TOKEN}`;
+
+    const response = await fetch(testUrl, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/vnd.api+json',
+        'Content-Type': 'application/vnd.api+json'
+      }
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      res.json({
+        success: true,
+        status: 'Token válido',
+        environment: process.env.NODE_ENV === 'production' ? 'production' : 'sandbox',
+        data: data
+      });
+    } else {
+      res.status(response.status).json({
+        success: false,
+        status: 'Token inválido',
+        environment: process.env.NODE_ENV === 'production' ? 'production' : 'sandbox',
+        error: data
+      });
+    }
+
+  } catch (error) {
+    console.error('[CLICKSIGN] ❌ Error testing token:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Erro interno ao testar token',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+/**
  * Regenerate ClickSign signature link
  * POST /api/propostas/:id/clicksign/regenerar
  */

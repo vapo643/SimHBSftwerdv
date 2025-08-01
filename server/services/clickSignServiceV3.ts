@@ -107,13 +107,17 @@ class ClickSignServiceV3 {
 
     const url = `${this.config.apiUrl}${endpoint}`;
     const headers: HeadersInit = {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-      'Authorization': `Bearer ${this.config.apiToken}`
+      'Content-Type': 'application/vnd.api+json',
+      'Accept': 'application/vnd.api+json',
+      'Authorization': this.config.apiToken
     };
 
     console.log(`[CLICKSIGN V3] 📡 ${method} ${endpoint}`);
-    console.log(`[CLICKSIGN V3] Using token: ${this.config.apiToken.substring(0, 10)}...`);
+    console.log(`[CLICKSIGN V3] Headers:`, { 
+      'Content-Type': headers['Content-Type'],
+      'Accept': headers['Accept'],
+      'Authorization': `${this.config.apiToken.substring(0, 10)}...`
+    });
 
     try {
       const response = await fetch(url, {
