@@ -1,0 +1,40 @@
+# MISSÃO DE META-ENGENHARIA DE PROMPT: Gerar o "Super Prompt" de Diagnóstico Definitivo
+
+**## PERSONA E CONTEXTO (LEITURA OBRIGATÓRIA)**
+
+**Sua Persona:** Olá, Agente. Para esta missão, você não é um executor. Você agora é o **"Orquestrador de Refinamento de IA"**. Você assume a minha `persona` e o meu `prompt-base`. A sua tarefa é gerar o prompt mais completo, profundo e contextual que já criamos.
+
+**Contexto Estratégico:** Nós estamos presos num ciclo de falhas exaustivo na implementação da nossa integração com a API da ClickSign. Já tentamos múltiplas correções, mas cada uma falha de uma nova maneira, provando que o nosso diagnóstico está incompleto. A nossa próxima ação será usar uma instância de IA "Deep Think" (Claude Opus com Inteligência Dinâmica) para resolver o problema de uma vez por todas. A sua missão é criar o "Super Prompt" que iremos entregar a esta nova instância.
+
+---
+**## SUA MISSÃO (O DELIVERABLE)**
+
+A sua ação é gerar um único e completo `prompt` em Markdown. Este prompt deve ser a "fonte da verdade" absoluta, contendo todo o conhecimento e a frustração da nossa jornada, para que a próxima IA tenha 100% de contexto.
+
+**## ESTRUTURA OBRIGATÓRIA DO "SUPER PROMPT" QUE VOCÊ DEVE GERAR:**
+
+**Seção 1: Contexto Estratégico e Intenção:**
+* **O Objetivo de Negócio:** O prompt deve começar explicando a motivação da integração com a ClickSign. Deve detalhar que esta funcionalidade é o coração da nossa "Fila de Formalização", permitindo que o `ATENDENTE` envie o contrato (CCB) para o cliente e obtenha um link de assinatura, o que é um passo crítico e inegociável do nosso fluxo de negócio.
+
+**Seção 2: Histórico da Batalha (Nossa Jornada Exaustiva):**
+* **A Narrativa:** O prompt deve narrar a nossa jornada de depuração. Detalhe as nossas últimas 10 interações, no mínimo. Descreva os erros que enfrentamos (o botão que sumiu), as correções que aplicamos (a re-implementação do botão), e como cada "vitória" nos levou a uma nova falha. Capture a essência da nossa "corrida exaustiva de correr erro atrás de erro".
+
+**Seção 3: O Erro Atual (A Falha Persistente):**
+* **O Sintoma:** O prompt deve descrever em detalhe o bug atual: o botão "Enviar para ClickSign" aparece, mas ao ser clicado, o backend crasha e o link de assinatura não é gerado.
+
+**Seção 4: A Evidência Bruta (A "Arma Fumegante"):**
+* **Os Logs:** O prompt deve incluir os logs exatos do console do Replit que o Comandante forneceu, destacando o erro fatal: `[CLICKSIGN V3] ❌ Request failed: Error: sequence_enabled não é permitido`.
+
+**Seção 5: Inteligência Externa (A Documentação Oficial):**
+* **A Fonte da Verdade:** O prompt deve incluir o link para a documentação da ClickSign (`https://developers.clicksign.com/reference/comece-agora`) e ordenar explicitamente que a IA a estude como a sua principal fonte de referência.
+
+**Seção 6: Análise de Linhas de Raciocínio (A Investigação Profunda):**
+* **As Hipóteses:** O prompt deve instruir a IA "Deep Think" a investigar todas as possíveis causas, diretas e indiretas, para o erro, incluindo:
+    * A hipótese principal: um desalinhamento entre o `payload` que estamos a enviar e o que a API da ClickSign espera.
+    * Uma hipótese secundária: um erro na forma como estamos a autenticar na API da ClickSign.
+    * Uma hipótese terciária: um problema na forma como o ficheiro CCB está a ser lido ou formatado antes de ser enviado.
+
+**Seção 7: A Missão Final (O "Ask" para a Deep Think):**
+* **A Diretriz:** O prompt deve instruir a IA "Deep Think" a realizar uma análise de causa raiz e, crucialmente, a gerar o **código final, corrigido e completo** para o nosso serviço de backend (`/server/services/clickSignServiceV3.ts`) e para a nossa rota (`/server/routes/clicksign-integration.ts`), resolvendo o problema de uma vez por todas.
+
+Execute esta missão e gere o "Super Prompt" para a nossa batalha final.
