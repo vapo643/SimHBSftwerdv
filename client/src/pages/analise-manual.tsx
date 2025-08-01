@@ -41,6 +41,7 @@ import {
   Clock,
   Calculator,
 } from "lucide-react";
+import RefreshButton from "@/components/RefreshButton";
 
 const decisionSchema = z.object({
   status: z.enum(["aprovado", "rejeitado", "solicitar_info"]),
@@ -133,6 +134,10 @@ export default function AnaliseManual() {
 
   const onSubmit = (data: DecisionForm) => {
     updateProposta.mutate(data);
+  };
+
+  const handleRefresh = () => {
+    queryClient.invalidateQueries({ queryKey: ["/api/propostas", propostaId] });
   };
 
   const formatCurrency = (value: string) => {
@@ -302,7 +307,16 @@ export default function AnaliseManual() {
   }
 
   return (
-    <DashboardLayout title={`Análise Manual - Proposta #${proposta.id}`}>
+    <DashboardLayout 
+      title={`Análise Manual - Proposta #${proposta.id}`}
+      actions={
+        <RefreshButton 
+          onRefresh={handleRefresh}
+          isLoading={isLoading}
+          variant="ghost"
+        />
+      }
+    >
       <div className="space-y-6">
         {/* Header Actions */}
         <div className="flex items-center justify-between">

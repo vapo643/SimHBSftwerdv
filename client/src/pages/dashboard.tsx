@@ -29,6 +29,7 @@ import {
   XCircle,
   Banknote
 } from "lucide-react";
+import RefreshButton from "@/components/RefreshButton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from "@/contexts/AuthContext";
 import { format } from "date-fns";
@@ -224,7 +225,16 @@ const Dashboard: React.FC = () => {
   }
 
   return (
-    <DashboardLayout title="Dashboard de Propostas">
+    <DashboardLayout 
+      title="Dashboard de Propostas"
+      actions={
+        <RefreshButton
+          onRefresh={handleRefresh}
+          isLoading={isLoading}
+          variant="ghost"
+        />
+      }
+    >
       <div className="space-y-6">
         {/* Estatísticas Gerais */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

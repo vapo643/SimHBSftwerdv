@@ -40,6 +40,8 @@ import {
   FileSearch,
   Package
 } from 'lucide-react';
+import DashboardLayout from '@/components/DashboardLayout';
+import RefreshButton from '@/components/RefreshButton';
 import {
   LineChart,
   Line,
@@ -201,16 +203,30 @@ export default function SecurityDashboard() {
       new Date(a.timestamp).getTime() > Date.now() - 3600000
     ).length : 0,
   };
+
+  const handleRefresh = () => {
+    queryClient.invalidateQueries({ queryKey: ['/api/security/metrics'] });
+    queryClient.invalidateQueries({ queryKey: ['/api/security/vulnerabilities'] });
+    queryClient.invalidateQueries({ queryKey: ['/api/security/anomalies'] });
+    queryClient.invalidateQueries({ queryKey: ['/api/security/dependency-scan'] });
+    queryClient.invalidateQueries({ queryKey: ['/api/security/semgrep-findings'] });
+  };
   
   return (
+    <DashboardLayout 
+      title="Monitoramento Avançado de Segurança"
+      actions={
+        <RefreshButton 
+          onRefresh={handleRefresh}
+          isLoading={metricsLoading || vulnerabilitiesLoading || anomaliesLoading}
+          variant="ghost"
+        />
+      }
+    >
     <div className="container mx-auto p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Shield className="h-8 w-8 text-primary" />
-            Monitoramento Avançado de Segurança
-          </h1>
           <p className="text-muted-foreground">
             Sistema autônomo de detecção e prevenção de vulnerabilidades
           </p>
@@ -407,6 +423,7 @@ export default function SecurityDashboard() {
         </Card>
       </div>
     </div>
+    </DashboardLayout>
   );
 }
 

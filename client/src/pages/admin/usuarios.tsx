@@ -22,6 +22,7 @@ import { api } from "@/lib/apiClient";
 import { queryKeys, invalidationPatterns } from "@/hooks/queries/queryKeys";
 import type { User } from "@shared/schema";
 import { Users, Edit, UserX, UserCheck, Loader2, Shield, UserPlus, Activity, BarChart3, TrendingUp, Mail, Calendar, Settings } from "lucide-react";
+import RefreshButton from "@/components/RefreshButton";
 
 const UsuariosPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -149,6 +150,10 @@ const UsuariosPage: React.FC = () => {
       title: "Info", 
       description: "Alteração de status será implementada em breve",
     });
+  };
+
+  const handleRefresh = () => {
+    queryClient.invalidateQueries({ queryKey: queryKeys.users.list() });
   };
 
   // Error handling
@@ -281,7 +286,16 @@ const UsuariosPage: React.FC = () => {
   };
 
   return (
-    <DashboardLayout title="Gestão de Usuários e Perfis">
+    <DashboardLayout 
+      title="Gestão de Usuários e Perfis"
+      actions={
+        <RefreshButton 
+          onRefresh={handleRefresh}
+          isLoading={loadingUsers}
+          variant="ghost"
+        />
+      }
+    >
       <div className="space-y-8">
         {/* Header Section */}
         <div className="flex items-center justify-between">
