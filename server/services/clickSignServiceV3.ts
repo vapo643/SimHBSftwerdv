@@ -141,7 +141,13 @@ class ClickSignServiceV3 {
 
       if (!response.ok) {
         console.error(`[CLICKSIGN V3] ❌ Error ${response.status}:`, data);
-        throw new Error(data.errors?.[0]?.message || `API error: ${response.status}`);
+        console.error(`[CLICKSIGN V3] ❌ Full error details:`, {
+          status: response.status,
+          statusText: response.statusText,
+          headers: Object.fromEntries(response.headers.entries()),
+          body: data
+        });
+        throw new Error(data.errors?.[0]?.detail || data.errors?.[0]?.message || `API error: ${response.status}`);
       }
 
       return { data };
@@ -155,9 +161,19 @@ class ClickSignServiceV3 {
    * Create a new envelope
    */
   async createEnvelope(envelopeData: EnvelopeData) {
-    const response = await this.makeRequest<any>('POST', '/envelopes', {
-      envelope: envelopeData
-    });
+    console.log(`[CLICKSIGN V3] 🔨 Creating envelope with data:`, envelopeData);
+    
+    // Use correct JSON API format per ClickSign documentation
+    const requestBody = {
+      data: {
+        type: 'envelopes',
+        attributes: envelopeData
+      }
+    };
+    
+    console.log(`[CLICKSIGN V3] 🔨 Request body:`, JSON.stringify(requestBody, null, 2));
+    
+    const response = await this.makeRequest<any>('POST', '/envelopes', requestBody);
 
     console.log(`[CLICKSIGN V3] ✅ Envelope created: ${response.data.id}`);
     return response.data;
@@ -167,10 +183,20 @@ class ClickSignServiceV3 {
    * Add document to envelope
    */
   async addDocumentToEnvelope(envelopeId: string, documentData: DocumentData) {
+    console.log(`[CLICKSIGN V3] 🔨 Adding document to envelope ${envelopeId}`);
+    
+    // Use correct JSON API format
+    const requestBody = {
+      data: {
+        type: 'documents',
+        attributes: documentData
+      }
+    };
+    
     const response = await this.makeRequest<any>(
       'POST',
       `/envelopes/${envelopeId}/documents`,
-      { document: documentData }
+      requestBody
     );
 
     console.log(`[CLICKSIGN V3] ✅ Document added to envelope: ${response.data.id}`);
@@ -204,21 +230,30 @@ class ClickSignServiceV3 {
    * Add signer to envelope (Creates the actual signer in ClickSign)
    */
   async addSignerToEnvelope(envelopeId: string, signerData: EnvelopeSignerData, fullSignerData?: SignerData) {
-    // If we have full signer data, create the signer with the envelope
-    const payload = fullSignerData ? {
-      signer: {
-        ...fullSignerData,
-        sign_as: signerData.sign_as,
-        refusable: signerData.refusable,
-        message: signerData.message,
-        group: signerData.group
-      }
+    console.log(`[CLICKSIGN V3] 🔨 Adding signer to envelope ${envelopeId}`);
+    
+    // Use correct JSON API format
+    const attributes = fullSignerData ? {
+      ...fullSignerData,
+      sign_as: signerData.sign_as,
+      refusable: signerData.refusable,
+      message: signerData.message,
+      group: signerData.group
     } : signerData;
+
+    const requestBody = {
+      data: {
+        type: 'signers',
+        attributes: attributes
+      }
+    };
+
+    console.log(`[CLICKSIGN V3] 🔨 Signer request body:`, JSON.stringify(requestBody, null, 2));
 
     const response = await this.makeRequest<any>(
       'POST',
       `/envelopes/${envelopeId}/signers`,
-      payload
+      requestBody
     );
 
     console.log(`[CLICKSIGN V3] ✅ Signer added to envelope`);
@@ -230,10 +265,20 @@ class ClickSignServiceV3 {
    * Add requirement to envelope
    */
   async addRequirement(envelopeId: string, requirementData: RequirementData) {
+    console.log(`[CLICKSIGN V3] 🔨 Adding requirement to envelope ${envelopeId}`);
+    
+    // Use correct JSON API format
+    const requestBody = {
+      data: {
+        type: 'requirements',
+        attributes: requirementData
+      }
+    };
+
     const response = await this.makeRequest<any>(
       'POST',
       `/envelopes/${envelopeId}/requirements`,
-      { requirement: requirementData }
+      requestBody
     );
 
     console.log(`[CLICKSIGN V3] ✅ Requirement added: ${requirementData.type}`);
