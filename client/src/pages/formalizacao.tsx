@@ -231,19 +231,11 @@ function FormalizacaoList() {
   };
 
   const getTitle = () => {
-    return user?.role === 'ATENDENTE' 
-      ? "Minhas Propostas - Formalização"
-      : user?.role === 'GERENTE' 
-        ? "Formalização - Minha Loja"
-        : "Formalização - Visão Geral";
+    return "Propostas em Formalização";
   };
 
   const getDescription = () => {
-    return user?.role === 'ATENDENTE'
-      ? "Suas propostas em processo de formalização"
-      : user?.role === 'GERENTE'
-        ? "Propostas de todos os atendentes da sua loja"
-        : "Acompanhe o processo de formalização das propostas aprovadas";
+    return "Acompanhe o processo de formalização das propostas aprovadas";
   };
 
   return (
@@ -631,7 +623,7 @@ export default function Formalizacao() {
       status: proposta.ccbGerado ? "completed" : "current",
       date: proposta.ccbGerado ? formatDate(proposta.createdAt) : "Pendente",
       completed: proposta.ccbGerado,
-      interactive: user?.role === 'ATENDENTE' || user?.role === 'ADMINISTRADOR',
+      interactive: true,
       etapa: 'ccb_gerado' as const,
     },
     {
@@ -642,7 +634,7 @@ export default function Formalizacao() {
       status: proposta.assinaturaEletronicaConcluida ? "completed" : proposta.ccbGerado ? "current" : "pending",
       date: proposta.assinaturaEletronicaConcluida ? formatDate(proposta.createdAt) : "Pendente",
       completed: proposta.assinaturaEletronicaConcluida,
-      interactive: (user?.role === 'ATENDENTE' || user?.role === 'ADMINISTRADOR') && proposta.ccbGerado,
+      interactive: proposta.ccbGerado,
       etapa: 'assinatura_eletronica' as const,
     },
     {
@@ -653,7 +645,7 @@ export default function Formalizacao() {
       status: proposta.biometriaConcluida ? "completed" : proposta.assinaturaEletronicaConcluida ? "current" : "pending",
       date: proposta.biometriaConcluida ? formatDate(proposta.createdAt) : "Pendente",
       completed: proposta.biometriaConcluida,
-      interactive: (user?.role === 'ATENDENTE' || user?.role === 'ADMINISTRADOR') && proposta.assinaturaEletronicaConcluida,
+      interactive: proposta.assinaturaEletronicaConcluida,
       etapa: 'biometria' as const,
     },
     {
@@ -842,8 +834,8 @@ export default function Formalizacao() {
                       const isCompleted = step.completed;
                       const isCurrent = step.status === "current";
 
-                      // Se é uma etapa interativa e o usuário é ATENDENTE ou ADMINISTRADOR, mostra o controle
-                      if (step.interactive && step.etapa && (user?.role === 'ATENDENTE' || user?.role === 'ADMINISTRADOR')) {
+                      // Se é uma etapa interativa, mostra o controle (independente do role)
+                      if (step.interactive && step.etapa) {
                         return (
                           <div key={step.id} className="mb-4">
                             <EtapaFormalizacaoControl
@@ -923,7 +915,7 @@ export default function Formalizacao() {
                               )}
 
                               {/* Botões para CCB e ClickSign */}
-                              {user?.role === 'ATENDENTE' && step.id === 2 && proposta.ccbGerado && (
+                              {step.id === 2 && proposta.ccbGerado && (
                                 <div className="mt-3">
                                   <Button
                                     onClick={async () => {
@@ -949,7 +941,7 @@ export default function Formalizacao() {
                                 </div>
                               )}
 
-                              {user?.role === 'ATENDENTE' && step.id === 3 && proposta.ccbGerado && !proposta.assinaturaEletronicaConcluida && (
+                              {step.id === 3 && proposta.ccbGerado && !proposta.assinaturaEletronicaConcluida && (
                                 <div className="mt-3 p-4 bg-blue-900/20 border border-blue-700 rounded-lg">
                                   <div className="flex items-center justify-between mb-3">
                                     <h5 className="font-medium text-blue-300">Enviar para Assinatura Eletrônica</h5>

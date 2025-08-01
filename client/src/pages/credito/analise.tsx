@@ -62,8 +62,21 @@ const updatePropostaStatus = async ({
 
 const decisionSchema = z.object({
   status: z.enum(["aprovado", "rejeitado", "pendenciado"]),
-  observacao: z.string().min(1, "Observação é obrigatória"),
-});
+  observacao: z.string().optional(),
+}).refine(
+  (data) => {
+    // Observação é obrigatória APENAS quando o status é "pendenciado"
+    if (data.status === "pendenciado") {
+      return data.observacao && data.observacao.trim().length > 0;
+    }
+    // Para "aprovado" e "rejeitado", observação é opcional
+    return true;
+  },
+  {
+    message: "Observação é obrigatória quando a proposta é pendenciada",
+    path: ["observacao"], // Aplica o erro no campo observacao
+  }
+);
 
 type DecisionFormData = z.infer<typeof decisionSchema>;
 
