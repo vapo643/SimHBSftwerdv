@@ -748,13 +748,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { status, observacao, valorAprovado } = req.body;
       const motivoPendencia = req.body.motivoPendencia || req.body.observacao; // Accept both field names
       
-      // Validation schema for status change
+      // Validation schema for status change with conditional observacao requirement
       const statusChangeSchema = z.object({
         status: z.enum(['aprovado', 'aguardando_aceite_atendente', 'aceito_atendente', 'rejeitado', 'pendenciado', 'aguardando_analise', 'cancelado']),
-        observacao: z.string().min(1, 'Observação é obrigatória'),
+        observacao: z.string().optional(),
         valorAprovado: z.number().optional(),
         motivoPendencia: z.string().optional()
-      });
+      }).refine(
+        (data) => {
+          // Observação é obrigatória APENAS quando o status é "pendenciado"
+          if (data.status === "pendenciado") {
+            return data.observacao && data.observacao.trim().length > 0;
+          }
+          // Para outros status, observação é opcional
+          return true;
+        },
+        {
+          message: "Observação é obrigatória quando a proposta é pendenciada",
+          path: ["observacao"],
+        }
+      );
       
       const validatedData = statusChangeSchema.parse({ status, observacao, valorAprovado, motivoPendencia });
       

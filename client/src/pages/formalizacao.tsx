@@ -257,12 +257,7 @@ function FormalizacaoList() {
             <p className="text-gray-600 dark:text-gray-400">
               {getDescription()}
             </p>
-            {user?.role === 'ATENDENTE' && (
-              <div className="mt-2 flex items-center gap-2 text-sm text-blue-400">
-                <Shield className="h-4 w-4" />
-                <span>Visualização do Atendente - Ações Pendentes</span>
-              </div>
-            )}
+
           </div>
           <div className="flex items-center gap-4">
             <div className="text-right">
@@ -702,18 +697,14 @@ export default function Formalizacao() {
 
   const formalizationSteps = getFormalizationSteps(proposta);
 
-  // Função para obter título baseado no papel
+  // Título unificado para todos os roles
   const getTitle = () => {
-    return user?.role === 'ATENDENTE' 
-      ? `Minha Proposta #${proposta.id} - Ação Necessária`
-      : `Acompanhamento da Formalização - Proposta #${proposta.id}`;
+    return `Formalização - Proposta #${proposta.id}`;
   };
 
-  // Função para obter destino do botão voltar
+  // Destino unificado do botão voltar
   const getBackLocation = () => {
-    return user?.role === 'ATENDENTE' 
-      ? "/formalizacao"
-      : "/credito/fila";
+    return "/formalizacao";
   };
 
   // 🔧 SEGURANÇA: Verificação de permissão agora é feita no BACKEND via RLS
@@ -731,14 +722,9 @@ export default function Formalizacao() {
               className="flex items-center gap-2"
             >
               <ArrowLeft className="h-4 w-4" />
-              {user?.role === 'ATENDENTE' ? 'Voltar para Minhas Propostas' : 'Voltar para Fila'}
+              Voltar para Formalização
             </Button>
-            {user?.role === 'ATENDENTE' && (
-              <div className="flex items-center gap-2 text-sm text-blue-600">
-                <Shield className="h-4 w-4" />
-                <span>Visualização do Atendente</span>
-              </div>
-            )}
+
           </div>
 
           <div className="flex items-center gap-2">
@@ -758,7 +744,7 @@ export default function Formalizacao() {
               <div className="mb-2 flex items-center justify-between">
                 <h3 className="flex items-center gap-2 text-lg font-semibold text-white">
                   <TrendingUp className="h-5 w-5 text-blue-400" />
-                  {user?.role === 'ATENDENTE' ? 'Sua Ação Necessária' : 'Progresso da Formalização'}
+                  Progresso da Formalização
                 </h3>
                 <span className="text-sm font-medium text-gray-400">
                   {getStatusProgress(proposta.status)}% concluído
