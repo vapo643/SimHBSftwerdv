@@ -188,11 +188,14 @@ class ClickSignServiceV3 {
   async addDocumentToEnvelope(envelopeId: string, documentData: DocumentData) {
     console.log(`[CLICKSIGN V3] 🔨 Adding document to envelope ${envelopeId}`);
     
+    // Remove 'type' field from attributes as API doesn't accept it
+    const { type, ...attributes } = documentData;
+    
     // Use correct JSON API format
     const requestBody = {
       data: {
         type: 'documents',
-        attributes: documentData
+        attributes: attributes
       }
     };
     
@@ -408,7 +411,6 @@ class ClickSignServiceV3 {
 
       // 2. Add document
       const document = await this.addDocumentToEnvelope(envelope.id, {
-        type: 'upload',
         content_base64: pdfBase64,
         filename: `ccb_proposta_${proposalId}.pdf`
       });
