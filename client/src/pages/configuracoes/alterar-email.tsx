@@ -173,7 +173,7 @@ export default function AlterarEmail() {
                   <div className="mb-2">
                     <strong>Modo Desenvolvimento - Token de Verificação:</strong>
                   </div>
-                  <code className="block p-2 bg-black/10 rounded text-xs break-all mb-3">
+                  <code className="block p-2 bg-muted rounded text-xs break-all mb-3">
                     {verificationToken}
                   </code>
                   <Button

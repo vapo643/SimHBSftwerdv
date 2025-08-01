@@ -49,7 +49,7 @@ export function DocumentsStep() {
 
   return (
     <div className="space-y-6">
-      <Card className="bg-black border-gray-800">
+      <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5" />
@@ -74,13 +74,13 @@ export function DocumentsStep() {
 
           <div className="space-y-4">
             <div
-              className="border-2 border-dashed border-gray-600 rounded-lg p-8 text-center hover:border-gray-500 transition-colors cursor-pointer"
+              className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-border/70 transition-colors cursor-pointer bg-muted/30 hover:bg-muted/50"
               onClick={() => fileInputRef.current?.click()}
             >
-              <Upload className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-              <p className="text-lg font-medium mb-2">Clique para fazer upload</p>
-              <p className="text-sm text-gray-500">ou arraste e solte os arquivos aqui</p>
-              <p className="text-xs text-gray-600 mt-2">
+              <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+              <p className="text-lg font-medium mb-2 text-foreground">Clique para fazer upload</p>
+              <p className="text-sm text-muted-foreground">ou arraste e solte os arquivos aqui</p>
+              <p className="text-xs text-muted-foreground mt-2">
                 Formatos aceitos: PDF, JPG, PNG (máx. 10MB por arquivo)
               </p>
             </div>
@@ -97,17 +97,17 @@ export function DocumentsStep() {
 
           {state.documents.length > 0 && (
             <div className="space-y-2">
-              <h4 className="font-medium text-sm text-gray-300">Documentos anexados:</h4>
+              <h4 className="font-medium text-sm text-foreground">Documentos anexados:</h4>
               {state.documents.map((doc) => (
                 <div
                   key={doc.id}
-                  className="flex items-center justify-between p-3 rounded-lg bg-gray-900 border border-gray-800"
+                  className="flex items-center justify-between p-3 rounded-lg bg-muted border border-border"
                 >
                   <div className="flex items-center gap-3">
-                    <FileText className="h-5 w-5 text-gray-400" />
+                    <FileText className="h-5 w-5 text-muted-foreground" />
                     <div>
-                      <p className="text-sm font-medium">{doc.name}</p>
-                      <p className="text-xs text-gray-500">{formatFileSize(doc.size)}</p>
+                      <p className="text-sm font-medium text-foreground">{doc.name}</p>
+                      <p className="text-xs text-muted-foreground">{formatFileSize(doc.size)}</p>
                     </div>
                   </div>
                   <Button

@@ -62,7 +62,7 @@ export function PersonalReferencesStep() {
 
   return (
     <div className="space-y-6">
-      <Card className="bg-black border-gray-800">
+      <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Users className="h-5 w-5" />
@@ -74,7 +74,7 @@ export function PersonalReferencesStep() {
         </CardHeader>
         <CardContent className="space-y-6">
           {personalReferences.map((reference, index) => (
-            <div key={index} className="space-y-4 p-4 bg-gray-900 rounded-lg relative">
+            <div key={index} className="space-y-4 p-4 bg-muted rounded-lg relative border border-border">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-medium">Referência {index + 1}</h3>
                 {personalReferences.length > 1 && (
@@ -83,7 +83,7 @@ export function PersonalReferencesStep() {
                     variant="ghost"
                     size="sm"
                     onClick={() => handleRemoveReference(index)}
-                    className="text-red-500 hover:text-red-400"
+                    className="text-destructive hover:text-destructive/80"
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -98,10 +98,10 @@ export function PersonalReferencesStep() {
                     type="text"
                     value={reference.nomeCompleto}
                     onChange={(e) => handleReferenceChange(index, 'nomeCompleto', e.target.value)}
-                    className={errors[`reference_${index}_nomeCompleto`] ? "border-red-500" : ""}
+                    className={errors[`reference_${index}_nomeCompleto`] ? "border-destructive" : ""}
                   />
                   {errors[`reference_${index}_nomeCompleto`] && 
-                    <p className="mt-1 text-sm text-red-500">{errors[`reference_${index}_nomeCompleto`]}</p>}
+                    <p className="mt-1 text-sm text-destructive">{errors[`reference_${index}_nomeCompleto`]}</p>}
                 </div>
 
                 <div>
@@ -110,7 +110,7 @@ export function PersonalReferencesStep() {
                     value={reference.grauParentesco}
                     onValueChange={(value) => handleReferenceChange(index, 'grauParentesco', value)}
                   >
-                    <SelectTrigger className={errors[`reference_${index}_grauParentesco`] ? "border-red-500" : ""}>
+                    <SelectTrigger className={errors[`reference_${index}_grauParentesco`] ? "border-destructive" : ""}>
                       <SelectValue placeholder="Selecione..." />
                     </SelectTrigger>
                     <SelectContent>
@@ -128,7 +128,7 @@ export function PersonalReferencesStep() {
                     </SelectContent>
                   </Select>
                   {errors[`reference_${index}_grauParentesco`] && 
-                    <p className="mt-1 text-sm text-red-500">{errors[`reference_${index}_grauParentesco`]}</p>}
+                    <p className="mt-1 text-sm text-destructive">{errors[`reference_${index}_grauParentesco`]}</p>}
                 </div>
 
                 <div>
@@ -145,12 +145,12 @@ export function PersonalReferencesStep() {
                         id={`telefone_${index}`}
                         type="tel"
                         placeholder="(11) 98765-4321"
-                        className={errors[`reference_${index}_telefone`] ? "border-red-500" : ""}
+                        className={errors[`reference_${index}_telefone`] ? "border-destructive" : ""}
                       />
                     )}
                   </InputMask>
                   {errors[`reference_${index}_telefone`] && 
-                    <p className="mt-1 text-sm text-red-500">{errors[`reference_${index}_telefone`]}</p>}
+                    <p className="mt-1 text-sm text-destructive">{errors[`reference_${index}_telefone`]}</p>}
                 </div>
               </div>
             </div>

@@ -4,35 +4,51 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom Modern Scrollbar Design - Blackout Theme */
+/* Custom Modern Scrollbar Design - Adaptive Theme */
 ::-webkit-scrollbar {
   width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: hsl(0, 0%, 8%);
+  background: var(--muted);
   border-radius: 10px;
   margin: 4px;
-  border: 1px solid hsl(0, 0%, 15%);
+  border: 1px solid var(--border);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, #3b82f6 0%, #10b981 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
   border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border);
   transition: all 0.3s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(135deg, #2563eb 0%, #059669 100%);
-  box-shadow: 0 2px 12px rgba(59, 130, 246, 0.3);
+  background: linear-gradient(135deg, hsl(220, 100%, 40%) 0%, hsl(120, 100%, 40%) 100%);
+  box-shadow: 0 2px 12px hsla(var(--primary), 0.3);
   transform: scale(1.1);
 }
 
-/* Firefox scrollbar */
+/* Firefox scrollbar - adaptive */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #3b82f6 hsl(0, 0%, 8%);
+  scrollbar-color: var(--primary) var(--muted);
+}
+
+/* Light mode scrollbar optimizations */
+.light ::-webkit-scrollbar-track {
+  background: hsl(240, 4.8%, 95.9%);
+  border: 1px solid hsl(240, 5.9%, 90%);
+}
+
+.light ::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, hsl(220, 100%, 50%) 0%, hsl(120, 100%, 50%) 100%);
+  border: 1px solid hsl(240, 5.9%, 85%);
+}
+
+.light ::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, hsl(220, 100%, 45%) 0%, hsl(120, 100%, 45%) 100%);
+  box-shadow: 0 2px 12px rgba(59, 130, 246, 0.2);
 }
 
 :root {
@@ -67,34 +83,43 @@
 }
 
 .light {
-  /* Tema Light */
+  /* Tema Light - Otimizado para clareza e elegância */
   --background: hsl(0, 0%, 100%);
   --foreground: hsl(240, 10%, 3.9%);
-  --muted: hsl(240, 4.8%, 95.9%);
+  --muted: hsl(240, 4.8%, 96.5%);
   --muted-foreground: hsl(240, 3.8%, 46.1%);
   --popover: hsl(0, 0%, 100%);
   --popover-foreground: hsl(240, 10%, 3.9%);
   --card: hsl(0, 0%, 100%);
   --card-foreground: hsl(240, 10%, 3.9%);
-  --border: hsl(240, 5.9%, 90%);
-  --input: hsl(240, 5.9%, 90%);
-  --primary: hsl(220, 100%, 45%);
+  --border: hsl(240, 5.9%, 88%);
+  --input: hsl(240, 5.9%, 96%);
+  --primary: hsl(220, 100%, 50%);
   --primary-foreground: hsl(0, 0%, 100%);
-  --secondary: hsl(240, 4.8%, 95.9%);
+  --secondary: hsl(240, 4.8%, 96%);
   --secondary-foreground: hsl(240, 5.9%, 10%);
-  --accent: hsl(120, 100%, 45%);
+  --accent: hsl(120, 100%, 50%);
   --accent-foreground: hsl(0, 0%, 100%);
-  --destructive: hsl(0, 84.2%, 60.2%);
-  --destructive-foreground: hsl(0, 0%, 98%);
-  --ring: hsl(220, 100%, 45%);
+  --destructive: hsl(0, 84.2%, 55%);
+  --destructive-foreground: hsl(0, 0%, 100%);
+  --ring: hsl(220, 100%, 50%);
   --radius: 0.5rem;
   --warning: hsl(38, 92%, 50%);
   --success: hsl(142, 76%, 36%);
-  /* Cores Simpix para tema claro */
-  --simpix-blue: hsl(220, 100%, 45%);
-  --simpix-green: hsl(120, 100%, 45%);
-  --simpix-blue-light: hsl(220, 100%, 55%);
-  --simpix-green-dark: hsl(120, 100%, 35%);
+  /* Cores Simpix para tema claro - mais vibrantes */
+  --simpix-blue: hsl(220, 100%, 50%);
+  --simpix-green: hsl(120, 100%, 50%);
+  --simpix-blue-light: hsl(220, 100%, 60%);
+  --simpix-green-dark: hsl(120, 100%, 40%);
+  /* Variáveis específicas para sidebar e navegação */
+  --sidebar-background: hsl(240, 4.8%, 98%);
+  --sidebar-foreground: hsl(240, 10%, 3.9%);
+  --sidebar-primary: hsl(220, 100%, 50%);
+  --sidebar-primary-foreground: hsl(0, 0%, 100%);
+  --sidebar-accent: hsl(240, 4.8%, 94%);
+  --sidebar-accent-foreground: hsl(240, 5.9%, 10%);
+  --sidebar-border: hsl(240, 5.9%, 90%);
+  --sidebar-ring: hsl(220, 100%, 50%);
 }
 
 .dark {

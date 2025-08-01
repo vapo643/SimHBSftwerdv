@@ -48,53 +48,51 @@ const LoginPage: React.FC = () => {
 
   return (
     <div className="w-full lg:grid lg:min-h-screen lg:grid-cols-2">
-      <div className="hidden bg-gray-900 lg:flex items-center justify-center relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-black opacity-60"></div>
+      <div className="hidden bg-muted lg:flex items-center justify-center relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary to-primary/80 opacity-40 dark:opacity-60"></div>
         <img 
           src="https://dvglgxrvhmtsixaabxha.supabase.co/storage/v1/object/public/logosimpixblack//Logotipo_Achadinhos_de_Beleza_Colorido_Moderno_Rosa_e_Preto-removebg-preview.png" 
           alt="Simpix Logo"
           className="relative z-10 w-1/2 opacity-75"
         />
       </div>
-      <div className="flex items-center justify-center py-12 bg-black min-h-screen lg:min-h-auto">
+      <div className="flex items-center justify-center py-12 bg-background min-h-screen lg:min-h-auto">
         <div className="mx-auto grid w-[350px] gap-6">
           <div className="grid gap-2 text-center">
-            <h1 className="text-3xl font-bold text-white">Login</h1>
-            <p className="text-balance text-gray-400">
+            <h1 className="text-3xl font-bold text-foreground">Login</h1>
+            <p className="text-balance text-muted-foreground">
               Acesse sua conta para continuar
             </p>
           </div>
           <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="email" className="text-white">Email</Label>
+              <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
                 placeholder="seu@email.com"
                 required
-                className="bg-gray-800 border-gray-600 text-white placeholder:text-gray-400"
                 {...register("email")}
               />
               {errors.email && (
-                <p className="text-sm text-red-400">{errors.email.message}</p>
+                <p className="text-sm text-destructive">{errors.email.message}</p>
               )}
             </div>
             <div className="grid gap-2">
               <div className="flex items-center">
-                <Label htmlFor="password" className="text-white">Senha</Label>
+                <Label htmlFor="password">Senha</Label>
               </div>
               <Input 
                 id="password" 
                 type="password" 
                 required 
-                className="bg-gray-800 border-gray-600 text-white placeholder:text-gray-400"
                 {...register("password")}
               />
               {errors.password && (
-                <p className="text-sm text-red-400">{errors.password.message}</p>
+                <p className="text-sm text-destructive">{errors.password.message}</p>
               )}
             </div>
-            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white" disabled={loading}>
+            <Button type="submit" className="w-full" disabled={loading}>
               {loading ? "Entrando..." : "Entrar"}
             </Button>
           </form>

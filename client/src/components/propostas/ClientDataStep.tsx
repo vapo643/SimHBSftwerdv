@@ -100,7 +100,7 @@ export function ClientDataStep() {
 
   return (
     <div className="space-y-6">
-      <Card className="bg-black border-gray-800">
+      <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <User className="h-5 w-5" />
@@ -124,11 +124,11 @@ export function ClientDataStep() {
                   id="cpf"
                   type="text"
                   placeholder="000.000.000-00"
-                  className={errors.cpf ? "border-red-500 focus:border-red-500" : ""}
+                  className={errors.cpf ? "border-destructive focus:border-destructive" : ""}
                 />
               )}
             </InputMask>
-            {errors.cpf && <p className="mt-1 text-sm text-red-500">{errors.cpf}</p>}
+            {errors.cpf && <p className="mt-1 text-sm text-destructive">{errors.cpf}</p>}
           </div>
 
           <div>
@@ -138,9 +138,9 @@ export function ClientDataStep() {
               type="text"
               value={clientData.nome}
               onChange={(e) => handleNameChange(e.target.value)}
-              className={errors.nome ? "border-red-500 focus:border-red-500" : ""}
+              className={errors.nome ? "border-destructive focus:border-destructive" : ""}
             />
-            {errors.nome && <p className="mt-1 text-sm text-red-500">{errors.nome}</p>}
+            {errors.nome && <p className="mt-1 text-sm text-destructive">{errors.nome}</p>}
           </div>
 
           <div>
@@ -217,7 +217,7 @@ export function ClientDataStep() {
         </CardContent>
       </Card>
 
-      <Card className="bg-black border-gray-800">
+      <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Phone className="h-5 w-5" />
@@ -241,11 +241,11 @@ export function ClientDataStep() {
                   id="telefone"
                   type="tel"
                   placeholder="(11) 98765-4321"
-                  className={errors.telefone ? "border-red-500 focus:border-red-500" : ""}
+                  className={errors.telefone ? "border-destructive focus:border-destructive" : ""}
                 />
               )}
             </InputMask>
-            {errors.telefone && <p className="mt-1 text-sm text-red-500">{errors.telefone}</p>}
+            {errors.telefone && <p className="mt-1 text-sm text-destructive">{errors.telefone}</p>}
           </div>
 
           <div>
@@ -255,14 +255,14 @@ export function ClientDataStep() {
               type="email"
               value={clientData.email}
               onChange={(e) => handleEmailChange(e.target.value)}
-              className={errors.email ? "border-red-500 focus:border-red-500" : ""}
+              className={errors.email ? "border-destructive focus:border-destructive" : ""}
             />
-            {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
+            {errors.email && <p className="mt-1 text-sm text-destructive">{errors.email}</p>}
           </div>
         </CardContent>
       </Card>
 
-      <Card className="bg-black border-gray-800">
+      <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <MapPin className="h-5 w-5" />
@@ -286,11 +286,11 @@ export function ClientDataStep() {
                   id="cep"
                   type="text"
                   placeholder="00000-000"
-                  className={errors.cep ? "border-red-500 focus:border-red-500" : ""}
+                  className={errors.cep ? "border-destructive focus:border-destructive" : ""}
                 />
               )}
             </InputMask>
-            {errors.cep && <p className="mt-1 text-sm text-red-500">{errors.cep}</p>}
+            {errors.cep && <p className="mt-1 text-sm text-destructive">{errors.cep}</p>}
           </div>
 
           <div className="md:col-span-2">
@@ -300,9 +300,9 @@ export function ClientDataStep() {
               type="text"
               value={clientData.endereco}
               onChange={(e) => updateClient({ endereco: e.target.value })}
-              className={errors.endereco ? "border-red-500" : ""}
+              className={errors.endereco ? "border-destructive" : ""}
             />
-            {errors.endereco && <p className="mt-1 text-sm text-red-500">{errors.endereco}</p>}
+            {errors.endereco && <p className="mt-1 text-sm text-destructive">{errors.endereco}</p>}
           </div>
 
           <div>
@@ -389,7 +389,7 @@ export function ClientDataStep() {
         </CardContent>
       </Card>
 
-      <Card className="bg-black border-gray-800">
+      <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Briefcase className="h-5 w-5" />
@@ -407,9 +407,9 @@ export function ClientDataStep() {
               type="text"
               value={clientData.ocupacao}
               onChange={(e) => updateClient({ ocupacao: e.target.value })}
-              className={errors.ocupacao ? "border-red-500" : ""}
+              className={errors.ocupacao ? "border-destructive" : ""}
             />
-            {errors.ocupacao && <p className="mt-1 text-sm text-red-500">{errors.ocupacao}</p>}
+            {errors.ocupacao && <p className="mt-1 text-sm text-destructive">{errors.ocupacao}</p>}
           </div>
 
           <div>
@@ -418,9 +418,9 @@ export function ClientDataStep() {
               id="rendaMensal"
               value={clientData.rendaMensal}
               onChange={(e) => updateClient({ rendaMensal: e.target.value })}
-              className={errors.rendaMensal ? "border-red-500" : ""}
+              className={errors.rendaMensal ? "border-destructive" : ""}
             />
-            {errors.rendaMensal && <p className="mt-1 text-sm text-red-500">{errors.rendaMensal}</p>}
+            {errors.rendaMensal && <p className="mt-1 text-sm text-destructive">{errors.rendaMensal}</p>}
           </div>
 
           <div className="md:col-span-2">
@@ -443,11 +443,11 @@ export function ClientDataStep() {
                   id="telefoneEmpresa"
                   type="tel"
                   placeholder="(11) 3456-7890"
-                  className={errors.telefoneEmpresa ? "border-red-500 focus:border-red-500" : ""}
+                  className={errors.telefoneEmpresa ? "border-destructive focus:border-destructive" : ""}
                 />
               )}
             </InputMask>
-            {errors.telefoneEmpresa && <p className="mt-1 text-sm text-red-500">{errors.telefoneEmpresa}</p>}
+            {errors.telefoneEmpresa && <p className="mt-1 text-sm text-destructive">{errors.telefoneEmpresa}</p>}
           </div>
         </CardContent>
       </Card>
