@@ -128,10 +128,10 @@ class InterBankService {
       apiUrl: process.env.NODE_ENV === 'production' 
         ? 'https://cdpj.partners.bancointer.com.br'
         : 'https://cdpj-sandbox.partners.uatinter.co',
-      clientId: process.env.INTER_CLIENT_ID || '',
-      clientSecret: process.env.INTER_CLIENT_SECRET || '',
-      certificate: process.env.INTER_CERTIFICATE || '',
-      privateKey: process.env.INTER_PRIVATE_KEY || '',
+      clientId: process.env.CLIENT_ID || '',
+      clientSecret: process.env.CLIENT_SECRET || '',
+      certificate: process.env.CERTIFICATE || '',
+      privateKey: process.env.PRIVATE_KEY || '',
       contaCorrente: process.env.INTER_CONTA_CORRENTE || ''
     };
 
@@ -233,6 +233,9 @@ class InterBankService {
 
       console.log('[INTER] 🚀 Making mTLS request with custom agent...');
 
+      // Declare response variable to use throughout the method
+      let response: any;
+
       // Try using node fetch with custom agent
       try {
         const fetchResponse = await fetch(tokenUrl.toString(), {
@@ -250,7 +253,7 @@ class InterBankService {
         console.log(`[INTER] 📡 Response status: ${fetchResponse.status}`);
         console.log(`[INTER] 📡 Response headers:`, fetchResponse.headers);
 
-        const response = {
+        response = {
           ok: fetchResponse.ok,
           status: fetchResponse.status,
           headers: fetchResponse.headers,
@@ -272,14 +275,15 @@ class InterBankService {
           }
         }
 
+        // Return early if fetch succeeded
         return response;
       } catch (fetchError) {
-        console.error(`[INTER] ❌ Fetch error: ${fetchError.message}`);
+        console.error(`[INTER] ❌ Fetch error: ${(fetchError as Error).message}`);
         
         // Fallback to raw HTTPS request
         console.log('[INTER] 🔄 Falling back to raw HTTPS request...');
         
-        const response = await new Promise<any>((resolve, reject) => {
+        response = await new Promise<any>((resolve, reject) => {
           const options = {
             hostname: tokenUrl.hostname,
             port: tokenUrl.port || 443,
@@ -328,12 +332,10 @@ class InterBankService {
           req.end();
         });
 
-        return response;
       }
 
       console.log(`[INTER] 📡 Response status: ${response.status}`);
-      console.log(`[INTER] 📡 Response headers:`, Object.fromEntries(response.headers.entries()));
-
+      
       if (!response.ok) {
         const errorText = await response.text();
         console.log(`[INTER] ❌ Error response body: ${errorText}`);
