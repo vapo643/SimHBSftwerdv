@@ -1030,6 +1030,52 @@ export default function Formalizacao() {
                                   <p className="text-xs text-gray-400 mt-2">
                                     Envelope ID: {clickSignData.envelopeId}
                                   </p>
+                                  
+                                  {/* Botão para regenerar link */}
+                                  <div className="mt-3 pt-3 border-t border-gray-700">
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={async () => {
+                                        setLoadingClickSign(true);
+                                        try {
+                                          const response = await apiRequest(`/api/propostas/${proposta.id}/clicksign/regenerar`, {
+                                            method: 'POST'
+                                          });
+                                          setClickSignData(response);
+                                          toast({
+                                            title: "Sucesso",
+                                            description: "Novo link de assinatura gerado com sucesso!",
+                                          });
+                                        } catch (error: any) {
+                                          toast({
+                                            title: "Erro",
+                                            description: error.response?.data?.error || "Erro ao regenerar link",
+                                            variant: "destructive",
+                                          });
+                                        } finally {
+                                          setLoadingClickSign(false);
+                                        }
+                                      }}
+                                      disabled={loadingClickSign}
+                                      className="border-yellow-600 text-yellow-400 hover:bg-yellow-600/10"
+                                    >
+                                      {loadingClickSign ? (
+                                        <div className="flex items-center">
+                                          <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-yellow-400 mr-2"></div>
+                                          Regenerando...
+                                        </div>
+                                      ) : (
+                                        <div className="flex items-center">
+                                          <Signature className="h-3 w-3 mr-2" />
+                                          Gerar Novo Link
+                                        </div>
+                                      )}
+                                    </Button>
+                                    <p className="text-xs text-gray-500 mt-1">
+                                      Use caso o link anterior não esteja funcionando
+                                    </p>
+                                  </div>
                                 </div>
                               )}
                             </div>

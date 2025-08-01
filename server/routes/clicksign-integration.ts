@@ -13,6 +13,125 @@ import path from 'path';
 const router = express.Router();
 
 /**
+ * Regenerate ClickSign signature link
+ * POST /api/propostas/:id/clicksign/regenerar
+ */
+router.post('/propostas/:id/clicksign/regenerar', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+  try {
+    const { id: propostaId } = req.params;
+    const userId = req.user?.id;
+    const userRole = req.user?.role;
+
+    console.log(`[CLICKSIGN] 🔄 Regenerating signature link - Proposta: ${propostaId}, User: ${userId}, Role: ${userRole}`);
+
+    // Verificar se é ATENDENTE
+    if (userRole !== 'ATENDENTE') {
+      return res.status(403).json({
+        message: 'Apenas atendentes podem regenerar links de assinatura'
+      });
+    }
+
+    // Import database dependencies
+    const { db } = await import("../lib/supabase");
+    const { propostas } = await import("../../shared/schema");
+    const { eq } = await import("drizzle-orm");
+
+    // Buscar dados da proposta
+    const [proposta] = await db
+      .select()
+      .from(propostas)
+      .where(eq(propostas.id, propostaId));
+
+    if (!proposta) {
+      return res.status(404).json({ message: 'Proposta não encontrada' });
+    }
+
+    // Verificar se CCB foi gerado
+    if (!proposta.ccbGerado) {
+      return res.status(400).json({
+        message: 'CCB deve ser gerada antes de regenerar link de assinatura'
+      });
+    }
+
+    // Cancelar envelope anterior se existir
+    if (proposta.clicksignListKey) {
+      try {
+        console.log(`[CLICKSIGN] 🗑️ Cancelling previous envelope: ${proposta.clicksignListKey}`);
+        await clickSignServiceV3.cancelEnvelope(proposta.clicksignListKey);
+      } catch (error) {
+        console.log(`[CLICKSIGN] ⚠️ Could not cancel previous envelope:`, error instanceof Error ? error.message : error);
+      }
+    }
+
+    // Parse client data from JSONB
+    const clienteData = proposta.clienteData as any;
+    if (!clienteData || !clienteData.nome || !clienteData.email || !clienteData.cpf) {
+      return res.status(400).json({
+        message: 'Dados do cliente incompletos. Nome, email e CPF são obrigatórios para regenerar link.'
+      });
+    }
+
+    // Get CCB file path
+    if (!proposta.caminhoCcbAssinado) {
+      return res.status(400).json({
+        message: 'Arquivo CCB não encontrado.'
+      });
+    }
+
+    // Read CCB file and convert to base64
+    const fs = await import('fs/promises');
+    const path = await import('path');
+    
+    const ccbPath = path.join(process.cwd(), proposta.caminhoCcbAssinado);
+    const ccbBuffer = await fs.readFile(ccbPath);
+    const pdfBase64 = ccbBuffer.toString('base64');
+
+    // Gerar novo link usando o mesmo fluxo
+    const result = await clickSignServiceV3.sendCCBForSignature(
+      propostaId, 
+      pdfBase64,
+      {
+        name: clienteData.nome,
+        email: clienteData.email,
+        cpf: clienteData.cpf,
+        phone: clienteData.telefone || '',
+        birthday: clienteData.dataNascimento
+      }
+    );
+
+    // Atualizar proposta no banco
+    await db
+      .update(propostas)
+      .set({
+        clicksignListKey: result.envelopeId,
+        clicksignDocumentKey: result.documentId || '',
+        clicksignSignerKey: result.signerId || '',
+        clicksignSignUrl: result.signUrl || '',
+        clicksignStatus: 'pending',
+        clicksignSentAt: new Date(),
+        assinaturaEletronicaConcluida: false // Reset status
+      })
+      .where(eq(propostas.id, propostaId));
+
+    console.log(`[CLICKSIGN] ✅ New signature link generated for proposal: ${propostaId}`);
+
+    res.json({
+      success: true,
+      signUrl: result.signUrl,
+      envelopeId: result.envelopeId,
+      message: 'Novo link de assinatura gerado com sucesso'
+    });
+
+  } catch (error) {
+    console.error('[CLICKSIGN] ❌ Error regenerating signature link:', error);
+    res.status(500).json({
+      error: 'Erro ao gerar novo link de assinatura',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+/**
  * Send proposal CCB to ClickSign for electronic signature
  * POST /api/propostas/:id/clicksign/enviar
  */
