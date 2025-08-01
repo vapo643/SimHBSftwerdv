@@ -173,9 +173,13 @@ class ClickSignServiceV3 {
     console.log(`[CLICKSIGN V3] 🔨 Request body:`, JSON.stringify(requestBody, null, 2));
     
     const response = await this.makeRequest<any>('POST', '/envelopes', requestBody);
-
-    console.log(`[CLICKSIGN V3] ✅ Envelope created: ${response.data.id}`);
-    return response.data;
+    
+    console.log(`[CLICKSIGN V3] 📦 Envelope response:`, JSON.stringify(response, null, 2));
+    
+    const envelopeId = response.data?.data?.id || response.data?.id;
+    console.log(`[CLICKSIGN V3] ✅ Envelope created: ${envelopeId}`);
+    
+    return response.data?.data || response.data;
   }
 
   /**
@@ -198,8 +202,12 @@ class ClickSignServiceV3 {
       requestBody
     );
 
-    console.log(`[CLICKSIGN V3] ✅ Document added to envelope: ${response.data.id}`);
-    return response.data;
+    console.log(`[CLICKSIGN V3] 📦 Document response:`, JSON.stringify(response, null, 2));
+    
+    const documentId = response.data?.data?.id || response.data?.id;
+    console.log(`[CLICKSIGN V3] ✅ Document added to envelope: ${documentId}`);
+    
+    return response.data?.data || response.data;
   }
 
   /**
@@ -256,8 +264,8 @@ class ClickSignServiceV3 {
     );
 
     console.log(`[CLICKSIGN V3] ✅ Signer added to envelope`);
-    console.log(`[CLICKSIGN V3] Signer response:`, JSON.stringify(response.data, null, 2));
-    return response.data;
+    console.log(`[CLICKSIGN V3] Signer response:`, JSON.stringify(response, null, 2));
+    return response.data?.data || response.data;
   }
 
   /**
@@ -281,7 +289,7 @@ class ClickSignServiceV3 {
     );
 
     console.log(`[CLICKSIGN V3] ✅ Requirement added: ${requirementData.type}`);
-    return response.data;
+    return response.data?.data || response.data;
   }
 
   /**
@@ -295,7 +303,7 @@ class ClickSignServiceV3 {
     );
 
     console.log(`[CLICKSIGN V3] ✅ Envelope finished and sent for signature`);
-    return response.data;
+    return response.data?.data || response.data;
   }
 
   /**
@@ -303,7 +311,7 @@ class ClickSignServiceV3 {
    */
   async getEnvelopeStatus(envelopeId: string) {
     const response = await this.makeRequest<any>('GET', `/envelopes/${envelopeId}`);
-    return response.data;
+    return response.data?.data || response.data;
   }
 
   /**
@@ -317,7 +325,7 @@ class ClickSignServiceV3 {
     );
 
     console.log(`[CLICKSIGN V3] ✅ Envelope cancelled`);
-    return response.data;
+    return response.data?.data || response.data;
   }
 
   /**
