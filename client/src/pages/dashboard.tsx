@@ -345,14 +345,6 @@ const Dashboard: React.FC = () => {
                 </CardDescription>
               </div>
               <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() => refetch()}
-                  disabled={isLoading}
-                >
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                  Atualizar
-                </Button>
                 <Link to="/propostas/nova">
                   <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
                     <PlusCircle className="h-4 w-4 mr-2" />
