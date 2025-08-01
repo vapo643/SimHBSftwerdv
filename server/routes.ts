@@ -817,6 +817,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         updateData.data_aprovacao = generateApprovalDate();
         console.log(`🎯 [APROVAÇÃO] Definindo data_aprovacao para proposta ${propostaId} no horário de Brasília`);
         
+        // CORREÇÃO CRÍTICA: Preservar tabela_comercial_id ao aprovar
+        // Buscar dados atuais da proposta para preservar campos importantes
+        const { data: propostaCompleta, error: fetchCompleteError } = await supabase
+          .from('propostas')
+          .select('tabela_comercial_id, valor_aprovado')
+          .eq('id', propostaId)
+          .single();
+          
+        if (propostaCompleta && propostaCompleta.tabela_comercial_id) {
+          // Preservar a tabela comercial
+          updateData.tabela_comercial_id = propostaCompleta.tabela_comercial_id;
+          console.log(`🎯 [APROVAÇÃO] Preservando tabela_comercial_id: ${propostaCompleta.tabela_comercial_id}`);
+        }
+        
+        // Se valor aprovado foi fornecido, usar esse valor, senão preservar o existente
+        if (valorAprovado) {
+          updateData.valor_aprovado = valorAprovado;
+        } else if (propostaCompleta && propostaCompleta.valor_aprovado) {
+          updateData.valor_aprovado = propostaCompleta.valor_aprovado;
+        }
+        
         // NOVO: Geração automática da CCB ao aprovar proposta
         try {
           const { generateCCB } = await import('./services/ccbGenerator');
@@ -1154,12 +1175,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Gerar URL assinada
+      // CORREÇÃO: Lidar com diferentes formatos de path
+      let ccbPath = proposta.caminho_ccb_assinado;
+      
+      // Se o caminho contém uma URL completa, extrair apenas o caminho do arquivo
+      const documentsIndex = ccbPath.indexOf('/documents/');
+      if (documentsIndex !== -1) {
+        ccbPath = ccbPath.substring(documentsIndex + '/documents/'.length);
+      }
+      
+      console.log(`[CCB URL] Gerando URL assinada para CCB: ${ccbPath}`);
+      
       const { data: signedUrlData, error: urlError } = await supabase.storage
         .from('documents')
-        .createSignedUrl(proposta.caminho_ccb_assinado, 3600); // 1 hora
+        .createSignedUrl(ccbPath, 3600); // 1 hora
       
       if (urlError || !signedUrlData) {
         console.error('Erro ao gerar URL assinada:', urlError);
+        console.error('Caminho tentado:', ccbPath);
         return res.status(500).json({ message: 'Erro ao gerar URL do documento' });
       }
       
