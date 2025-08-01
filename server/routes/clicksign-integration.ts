@@ -71,20 +71,64 @@ router.post('/propostas/:id/clicksign/regenerar', jwtAuthMiddleware, async (req:
       });
     }
 
-    // Get CCB file path
-    if (!proposta.caminhoCcbAssinado) {
-      return res.status(400).json({
-        message: 'Arquivo CCB não encontrado.'
-      });
-    }
-
-    // Read CCB file and convert to base64
-    const fs = await import('fs/promises');
-    const path = await import('path');
+    // Generate or regenerate CCB if needed
+    let pdfBase64: string;
     
-    const ccbPath = path.join(process.cwd(), proposta.caminhoCcbAssinado);
-    const ccbBuffer = await fs.readFile(ccbPath);
-    const pdfBase64 = ccbBuffer.toString('base64');
+    if (!proposta.caminhoCcbAssinado) {
+      console.log(`[CLICKSIGN] 🔄 CCB path not found, generating new CCB for proposal: ${propostaId}`);
+      
+      // Generate new CCB
+      const { generateCCB } = await import("../services/ccbGenerator");
+      const ccbPath = await generateCCB(propostaId);
+      
+      // Update proposal with new CCB path
+      await db
+        .update(propostas)
+        .set({ caminhoCcbAssinado: ccbPath })
+        .where(eq(propostas.id, propostaId));
+      
+      // Read the newly generated CCB
+      const fs = await import('fs/promises');
+      const path = await import('path');
+      const fullCcbPath = path.join(process.cwd(), ccbPath);
+      const ccbBuffer = await fs.readFile(fullCcbPath);
+      pdfBase64 = ccbBuffer.toString('base64');
+      
+      console.log(`[CLICKSIGN] ✅ New CCB generated: ${ccbPath}`);
+    } else {
+      // Try to read existing CCB file
+      try {
+        const fs = await import('fs/promises');
+        const path = await import('path');
+        
+        const ccbPath = path.join(process.cwd(), proposta.caminhoCcbAssinado);
+        const ccbBuffer = await fs.readFile(ccbPath);
+        pdfBase64 = ccbBuffer.toString('base64');
+        
+        console.log(`[CLICKSIGN] ✅ Using existing CCB: ${proposta.caminhoCcbAssinado}`);
+      } catch (fileError) {
+        console.log(`[CLICKSIGN] ⚠️ Existing CCB file not found, generating new one: ${fileError.message}`);
+        
+        // Generate new CCB if file doesn't exist
+        const { generateCCB } = await import("../services/ccbGenerator");
+        const ccbPath = await generateCCB(propostaId);
+        
+        // Update proposal with new CCB path
+        await db
+          .update(propostas)
+          .set({ caminhoCcbAssinado: ccbPath })
+          .where(eq(propostas.id, propostaId));
+        
+        // Read the newly generated CCB
+        const fs = await import('fs/promises');
+        const path = await import('path');
+        const fullCcbPath = path.join(process.cwd(), ccbPath);
+        const ccbBuffer = await fs.readFile(fullCcbPath);
+        pdfBase64 = ccbBuffer.toString('base64');
+        
+        console.log(`[CLICKSIGN] ✅ New CCB regenerated: ${ccbPath}`);
+      }
+    }
 
     // Gerar novo link usando o mesmo fluxo
     const result = await clickSignServiceV3.sendCCBForSignature(
