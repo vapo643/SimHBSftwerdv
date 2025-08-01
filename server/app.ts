@@ -54,63 +54,88 @@ export async function createApp() {
   app.use(csrfProtection);
   log("🔒 [SECURITY] CSRF protection middleware activated - OWASP Cheat Sheet");
 
-  // Rate Limiting (only in production/staging)
+  // Rate Limiting - Configuração por ambiente
   if (process.env.NODE_ENV !== 'test') {
+    // Configurações diferentes por ambiente
+    const isDevelopment = process.env.NODE_ENV === 'development';
+    
     const generalApiLimiter = rateLimit({
-      windowMs: 15 * 60 * 1000,
-      max: 100,
+      windowMs: isDevelopment ? 1 * 60 * 1000 : 15 * 60 * 1000, // 1min dev, 15min prod
+      max: isDevelopment ? 10000 : 1000, // 10k dev, 1k prod (muito mais permissivo)
       message: {
-        error: "Muitas requisições da API. Tente novamente em 15 minutos.",
-        retryAfter: "15 minutos"
+        error: isDevelopment 
+          ? "Rate limit atingido (modo desenvolvimento - limites altos)" 
+          : "Muitas requisições da API. Tente novamente em 15 minutos.",
+        retryAfter: isDevelopment ? "1 minuto" : "15 minutos"
       },
       standardHeaders: true,
       legacyHeaders: false,
       handler: (req, res) => {
         securityLogger.logEvent({
           type: SecurityEventType.RATE_LIMIT_EXCEEDED,
-          severity: "MEDIUM",
+          severity: isDevelopment ? "LOW" : "MEDIUM",
           ipAddress: getClientIP(req),
           userAgent: req.headers['user-agent'],
           endpoint: req.originalUrl,
           success: false,
-          details: { type: 'general_api' }
+          details: { 
+            type: 'general_api',
+            environment: process.env.NODE_ENV,
+            limit: isDevelopment ? 10000 : 1000
+          }
         });
         res.status(429).json({
-          error: "Muitas requisições da API. Tente novamente em 15 minutos.",
-          retryAfter: "15 minutos"
+          error: isDevelopment 
+            ? "Rate limit atingido (modo desenvolvimento - limites altos)" 
+            : "Muitas requisições da API. Tente novamente em 15 minutos.",
+          retryAfter: isDevelopment ? "1 minuto" : "15 minutos"
         });
       }
     });
 
     const authLimiter = rateLimit({
-      windowMs: 15 * 60 * 1000,
-      max: 5,
+      windowMs: isDevelopment ? 1 * 60 * 1000 : 15 * 60 * 1000, // 1min dev, 15min prod
+      max: isDevelopment ? 1000 : 20, // 1000 dev, 20 prod (muito mais permissivo)
       skipSuccessfulRequests: true,
       message: {
-        error: "Muitas tentativas de autenticação. Tente novamente em 15 minutos.",
-        retryAfter: "15 minutos"
+        error: isDevelopment
+          ? "Rate limit auth atingido (modo desenvolvimento)"
+          : "Muitas tentativas de autenticação. Tente novamente em 15 minutos.",
+        retryAfter: isDevelopment ? "1 minuto" : "15 minutos"
       },
       standardHeaders: true,
       legacyHeaders: false,
       handler: (req, res) => {
         securityLogger.logEvent({
           type: SecurityEventType.BRUTE_FORCE_DETECTED,
-          severity: "HIGH",
+          severity: isDevelopment ? "LOW" : "HIGH",
           ipAddress: getClientIP(req),
           userAgent: req.headers['user-agent'],
           endpoint: req.originalUrl,
           success: false,
-          details: { type: 'authentication_brute_force' }
+          details: { 
+            type: 'authentication_brute_force',
+            environment: process.env.NODE_ENV,
+            limit: isDevelopment ? 1000 : 20
+          }
         });
         res.status(429).json({
-          error: "Muitas tentativas de autenticação. Tente novamente em 15 minutos.",
-          retryAfter: "15 minutos"
+          error: isDevelopment
+            ? "Rate limit auth atingido (modo desenvolvimento)"
+            : "Muitas tentativas de autenticação. Tente novamente em 15 minutos.",
+          retryAfter: isDevelopment ? "1 minuto" : "15 minutos"
         });
       }
     });
 
     app.use("/api/", generalApiLimiter);
     app.use("/api/auth/", authLimiter);
+    
+    if (isDevelopment) {
+      log("🔧 [DEV] Rate limiting configurado para desenvolvimento - limites altos");
+    } else {
+      log("🔒 [PROD] Rate limiting configurado para produção - limites seguros");
+    }
   }
 
   // JSON middleware
