@@ -1023,16 +1023,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Gerar CCB
-      console.log(`[CCB] Gerando CCB para proposta ${id}...`);
-      const { generateCCB } = await import("./services/ccbGenerator");
+      // Gerar CCB usando template
+      console.log(`[CCB] Gerando CCB com template para proposta ${id}...`);
+      const { generateCCBFromTemplate } = await import("./services/ccbTemplateGenerator");
       
       try {
-        const ccbPath = await generateCCB(id);
-        console.log(`[CCB] CCB gerada com sucesso: ${ccbPath}`);
+        const ccbPath = await generateCCBFromTemplate(id);
+        console.log(`[CCB] CCB gerada com sucesso usando template: ${ccbPath}`);
         res.json({ 
           success: true, 
-          message: "CCB gerada com sucesso",
+          message: "CCB gerada com sucesso usando template personalizado",
           caminho: ccbPath 
         });
       } catch (error) {
