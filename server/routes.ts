@@ -10,6 +10,7 @@ import { z } from "zod";
 import multer from "multer";
 import originationRoutes from "./routes/origination.routes";
 import { clickSignRouter } from "./routes/clicksign.js";
+import clicksignIntegrationRoutes from "./routes/clicksign-integration.js";
 import { interRoutes } from "./routes/inter.js";
 import { setupSecurityRoutes } from "./routes/security.js";
 import emailChangeRoutes from "./routes/email-change";
@@ -4085,6 +4086,9 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
   // Pagamentos routes
   const pagamentosRoutes = (await import('./routes/pagamentos.js')).default;
   app.use('/api/financeiro/pagamentos', pagamentosRoutes);
+
+  // ClickSign Integration routes
+  app.use('/api', clicksignIntegrationRoutes);
 
   const httpServer = createServer(app);
   return httpServer;

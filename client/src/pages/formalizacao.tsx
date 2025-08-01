@@ -923,133 +923,113 @@ export default function Formalizacao() {
                               )}
 
                               {/* Botões para CCB e ClickSign */}
-                              {step.id === 2 && (
-                                <div className="mt-4 space-y-3">
-                                  {/* Seção CCB */}
-                                  <div className="flex gap-2">
-                                    {!proposta.ccbGerado ? (
-                                      <Button
-                                        variant="default"
-                                        size="sm"
-                                        onClick={() => generateCCB(proposta.id)}
-                                      >
-                                        <FileText className="mr-2 h-4 w-4" />
-                                        Gerar CCB
-                                      </Button>
-                                    ) : (
-                                      <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => viewCCB(proposta.id)}
-                                      >
-                                        <Eye className="mr-2 h-4 w-4" />
-                                        Visualizar CCB
-                                      </Button>
-                                    )}
-                                  </div>
+                              {user?.role === 'ATENDENTE' && step.id === 2 && proposta.ccbGerado && (
+                                <div className="mt-3">
+                                  <Button
+                                    onClick={async () => {
+                                      try {
+                                        const response = await apiRequest(`/api/propostas/${proposta.id}/ccb-url`);
+                                        setCcbUrl(response.url);
+                                        setShowCcbViewer(true);
+                                      } catch (error) {
+                                        toast({
+                                          title: "Erro",
+                                          description: "Erro ao visualizar CCB",
+                                          variant: "destructive",
+                                        });
+                                      }
+                                    }}
+                                    variant="outline"
+                                    size="sm"
+                                    className="mr-2"
+                                  >
+                                    <FileText className="h-4 w-4 mr-2" />
+                                    Visualizar CCB
+                                  </Button>
+                                </div>
+                              )}
 
-                                  {/* Seção ClickSign - só aparece se CCB foi gerado */}
-                                  {proposta.ccbGerado && (
-                                    <div className="p-3 bg-gray-700 rounded-lg border border-gray-600">
-                                      <div className="flex items-center gap-2 mb-2">
-                                        <Signature className="h-4 w-4 text-blue-400" />
-                                        <span className="text-sm font-medium text-blue-400">Assinatura Eletrônica</span>
+                              {user?.role === 'ATENDENTE' && step.id === 3 && proposta.ccbGerado && !proposta.assinaturaEletronicaConcluida && (
+                                <div className="mt-3 p-4 bg-blue-900/20 border border-blue-700 rounded-lg">
+                                  <div className="flex items-center justify-between mb-3">
+                                    <h5 className="font-medium text-blue-300">Enviar para Assinatura Eletrônica</h5>
+                                    <Signature className="h-5 w-5 text-blue-400" />
+                                  </div>
+                                  <p className="text-sm text-blue-200 mb-4">
+                                    Clique no botão abaixo para enviar o contrato CCB para o ClickSign e gerar o link de assinatura para o cliente.
+                                  </p>
+                                  <Button
+                                    onClick={async () => {
+                                      setLoadingClickSign(true);
+                                      try {
+                                        const response = await apiRequest(`/api/propostas/${proposta.id}/clicksign/enviar`, {
+                                          method: 'POST'
+                                        });
+                                        setClickSignData(response);
+                                        toast({
+                                          title: "Sucesso",
+                                          description: "Contrato enviado para ClickSign com sucesso!",
+                                        });
+                                      } catch (error: any) {
+                                        toast({
+                                          title: "Erro",
+                                          description: error.response?.data?.message || "Erro ao enviar para ClickSign",
+                                          variant: "destructive",
+                                        });
+                                      } finally {
+                                        setLoadingClickSign(false);
+                                      }
+                                    }}
+                                    disabled={loadingClickSign}
+                                    className="w-full bg-blue-600 hover:bg-blue-700"
+                                  >
+                                    {loadingClickSign ? (
+                                      <div className="flex items-center">
+                                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                        Enviando para ClickSign...
                                       </div>
-                                      
-                                      {!clickSignData?.clickSignData?.documentKey && !initialClickSignData?.clickSignData?.documentKey ? (
-                                        // Não enviado ainda
-                                        <div className="space-y-2">
-                                          <p className="text-xs text-gray-400">CCB pronta para assinatura eletrônica</p>
-                                          <Button
-                                            variant="default"
-                                            size="sm"
-                                            onClick={() => sendToClickSign(proposta.id)}
-                                            disabled={loadingClickSign}
-                                            className="bg-blue-600 hover:bg-blue-700"
-                                          >
-                                            {loadingClickSign ? (
-                                              <>
-                                                <Clock className="mr-2 h-4 w-4 animate-spin" />
-                                                Enviando...
-                                              </>
-                                            ) : (
-                                              <>
-                                                <Send className="mr-2 h-4 w-4" />
-                                                Enviar para ClickSign
-                                              </>
-                                            )}
-                                          </Button>
-                                        </div>
-                                      ) : (
-                                        // Já enviado - mostrar status e link
-                                        <div className="space-y-2">
-                                          {(() => {
-                                            const data = clickSignData?.clickSignData || initialClickSignData?.clickSignData;
-                                            const status = data?.status;
-                                            const signUrl = data?.signUrl;
-                                            
-                                            return (
-                                              <>
-                                                <div className="flex items-center gap-2">
-                                                  <div className={`w-2 h-2 rounded-full ${
-                                                    status === 'signed' || status === 'finished' ? 'bg-green-500' :
-                                                    status === 'pending' ? 'bg-yellow-500' :
-                                                    status === 'cancelled' ? 'bg-red-500' : 'bg-gray-500'
-                                                  }`} />
-                                                  <span className="text-xs text-gray-300">
-                                                    Status: {
-                                                      status === 'signed' || status === 'finished' ? 'Assinado' :
-                                                      status === 'pending' ? 'Aguardando Assinatura' :
-                                                      status === 'cancelled' ? 'Cancelado' : 'Processando'
-                                                    }
-                                                  </span>
-                                                </div>
-                                                
-                                                {signUrl && status === 'pending' && (
-                                                  <div className="flex gap-2">
-                                                    <Button
-                                                      variant="outline"
-                                                      size="sm"
-                                                      onClick={() => {
-                                                        navigator.clipboard.writeText(signUrl);
-                                                        toast({
-                                                          title: "Link Copiado",
-                                                          description: "Link de assinatura copiado para a área de transferência",
-                                                        });
-                                                      }}
-                                                      className="text-xs"
-                                                    >
-                                                      <MessageSquare className="mr-1 h-3 w-3" />
-                                                      Copiar Link
-                                                    </Button>
-                                                    <Button
-                                                      variant="outline"
-                                                      size="sm"
-                                                      onClick={() => window.open(signUrl, '_blank')}
-                                                      className="text-xs"
-                                                    >
-                                                      <Eye className="mr-1 h-3 w-3" />
-                                                      Abrir Link
-                                                    </Button>
-                                                  </div>
-                                                )}
-                                                
-                                                <Button
-                                                  variant="ghost"
-                                                  size="sm"
-                                                  onClick={() => checkClickSignStatus(proposta.id)}
-                                                  className="text-xs"
-                                                >
-                                                  <Activity className="mr-1 h-3 w-3" />
-                                                  Atualizar Status
-                                                </Button>
-                                              </>
-                                            );
-                                          })()}
-                                        </div>
-                                      )}
-                                    </div>
-                                  )}
+                                    ) : (
+                                      <div className="flex items-center">
+                                        <Signature className="h-4 w-4 mr-2" />
+                                        Enviar Contrato para Assinatura (ClickSign)
+                                      </div>
+                                    )}
+                                  </Button>
+                                </div>
+                              )}
+
+                              {clickSignData && step.id === 3 && (
+                                <div className="mt-3 p-4 bg-green-900/20 border border-green-700 rounded-lg">
+                                  <div className="flex items-center mb-3">
+                                    <CheckCircle className="h-5 w-5 text-green-400 mr-2" />
+                                    <h5 className="font-medium text-green-300">Contrato Enviado com Sucesso</h5>
+                                  </div>
+                                  <p className="text-sm text-green-200 mb-3">
+                                    O contrato foi enviado para o ClickSign. Compartilhe o link abaixo com o cliente:
+                                  </p>
+                                  <div className="flex items-center gap-2 p-3 bg-gray-800 rounded border">
+                                    <input
+                                      type="text"
+                                      value={clickSignData.signUrl}
+                                      readOnly
+                                      className="flex-1 bg-transparent text-white text-sm"
+                                    />
+                                    <Button
+                                      size="sm"
+                                      onClick={() => {
+                                        navigator.clipboard.writeText(clickSignData.signUrl);
+                                        toast({
+                                          title: "Copiado!",
+                                          description: "Link de assinatura copiado para a área de transferência",
+                                        });
+                                      }}
+                                    >
+                                      Copiar
+                                    </Button>
+                                  </div>
+                                  <p className="text-xs text-gray-400 mt-2">
+                                    Envelope ID: {clickSignData.envelopeId}
+                                  </p>
                                 </div>
                               )}
                             </div>

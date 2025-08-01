@@ -1,0 +1,30 @@
+# MISSÃO DE IMPLEMENTAÇÃO: Ativar a Integração ClickSign para o Atendente
+
+**Contexto e Intenção:**
+Olá, Agente. O nosso fluxo de "Formalização" precisa de um ajuste crucial para se alinhar com o nosso processo de negócio do mundo real. O `ATENDENTE` é a pessoa que orquestra a formalização e guia o cliente na assinatura do contrato. Portanto, ele precisa de ter as ferramentas para iniciar este processo.
+
+**O Problema (O Que Está Quebrado):**
+Atualmente, na tela de "Formalização", o `ATENDENTE` só consegue marcar caixas de seleção, mas não há um botão para ele de facto iniciar o processo de assinatura eletrónica. Pior ainda, o botão para "Enviar para ClickSign" está a aparecer para o `ADMINISTRADOR`, que não faz parte deste fluxo operacional.
+
+**Sua Missão (A Solução):**
+A sua tarefa é refatorar a tela de "Formalização" para dar ao `ATENDENTE` o controlo do processo de assinatura eletrónica, conectando a nossa interface à API da ClickSign.
+
+**Roadmap de Execução:**
+
+1.  **Corrija a Interface de Usuário (UI):**
+    * **Ficheiro Alvo:** `/client/src/pages/formalizacao.tsx`.
+    * **Tarefa:** Adicione um botão claro e funcional para o `ATENDENTE` chamado **"Enviar Contrato para Assinatura (ClickSign)"**. Garanta que este botão seja visível para o `ATENDENTE` e para o `ADMINISTRADOR`.
+
+2.  **Implemente a Lógica de Integração no Backend:**
+    * **Tarefa:** Quando o `ATENDENTE` clicar neste novo botão, ele deve chamar um novo endpoint de backend (ex: `POST /api/propostas/:id/clicksign/enviar`).
+    * **Lógica do Endpoint:** Este novo endpoint deve fazer o seguinte:
+        a.  Pegar os dados da proposta e o documento CCB que já foi gerado.
+        b.  Conectar-se à API da ClickSign usando as nossas credenciais.
+        c.  Enviar o documento CCB para a ClickSign para criar um "envelope" de assinatura.
+        d.  Retornar o **link de assinatura** que foi gerado pela ClickSign para o frontend.
+
+3.  **Exiba o Link de Assinatura no Frontend:**
+    * **Tarefa:** Após a chamada à API do passo 2 ser bem-sucedida, a interface de "Formalização" deve exibir o link de assinatura que foi retornado, para que o `ATENDENTE` possa copiá-lo e fornecê-lo ao cliente.
+
+**Resumo da Missão:**
+Dê ao `ATENDENTE` a capacidade de iniciar o processo de assinatura eletrónica, integrando o nosso sistema com a API da ClickSign e exibindo o link de assinatura resultante.
