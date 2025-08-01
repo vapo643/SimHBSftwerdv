@@ -546,18 +546,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/propostas", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     try {
       // Extract query parameters for enhanced filtering
-      const { queue, status, atendenteId } = req.query;
-      const isAnalysisQueue = queue === 'analysis';
+      let { queue, status, atendenteId } = req.query;
       
       // 🔒 SEGURANÇA CRÍTICA: Validar permissões por role
       const userRole = req.user?.role;
       const userId = req.user?.id;
       
-      // ANALISTA: Só pode acessar fila de análise
+      // ANALISTA: Automaticamente definir como fila de análise se não especificado
+      if (userRole === 'ANALISTA' && queue !== 'analysis') {
+        console.log(`🔧 [AUTO-REDIRECT] ANALISTA ${userId} - AUTO-DEFININDO como fila de análise`);
+        queue = 'analysis';
+        req.query.queue = 'analysis';
+      }
+      
+      const isAnalysisQueue = queue === 'analysis';
+      
+      console.log(`🔍 [DEBUG] Role: ${userRole}, Queue: ${queue}, IsAnalysisQueue: ${isAnalysisQueue}`);
+      
+      // ANALISTA: Deve SEMPRE acessar apenas fila de análise (essa verificação é redundante agora)
       if (userRole === 'ANALISTA' && !isAnalysisQueue) {
+        console.log(`❌ [SECURITY BLOCK] ANALISTA tentando acessar fora da fila: queue=${queue}`);
         return res.status(403).json({ 
           message: 'Acesso negado. Analistas só podem acessar a fila de análise.',
-          requiredQueue: 'analysis'
+          requiredQueue: 'analysis',
+          currentQueue: queue,
+          debug: { userRole, queue, isAnalysisQueue }
         });
       }
       

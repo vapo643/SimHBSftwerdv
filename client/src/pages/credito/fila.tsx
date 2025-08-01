@@ -71,14 +71,32 @@ const FilaAnalise: React.FC = () => {
   const [filterStore, setFilterStore] = useState("all");
   const { user } = useAuth();
 
-  // Build query based on user role - for ANALISTA, filter to analysis-ready proposals
-  const queryUrl = user?.role === 'ATENDENTE' 
-    ? `/api/propostas?atendenteId=${user.id}`
-    : '/api/propostas'; // All proposals for ANALISTA/others, frontend filtering will handle analysis queue
+  // 🔒 Build query based on user role - CRITICAL FOR SECURITY
+  const queryUrl = useMemo(() => {
+    switch (user?.role) {
+      case 'ATENDENTE':
+        // ATENDENTE vê apenas suas próprias propostas
+        return `/api/propostas?atendenteId=${user.id}`;
+      
+      case 'ANALISTA':
+        // ANALISTA vê APENAS a fila de análise
+        return '/api/propostas?queue=analysis';
+      
+      case 'GERENTE':
+      case 'ADMINISTRADOR':
+      case 'DIRETOR':
+        // Gestores veem tudo ou fila de análise dependendo da página
+        return '/api/propostas?queue=analysis';
+      
+      default:
+        return '/api/propostas';
+    }
+  }, [user?.role, user?.id]);
 
-  // Fetch real proposals data - filtered based on role
+  // Fetch real proposals data - filtered based on role with PROPER SECURITY
   const { data: propostas, isLoading, error } = useQuery<Proposta[]>({
     queryKey: [queryUrl],
+    enabled: !!user?.role, // Só fazer query se tiver role definido
   });
 
   // Fetch partners data
