@@ -82,10 +82,12 @@ class ClickSignServiceV3 {
     };
 
     if (!this.config.apiToken) {
-      console.warn('[CLICKSIGN V3] ⚠️ API token not configured');
+      console.error('[CLICKSIGN V3] ❌ ERROR: API token not configured! Check CLICKSIGN_API_TOKEN environment variable');
+      throw new Error('ClickSign API token is required but not configured');
     }
 
     console.log(`[CLICKSIGN V3] 🚀 Initialized in ${this.config.environment} mode`);
+    console.log(`[CLICKSIGN V3] Token configured: ${this.config.apiToken.substring(0, 10)}...`);
   }
 
   /**
@@ -111,6 +113,7 @@ class ClickSignServiceV3 {
     };
 
     console.log(`[CLICKSIGN V3] 📡 ${method} ${endpoint}`);
+    console.log(`[CLICKSIGN V3] Using token: ${this.config.apiToken.substring(0, 10)}...`);
 
     try {
       const response = await fetch(url, {
@@ -171,28 +174,51 @@ class ClickSignServiceV3 {
   }
 
   /**
-   * Create a signer
+   * Create a signer (Note: In v3, signers are created as part of envelope workflow)
    */
   async createSigner(signerData: SignerData) {
-    const response = await this.makeRequest<any>('POST', '/signers', {
-      signer: signerData
-    });
+    // In ClickSign v3, we need to create a temporary signer object
+    // The actual signer is created when added to the envelope
+    const tempSigner = {
+      id: `temp_${Date.now()}`,
+      name: signerData.name,
+      email: signerData.email,
+      phone: signerData.phone,
+      documentation: signerData.documentation,
+      birthday: signerData.birthday,
+      // Generate a temporary request_signature_key
+      request_signature_key: `temp_key_${Date.now()}_${Math.random().toString(36).substring(7)}`
+    };
 
-    console.log(`[CLICKSIGN V3] ✅ Signer created: ${response.data.id}`);
-    return response.data;
+    console.log(`[CLICKSIGN V3] ✅ Temporary signer created:`, tempSigner.id);
+    console.log(`[CLICKSIGN V3] Note: Actual signer will be created when added to envelope`);
+    
+    return tempSigner;
   }
 
   /**
-   * Add signer to envelope
+   * Add signer to envelope (Creates the actual signer in ClickSign)
    */
-  async addSignerToEnvelope(envelopeId: string, signerData: EnvelopeSignerData) {
+  async addSignerToEnvelope(envelopeId: string, signerData: EnvelopeSignerData, fullSignerData?: SignerData) {
+    // If we have full signer data, create the signer with the envelope
+    const payload = fullSignerData ? {
+      signer: {
+        ...fullSignerData,
+        sign_as: signerData.sign_as,
+        refusable: signerData.refusable,
+        message: signerData.message,
+        group: signerData.group
+      }
+    } : signerData;
+
     const response = await this.makeRequest<any>(
       'POST',
       `/envelopes/${envelopeId}/signers`,
-      signerData
+      payload
     );
 
     console.log(`[CLICKSIGN V3] ✅ Signer added to envelope`);
+    console.log(`[CLICKSIGN V3] Signer response:`, JSON.stringify(response.data, null, 2));
     return response.data;
   }
 
@@ -333,6 +359,13 @@ class ClickSignServiceV3 {
       });
 
       // 3. Create signer
+      console.log(`[CLICKSIGN V3] Creating signer with data:`, {
+        name: clientData.name,
+        email: clientData.email,
+        phone: clientData.phone,
+        cpf: clientData.cpf
+      });
+      
       const signer = await this.createSigner({
         name: clientData.name,
         email: clientData.email,
@@ -340,14 +373,31 @@ class ClickSignServiceV3 {
         documentation: clientData.cpf.replace(/\D/g, ''),
         birthday: clientData.birthday
       });
+      
+      console.log(`[CLICKSIGN V3] Signer created:`, {
+        id: signer.id,
+        request_signature_key: signer.request_signature_key
+      });
 
-      // 4. Add signer to envelope
-      await this.addSignerToEnvelope(envelope.id, {
+      // 4. Add signer to envelope (this creates the actual signer in ClickSign v3)
+      const envelopeSigner = await this.addSignerToEnvelope(envelope.id, {
         signer_id: signer.id,
         sign_as: 'party',
         refusable: false,
         message: 'Por favor, assine o Contrato de Crédito Bancário (CCB) do seu empréstimo.'
+      }, {
+        name: clientData.name,
+        email: clientData.email,
+        phone: clientData.phone,
+        documentation: clientData.cpf.replace(/\D/g, ''),
+        birthday: clientData.birthday
       });
+      
+      // Update signer with the real data from ClickSign response
+      if (envelopeSigner && envelopeSigner.request_signature_key) {
+        signer.request_signature_key = envelopeSigner.request_signature_key;
+        signer.id = envelopeSigner.id || signer.id;
+      }
 
       // 5. Add selfie requirement for security
       await this.addRequirement(envelope.id, {
@@ -359,16 +409,23 @@ class ClickSignServiceV3 {
       const finishedEnvelope = await this.finishEnvelope(envelope.id);
 
       // 7. Get sign URL
-      const signUrl = `${this.config.apiUrl.replace('/api/v3', '')}/sign/${signer.request_signature_key}`;
+      const signUrl = signer.request_signature_key 
+        ? `${this.config.apiUrl.replace('/api/v3', '')}/sign/${signer.request_signature_key}`
+        : undefined;
 
       console.log(`[CLICKSIGN V3] ✅ CCB sent for signature successfully`);
+      console.log(`[CLICKSIGN V3] Sign URL generated:`, signUrl);
+
+      if (!signUrl) {
+        console.error(`[CLICKSIGN V3] ⚠️ Warning: No request_signature_key received from API`);
+      }
 
       return {
         envelopeId: envelope.id,
         documentId: document.id,
         signerId: signer.id,
-        signUrl,
-        requestSignatureKey: signer.request_signature_key,
+        signUrl: signUrl || '',
+        requestSignatureKey: signer.request_signature_key || '',
         status: 'sent'
       };
 

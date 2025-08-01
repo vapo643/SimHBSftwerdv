@@ -132,10 +132,16 @@ router.post('/propostas/:id/clicksign/enviar', jwtAuthMiddleware, async (req: Au
     console.log(`[CLICKSIGN] Enviando para ClickSign API...`);
 
     // Chamar ClickSign API
-    const result = await clickSignServiceV3.createCompleteSignatureFlow(
-      envelopeData,
-      documentData,
-      signerData
+    const result = await clickSignServiceV3.sendCCBForSignature(
+      propostaId,
+      base64Content,
+      {
+        name: clienteData.nome,
+        email: clienteData.email,
+        phone: clienteData.telefone || '',
+        cpf: clienteData.cpf,
+        birthday: clienteData.dataNascimento
+      }
     );
 
     console.log(`[CLICKSIGN] ✅ Sucesso! Envelope criado: ${result.envelopeId}`);
@@ -145,9 +151,9 @@ router.post('/propostas/:id/clicksign/enviar', jwtAuthMiddleware, async (req: Au
       .update(propostas)
       .set({
         clicksignListKey: result.envelopeId, // Using listKey for envelope ID
-        clicksignDocumentKey: result.documentKey,
-        clicksignSignerKey: result.signerKey,
-        clicksignSignUrl: result.signUrl,
+        clicksignDocumentKey: result.documentId || '',
+        clicksignSignerKey: result.signerId || '',
+        clicksignSignUrl: result.signUrl || '',
         clicksignStatus: 'pending',
         clicksignSentAt: new Date()
       })
@@ -167,9 +173,9 @@ router.post('/propostas/:id/clicksign/enviar', jwtAuthMiddleware, async (req: Au
     res.json({
       message: 'Contrato enviado para ClickSign com sucesso',
       envelopeId: result.envelopeId, // Keep as envelopeId for frontend compatibility
-      documentKey: result.documentKey,
-      signerKey: result.signerKey,
-      signUrl: result.signUrl,
+      documentKey: result.documentId || '',
+      signerKey: result.signerId || '',
+      signUrl: result.signUrl || '',
       status: 'pending',
       createdAt: getBrasiliaTimestamp()
     });
