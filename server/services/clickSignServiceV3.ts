@@ -24,7 +24,7 @@ interface EnvelopeData {
 }
 
 interface DocumentData {
-  content_base64?: string; // base64 with Data URI format
+  content?: string; // base64 with Data URI format  
   filename?: string;
   template_id?: string; // for template type
 }
@@ -408,9 +408,11 @@ class ClickSignServiceV3 {
         block_after_refusal: true
       });
 
-      // 2. Add document - pdfBase64 já vem com Data URI format
+      // 2. Add document - ensure Data URI format is applied
+      const dataUriContent = pdfBase64.startsWith('data:') ? pdfBase64 : `data:application/pdf;base64,${pdfBase64}`;
+      
       const document = await this.addDocumentToEnvelope(envelope.id, {
-        content_base64: pdfBase64,
+        content: dataUriContent,
         filename: `ccb_proposta_${proposalId}.pdf`
       });
 
