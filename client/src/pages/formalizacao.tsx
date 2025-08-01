@@ -631,7 +631,7 @@ export default function Formalizacao() {
       status: proposta.ccbGerado ? "completed" : "current",
       date: proposta.ccbGerado ? formatDate(proposta.createdAt) : "Pendente",
       completed: proposta.ccbGerado,
-      interactive: user?.role === 'ATENDENTE',
+      interactive: user?.role === 'ATENDENTE' || user?.role === 'ADMINISTRADOR',
       etapa: 'ccb_gerado' as const,
     },
     {
@@ -642,7 +642,7 @@ export default function Formalizacao() {
       status: proposta.assinaturaEletronicaConcluida ? "completed" : proposta.ccbGerado ? "current" : "pending",
       date: proposta.assinaturaEletronicaConcluida ? formatDate(proposta.createdAt) : "Pendente",
       completed: proposta.assinaturaEletronicaConcluida,
-      interactive: user?.role === 'ATENDENTE' && proposta.ccbGerado,
+      interactive: (user?.role === 'ATENDENTE' || user?.role === 'ADMINISTRADOR') && proposta.ccbGerado,
       etapa: 'assinatura_eletronica' as const,
     },
     {
@@ -653,7 +653,7 @@ export default function Formalizacao() {
       status: proposta.biometriaConcluida ? "completed" : proposta.assinaturaEletronicaConcluida ? "current" : "pending",
       date: proposta.biometriaConcluida ? formatDate(proposta.createdAt) : "Pendente",
       completed: proposta.biometriaConcluida,
-      interactive: user?.role === 'ATENDENTE' && proposta.assinaturaEletronicaConcluida,
+      interactive: (user?.role === 'ATENDENTE' || user?.role === 'ADMINISTRADOR') && proposta.assinaturaEletronicaConcluida,
       etapa: 'biometria' as const,
     },
     {
@@ -842,8 +842,8 @@ export default function Formalizacao() {
                       const isCompleted = step.completed;
                       const isCurrent = step.status === "current";
 
-                      // Se é uma etapa interativa e o usuário é ATENDENTE, mostra o controle
-                      if (step.interactive && step.etapa && user?.role === 'ATENDENTE') {
+                      // Se é uma etapa interativa e o usuário é ATENDENTE ou ADMINISTRADOR, mostra o controle
+                      if (step.interactive && step.etapa && (user?.role === 'ATENDENTE' || user?.role === 'ADMINISTRADOR')) {
                         return (
                           <div key={step.id} className="mb-4">
                             <EtapaFormalizacaoControl

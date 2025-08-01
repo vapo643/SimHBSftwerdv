@@ -11,6 +11,7 @@ CCB Generation: ✅ IMPLEMENTED - Uses custom PDF template provided by user inst
 Inter Bank API: Complete integration for automated boleto generation with focus on anti-fragile RBAC system and comprehensive automated proposal lifecycle management.
 Security: "Redobrada" (doubled) security measures required for banking/loan data - maximum OWASP Top 10 compliance is critical.
 Production Timeline: Software to be deployed at Eleeve loan stores by next week (August 2025) - ALL INTEGRATIONS READY FOR PRODUCTION DEPLOYMENT.
+Formalization Interface: ✅ UNIFIED - Attendant and Administrator interfaces must be identical. Both roles now have the same access to formalization controls and functionality (August 2025).
 
 ## System Architecture
 
