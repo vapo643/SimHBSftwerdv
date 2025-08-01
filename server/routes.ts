@@ -1370,15 +1370,106 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         res.json(formattedProposta);
       } else {
-        // Para outros roles (ADMIN, GERENTE), usar método original sem RLS
+        // Para outros roles (ADMIN, GERENTE, ANALISTA), usar método original sem RLS
         const proposta = await storage.getPropostaById(idParam);
 
         if (!proposta) {
           return res.status(404).json({ message: "Proposta not found" });
         }
 
-        console.log(`🔐 [ADMIN/GERENTE ACCESS] User ${user.id} (${user.role}) accessing proposta ${idParam}`);
-        res.json(proposta);
+        console.log(`🔐 [ADMIN/GERENTE/ANALISTA ACCESS] User ${user.id} (${user.role}) accessing proposta ${idParam}`);
+        
+        // 🔧 CORREÇÃO CRÍTICA: Aplicar mesma lógica de documentos do ATENDENTE
+        const { createServerSupabaseAdminClient } = await import('../server/lib/supabase');
+        const supabase = createServerSupabaseAdminClient();
+        
+        // Buscar documentos da proposta (mesma lógica do ATENDENTE)
+        const { data: documentos, error: docError } = await supabase
+          .from('proposta_documentos')
+          .select('*')
+          .eq('proposta_id', idParam);
+        
+        console.log(`🔍 [ANÁLISE-OUTROS] Documentos encontrados para proposta ${idParam}:`, documentos?.length || 0);
+        
+        // Gerar URLs assinadas para visualização dos documentos (mesma lógica do ATENDENTE)
+        let documentosComUrls = [];
+        if (documentos && documentos.length > 0) {
+          console.log(`🔍 [ANÁLISE-OUTROS] Gerando URLs assinadas para ${documentos.length} documentos...`);
+          
+          for (const doc of documentos) {
+            try {
+              console.log(`🔍 [ANÁLISE-OUTROS] Tentando gerar URL para documento:`, {
+                nome: doc.nome_arquivo,
+                url: doc.url,
+                tipo: doc.tipo,
+                proposta_id: doc.proposta_id
+              });
+
+              // Extrair o caminho do arquivo a partir da URL salva
+              const documentsIndex = doc.url.indexOf('/documents/');
+              let filePath;
+              
+              if (documentsIndex !== -1) {
+                // Extrair caminho após '/documents/'
+                filePath = doc.url.substring(documentsIndex + '/documents/'.length);
+              } else {
+                // Fallback: construir caminho baseado no nome do arquivo
+                const fileName = doc.nome_arquivo;
+                filePath = `proposta-${idParam}/${fileName}`;
+              }
+              
+              console.log(`🔍 [ANÁLISE-OUTROS] Caminho extraído para URL assinada: ${filePath}`);
+
+              const { data: signedUrlData, error: urlError } = await supabase.storage
+                .from('documents')
+                .createSignedUrl(filePath, 3600); // 1 hora
+
+              if (!urlError && signedUrlData) {
+                documentosComUrls.push({
+                  ...doc,
+                  // Mapeamento para formato esperado pelo DocumentViewer
+                  name: doc.nome_arquivo,
+                  url: signedUrlData.signedUrl,
+                  type: doc.tipo || 'application/octet-stream', // fallback se tipo for null
+                  uploadDate: doc.created_at,
+                  // Manter campos originais também
+                  url_visualizacao: signedUrlData.signedUrl
+                });
+                console.log(`🔍 [ANÁLISE-OUTROS] ✅ URL gerada para documento: ${doc.nome_arquivo}`);
+              } else {
+                console.log(`🔍 [ANÁLISE-OUTROS] ❌ Erro ao gerar URL para documento ${doc.nome_arquivo}:`, urlError?.message);
+                console.log(`🔍 [ANÁLISE-OUTROS] ❌ Caminho tentado: ${filePath}`);
+                documentosComUrls.push({
+                  ...doc,
+                  // Mesmo sem URL, mapear para formato esperado
+                  name: doc.nome_arquivo,
+                  url: '',
+                  type: doc.tipo || 'application/octet-stream',
+                  uploadDate: doc.created_at
+                }); // Adiciona sem URL em caso de erro
+              }
+            } catch (error) {
+              console.log(`🔍 [ANÁLISE-OUTROS] ❌ Erro ao processar documento ${doc.nome_arquivo}:`, error);
+              documentosComUrls.push({
+                ...doc,
+                // Mesmo com erro, mapear para formato esperado
+                name: doc.nome_arquivo,
+                url: '',
+                type: doc.tipo || 'application/octet-stream',
+                uploadDate: doc.created_at
+              }); // Adiciona sem URL em caso de erro
+            }
+          }
+        }
+        
+        // Incluir documentos formatados na resposta
+        const propostaComDocumentos = {
+          ...proposta,
+          documentos: documentosComUrls || []
+        };
+        
+        console.log(`🔍 [ANÁLISE-OUTROS] ✅ Retornando proposta ${idParam} com ${documentosComUrls.length} documentos formatados`);
+        res.json(propostaComDocumentos);
       }
     } catch (error) {
       console.error("Get proposta error:", error);
