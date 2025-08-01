@@ -86,6 +86,8 @@ export const statusEnum = pgEnum("status", [
   "em_analise",
   "pendente",
   "aprovado",
+  "aguardando_aceite_atendente", // Novo status após aprovação do analista
+  "aceito_atendente", // Aceito pelo atendente, pronto para formalização
   "rejeitado",
   "documentos_enviados",
   "contratos_preparados",

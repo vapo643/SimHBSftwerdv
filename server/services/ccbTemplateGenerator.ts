@@ -218,48 +218,126 @@ function generateParcelas(numeroParcelas: number, valorParcela: number, dataBase
 // Função para criar CCB usando template
 async function createCCBWithTemplate(pdfDoc: PDFDocument, fields: CCBFields): Promise<Uint8Array> {
   try {
-    // Para este template específico, vamos sobrepor texto nas posições corretas
-    // Como o PDF fornecido não tem campos editáveis, vamos usar uma abordagem de overlay
+    console.log('📝 [CCB Template] Preenchendo campos do template PDF...');
     
     const pages = pdfDoc.getPages();
     const firstPage = pages[0];
     const { width, height } = firstPage.getSize();
     
-    // Configurar fonte
+    // Configurar fonte - usar tamanhos menores para não sobrepor
     const helvetica = await pdfDoc.embedFont('Helvetica');
-    const helveticaBold = await pdfDoc.embedFont('Helvetica-Bold');
+    const fontSize = 9; // Tamanho padrão menor
+    const smallFontSize = 8; // Para campos com menos espaço
     
-    // Cabeçalho - preenchendo os campos principais
-    firstPage.drawText(fields.cedulaNumero, {
-      x: 200, y: height - 80, // Posição aproximada do "Cédula Nº"
-      size: 10,
-      font: helvetica,
+    // Função auxiliar para desenhar texto com validação
+    const drawSafeText = (text: string, x: number, y: number, options: any = {}) => {
+      if (text && text.toString().trim()) {
+        firstPage.drawText(text.toString(), {
+          x,
+          y,
+          size: options.size || fontSize,
+          font: options.font || helvetica,
+          ...options
+        });
+      }
+    };
+    
+    // CABEÇALHO - Linha 3 do template (Cédula Nº, Data de Emissão, Finalidade)
+    drawSafeText(fields.cedulaNumero, 95, height - 88, { size: smallFontSize });
+    drawSafeText(fields.dataEmissao, 265, height - 88, { size: smallFontSize });
+    drawSafeText('Empréstimo Pessoal', 435, height - 88, { size: smallFontSize });
+    
+    // SEÇÃO I - EMITENTE (linha 10-16 do template)
+    // Nome/Razão Social e CPF/CNPJ
+    drawSafeText(fields.emitenteNome, 60, height - 135, { size: smallFontSize });
+    drawSafeText(fields.emitenteCpf, 450, height - 135, { size: smallFontSize });
+    
+    // RG, Expedidor, etc (linha 12)
+    drawSafeText(fields.emitenteRg || '', 50, height - 155, { size: smallFontSize });
+    drawSafeText(fields.emitenteOrgaoEmissor || '', 120, height - 155, { size: smallFontSize });
+    drawSafeText('SP', 185, height - 155, { size: smallFontSize }); // UF padrão
+    drawSafeText(fields.emitenteNacionalidade || 'Brasileiro', 270, height - 155, { size: smallFontSize });
+    
+    // Estado Civil (linha 14)
+    drawSafeText(fields.emitenteEstadoCivil || '', 95, height - 175, { size: smallFontSize });
+    
+    // Endereço (linha 16)
+    drawSafeText(fields.emitenteEndereco, 75, height - 195, { size: smallFontSize });
+    drawSafeText(fields.emitenteCep, 275, height - 195, { size: smallFontSize });
+    drawSafeText(fields.emitenteCidade || '', 370, height - 195, { size: smallFontSize });
+    drawSafeText('SP', 540, height - 195, { size: smallFontSize }); // UF padrão
+    
+    // SEÇÃO II - CREDOR (linha 25-28 do template)
+    drawSafeText(fields.credorRazaoSocial, 60, height - 250, { size: smallFontSize });
+    drawSafeText(fields.credorCnpj, 450, height - 250, { size: smallFontSize });
+    drawSafeText(fields.credorEndereco, 75, height - 270, { size: smallFontSize });
+    drawSafeText(fields.credorCep, 230, height - 270, { size: smallFontSize });
+    drawSafeText('São Paulo', 370, height - 270, { size: smallFontSize });
+    drawSafeText('SP', 540, height - 270, { size: smallFontSize });
+    
+    // SEÇÃO III - CONDIÇÕES (linha 35-52 do template)
+    // Linha 35-36: Valor Principal, Data Emissão, Vencimentos
+    drawSafeText(fields.valorPrincipal, 115, height - 325, { size: smallFontSize });
+    drawSafeText(fields.dataEmissao, 225, height - 325, { size: smallFontSize });
+    drawSafeText(fields.vencimentoPrimeira, 350, height - 325, { size: smallFontSize });
+    drawSafeText(fields.vencimentoUltima, 485, height - 325, { size: smallFontSize });
+    
+    // Linha 38-41: Prazo, Juros, Taxa
+    drawSafeText(fields.prazoAmortizacao, 50, height - 355, { size: smallFontSize });
+    drawSafeText('Pré-Fixados', 170, height - 355, { size: smallFontSize });
+    drawSafeText(fields.taxaJuros, 295, height - 355, { size: smallFontSize });
+    
+    // Linha 44-46: Taxa Mensal, Anual, IOF
+    drawSafeText(fields.taxaJuros, 50, height - 385, { size: smallFontSize });
+    drawSafeText(fields.taxaJurosAnual, 175, height - 385, { size: smallFontSize });
+    drawSafeText(fields.valorIof, 295, height - 385, { size: smallFontSize });
+    drawSafeText('São Paulo', 415, height - 385, { size: smallFontSize });
+    
+    // Linha 47: TAC
+    drawSafeText(fields.valorTac, 295, height - 405, { size: smallFontSize });
+    
+    // Linha 49: CET
+    drawSafeText(fields.cet, 485, height - 425, { size: smallFontSize });
+    
+    // Linha 52-53: Data liberação e Valor líquido
+    drawSafeText(fields.dataLiberacao, 195, height - 465, { size: smallFontSize });
+    drawSafeText(fields.valorLiquido, 385, height - 465, { size: smallFontSize });
+    drawSafeText(fields.valorLiquido, 195, height - 480, { size: smallFontSize });
+    
+    // Linha 62-67: Dados bancários
+    drawSafeText(fields.bancoCliente, 115, height - 530, { size: smallFontSize });
+    drawSafeText(fields.agenciaCliente, 250, height - 530, { size: smallFontSize });
+    drawSafeText(fields.contaCliente, 380, height - 530, { size: smallFontSize });
+    drawSafeText(fields.tipoContaCliente, 485, height - 550, { size: smallFontSize });
+    
+    // FLUXO DE PAGAMENTO (linha 79+)
+    // Vamos preencher até 12 parcelas na primeira página
+    let parcelaY = height - 650;
+    const maxParcelasPrimeiraPagina = 12;
+    
+    fields.parcelas.slice(0, maxParcelasPrimeiraPagina).forEach((parcela, index) => {
+      drawSafeText(`${parcela.numero}`, 150, parcelaY, { size: smallFontSize });
+      drawSafeText(parcela.vencimento, 280, parcelaY, { size: smallFontSize });
+      drawSafeText(parcela.valor, 420, parcelaY, { size: smallFontSize });
+      parcelaY -= 20;
     });
     
-    firstPage.drawText(fields.dataEmissao, {
-      x: 350, y: height - 80, // Posição aproximada da "Data de Emissão"
-      size: 10,
-      font: helvetica,
-    });
+    // Se houver mais páginas e mais parcelas, continuar nas próximas páginas
+    if (fields.parcelas.length > maxParcelasPrimeiraPagina && pages.length > 1) {
+      // Implementar lógica para páginas adicionais se necessário
+      console.log(`⚠️ [CCB Template] ${fields.parcelas.length} parcelas - algumas podem não aparecer no template`);
+    }
     
-    firstPage.drawText(fields.finalidade, {
-      x: 450, y: height - 80, // Posição aproximada da "Finalidade"
-      size: 10,
-      font: helvetica,
-    });
+    // Retornar PDF preenchido
+    const pdfBytes = await pdfDoc.save();
+    console.log('✅ [CCB Template] Template preenchido com sucesso');
+    return pdfBytes;
     
-    // Seção I - EMITENTE
-    let currentY = height - 150;
-    
-    firstPage.drawText(fields.emitenteNome, {
-      x: 50, y: currentY, // Nome/Razão Social
-      size: 10,
-      font: helvetica,
-    });
-    
-    firstPage.drawText(fields.emitenteCpf, {
-      x: 400, y: currentY, // CPF/CNPJ
-      size: 10,
+  } catch (error) {
+    console.error('❌ [CCB Template] Erro ao preencher template:', error);
+    throw error;
+  }
+}
       font: helvetica,
     });
     

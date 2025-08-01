@@ -742,7 +742,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Validation schema for status change
       const statusChangeSchema = z.object({
-        status: z.enum(['aprovado', 'rejeitado', 'pendenciado', 'aguardando_analise']),
+        status: z.enum(['aprovado', 'aguardando_aceite_atendente', 'aceito_atendente', 'rejeitado', 'pendenciado', 'aguardando_analise', 'cancelado']),
         observacao: z.string().min(1, 'Observação é obrigatória'),
         valorAprovado: z.number().optional(),
         motivoPendencia: z.string().optional()
@@ -767,9 +767,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // 2. Validate status transition
       const validTransitions = {
-        'aguardando_analise': ['em_analise', 'aprovado', 'rejeitado', 'pendenciado'],
-        'em_analise': ['aprovado', 'rejeitado', 'pendenciado'],
-        'pendenciado': ['aguardando_analise'] // Atendente can resubmit after fixing
+        'aguardando_analise': ['em_analise', 'aguardando_aceite_atendente', 'rejeitado', 'pendenciado'],
+        'em_analise': ['aguardando_aceite_atendente', 'rejeitado', 'pendenciado'],
+        'pendenciado': ['aguardando_analise'], // Atendente can resubmit after fixing
+        'aguardando_aceite_atendente': ['aceito_atendente', 'cancelado'], // Atendente aceita ou cancela
+        'aceito_atendente': ['aprovado', 'cancelado'] // Pronto para formalização
       };
       
       const currentStatus = currentProposta.status;
@@ -905,7 +907,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Formalization statuses according to business logic
       const formalizationStatuses = [
-        'aprovado',
+        'aceito_atendente', // Novo status após aceite do atendente
+        'aprovado', // Mantém para compatibilidade temporária
         'documentos_enviados', 
         'contratos_preparados',
         'contratos_assinados',
@@ -1023,13 +1026,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Gerar CCB usando template
-      console.log(`[CCB] Gerando CCB com template para proposta ${id}...`);
-      const { generateCCBFromTemplate } = await import("./services/ccbTemplateGenerator");
+      // Gerar CCB usando template V2
+      console.log(`[CCB] Gerando CCB com template V2 para proposta ${id}...`);
+      const { generateCCBFromTemplateV2 } = await import("./services/ccbTemplateGeneratorV2");
       
       try {
-        const ccbPath = await generateCCBFromTemplate(id);
-        console.log(`[CCB] CCB gerada com sucesso usando template: ${ccbPath}`);
+        const ccbPath = await generateCCBFromTemplateV2(id);
+        console.log(`[CCB] CCB gerada com sucesso usando template V2: ${ccbPath}`);
         res.json({ 
           success: true, 
           message: "CCB gerada com sucesso usando template personalizado",

@@ -351,6 +351,14 @@ const Dashboard: React.FC = () => {
                     Nova Proposta
                   </Button>
                 </Link>
+                {user?.role === 'ATENDENTE' && (
+                  <Link to="/aceite-atendente">
+                    <Button variant="outline">
+                      <CheckCircle2 className="h-4 w-4 mr-2" />
+                      Aceitar Propostas
+                    </Button>
+                  </Link>
+                )}
               </div>
             </div>
           </CardHeader>
