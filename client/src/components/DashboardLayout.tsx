@@ -170,8 +170,8 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
                   // 🔒 FILTRO RÍGIDO POR ROLE
                   switch(user?.role) {
                     case 'ATENDENTE':
-                      // ATENDENTE: Apenas Dashboard e Nova Proposta
-                      return ['📊 Dashboard', '➕ Nova Proposta'].includes(item.name);
+                      // ATENDENTE: Dashboard, Nova Proposta e Formalização
+                      return ['📊 Dashboard', '➕ Nova Proposta', '📄 Formalização'].includes(item.name);
                     
                     case 'ANALISTA':
                       // ANALISTA: APENAS Fila de Análise

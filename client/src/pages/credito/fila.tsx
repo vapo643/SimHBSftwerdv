@@ -206,32 +206,32 @@ const FilaAnalise: React.FC = () => {
       <div className="space-y-6">
         {/* KPIs Section */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          <Card className="card-simpix">
+          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
                 <Calendar className="h-5 w-5 text-blue-400" />
                 Propostas no Dia
               </CardTitle>
             </CardHeader>
-            <CardContent className="text-2xl font-bold">{propostasHoje}</CardContent>
+            <CardContent className="text-2xl font-bold text-gray-900 dark:text-white">{propostasHoje}</CardContent>
           </Card>
-          <Card className="card-simpix">
+          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
                 <TrendingUp className="h-5 w-5 text-green-400" />
                 Acumulado no Mês
               </CardTitle>
             </CardHeader>
-            <CardContent className="text-2xl font-bold">{acumuladoMes}</CardContent>
+            <CardContent className="text-2xl font-bold text-gray-900 dark:text-white">{acumuladoMes}</CardContent>
           </Card>
-          <Card className="card-simpix">
+          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
                 <Clock className="h-5 w-5 text-yellow-400" />
                 Propostas Pendentes
               </CardTitle>
             </CardHeader>
-            <CardContent className="text-2xl font-bold">{propostasPendentes}</CardContent>
+            <CardContent className="text-2xl font-bold text-gray-900 dark:text-white">{propostasPendentes}</CardContent>
           </Card>
         </div>
 
@@ -253,7 +253,7 @@ const FilaAnalise: React.FC = () => {
           )}
           
           <div className="flex items-center gap-2">
-            <Filter className="h-4 w-4 text-muted-foreground" />
+            <Filter className="h-4 w-4 text-gray-600 dark:text-gray-400" />
             <Select onValueChange={setFilterStatus} defaultValue="all">
               <SelectTrigger className="w-full md:w-[180px]">
                 <SelectValue placeholder="Filtrar por Status" />
@@ -269,7 +269,7 @@ const FilaAnalise: React.FC = () => {
             </Select>
           </div>
           <div className="flex items-center gap-2">
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <Users className="h-4 w-4 text-gray-600 dark:text-gray-400" />
             <Select onValueChange={handlePartnerChange} defaultValue="all">
               <SelectTrigger className="w-full md:w-[180px]">
                 <SelectValue placeholder="Filtrar por Parceiro" />
@@ -285,7 +285,7 @@ const FilaAnalise: React.FC = () => {
             </Select>
           </div>
           <div className="flex items-center gap-2">
-            <Store className="h-4 w-4 text-muted-foreground" />
+            <Store className="h-4 w-4 text-gray-600 dark:text-gray-400" />
             <Select
               onValueChange={setFilterStore}
               value={filterStore}
@@ -303,49 +303,49 @@ const FilaAnalise: React.FC = () => {
         </div>
 
         {/* Table Section */}
-        <Card className="card-simpix">
+        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
           <CardContent className="p-0">
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="flex items-center gap-2 min-w-[120px]">
-                      <FileText className="h-4 w-4" />
+                    <TableHead className="flex items-center gap-2 min-w-[120px] text-gray-900 dark:text-white">
+                      <FileText className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                       ID Proposta
                     </TableHead>
-                    <TableHead className="min-w-[100px]">
+                    <TableHead className="min-w-[100px] text-gray-900 dark:text-white">
                       <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4" />
+                        <Calendar className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                         Data
                       </div>
                     </TableHead>
-                    <TableHead className="min-w-[150px]">
+                    <TableHead className="min-w-[150px] text-gray-900 dark:text-white">
                       <div className="flex items-center gap-2">
-                        <User className="h-4 w-4" />
+                        <User className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                         Cliente
                       </div>
                     </TableHead>
-                    <TableHead className="min-w-[130px]">
+                    <TableHead className="min-w-[130px] text-gray-900 dark:text-white">
                       <div className="flex items-center gap-2">
-                        <Building className="h-4 w-4" />
+                        <Building className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                         Parceiro
                       </div>
                     </TableHead>
-                    <TableHead className="min-w-[100px]">
+                    <TableHead className="min-w-[100px] text-gray-900 dark:text-white">
                       <div className="flex items-center gap-2">
-                        <Store className="h-4 w-4" />
+                        <Store className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                         Loja
                       </div>
                     </TableHead>
-                    <TableHead className="min-w-[120px]">Status</TableHead>
-                    <TableHead className="text-right min-w-[100px]">Ações</TableHead>
+                    <TableHead className="min-w-[120px] text-gray-900 dark:text-white">Status</TableHead>
+                    <TableHead className="text-right min-w-[100px] text-gray-900 dark:text-white">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
               <TableBody>
                 {isLoading ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8">
-                      <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2" />
+                    <TableCell colSpan={7} className="text-center py-8 text-gray-900 dark:text-white">
+                      <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2 text-gray-600 dark:text-gray-400" />
                       <p>Carregando propostas...</p>
                     </TableCell>
                   </TableRow>
@@ -364,11 +364,11 @@ const FilaAnalise: React.FC = () => {
                 ) : (
                   filteredData.map(proposta => (
                     <TableRow key={proposta.id}>
-                      <TableCell className="font-medium">{proposta.id}</TableCell>
-                      <TableCell>{format(new Date(proposta.createdAt), 'dd/MM/yyyy', { locale: ptBR })}</TableCell>
-                      <TableCell>{proposta.nomeCliente || '-'}</TableCell>
-                      <TableCell>{proposta.parceiro?.razaoSocial || '-'}</TableCell>
-                      <TableCell>{proposta.loja?.nomeLoja || '-'}</TableCell>
+                      <TableCell className="font-medium text-gray-900 dark:text-white">{proposta.id}</TableCell>
+                      <TableCell className="text-gray-900 dark:text-white">{format(new Date(proposta.createdAt), 'dd/MM/yyyy', { locale: ptBR })}</TableCell>
+                      <TableCell className="text-gray-900 dark:text-white">{proposta.nomeCliente || '-'}</TableCell>
+                      <TableCell className="text-gray-900 dark:text-white">{proposta.parceiro?.razaoSocial || '-'}</TableCell>
+                      <TableCell className="text-gray-900 dark:text-white">{proposta.loja?.nomeLoja || '-'}</TableCell>
                       <TableCell>
                         <span className={
                           proposta.status === "aprovado" ? "status-approved" :
@@ -387,7 +387,7 @@ const FilaAnalise: React.FC = () => {
                       <TableCell className="text-right">
                         <div className="flex gap-2 justify-end">
                           <Link to={`/credito/analise/${proposta.id}`}>
-                            <Button className="btn-simpix-primary" size="sm">
+                            <Button className="bg-blue-500 hover:bg-blue-600 text-white" size="sm">
                               <Eye className="h-4 w-4 mr-2" />
                               <span className="hidden sm:inline">Analisar</span>
                             </Button>
@@ -396,7 +396,7 @@ const FilaAnalise: React.FC = () => {
                           {(user?.role === 'ATENDENTE' || user?.role === 'ADMINISTRADOR') && 
                            ['rascunho', 'aguardando_analise', 'em_analise', 'pendente', 'suspensa'].includes(proposta.status) && (
                             <Button 
-                              className={proposta.status === 'suspensa' ? "btn-simpix-warning" : "btn-simpix-secondary"} 
+                              className={proposta.status === 'suspensa' ? "bg-yellow-500 hover:bg-yellow-600 text-white" : "bg-gray-500 hover:bg-gray-600 text-white"} 
                               size="sm"
                               onClick={() => handleToggleStatus(proposta.id, proposta.status)}
                               title={proposta.status === 'suspensa' ? 'Reativar proposta' : 'Suspender proposta'}
