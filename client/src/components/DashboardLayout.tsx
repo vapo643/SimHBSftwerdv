@@ -45,19 +45,22 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
   
 
 
-  // Base navigation items - varies by role
+  // 🔒 PERMISSÕES RÍGIDAS SEGUNDO DOCUMENTO OFICIAL
+  // ATENDENTE: Apenas Dashboard e criação (sem fila de análise!)
   const attendantNavigation = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     { name: "Nova Proposta", href: "/propostas/nova", icon: PlusCircle },
-    { name: "Minhas Propostas", href: "/credito/fila", icon: List },
-    { name: "Formalização", href: "/formalizacao", icon: FileText },
+    // REMOVIDO: Fila de análise - ATENDENTE NÃO TEM ACESSO
+    // REMOVIDO: Formalização separada - tudo está no Dashboard
   ];
 
+  // ANALISTA: APENAS Fila de Análise (sem dashboard!)
   const analystNavigation = [
     { name: "Fila de Análise", href: "/credito/fila", icon: List },
-    // Nota: ANALISTA não tem acesso à Formalização conforme regras de negócio
+    // NADA MAIS - Analista só vê fila de análise
   ];
 
+  // GERENTE: Acesso completo ao workflow
   const managerNavigation = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     { name: "Nova Proposta", href: "/propostas/nova", icon: PlusCircle },
@@ -163,13 +166,31 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
                   { name: "➕ Nova Proposta", href: "/propostas/nova", icon: PlusCircle, gradient: "from-green-500 to-emerald-600" },
                   { name: "📋 Fila de Análise", href: "/credito/fila", icon: List, gradient: "from-orange-500 to-red-600" },
                   { name: "📄 Formalização", href: "/formalizacao", icon: FileText, gradient: "from-indigo-500 to-blue-600" },
-                ].filter(item => 
-                  (user?.role === 'ATENDENTE' && ['📊 Dashboard', '➕ Nova Proposta', '📋 Fila de Análise', '📄 Formalização'].includes(item.name)) ||
-                  (user?.role === 'ANALISTA' && ['📋 Fila de Análise'].includes(item.name)) ||
-                  (user?.role === 'GERENTE' && ['📊 Dashboard', '➕ Nova Proposta', '📋 Fila de Análise', '📄 Formalização'].includes(item.name)) ||
-                  (user?.role === 'FINANCEIRO' && ['📊 Dashboard', '➕ Nova Proposta', '📋 Fila de Análise', '📄 Formalização'].includes(item.name)) ||
-                  (user?.role === 'ADMINISTRADOR' && ['📊 Dashboard', '➕ Nova Proposta', '📋 Fila de Análise', '📄 Formalização'].includes(item.name))
-                ).map(item => {
+                ].filter(item => {
+                  // 🔒 FILTRO RÍGIDO POR ROLE
+                  switch(user?.role) {
+                    case 'ATENDENTE':
+                      // ATENDENTE: Apenas Dashboard e Nova Proposta
+                      return ['📊 Dashboard', '➕ Nova Proposta'].includes(item.name);
+                    
+                    case 'ANALISTA':
+                      // ANALISTA: APENAS Fila de Análise
+                      return ['📋 Fila de Análise'].includes(item.name);
+                    
+                    case 'FINANCEIRO':
+                      // FINANCEIRO: Sem acesso ao workflow principal
+                      return false;
+                    
+                    case 'GERENTE':
+                    case 'ADMINISTRADOR':
+                    case 'DIRETOR':
+                      // Gestores: Acesso completo
+                      return true;
+                    
+                    default:
+                      return false;
+                  }
+                }).map(item => {
                   const Icon = item.icon;
                   const isActive = location === item.href;
                   return (

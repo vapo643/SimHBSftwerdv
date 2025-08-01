@@ -3,7 +3,8 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { createServerSupabaseClient } from "../client/src/lib/supabase";
 import { jwtAuthMiddleware, type AuthenticatedRequest } from "./lib/jwt-auth-middleware";
-import { requireAdmin, requireManagerOrAdmin, requireAnyRole } from "./lib/role-guards";
+import { requireAdmin, requireManagerOrAdmin, requireAnyRole, requireRoles } from "./lib/role-guards";
+import { enforceRoutePermissions, requireAnalyst, requireFinanceiro, filterProposalsByRole } from "./lib/role-based-access";
 import { insertPropostaSchema, updatePropostaSchema, insertGerenteLojaSchema, insertLojaSchema, updateLojaSchema, propostaLogs, propostas } from "@shared/schema";
 import { z } from "zod";
 import multer from "multer";
@@ -541,12 +542,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Proposal routes - ENHANCED WITH MULTI-FILTER SUPPORT
+  // Proposal routes - ENHANCED WITH MULTI-FILTER SUPPORT AND RBAC SECURITY
   app.get("/api/propostas", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     try {
       // Extract query parameters for enhanced filtering
       const { queue, status, atendenteId } = req.query;
       const isAnalysisQueue = queue === 'analysis';
+      
+      // 🔒 SEGURANÇA CRÍTICA: Validar permissões por role
+      const userRole = req.user?.role;
+      const userId = req.user?.id;
+      
+      // ANALISTA: Só pode acessar fila de análise
+      if (userRole === 'ANALISTA' && !isAnalysisQueue) {
+        return res.status(403).json({ 
+          message: 'Acesso negado. Analistas só podem acessar a fila de análise.',
+          requiredQueue: 'analysis'
+        });
+      }
+      
+      // ATENDENTE: Não pode acessar fila de análise
+      if (userRole === 'ATENDENTE' && isAnalysisQueue) {
+        return res.status(403).json({ 
+          message: 'Acesso negado. Atendentes não têm permissão para acessar a fila de análise.'
+        });
+      }
       
       // Import database dependencies
       const { db } = await import("../server/lib/supabase");
@@ -575,16 +595,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .leftJoin(lojas, eq(propostas.lojaId, lojas.id))
         .leftJoin(parceiros, eq(lojas.parceiroId, parceiros.id));
       
-      // Build where conditions based on filters
+      // Build where conditions based on filters AND ROLE PERMISSIONS
       const whereConditions = [];
       
-      if (isAnalysisQueue) {
-        whereConditions.push(inArray(propostas.status, ['aguardando_analise', 'em_analise']));
-      } else if (status) {
+      // 🔒 FILTRO POR ROLE - SEGURANÇA CRÍTICA
+      switch (userRole) {
+        case 'ATENDENTE':
+          // ATENDENTE vê APENAS suas próprias propostas
+          whereConditions.push(eq(propostas.userId, userId));
+          console.log(`🔒 [SECURITY] ATENDENTE ${userId} - filtrando apenas propostas próprias`);
+          break;
+          
+        case 'ANALISTA':
+          // ANALISTA vê APENAS propostas em análise (todas as lojas)
+          whereConditions.push(inArray(propostas.status, ['aguardando_analise', 'em_analise']));
+          console.log(`🔒 [SECURITY] ANALISTA ${userId} - filtrando propostas em análise`);
+          break;
+          
+        case 'FINANCEIRO':
+          // FINANCEIRO vê APENAS propostas aprovadas/pagamento
+          whereConditions.push(inArray(propostas.status, ['aprovado', 'pronto_pagamento', 'pago']));
+          console.log(`🔒 [SECURITY] FINANCEIRO ${userId} - filtrando propostas para pagamento`);
+          break;
+          
+        case 'GERENTE':
+          // GERENTE vê todas da sua loja (filtro será aplicado por RLS)
+          // Por enquanto, não adicionar filtro adicional
+          console.log(`🔒 [SECURITY] GERENTE ${userId} - sem filtro adicional (RLS aplicará)`);
+          break;
+          
+        case 'ADMINISTRADOR':
+          // ADMIN vê tudo
+          console.log(`🔒 [SECURITY] ADMINISTRADOR ${userId} - acesso total`);
+          break;
+          
+        default:
+          // Sem role = sem acesso
+          return res.status(403).json({ 
+            message: 'Acesso negado. Usuário sem perfil definido.' 
+          });
+      }
+      
+      // Aplicar filtros adicionais da query
+      if (isAnalysisQueue && userRole !== 'ATENDENTE') {
+        // Fila de análise já foi filtrada para ANALISTA acima
+        if (userRole !== 'ANALISTA') {
+          whereConditions.push(inArray(propostas.status, ['aguardando_analise', 'em_analise']));
+        }
+      } else if (status && userRole === 'ADMINISTRADOR') {
+        // Apenas ADMIN pode filtrar por status específico
         whereConditions.push(eq(propostas.status, status as string));
       }
       
-      if (atendenteId) {
+      if (atendenteId && ['GERENTE', 'ADMINISTRADOR'].includes(userRole!)) {
+        // Apenas GERENTE e ADMIN podem filtrar por atendente
         whereConditions.push(eq(propostas.userId, atendenteId as string));
       }
       
