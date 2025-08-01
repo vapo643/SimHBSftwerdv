@@ -73,12 +73,11 @@ class ClickSignServiceV3 {
   private rateLimitReset: Date = new Date();
 
   constructor() {
+    // ALWAYS use production ClickSign API for valid legal signatures
     this.config = {
-      apiUrl: process.env.NODE_ENV === 'production' 
-        ? 'https://app.clicksign.com/api/v3'
-        : 'https://sandbox.clicksign.com/api/v3',
+      apiUrl: 'https://app.clicksign.com/api/v3',
       apiToken: process.env.CLICKSIGN_API_TOKEN || '',
-      environment: process.env.NODE_ENV === 'production' ? 'production' : 'sandbox'
+      environment: 'production'
     };
 
     if (!this.config.apiToken) {
@@ -86,7 +85,8 @@ class ClickSignServiceV3 {
       throw new Error('ClickSign API token is required but not configured');
     }
 
-    console.log(`[CLICKSIGN V3] 🚀 Initialized in ${this.config.environment} mode`);
+    console.log(`[CLICKSIGN V3] 🚀 Initialized in PRODUCTION mode (legal signatures)`);
+    console.log(`[CLICKSIGN V3] API URL: ${this.config.apiUrl}`);
     console.log(`[CLICKSIGN V3] Token configured: ${this.config.apiToken.substring(0, 10)}...`);
   }
 

@@ -1,0 +1,73 @@
+Mensagens de erro
+Códigos de erros e explicações
+
+HTTP Status Codes
+A Clicksign segue o padrão de HTTP Status Codes. Os erros na faixa 4xx ocorrem quando há algo errado na requisição enviada pelo cliente para a Clicksign. Já os erros na faixa 5xx são erros inesperados que ocorrem nos servidores da Clicksign.
+
+Sobre as mensagens de erro
+Seguindo a especificação JSONAPI, todas as mensagens de erro incluirão detalhes no corpo da resposta, fornecendo code, status, title, detail, e, quando necessário, source.
+
+4×× Client Error
+Sempre verifique o BODY da resposta, o retorno da requisição mostrará o motivo pelo qual a requisição não foi aceita pelos servidores da Clicksign.
+
+Código	Referência	Explicação
+400	BAD REQUEST	O servidor não processará a solicitação devido a algo que é percebido como sendo um erro do cliente. Este é um erro genérico.
+401	UNAUTHORIZED	O servidor não autorizou a requisição. Access Token inválido.
+403	FORBIDDEN	O servidor não autorizou a requisição. O Access Token não possui permissão para acessar o recurso.
+404	NOT FOUND	O servidor não encontrou o recurso ou não está disposto a divulgar sua existência.
+422	UNPROCESSABLE ENTITY	O servidor não conseguiu processar as informações contidas na requisição.
+Exemplos de retorno de requisição inválida
+400: Bad Request
+401: Anauthorized
+
+{
+  "errors": [
+    {
+      "code": "bad_request",
+      "status": 400,
+      "source": {
+        "pointer": "/data/attributes/filename"
+      },
+      "detail": "filename deve ser informado(a)"
+    }
+  ]
+}
+5×× Server Error
+Código
+
+Referência
+
+Explicação
+
+500
+
+INTERNAL SERVER ERROR
+
+Ocorreu um erro interno inesperado.
+
+503
+
+SERVICE UNAVAILABLE
+
+Serviço Indisponível.
+
+O envelope está ativo para contas criadas a partir de 01/07/2024. Caso receba o erro de serviço indisponível, entre em contato com ajuda@clicksign.com .
+
+A Clicksign possui sistema de monitoramento de erros 500.
+Suporte da Clicksign
+Se você estiver com problemas relacionados à integração, entre em contato conosco através do e-mail ajuda@clicksign.com com o máximo de detalhes possível. Informações que nos ajudam a debugar a sua requisição:
+
+
+- Ambiente: sandbox ou produção
+- Conta
+- E-mail do operador
+- Path da requisição
+- Método da requisição
+- Código HTTP de erro
+- JSON enviado
+- JSON recebido
+- Key do documento
+- E-mails contidos na lista de assinatura
+- Horário da requisição
+- IP de origem
+- Print screen

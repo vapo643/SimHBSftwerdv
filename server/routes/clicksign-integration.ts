@@ -28,10 +28,8 @@ router.get('/clicksign/test-token', jwtAuthMiddleware, async (req: Authenticated
       });
     }
 
-    // Test token using official ClickSign documentation method
-    const testUrl = process.env.NODE_ENV === 'production' 
-      ? `https://app.clicksign.com/api/v3/envelopes?access_token=${process.env.CLICKSIGN_API_TOKEN}`
-      : `https://sandbox.clicksign.com/api/v3/envelopes?access_token=${process.env.CLICKSIGN_API_TOKEN}`;
+    // Test token using PRODUCTION ClickSign API (legal signatures only)
+    const testUrl = `https://app.clicksign.com/api/v3/envelopes?access_token=${process.env.CLICKSIGN_API_TOKEN}`;
 
     const response = await fetch(testUrl, {
       method: 'GET',
@@ -46,15 +44,16 @@ router.get('/clicksign/test-token', jwtAuthMiddleware, async (req: Authenticated
     if (response.ok) {
       res.json({
         success: true,
-        status: 'Token válido',
-        environment: process.env.NODE_ENV === 'production' ? 'production' : 'sandbox',
-        data: data
+        status: 'Token válido - API de PRODUÇÃO',
+        environment: 'production',
+        envelopes_count: data.meta?.record_count || 0,
+        message: 'Assinaturas com validade jurídica'
       });
     } else {
       res.status(response.status).json({
         success: false,
-        status: 'Token inválido',
-        environment: process.env.NODE_ENV === 'production' ? 'production' : 'sandbox',
+        status: 'Token inválido - API de PRODUÇÃO',
+        environment: 'production',
         error: data
       });
     }
