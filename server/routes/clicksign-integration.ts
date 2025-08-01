@@ -24,10 +24,10 @@ router.post('/propostas/:id/clicksign/regenerar', jwtAuthMiddleware, async (req:
 
     console.log(`[CLICKSIGN] 🔄 Regenerating signature link - Proposta: ${propostaId}, User: ${userId}, Role: ${userRole}`);
 
-    // Verificar se é ATENDENTE
-    if (userRole !== 'ATENDENTE') {
+    // Verificar se é ATENDENTE ou ADMINISTRADOR
+    if (userRole !== 'ATENDENTE' && userRole !== 'ADMINISTRADOR') {
       return res.status(403).json({
-        message: 'Apenas atendentes podem regenerar links de assinatura'
+        message: 'Apenas atendentes e administradores podem regenerar links de assinatura'
       });
     }
 
@@ -143,10 +143,10 @@ router.post('/propostas/:id/clicksign/enviar', jwtAuthMiddleware, async (req: Au
 
     console.log(`[CLICKSIGN] ${getBrasiliaTimestamp()} - Iniciando envio para ClickSign - Proposta: ${propostaId}, User: ${userId}, Role: ${userRole}`);
 
-    // Verificar se é ATENDENTE
-    if (userRole !== 'ATENDENTE') {
+    // Verificar se é ATENDENTE ou ADMINISTRADOR
+    if (userRole !== 'ATENDENTE' && userRole !== 'ADMINISTRADOR') {
       return res.status(403).json({
-        message: 'Apenas atendentes podem enviar contratos para assinatura eletrônica'
+        message: 'Apenas atendentes e administradores podem enviar contratos para assinatura eletrônica'
       });
     }
 

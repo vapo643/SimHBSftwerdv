@@ -3102,10 +3102,14 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
         // Other steps (ClickSign, Biometry) only ATENDENTE of the same store
         console.log(`🔍 [ETAPA DEBUG] Checking other steps permissions - Role: ${req.user?.role}, LojaId: ${req.user?.loja_id}, PropostaLojaId: ${proposta.lojaId}`);
         
-        if (req.user?.role !== 'ATENDENTE' || req.user?.loja_id !== proposta.lojaId) {
+        // Allow ADMINISTRADOR to access any store, otherwise check if ATENDENTE of same store
+        const isAdmin = req.user?.role === 'ADMINISTRADOR';
+        const isAttendenteFromSameStore = req.user?.role === 'ATENDENTE' && req.user?.loja_id === proposta.lojaId;
+        
+        if (!isAdmin && !isAttendenteFromSameStore) {
           console.log(`❌ [ETAPA DEBUG] Permission denied for step ${etapa}`);
           return res.status(403).json({ 
-            message: `Apenas o atendente da loja pode atualizar as etapas de assinatura e biometria. Seu role: ${req.user?.role}` 
+            message: `Apenas atendente da loja ou administrador pode atualizar as etapas de assinatura e biometria. Seu role: ${req.user?.role}` 
           });
         }
         console.log(`✅ [ETAPA DEBUG] Permission granted for step ${etapa}`);
