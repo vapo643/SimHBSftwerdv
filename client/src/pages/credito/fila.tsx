@@ -69,6 +69,7 @@ const FilaAnalise: React.FC = () => {
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterPartner, setFilterPartner] = useState("all");
   const [filterStore, setFilterStore] = useState("all");
+  const [showHistorico, setShowHistorico] = useState(false); // Para ANALISTA ver histórico
   const { user } = useAuth();
 
   // 🔒 Build query based on user role - CRITICAL FOR SECURITY
@@ -79,8 +80,10 @@ const FilaAnalise: React.FC = () => {
         return `/api/propostas?atendenteId=${user.id}`;
       
       case 'ANALISTA':
-        // ANALISTA vê APENAS a fila de análise
-        return '/api/propostas?queue=analysis';
+        // ANALISTA vê fila de análise OU histórico completo
+        return showHistorico 
+          ? '/api/propostas' // Histórico completo
+          : '/api/propostas?queue=analysis'; // Apenas fila de análise
       
       case 'GERENTE':
       case 'ADMINISTRADOR':
@@ -91,7 +94,7 @@ const FilaAnalise: React.FC = () => {
       default:
         return '/api/propostas';
     }
-  }, [user?.role, user?.id]);
+  }, [user?.role, user?.id, showHistorico]);
 
   // Fetch real proposals data - filtered based on role with PROPER SECURITY
   const { data: propostas, isLoading, error } = useQuery<Proposta[]>({
@@ -112,8 +115,8 @@ const FilaAnalise: React.FC = () => {
       
       let filtered = propostas;
       
-      // For ANALISTA role, only show analysis-ready proposals
-      if (user?.role === 'ANALISTA') {
+      // For ANALISTA role, filter based on mode (fila vs histórico)
+      if (user?.role === 'ANALISTA' && !showHistorico) {
         filtered = propostas.filter(proposta => 
           proposta.status === 'aguardando_analise' || proposta.status === 'em_analise'
         );
@@ -130,7 +133,7 @@ const FilaAnalise: React.FC = () => {
         return byStatus && byPartner && byStore;
       });
     },
-    [propostas, filterStatus, filterPartner, filterStore, user?.role]
+    [propostas, filterStatus, filterPartner, filterStore, user?.role, showHistorico]
   );
 
   const handlePartnerChange = (partnerId: string) => {
@@ -187,7 +190,11 @@ const FilaAnalise: React.FC = () => {
 
   return (
     <DashboardLayout 
-      title={user?.role === 'ANALISTA' ? "Fila de Análise de Crédito" : "Minhas Propostas"}
+      title={
+        user?.role === 'ANALISTA' 
+          ? (showHistorico ? "Histórico de Análises" : "Fila de Análise de Crédito")
+          : "Minhas Propostas"
+      }
       actions={
         <RefreshButton 
           onRefresh={handleRefresh}
@@ -230,6 +237,21 @@ const FilaAnalise: React.FC = () => {
 
         {/* Filters Section */}
         <div className="flex flex-col gap-4 md:flex-row">
+          {/* Toggle História para ANALISTA */}
+          {user?.role === 'ANALISTA' && (
+            <div className="flex items-center gap-2">
+              <Button
+                variant={showHistorico ? "default" : "outline"}
+                size="sm"
+                onClick={() => setShowHistorico(!showHistorico)}
+                className="flex items-center gap-2"
+              >
+                <FileText className="h-4 w-4" />
+                {showHistorico ? "Ver Fila" : "Ver Histórico"}
+              </Button>
+            </div>
+          )}
+          
           <div className="flex items-center gap-2">
             <Filter className="h-4 w-4 text-muted-foreground" />
             <Select onValueChange={setFilterStatus} defaultValue="all">

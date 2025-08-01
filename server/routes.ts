@@ -563,12 +563,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`🔍 [DEBUG] Role: ${userRole}, Queue: ${queue}, IsAnalysisQueue: ${isAnalysisQueue}`);
       
-      // ANALISTA: Deve SEMPRE acessar apenas fila de análise (essa verificação é redundante agora)
-      if (userRole === 'ANALISTA' && !isAnalysisQueue) {
-        console.log(`❌ [SECURITY BLOCK] ANALISTA tentando acessar fora da fila: queue=${queue}`);
+      // ANALISTA: Pode acessar fila OU histórico completo (se não especificar queue)
+      if (userRole === 'ANALISTA' && queue && queue !== 'analysis') {
+        console.log(`❌ [SECURITY BLOCK] ANALISTA tentando acessar queue inválida: ${queue}`);
         return res.status(403).json({ 
-          message: 'Acesso negado. Analistas só podem acessar a fila de análise.',
-          requiredQueue: 'analysis',
+          message: 'Acesso negado. Analistas só podem acessar a fila de análise ou histórico completo.',
+          allowedQueues: ['analysis', null],
           currentQueue: queue,
           debug: { userRole, queue, isAnalysisQueue }
         });
