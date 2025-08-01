@@ -788,8 +788,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // 2. Validate status transition
       const validTransitions = {
-        'aguardando_analise': ['em_analise', 'aguardando_aceite_atendente', 'rejeitado', 'pendenciado'],
-        'em_analise': ['aguardando_aceite_atendente', 'rejeitado', 'pendenciado'],
+        'aguardando_analise': ['em_analise', 'aprovado', 'rejeitado', 'pendenciado'], // Permitir aprovação direta
+        'em_analise': ['aprovado', 'rejeitado', 'pendenciado'], // Simplificado
         'pendenciado': ['aguardando_analise'], // Atendente can resubmit after fixing
         'aguardando_aceite_atendente': ['aceito_atendente', 'cancelado'], // Atendente aceita ou cancela
         'aceito_atendente': ['aprovado', 'cancelado'] // Pronto para formalização
