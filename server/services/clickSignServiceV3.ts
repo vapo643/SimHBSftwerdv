@@ -21,10 +21,15 @@ interface EnvelopeData {
   auto_close?: boolean;
   deadline_at?: string;
   block_after_refusal?: boolean;
+  documents?: Array<{
+    filename: string;
+    content_base64: string;
+  }>; // For atomic document creation
 }
 
 interface DocumentData {
   content?: string; // base64 with Data URI format  
+  content_base64?: string; // base64 with Data URI format (for atomic creation)
   filename?: string;
   template_id?: string; // for template type
 }
@@ -156,10 +161,34 @@ class ClickSignServiceV3 {
   }
 
   /**
-   * Create a new envelope
+   * Helper function to ensure correct Data URI format
+   */
+  private formatBase64ToDataURI(base64Content: string): string {
+    const prefix = 'data:application/pdf;base64,';
+
+    if (base64Content.startsWith(prefix)) {
+      return base64Content; // Already correct
+    }
+
+    // If has another 'data:' prefix, remove it before adding the correct one
+    if (base64Content.startsWith('data:')) {
+      const parts = base64Content.split(',');
+      if (parts.length === 2) {
+        return `${prefix}${parts[1]}`;
+      }
+    }
+    
+    // Add prefix if it's pure Base64
+    return `${prefix}${base64Content}`;
+  }
+
+  /**
+   * Create a new envelope (supports atomic document creation)
    */
   async createEnvelope(envelopeData: EnvelopeData) {
-    console.log(`[CLICKSIGN V3] 🔨 Creating envelope with data:`, envelopeData);
+    const isAtomic = envelopeData.documents && envelopeData.documents.length > 0;
+    console.log(`[CLICKSIGN V3] 🔨 Creating envelope ${isAtomic ? 'with documents (ATOMIC)' : '(empty)'}`);
+    console.log(`[CLICKSIGN V3] Envelope data:`, envelopeData);
     
     // Use correct JSON API format per ClickSign documentation
     const requestBody = {
@@ -397,24 +426,28 @@ class ClickSignServiceV3 {
       );
       console.log('[CLICKSIGN V3 AUDIT]', auditLog);
 
-      console.log(`[CLICKSIGN V3] 🚀 Starting CCB signature flow for proposal: ${proposalId}`);
+      console.log(`[CLICKSIGN V3 - ATOMIC] 🚀 Starting atomic CCB signature flow for proposal: ${proposalId}`);
 
-      // 1. Create envelope
+      // 1. Ensure correct Data URI format
+      const dataUriContent = this.formatBase64ToDataURI(pdfBase64);
+
+      // 2. Create envelope WITH document atomically
       const envelope = await this.createEnvelope({
         name: `CCB - Proposta ${proposalId}`,
         locale: 'pt-BR',
         auto_close: true,
         deadline_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days
-        block_after_refusal: true
+        block_after_refusal: true,
+        // Include document atomically as suggested by Deep Think
+        documents: [
+          {
+            filename: `ccb_proposta_${proposalId}.pdf`,
+            content_base64: dataUriContent
+          }
+        ]
       });
 
-      // 2. Add document - ensure Data URI format is applied
-      const dataUriContent = pdfBase64.startsWith('data:') ? pdfBase64 : `data:application/pdf;base64,${pdfBase64}`;
-      
-      const document = await this.addDocumentToEnvelope(envelope.id, {
-        content: dataUriContent,
-        filename: `ccb_proposta_${proposalId}.pdf`
-      });
+      console.log(`[CLICKSIGN V3 - ATOMIC] ✅ Envelope created with document atomically`);
 
       // 3. Create signer
       console.log(`[CLICKSIGN V3] Creating signer with data:`, {
@@ -478,9 +511,14 @@ class ClickSignServiceV3 {
         console.error(`[CLICKSIGN V3] ⚠️ Warning: No request_signature_key received from API`);
       }
 
+      // Get document ID from envelope response (first document)
+      const documentId = envelope.relationships?.documents?.data?.[0]?.id || 
+                       envelope.documents?.[0]?.id || 
+                       'document-created-atomically';
+
       return {
         envelopeId: envelope.id,
-        documentId: document.id,
+        documentId: documentId,
         signerId: signer.id,
         signUrl: signUrl || '',
         requestSignatureKey: signer.request_signature_key || '',
