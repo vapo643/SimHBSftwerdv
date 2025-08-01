@@ -73,6 +73,7 @@ interface Proposta {
   created_at: string;
   updated_at: string;
   data_aprovacao?: string;
+  clicksignSignUrl?: string;
   documentos_adicionais?: string[];
   contrato_gerado?: boolean;
   contrato_assinado?: boolean;
@@ -976,26 +977,27 @@ export default function Formalizacao() {
                                 </div>
                               )}
 
-                              {clickSignData && step.id === 3 && (
+                              {(clickSignData || proposta.clicksignSignUrl) && step.id === 3 && (
                                 <div className="mt-3 p-4 bg-green-900/20 border border-green-700 rounded-lg">
                                   <div className="flex items-center mb-3">
                                     <CheckCircle className="h-5 w-5 text-green-400 mr-2" />
-                                    <h5 className="font-medium text-green-300">Contrato Enviado com Sucesso</h5>
+                                    <h5 className="font-medium text-green-300">Link de Assinatura Disponível</h5>
                                   </div>
                                   <p className="text-sm text-green-200 mb-3">
-                                    O contrato foi enviado para o ClickSign. Compartilhe o link abaixo com o cliente:
+                                    Compartilhe o link abaixo com o cliente para assinatura digital:
                                   </p>
                                   <div className="flex items-center gap-2 p-3 bg-gray-800 rounded border">
                                     <input
                                       type="text"
-                                      value={clickSignData.signUrl}
+                                      value={clickSignData?.signUrl || proposta.clicksignSignUrl || ''}
                                       readOnly
                                       className="flex-1 bg-transparent text-white text-sm"
                                     />
                                     <Button
                                       size="sm"
                                       onClick={() => {
-                                        navigator.clipboard.writeText(clickSignData.signUrl);
+                                        const linkUrl = clickSignData?.signUrl || proposta.clicksignSignUrl || '';
+                                        navigator.clipboard.writeText(linkUrl);
                                         toast({
                                           title: "Copiado!",
                                           description: "Link de assinatura copiado para a área de transferência",
@@ -1005,9 +1007,11 @@ export default function Formalizacao() {
                                       Copiar
                                     </Button>
                                   </div>
-                                  <p className="text-xs text-gray-400 mt-2">
-                                    Envelope ID: {clickSignData.envelopeId}
-                                  </p>
+                                  {clickSignData?.envelopeId && (
+                                    <p className="text-xs text-gray-400 mt-2">
+                                      Envelope ID: {clickSignData.envelopeId}
+                                    </p>
+                                  )}
                                   
                                   {/* Botão para regenerar link */}
                                   <div className="mt-3 pt-3 border-t border-gray-700">
