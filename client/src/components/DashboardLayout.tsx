@@ -46,12 +46,12 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
 
 
   // 🔒 PERMISSÕES RÍGIDAS SEGUNDO DOCUMENTO OFICIAL
-  // ATENDENTE: Apenas Dashboard e criação (sem fila de análise!)
+  // ATENDENTE: Dashboard, criação e formalização
   const attendantNavigation = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     { name: "Nova Proposta", href: "/propostas/nova", icon: PlusCircle },
+    { name: "Formalização", href: "/formalizacao", icon: FileText },
     // REMOVIDO: Fila de análise - ATENDENTE NÃO TEM ACESSO
-    // REMOVIDO: Formalização separada - tudo está no Dashboard
   ];
 
   // ANALISTA: APENAS Fila de Análise (sem dashboard!)

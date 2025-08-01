@@ -281,15 +281,13 @@ function FormalizacaoList() {
         </div>
 
         {/* Status Overview */}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-6">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-5">
           {[
-            { status: "aceito_atendente", label: "Aceito", color: "bg-green-500" },
             { status: "aprovado", label: "Aprovado", color: "bg-green-400" },
             { status: "documentos_enviados", label: "Docs Enviados", color: "bg-blue-500" },
             { status: "contratos_preparados", label: "Contratos Prep.", color: "bg-purple-500" },
             { status: "contratos_assinados", label: "Assinados", color: "bg-indigo-500" },
             { status: "pronto_pagamento", label: "Pronto Pag.", color: "bg-orange-500" },
-            { status: "pago", label: "Pago", color: "bg-green-600" },
           ].map(item => {
             const count = formalizacaoPropostas.filter(p => p.status === item.status).length;
             return (
