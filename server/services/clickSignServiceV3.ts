@@ -24,9 +24,8 @@ interface EnvelopeData {
 }
 
 interface DocumentData {
-  content?: string; // base64 content
+  content_base64?: string; // base64 with Data URI format
   filename?: string;
-  content_type?: string; // MIME type
   template_id?: string; // for template type
 }
 
@@ -409,11 +408,12 @@ class ClickSignServiceV3 {
         block_after_refusal: true
       });
 
-      // 2. Add document
+      // 2. Add document with Data URI format
+      const dataUriContent = `data:application/pdf;base64,${pdfBase64}`;
+      
       const document = await this.addDocumentToEnvelope(envelope.id, {
-        content: pdfBase64,
-        filename: `ccb_proposta_${proposalId}.pdf`,
-        content_type: 'application/pdf'
+        content_base64: dataUriContent,
+        filename: `ccb_proposta_${proposalId}.pdf`
       });
 
       // 3. Create signer

@@ -353,10 +353,11 @@ router.post('/propostas/:id/clicksign/enviar', jwtAuthMiddleware, async (req: Au
       });
     }
 
-    // Convert file to base64 (sem prefixo data:)
+    // Convert file to base64 with Data URI format
     const arrayBuffer = await ccbFile.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
-    const base64Content = buffer.toString('base64');
+    const base64Raw = buffer.toString('base64');
+    const base64Content = `data:application/pdf;base64,${base64Raw}`;
 
     console.log(`[CLICKSIGN] CCB convertido para base64, tamanho: ${base64Content.length} chars`);
 
@@ -370,9 +371,8 @@ router.post('/propostas/:id/clicksign/enviar', jwtAuthMiddleware, async (req: Au
     };
 
     const documentData = {
-      content: base64Content,
-      filename: `CCB-${propostaId}.pdf`,
-      content_type: 'application/pdf'
+      content_base64: base64Content,
+      filename: `CCB-${propostaId}.pdf`
     };
 
     const signerData = {
