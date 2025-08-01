@@ -42,7 +42,7 @@ export function LoanConditionsStep() {
 
   return (
     <div className="space-y-6">
-      <Card className="bg-black border-gray-800">
+      <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Package className="h-5 w-5" />
@@ -73,7 +73,7 @@ export function LoanConditionsStep() {
                 ))}
               </SelectContent>
             </Select>
-            {errors.produtoId && <p className="mt-1 text-sm text-red-500">{errors.produtoId}</p>}
+            {errors.produtoId && <p className="mt-1 text-sm text-destructive">{errors.produtoId}</p>}
           </div>
 
           <div>
@@ -94,19 +94,19 @@ export function LoanConditionsStep() {
                 {selectedProduct?.tabelasDisponiveis.map((tabela) => (
                   <SelectItem key={tabela.id} value={tabela.id.toString()}>
                     {tabela.nomeTabela}
-                    <span className="text-sm text-gray-500 ml-2">
+                    <span className="text-sm text-muted-foreground ml-2">
                       ({tabela.taxaJuros}% a.m. - {tabela.tipo})
                     </span>
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            {errors.tabelaComercialId && <p className="mt-1 text-sm text-red-500">{errors.tabelaComercialId}</p>}
+            {errors.tabelaComercialId && <p className="mt-1 text-sm text-destructive">{errors.tabelaComercialId}</p>}
           </div>
         </CardContent>
       </Card>
 
-      <Card className="bg-black border-gray-800">
+      <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <DollarSign className="h-5 w-5" />
@@ -124,9 +124,9 @@ export function LoanConditionsStep() {
               value={loanData.valorSolicitado}
               onChange={(e) => updateLoanConditions({ valorSolicitado: e.target.value })}
               placeholder={`Mín: R$ ${context.limites.valorMinimo.toLocaleString('pt-BR')} - Máx: R$ ${context.limites.valorMaximo.toLocaleString('pt-BR')}`}
-              className={errors.valorSolicitado ? "border-red-500" : ""}
+              className={errors.valorSolicitado ? "border-destructive" : ""}
             />
-            {errors.valorSolicitado && <p className="mt-1 text-sm text-red-500">{errors.valorSolicitado}</p>}
+            {errors.valorSolicitado && <p className="mt-1 text-sm text-destructive">{errors.valorSolicitado}</p>}
           </div>
 
           <div>
@@ -151,7 +151,7 @@ export function LoanConditionsStep() {
                 ))}
               </SelectContent>
             </Select>
-            {errors.prazo && <p className="mt-1 text-sm text-red-500">{errors.prazo}</p>}
+            {errors.prazo && <p className="mt-1 text-sm text-destructive">{errors.prazo}</p>}
           </div>
 
           <div className="flex items-center space-x-2">
@@ -178,7 +178,7 @@ export function LoanConditionsStep() {
               min={format(new Date(), 'yyyy-MM-dd')}
               max={format(new Date(Date.now() + 45 * 24 * 60 * 60 * 1000), 'yyyy-MM-dd')}
             />
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-sm text-muted-foreground">
               Máximo de 45 dias a partir de hoje
             </p>
           </div>
@@ -186,9 +186,9 @@ export function LoanConditionsStep() {
       </Card>
 
       {simulation && (
-        <Card className="bg-black border-gray-800 border-green-800">
+        <Card className="border-2 border-green-500 dark:border-green-400">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-green-400">
+            <CardTitle className="flex items-center gap-2 text-green-600 dark:text-green-400">
               <Calculator className="h-5 w-5" />
               Simulação de Crédito
             </CardTitle>
@@ -199,47 +199,47 @@ export function LoanConditionsStep() {
           <CardContent className="space-y-3">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-sm text-gray-500">Valor da Parcela</p>
-                <p className="text-2xl font-bold text-green-400">
+                <p className="text-sm text-muted-foreground">Valor da Parcela</p>
+                <p className="text-2xl font-bold text-green-600 dark:text-green-400">
                   R$ {parseFloat(simulation.valorParcela).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Taxa de Juros</p>
+                <p className="text-sm text-muted-foreground">Taxa de Juros</p>
                 <p className="text-lg font-semibold">
                   {simulation.taxaJuros}% ao mês
                 </p>
               </div>
             </div>
 
-            <div className="border-t border-gray-800 pt-3 space-y-2">
+            <div className="border-t border-border pt-3 space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-gray-500">Valor Solicitado:</span>
-                <span>R$ {parseFloat(loanData.valorSolicitado || '0').toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                <span className="text-muted-foreground">Valor Solicitado:</span>
+                <span className="text-foreground">R$ {parseFloat(loanData.valorSolicitado || '0').toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-gray-500">IOF:</span>
-                <span>R$ {parseFloat(simulation.valorIOF).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                <span className="text-muted-foreground">IOF:</span>
+                <span className="text-foreground">R$ {parseFloat(simulation.valorIOF).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
               </div>
               {loanData.incluirTac && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">TAC:</span>
-                  <span>R$ {parseFloat(simulation.valorTAC).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                  <span className="text-muted-foreground">TAC:</span>
+                  <span className="text-foreground">R$ {parseFloat(simulation.valorTAC).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                 </div>
               )}
               {simulation.jurosCarencia && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Juros de Carência ({simulation.diasCarencia} dias):</span>
-                  <span>R$ {parseFloat(simulation.jurosCarencia).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                  <span className="text-muted-foreground">Juros de Carência ({simulation.diasCarencia} dias):</span>
+                  <span className="text-foreground">R$ {parseFloat(simulation.jurosCarencia).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                 </div>
               )}
-              <div className="flex justify-between text-sm font-semibold border-t border-gray-800 pt-2">
-                <span>Total Financiado:</span>
-                <span>R$ {parseFloat(simulation.valorTotalFinanciado).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+              <div className="flex justify-between text-sm font-semibold border-t border-border pt-2">
+                <span className="text-foreground">Total Financiado:</span>
+                <span className="text-foreground">R$ {parseFloat(simulation.valorTotalFinanciado).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-gray-500">CET Anual:</span>
-                <span className="font-semibold">{simulation.custoEfetivoTotal}%</span>
+                <span className="text-muted-foreground">CET Anual:</span>
+                <span className="font-semibold text-foreground">{simulation.custoEfetivoTotal}%</span>
               </div>
             </div>
           </CardContent>

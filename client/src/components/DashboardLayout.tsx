@@ -136,7 +136,7 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
   };
 
   return (
-    <div className="grid min-h-screen w-full lg:grid-cols-[280px_1fr]">
+    <div className="grid min-h-screen w-full lg:grid-cols-[280px_1fr] overflow-hidden">
       {/* Pilar 12 - Progressive Enhancement: Offline Status Banner */}
       <OfflineIndicator variant="banner" />
       <div className="hidden border-r bg-card text-card-foreground lg:block">

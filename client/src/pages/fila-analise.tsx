@@ -161,10 +161,10 @@ export default function FilaAnalise() {
           <Card>
             <CardContent className="p-6">
               <div className="animate-pulse space-y-4">
-                <div className="h-4 w-1/4 rounded bg-gray-200"></div>
+                <div className="h-4 w-1/4 rounded bg-muted"></div>
                 <div className="grid grid-cols-4 gap-4">
                   {[1, 2, 3, 4].map(i => (
-                    <div key={i} className="h-10 rounded bg-gray-200"></div>
+                    <div key={i} className="h-10 rounded bg-muted"></div>
                   ))}
                 </div>
               </div>
@@ -185,10 +185,10 @@ export default function FilaAnalise() {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-600">Aguardando Análise</p>
-                    <p className="text-2xl font-bold text-orange-600">{stats.aguardando}</p>
+                    <p className="text-sm text-muted-foreground">Aguardando Análise</p>
+                    <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">{stats.aguardando}</p>
                   </div>
-                  <Clock className="h-8 w-8 text-orange-600" />
+                  <Clock className="h-8 w-8 text-orange-600 dark:text-orange-400" />
                 </div>
               </CardContent>
             </Card>
@@ -197,10 +197,10 @@ export default function FilaAnalise() {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-600">Em Análise</p>
-                    <p className="text-2xl font-bold text-blue-600">{stats.emAnalise}</p>
+                    <p className="text-sm text-muted-foreground">Em Análise</p>
+                    <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{stats.emAnalise}</p>
                   </div>
-                  <AlertCircle className="h-8 w-8 text-blue-600" />
+                  <AlertCircle className="h-8 w-8 text-blue-600 dark:text-blue-400" />
                 </div>
               </CardContent>
             </Card>
@@ -209,10 +209,10 @@ export default function FilaAnalise() {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-600">Aprovadas</p>
-                    <p className="text-2xl font-bold text-green-600">{stats.aprovadas}</p>
+                    <p className="text-sm text-muted-foreground">Aprovadas</p>
+                    <p className="text-2xl font-bold text-green-600 dark:text-green-400">{stats.aprovadas}</p>
                   </div>
-                  <CheckCircle className="h-8 w-8 text-green-600" />
+                  <CheckCircle className="h-8 w-8 text-green-600 dark:text-green-400" />
                 </div>
               </CardContent>
             </Card>
@@ -221,10 +221,10 @@ export default function FilaAnalise() {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-600">Rejeitadas</p>
-                    <p className="text-2xl font-bold text-red-600">{stats.rejeitadas}</p>
+                    <p className="text-sm text-muted-foreground">Rejeitadas</p>
+                    <p className="text-2xl font-bold text-red-600 dark:text-red-400">{stats.rejeitadas}</p>
                   </div>
-                  <XCircle className="h-8 w-8 text-red-600" />
+                  <XCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
                 </div>
               </CardContent>
             </Card>
@@ -295,7 +295,7 @@ export default function FilaAnalise() {
               <div>
                 <Label htmlFor="busca">Buscar Cliente</Label>
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
                   <Input
                     id="busca"
                     placeholder="Nome do cliente..."
@@ -324,7 +324,7 @@ export default function FilaAnalise() {
             </div>
 
             <div className="mt-4 flex items-center justify-between">
-              <div className="text-sm text-gray-600">
+              <div className="text-sm text-muted-foreground">
                 {filteredPropostas
                   ? `${filteredPropostas.length} de ${propostas?.length || 0} propostas`
                   : ""}
@@ -347,7 +347,7 @@ export default function FilaAnalise() {
                 Propostas para Análise
               </span>
               {stats && (
-                <div className="text-sm text-gray-600">
+                <div className="text-sm text-muted-foreground">
                   Valor Total: {formatCurrency(stats.valorTotal.toString())} | Média:{" "}
                   {formatCurrency(stats.valorMedio.toString())}
                 </div>
@@ -356,53 +356,53 @@ export default function FilaAnalise() {
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className="min-w-full divide-y divide-border">
+                <thead className="bg-muted">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                       ID
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                       Cliente
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                       Valor
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                       Prazo
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                       Status
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                       Prioridade
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                       Data
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                       Ações
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200 bg-white">
+                <tbody className="divide-y divide-border bg-background">
                   {filteredPropostas && filteredPropostas.length > 0 ? (
                     filteredPropostas.map(proposta => {
                       const statusInfo = getStatusBadge(proposta.status);
                       const priorityInfo = getPriorityBadge(proposta.valor);
 
                       return (
-                        <tr key={proposta.id} className="hover:bg-gray-50">
-                          <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
+                        <tr key={proposta.id} className="hover:bg-muted/50">
+                          <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-foreground">
                             #{proposta.id}
                           </td>
-                          <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
+                          <td className="whitespace-nowrap px-6 py-4 text-sm text-foreground">
                             {proposta.clienteNome}
                           </td>
-                          <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
+                          <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-foreground">
                             {formatCurrency(proposta.valor)}
                           </td>
-                          <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
+                          <td className="whitespace-nowrap px-6 py-4 text-sm text-muted-foreground">
                             {proposta.prazo} meses
                           </td>
                           <td className="whitespace-nowrap px-6 py-4">
@@ -411,7 +411,7 @@ export default function FilaAnalise() {
                           <td className="whitespace-nowrap px-6 py-4">
                             <Badge variant={priorityInfo.variant}>{priorityInfo.label}</Badge>
                           </td>
-                          <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                          <td className="whitespace-nowrap px-6 py-4 text-sm text-muted-foreground">
                             {new Date(proposta.createdAt).toLocaleDateString("pt-BR")}
                           </td>
                           <td className="whitespace-nowrap px-6 py-4 text-sm font-medium">
@@ -434,9 +434,9 @@ export default function FilaAnalise() {
                     })
                   ) : (
                     <tr>
-                      <td colSpan={8} className="px-6 py-12 text-center text-gray-500">
+                      <td colSpan={8} className="px-6 py-12 text-center text-muted-foreground">
                         <div className="flex flex-col items-center">
-                          <Search className="mb-2 h-8 w-8 text-gray-400" />
+                          <Search className="mb-2 h-8 w-8 text-muted-foreground" />
                           <p>Nenhuma proposta encontrada</p>
                           <p className="text-sm">
                             Tente ajustar os filtros ou criar uma nova proposta
