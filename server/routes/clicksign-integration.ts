@@ -366,7 +366,6 @@ router.post('/propostas/:id/clicksign/enviar', jwtAuthMiddleware, async (req: Au
       locale: 'pt-BR',
       auto_close: false,
       deadline_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 dias
-      sequence_enabled: false,
       block_after_refusal: true
     };
 

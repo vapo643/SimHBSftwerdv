@@ -20,7 +20,6 @@ interface EnvelopeData {
   locale?: string;
   auto_close?: boolean;
   deadline_at?: string;
-  sequence_enabled?: boolean;
   block_after_refusal?: boolean;
 }
 
@@ -396,7 +395,6 @@ class ClickSignServiceV3 {
         locale: 'pt-BR',
         auto_close: true,
         deadline_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days
-        sequence_enabled: false,
         block_after_refusal: true
       });
 
