@@ -823,6 +823,164 @@ export default function Formalizacao() {
 
                       // Se é uma etapa interativa, mostra o controle (independente do role)
                       if (step.interactive && step.etapa) {
+                        // Para a etapa de assinatura eletrônica, mostrar interface customizada
+                        if (step.etapa === 'assinatura_eletronica' && proposta.ccbGerado) {
+                          return (
+                            <div key={step.id} className="mb-4">
+                              <div className="space-y-4">
+                                {/* Controle padrão da etapa */}
+                                <EtapaFormalizacaoControl
+                                  propostaId={proposta.id}
+                                  etapa={step.etapa}
+                                  titulo={step.title}
+                                  descricao={step.description}
+                                  concluida={isCompleted}
+                                  habilitada={step.interactive}
+                                  onUpdate={() => refetch()}
+                                />
+                                
+                                {/* Botão de enviar para ClickSign se ainda não foi enviado */}
+                                {!proposta.clicksignSignUrl && !clickSignData && (
+                                  <div className="mt-3 p-4 bg-blue-900/20 border border-blue-700 rounded-lg">
+                                    <div className="flex items-center justify-between mb-3">
+                                      <h5 className="font-medium text-blue-300">Enviar para Assinatura Eletrônica</h5>
+                                      <Signature className="h-5 w-5 text-blue-400" />
+                                    </div>
+                                    <p className="text-sm text-blue-200 mb-4">
+                                      Clique no botão abaixo para enviar o contrato CCB para o ClickSign e gerar o link de assinatura para o cliente.
+                                    </p>
+                                    <Button
+                                      onClick={async () => {
+                                        setLoadingClickSign(true);
+                                        try {
+                                          const response = await apiRequest(`/api/propostas/${proposta.id}/clicksign/enviar`, {
+                                            method: 'POST'
+                                          });
+                                          setClickSignData(response);
+                                          toast({
+                                            title: "Sucesso",
+                                            description: "Contrato enviado para ClickSign com sucesso!",
+                                          });
+                                          refetch(); // Recarregar dados da proposta
+                                        } catch (error: any) {
+                                          toast({
+                                            title: "Erro",
+                                            description: error.response?.data?.message || "Erro ao enviar para ClickSign",
+                                            variant: "destructive",
+                                          });
+                                        } finally {
+                                          setLoadingClickSign(false);
+                                        }
+                                      }}
+                                      disabled={loadingClickSign}
+                                      className="w-full bg-blue-600 hover:bg-blue-700"
+                                    >
+                                      {loadingClickSign ? (
+                                        <div className="flex items-center">
+                                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                          Enviando para ClickSign...
+                                        </div>
+                                      ) : (
+                                        <div className="flex items-center">
+                                          <Signature className="h-4 w-4 mr-2" />
+                                          Enviar Contrato para Assinatura (ClickSign)
+                                        </div>
+                                      )}
+                                    </Button>
+                                  </div>
+                                )}
+                                
+                                {/* Exibir link de assinatura se já existe */}
+                                {(clickSignData || proposta.clicksignSignUrl) && (
+                                  <div className="mt-3 p-4 bg-green-900/20 border border-green-700 rounded-lg">
+                                    <div className="flex items-center mb-3">
+                                      <CheckCircle className="h-5 w-5 text-green-400 mr-2" />
+                                      <h5 className="font-medium text-green-300">Link de Assinatura Disponível</h5>
+                                    </div>
+                                    <p className="text-sm text-green-200 mb-3">
+                                      Compartilhe o link abaixo com o cliente para assinatura digital:
+                                    </p>
+                                    <div className="flex items-center gap-2 p-3 bg-gray-800 rounded border">
+                                      <input
+                                        type="text"
+                                        value={clickSignData?.signUrl || proposta.clicksignSignUrl || ''}
+                                        readOnly
+                                        className="flex-1 bg-transparent text-white text-sm"
+                                      />
+                                      <Button
+                                        size="sm"
+                                        onClick={() => {
+                                          const linkUrl = clickSignData?.signUrl || proposta.clicksignSignUrl || '';
+                                          navigator.clipboard.writeText(linkUrl);
+                                          toast({
+                                            title: "Copiado!",
+                                            description: "Link de assinatura copiado para a área de transferência",
+                                          });
+                                        }}
+                                      >
+                                        Copiar
+                                      </Button>
+                                    </div>
+                                    {clickSignData?.envelopeId && (
+                                      <p className="text-xs text-gray-400 mt-2">
+                                        Envelope ID: {clickSignData.envelopeId}
+                                      </p>
+                                    )}
+                                    
+                                    {/* Botão para regenerar link */}
+                                    <div className="mt-3 pt-3 border-t border-gray-700">
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={async () => {
+                                          setLoadingClickSign(true);
+                                          try {
+                                            const response = await apiRequest(`/api/propostas/${proposta.id}/clicksign/regenerar`, {
+                                              method: 'POST'
+                                            });
+                                            setClickSignData(response);
+                                            toast({
+                                              title: "Sucesso",
+                                              description: "Novo link de assinatura gerado com sucesso!",
+                                            });
+                                            refetch(); // Recarregar dados da proposta
+                                          } catch (error: any) {
+                                            toast({
+                                              title: "Erro",
+                                              description: error.response?.data?.error || "Erro ao regenerar link",
+                                              variant: "destructive",
+                                            });
+                                          } finally {
+                                            setLoadingClickSign(false);
+                                          }
+                                        }}
+                                        disabled={loadingClickSign}
+                                        className="border-yellow-600 text-yellow-400 hover:bg-yellow-600/10"
+                                      >
+                                        {loadingClickSign ? (
+                                          <div className="flex items-center">
+                                            <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-yellow-400 mr-2"></div>
+                                            Regenerando...
+                                          </div>
+                                        ) : (
+                                          <div className="flex items-center">
+                                            <Signature className="h-3 w-3 mr-2" />
+                                            Gerar Novo Link
+                                          </div>
+                                        )}
+                                      </Button>
+                                      <p className="text-xs text-gray-500 mt-1">
+                                        Use caso o link anterior não esteja funcionando
+                                      </p>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        }
+                        
+                        // Para outras etapas, usar o controle padrão
                         return (
                           <div key={step.id} className="mb-4">
                             <EtapaFormalizacaoControl
