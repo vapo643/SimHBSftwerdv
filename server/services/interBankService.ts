@@ -417,7 +417,19 @@ class InterBankService {
       if (!response.ok) {
         const errorText = await response.text();
         console.error(`[INTER] Error ${response.status}: ${errorText}`);
-        throw new Error(`Inter API error: ${response.status} - ${errorText}`);
+        
+        // Try to parse error details if it's JSON
+        let errorDetails = errorText;
+        try {
+          const jsonError = JSON.parse(errorText);
+          console.log('[INTER] 📋 Error details:', JSON.stringify(jsonError, null, 2));
+          errorDetails = JSON.stringify(jsonError);
+        } catch (e) {
+          // Not JSON, use raw text
+          console.log('[INTER] 📋 Raw error response:', errorText);
+        }
+        
+        throw new Error(`Inter API error: ${response.status} - ${errorDetails}`);
       }
 
       // Handle empty responses (204 No Content)
