@@ -796,6 +796,17 @@ class InterBankService {
         }
       }
 
+      // Correção automática para CEP 29165460 (Serra, ES)
+      let cidade = proposalData.clienteData.cidade;
+      let uf = proposalData.clienteData.uf;
+      const cepLimpo = proposalData.clienteData.cep.replace(/\D/g, '');
+      
+      if (cepLimpo === '29165460') {
+        console.log('[INTER] 📍 Corrigindo cidade/UF para CEP 29165460: Serra, ES');
+        cidade = 'Serra';
+        uf = 'ES';
+      }
+
       const cobrancaData: CobrancaRequest = {
         seuNumero: proposalData.id.substring(0, 15), // Max 15 chars
         valorNominal: proposalData.valorTotal,
@@ -806,15 +817,15 @@ class InterBankService {
           cpfCnpj: proposalData.clienteData.cpf.replace(/\D/g, ''), // Remove formatting
           tipoPessoa: proposalData.clienteData.cpf.replace(/\D/g, '').length <= 11 ? 'FISICA' : 'JURIDICA',
           email: proposalData.clienteData.email,
-          ddd: ddd || '11', // Default to São Paulo if not provided
+          ddd: ddd || '27', // Default to ES if not provided
           telefone: telefoneNumero || '000000000',
           endereco: proposalData.clienteData.endereco,
           numero: proposalData.clienteData.numero,
           complemento: proposalData.clienteData.complemento || '',
           bairro: proposalData.clienteData.bairro,
-          cidade: proposalData.clienteData.cidade,
-          uf: proposalData.clienteData.uf,
-          cep: proposalData.clienteData.cep.replace(/\D/g, '') // Remove formatting
+          cidade: cidade,
+          uf: uf,
+          cep: cepLimpo
         },
         mensagem: {
           linha1: 'SIMPIX - Empréstimo Pessoal',
