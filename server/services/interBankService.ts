@@ -848,14 +848,14 @@ class InterBankService {
           uf: uf,
           cep: cepLimpo
         },
+        formasRecebimento: ['BOLETO', 'PIX'], // Campo obrigatório para API v3
         mensagem: {
           linha1: 'SIMPIX - Empréstimo Pessoal',
           linha2: `Proposta: ${proposalData.id}`,
           linha3: 'Pague via PIX ou boleto bancário',
           linha4: 'Dúvidas: contato@simpix.com.br',
           linha5: 'www.simpix.com.br'
-        },
-        formasRecebimento: ['BOLETO', 'PIX']
+        }
       };
 
       const result = await this.emitirCobranca(cobrancaData);
