@@ -11,6 +11,7 @@ import { getBrasiliaTimestamp } from '../lib/timezone.js';
 import { z } from 'zod';
 import { db } from '../lib/supabase.js';
 import { interCollections } from '@shared/schema';
+import { eq } from 'drizzle-orm';
 
 const router = express.Router();
 
@@ -235,6 +236,31 @@ router.post('/collections', jwtAuthMiddleware, async (req: AuthenticatedRequest,
     const validatedData = createCollectionSchema.parse(req.body);
     
     console.log(`[INTER] Creating collection for proposal: ${validatedData.proposalId}`);
+    
+    // Verificar se já existe boleto ativo para esta proposta
+    const existingCollections = await db.select()
+      .from(interCollections)
+      .where(eq(interCollections.propostaId, validatedData.proposalId));
+    
+    // Filtrar apenas boletos com status "a receber" (não pagos)
+    const activeCollections = existingCollections.filter(col => 
+      col.situacao === 'NORMAL' || col.situacao === 'EM_ABERTO' || !col.situacao
+    );
+    
+    if (activeCollections.length > 0) {
+      console.log(`[INTER] Found ${activeCollections.length} active collections for proposal ${validatedData.proposalId}`);
+      return res.status(409).json({
+        success: false,
+        error: 'Boleto ativo encontrado',
+        message: 'Já existem boletos ativos (não pagos) para esta proposta. Aguarde o pagamento ou cancele os boletos anteriores.',
+        existingCollections: activeCollections.map(col => ({
+          codigo: col.codigoSolicitacao,
+          valor: col.valorNominal,
+          vencimento: col.dataVencimento,
+          situacao: col.situacao || 'EM_ABERTO'
+        }))
+      });
+    }
 
     // Create collection via Inter API
     const collectionResponse = await interBankService.criarCobrancaParaProposta({
@@ -286,10 +312,21 @@ router.post('/collections', jwtAuthMiddleware, async (req: AuthenticatedRequest,
       });
     }
 
+    // Tratar erro específico do Inter sobre boleto duplicado
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    if (errorMessage.includes('existe uma cobrança emitida há poucos minutos')) {
+      return res.status(409).json({
+        success: false,
+        error: 'Boleto duplicado',
+        message: 'Já existe um boleto ativo para esta proposta. Aguarde o pagamento ou cancelamento do boleto anterior antes de gerar um novo.',
+        details: errorMessage
+      });
+    }
+
     res.status(500).json({
       success: false,
       error: 'Failed to create collection',
-      details: error instanceof Error ? error.message : 'Unknown error'
+      details: errorMessage
     });
   }
 });

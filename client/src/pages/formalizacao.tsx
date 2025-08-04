@@ -1093,11 +1093,25 @@ export default function Formalizacao() {
                                           refetch(); // Recarregar dados da proposta
                                         } catch (error: any) {
                                           console.error('[INTER] Erro ao gerar boleto:', error);
-                                          toast({
-                                            title: "Erro",
-                                            description: error.response?.data?.details || error.response?.data?.error || "Erro ao gerar boletos",
-                                            variant: "destructive",
-                                          });
+                                          
+                                          // Verificar se é erro de boleto duplicado
+                                          if (error.status === 409 || error.response?.status === 409) {
+                                            const existingCollections = error.response?.data?.existingCollections || [];
+                                            toast({
+                                              title: "Boletos já existentes",
+                                              description: error.response?.data?.message || "Já existem boletos ativos para esta proposta. Verifique na lista abaixo.",
+                                              variant: "default",
+                                            });
+                                            
+                                            // Recarregar para mostrar os boletos existentes
+                                            queryClient.invalidateQueries({ queryKey: ["/api/inter/collections", proposta.id] });
+                                          } else {
+                                            toast({
+                                              title: "Erro",
+                                              description: error.response?.data?.message || error.response?.data?.details || error.response?.data?.error || "Erro ao gerar boletos",
+                                              variant: "destructive",
+                                            });
+                                          }
                                         } finally {
                                           setLoadingInter(false);
                                         }
