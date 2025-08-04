@@ -1,8 +1,8 @@
 # 🎯 CLICKSIGN MASTER GUIDE - Guia Definitivo de Implementação
 
-## 📋 Visão Geral da API v3
+## 📋 Visão Geral da API v2
 
-A ClickSign migrou de "Listas" para "Envelopes" na API v3, oferecendo mais controle e flexibilidade.
+A ClickSign migrou de "Listas" para "Envelopes" na API v2, oferecendo mais controle e flexibilidade.
 
 ### 🔑 Conceitos Fundamentais
 
@@ -16,7 +16,7 @@ A ClickSign migrou de "Listas" para "Envelopes" na API v3, oferecendo mais contr
 
 ### 1️⃣ Criar Envelope
 ```javascript
-POST /api/v3/envelopes
+POST /api/v2/envelopes
 {
   "envelope": {
     "name": "CCB - Proposta 12345",
@@ -31,7 +31,7 @@ POST /api/v3/envelopes
 
 ### 2️⃣ Adicionar Documento ao Envelope
 ```javascript
-POST /api/v3/envelopes/{envelope_id}/documents
+POST /api/v2/envelopes/{envelope_id}/documents
 {
   "document": {
     "type": "upload",
@@ -43,7 +43,7 @@ POST /api/v3/envelopes/{envelope_id}/documents
 
 ### 3️⃣ Criar Signatário
 ```javascript
-POST /api/v3/signers
+POST /api/v2/signers
 {
   "signer": {
     "name": "João Silva",
@@ -57,7 +57,7 @@ POST /api/v3/signers
 
 ### 4️⃣ Adicionar Signatário ao Envelope
 ```javascript
-POST /api/v3/envelopes/{envelope_id}/signers
+POST /api/v2/envelopes/{envelope_id}/signers
 {
   "signer_id": "{signer_id}",
   "sign_as": "party",
@@ -69,7 +69,7 @@ POST /api/v3/envelopes/{envelope_id}/signers
 ### 5️⃣ Adicionar Requisitos (Opcional)
 ```javascript
 // Autenticação por Selfie
-POST /api/v3/envelopes/{envelope_id}/requirements
+POST /api/v2/envelopes/{envelope_id}/requirements
 {
   "requirement": {
     "type": "selfie",
@@ -78,7 +78,7 @@ POST /api/v3/envelopes/{envelope_id}/requirements
 }
 
 // Autenticação por PIX
-POST /api/v3/envelopes/{envelope_id}/requirements
+POST /api/v2/envelopes/{envelope_id}/requirements
 {
   "requirement": {
     "type": "pix",
@@ -89,14 +89,14 @@ POST /api/v3/envelopes/{envelope_id}/requirements
 
 ### 6️⃣ Finalizar Envelope
 ```javascript
-POST /api/v3/envelopes/{envelope_id}/finish
+POST /api/v2/envelopes/{envelope_id}/finish
 ```
 
 ## 🔔 Webhooks - Eventos Críticos
 
 ### Configuração de Webhook
 ```javascript
-POST /api/v3/webhooks
+POST /api/v2/webhooks
 {
   "webhook": {
     "url": "https://seu-dominio.com/api/clicksign/webhook",
@@ -171,7 +171,7 @@ function validateWebhook(payload, signature, secret) {
 
 ### Configurar WhatsApp
 ```javascript
-POST /api/v3/envelopes/{envelope_id}/signers/{signer_id}/whatsapp
+POST /api/v2/envelopes/{envelope_id}/signers/{signer_id}/whatsapp
 {
   "phone": "5511999999999",
   "message": "Olá! Clique no link para assinar seu CCB"
@@ -215,7 +215,7 @@ window.addEventListener('message', (event) => {
 
 ### Criar Sessão Presencial
 ```javascript
-POST /api/v3/envelopes/{envelope_id}/in_person_sessions
+POST /api/v2/envelopes/{envelope_id}/in_person_sessions
 {
   "session": {
     "location": "Loja Eleeve - São Paulo",
@@ -227,7 +227,7 @@ POST /api/v3/envelopes/{envelope_id}/in_person_sessions
 
 ### Validar Token
 ```javascript
-POST /api/v3/in_person_sessions/{session_id}/validate
+POST /api/v2/in_person_sessions/{session_id}/validate
 {
   "token": "123456"
 }

@@ -90,6 +90,9 @@ Formalization Interface: ✅ COMPLETELY UNIFIED - Attendant and Administrator in
   - Full OWASP compliance: ASVS Level 1 verified, Top 10 mitigations implemented
   - ✅ NEW: Regenerate signature link functionality - Attendants can generate new signature links if needed
   - ✅ NEW: Configuration guide created (CLICKSIGN_CONFIGURACAO_OBRIGATORIA.md) - Covers webhook setup, account settings, and security requirements
+  - ✅ ARCHITECTURAL FIX (04/08/2025): All API calls now use simple JSON format (`{signer: {...}}`) instead of JSON:API format - resolved HTML response errors
+  - ✅ HEADERS FIX: All endpoints now use `Content-Type: application/json` - aligned with ClickSign documentation
+  - ✅ CRITICAL DISCOVERY (04/08/2025): ClickSign API v3 doesn't exist! Changed from `/api/v3` to `/api/v2` - this was causing 404 HTML responses
 - **Banco Inter API**: For automated boleto/PIX payment generation and tracking - ✅ PRODUCTION READY (100% OPERATIONAL, production credentials working)
   - Complete OAuth 2.0 authentication with mTLS following official documentation
   - Automatic boleto generation after ClickSign signature (fully automated)  
