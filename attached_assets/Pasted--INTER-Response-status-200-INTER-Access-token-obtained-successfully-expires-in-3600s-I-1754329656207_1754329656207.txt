@@ -1,0 +1,85 @@
+[INTER] 📡 Response status: 200
+[INTER] ✅ Access token obtained successfully (expires in 3600s)
+[INTER] GET /cobranca/v3/cobrancas/902183dd-b5d1-4e20-8a72-79d3d3559d4d
+[2025-08-04T14:46:56.000-03:00] ✅ URL gerada para documento: WalkingSkeletonMvp - Replit - Google Chrome 16_07_2025 09_21_37.png
+[2025-08-04T14:46:56.000-03:00] 🔍 STEP 5 - Verificando tabela_comercial_id: 16
+[2025-08-04T14:46:56.000-03:00] 🔍 STEP 5.1 - Buscando tabela comercial ID: 16
+[INTER] Error 400: 
+[INTER] Request failed for /cobranca/v3/cobrancas/902183dd-b5d1-4e20-8a72-79d3d3559d4d: Error: Inter API error: 400 - 
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:490:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter.ts:286:31)
+[INTER] ❌ Failed to retrieve collection: Error: Inter API error: 400 - 
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:490:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter.ts:286:31)
+[INTER] Failed to get collection details: Error: Inter API error: 400 - 
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:490:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter.ts:286:31)
+[2025-08-04T14:46:57.000-03:00] 🔍 STEP 5.2 - Resultado da consulta tabela comercial: {
+  data: { taxa_juros: 19.7, nome_tabela: 'Flex', parceiro_id: null },
+  error: undefined,
+  hasData: true
+}
+[2025-08-04T14:46:57.000-03:00] ✅ Taxa de juros encontrada: 19.7 % da tabela "Flex"
+[2025-08-04T14:46:57.000-03:00] 🔍 STEP 6 - Processando dados JSONB...
+[2025-08-04T14:46:57.000-03:00] ✅ SUCESSO - Dados de formalização retornados para proposta 902183dd-b5d1-4e20-8a72-79d3d3559d4d: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  dataAprovacao: '2025-08-01T13:21:55',
+  temClienteData: true,
+  temCondicoesData: true,
+  totalDocumentos: 1,
+  clienteNome: 'Gabriel de Jesus Santana Serri',
+  valorEmprestimo: 1000,
+  taxaJuros: 19.7
+}
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-04T17:46:57.682Z'
+}
+[DEBUG] Gerando URL assinada para: proposta-902183dd-b5d1-4e20-8a72-79d3d3559d4d/1754064515626-WalkingSkeletonMvp%20-%20Replit%20-%20Google%20Chrome%2016_07_2025%2009_21_37.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV80OTVlMjJjYS1lMDMxLTQ0Y2YtOTM3Zi03N2M3ZWNiMTk2YzkiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJkb2N1bWVudHMvcHJvcG9zdGEtOTAyMTgzZGQtYjVkMS00ZTIwLThhNzItNzlkM2QzNTU5ZDRkLzE3NTQwNjQ1MTU2MjYtV2Fsa2luZ1NrZWxldG9uTXZwIC0gUmVwbGl0IC0gR29vZ2xlIENocm9tZSAxNl8wN18yMDI1IDA5XzIxXzM3LnBuZyIsImlhdCI6MTc1NDA2NDUxOSwiZXhwIjoxNzU0MDY4MTE5fQ.vy9PR-FS4OfuXoTuNLEstla4LgD57ZdTt1RhNZbvSCM
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-04T17:47:02.644Z'
+}
+[INTER] Creating collection for proposal: 902183dd-b5d1-4e20-8a72-79d3d3559d4d
+[INTER] 🚀 Creating collection for proposal: 902183dd-b5d1-4e20-8a72-79d3d3559d4d
+[INTER] 📤 Creating collection: 902183dd-b5d1-4
+[INTER] POST /cobranca/v3/cobrancas
+[INTER] Error 400: 
+[INTER] Request failed for /cobranca/v3/cobrancas: Error: Inter API error: 400 - 
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.emitirCobranca (/home/runner/workspace/server/services/interBankService.ts:472:24)
+    at async InterBankService.criarCobrancaParaProposta (/home/runner/workspace/server/services/interBankService.ts:782:22)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter.ts:238:32)
+[INTER] ❌ Failed to create collection: Error: Inter API error: 400 - 
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.emitirCobranca (/home/runner/workspace/server/services/interBankService.ts:472:24)
+    at async InterBankService.criarCobrancaParaProposta (/home/runner/workspace/server/services/interBankService.ts:782:22)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter.ts:238:32)
+[INTER] ❌ Failed to create collection for proposal: Error: Inter API error: 400 - 
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.emitirCobranca (/home/runner/workspace/server/services/interBankService.ts:472:24)
+    at async InterBankService.criarCobrancaParaProposta (/home/runner/workspace/server/services/interBankService.ts:782:22)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter.ts:238:32)
+[INTER] Failed to create collection: Error: Inter API error: 400 - 
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.emitirCobranca (/home/runner/workspace/server/services/interBankService.ts:472:24)
+    at async InterBankService.criarCobrancaParaProposta (/home/runner/workspace/server/services/interBankService.ts:782:22)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter.ts:238:32)
