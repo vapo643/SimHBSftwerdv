@@ -262,72 +262,105 @@ class ClickSignServiceV3 {
   }
 
   /**
-   * Create a signer (Note: In v3, signers are created as part of envelope workflow)
+   * STEP 1: Create signer globally (correct v3 flow)
    */
-  async createSigner(signerData: SignerData) {
-    // In ClickSign v3, we need to create a temporary signer object
-    // The actual signer is created when added to the envelope
-    const tempSigner = {
-      id: `temp_${Date.now()}`,
+  async createSignerGlobally(signerData: SignerData) {
+    console.log(`[CLICKSIGN V3] 🚀 STEP 1: Creating signer globally`);
+    console.log(`[CLICKSIGN V3] Signer data:`, {
       name: signerData.name,
       email: signerData.email,
-      phone: signerData.phone,
-      documentation: signerData.documentation,
-      birthday: signerData.birthday,
-      // Generate a temporary request_signature_key
-      request_signature_key: `temp_key_${Date.now()}_${Math.random().toString(36).substring(7)}`
+      documentation: signerData.documentation
+    });
+    
+    const requestBody = {
+      data: {
+        type: 'signers',
+        attributes: {
+          name: signerData.name,
+          email: signerData.email,
+          documentation: signerData.documentation,
+          ...(signerData.birthday && { birthday: signerData.birthday })
+        }
+      }
     };
 
-    console.log(`[CLICKSIGN V3] ✅ Temporary signer created:`, tempSigner.id);
-    console.log(`[CLICKSIGN V3] Note: Actual signer will be created when added to envelope`);
-    
-    return tempSigner;
-  }
-
-  /**
-   * Add signer to envelope (Creates the actual signer in ClickSign)
-   */
-  async addSignerToEnvelope(envelopeId: string, signerData: EnvelopeSignerData, fullSignerData?: SignerData) {
-    console.log(`[CLICKSIGN V3] 🔨 Adding signer to envelope ${envelopeId}`);
-    
-    let requestBody: any;
-    
-    if (fullSignerData) {
-      // When creating a new signer with full data, only send basic fields
-      requestBody = {
-        data: {
-          type: 'signers',
-          attributes: {
-            name: fullSignerData.name,
-            email: fullSignerData.email,
-            documentation: fullSignerData.documentation,
-            ...(fullSignerData.birthday && { birthday: fullSignerData.birthday })
-          }
-        }
-      };
-    } else {
-      // When adding an existing signer by ID
-      requestBody = {
-        data: {
-          type: 'signers',
-          attributes: {
-            signer_id: signerData.signer_id
-          }
-        }
-      };
-    }
-
-    console.log(`[CLICKSIGN V3] 🔨 Signer request body:`, JSON.stringify(requestBody, null, 2));
+    console.log(`[CLICKSIGN V3] 📡 POST /signers (global endpoint)`);
+    console.log(`[CLICKSIGN V3] Request body:`, JSON.stringify(requestBody, null, 2));
 
     const response = await this.makeRequest<any>(
       'POST',
-      `/envelopes/${envelopeId}/signers`,
+      '/signers',
       requestBody
     );
 
-    console.log(`[CLICKSIGN V3] ✅ Signer added to envelope`);
-    console.log(`[CLICKSIGN V3] Signer response:`, JSON.stringify(response, null, 2));
+    const signer = response.data?.data || response.data;
+    console.log(`[CLICKSIGN V3] ✅ STEP 1 COMPLETE: Signer created with ID: ${signer.id}`);
+    console.log(`[CLICKSIGN V3] Signer response:`, JSON.stringify(signer, null, 2));
+    
+    return signer;
+  }
+
+  /**
+   * Legacy method for backwards compatibility
+   */
+  async createSigner(signerData: SignerData) {
+    return this.createSignerGlobally(signerData);
+  }
+
+  /**
+   * STEP 2: Create requirement to link signer to envelope (correct v3 flow)
+   */
+  async createRequirementForSigner(envelopeId: string, signerId: string, signerRole: 'party' | 'witness' | 'approver' = 'party') {
+    console.log(`[CLICKSIGN V3] 🚀 STEP 2: Creating requirement to link signer to envelope`);
+    console.log(`[CLICKSIGN V3] Envelope ID: ${envelopeId}, Signer ID: ${signerId}, Role: ${signerRole}`);
+    
+    const requestBody = {
+      data: {
+        type: 'requirements',
+        attributes: {
+          action: 'sign',
+          group: 0,
+          order: 0,
+          refusable: false
+        },
+        relationships: {
+          signer: {
+            data: {
+              type: 'signers',
+              id: signerId
+            }
+          },
+          document: {
+            data: null // Will sign all documents
+          }
+        }
+      }
+    };
+
+    console.log(`[CLICKSIGN V3] 📡 POST /envelopes/${envelopeId}/requirements`);
+    console.log(`[CLICKSIGN V3] Request body:`, JSON.stringify(requestBody, null, 2));
+
+    const response = await this.makeRequest<any>(
+      'POST',
+      `/envelopes/${envelopeId}/requirements`,
+      requestBody
+    );
+
+    console.log(`[CLICKSIGN V3] ✅ STEP 2 COMPLETE: Requirement created`);
+    console.log(`[CLICKSIGN V3] Requirement response:`, JSON.stringify(response, null, 2));
     return response.data?.data || response.data;
+  }
+
+  /**
+   * Legacy method - DO NOT USE (kept for backwards compatibility during migration)
+   */
+  async addSignerToEnvelope(envelopeId: string, signerData: EnvelopeSignerData, fullSignerData?: SignerData) {
+    console.log(`[CLICKSIGN V3] ⚠️ WARNING: Using deprecated method addSignerToEnvelope`);
+    console.log(`[CLICKSIGN V3] This method uses the unstable /envelopes/{id}/signers endpoint`);
+    console.log(`[CLICKSIGN V3] Please use createSignerGlobally + createRequirementForSigner instead`);
+    
+    // For now, throw an error to force migration
+    throw new Error('addSignerToEnvelope is deprecated. Use the 2-step flow: createSignerGlobally + createRequirementForSigner');
   }
 
   /**
@@ -481,63 +514,44 @@ class ClickSignServiceV3 {
 
       console.log(`[CLICKSIGN V3] ✅ Document added: ${document.id}`);
 
-      // 4. Create signer with validated CPF
-      console.log(`[CLICKSIGN V3] Creating signer with data:`, {
-        name: clientData.name,
-        email: clientData.email,
-        phone: clientData.phone,
-        cpf: clientData.cpf
-      });
-      
-      // Validate and sanitize CPF before proceeding
+      // 4. Validate and sanitize CPF before proceeding
+      console.log(`[CLICKSIGN V3] Validating CPF for client: ${clientData.name}`);
       const validatedCpf = this.sanitizeAndValidateCPF(clientData.cpf);
       
-      const signer = await this.createSigner({
+      // 5. STEP 1: Create signer globally (correct v3 flow)
+      const signer = await this.createSignerGlobally({
         name: clientData.name,
         email: clientData.email,
         phone: clientData.phone,
         documentation: validatedCpf,
         birthday: clientData.birthday
       });
+
+      console.log(`[CLICKSIGN V3] Global signer created with ID:`, signer.id);
       
-      console.log(`[CLICKSIGN V3] Signer created:`, {
-        id: signer.id,
-        request_signature_key: signer.request_signature_key
-      });
-
-      // 5. Add signer to envelope (this creates the actual signer in ClickSign v3)
-      const envelopeSigner = await this.addSignerToEnvelope(envelope.id, {
-        signer_id: signer.id,
-        sign_as: 'party',
-        refusable: false,
-        message: 'Por favor, assine o Contrato de Crédito Bancário (CCB) do seu empréstimo.'
-      }, {
-        name: clientData.name,
-        email: clientData.email,
-        phone: clientData.phone,
-        documentation: validatedCpf,
-        birthday: clientData.birthday
-      });
+      // 6. STEP 2: Create requirement to link signer to envelope
+      const requirement = await this.createRequirementForSigner(
+        envelope.id,
+        signer.id,
+        'party' // Role: party (signatário)
+      );
       
-      // Update signer with the real data from ClickSign response
-      if (envelopeSigner && envelopeSigner.request_signature_key) {
-        signer.request_signature_key = envelopeSigner.request_signature_key;
-        signer.id = envelopeSigner.id || signer.id;
-      }
+      console.log(`[CLICKSIGN V3] Requirement created, signer linked to envelope`);
 
-      // 6. Add selfie requirement for security
-      await this.addRequirement(envelope.id, {
-        type: 'selfie',
-        signer_id: signer.id
-      });
+      // 7. Add selfie requirement for security (optional)
+      // await this.addRequirement(envelope.id, {
+      //   type: 'selfie',
+      //   signer_id: signer.id
+      // });
 
-      // 7. Finish envelope
+      // 8. Finish envelope
       const finishedEnvelope = await this.finishEnvelope(envelope.id);
 
-      // 8. Get sign URL
-      const signUrl = signer.request_signature_key 
-        ? `${this.config.apiUrl.replace('/api/v3', '')}/sign/${signer.request_signature_key}`
-        : undefined;
+      // 9. Get sign URL - we need to fetch the requirement to get the signing key
+      const signUrl = requirement.attributes?.sign_link || 
+        (signer.attributes?.request_signature_key 
+          ? `${this.config.apiUrl.replace('/api/v3', '')}/sign/${signer.attributes.request_signature_key}`
+          : undefined);
 
       console.log(`[CLICKSIGN V3] ✅ CCB sent for signature successfully`);
       console.log(`[CLICKSIGN V3] Sign URL generated:`, signUrl);
