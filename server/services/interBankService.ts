@@ -796,6 +796,14 @@ class InterBankService {
         }
       }
 
+      // Função para remover acentos e caracteres especiais
+      const removeAccents = (str: string): string => {
+        return str.normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .replace(/[^a-zA-Z0-9\s]/g, ' ')
+          .trim();
+      };
+
       // Correção automática para CEP 29165460 (Serra, ES)
       let cidade = proposalData.clienteData.cidade;
       let uf = proposalData.clienteData.uf;
@@ -807,23 +815,36 @@ class InterBankService {
         uf = 'ES';
       }
 
+      // Remove caracteres especiais de todos os campos de texto
+      const nomeClean = removeAccents(proposalData.clienteData.nome);
+      const enderecoClean = removeAccents(proposalData.clienteData.endereco);
+      const bairroClean = removeAccents(proposalData.clienteData.bairro);
+      const cidadeClean = removeAccents(cidade);
+
+      console.log('[INTER] 🧹 Dados limpos:', {
+        nome: nomeClean,
+        endereco: enderecoClean,
+        bairro: bairroClean,
+        cidade: cidadeClean
+      });
+
       const cobrancaData: CobrancaRequest = {
         seuNumero: proposalData.id.substring(0, 15), // Max 15 chars
         valorNominal: proposalData.valorTotal,
         dataVencimento: proposalData.dataVencimento,
         numDiasAgenda: 30, // 30 days after due date for auto cancellation
         pagador: {
-          nome: proposalData.clienteData.nome,
+          nome: nomeClean,
           cpfCnpj: proposalData.clienteData.cpf.replace(/\D/g, ''), // Remove formatting
           tipoPessoa: proposalData.clienteData.cpf.replace(/\D/g, '').length <= 11 ? 'FISICA' : 'JURIDICA',
           email: proposalData.clienteData.email,
           ddd: ddd || '27', // Default to ES if not provided
           telefone: telefoneNumero || '000000000',
-          endereco: proposalData.clienteData.endereco,
+          endereco: enderecoClean,
           numero: proposalData.clienteData.numero,
           complemento: proposalData.clienteData.complemento || '',
-          bairro: proposalData.clienteData.bairro,
-          cidade: cidade,
+          bairro: bairroClean,
+          cidade: cidadeClean,
           uf: uf,
           cep: cepLimpo
         },
