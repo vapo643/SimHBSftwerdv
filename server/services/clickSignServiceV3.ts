@@ -270,21 +270,32 @@ class ClickSignServiceV3 {
   async addSignerToEnvelope(envelopeId: string, signerData: EnvelopeSignerData, fullSignerData?: SignerData) {
     console.log(`[CLICKSIGN V3] 🔨 Adding signer to envelope ${envelopeId}`);
     
-    // Use correct JSON API format
-    const attributes = fullSignerData ? {
-      ...fullSignerData,
-      sign_as: signerData.sign_as,
-      refusable: signerData.refusable,
-      message: signerData.message,
-      group: signerData.group
-    } : signerData;
-
-    const requestBody = {
-      data: {
-        type: 'signers',
-        attributes: attributes
-      }
-    };
+    let requestBody: any;
+    
+    if (fullSignerData) {
+      // When creating a new signer with full data, only send basic fields
+      requestBody = {
+        data: {
+          type: 'signers',
+          attributes: {
+            name: fullSignerData.name,
+            email: fullSignerData.email,
+            documentation: fullSignerData.documentation,
+            ...(fullSignerData.birthday && { birthday: fullSignerData.birthday })
+          }
+        }
+      };
+    } else {
+      // When adding an existing signer by ID
+      requestBody = {
+        data: {
+          type: 'signers',
+          attributes: {
+            signer_id: signerData.signer_id
+          }
+        }
+      };
+    }
 
     console.log(`[CLICKSIGN V3] 🔨 Signer request body:`, JSON.stringify(requestBody, null, 2));
 
