@@ -882,6 +882,19 @@ class InterBankService {
         }
       };
 
+      console.log('[INTER] 🔥🔥🔥 FINAL COBRANCA DATA BEFORE SENDING 🔥🔥🔥');
+      console.log('[INTER] Full object:', JSON.stringify(cobrancaData, null, 2));
+      console.log('[INTER] Field check:');
+      console.log('[INTER]   - seuNumero:', cobrancaData.seuNumero);
+      console.log('[INTER]   - valorNominal:', cobrancaData.valorNominal, 'type:', typeof cobrancaData.valorNominal);
+      console.log('[INTER]   - dataEmissao:', cobrancaData.dataEmissao || 'NOT PRESENT!');
+      console.log('[INTER]   - dataVencimento:', cobrancaData.dataVencimento);
+      console.log('[INTER]   - multa present?', !!cobrancaData.multa);
+      console.log('[INTER]   - mora present?', !!cobrancaData.mora);
+      console.log('[INTER]   - desconto present?', !!cobrancaData.desconto);
+      console.log('[INTER]   - mensagem present?', !!cobrancaData.mensagem);
+      console.log('[INTER] 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥');
+
       const result = await this.emitirCobranca(cobrancaData);
       
       console.log(`[INTER] ✅ Collection created for proposal successfully`);
