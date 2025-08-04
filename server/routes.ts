@@ -12,6 +12,7 @@ import originationRoutes from "./routes/origination.routes";
 import { clickSignRouter } from "./routes/clicksign.js";
 import clicksignIntegrationRoutes from "./routes/clicksign-integration.js";
 import { interRoutes } from "./routes/inter.js";
+import interWebhookRouter from "./routes/webhooks/inter";
 import { setupSecurityRoutes } from "./routes/security.js";
 import emailChangeRoutes from "./routes/email-change";
 import { getBrasiliaDate, formatBrazilianDateTime, generateApprovalDate, getBrasiliaTimestamp } from "./lib/timezone";
@@ -3919,6 +3920,7 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
 
   // Register ClickSign routes
   app.use('/api/clicksign', clickSignRouter);
+  app.use('/webhooks/inter', interWebhookRouter);
 
   // Register Inter Bank routes
   app.use('/api/inter', interRoutes);
