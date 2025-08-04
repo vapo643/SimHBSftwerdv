@@ -36,6 +36,8 @@ import {
   FileCheck,
   Signature,
   TrendingUp,
+  Building2,
+  Printer,
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -647,8 +649,19 @@ export default function Formalizacao() {
     },
     {
       id: 5,
+      title: "Banco Inter - Boletos",
+      description: "Boletos gerados automaticamente pelo Banco Inter para pagamento",
+      icon: Building2,
+      status: proposta.interBoletoGerado ? "completed" : proposta.assinaturaEletronicaConcluida ? "current" : "pending",
+      date: proposta.interBoletoGerado ? formatDate(proposta.createdAt) : "Pendente",
+      completed: proposta.interBoletoGerado || false,
+      interactive: proposta.assinaturaEletronicaConcluida,
+      etapa: 'banco_inter' as const,
+    },
+    {
+      id: 6,
       title: "Liberação do Pagamento",
-      description: "Boletos gerados e valor liberado para pagamento",
+      description: "Valor liberado e disponível para transferência",
       icon: CreditCard,
       status:
         proposta.status === "pronto_pagamento"
@@ -976,6 +989,107 @@ export default function Formalizacao() {
                                     </div>
                                   </div>
                                 )}
+                              </div>
+                            </div>
+                          );
+                        }
+
+                        // Para a etapa do Banco Inter, mostrar interface customizada
+                        if (step.etapa === 'banco_inter' && proposta.assinaturaEletronicaConcluida) {
+                          return (
+                            <div key={step.id} className="mb-4">
+                              <div className="space-y-4">
+                                {/* Controle padrão da etapa */}
+                                <EtapaFormalizacaoControl
+                                  propostaId={proposta.id}
+                                  etapa={step.etapa}
+                                  titulo={step.title}
+                                  descricao={step.description}
+                                  concluida={isCompleted}
+                                  habilitada={step.interactive}
+                                  onUpdate={() => refetch()}
+                                />
+                                
+                                {/* Interface do Banco Inter */}
+                                <div className="mt-3 p-4 bg-orange-900/20 border border-orange-700 rounded-lg">
+                                  <div className="flex items-center justify-between mb-3">
+                                    <h5 className="font-medium text-orange-300 flex items-center gap-2">
+                                      <Building2 className="h-5 w-5" />
+                                      Banco Inter - Boletos de Pagamento
+                                    </h5>
+                                  </div>
+                                  
+                                  <p className="text-sm text-orange-200 mb-4">
+                                    Após a assinatura do contrato, os boletos são gerados automaticamente pelo Banco Inter para processamento do pagamento ao cliente.
+                                  </p>
+
+                                  {!proposta.interBoletoGerado ? (
+                                    // Botão para gerar boletos
+                                    <Button
+                                      onClick={async () => {
+                                        try {
+                                          const response = await apiRequest(`/api/propostas/${proposta.id}/inter/gerar-boleto`, {
+                                            method: 'POST'
+                                          });
+                                          toast({
+                                            title: "Sucesso",
+                                            description: "Boletos gerados com sucesso pelo Banco Inter!",
+                                          });
+                                          refetch(); // Recarregar dados da proposta
+                                        } catch (error: any) {
+                                          toast({
+                                            title: "Erro",
+                                            description: error.response?.data?.message || "Erro ao gerar boletos",
+                                            variant: "destructive",
+                                          });
+                                        }
+                                      }}
+                                      className="w-full bg-orange-600 hover:bg-orange-700"
+                                    >
+                                      <Building2 className="h-4 w-4 mr-2" />
+                                      Gerar Boletos via Banco Inter
+                                    </Button>
+                                  ) : (
+                                    // Boletos já gerados - mostrar opções
+                                    <div className="space-y-3">
+                                      <div className="flex items-center gap-2 p-3 bg-green-900/20 border border-green-700 rounded">
+                                        <CheckCircle className="h-5 w-5 text-green-400" />
+                                        <span className="text-green-300 font-medium">Boletos gerados com sucesso</span>
+                                      </div>
+                                      
+                                      <div className="grid grid-cols-2 gap-3">
+                                        <Button
+                                          variant="outline"
+                                          onClick={() => {
+                                            window.open(`/api/propostas/${proposta.id}/inter/boleto/imprimir`, '_blank');
+                                          }}
+                                          className="border-orange-600 text-orange-400 hover:bg-orange-600/10"
+                                        >
+                                          <Printer className="h-4 w-4 mr-2" />
+                                          Imprimir Boletos
+                                        </Button>
+                                        
+                                        <Button
+                                          variant="outline"
+                                          onClick={() => {
+                                            window.open(`/api/propostas/${proposta.id}/inter/boleto/download`, '_blank');
+                                          }}
+                                          className="border-orange-600 text-orange-400 hover:bg-orange-600/10"
+                                        >
+                                          <Download className="h-4 w-4 mr-2" />
+                                          Download PDF
+                                        </Button>
+                                      </div>
+                                      
+                                      <div className="text-xs text-gray-400 mt-2">
+                                        <p><strong>Instruções para o Cliente:</strong></p>
+                                        <p>• Boletos gerados automaticamente pelo Banco Inter</p>
+                                        <p>• Pode pagar via PIX, débito ou transferência bancária</p>
+                                        <p>• Valor será creditado após compensação bancária</p>
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
                               </div>
                             </div>
                           );
