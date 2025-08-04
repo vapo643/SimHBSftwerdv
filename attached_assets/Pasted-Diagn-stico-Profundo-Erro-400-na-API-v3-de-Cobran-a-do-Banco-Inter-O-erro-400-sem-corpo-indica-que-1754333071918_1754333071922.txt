@@ -1,0 +1,127 @@
+Diagnóstico Profundo – Erro 400 na API v3 de Cobrança do Banco Inter
+O erro 400 sem corpo indica que o JSON enviado está mal formado ou faltam campos obrigatórios. A API v3 de cobrança (boleto/Pix) do Banco Inter exige vários campos além dos que foram enviados. Segundo a documentação oficial do Inter (Portal do Desenvolvedor)
+developers.inter.co
+, o corpo da requisição deve incluir todos os dados necessários para geração do boleto.
+1. Campos obrigatórios faltantes no payload
+Além dos campos informados, a API v3 exige (ou espera) normalmente os seguintes campos adicionais:
+dataEmissao: data de emissão da cobrança (ex.: "2025-08-01"). Geralmente é obrigatório e deve vir em ISO (YYYY-MM-DD).
+formasRecebimento: lista (array) com as formas permitidas de pagamento (explicado abaixo).
+desconto: objeto com informações de desconto. Mesmo que não haja desconto, envie algo como { "tipoDesconto": "SEM_DESCONTO", "valor": 0.0 }.
+multa e mora (juros): objetos com regras de multa (atraso) e juros ("mora"). Exemplo mínimo para multa de 2% seria { "tipoMulta": "PERCENTUAL", "valor": 2.0 }. Para juros diários, por exemplo { "tipoJuros": "PERCENTUAL", "valor": 0.0333 }. Se não for aplicar, pode enviar tipo “SEM” ou objeto vazio.
+mensagem: objeto com até 4 linhas de texto para exibição no boleto (ex.: { "linha1": "Mensagem 1", "linha2": "", ... }). Esses campos são opcionais, mas já estão previstos no JSON da API.
+pagador.complemento: complemento do endereço do pagador (pode ser string vazia "" se não houver).
+numDiasAgenda: já enviado como 30. No entanto, outro campo relacionado pode ser dataLimite, dependendo da versão. Verifique se o campo “numDiasAgenda” é realmente aceito (em v3 ele é aceito; em v2 era “dataLimite”).
+Caso algum desses campos obrigatórios falte, a API retorna 400 sem corpo. Por isso, o JSON completo deve incluir, além dos dados fornecidos, esses campos de desconto, multa, juros (mora), e possivelmente as mensagens.
+2. Estrutura do campo formasRecebimento
+O campo formasRecebimento deve ser um array de strings com as opções de recebimento, usando os valores do enum FormaRecebimentoEnum. Por exemplo:
+json
+Copiar
+Editar
+"formasRecebimento": ["BOLETO","PIX"]
+Se não for informado, o padrão do Inter é permitir ambas as formas (boleto e Pix)
+developers.inter.co
+. Em teoria, você só precisa incluir esse campo se quiser restringir a cobrança a somente boleto ou somente Pix. A estrutura correta é exatamente um array JSON, por isso em código TypeScript/JavaScript deve ser algo como:
+ts
+Copiar
+Editar
+formasRecebimento: ["BOLETO", "PIX"]
+(verificar se o framework/serializador não está omitindo o campo).
+3. Validações específicas dos campos
+seuNumero (identificador): Deve ser único por cobrança e ter até 15 caracteres (alfanuméricos). A documentação indica que usa-se esse campo como parte da chave para evitar duplicidade
+developers.inter.co
+. Evite caracteres especiais (somente letras, números e hífens/substituições simples). O exemplo enviado ("902183dd-b5d1-4") já tem 14 chars, mas verifique se não faltou dígito: talvez precise ter entre 1 e 15 caracteres. Alguns integradores recomendam colocar um número sequencial ou UUID completo sem hífen.
+Formato de datas: Use sempre YYYY-MM-DD (ISO 8601). O exemplo "2025-08-09" está correto. Certifique-se de que o horário do servidor não está gerando offset.
+Valores mínimo/máximo: O valor (valorNominal) deve ser maior que zero. O Inter não documenta publicamente o valor mínimo, mas na prática boletos podem ser de centavos. Para segurança, use no mínimo R$0,10. Não há um teto específico divulgado, mas evite valores astronomicamente altos sem necessidade.
+Telefone do pagador: Deve ser enviado sem formatação. Geralmente envia-se DDD separado (por exemplo "ddd": "27", "telefone": "998538565"). No payload original, o DDD e telefone foram configurados – mantenha esse padrão. (Alguns clientes confundem e enviam o telefone todo sem DDD, mas o correto é separar.)
+E-mail do pagador: Endereço válido. Se o e-mail estiver mal formado, a API pode rejeitar.
+CEP / Endereço: Formato numérico sem hífen ("29165460" está ok). Nos testes, o CEP e cidade/UF foram corrigidos para "Serra/ES". Normalmente não há validação cruzada forte do Inter para CEPXmorada; no entanto, recomenda-se que combinem (caso contrário pode haver rejeição silenciosa ou divergência no registro bancário).
+Charset/encoding: A requisição JSON deve ser UTF-8 e o header Content-Type: application/json deve conter charset=UTF-8 se aplicável. Em geral, enviar JSON padrão UTF-8 é suficiente – não há encoding especial além disso. Evite caracteres acentuados (como feito) ou garanta UTF-8 no corpo.
+4. Diferenças entre API v2 e v3
+Em relação à v2 de boletos (registro online anterior), a v3 traz mudanças como:
+Inclusão de Pix: v3 passou a gerar QR Code/Pix (daí o nome “Boleto com Pix”), e o campo formasRecebimento.
+Mudança de URLs: o endpoint subiu de /cobranca/v2/boletos para /cobranca/v3/cobrancas (observe o plural).
+Campos renomeados: Em v2 havia campos como dataLimite (dias após vencimento) e dataEmissao; em v3 usa-se numDiasAgenda e também dataEmissao.
+Formato de juross/descontos: Em v2, descontos e juros eram feitos via código ou instrução; em v3 há objetos JSON (desconto, multa, mora).
+Mensagens: v2 usava várias tags de instrução; v3 possui objeto mensagem com linhas.
+Beneficiário: Na v2 podia ser necessário informar agencia/conta do cedente; na v3, como se integra via credenciais, esses dados já vêm do convênio (não se envia mais).
+As maiores mudanças para payload são os objetos novos (desconto, multa, mora, formasRecebimento, mensagem). Portanto, revise o exemplo da v3 (que difere da v2) antes de enviar.
+5. Conta-corrente do beneficiário
+Na API v3 do Inter não é necessário (e nem possível) informar manualmente os dados da conta-corrente do beneficiário (agência/conta). Isso já está configurado internamente ao criar a aplicação no Internet Banking (na seção Aplicações). Ou seja, não há campos JSON para agência/conta: o boleto será emitido para a conta vinculada ao certificado usado. Simplesmente não existem no endpoint v3.
+6. Campos de mensagem e complementos
+Mensagens no boleto: São opcionais. Se não precisar de texto extra, pode omitir mensagem. Caso sejam usadas, a documentação indica até 4 linhas: ex. { "linha1": "...", "linha2": "...", ... }. Essas linhas aparecem na ficha de compensação do boleto.
+Complemento de endereço: Se o pagador tiver complemento (p.ex., “AP 201”), inclua em "pagador.complemento". Se não tiver, pode enviar string vazia "" ou omitir. Geralmente não causa 400, mas é melhor incluir vazio que omitir completamente (evita erros de schema se o objeto esperar a propriedade).
+7. Validação de CEP/cidade/UF
+O Inter provavelmente não valida estritamente se CEP bate com a cidade/UF informados, pois isso mudaria frequentemente. Entretanto, espera-se consistência: se o CEP pertence a outro estado, pode haver rejeição ou inconsistência. Em testes, o CEP 29165460 foi corretamente associado a Serra/ES. Recomendamos sempre usar dados consistentes (CEP certo para a cidade/UF) para evitar erros não documentados. Não há nota pública na documentação sobre essa validação, mas na prática muitos bancos bancários fazem checagens básicas (atômica).
+8. Requisitos de Encoding/Charset
+Os dados devem ser enviados como JSON UTF-8. Isso significa definir Content-Type: application/json; charset=UTF-8 no header (embora o Inter geralmente aceite application/json puro). O importante é garantir que caracteres especiais estejam em UTF-8. Como já foi tentado remover acentos, o ideal é mesmo usar somente ASCII ou UTF-8 normal. Não existe outra codificação especial (não use ASCII estendido ou Base64, por exemplo).
+9. Exemplo completo de payload v3 funcional
+Abaixo um exemplo completo incluindo todos campos relevantes (este é ilustrativo; ajuste valores reais). Note como inclui descontos/multa/juros e formasRecebimento:
+json
+Copiar
+Editar
+{
+  "seuNumero": "902183ddb5d14",             // até 15 caracteres
+  "valorNominal": 1000.00,
+  "dataEmissao": "2025-08-01",
+  "dataVencimento": "2025-08-09",
+  "numDiasAgenda": 30,
+  "formasRecebimento": ["BOLETO"],         // só boleto; poderia incluir "PIX"
+  "desconto": {
+    "tipoDesconto": "SEM_DESCONTO",
+    "valor": 0.0
+  },
+  "multa": {
+    "tipoMulta": "PERCENTUAL",
+    "valor": 2.0
+  },
+  "mora": {
+    "tipoJuros": "PERCENTUAL",
+    "valor": 0.0333
+  },
+  "mensagem": {
+    "linha1": "Não aceitar após vencimento",
+    "linha2": "Recibo do Pagador"
+  },
+  "pagador": {
+    "cpfCnpj": "20528464760",
+    "tipoPessoa": "FISICA",
+    "nome": "Gabriel de Jesus Santana Serri",
+    "endereco": "Rua Miguel Angelo",
+    "numero": "100",
+    "complemento": "",
+    "bairro": "Centro",
+    "cidade": "Serra",
+    "uf": "ES",
+    "cep": "29165460",
+    "email": "gabrieldjesus238@gmail.com",
+    "ddd": "27",
+    "telefone": "998538565"
+  }
+}
+Esse payload, já incluindo todos os campos extras, deve ser aceito (desde que o certificado/clientes do Inter estejam corretos). A inclusão de campos como "desconto", "multa" e "mora" mesmo sem valores (e.g. multa/juros mínimos) evita erros por omissão de schema.
+10. Códigos de erro 400 comuns e causas
+400 (Requisição inválida) sem corpo, geralmente indica payload inválido ou faltando campo. Causas típicas: JSON mal formatado, campo obrigatório faltando, valor fora do padrão (e.g. data inválida, CPF mal formado) ou tipo errado (e.g. string no lugar de número).
+400 – Invalid Data: segundo relatos, pode ocorrer se formatos de campos não seguirem o schema (por exemplo, número em string, data no formato errado, valor cheio sem decimais quando exige decimal, etc).
+400 – Required Field Missing: embora o corpo venha vazio, internamente o Inter pode sinalizar que um campo obrigatório não foi recebido. Verifique logs/suporte se possível.
+400 – Duplicidade: se você enviar dois boletos com mesmo seuNumero + valor + vencimento + CPF num curto intervalo, o banco pode bloquear por duplicidade, retornando 400 (às vezes sem detalhe)
+developers.inter.co
+. Mude o seuNumero para diferente nesse caso.
+400 – Escopos ou Autenticação: embora este seja 400 na fase de OAuth (token), muitas vezes erro de permissão se manifesta como 400 genérico. Verifique se o scope inclui boleto-cobranca.write para criação.
+Diferentes fontes indicam que 400 genérico sem mensagem geralmente é problema de validação no corpo. Recomenda-se testar o exemplo JSON acima e ver qual parte está causando. Além disso, consulte o portal de erros do Inter (Erros Status Code) para possíveis mensagens (embora nem sempre o corpo venha).
+11. Documentação oficial e referência
+A documentação mais recente da API de cobrança do Banco Inter está disponível no Portal do Desenvolvedor Inter: developers.inter.co/references/cobranca-bolepix 
+developers.inter.co
+. Esse portal (atualizado em 2024/2025) traz detalhes de todos os campos, esquemas e exemplos. Outros links úteis: seção Erros Status Code
+developers.inter.co
+ do portal e guias de integração.
+12. Regras de negócio não documentadas
+Algumas validações do Inter não estão publicadas explicitamente, mas foram identificadas por quem integrou:
+Validade de seuNumero: além do tamanho, recomenda-se que seja único por dia; reuso imediato pode ser barrado.
+Chave anti-duplicidade: internamente o Inter pode concatenar seuNumero + valorNominal + dataVencimento + CPF para evitar duplicatas
+developers.inter.co
+. Enviar valores idênticos em cobrança dupla pode ser rejeitado sem aviso claro.
+Timestamp do servidor: valores de dataEmissao muito distantes (p.ex. anos futuros) podem causar erro de integridade, mesmo que formato esteja certo. Use datas coerentes.
+Papel moeda: não há campo específico, mas o Inter entende implicitamente moeda BRL. Não enviar sinal de moeda ou texto, apenas número.
+Em resumo, verifique todos os campos obrigatórios e seus formatos com cuidado. Use o exemplo acima como base, adapte para seu cenário e teste no sandbox do Inter. Uma vez funcionando lá (siga o guia de homologação do Inter), o mesmo payload deverá ser válido em produção. Fontes: Documentação oficial do Banco Inter
+developers.inter.co
+ e experiência de desenvolvedores integradores (e.g. comunidade ACBr e fóruns) foram utilizadas para este diagnóstico.

@@ -828,9 +828,13 @@ class InterBankService {
         cidade: cidadeClean
       });
 
+      // Garantir que o valor está em formato decimal com 2 casas
+      const valorDecimal = Number(proposalData.valorTotal).toFixed(2);
+      console.log('[INTER] 💰 Valor formatado:', valorDecimal);
+
       const cobrancaData: CobrancaRequest = {
         seuNumero: proposalData.id.substring(0, 15), // Max 15 chars
-        valorNominal: proposalData.valorTotal,
+        valorNominal: parseFloat(valorDecimal), // Garantir que é um número decimal
         dataVencimento: proposalData.dataVencimento,
         numDiasAgenda: 30, // 30 days after due date for auto cancellation
         pagador: {
@@ -848,7 +852,6 @@ class InterBankService {
           uf: uf,
           cep: cepLimpo
         },
-        formasRecebimento: ['BOLETO', 'PIX'], // Campo obrigatório para API v3
         mensagem: {
           linha1: 'SIMPIX - Empréstimo Pessoal',
           linha2: `Proposta: ${proposalData.id}`,

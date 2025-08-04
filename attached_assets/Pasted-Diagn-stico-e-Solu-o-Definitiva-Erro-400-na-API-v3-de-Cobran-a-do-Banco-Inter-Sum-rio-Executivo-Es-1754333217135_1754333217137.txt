@@ -1,0 +1,297 @@
+Diagnóstico e Solução Definitiva: Erro 400 na API v3 de Cobrança do Banco Inter
+Sumário Executivo
+Este relatório apresenta uma análise aprofundada do erro persistente 400 Bad Request com corpo de resposta vazio, encontrado durante a tentativa de emissão de cobranças através da API v3 do Banco Inter. A investigação conclui que a causa primária do erro não reside no payload JSON, mas sim na ausência de um parâmetro mandatório no cabeçalho (header) da requisição HTTP: o x-conta-corrente. A ausência deste header provoca uma rejeição imediata da requisição no nível do gateway da API, antes que o corpo da mensagem possa ser processado e validado, resultando em uma resposta de erro genérica e sem detalhes.
+
+Adicionalmente, foram identificadas inconsistências secundárias no payload fornecido que, mesmo após a correção do header, poderiam levar a falhas de validação. Estas incluem a formatação do campo valorNominal e a ausência de estruturas de dados opcionais, porém recomendadas para uma integração robusta.
+
+Para remediação imediata e desbloqueio do processo de desenvolvimento, a equipe deve seguir os seguintes passos críticos:
+
+Adicionar o Header x-conta-corrente: Incluir o cabeçalho x-conta-corrente em todas as chamadas ao endpoint POST /cobranca/v3/cobrancas, contendo o número da conta corrente do beneficiário.
+
+Formatar valorNominal: Assegurar que o campo valorNominal seja enviado como um número com duas casas decimais (ex: 1000.00 em vez de 1000).
+
+Remover Campos Inválidos: O campo formasRecebimento não é válido para este endpoint da API v3 e deve ser removido do payload.
+
+Implementar Fluxo Assíncrono: Preparar a aplicação para o modelo de operação assíncrono da API v3, que retorna um codigoSolicitacao para consulta posterior, em vez dos dados completos do boleto na resposta inicial.
+
+Seção 1: Análise da Causa Raiz: Desconstruindo a Rejeição no Gateway da API
+A natureza do erro — um código de status 400 acompanhado de um corpo de resposta vazio — é um sintoma clássico de uma falha que ocorre nas camadas iniciais de processamento de uma API, como o balanceador de carga ou o gateway. Este comportamento indica que a requisição foi considerada inválida em um nível fundamental, antes de ser encaminhada para a lógica da aplicação que gera mensagens de erro detalhadas em formato JSON.
+
+1.1 O Culpado Principal: A Ausência do Header x-conta-corrente
+A documentação oficial da API de Cobrança v3 do Banco Inter especifica inequivocamente que x-conta-corrente é um header Parameter obrigatório para o endpoint de emissão de cobranças. Este cabeçalho é essencial para que o sistema do Inter identifique a qual conta do beneficiário a cobrança deve ser vinculada. Sem essa informação, a requisição é semanticamente incompleta e não pode ser roteada ou processada.
+
+A criticidade deste header é corroborada por implementações de clientes da API desenvolvidas pela comunidade. Um cliente em Python, por exemplo, destaca a variável X_INTER_CONTA_CORRENTE como um item de configuração essencial para a operação da biblioteca, validando seu status não-negociável em um cenário de uso real.
+
+A sequência lógica que leva ao erro observado é a seguinte:
+
+O cliente envia uma requisição POST para o endpoint da API.
+
+O gateway da API do Inter intercepta a requisição para validação inicial. Os cabeçalhos HTTP são a primeira parte da requisição a ser inspecionada.
+
+O gateway detecta a ausência do header mandatório x-conta-corrente.
+
+Considerando a requisição malformada e impossível de processar (pois não sabe a qual conta se destina), o gateway a rejeita imediatamente com um código de erro genérico 400 Bad Request.
+
+Como a rejeição ocorre antes que a requisição chegue à aplicação principal de cobranças, nenhum corpo de erro detalhado (com campos como "violacoes" ou "message") é gerado. A resposta é, portanto, vazia.
+
+1.2 Verificação de Integridade do Payload: Discrepâncias Estruturais e de Tipos de Dados
+Embora a ausência do header seja a causa primária, a análise do payload JSON revela pontos que poderiam causar falhas subsequentes.
+
+Tipo de Dado de valorNominal: O payload enviado utiliza o valor 1000 para o campo valorNominal. A documentação oficial da API, no entanto, especifica que este campo é do tipo number e apresenta um exemplo com casas decimais (2.5), além de definir um intervalo de validação que vai de 2.5 a 99999999.99. APIs financeiras são notoriamente rigorosas com a formatação de valores monetários. É imperativo que o valor seja enviado no formato de ponto flutuante com duas casas decimais, como 
+
+1000.00, para evitar ambiguidades ou falhas de validação.
+
+Estrutura do Payload: O payload em uso é minimalista. A documentação oficial provê um exemplo muito mais completo, que inclui objetos opcionais poderosos como desconto, multa, mora, mensagem e beneficiarioFinal. A familiaridade com esta estrutura completa é crucial para construir uma integração robusta e aproveitar todas as funcionalidades da API, como a configuração de juros, multas e mensagens personalizadas no boleto.
+
+Campo Inválido formasRecebimento: A tentativa de adicionar um campo formasRecebimento indica uma possível confusão com especificações de outras APIs (como a API v2 ou a API Pix pura) ou com documentação de terceiros. Este campo não existe na especificação do endpoint POST /cobranca/v3/cobrancas e sua presença poderia, em alguns sistemas, causar um erro de validação por campo desconhecido.
+
+Seção 2: O Blueprint Funcional: Uma Estrutura Definitiva para a Requisição de Cobrança v3
+Para garantir o sucesso da integração, é fundamental construir a requisição HTTP completa, incluindo cabeçalhos e corpo, de acordo com as especificações exatas da API.
+
+2.1 A Requisição HTTP Completa: Cabeçalhos e Corpo
+A seguir, um exemplo de como a requisição completa deve ser estruturada. Note a presença dos três headers essenciais: Authorization para o token OAuth2, Content-Type para definir o formato do payload e o crítico x-conta-corrente.
+
+Exemplo de Requisição HTTP
+
+HTTP
+
+POST /cobranca/v3/cobrancas HTTP/1.1
+Host: cdpj.partners.bancointer.com.br
+Authorization: Bearer
+Content-Type: application/json; charset=utf-8
+x-conta-corrente:
+
+{
+  "seuNumero": "902183dd-b5d1-4",
+  "valorNominal": 1000.00,
+  "dataVencimento": "2025-08-09",
+  "numDiasAgenda": 30,
+  "pagador": {
+    "cpfCnpj": "20528464760",
+    "tipoPessoa": "FISICA",
+    "nome": "Gabriel de Jesus Santana Serri",
+    "endereco": "Rua Miguel Angelo",
+    "numero": "100",
+    "bairro": "Centro",
+    "cidade": "Serra",
+    "uf": "ES",
+    "cep": "29165460",
+    "email": "gabrieldjesus238@gmail.com",
+    "ddd": "27",
+    "telefone": "998538565"
+  }
+}
+Exemplo de Implementação em Node.js com undici
+
+JavaScript
+
+import { Agent, request } from 'undici';
+import { readFileSync } from 'fs';
+
+const mAgent = new Agent({
+  connect: {
+    cert: readFileSync('/path/to/certificado.crt'),
+    key: readFileSync('/path/to/chave.key'),
+  }
+});
+
+const payload = {
+  seuNumero: "902183dd-b5d1-4",
+  valorNominal: 1000.00, // Corrigido para formato decimal
+  dataVencimento: "2025-08-09",
+  numDiasAgenda: 30,
+  pagador: {
+    //... dados do pagador
+  }
+};
+
+const { statusCode, body } = await request(
+  'https://cdpj.partners.bancointer.com.br/cobranca/v3/cobrancas',
+  {
+    method: 'POST',
+    dispatcher: mAgent,
+    headers: {
+      'Authorization': 'Bearer',
+      'Content-Type': 'application/json; charset=utf-8',
+      'x-conta-corrente': '' // Header crítico adicionado
+    },
+    body: JSON.stringify(payload)
+  }
+);
+
+const responseData = await body.json();
+console.log('Status:', statusCode);
+console.log('Response:', responseData);
+2.2 Payload JSON Anotado e Pronto para Produção
+O exemplo abaixo é baseado na estrutura mais completa encontrada na documentação oficial. Ele serve como um modelo "padrão ouro" que pode ser adaptado, incluindo estruturas opcionais para descontos, multas e juros.
+
+JSON
+
+{
+  "seuNumero": "cobranca-exemplo-001",
+  "valorNominal": 250.75,
+  "dataVencimento": "2025-12-31",
+  "numDiasAgenda": 60,
+  "pagador": {
+    "cpfCnpj": "12345678901",
+    "tipoPessoa": "FISICA",
+    "nome": "Nome Completo do Pagador",
+    "endereco": "Avenida Exemplo",
+    "numero": "123",
+    "complemento": "Apto 45",
+    "bairro": "Bairro Exemplo",
+    "cidade": "Cidade Exemplo",
+    "uf": "UF",
+    "cep": "12345678",
+    "email": "pagador@exemplo.com",
+    "ddd": "11",
+    "telefone": "987654321"
+  },
+  "mensagem": {
+    "linha1": "Mensagem linha 1: Nao receber apos o vencimento.",
+    "linha2": "Mensagem linha 2: Em caso de duvidas, contate-nos.",
+    "linha3": "Mensagem linha 3",
+    "linha4": "Mensagem linha 4",
+    "linha5": "Mensagem linha 5"
+  },
+  "desconto": {
+    "codigo": "PERCENTUALDATAINFORMADA",
+    "data": "2025-12-20",
+    "taxa": 5.00
+  },
+  "multa": {
+    "codigo": "PERCENTUAL",
+    "taxa": 2.00
+  },
+  "mora": {
+    "codigo": "TAXAMENSAL",
+    "taxa": 1.00
+  },
+  "beneficiarioFinal": {
+    "cpfCnpj": "98765432109",
+    "tipoPessoa": "FISICA",
+    "nome": "Nome do Beneficiario Final",
+    "endereco": "Rua do Beneficiario",
+    "bairro": "Centro",
+    "cidade": "Outra Cidade",
+    "uf": "XX",
+    "cep": "87654321"
+  }
+}
+2.3 Tabela de Referência Definitiva de Campos
+A tabela a seguir consolida as informações dos campos da requisição, dispersas na documentação , em um único local de referência.
+
+Tabela de Referência Completa: Endpoint POST /cobranca/v3/cobrancas
+
+Path do Campo	Obrigatório?	Tipo de Dado	Regras e Validações	Descrição e Notas
+Header				
+header:x-conta-corrente	Sim	string	Padrão: [1-9][0-9]*. Apenas números.	Conta corrente do beneficiário que será utilizada na operação. Causa primária do erro 400.
+Payload (Body)				
+seuNumero	Sim	string	<= 15 caracteres.	Identificador único da cobrança definido pelo cliente.
+valorNominal	Sim	number	Mínimo: 2.5. Máximo: 99999999.99.	Valor nominal do título. Deve ser enviado com duas casas decimais (ex: 100.00).
+dataVencimento	Sim	string	Formato: YYYY-MM-DD.	Data de vencimento do título.
+numDiasAgenda	Sim	integer	Ex: 30, 60.	Número de dias que a cobrança permanecerá ativa para pagamento após o vencimento.
+pagador	Sim	object	-	Objeto contendo os dados do pagador.
+pagador.cpfCnpj	Sim	string	Apenas números.	CPF ou CNPJ do pagador.
+pagador.tipoPessoa	Sim	string	Enum: FISICA, JURIDICA.	Tipo de pessoa do pagador.
+pagador.nome	Sim	string	-	Nome ou Razão Social do pagador.
+pagador.endereco	Sim	string	-	Endereço do pagador.
+pagador.numero	Sim	string	-	Número do endereço do pagador.
+pagador.bairro	Sim	string	-	Bairro do pagador.
+pagador.cidade	Sim	string	-	Cidade do pagador.
+pagador.uf	Sim	string	2 caracteres.	Unidade Federativa do pagador.
+pagador.cep	Sim	string	8 caracteres, apenas números.	CEP do pagador.
+pagador.email	Opcional	string	-	E-mail do pagador.
+pagador.ddd	Opcional	string	-	DDD do telefone do pagador.
+pagador.telefone	Opcional	string	-	Número do telefone do pagador.
+desconto	Opcional	object	-	Estrutura para configurar descontos.
+desconto.codigo	Sim (se desconto existir)	string	Enum: VALORFIXODATAINFORMADA, PERCENTUALDATAINFORMADA.	Tipo de desconto a ser aplicado.
+desconto.data	Sim (se desconto existir)	string	Formato: YYYY-MM-DD.	Data limite para a concessão do desconto.
+desconto.taxa	Sim (se desconto existir)	number	-	Valor ou percentual do desconto.
+multa	Opcional	object	-	Estrutura para configurar multa por atraso.
+multa.codigo	Sim (se multa existir)	string	Enum: VALORFIXO, PERCENTUAL.	Tipo de multa a ser aplicada.
+multa.taxa	Sim (se multa existir)	number	-	Valor ou percentual da multa.
+mora	Opcional	object	-	Estrutura para configurar juros de mora.
+mora.codigo	Sim (se mora existir)	string	Enum: VALORDIA, TAXAMENSAL.	Tipo de juros de mora a ser aplicado.
+mora.taxa	Sim (se mora existir)	number	-	Valor ou percentual dos juros.
+mensagem	Opcional	object	-	Mensagens a serem impressas no boleto.
+mensagem.linha[1-5]	Opcional	string	-	Campos de texto livre para o boleto.
+beneficiarioFinal	Opcional	object	-	Dados do beneficiário final, se diferente do emissor.
+
+Exportar para as Planilhas
+Seção 3: Resolução Abrangente das Dúvidas (Ponto a Ponto)
+Esta seção responde diretamente a cada uma das perguntas levantadas, com base na análise realizada.
+
+Campos obrigatórios faltantes: O item mais crítico que falta na requisição é o header x-conta-corrente. No corpo do payload, todos os campos obrigatórios (seuNumero, valorNominal, dataVencimento, numDiasAgenda e o objeto pagador com seus subcampos essenciais) parecem estar presentes, embora valorNominal precise de correção de formato.
+
+Estrutura do campo formasRecebimento: Este campo não faz parte da especificação da API de Cobrança v3. Sua presença é incorreta e ele deve ser completamente removido do payload. A estrutura de pagamento é definida pela própria natureza do endpoint, que gera um boleto com código de barras e, opcionalmente, um QR Code Pix associado.
+
+Validações específicas:
+
+seuNumero: Sim, possui uma validação de string com no máximo 15 caracteres.
+
+Formato da data: Sim, o formato YYYY-MM-DD para dataVencimento está correto.
+
+Validação de valor: Sim, valorNominal possui um valor mínimo de 2.50 e um máximo de 99999999.99.
+
+Diferenças entre API v2 e v3: A mudança mais significativa não é apenas nos campos, mas na arquitetura de operação. A API v2 operava de forma síncrona, retornando os dados completos do boleto na resposta da requisição de emissão. A API v3 opera de forma assíncrona. Ao enviar uma cobrança, a API responde imediatamente com um codigoSolicitacao. O processamento do boleto ocorre em background. O status final e os dados do boleto (como nossoNumero e linhaDigitavel) devem ser obtidos posteriormente, seja através de uma consulta ativa usando o codigoSolicitacao ou, preferencialmente, aguardando uma notificação via webhook. Esta mudança arquitetônica exige uma adaptação significativa na lógica da aplicação cliente.
+
+Conta corrente obrigatória: Sim, é absolutamente obrigatória. No entanto, ela não deve ser informada no corpo do JSON, mas sim no cabeçalho HTTP da requisição, através do campo x-conta-corrente.
+
+Campos de mensagem: O objeto mensagem e seus campos (linha1 a linha5) são opcionais. Eles podem ser utilizados para adicionar informações personalizadas ao corpo do boleto.
+
+Validação de CEP: Embora a documentação não detalhe explicitamente o algoritmo de validação, é uma prática padrão e altamente provável que a API do Inter valide se o CEP (cep) corresponde à cidade (cidade) e estado (uf) informados. A ação de corrigir os dados de São Paulo para Espírito Santo foi um passo de depuração correto e necessário.
+
+Encoding/Charset: O padrão para APIs REST modernas é UTF-8. O header Content-Type: application/json geralmente implica o uso de UTF-8. Para evitar quaisquer problemas, é uma boa prática especificar explicitamente o charset no header: Content-Type: application/json; charset=utf-8. A remoção de acentos é uma medida de contingência válida, mas a API deve ser capaz de processar caracteres UTF-8 corretamente.
+
+Seção 4: Implementação Estratégica e Resolução Proativa de Problemas
+Superar o erro 400 é o primeiro passo. Para uma integração estável e pronta para produção, é crucial entender e implementar as seguintes estratégias.
+
+4.1 Dominando o Fluxo de Trabalho Assíncrono: Lidando com o codigoSolicitacao
+Conforme mencionado, a API v3 é assíncrona. Ignorar este fato levará a problemas na próxima fase do desenvolvimento. A aplicação deve ser projetada para lidar com o 
+
+codigoSolicitacao retornado após a chamada POST. Existem duas abordagens principais:
+
+Implementação de Webhook (Recomendado): Esta é a abordagem mais eficiente. A aplicação configura um endpoint (URL de webhook) no painel do Inter. Após o processamento da cobrança, o Inter enviará uma notificação POST para este endpoint com os dados completos e o status final do boleto. A documentação menciona a API de Webhook para este fim.
+
+Polling Ativo (Alternativa): Se um webhook não for viável, a aplicação pode armazenar o codigoSolicitacao e, após um breve intervalo, fazer chamadas periódicas para o endpoint GET /cobranca/v3/cobrancas/{codigoSolicitacao} para verificar o status. Esta abordagem é menos eficiente e pode gerar tráfego desnecessário, estando sujeita a limites de requisição (rate limits).
+
+4.2 Um Catálogo de Erros Comuns (Além do Atual 400)
+Quando o corpo do erro é retornado, ele geralmente contém informações valiosas. Abaixo estão exemplos de outros erros 400 que podem ocorrer e como agir.
+
+Sintoma (Corpo do Erro JSON)	Causa Provável	Ação Corretiva
+{"violacoes": [{"razao": "CPF/CNPJ do pagador inválido"}]}	O pagador.cpfCnpj não passou na validação de dígito verificador (algoritmo Módulo 11).	Implementar uma biblioteca de validação de CPF/CNPJ no lado do cliente para verificar os dados antes de enviá-los à API.
+{"violacoes":}	O campo dataVencimento está no passado.	Garantir que a lógica de negócio gere datas de vencimento válidas, considerando o fuso horário do servidor.
+{"violacoes": [{"razao": "Campo seuNumero já existe para este beneficiário"}]}	Foi tentado criar uma cobrança com um seuNumero que já foi utilizado e ainda está ativo.	Implementar uma lógica para garantir a unicidade do seuNumero ou utilizar identificadores únicos, como UUIDs.
+
+Exportar para as Planilhas
+4.3 Utilizando a Idempotência para Retentativas Seguras
+A documentação da API v3 menciona um mecanismo de idempotência crucial para a robustez do sistema: "utilizamos os campos seuNumero, valorNominal, dataVencimento e cpfCnpj do pagador para montar uma chave de idempotência, com duração de 30min".
+
+Isso significa que, se uma requisição falhar por um problema de rede e o cliente não tiver certeza se a cobrança foi criada, ele pode reenviar a exata mesma requisição (com os mesmos quatro campos-chave) dentro de 30 minutos. A API garantirá que a cobrança não seja duplicada. Se a primeira tentativa foi bem-sucedida, a segunda simplesmente retornará o resultado da primeira. Esta é uma ferramenta poderosa para prevenir cobranças duplicadas acidentalmente.
+
+4.4 Documentação Oficial e Recursos da Comunidade
+Para referência contínua e resolução de problemas futuros, os seguintes links são essenciais:
+
+Referência da API de Cobrança v3: https://developers.inter.co/references/cobranca-bolepix 
+
+Portal do Desenvolvedor Inter: https://developers.inter.co/ 
+
+Fórum de Desenvolvedores Inter: Mencionado na Central de Ajuda como um recurso para tirar dúvidas.
+
+Tópico no GitHub para banco-inter: https://github.com/topics/banco-inter  - Útil para encontrar bibliotecas e exemplos da comunidade.
+
+Conclusão: Checklist Acionável para Prontidão em Produção
+Para resolver o problema atual e garantir uma integração robusta e confiável com a API de Cobrança v3 do Banco Inter, a equipe de desenvolvimento deve executar as seguintes ações:
+
+Adicionar o Header x-conta-corrente: Incluir este cabeçalho em todas as requisições para POST /cobranca/v3/cobrancas.
+
+Validar e Formatar valorNominal: Garantir que o valor seja um número com duas casas decimais (ex: 1000.00).
+
+Construir o Payload Completo: Utilizar o payload anotado como base, incluindo campos opcionais de multa, juros e desconto conforme a necessidade do negócio.
+
+Implementar a Estratégia Assíncrona: Desenvolver a lógica da aplicação para lidar com o codigoSolicitacao, seja via Webhooks (preferencial) ou Polling.
+
+Revisar as Regras de Idempotência: Incorporar uma lógica de retentativa segura na manipulação de erros de rede, aproveitando a chave de idempotência da API.
+
+Salvar os Links da Documentação Oficial: Manter os links da documentação oficial à mão para referência rápida durante o desenvolvimento e manutenção.
