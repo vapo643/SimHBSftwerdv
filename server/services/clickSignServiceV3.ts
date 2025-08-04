@@ -149,18 +149,30 @@ class ClickSignServiceV3 {
       console.log(`[CLICKSIGN V1] Response content-type: ${contentType}`);
       console.log(`[CLICKSIGN V1] Response status: ${response.status}`);
       
+      // Handle 202 Accepted status (common for async operations like notifications)
+      if (response.status === 202) {
+        console.log(`[CLICKSIGN V1] ✅ Request accepted (202) - Processing asynchronously`);
+        return { data: { status: 'accepted', message: 'Request accepted for processing' } } as ClickSignV3Response<T>;
+      }
+
       // Always try to get text first to debug
       const responseText = await response.text();
       
       let data;
-      try {
-        data = JSON.parse(responseText);
-      } catch (parseError) {
-        console.error(`[CLICKSIGN V1] ❌ Failed to parse JSON response!`);
-        console.error(`[CLICKSIGN V1] Response text (first 1000 chars): ${responseText.substring(0, 1000)}`);
-        console.error(`[CLICKSIGN V1] Full URL was: ${url}`);
-        console.error(`[CLICKSIGN V1] Status: ${response.status}`);
-        throw new Error(`Failed to parse JSON. Status: ${response.status}. Response starts with: ${responseText.substring(0, 100)}`);
+      if (responseText.trim() === '') {
+        // Empty response (common for 204 No Content or some 202 responses)
+        console.log(`[CLICKSIGN V1] Empty response body for status ${response.status}`);
+        data = { status: response.status };
+      } else {
+        try {
+          data = JSON.parse(responseText);
+        } catch (parseError) {
+          console.error(`[CLICKSIGN V1] ❌ Failed to parse JSON response!`);
+          console.error(`[CLICKSIGN V1] Response text (first 1000 chars): ${responseText.substring(0, 1000)}`);
+          console.error(`[CLICKSIGN V1] Full URL was: ${url}`);
+          console.error(`[CLICKSIGN V1] Status: ${response.status}`);
+          throw new Error(`Failed to parse JSON. Status: ${response.status}. Response starts with: ${responseText.substring(0, 100)}`);
+        }
       }
 
       if (!response.ok) {
