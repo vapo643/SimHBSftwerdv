@@ -784,6 +784,18 @@ class InterBankService {
     try {
       console.log(`[INTER] 🚀 Creating collection for proposal: ${proposalData.id}`);
 
+      // Extract DDD and phone number from telefone
+      let ddd = '';
+      let telefoneNumero = '';
+      if (proposalData.clienteData.telefone) {
+        // Remove all non-numeric characters
+        const cleanPhone = proposalData.clienteData.telefone.replace(/\D/g, '');
+        if (cleanPhone.length >= 10) {
+          ddd = cleanPhone.substring(0, 2);
+          telefoneNumero = cleanPhone.substring(2);
+        }
+      }
+
       const cobrancaData: CobrancaRequest = {
         seuNumero: proposalData.id.substring(0, 15), // Max 15 chars
         valorNominal: proposalData.valorTotal,
@@ -794,7 +806,8 @@ class InterBankService {
           cpfCnpj: proposalData.clienteData.cpf.replace(/\D/g, ''), // Remove formatting
           tipoPessoa: proposalData.clienteData.cpf.replace(/\D/g, '').length <= 11 ? 'FISICA' : 'JURIDICA',
           email: proposalData.clienteData.email,
-          telefone: proposalData.clienteData.telefone || '',
+          ddd: ddd || '11', // Default to São Paulo if not provided
+          telefone: telefoneNumero || '000000000',
           endereco: proposalData.clienteData.endereco,
           numero: proposalData.clienteData.numero,
           complemento: proposalData.clienteData.complemento || '',
