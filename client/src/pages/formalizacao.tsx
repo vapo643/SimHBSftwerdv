@@ -57,6 +57,13 @@ interface Proposta {
     telefone: string;
     dataNascimento: string;
     renda: number;
+    endereco?: string;
+    numero?: string;
+    complemento?: string;
+    bairro?: string;
+    cidade?: string;
+    uf?: string;
+    cep?: string;
   };
   condicoes_data: {
     valor: number;
@@ -88,6 +95,8 @@ interface Proposta {
   assinaturaEletronicaConcluida: boolean;
   biometriaConcluida: boolean;
   caminhoCcbAssinado?: string;
+  interBoletoGerado?: boolean;
+  interCodigoSolicitacao?: string;
   // Backend fields (camelCase)
   lojaId: number;
   createdAt: string;
@@ -1002,17 +1011,6 @@ export default function Formalizacao() {
                           return (
                             <div key={step.id} className="mb-4">
                               <div className="space-y-4">
-                                {/* Controle padrão da etapa */}
-                                <EtapaFormalizacaoControl
-                                  propostaId={proposta.id}
-                                  etapa={step.etapa}
-                                  titulo={step.title}
-                                  descricao={step.description}
-                                  concluida={isCompleted}
-                                  habilitada={step.interactive}
-                                  onUpdate={() => refetch()}
-                                />
-                                
                                 {/* Interface do Banco Inter */}
                                 <div className="mt-3 p-4 bg-orange-900/20 border border-orange-700 rounded-lg">
                                   <div className="flex items-center justify-between mb-3">
@@ -1036,6 +1034,15 @@ export default function Formalizacao() {
                                           const dataVencimento = new Date();
                                           dataVencimento.setDate(dataVencimento.getDate() + 5); // Vencimento em 5 dias
                                           
+                                          // Aviso se dados de endereço estão incompletos
+                                          const enderecoIncompleto = !proposta.cliente_data?.endereco || !proposta.cliente_data?.numero || 
+                                              !proposta.cliente_data?.bairro || !proposta.cliente_data?.cidade || 
+                                              !proposta.cliente_data?.uf || !proposta.cliente_data?.cep;
+                                          
+                                          if (enderecoIncompleto) {
+                                            console.warn('[INTER] Dados de endereço incompletos, usando valores padrão temporários');
+                                          }
+                                          
                                           const requestData = {
                                             proposalId: proposta.id,
                                             valorTotal: proposta.condicoes_data?.valor || 0,
@@ -1044,14 +1051,14 @@ export default function Formalizacao() {
                                               nome: proposta.cliente_data?.nome || '',
                                               cpf: proposta.cliente_data?.cpf || '',
                                               email: proposta.cliente_data?.email || '',
-                                              telefone: proposta.cliente_data?.telefone || '',
-                                              endereco: proposta.cliente_data?.endereco || '',
-                                              numero: proposta.cliente_data?.numero || '',
+                                              telefone: proposta.cliente_data?.telefone || '00000000000',
+                                              endereco: proposta.cliente_data?.endereco || 'Rua Principal',
+                                              numero: proposta.cliente_data?.numero || '100',
                                               complemento: proposta.cliente_data?.complemento || '',
-                                              bairro: proposta.cliente_data?.bairro || '',
-                                              cidade: proposta.cliente_data?.cidade || '',
-                                              uf: proposta.cliente_data?.uf || '',
-                                              cep: proposta.cliente_data?.cep || ''
+                                              bairro: proposta.cliente_data?.bairro || 'Centro',
+                                              cidade: proposta.cliente_data?.cidade || 'São Paulo',
+                                              uf: proposta.cliente_data?.uf || 'SP',
+                                              cep: proposta.cliente_data?.cep?.replace(/\D/g, '') || '00000000'
                                             }
                                           };
                                           
@@ -1059,10 +1066,7 @@ export default function Formalizacao() {
                                           
                                           const response = await apiRequest('/api/inter/collections', {
                                             method: 'POST',
-                                            body: JSON.stringify(requestData),
-                                            headers: {
-                                              'Content-Type': 'application/json'
-                                            }
+                                            body: JSON.stringify(requestData)
                                           });
                                           
                                           console.log('[INTER] Resposta da API:', response);
@@ -1197,20 +1201,23 @@ export default function Formalizacao() {
                           );
                         }
                         
-                        // Para outras etapas, usar o controle padrão
-                        return (
-                          <div key={step.id} className="mb-4">
-                            <EtapaFormalizacaoControl
-                              propostaId={proposta.id}
-                              etapa={step.etapa}
-                              titulo={step.title}
-                              descricao={step.description}
-                              concluida={isCompleted}
-                              habilitada={step.interactive}
-                              onUpdate={() => refetch()}
-                            />
-                          </div>
-                        );
+                        // Para outras etapas, usar o controle padrão se o tipo de etapa for válido
+                        if (step.etapa && step.etapa !== 'banco_inter') {
+                          return (
+                            <div key={step.id} className="mb-4">
+                              <EtapaFormalizacaoControl
+                                propostaId={proposta.id}
+                                etapa={step.etapa}
+                                titulo={step.title}
+                                descricao={step.description}
+                                concluida={isCompleted}
+                                habilitada={step.interactive}
+                                onUpdate={() => refetch()}
+                              />
+                            </div>
+                          );
+                        }
+                        return null;
                       }
 
                       // Caso contrário, mostra a timeline normal
