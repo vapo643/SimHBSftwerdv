@@ -301,13 +301,22 @@ class ClickSignWebhookService {
     
     const signerInfo = data.signer ? ` por ${data.signer.name || data.signer.email}` : '';
     
+    // Update proposal to mark electronic signature as completed
+    await storage.updateProposta(proposta.id, {
+      assinaturaEletronicaConcluida: true,
+      clicksignStatus: 'signed',
+      clicksignDocumentKey: data.document?.key || null
+    });
+    
     await storage.createPropostaLog({
       propostaId: proposta.id,
       autorId: 'clicksign-webhook',
       statusAnterior: proposta.status,
       statusNovo: proposta.status,
-      observacao: `✍️ Documento assinado${signerInfo}`
+      observacao: `✍️ Documento assinado${signerInfo} - Assinatura eletrônica concluída`
     });
+    
+    console.log(`[CLICKSIGN WEBHOOK] ✅ Updated proposal ${proposta.id} - assinatura_eletronica_concluida = true`);
     
     return { processed: true, proposalId: proposta.id, documentKey: data.document?.key };
   }
@@ -338,7 +347,7 @@ class ClickSignWebhookService {
   /**
    * Handle document created event
    */
-  private async handleDocumentCreated(proposta: any, data: WebhookEvent['event']['data']) {
+  private async handleDocumentCreated(proposta: any, data: WebhookEvent['data']) {
     console.log(`[CLICKSIGN WEBHOOK] Document created for proposal: ${proposta.id}`);
     
     await storage.createPropostaLog({
@@ -355,7 +364,7 @@ class ClickSignWebhookService {
   /**
    * Handle document signed event
    */
-  private async handleDocumentSigned(proposta: any, data: WebhookEvent['event']['data']) {
+  private async handleDocumentSigned(proposta: any, data: WebhookEvent['data']) {
     console.log(`[CLICKSIGN WEBHOOK] Document signed for proposal: ${proposta.id}`);
     
     const updateData = {
@@ -385,7 +394,7 @@ class ClickSignWebhookService {
   /**
    * Handle document finished event (all signers completed)
    */
-  private async handleDocumentFinished(proposta: any, data: WebhookEvent['event']['data']) {
+  private async handleDocumentFinished(proposta: any, data: WebhookEvent['data']) {
     console.log(`[CLICKSIGN WEBHOOK] Document finished for proposal: ${proposta.id}`);
     
     const finishedAt = getBrasiliaTimestamp();
@@ -411,7 +420,7 @@ class ClickSignWebhookService {
   /**
    * Handle document cancelled event
    */
-  private async handleDocumentCancelled(proposta: any, data: WebhookEvent['event']['data']) {
+  private async handleDocumentCancelled(proposta: any, data: WebhookEvent['data']) {
     console.log(`[CLICKSIGN WEBHOOK] Document cancelled for proposal: ${proposta.id}`);
     
     const updateData = {
@@ -434,7 +443,7 @@ class ClickSignWebhookService {
   /**
    * Handle document refused event
    */
-  private async handleDocumentRefused(proposta: any, data: WebhookEvent['event']['data']) {
+  private async handleDocumentRefused(proposta: any, data: WebhookEvent['data']) {
     console.log(`[CLICKSIGN WEBHOOK] Document refused for proposal: ${proposta.id}`);
     
     const updateData = {
