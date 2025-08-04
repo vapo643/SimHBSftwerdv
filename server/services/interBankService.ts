@@ -171,7 +171,7 @@ class InterBankService {
         'client_id': this.config.clientId,
         'client_secret': this.config.clientSecret,
         'grant_type': 'client_credentials',
-        'scope': 'boleto-cobranca.read boleto-cobranca.write' // Official scopes from documentation
+        'scope': 'boleto-cobranca.read boleto-cobranca.write webhook.read webhook.write' // All required scopes for API v3
       });
       
       // Log client_id length for debugging
