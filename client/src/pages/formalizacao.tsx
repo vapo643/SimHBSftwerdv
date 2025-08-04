@@ -384,8 +384,20 @@ export default function Formalizacao() {
   const [useBiometricAuth, setUseBiometricAuth] = useState(false);
   const [interBoletoData, setInterBoletoData] = useState<any>(null);
   const [loadingInter, setLoadingInter] = useState(false);
+  const [boletosGerados, setBoletosGerados] = useState<any[]>([]);
   
   const propostaId = params?.id;
+
+  // Query para buscar boletos gerados
+  const { data: collectionsData } = useQuery({
+    queryKey: ["/api/inter/collections", propostaId],
+    queryFn: async () => {
+      if (!propostaId) return [];
+      const response = await apiRequest(`/api/inter/collections/${propostaId}`);
+      return response;
+    },
+    enabled: !!propostaId,
+  });
 
   // TODOS os hooks devem estar aqui no topo
   const { data: proposta, isLoading, refetch } = useQuery<Proposta>({
@@ -1024,7 +1036,7 @@ export default function Formalizacao() {
                                     Após a assinatura do contrato, os boletos são gerados automaticamente pelo Banco Inter para processamento do pagamento ao cliente.
                                   </p>
 
-                                  {!proposta.interBoletoGerado && !interBoletoData ? (
+                                  {(!proposta.interBoletoGerado && !interBoletoData && (!collectionsData || collectionsData.length === 0)) ? (
                                     // Botão para gerar boletos
                                     <Button
                                       onClick={async () => {
@@ -1106,15 +1118,103 @@ export default function Formalizacao() {
                                       )}
                                     </Button>
                                   ) : (
-                                    // Boletos já gerados - mostrar opções
+                                    // Boletos já gerados - mostrar lista
                                     <div className="space-y-3">
                                       <div className="flex items-center gap-2 p-3 bg-green-900/20 border border-green-700 rounded">
                                         <CheckCircle className="h-5 w-5 text-green-400" />
-                                        <span className="text-green-300 font-medium">Boletos gerados com sucesso</span>
+                                        <span className="text-green-300 font-medium">
+                                          {collectionsData && collectionsData.length > 0 
+                                            ? `${collectionsData.length} boleto(s) gerado(s) com sucesso` 
+                                            : "Boletos gerados com sucesso"}
+                                        </span>
                                       </div>
                                       
-                                      {/* Mostrar código do boleto se disponível */}
-                                      {(interBoletoData?.codigoSolicitacao || proposta.interCodigoSolicitacao) && (
+                                      {/* Listar todos os boletos gerados */}
+                                      {collectionsData && collectionsData.length > 0 ? (
+                                        <div className="space-y-3">
+                                          {collectionsData.map((boleto: any, index: number) => (
+                                            <div key={boleto.id || index} className="p-4 bg-gray-800 rounded-lg border border-gray-700">
+                                              <div className="flex items-start justify-between mb-3">
+                                                <div>
+                                                  <h6 className="font-medium text-orange-300 mb-1">
+                                                    {boleto.seuNumero || boleto.codigoSolicitacao}
+                                                  </h6>
+                                                  <div className="flex items-center gap-4 text-sm text-gray-400">
+                                                    <span>Valor: R$ {boleto.valorNominal}</span>
+                                                    <span>Venc: {new Date(boleto.dataVencimento).toLocaleDateString('pt-BR')}</span>
+                                                  </div>
+                                                </div>
+                                                <Badge 
+                                                  variant={
+                                                    boleto.situacao === 'RECEBIDO' ? 'success' : 
+                                                    boleto.situacao === 'VENCIDO' ? 'destructive' : 
+                                                    'secondary'
+                                                  }
+                                                >
+                                                  {boleto.situacao}
+                                                </Badge>
+                                              </div>
+                                              
+                                              {/* QR Code e Código de Barras */}
+                                              {(boleto.qrCode || boleto.codigoBarras) && (
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                                  {boleto.qrCode && (
+                                                    <div className="p-3 bg-gray-900 rounded border border-gray-700">
+                                                      <p className="text-xs text-gray-400 mb-2">QR Code PIX</p>
+                                                      <div className="bg-white p-2 rounded">
+                                                        <img 
+                                                          src={`data:image/png;base64,${boleto.qrCode}`} 
+                                                          alt="QR Code PIX" 
+                                                          className="w-full max-w-[150px] mx-auto"
+                                                        />
+                                                      </div>
+                                                    </div>
+                                                  )}
+                                                  
+                                                  {boleto.codigoBarras && (
+                                                    <div className="p-3 bg-gray-900 rounded border border-gray-700">
+                                                      <p className="text-xs text-gray-400 mb-2">Código de Barras</p>
+                                                      <div className="flex items-center gap-2">
+                                                        <code className="flex-1 text-orange-400 font-mono text-xs break-all">
+                                                          {boleto.codigoBarras}
+                                                        </code>
+                                                        <Button
+                                                          size="sm"
+                                                          variant="ghost"
+                                                          onClick={() => {
+                                                            navigator.clipboard.writeText(boleto.codigoBarras);
+                                                            toast({
+                                                              title: "Copiado!",
+                                                              description: "Código de barras copiado",
+                                                            });
+                                                          }}
+                                                        >
+                                                          <Copy className="h-3 w-3" />
+                                                        </Button>
+                                                      </div>
+                                                    </div>
+                                                  )}
+                                                </div>
+                                              )}
+                                              
+                                              {/* Ações do boleto */}
+                                              <div className="flex gap-2">
+                                                {boleto.linkPdf && (
+                                                  <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    onClick={() => window.open(boleto.linkPdf, '_blank')}
+                                                    className="border-orange-700 text-orange-300 hover:bg-orange-900/20"
+                                                  >
+                                                    <Download className="h-4 w-4 mr-2" />
+                                                    Baixar PDF
+                                                  </Button>
+                                                )}
+                                              </div>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      ) : (interBoletoData?.codigoSolicitacao || proposta.interCodigoSolicitacao) && (
                                         <div className="p-3 bg-gray-800 rounded border border-gray-700">
                                           <p className="text-sm text-gray-400 mb-1">Código do Boleto:</p>
                                           <div className="flex items-center gap-2">

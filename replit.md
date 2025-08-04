@@ -94,6 +94,10 @@ Formalization Interface: ✅ COMPLETELY UNIFIED - Attendant and Administrator in
   - ✅ HEADERS FIX: All endpoints now use `Content-Type: application/json` - aligned with ClickSign documentation
   - ✅ CRITICAL DISCOVERY (04/08/2025): ClickSign API v3 doesn't exist! Changed from `/api/v3` to `/api/v2` - this was causing 404 HTML responses
   - ✅ HTTP 202 FIX (04/08/2025): Fixed handling of HTTP 202 (Accepted) status code for notifications - now correctly treats as success for asynchronous operations
+  - ✅ INTER BANK BOLETO DISPLAY (04/08/2025): Implemented comprehensive boleto display with QR codes and payment details
+    - Formalization screen now shows all generated boletos with QR codes, barcodes, and download links
+    - Collections screen enhanced to display Inter Bank payment status and QR codes
+    - Webhook system updates payment status in real-time when boletos are paid
 - **Banco Inter API**: For automated boleto/PIX payment generation and tracking - ✅ PRODUCTION READY (100% OPERATIONAL, production credentials working)
   - Complete OAuth 2.0 authentication with mTLS following official documentation
   - Automatic boleto generation after ClickSign signature (fully automated)  

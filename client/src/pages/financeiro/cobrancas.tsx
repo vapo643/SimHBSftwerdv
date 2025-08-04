@@ -26,7 +26,11 @@ import {
   DollarSign,
   FileText,
   Send,
-  Filter
+  Filter,
+  QrCode,
+  Copy,
+  Building2,
+  RefreshCw
 } from "lucide-react";
 import { format, addMonths, differenceInDays, isAfter } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -41,6 +45,12 @@ interface Parcela {
   linhaDigitavel?: string;
   status: 'pago' | 'pendente' | 'vencido';
   diasAtraso?: number;
+  // Inter Bank fields
+  interCodigoSolicitacao?: string;
+  interQrCode?: string;
+  interCodigoBarras?: string;
+  interSituacao?: string;
+  interLinkPdf?: string;
 }
 
 interface PropostaCobranca {
@@ -457,6 +467,80 @@ export default function Cobrancas() {
                               {parcela.linhaDigitavel && (
                                 <div className="text-xs font-mono bg-muted p-2 rounded">
                                   {parcela.linhaDigitavel}
+                                </div>
+                              )}
+                              
+                              {/* Inter Bank Integration */}
+                              {parcela.interCodigoSolicitacao && (
+                                <div className="mt-3 p-3 bg-orange-900/10 border border-orange-700/20 rounded-lg">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <Building2 className="h-4 w-4 text-orange-500" />
+                                    <span className="text-sm font-medium text-orange-400">Banco Inter</span>
+                                    {parcela.interSituacao && (
+                                      <Badge 
+                                        variant={
+                                          parcela.interSituacao === 'VENCIDO' ? 'destructive' : 'secondary'
+                                        }
+                                        className={
+                                          parcela.interSituacao === 'RECEBIDO' ? 'bg-green-600 text-white' : ''
+                                        }
+                                      >
+                                        {parcela.interSituacao}
+                                      </Badge>
+                                    )}
+                                  </div>
+                                  
+                                  <div className="grid grid-cols-2 gap-2">
+                                    {/* QR Code PIX */}
+                                    {parcela.interQrCode && (
+                                      <div className="bg-white p-2 rounded">
+                                        <img 
+                                          src={`data:image/png;base64,${parcela.interQrCode}`} 
+                                          alt="QR Code PIX" 
+                                          className="w-20 h-20 mx-auto"
+                                        />
+                                        <p className="text-xs text-center mt-1 text-gray-600">PIX</p>
+                                      </div>
+                                    )}
+                                    
+                                    {/* Código de Barras */}
+                                    {parcela.interCodigoBarras && (
+                                      <div className="space-y-1">
+                                        <p className="text-xs text-gray-400">Código de Barras:</p>
+                                        <div className="flex items-center gap-1">
+                                          <code className="text-xs font-mono text-orange-400 truncate">
+                                            {parcela.interCodigoBarras.slice(0, 15)}...
+                                          </code>
+                                          <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            onClick={() => {
+                                              navigator.clipboard.writeText(parcela.interCodigoBarras!);
+                                              toast({
+                                                title: "Copiado!",
+                                                description: "Código de barras copiado",
+                                              });
+                                            }}
+                                          >
+                                            <Copy className="h-3 w-3" />
+                                          </Button>
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                  
+                                  {/* Ações */}
+                                  {parcela.interLinkPdf && (
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      className="mt-2 text-orange-400 hover:text-orange-300"
+                                      onClick={() => window.open(parcela.interLinkPdf, '_blank')}
+                                    >
+                                      <Download className="h-3 w-3 mr-1" />
+                                      Baixar Boleto
+                                    </Button>
+                                  )}
                                 </div>
                               )}
                             </div>

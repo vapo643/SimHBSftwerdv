@@ -1,5 +1,9 @@
 import { Router } from 'express';
 import { getBrasiliaTimestamp } from '../../lib/timezone';
+import { storage } from '../../storage';
+import { db } from '../../lib/supabase';
+import { interWebhooks, interCollections } from '@shared/schema';
+import { eq } from 'drizzle-orm';
 
 const router = Router();
 
@@ -21,6 +25,14 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'Invalid webhook structure' });
     }
 
+    // Salvar webhook no banco para auditoria
+    await db.insert(interWebhooks).values({
+      evento,
+      payload: req.body,
+      processedAt: new Date(),
+      status: 'SUCCESS'
+    });
+
     // Processar diferentes tipos de eventos
     switch (evento) {
       case 'cobranca-paga':
@@ -28,18 +40,73 @@ router.post('/', async (req, res) => {
         console.log(`[INTER WEBHOOK] Cobrança: ${cobranca.seuNumero}`);
         console.log(`[INTER WEBHOOK] Valor: R$ ${cobranca.valorRecebido}`);
         
-        // Aqui você pode atualizar o status da proposta
-        // await updateProposalPaymentStatus(cobranca.seuNumero, 'PAGO');
+        // Atualizar collection no banco
+        if (cobranca.seuNumero) {
+          try {
+            // seuNumero é no formato "SIMPIX-{propostaId}-{numeroParcela}"
+            const parts = cobranca.seuNumero.split('-');
+            if (parts.length >= 2) {
+              const propostaId = parts[1];
+              
+              // Atualizar collection como paga
+              await db.update(interCollections)
+                .set({ 
+                  situacao: 'RECEBIDO',
+                  dataSituacao: new Date().toISOString(),
+                  valorPago: cobranca.valorRecebido?.toString(),
+                  updatedAt: new Date()
+                })
+                .where(eq(interCollections.seuNumero, cobranca.seuNumero));
+              
+              console.log(`[INTER WEBHOOK] ✅ Cobrança ${cobranca.seuNumero} da proposta ${propostaId} marcada como paga`);
+              
+              // Verificar se todas as cobranças foram pagas
+              const todasCobrancas = await db.select()
+                .from(interCollections)
+                .where(eq(interCollections.propostaId, propostaId));
+              
+              const todasPagas = todasCobrancas.every(c => c.situacao === 'RECEBIDO');
+              
+              if (todasPagas) {
+                // Atualizar proposta como quitada
+                await storage.updateProposta(propostaId, { status: 'pago' });
+                console.log(`[INTER WEBHOOK] 🎉 Proposta ${propostaId} totalmente quitada`);
+              }
+            }
+          } catch (error) {
+            console.error('[INTER WEBHOOK] ❌ Erro ao atualizar cobrança:', error);
+          }
+        }
         break;
 
       case 'cobranca-vencida':
         console.log('[INTER WEBHOOK] ⏰ Cobrança vencida');
-        // await updateProposalPaymentStatus(cobranca.seuNumero, 'VENCIDO');
+        
+        // Atualizar status da parcela para vencido
+        if (cobranca.seuNumero) {
+          try {
+            const parts = cobranca.seuNumero.split('-');
+            if (parts.length >= 3) {
+              const propostaId = parts[1];
+              
+              await db.update(interCollections)
+                .set({ 
+                  situacao: 'VENCIDO',
+                  dataSituacao: new Date().toISOString(),
+                  updatedAt: new Date()
+                })
+                .where(eq(interCollections.seuNumero, cobranca.seuNumero));
+              
+              console.log(`[INTER WEBHOOK] ⏰ Cobrança ${cobranca.seuNumero} da proposta ${propostaId} marcada como vencida`);
+            }
+          } catch (error) {
+            console.error('[INTER WEBHOOK] ❌ Erro ao atualizar parcela vencida:', error);
+          }
+        }
         break;
 
       case 'cobranca-cancelada':
         console.log('[INTER WEBHOOK] ❌ Cobrança cancelada');
-        // await updateProposalPaymentStatus(cobranca.seuNumero, 'CANCELADO');
         break;
 
       default:
