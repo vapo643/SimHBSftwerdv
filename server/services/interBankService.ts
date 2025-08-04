@@ -123,17 +123,23 @@ class InterBankService {
   } | null = null;
 
   constructor() {
+    // Auto-detect if we're using production credentials based on presence of CONTA_CORRENTE
+    const isProduction = !!process.env.CONTA_CORRENTE;
+    
     this.config = {
-      environment: process.env.NODE_ENV === 'production' ? 'production' : 'sandbox',
-      apiUrl: process.env.NODE_ENV === 'production' 
+      environment: isProduction ? 'production' : 'sandbox',
+      apiUrl: isProduction 
         ? 'https://cdpj.partners.bancointer.com.br'
         : 'https://cdpj-sandbox.partners.uatinter.co',
       clientId: process.env.CLIENT_ID || '',
       clientSecret: process.env.CLIENT_SECRET || '',
       certificate: process.env.CERTIFICATE || '',
       privateKey: process.env.PRIVATE_KEY || '',
-      contaCorrente: process.env.INTER_CONTA_CORRENTE || ''
+      contaCorrente: process.env.CONTA_CORRENTE || ''
     };
+    
+    console.log(`[INTER] 🏦 Initialized in ${this.config.environment} mode`);
+    console.log(`[INTER] 🌐 API URL: ${this.config.apiUrl}`);
 
     if (!this.config.clientId || !this.config.clientSecret) {
       console.warn('[INTER] ⚠️ Client credentials not configured. Inter Bank integration will not work.');
@@ -168,7 +174,7 @@ class InterBankService {
         'scope': 'boleto-cobranca.read boleto-cobranca.write webhook.write webhook.read' // Official scopes from documentation
       });
       
-      console.log(`[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=cobv.write cobv.read`);
+      console.log(`[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=${formBody.get('scope')}`);
 
       // Não logar o form body pois contém credenciais
       console.log(`[INTER] 🔒 Using mTLS certificate authentication`);
