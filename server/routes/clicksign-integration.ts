@@ -175,7 +175,7 @@ router.post('/propostas/:id/clicksign/regenerar', jwtAuthMiddleware, async (req:
         
         console.log(`[CLICKSIGN] ✅ Using existing CCB from Supabase: ${proposta.caminhoCcbAssinado}`);
       } catch (fileError) {
-        console.log(`[CLICKSIGN] ⚠️ Existing CCB file not found, generating new one: ${fileError.message}`);
+        console.log(`[CLICKSIGN] ⚠️ Existing CCB file not found, generating new one: ${fileError instanceof Error ? fileError.message : 'Unknown error'}`);
         
         // Generate new CCB if file doesn't exist
         const { generateCCB } = await import("../services/ccbGenerator");
@@ -220,8 +220,8 @@ router.post('/propostas/:id/clicksign/regenerar', jwtAuthMiddleware, async (req:
     await db
       .update(propostas)
       .set({
-        clicksignListKey: result.envelopeId,
-        clicksignDocumentKey: result.documentId || '',
+        clicksignListKey: result.requestSignatureKey || '',
+        clicksignDocumentKey: result.documentKey || '',
         clicksignSignerKey: result.signerId || '',
         clicksignSignUrl: result.signUrl || '',
         clicksignStatus: 'pending',
@@ -235,7 +235,7 @@ router.post('/propostas/:id/clicksign/regenerar', jwtAuthMiddleware, async (req:
     res.json({
       success: true,
       signUrl: result.signUrl,
-      envelopeId: result.envelopeId,
+      envelopeId: result.documentKey, // Keep as envelopeId for frontend compatibility
       message: 'Novo link de assinatura gerado com sucesso'
     });
 
@@ -399,14 +399,14 @@ router.post('/propostas/:id/clicksign/enviar', jwtAuthMiddleware, async (req: Au
       }
     );
 
-    console.log(`[CLICKSIGN] ✅ Sucesso! Envelope criado: ${result.envelopeId}`);
+    console.log(`[CLICKSIGN] ✅ Sucesso! Documento criado: ${result.documentKey}`);
 
     // Atualizar proposta no banco
     await db
       .update(propostas)
       .set({
-        clicksignListKey: result.envelopeId, // Using listKey for envelope ID
-        clicksignDocumentKey: result.documentId || '',
+        clicksignListKey: result.requestSignatureKey || '', // Using request signature key
+        clicksignDocumentKey: result.documentKey || '',
         clicksignSignerKey: result.signerId || '',
         clicksignSignUrl: result.signUrl || '',
         clicksignStatus: 'pending',
@@ -420,15 +420,15 @@ router.post('/propostas/:id/clicksign/enviar', jwtAuthMiddleware, async (req: Au
       propostaId,
       autorId: userId || '',
       statusNovo: 'clicksign_enviado',
-      observacao: `Contrato enviado para ClickSign. Envelope: ${result.envelopeId}`
+      observacao: `Contrato enviado para ClickSign. Documento: ${result.documentKey}`
     });
 
     console.log(`[CLICKSIGN] ✅ Proposta atualizada e log registrado`);
 
     res.json({
       message: 'Contrato enviado para ClickSign com sucesso',
-      envelopeId: result.envelopeId, // Keep as envelopeId for frontend compatibility
-      documentKey: result.documentId || '',
+      envelopeId: result.documentKey, // Keep as envelopeId for frontend compatibility
+      documentKey: result.documentKey || '',
       signerKey: result.signerId || '',
       signUrl: result.signUrl || '',
       status: 'pending',

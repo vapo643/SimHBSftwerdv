@@ -78,21 +78,21 @@ class ClickSignServiceV3 {
 
   constructor() {
     // ALWAYS use production ClickSign API for valid legal signatures
-    // NOTE: ClickSign uses v2 for their Envelope API, not v3
+    // ClickSign uses API v1 with query parameter authentication
     this.config = {
-      apiUrl: 'https://app.clicksign.com/api/v2',
+      apiUrl: 'https://app.clicksign.com/api/v1',
       apiToken: process.env.CLICKSIGN_API_TOKEN || '',
       environment: 'production'
     };
 
     if (!this.config.apiToken) {
-      console.error('[CLICKSIGN V2] ❌ ERROR: API token not configured! Check CLICKSIGN_API_TOKEN environment variable');
+      console.error('[CLICKSIGN V1] ❌ ERROR: API token not configured! Check CLICKSIGN_API_TOKEN environment variable');
       throw new Error('ClickSign API token is required but not configured');
     }
 
-    console.log(`[CLICKSIGN V2] 🚀 Initialized in PRODUCTION mode (legal signatures)`);
-    console.log(`[CLICKSIGN V2] API URL: ${this.config.apiUrl}`);
-    console.log(`[CLICKSIGN V2] Token configured: ${this.config.apiToken.substring(0, 10)}...`);
+    console.log(`[CLICKSIGN V1] 🚀 Initialized in PRODUCTION mode (legal signatures)`);
+    console.log(`[CLICKSIGN V1] API URL: ${this.config.apiUrl}`);
+    console.log(`[CLICKSIGN V1] Token configured: ${this.config.apiToken.substring(0, 10)}...`);
   }
 
   /**
@@ -106,21 +106,21 @@ class ClickSignServiceV3 {
     // Check rate limit
     if (this.rateLimitRemaining <= 0 && new Date() < this.rateLimitReset) {
       const waitTime = this.rateLimitReset.getTime() - Date.now();
-      console.log(`[CLICKSIGN V2] ⚠️ Rate limit reached. Waiting ${waitTime}ms`);
+      console.log(`[CLICKSIGN V1] ⚠️ Rate limit reached. Waiting ${waitTime}ms`);
       await new Promise(resolve => setTimeout(resolve, waitTime));
     }
 
-    const url = `${this.config.apiUrl}${endpoint}`;
-    // Use simple JSON for all endpoints per ClickSign documentation
+    // ClickSign uses query parameter authentication
+    const url = `${this.config.apiUrl}${endpoint}?access_token=${this.config.apiToken}`;
+    // Use standard JSON format for v1 API
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
-      'Accept': 'application/json',
-      'Authorization': this.config.apiToken
+      'Accept': 'application/json'
     };
 
-    console.log(`[CLICKSIGN V2] 🌐 Full URL: ${url}`);
-    console.log(`[CLICKSIGN V2] 📡 ${method} ${endpoint}`);
-    console.log(`[CLICKSIGN V2] Headers:`, { 
+    console.log(`[CLICKSIGN V1] 🌐 Full URL: ${url}`);
+    console.log(`[CLICKSIGN V1] 📡 ${method} ${endpoint}`);
+    console.log(`[CLICKSIGN V1] Headers:`, { 
       'Content-Type': headers['Content-Type'],
       'Accept': headers['Accept'],
       'Authorization': `${this.config.apiToken.substring(0, 10)}...`
@@ -146,22 +146,26 @@ class ClickSignServiceV3 {
 
       // Check if response is JSON
       const contentType = response.headers.get('content-type');
-      console.log(`[CLICKSIGN V2] Response content-type: ${contentType}`);
+      console.log(`[CLICKSIGN V1] Response content-type: ${contentType}`);
+      console.log(`[CLICKSIGN V1] Response status: ${response.status}`);
+      
+      // Always try to get text first to debug
+      const responseText = await response.text();
       
       let data;
-      if (contentType?.includes('application/json') || contentType?.includes('application/vnd.api+json')) {
-        data = await response.json();
-      } else {
-        const text = await response.text();
-        console.error(`[CLICKSIGN V2] ❌ Non-JSON response received!`);
-        console.error(`[CLICKSIGN V2] Response status: ${response.status}`);
-        console.error(`[CLICKSIGN V2] Response text (first 500 chars): ${text.substring(0, 500)}`);
-        throw new Error(`Expected JSON but received ${contentType}. Status: ${response.status}. This usually means the endpoint doesn't exist.`);
+      try {
+        data = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error(`[CLICKSIGN V1] ❌ Failed to parse JSON response!`);
+        console.error(`[CLICKSIGN V1] Response text (first 1000 chars): ${responseText.substring(0, 1000)}`);
+        console.error(`[CLICKSIGN V1] Full URL was: ${url}`);
+        console.error(`[CLICKSIGN V1] Status: ${response.status}`);
+        throw new Error(`Failed to parse JSON. Status: ${response.status}. Response starts with: ${responseText.substring(0, 100)}`);
       }
 
       if (!response.ok) {
-        console.error(`[CLICKSIGN V2] ❌ Error ${response.status}:`, data);
-        console.error(`[CLICKSIGN V2] ❌ Full error details:`, {
+        console.error(`[CLICKSIGN V1] ❌ Error ${response.status}:`, data);
+        console.error(`[CLICKSIGN V1] ❌ Full error details:`, {
           status: response.status,
           statusText: response.statusText,
           headers: Object.fromEntries(response.headers.entries()),
@@ -172,7 +176,7 @@ class ClickSignServiceV3 {
 
       return { data };
     } catch (error) {
-      console.error(`[CLICKSIGN V2] ❌ Request failed:`, error);
+      console.error(`[CLICKSIGN V1] ❌ Request failed:`, error);
       throw error;
     }
   }
@@ -206,60 +210,66 @@ class ClickSignServiceV3 {
     // Sanitize: Remove all non-numeric characters
     const cleanCpf = rawCpf.replace(/\D/g, '');
     
-    console.log(`[CLICKSIGN V2] 🧹 CPF sanitization: ${rawCpf} → ${cleanCpf}`);
+    console.log(`[CLICKSIGN V1] 🧹 CPF sanitization: ${rawCpf} → ${cleanCpf}`);
     
     // Validate using the library
     if (!cpf.isValid(cleanCpf)) {
-      console.error(`[CLICKSIGN V2] ❌ Invalid CPF: ${cleanCpf}`);
+      console.error(`[CLICKSIGN V1] ❌ Invalid CPF: ${cleanCpf}`);
       throw new Error('CPF do cliente é inválido. Operação abortada em ambiente de Produção.');
     }
     
-    console.log(`[CLICKSIGN V2] ✅ CPF validation passed: ${cleanCpf}`);
+    console.log(`[CLICKSIGN V1] ✅ CPF validation passed: ${cleanCpf}`);
     return cleanCpf;
   }
 
   /**
-   * Create a new envelope (supports atomic document creation)
+   * Create a document batch (ClickSign v1 doesn't have envelopes, uses batches)
    */
-  async createEnvelope(envelopeData: EnvelopeData) {
-    const isAtomic = envelopeData.documents && envelopeData.documents.length > 0;
-    console.log(`[CLICKSIGN V2] 🔨 Creating envelope ${isAtomic ? 'with documents (ATOMIC)' : '(empty)'}`);
-    console.log(`[CLICKSIGN V2] Envelope data:`, envelopeData);
+  async createDocumentBatch(documentData: any) {
+    console.log(`[CLICKSIGN V1] 🔨 Creating document batch`);
+    console.log(`[CLICKSIGN V1] Document data:`, documentData);
     
-    // Use simple JSON format from documentation
+    // Use simple JSON format for v1 API
     const requestBody = {
-      envelope: envelopeData
+      document: {
+        path: `/propostas/${Date.now()}.pdf`,
+        content_base64: documentData.content_base64,
+        deadline_at: documentData.deadline_at,
+        auto_close: true,
+        locale: 'pt-BR',
+        reminders: true,
+        block_after_refusal: true
+      }
     };
     
-    console.log(`[CLICKSIGN V2] 🔨 Request body:`, JSON.stringify(requestBody, null, 2));
+    console.log(`[CLICKSIGN V1] 🔨 Request body:`, JSON.stringify(requestBody, null, 2));
     
-    const response = await this.makeRequest<any>('POST', '/envelopes', requestBody);
+    const response = await this.makeRequest<any>('POST', '/documents', requestBody);
     
-    console.log(`[CLICKSIGN V2] 📦 Envelope response:`, JSON.stringify(response, null, 2));
+    console.log(`[CLICKSIGN V1] 📦 Document response:`, JSON.stringify(response, null, 2));
     
-    const envelope = response.data?.envelope || response.data;
-    console.log(`[CLICKSIGN V2] ✅ Envelope created: ${envelope.id}`);
+    const document = response.document || response;
+    console.log(`[CLICKSIGN V1] ✅ Document created: ${document.key}`);
     
-    return envelope;
+    return document;
   }
 
   /**
    * Add document to envelope
    */
   async addDocumentToEnvelope(envelopeId: string, documentData: DocumentData) {
-    console.log(`[CLICKSIGN V2] 🔨 Adding document to envelope ${envelopeId}`);
-    console.log(`[CLICKSIGN V2] Document data:`, documentData);
+    console.log(`[CLICKSIGN V1] 🔨 Adding document to envelope ${envelopeId}`);
+    console.log(`[CLICKSIGN V1] Document data:`, documentData);
     
-    // Use simple JSON format from documentation
+    // Use JSON:API format
     const requestBody = {
-      document: {
-        type: 'upload',
-        content: documentData.content_base64 || documentData.content,
-        filename: documentData.filename
+      data: {
+        type: 'documents',
+        attributes: documentData
       }
     };
     
-    console.log(`[CLICKSIGN V2] Request body being sent:`, JSON.stringify(requestBody, null, 2));
+    console.log(`[CLICKSIGN V1] Request body being sent:`, JSON.stringify(requestBody, null, 2));
     
     const response = await this.makeRequest<any>(
       'POST',
@@ -267,38 +277,40 @@ class ClickSignServiceV3 {
       requestBody
     );
 
-    console.log(`[CLICKSIGN V2] 📦 Document response:`, JSON.stringify(response, null, 2));
+    console.log(`[CLICKSIGN V1] 📦 Document response:`, JSON.stringify(response, null, 2));
     
-    const document = response.data?.document || response.data;
-    console.log(`[CLICKSIGN V2] ✅ Document added to envelope: ${document.id}`);
+    const document = response.data?.data || response.data;
+    console.log(`[CLICKSIGN V1] ✅ Document added to envelope: ${document.id}`);
     
     return document;
   }
 
   /**
-   * STEP 1: Create signer globally (correct v3 flow)
+   * Create signer (ClickSign v1 format)
    */
-  async createSignerGlobally(signerData: SignerData) {
-    console.log(`[CLICKSIGN V2] 🚀 STEP 1: Creating signer globally`);
-    console.log(`[CLICKSIGN V2] Signer data:`, {
+  async createSigner(signerData: SignerData) {
+    console.log(`[CLICKSIGN V1] 👤 Creating signer`);
+    console.log(`[CLICKSIGN V1] Signer data:`, {
       name: signerData.name,
       email: signerData.email,
       documentation: signerData.documentation
     });
     
-    // Use simple JSON format from documentation, NOT JSON:API format
+    // Use simple JSON format for v1
     const requestBody = {
       signer: {
         name: signerData.name,
         email: signerData.email,
-        phone: signerData.phone,
+        phone_number: signerData.phone,
         documentation: signerData.documentation,
-        ...(signerData.birthday && { birthday: signerData.birthday })
+        ...(signerData.birthday && { birthday: signerData.birthday }),
+        auths: ['email'], // Email authentication
+        delivery: 'email' // Delivery method
       }
     };
 
-    console.log(`[CLICKSIGN V2] 📡 POST /signers (global endpoint)`);
-    console.log(`[CLICKSIGN V2] Request body:`, JSON.stringify(requestBody, null, 2));
+    console.log(`[CLICKSIGN V1] 📡 POST /signers`);
+    console.log(`[CLICKSIGN V1] Request body:`, JSON.stringify(requestBody, null, 2));
 
     const response = await this.makeRequest<any>(
       'POST',
@@ -306,9 +318,9 @@ class ClickSignServiceV3 {
       requestBody
     );
 
-    const signer = response.data?.signer || response.data;
-    console.log(`[CLICKSIGN V2] ✅ STEP 1 COMPLETE: Signer created with ID: ${signer.id}`);
-    console.log(`[CLICKSIGN V2] Signer response:`, JSON.stringify(signer, null, 2));
+    const signer = response.signer || response;
+    console.log(`[CLICKSIGN V1] ✅ Signer created with key: ${signer.key}`);
+    console.log(`[CLICKSIGN V1] Signer response:`, JSON.stringify(signer, null, 2));
     
     return signer;
   }
@@ -324,8 +336,8 @@ class ClickSignServiceV3 {
    * STEP 2: Add signer to envelope using the proper endpoint
    */
   async addSignerToEnvelopeV3(envelopeId: string, signerId: string, signAs: 'party' | 'witness' | 'approver' = 'party') {
-    console.log(`[CLICKSIGN V2] 🚀 STEP 2: Adding signer to envelope`);
-    console.log(`[CLICKSIGN V2] Envelope ID: ${envelopeId}, Signer ID: ${signerId}, Sign as: ${signAs}`);
+    console.log(`[CLICKSIGN V1] 🚀 STEP 2: Adding signer to envelope`);
+    console.log(`[CLICKSIGN V1] Envelope ID: ${envelopeId}, Signer ID: ${signerId}, Sign as: ${signAs}`);
     
     const requestBody = {
       signer_id: signerId,
@@ -334,8 +346,8 @@ class ClickSignServiceV3 {
       message: 'Por favor, assine o Contrato de Crédito Bancário (CCB) do seu empréstimo.'
     };
 
-    console.log(`[CLICKSIGN V2] 📡 POST /envelopes/${envelopeId}/signers`);
-    console.log(`[CLICKSIGN V2] Request body:`, JSON.stringify(requestBody, null, 2));
+    console.log(`[CLICKSIGN V1] 📡 POST /envelopes/${envelopeId}/signers`);
+    console.log(`[CLICKSIGN V1] Request body:`, JSON.stringify(requestBody, null, 2));
 
     const response = await this.makeRequest<any>(
       'POST',
@@ -343,8 +355,8 @@ class ClickSignServiceV3 {
       requestBody
     );
 
-    console.log(`[CLICKSIGN V2] ✅ STEP 2 COMPLETE: Signer added to envelope`);
-    console.log(`[CLICKSIGN V2] Response:`, JSON.stringify(response, null, 2));
+    console.log(`[CLICKSIGN V1] ✅ STEP 2 COMPLETE: Signer added to envelope`);
+    console.log(`[CLICKSIGN V1] Response:`, JSON.stringify(response, null, 2));
     return response.data;
   }
 
@@ -352,9 +364,9 @@ class ClickSignServiceV3 {
    * Legacy method - DO NOT USE (kept for backwards compatibility during migration)
    */
   async addSignerToEnvelope(envelopeId: string, signerData: EnvelopeSignerData, fullSignerData?: SignerData) {
-    console.log(`[CLICKSIGN V2] ⚠️ WARNING: Using deprecated method addSignerToEnvelope`);
-    console.log(`[CLICKSIGN V2] This method uses the unstable /envelopes/{id}/signers endpoint`);
-    console.log(`[CLICKSIGN V2] Please use createSignerGlobally + createRequirementForSigner instead`);
+    console.log(`[CLICKSIGN V1] ⚠️ WARNING: Using deprecated method addSignerToEnvelope`);
+    console.log(`[CLICKSIGN V1] This method uses the unstable /envelopes/{id}/signers endpoint`);
+    console.log(`[CLICKSIGN V1] Please use createSignerGlobally + createRequirementForSigner instead`);
     
     // For now, throw an error to force migration
     throw new Error('addSignerToEnvelope is deprecated. Use the 2-step flow: createSignerGlobally + createRequirementForSigner');
@@ -364,7 +376,7 @@ class ClickSignServiceV3 {
    * Add requirement to envelope
    */
   async addRequirement(envelopeId: string, requirementData: RequirementData) {
-    console.log(`[CLICKSIGN V2] 🔨 Adding requirement to envelope ${envelopeId}`);
+    console.log(`[CLICKSIGN V1] 🔨 Adding requirement to envelope ${envelopeId}`);
     
     // Use correct JSON API format
     const requestBody = {
@@ -380,7 +392,7 @@ class ClickSignServiceV3 {
       requestBody
     );
 
-    console.log(`[CLICKSIGN V2] ✅ Requirement added: ${requirementData.type}`);
+    console.log(`[CLICKSIGN V1] ✅ Requirement added: ${requirementData.type}`);
     return response.data?.data || response.data;
   }
 
@@ -394,7 +406,7 @@ class ClickSignServiceV3 {
       {}
     );
 
-    console.log(`[CLICKSIGN V2] ✅ Envelope finished and sent for signature`);
+    console.log(`[CLICKSIGN V1] ✅ Envelope finished and sent for signature`);
     return response.data?.data || response.data;
   }
 
@@ -416,7 +428,7 @@ class ClickSignServiceV3 {
       {}
     );
 
-    console.log(`[CLICKSIGN V2] ✅ Envelope cancelled`);
+    console.log(`[CLICKSIGN V1] ✅ Envelope cancelled`);
     return response.data?.data || response.data;
   }
 
@@ -439,7 +451,7 @@ class ClickSignServiceV3 {
       webhook: webhookData
     });
 
-    console.log(`[CLICKSIGN V2] ✅ Webhook configured`);
+    console.log(`[CLICKSIGN V1] ✅ Webhook configured`);
     return response.data;
   }
 
@@ -458,8 +470,38 @@ class ClickSignServiceV3 {
       { phone, message }
     );
 
-    console.log(`[CLICKSIGN V2] ✅ WhatsApp notification sent`);
+    console.log(`[CLICKSIGN V1] ✅ WhatsApp notification sent`);
     return response.data;
+  }
+
+  /**
+   * Add signer to document (v1 API)
+   */
+  async addSignerToDocument(documentKey: string, signerKey: string) {
+    const requestBody = {
+      list: {
+        document_key: documentKey,
+        signer_key: signerKey,
+        sign_as: 'sign'
+      }
+    };
+
+    console.log(`[CLICKSIGN V1] 📡 POST /lists`);
+    const response = await this.makeRequest<any>('POST', '/lists', requestBody);
+    return response.list || response;
+  }
+
+  /**
+   * Request signature (v1 API)
+   */
+  async requestSignature(signerKey: string) {
+    const requestBody = {
+      request_signature_key: signerKey
+    };
+
+    console.log(`[CLICKSIGN V1] 📡 POST /notifications`);
+    const response = await this.makeRequest<any>('POST', '/notifications', requestBody);
+    return response;
   }
 
   /**
@@ -482,96 +524,67 @@ class ClickSignServiceV3 {
       
       // Create audit log for signature request
       const auditLog = clickSignSecurityService.createAuditLog(
-        'CLICKSIGN_V3_SEND_CCB',
+        'CLICKSIGN_V1_SEND_CCB',
         { proposalId, clientEmail: validatedClientData.email }
       );
-      console.log('[CLICKSIGN V3 AUDIT]', auditLog);
+      console.log('[CLICKSIGN V1 AUDIT]', auditLog);
 
-      console.log(`[CLICKSIGN V3 - ATOMIC] 🚀 Starting atomic CCB signature flow for proposal: ${proposalId}`);
+      console.log(`[CLICKSIGN V1] 🚀 Starting CCB signature flow for proposal: ${proposalId}`);
 
-      // 1. Ensure correct Data URI format
-      const dataUriContent = this.formatBase64ToDataURI(pdfBase64);
+      // 1. Ensure correct base64 format (no data URI prefix)
+      const cleanBase64 = pdfBase64.replace(/^data:application\/pdf;base64,/, '');
 
-      // 2. Create envelope (empty - API doesn't allow documents field)
-      const envelope = await this.createEnvelope({
-        name: `CCB - Proposta ${proposalId}`,
-        locale: 'pt-BR',
-        auto_close: true,
-        deadline_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days
-        block_after_refusal: true
-      });
-
-      console.log(`[CLICKSIGN V2] ✅ Envelope created: ${envelope.id}`);
-
-      // 3. Add document with CORRECT field name
-      const document = await this.addDocumentToEnvelope(envelope.id, {
-        content_base64: dataUriContent, // Using content_base64 instead of content
-        filename: `ccb_proposta_${proposalId}.pdf`
-      });
-
-      console.log(`[CLICKSIGN V2] ✅ Document added: ${document.id}`);
-
-      // 4. Validate and sanitize CPF before proceeding
-      console.log(`[CLICKSIGN V2] Validating CPF for client: ${clientData.name}`);
+      // 2. Validate and sanitize CPF before proceeding
+      console.log(`[CLICKSIGN V1] Validating CPF for client: ${clientData.name}`);
       const validatedCpf = this.sanitizeAndValidateCPF(clientData.cpf);
-      
-      // 5. STEP 1: Create signer globally (correct v3 flow)
-      const signer = await this.createSignerGlobally({
+
+      // 3. Upload document
+      console.log(`[CLICKSIGN V1] 📄 Uploading document`);
+      const document = await this.createDocumentBatch({
+        content_base64: cleanBase64,
+        deadline_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // 30 days
+      });
+      console.log(`[CLICKSIGN V1] ✅ Document uploaded with key: ${document.key}`);
+
+      // 4. Create signer
+      console.log(`[CLICKSIGN V1] 👤 Creating signer`);
+      const signer = await this.createSigner({
         name: clientData.name,
         email: clientData.email,
         phone: clientData.phone,
         documentation: validatedCpf,
         birthday: clientData.birthday
       });
+      console.log(`[CLICKSIGN V1] ✅ Signer created with key: ${signer.key}`);
 
-      console.log(`[CLICKSIGN V2] Global signer created with ID:`, signer.id);
-      
-      // 6. STEP 2: Add signer to envelope
-      const signerEnvelope = await this.addSignerToEnvelopeV3(
-        envelope.id,
-        signer.id,
-        'party' // Role: party (signatário)
-      );
-      
-      console.log(`[CLICKSIGN V2] Signer added to envelope successfully`);
+      // 5. Add signer to document
+      console.log(`[CLICKSIGN V1] 🔗 Adding signer to document`);
+      const list = await this.addSignerToDocument(document.key, signer.key);
+      console.log(`[CLICKSIGN V1] ✅ Signer added to document`);
 
-      // 7. Add selfie requirement for security (optional)
-      // await this.addRequirement(envelope.id, {
-      //   type: 'selfie',
-      //   signer_id: signer.id
-      // });
+      // 6. Request signature
+      console.log(`[CLICKSIGN V1] 📧 Requesting signature`);
+      const notification = await this.requestSignature(list.request_signature_key || signer.key);
+      console.log(`[CLICKSIGN V1] ✅ Signature requested`);
 
-      // 8. Finish envelope
-      const finishedEnvelope = await this.finishEnvelope(envelope.id);
+      // 7. Build sign URL
+      const signUrl = list.request_signature_key 
+        ? `https://app.clicksign.com/sign/${list.request_signature_key}`
+        : `https://app.clicksign.com/documento/${document.key}`;
 
-      // 9. Get sign URL
-      const signUrl = signerEnvelope?.request_signature_key 
-        ? `${this.config.apiUrl.replace('/api/v3', '')}/sign/${signerEnvelope.request_signature_key}`
-        : (signer.request_signature_key 
-          ? `${this.config.apiUrl.replace('/api/v3', '')}/sign/${signer.request_signature_key}`
-          : undefined);
-
-      console.log(`[CLICKSIGN V2] ✅ CCB sent for signature successfully`);
-      console.log(`[CLICKSIGN V2] Sign URL generated:`, signUrl);
-
-      if (!signUrl) {
-        console.error(`[CLICKSIGN V2] ⚠️ Warning: No request_signature_key received from API`);
-      }
-
-      // Get document ID from the addDocumentToEnvelope response
-      const documentId = document.id;
+      console.log(`[CLICKSIGN V1] ✅ CCB sent for signature successfully`);
+      console.log(`[CLICKSIGN V1] Sign URL generated:`, signUrl);
 
       return {
-        envelopeId: envelope.id,
-        documentId: documentId,
-        signerId: signer.id,
-        signUrl: signUrl || '',
-        requestSignatureKey: signer.request_signature_key || '',
+        documentKey: document.key,
+        signerId: signer.key,
+        signUrl: signUrl,
+        requestSignatureKey: list.request_signature_key || '',
         status: 'sent'
       };
 
     } catch (error) {
-      console.error(`[CLICKSIGN V2] ❌ Failed to send CCB for signature:`, error);
+      console.error(`[CLICKSIGN V1] ❌ Failed to send CCB for signature:`, error);
       throw error;
     }
   }
@@ -582,10 +595,10 @@ class ClickSignServiceV3 {
   async testConnection(): Promise<boolean> {
     try {
       await this.makeRequest('GET', '/envelopes?limit=1');
-      console.log(`[CLICKSIGN V2] ✅ Connection test successful`);
+      console.log(`[CLICKSIGN V1] ✅ Connection test successful`);
       return true;
     } catch (error) {
-      console.error(`[CLICKSIGN V2] ❌ Connection test failed:`, error);
+      console.error(`[CLICKSIGN V1] ❌ Connection test failed:`, error);
       return false;
     }
   }
