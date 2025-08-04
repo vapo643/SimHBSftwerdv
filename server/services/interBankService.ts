@@ -525,7 +525,7 @@ class InterBankService {
       // Log COMPLETE request data for debugging
       console.log('[INTER] 📋 COMPLETE Request data:', JSON.stringify(cobrancaData, null, 2));
 
-      const response = await this.makeRequest('/cobranca/v2/cobrancas', 'POST', cobrancaData);
+      const response = await this.makeRequest('/cobranca/v3/cobrancas', 'POST', cobrancaData);
       
       console.log(`[INTER] ✅ Collection created successfully: ${response.codigoSolicitacao}`);
       return response;
@@ -543,7 +543,7 @@ class InterBankService {
     try {
       console.log(`[INTER] 📋 Retrieving collection: ${codigoSolicitacao}`);
 
-      const response = await this.makeRequest(`/cobranca/v2/cobrancas/${codigoSolicitacao}`);
+      const response = await this.makeRequest(`/cobranca/v3/cobrancas/${codigoSolicitacao}`);
       
       console.log(`[INTER] ✅ Collection retrieved successfully`);
       return response;
@@ -585,7 +585,7 @@ class InterBankService {
         }
       });
 
-      const response = await this.makeRequest(`/cobranca/v2/cobrancas?${queryParams.toString()}`);
+      const response = await this.makeRequest(`/cobranca/v3/cobrancas?${queryParams.toString()}`);
       
       console.log(`[INTER] ✅ Found ${response.totalElementos} collections`);
       return response;
@@ -603,7 +603,7 @@ class InterBankService {
     try {
       console.log(`[INTER] ✏️ Editing collection: ${codigoSolicitacao}`);
 
-      const response = await this.makeRequest(`/cobranca/v2/cobrancas/${codigoSolicitacao}`, 'PATCH', updateData);
+      const response = await this.makeRequest(`/cobranca/v3/cobrancas/${codigoSolicitacao}`, 'PATCH', updateData);
       
       console.log(`[INTER] ✅ Collection edited successfully`);
       return response;
@@ -622,7 +622,7 @@ class InterBankService {
       console.log(`[INTER] ❌ Cancelling collection: ${codigoSolicitacao}`);
 
       const response = await this.makeRequest(
-        `/cobranca/v2/cobrancas/${codigoSolicitacao}/cancelamento`, 
+        `/cobranca/v3/cobrancas/${codigoSolicitacao}/cancelamento`, 
         'POST', 
         { motivoCancelamento }
       );
@@ -644,7 +644,7 @@ class InterBankService {
       console.log(`[INTER] 📄 Getting PDF for collection: ${codigoSolicitacao}`);
 
       const token = await this.getAccessToken();
-      const url = `${this.config.apiUrl}/cobranca/v2/cobrancas/${codigoSolicitacao}/pdf`;
+      const url = `${this.config.apiUrl}/cobranca/v3/cobrancas/${codigoSolicitacao}/pdf`;
 
       const headers: Record<string, string> = {
         'Authorization': `Bearer ${token}`,
@@ -691,7 +691,7 @@ class InterBankService {
         }
       });
 
-      const response = await this.makeRequest(`/cobranca/v2/cobrancas/sumario?${queryParams.toString()}`);
+      const response = await this.makeRequest(`/cobranca/v3/cobrancas/sumario?${queryParams.toString()}`);
       
       console.log(`[INTER] ✅ Summary retrieved successfully`);
       return response;
@@ -768,7 +768,7 @@ class InterBankService {
       console.log(`[INTER] 💰 Simulating payment for collection: ${codigoSolicitacao}`);
 
       const response = await this.makeRequest(
-        `/cobranca/v2/cobrancas/${codigoSolicitacao}/pagamento`, 
+        `/cobranca/v3/cobrancas/${codigoSolicitacao}/pagamento`, 
         'POST', 
         { valorPago }
       );
@@ -880,12 +880,12 @@ class InterBankService {
           uf: uf,
           cep: cepLimpo
         },
-        // Desconto apenas se houver valor
-        // desconto: {
-        //   codigo: 'PERCENTUALDATAINFORMADA',
-        //   taxa: 0,
-        //   quantidadeDias: 0
-        // },
+        // Desconto obrigatório mesmo com valor zero
+        desconto: {
+          codigo: 'PERCENTUALDATAINFORMADA',
+          taxa: 0,
+          quantidadeDias: 0
+        },
         // Multa e mora são opcionais mas vamos incluir com valores padrão
         multa: {
           codigo: 'PERCENTUAL',
@@ -901,7 +901,9 @@ class InterBankService {
           linha3: 'Pague via PIX ou boleto bancário',
           linha4: 'Dúvidas: contato@simpix.com.br',
           linha5: 'www.simpix.com.br'
-        }
+        },
+        // Campo obrigatório segundo a documentação oficial
+        formasRecebimento: ['BOLETO', 'PIX']
       };
 
       console.log('[INTER] 🔥🔥🔥 FINAL COBRANCA DATA BEFORE SENDING 🔥🔥🔥');
