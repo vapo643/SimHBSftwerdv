@@ -1,0 +1,497 @@
+DIAGNÓSTICO PROFUNDO E PLANO DE AÇÃO: Resolução do Erro Persistente OAuth2/mTLS na API v3 do Banco Inter
+I. Sumário Executivo e Análise Preliminar
+Este relatório apresenta uma análise forense detalhada do erro persistente 400 Bad Request com corpo de resposta vazio, encontrado durante a tentativa de autenticação OAuth2 com a API v3 do Banco Inter. A análise transcende as verificações padrão e foca em causas-raiz complexas relacionadas à implementação de mTLS (Mutual Transport Layer Security), configuração de ambiente e nuances do cliente HTTP.
+
+Recontextualização do Problema
+O erro 400 Bad Request, quando acompanhado por um corpo de resposta vazio (content-length: 0), não é um erro de aplicação OAuth2 típico. Erros de aplicação, como credenciais inválidas, geralmente retornam um corpo JSON estruturado, conforme a RFC 7807, algo que a própria API Pix do Banco Inter faz em outros cenários. A ausência de um corpo de resposta é uma assinatura clássica de uma rejeição prematura da conexão na camada de borda da infraestrutura do servidor, como um Load Balancer, API Gateway ou Web Application Firewall (WAF).
+
+Essa rejeição ocorre tipicamente durante o handshake TLS, no momento em que o servidor valida o certificado apresentado pelo cliente. Se o certificado do cliente for inválido, malformado, não confiável ou não atender a uma política de segurança específica, o dispositivo de borda encerra a conexão imediatamente com um código de status HTTP genérico. Ele o faz antes que a requisição seja encaminhada para a lógica da aplicação backend (o servidor OAuth2), que seria responsável por gerar uma resposta de erro JSON detalhada. Portanto, a investigação deve ser redirecionada: o problema primário não reside no fluxo OAuth2 (
+
+grant_type, scope, etc.), mas sim em uma falha na autenticação do cliente no nível do protocolo TLS.
+
+Análise do Header traceparent
+A presença do header traceparent na resposta, com o valor 00-72555a00aff2919ac0f603dce306a458-14fa70b32ce7602f-00, é uma evidência crucial. Este header é um padrão da W3C Trace Context, utilizado para rastreamento distribuído em arquiteturas de microsserviços. Sua existência na resposta do servidor do Banco Inter confirma inequivocamente que:
+
+A conexão TCP/IP do ambiente Replit para a infraestrutura do Banco Inter foi estabelecida com sucesso.
+
+A requisição passou por firewalls de rede básicos e foi recebida por um componente da infraestrutura do banco que participa do sistema de rastreamento distribuído.
+
+O problema não é um bloqueio de rede fundamental (como um bloqueio de toda a faixa de IPs do Replit) ou um erro de resolução de DNS.
+
+Este header isola o problema no estágio de negociação do protocolo seguro (mTLS) ou na interpretação dos dados da aplicação dentro do túnel TLS já estabelecido.
+
+Principais Hipóteses de Investigação
+Com base nos sintomas e na evidência do traceparent, a análise se concentrará em três pilares de investigação, em ordem de probabilidade:
+
+Falha na Validação do Certificado mTLS: A causa mais provável. Isso engloba problemas com o formato do certificado, a integridade da sua cadeia de confiança, ou a validação de campos específicos dentro do certificado que não estão sendo atendidos pela implementação atual.
+
+Restrições do Ambiente de Hospedagem (Replit): O ambiente de Platform-as-a-Service (PaaS) do Replit introduz variáveis de rede (IPs de saída dinâmicos, possíveis regras de egress) que podem ser incompatíveis com os requisitos de segurança do Banco Inter.
+
+Nuances da Implementação do Cliente HTTP (Node.js): Configurações sutis, mas críticas, no https.Agent do Node.js ou na forma como a requisição fetch é construída, que podem estar gerando uma incompatibilidade com a pilha de servidores do Banco Inter.
+
+A estratégia diagnóstica adotada neste relatório seguirá uma abordagem metódica para testar cada uma dessas hipóteses, começando pela mais provável e utilizando ferramentas externas para isolar as variáveis do problema.
+
+II. Análise Forense do Handshake mTLS: A Causa Raiz Mais Provável
+A probabilidade mais alta é de que a falha resida na forma como o certificado do cliente está sendo apresentado e validado. Uma implementação mTLS robusta possui múltiplos pontos de falha que vão além da simples presença de um arquivo de certificado e chave.
+
+Investigação 1: Formato e Empacotamento do Certificado (PFX vs. PEM)
+Uma discrepância crítica foi identificada entre a implementação atual e a documentação oficial do Banco Inter. A implementação utiliza arquivos separados no formato PEM (.crt para o certificado e .key para a chave privada). No entanto, a documentação dos SDKs oficiais do Banco Inter, como os de Java e C#, instrui explicitamente os desenvolvedores a combinar o certificado e a chave em um único arquivo de formato PKCS#12 (.pfx) usando o utilitário OpenSSL.
+
+A razão para essa exigência é técnica e fundamental. Sistemas de grande porte, especialmente aqueles com um histórico de desenvolvimento em plataformas como Java, frequentemente padronizam o uso de um único "Keystore" (como arquivos JKS ou PFX) para gerenciar credenciais criptográficas. O servidor de borda do Banco Inter, que termina a conexão TLS, pode estar configurado para esperar e analisar um bundle PFX. Ao receber os arquivos PEM separados, ele pode falhar em associar corretamente a chave privada ao certificado público, resultando em uma falha de handshake que se manifesta como um erro 400 genérico.
+
+Ações Corretivas:
+
+Gerar o arquivo PFX: O primeiro passo é seguir a recomendação da documentação do banco e criar o arquivo .pfx. Execute o seguinte comando OpenSSL no terminal, substituindo os nomes dos arquivos pelos seus:
+
+Bash
+
+openssl pkcs12 -export -out inter.pfx -inkey "seu_arquivo_de_chave.key" -in "seu_arquivo_de_certificado.crt" -aes256
+Será solicitado que se crie uma senha (passphrase) para o arquivo PFX. Guarde esta senha, pois ela será necessária na configuração da aplicação.
+
+Atualizar a Configuração do https.Agent em Node.js: Modifique o código TypeScript para carregar o arquivo PFX em vez dos arquivos PEM individuais. O objeto https.Agent deve ser configurado com as propriedades pfx e passphrase.
+
+TypeScript
+
+import https from 'https';
+import fs from 'fs';
+
+// Carregue o arquivo PFX e a senha (idealmente de variáveis de ambiente)
+const pfxCertificate = fs.readFileSync('/path/to/your/inter.pfx');
+const pfxPassphrase = 'SUA_SENHA_DO_PFX';
+
+const agent = new https.Agent({
+    pfx: pfxCertificate,
+    passphrase: pfxPassphrase,
+    rejectUnauthorized: true // Manter a segurança
+});
+
+// Use este 'agent' na sua chamada fetch
+const response = await fetch(tokenUrl, {
+    method: 'POST',
+    headers: { /*... seus headers... */ },
+    body: params.toString(),
+    agent // Utiliza o agente configurado com PFX
+});
+Investigação 2: A Cadeia de Certificados (Certificate Chain)
+Um segundo ponto crítico, e frequentemente negligenciado, em mTLS é a necessidade do cliente enviar não apenas seu próprio certificado (o "leaf certificate"), mas também a cadeia de certificados intermediários que o emitiram. O servidor precisa validar a "cadeia de confiança" completa, desde o certificado do cliente, passando por uma ou mais Autoridades Certificadoras (CAs) intermediárias, até uma CA raiz em que o servidor confia.
+
+A configuração atual do https.Agent especifica apenas cert e key. A propriedade ca está ausente. No Node.js, a propriedade ca é usada para fornecer certificados de CA adicionais a serem confiados ou, no contexto de mTLS, para fornecer a cadeia de certificados intermediários que o cliente deve apresentar ao servidor. Sem isso, o servidor do Banco Inter recebe apenas o certificado final e, ao não conseguir construir o caminho de validação até sua CA raiz confiável, rejeita a conexão.
+
+Ações Corretivas:
+
+Obter a Cadeia de Certificados do Inter: O Banco Inter deve disponibilizar os certificados de suas CAs intermediárias em seu portal de desenvolvedores. Guias de outras plataformas indicam que o download do certificado .crt é um passo padrão. Se não estiverem explicitamente disponíveis para download, é possível extraí-los de uma conexão bem-sucedida usando 
+
+openssl s_client (detalhado na Seção V).
+
+Empacotar a Cadeia: Concatene o certificado da CA intermediária (e a da raiz, se fornecida) em um único arquivo PEM. A ordem é importante: geralmente, o certificado intermediário vem primeiro, seguido pelo raiz.
+
+Bash
+
+cat inter-intermediate-ca.pem inter-root-ca.pem > inter-chain.pem
+Atualizar a Configuração do https.Agent: Inclua a propriedade ca na configuração do agente, apontando para o arquivo da cadeia que foi criado.
+
+TypeScript
+
+import https from 'https';
+import fs from 'fs';
+
+const agent = new https.Agent({
+    cert: fs.readFileSync('/path/to/your/cert.crt'),
+    key: fs.readFileSync('/path/to/your/private.key'),
+    ca: fs.readFileSync('/path/to/your/inter-chain.pem'), // Fornecendo a cadeia de confiança
+    rejectUnauthorized: true
+});
+Note que esta abordagem com PEM é uma alternativa à abordagem PFX. A abordagem PFX (Investigação 1) é a mais provável de funcionar, pois o arquivo PFX já pode conter a cadeia completa. Esta investigação é o plano B se a abordagem PFX falhar.
+
+Investigação 3: Validação do Common Name (CN) e Subject Alternative Name (SAN)
+Instituições financeiras podem implementar uma camada adicional de segurança na validação do mTLS, verificando se campos específicos dentro do certificado do cliente correspondem a valores esperados. Os campos mais comuns para essa verificação são o Common Name (CN) e o Subject Alternative Name (SAN). O servidor pode, por exemplo, verificar se o CN do certificado corresponde ao CNPJ da empresa titular da conta  ou se um dos SANs corresponde ao 
+
+client_id da aplicação.
+
+Embora o certificado tenha sido baixado do portal do Inter, é crucial verificar seu conteúdo para garantir que não há discrepâncias.
+
+Comandos de Diagnóstico:
+
+Utilize os seguintes comandos openssl para inspecionar os campos relevantes do seu certificado:
+
+Verificar o Subject Completo (inclui o CN):
+
+Bash
+
+openssl x509 -noout -subject -in seu_arquivo_de_certificado.crt
+A saída será algo como: subject= /C=BR/ST=State/L=City/O=Organization/OU=OrgUnit/CN=your.common.name. Verifique se o valor de 
+
+CN está correto.
+
+Verificar os Subject Alternative Names (SANs):
+
+Bash
+
+openssl x509 -noout -text -in seu_arquivo_de_certificado.crt | grep -A1 "Subject Alternative Name"
+Isso mostrará a seção de SANs, que pode conter entradas como DNS:some.domain, IP Address:1.2.3.4, etc.. Verifique se os valores correspondem ao esperado.
+
+Se for encontrada uma discrepância, a única solução é contatar o suporte do Banco Inter para esclarecer os requisitos exatos para esses campos e, se necessário, solicitar a emissão de um novo certificado.
+
+A hierarquia de depuração para problemas de certificado deve seguir uma ordem lógica para máxima eficiência: primeiro, garantir que o formato e o empacotamento (.pfx) estão corretos. Se o erro persistir, garantir que a cadeia de confiança completa está sendo fornecida. Somente após esgotar essas duas vias, a investigação deve se aprofundar no conteúdo específico do certificado, como os campos CN e SAN.
+
+III. O Ambiente Replit: Isolando Fatores Externos
+O ambiente de hospedagem é uma variável crítica que deve ser sistematicamente isolada e testada. Plataformas PaaS como o Replit, embora convenientes, podem introduzir restrições de rede que interferem em protocolos de segurança rigorosos como o mTLS.
+
+Investigação 4: Restrições de Rede de Saída (Egress) e IP Allow-listing
+Aplicações hospedadas no Replit fazem requisições de saída a partir de um pool de endereços IP dinâmicos e compartilhados, não de um IP estático dedicado. Além disso, a documentação do Replit menciona a existência de limites sobre o número de conexões de saída concorrentes e a largura de banda, que são determinadas pelo plano do usuário.
+
+Por outro lado, é uma prática de segurança comum em instituições financeiras restringir o acesso a APIs sensíveis através de um "allow-list" de endereços IP. Se o Banco Inter emprega essa política, as requisições originadas dos IPs dinâmicos do Replit seriam bloqueadas pelo firewall do banco, resultando em uma falha de conexão que poderia se manifestar como um timeout ou um erro genérico como o 400 Bad Request. Outras plataformas de nuvem oferecem maneiras de obter um IP de saída estático justamente para contornar esse problema , algo que o Replit não parece oferecer de forma nativa para deployments dinâmicos.
+
+Plano de Teste para Isolamento de Ambiente:
+
+A estratégia mais eficaz para confirmar ou descartar o Replit como a causa do problema é realizar testes de um ambiente de rede diferente e controlado.
+
+Teste a partir da Máquina Local: Execute o comando curl completo (detalhado na Seção IV) a partir do terminal de uma máquina de desenvolvimento local. Se esta requisição for bem-sucedida (retornando um token de acesso), isso é um forte indicador de que o problema está relacionado ao ambiente de rede do Replit.
+
+Teste a partir de uma VM na Nuvem: Para um teste definitivo, provisione uma máquina virtual básica em um provedor de nuvem (como uma t2.micro na AWS EC2 ou uma e2-micro no Google Cloud Platform). Essas VMs possuem um endereço IP público estável e conhecido. Instale o curl e execute o mesmo comando. Se a requisição funcionar a partir da VM, é quase certo que a rede do Replit é o problema. O próximo passo seria contatar o suporte do Banco Inter para perguntar sobre a necessidade de cadastrar IPs de origem no allow-list.
+
+Investigação 5: Potencial Interferência de Protocolo no Ambiente PaaS
+Embora menos provável, alguns ambientes PaaS podem ter proxies de rede transparentes ou outras camadas de infraestrutura que interferem na negociação do handshake mTLS. Isso pode incluir a modificação ou remoção de extensões TLS, a imposição de um conjunto restrito de suítes de cifras (cipher suites) ou outras manipulações no tráfego que quebram a comunicação com servidores que têm expectativas muito específicas. Usuários em fóruns já relataram dificuldades genéricas com fluxos de autenticação no Replit, o que sugere que o ambiente pode ter suas peculiaridades.
+
+Esta hipótese se torna relevante se os testes de curl a partir de ambientes externos (local/VM) funcionarem, mas a aplicação Node.js dentro do Replit continuar a falhar, mesmo após a aplicação de todas as correções de certificado. Nesse cenário, a conclusão seria uma incompatibilidade fundamental entre a implementação TLS do Node.js no ambiente Replit e os servidores do Banco Inter. A mitigação definitiva seria migrar a aplicação para um ambiente de hospedagem com maior controle sobre a configuração de rede, como uma VM dedicada ou um contêiner em um serviço como AWS Fargate ou Google Cloud Run.
+
+O cenário clássico de "funciona na minha máquina" é, neste caso, uma ferramenta de diagnóstico poderosa. É a maneira mais rápida de confirmar ou negar uma classe inteira de problemas relacionados às políticas de rede de saída do Replit , NAT, ou potencial bloqueio de IP.
+
+IV. Auditoria da Requisição HTTP e do Cliente Node.js
+Esta seção analisa a implementação do cliente HTTP em Node.js, assumindo, para fins de diagnóstico, que o certificado e o ambiente não são o problema. O objetivo é garantir que a requisição seja construída de forma perfeitamente compatível com as expectativas do servidor.
+
+Investigação 6: Configurações Avançadas do https.Agent
+As configurações padrão do https.Agent do Node.js podem não ser suficientes para se comunicar com um servidor financeiro de alta segurança. É necessário auditar e, se preciso, definir explicitamente parâmetros TLS avançados.
+
+Parâmetros Chave para Diagnóstico:
+
+ciphers: O servidor do Banco Inter pode exigir uma suíte de cifras específica e moderna, rejeitando as mais antigas ou mais fracas. Forçar um conjunto de cifras fortes pode resolver falhas de negociação. A lista de cifras pode ser obtida inspecionando uma conexão bem-sucedida com openssl s_client.
+
+secureProtocol: Definir explicitamente a versão mínima do protocolo TLS (ex: TLSv1_2_method ou TLSv1_3_method) previne "downgrade attacks" e garante a compatibilidade com servidores que desabilitaram versões mais antigas como TLS 1.0 e 1.1.
+
+keepAlive: Embora o reaproveitamento de conexões (keep-alive) melhore a performance, implementações com bugs em qualquer um dos lados (cliente ou servidor) podem levar a erros intermitentes ou conexões travadas. Desabilitar o keepAlive (keepAlive: false) é um passo de diagnóstico valioso para eliminar essa variável.
+
+Configuração de Agente "Paranoica" para Teste:
+
+O código a seguir apresenta uma configuração de https.Agent mais explícita e robusta, que pode ser usada para substituir a atual durante os testes:
+
+TypeScript
+
+import https from 'https';
+import tls from 'tls';
+
+// Lista de cifras modernas e fortes. Pode ser ajustada conforme necessário.
+const HIGH_SECURITY_CIPHERS =.join(':');
+
+const agent = new https.Agent({
+    // Usar a configuração de PFX da Investigação 1
+    pfx: fs.readFileSync('/path/to/your/inter.pfx'),
+    passphrase: 'SUA_SENHA_DO_PFX',
+    
+    // Configurações de segurança explícitas
+    ciphers: HIGH_SECURITY_CIPHERS,
+    minVersion: 'TLSv1.2', // Força no mínimo TLS 1.2
+    
+    // Desabilitar keep-alive para diagnóstico
+    keepAlive: false 
+});
+Investigação 7: Reconstrução da Requisição com curl para Validação de Byte-Level
+A ferramenta curl é o padrão-ouro para testes de API e serve como uma implementação de referência. Se uma requisição curl funcionar, qualquer falha persistente na aplicação Node.js está, com certeza, na forma como a aplicação constrói a requisição. Um erro comum, por exemplo, é enviar os parâmetros no corpo como JSON em vez de x-www-form-urlencoded, ou como parâmetros de query na URL em vez de no corpo.
+
+Comando curl de Referência:
+
+O comando a seguir replica precisamente a requisição de autenticação, incluindo o mTLS. Ele deve ser executado a partir de um terminal com acesso aos arquivos de certificado.
+
+Bash
+
+curl --request POST 'https://cdpj.partners.bancointer.com.br/oauth/v2/token' \
+--cert /caminho/para/seu/certificado.crt \
+--key /caminho/para/sua/chave.key \
+--cacert /caminho/para/sua/inter-chain.pem \
+--header 'Content-Type: application/x-www-form-urlencoded' \
+--data-urlencode 'client_id=SEU_CLIENT_ID' \
+--data-urlencode 'client_secret=SEU_CLIENT_SECRET' \
+--data-urlencode 'grant_type=client_credentials' \
+--data-urlencode 'scope=boleto-cobranca.read boleto-cobranca.write webhook.read webhook.write' \
+--verbose
+Nota: --cacert é necessário se a cadeia de certificados intermediários for um fator (Investigação 2). Se a abordagem PFX for usada, o curl também suporta o formato com --cert-type P12 e --cert inter.pfx:senha.
+
+A opção --verbose é crucial, pois mostrará detalhes do handshake TLS e os headers da requisição e resposta.
+
+Depuração curl Avançada:
+
+Para uma análise de nível de byte, a flag --trace-ascii <arquivo.txt> é inestimável. Ela salva a requisição e a resposta brutas, incluindo todos os headers e o corpo, em um arquivo de texto. Isso permite uma comparação forense com o que a aplicação Node.js está enviando, revelando discrepâncias sutis em codificação de caracteres, quebras de linha ou formatação do corpo x-www-form-urlencoded.
+
+V. Plano de Ação Estratégico e Solução Definitiva
+A seguir, um plano de ação sequencial e priorizado para diagnosticar e resolver o problema de forma definitiva. É imperativo seguir as fases na ordem apresentada para isolar as variáveis eficientemente.
+
+Fase 1: Validação Externa e Isolamento do Problema (Prioridade Máxima)
+Objetivo: Validar as credenciais (certificados, client_id/secret) e a conectividade de rede de forma completamente independente da aplicação Node.js e do ambiente Replit.
+
+Passo 1: Teste de Handshake TLS Bruto com openssl s_client
+Esta ferramenta tenta estabelecer uma conexão TLS e fornece um output detalhado sobre o handshake, a cadeia de certificados do servidor e a negociação de cifras. É o teste mais fundamental da validade dos seus certificados no nível do protocolo.
+
+Bash
+
+openssl s_client -connect cdpj.partners.bancointer.com.br:443 \
+-cert /caminho/para/seu/certificado.crt \
+-key /caminho/para/sua/chave.key \
+-CAfile /caminho/para/sua/inter-chain.pem \
+-state -debug -status
+Resultado de Sucesso: A conexão é estabelecida, o output mostra Verification: OK e a sessão entra em modo interativo (aguardando input). Isso prova que seus certificados são aceitos pelo servidor do Inter para o handshake mTLS.
+
+Resultado de Falha: A conexão falha com um erro de verificação (verify error). A análise do output de debug indicará a causa (ex: unable to get local issuer certificate, indicando um problema na cadeia de certificados).
+
+Passo 2: Execução da Requisição curl Completa de um Ambiente Confiável
+Utilize o comando curl da Seção IV, executando-o a partir da sua máquina local ou de uma VM na nuvem.
+
+Resultado de Sucesso: A curl retorna um status 200 OK com um corpo JSON contendo o access_token. Implicação: Suas credenciais (client_id, secret, certificados) estão corretas e válidas. O problema está confinado à sua aplicação Node.js ou ao ambiente Replit.
+
+Resultado de Falha: A curl retorna o mesmo erro 400 Bad Request. Implicação: As credenciais em si estão com problemas. A causa mais provável é o formato/empacotamento do certificado (PEM vs. PFX) ou uma cadeia de certificados incompleta.
+
+Fase 2: Implementação de Código Corrigida e Robusta
+Objetivo: Aplicar os aprendizados da investigação para corrigir o código da aplicação.
+
+Passo 1: Re-empacotar os Certificados para o formato PFX.
+Siga as instruções da Investigação 1 para gerar o arquivo inter.pfx com o OpenSSL.
+
+Passo 2: Atualizar a Configuração do https.Agent.
+Implemente a configuração de agente robusta, utilizando o arquivo PFX e definindo explicitamente os parâmetros de segurança, como demonstrado na Investigação 6.
+
+Passo 3: Testar a Aplicação.
+Faça o deploy da aplicação corrigida. Idealmente, teste primeiro em um ambiente de desenvolvimento local ou em uma VM (se a Fase 1 indicou um problema no Replit) antes de enviar para o ambiente de produção no Replit.
+
+Fase 3: Engajamento Eficaz com o Suporte Técnico do Banco Inter
+Objetivo: Se as fases 1 e 2 não resolverem o problema, é necessário contatar o suporte do Inter com dados técnicos precisos para agilizar a resolução.
+
+Quando Contatar: Apenas após completar as Fases 1 e 2. Isso demonstra que uma investigação completa foi realizada do seu lado.
+
+Canais de Suporte: Utilize os canais oficiais de atendimento listados no site do banco. O portal do desenvolvedor e seu fórum não são canais de suporte oficiais para problemas urgentes ou específicos da conta.
+
+Template de Comunicação:
+
+Assunto: Erro Crítico de Autenticação mTLS - API v3 Boletos - traceparent: 00-72555a00aff2919ac0f603dce306a458-14fa70b32ce7602f-00
+
+Prezada equipe de suporte da API do Banco Inter,
+
+Estamos enfrentando um erro crítico e persistente HTTP 400 Bad Request com corpo de resposta vazio ao tentar obter um token OAuth2 (grant_type=client_credentials) no endpoint de produção https://cdpj.partners.bancointer.com.br/oauth/v2/token.
+
+Realizamos um diagnóstico técnico aprofundado e gostaríamos de compartilhar nossos achados para agilizar a resolução.
+
+Cenário A (Sucesso no curl externo): "Confirmamos com curl a partir de um IP externo ao nosso ambiente de produção que nossas credenciais (client_id, secret) e nosso par de certificados mTLS são válidos e capazes de obter um token de acesso com sucesso. Isso isola o problema ao nosso ambiente de hospedagem (Replit) ou à interação específica da nossa aplicação Node.js."
+
+Cenário B (Falha no curl externo): "Mesmo utilizando curl a partir de um IP externo, o erro 400 persiste. Isso sugere um problema com os próprios certificados ou com as credenciais, apesar de termos seguido a documentação."
+
+Para nos ajudar a resolver este impasse, poderiam por favor confirmar os seguintes requisitos técnicos para a conexão mTLS?
+
+Formato do Certificado: O servidor de autenticação espera obrigatoriamente um bundle PKCS#12 (.pfx) ou aceita um par de arquivos PEM (.crt e .key)? A documentação do SDK sugere PFX.
+
+Cadeia de Certificados: É mandatório que o cliente envie a cadeia de certificados da CA intermediária completa durante o handshake TLS?
+
+IP Allow-listing: Existe uma política de allow-listing para os IPs de origem que se conectam via mTLS? Nossas requisições de produção se originam de IPs dinâmicos da plataforma Replit.
+
+Suítes de Cifras (Cipher Suites): Há uma lista específica de suítes de cifras TLS que são permitidas ou exigidas pelo servidor?
+
+O traceparent de uma de nossas requisições que falhou é 00-72555a00aff2919ac0f603dce306a458-14fa70b32ce7602f-00.
+
+Agradecemos a vossa atenção para este problema que está impactando nossa operação em produção.
+
+VI. Tabelas de Diagnóstico Essenciais
+As tabelas a seguir fornecem um guia estruturado para a execução do plano de ação.
+
+Tabela 1: Playbook de Diagnóstico com Ferramentas Externas
+Passo	Ferramenta	Comando (Exemplo)	Hipótese Testada	Resultado de Sucesso	Implicação do Sucesso	Implicação da Falha
+1	ping	ping cdpj.partners.bancointer.com.br	Conectividade de rede e DNS básicos.	Respostas ICMP recebidas.	Rota de rede e DNS funcionais.	Bloqueio de rede fundamental ou problema de DNS.
+2	openssl s_client	openssl s_client -connect... (sem cert/key)	Servidor TLS do Inter está ativo e responde.	Handshake completa, certificado do servidor é exibido.	O endpoint está acessível via TLS.	Problema no firewall do Inter ou no servidor TLS.
+3	openssl s_client	openssl s_client -connect... (com cert/key/CAfile)	Certificados do cliente são aceitos na camada TLS.	Handshake completa, Verification: OK.	Certificados e cadeia são válidos para o handshake mTLS.	Problema no formato do certificado, chave ou cadeia.
+4	curl	curl --request POST... (de ambiente externo)	Requisição OAuth2 completa é válida.	Status 200 OK com token JSON.	Credenciais e formato da requisição estão corretos.	Problema nas credenciais (client_id/secret) ou formato/conteúdo do certificado.
+
+Exportar para as Planilhas
+Tabela 2: Matriz de Configuração do https.Agent
+Parâmetro	Configuração Atual (Implícita/Explícita)	Configuração de Diagnóstico #1 (PFX + Chain)	Configuração de Diagnóstico #2 (PEM + Cipher Lock)	Propósito e Justificativa
+pfx	undefined	fs.readFileSync('inter.pfx')	undefined	
+Testa o formato de bundle PKCS#12, que é o recomendado pela documentação do SDK do Inter.
+
+passphrase	undefined	'sua_senha_pfx'	undefined	Senha necessária para descriptografar o arquivo PFX.
+cert	fs.readFileSync('cert.crt')	undefined	fs.readFileSync('cert.crt')	Certificado do cliente em formato PEM. Usado na configuração alternativa.
+key	fs.readFileSync('key.key')	undefined	fs.readFileSync('key.key')	Chave privada do cliente em formato PEM. Usada na configuração alternativa.
+ca	undefined	Incluído no PFX ou fs.readFileSync('inter-chain.pem')	fs.readFileSync('inter-chain.pem')	
+Fornece a cadeia de certificados da CA intermediária para validação do servidor.
+
+ciphers	Padrão do Node.js	Padrão do Node.js	HIGH_SECURITY_CIPHERS	Força o uso de suítes de cifras específicas e fortes para evitar falhas de negociação com servidores restritivos.
+secureProtocol / minVersion	Padrão do Node.js	'TLSv1.2'	'TLSv1.2'	
+Garante que uma versão segura e moderna do TLS seja usada, evitando problemas de compatibilidade.
+
+keepAlive	true (padrão)	false	false	
+Desabilita o reaproveitamento de conexões para diagnosticar problemas relacionados a keep-alive.
+
+VII. Conclusão e Recomendações Finais
+A análise forense do erro 400 Bad Request com corpo vazio indica, com alta probabilidade, que a causa raiz não é um erro na lógica da aplicação OAuth2, mas sim uma falha na camada de segurança de transporte durante o handshake mTLS. A evidência aponta para uma rejeição da conexão pela infraestrutura de borda do Banco Inter antes que a requisição alcance a aplicação de autenticação.
+
+As causas prováveis, em ordem de prioridade, são:
+
+Formato Incorreto do Certificado: A utilização de arquivos PEM separados (.crt, .key) em vez de um bundle PKCS#12 (.pfx), que é o formato explicitamente recomendado na documentação do SDK do Banco Inter. Esta é a hipótese mais forte.
+
+Cadeia de Certificados Incompleta: A não apresentação da cadeia de certificados da CA intermediária do Inter durante o handshake, resultando na incapacidade do servidor de validar a confiança do certificado do cliente.
+
+Restrições de Rede do Ambiente Replit: A possibilidade de os endereços IP de saída dinâmicos do Replit não estarem em um "allow-list" mantido pelo Banco Inter para conexões mTLS, uma prática de segurança comum em ambientes financeiros.
+
+Recomenda-se a execução do plano de ação em três fases, na ordem estrita definida na Seção V: 1. Validar Externamente, 2. Corrigir a Implementação, 3. Escalar para o Suporte. Esta abordagem metódica é o caminho mais eficiente para isolar a variável causadora do problema, seja ela o certificado, o código ou o ambiente, e alcançar uma solução definitiva para restabelecer a operação crítica de geração de boletos.
+
+
+Fontes usadas no relatório
+
+reddit.com
+Integração de API não funcionando : r/replit - Reddit
+Abre em uma nova janela
+
+reddit.com
+Por que tá com essa dificuldade? : r/replit - Reddit
+Abre em uma nova janela
+
+support.servicenow.com
+HTTP 400 Bad Request (SSL certificate error) Response to inbound API Calls to the Instance When Using mTLS (HTTPS Mutual Authentication) - ServiceNow support
+Abre em uma nova janela
+
+replit.com
+Fixing AI Agent errors and looping non-fixes - Replit
+Abre em uma nova janela
+
+developers.inter.co
+Portal do desenvolvedor Inter Empresas
+Abre em uma nova janela
+
+github.com
+Node.js 20 problems · Issue #907 · jishi/node-sonos-http-api - GitHub
+Abre em uma nova janela
+
+developers.inter.co
+Dúvidas Frequentes | Portal do desenvolvedor Inter Empresas
+Abre em uma nova janela
+
+stackoverflow.com
+Python OAuth Client Credentials Grant Type Returned 400, [error: unsupported grant] type but Curl Works Fine - Stack Overflow
+Abre em uma nova janela
+
+ajuda.inter.co
+Como acesso o Portal Developers? - Ajuda Inter
+Abre em uma nova janela
+
+developers.inter.co
+Sobre este portal | Portal do desenvolvedor Inter Empresas - Banco Inter
+Abre em uma nova janela
+
+developers.inter.co
+API Pix Automático | Portal do desenvolvedor Inter Empresas
+Abre em uma nova janela
+
+inter.co
+Our Privacy Policy - Banco Inter
+Abre em uma nova janela
+
+api.mziq.com
+BANCO INTER S.A. CNPJ/ME 00.416.968/0001-01 NIRE 31300010864 Publicly-Traded Company with {of} Authorized Capital CALL NOTI - Mziq
+Abre em uma nova janela
+
+last9.io
+Traceparent: How OpenTelemetry Connects Your Microservices - Last9
+Abre em uma nova janela
+
+uptrace.dev
+OpenTelemetry Traceparent HTTP Header [Go] - Uptrace
+Abre em uma nova janela
+
+learn.microsoft.com
+Inbound/Outbound IP addresses - Azure App Service - Microsoft Learn
+Abre em uma nova janela
+
+cloud.google.com
+Static outbound IP address | Cloud Run Documentation - Google Cloud
+Abre em uma nova janela
+
+pressable.com
+Introducing: Egress Firewall Rules - Pressable
+Abre em uma nova janela
+
+cloud.google.com
+VPC firewall rules | Cloud NGFW
+Abre em uma nova janela
+
+reddit.com
+How can I get my servers ip address : r/replit - Reddit
+Abre em uma nova janela
+
+luizlelis.com
+Using W3C Trace Context standard in distributed tracing - ‍ Luiz Lelis
+Abre em uma nova janela
+
+docs.dapr.io
+W3C trace context overview - Dapr Docs
+Abre em uma nova janela
+
+support.egress.com
+Allowlisted IP addresses - Egress Support
+Abre em uma nova janela
+
+developers.inter.co
+Sobre o Inter SDK | Portal do desenvolvedor Inter Empresas
+Abre em uma nova janela
+
+docs.replit.com
+Replit Docs
+Abre em uma nova janela
+
+docs.openssl.org
+s_client - OpenSSL Documentation
+Abre em uma nova janela
+
+docs.openssl.org
+openssl-s_client - OpenSSL Documentation
+Abre em uma nova janela
+
+nodejs.org
+HTTPS | Node.js v24.5.0 Documentation
+Abre em uma nova janela
+
+ajuda.inter.co
+Como faço o download do arquivo .CRT? - Ajuda Inter
+Abre em uma nova janela
+
+somicro.com.br
+Tutorial detalhado para baixar as chaves e certificados da sua API no Banco Inter: –
+Abre em uma nova janela
+
+docs.fomenti.com.br
+Banco Inter: Como gerar certificado de integração com API - Fomenti
+Abre em uma nova janela
+
+developers.inter.co
+Portal do desenvolvedor Inter Empresas | Portal do desenvolvedor Inter Empresas - Banco Inter
+Abre em uma nova janela
+
+stackoverflow.com
+How to display the Subject Alternative Name of a certificate? - Stack Overflow
+Abre em uma nova janela
+
+nodejs.org
+TLS (SSL) | Node.js v24.5.0 Documentation
+Abre em uma nova janela
+
+stackoverflow.com
+How to Check Subject Alternative Names for a SSL/TLS Certificate? - Stack Overflow
+Abre em uma nova janela
+
+dev.to
+Node mTLS from scratch - DEV Community
+Abre em uma nova janela
+
+entrust.com
+What is a Subject Alternative Name (SAN)? - Entrust
+Abre em uma nova janela
+
+unix.stackexchange.com
+Get common name (CN) from SSL certificate? - Unix & Linux Stack Exchange
+Abre em uma nova janela
+
+en.wikipedia.org
+Public key certificate - Wikipedia

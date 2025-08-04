@@ -1,0 +1,61 @@
+Diagnóstico Profundo do Erro OAuth2
+O erro 400 sem corpo na requisição de token indica que o Inter está rejeitando a autenticação antes mesmo de processar o corpo. Como credenciais e endpoint foram validados (o mesmo client_id/secret funcionou via Postman
+projetoacbr.com.br
+), o problema provavelmente está no mTLS ou no cliente HTTP. Uma causa comum é que o fetch nativo do Node não encaminha o certificado via https.Agent, pois usa o cliente interno undici (não respeita a opção agent)
+stackoverflow.com
+. Em outras palavras, embora o agente seja configurado, o undici pode ignorá-lo, fazendo com que o certificado não chegue ao servidor. A solução sugerida é usar diretamente o undici.Agent com as opções de TLS (incluindo cert, key e até ca)
+stackoverflow.com
+stackoverflow.com
+, ou então usar outra biblioteca (ex.: node-fetch ou axios com https.Agent) que efetivamente envie o certificado. Além disso, é fundamental incluir qualquer cadeia de certificados (CA) necessária: no exemplo da comunidade undici, usam connect: { ca: [readFileSync('...ca.crt')], cert: '...crt', key: '...key' }
+stackoverflow.com
+. Outras causas possivelmente não exploradas incluem formato/encoding do certificado. Embora já tenham testado diversas variações, vale verificar se o certificado PEM está completo (com marcações BEGIN CERTIFICATE/END CERTIFICATE) e se contém a cadeia intermediária, caso requerida. Em alguns casos, converter o par cert+key para um arquivo PFX (PKCS#12) e usar pfx no agente HTTPS resolve incompatibilidades de formato. Também é preciso confirmar no Internet Banking que o certificado foi ativado na integração correta e que o Common Name (CN) ou o UID do certificado está associado à aplicação – no modelo OAuth do Open Banking, por exemplo, há exigência de Software Statement Assertion e vínculo certificado/cliente, o que pode ser análogo no Inter. Por fim, embora improvável, é bom confirmar se não há alguma restrição de IP (alguns provedores de nuvem têm intervalos dinâmicos que podem ser bloqueados) ou limite de taxa sendo alcançado, verificando se há mensagens de erro nos logs internos do Inter.
+Métodos Avançados de Debug
+Para entender o que ocorre na camada TLS, recomenda-se testar a conexão via OpenSSL no próprio servidor ou ambiente similar. Por exemplo, execute:
+bash
+Copiar
+Editar
+openssl s_client -connect cdpj.partners.bancointer.com.br:443 -state -debug \
+ -cert seu_certificado.crt -key sua_chave.key
+A opção -state -debug mostra cada etapa da negociação TLS. Se o cliente apresentar o certificado corretamente, você verá no log algo como “write client certificate” e dezenas de bytes enviados (p.ex. “1576 bytes”)
+stackoverflow.com
+. Se apenas aparecer “no client certificate” então o certificado não foi enviado
+stackoverflow.com
+. Isso confirma se o erro é mesmo na negociação TLS. É possível testar com e sem as opções -cert/-key para comparar o fluxo, como explicado em StackOverflow
+stackoverflow.com
+stackoverflow.com
+. Além disso, ative logs de depuração do TLS no Node (por exemplo, definindo NODE_DEBUG=tls,https) para ver se a biblioteca tentou usar o certificado. Ferramentas como curl (com --cert --key) ou clients HTTP que exibem logs detalhados podem auxiliar a reproduzir o problema fora do Replit. O cabeçalho traceparent presente na resposta sugere que o servidor gerou um ID de transação – anote-o e peça ao suporte do Inter para verificar logs internos usando esse valor. Por fim, confira se a requisição HTTP montada está conforme o padrão: verifique no servidor ou console do Node se o corpo está correto (grant_type=client_credentials, scope separado por espaço) e se o header Content-Type: application/x-www-form-urlencoded foi enviado.
+Soluções e Workarounds
+Como solução alternativa, uma abordagem prática é usar outra stack ou biblioteca que tenha mTLS comprovado. Por exemplo, existem SDKs oficiais em Java ou C# para o Inter, ou até wrappers em Python que aceitam cert_path/key_path, como o cliente bancointer 
+github.com
+. Esse exemplo Python mostra a configuração esperada:
+python
+Copiar
+Editar
+inter = Inter(
+    client_id="SEU_ID",
+    client_secret="SEU_SECRET",
+    cert_path='/caminho/para/certificado.crt',
+    key_path='/caminho/para/chave.key',
+)
+Isso serve como referência de implementação funcional. Para troubleshoot imediato, você pode testar a obtenção de token via script Python ou uma ferramenta de linha de comando (como cURL ou Postman com mTLS) no mesmo ambiente do servidor, isolando o problema do código Node. Se conseguir o token externamente, o problema está no cliente HTTP do Node (confirmando a hipótese). Caso nada funcione no Replit, considere executar o processo em outro ambiente (mesmo provisório) para gerar o token e depois guardar esse token no Replit. Por exemplo, um job em outra máquina poderia periodicamente atualizar o token e salvar em um banco ou segredo, contornando o OAuth via código. Essa é uma solução “paliativa” mas pode manter o sistema rodando até a origem ser solucionada.
+Contatos e Suporte Oficial
+Para suporte técnico, use os canais oficiais do Banco Inter. Embora o Portal do Desenvolvedor (developers.inter.co) não seja um canal de atendimento direto, ele possui fórum comunitário (comunidade.inter.co linkado no portal). Para problemas específicos de integração em produção, contacte o suporte do Inter via os telefones informados no site: 3003-4070 (capitais e regiões metropolitanas) ou 0800-940-0007 (demais regiões)
+developers.inter.co
+. Informe ao atendente o traceparent da requisição e descreva o problema detalhadamente. O suporte pode checar nos logs internos pelo ID de transação e identificar se há rejeição no mTLS ou outro motivo interno. Além disso, verifique o Chatbot e as perguntas frequentes do desenvolvedor, e acompanhe se há notícias no Changelog do Inter (por exemplo, versões da API que possam ter mudado requisitos).
+Exemplos de Implementações Similares
+Vários usuários e bibliotecas já mostraram sucesso com OAuth mTLS do Inter. Além do exemplo Python citado
+github.com
+, a própria documentação exemplo em PHP/Chilkat ilustra o fluxo: carrega-se o .crt e .key e faz a requisição POST para /oauth/v2/token com grant_type=client_credentials e escopos (similares aos seus)
+example-code.com
+example-code.com
+. No fórum ACBr, desenvolvedores Delphi relataram erro HTTP 500 que foi resolvido após corrigir bibliotecas e parâmetros; eles confirmaram sucesso no Postman usando as mesmas credenciais
+projetoacbr.com.br
+, exatamente como você testou. Essa experiência reforça que o problema tende a ser no cliente HTTP. Em síntese, a melhor referência é imitar exatamente uma integração já testada: usar uma biblioteca/linguagem que carregue corretamente o certificado (como no exemplo acima) e cruzar esse comportamento com o seu código. Se o exemplo em outra linguagem funcionar, adapte a lógica (especialmente o envio do certificado) ao Node.js usando undici.Agent ou similar. Em todos os casos, preserve logs detalhados e mensagens completas (incluindo cabeçalhos) para comparar implementações. A solução definitiva virá de descobrir onde a requisição difere de um caso bem-sucedido. Enquanto isso, seguir as dicas acima (testar mTLS com OpenSSL e ajustar o agente HTTP) deve ajudar a isolar e solucionar o erro 400 persistente. Fontes: Documentação e exemplos do Inter Empresas
+github.com
+projetoacbr.com.br
+, discussões técnicas sobre fetch no Node.js
+stackoverflow.com
+ e uso de mTLS com openssl s_client
+stackoverflow.com
+stackoverflow.com
+ foram consultados para embasar estas recomendações.

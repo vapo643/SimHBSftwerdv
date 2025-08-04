@@ -107,3 +107,4 @@ Formalization Interface: ✅ COMPLETELY UNIFIED - Attendant and Administrator in
   - **CONFIRMED WORKING**: Production OAuth2 token obtained successfully (01/08/2025)
   - **mTLS Certificates**: Properly configured and validated
   - **Integration Status**: 100% operational, ready for real transactions
+  - **OAuth2 FIX (04/08/2025)**: Resolved persistent 400 error - Node.js fetch was not sending certificates properly. Solution: Implemented fallback to native HTTPS module which works perfectly. Access token now obtained successfully!

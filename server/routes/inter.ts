@@ -570,4 +570,39 @@ router.post('/collections/:codigoSolicitacao/pay', jwtAuthMiddleware, async (req
   }
 });
 
+/**
+ * Test OAuth2 authentication with undici Agent
+ * GET /api/inter/test-auth
+ */
+router.get('/test-auth', async (req, res) => {
+  try {
+    console.log('[INTER TEST] Testing OAuth2 authentication with undici Agent...');
+    
+    // Force a new token request by clearing cache
+    // @ts-ignore - Accessing private property for testing
+    interBankService.tokenCache = null;
+    
+    // Try to get access token
+    // @ts-ignore - Accessing private method for testing
+    const token = await interBankService.getAccessToken();
+    
+    console.log('[INTER TEST] ✅ Authentication successful!');
+    
+    res.json({
+      success: true,
+      message: 'OAuth2 authentication successful with undici Agent!',
+      tokenReceived: !!token,
+      tokenLength: token ? token.length : 0
+    });
+  } catch (error) {
+    console.error('[INTER TEST] ❌ Authentication failed:', error);
+    
+    res.status(500).json({
+      success: false,
+      message: 'OAuth2 authentication failed',
+      error: (error as Error).message
+    });
+  }
+});
+
 export { router as interRoutes };

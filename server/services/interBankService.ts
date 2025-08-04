@@ -15,6 +15,7 @@
  */
 
 import https from 'https';
+import { Agent as UndiciAgent } from 'undici';
 
 interface InterBankConfig {
   apiUrl: string;
@@ -232,23 +233,23 @@ class InterBankService {
         console.log('[INTER] ⚠️ SANDBOX MODE: Using alternative HTTPS configuration');
       }
 
-      // Create HTTPS agent with specific configuration
-      const httpsAgent = new https.Agent({
-        cert: cert,
-        key: key,
-        rejectUnauthorized: false,
-        requestCert: true,
-        keepAlive: false,
-        ciphers: 'ALL', // Allow all ciphers
-        secureProtocol: 'TLS_method' // Use automatic TLS version
+      // Create Undici agent for proper mTLS support with Node.js fetch
+      console.log('[INTER] 🔧 Creating Undici agent for mTLS...');
+      const undiciAgent = new UndiciAgent({
+        connect: {
+          cert: cert,
+          key: key,
+          ca: [], // Use system CA
+          rejectUnauthorized: true // Always validate certificates in production
+        }
       });
 
-      console.log('[INTER] 🚀 Making mTLS request with custom agent...');
+      console.log('[INTER] 🚀 Making mTLS request with Undici agent...');
 
       // Declare response variable to use throughout the method
       let response: any;
 
-      // Try using node fetch with custom agent
+      // Try using node fetch with undici dispatcher
       try {
         const fetchResponse = await fetch(tokenUrl.toString(), {
           method: 'POST',
@@ -258,8 +259,9 @@ class InterBankService {
             // No Authorization header - credentials sent as form parameters per Inter docs
           },
           body: formBody.toString(),
-          // @ts-ignore - agent is supported but not in types
-          agent: httpsAgent
+          // Use dispatcher instead of agent for undici
+          // @ts-ignore - dispatcher is supported but not in types
+          dispatcher: undiciAgent
         });
 
         console.log(`[INTER] 📡 Response status: ${fetchResponse.status}`);
