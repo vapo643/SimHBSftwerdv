@@ -431,25 +431,26 @@ class ClickSignServiceV3 {
       // 1. Ensure correct Data URI format
       const dataUriContent = this.formatBase64ToDataURI(pdfBase64);
 
-      // 2. Create envelope WITH document atomically
+      // 2. Create envelope (empty - API doesn't allow documents field)
       const envelope = await this.createEnvelope({
         name: `CCB - Proposta ${proposalId}`,
         locale: 'pt-BR',
         auto_close: true,
         deadline_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days
-        block_after_refusal: true,
-        // Include document atomically as suggested by Deep Think
-        documents: [
-          {
-            filename: `ccb_proposta_${proposalId}.pdf`,
-            content_base64: dataUriContent
-          }
-        ]
+        block_after_refusal: true
       });
 
-      console.log(`[CLICKSIGN V3 - ATOMIC] ✅ Envelope created with document atomically`);
+      console.log(`[CLICKSIGN V3] ✅ Envelope created: ${envelope.id}`);
 
-      // 3. Create signer
+      // 3. Add document with CORRECT field name
+      const document = await this.addDocumentToEnvelope(envelope.id, {
+        content_base64: dataUriContent, // Using content_base64 instead of content
+        filename: `ccb_proposta_${proposalId}.pdf`
+      });
+
+      console.log(`[CLICKSIGN V3] ✅ Document added: ${document.id}`);
+
+      // 4. Create signer
       console.log(`[CLICKSIGN V3] Creating signer with data:`, {
         name: clientData.name,
         email: clientData.email,
@@ -470,7 +471,7 @@ class ClickSignServiceV3 {
         request_signature_key: signer.request_signature_key
       });
 
-      // 4. Add signer to envelope (this creates the actual signer in ClickSign v3)
+      // 5. Add signer to envelope (this creates the actual signer in ClickSign v3)
       const envelopeSigner = await this.addSignerToEnvelope(envelope.id, {
         signer_id: signer.id,
         sign_as: 'party',
@@ -490,16 +491,16 @@ class ClickSignServiceV3 {
         signer.id = envelopeSigner.id || signer.id;
       }
 
-      // 5. Add selfie requirement for security
+      // 6. Add selfie requirement for security
       await this.addRequirement(envelope.id, {
         type: 'selfie',
         signer_id: signer.id
       });
 
-      // 6. Finish envelope
+      // 7. Finish envelope
       const finishedEnvelope = await this.finishEnvelope(envelope.id);
 
-      // 7. Get sign URL
+      // 8. Get sign URL
       const signUrl = signer.request_signature_key 
         ? `${this.config.apiUrl.replace('/api/v3', '')}/sign/${signer.request_signature_key}`
         : undefined;
@@ -511,10 +512,8 @@ class ClickSignServiceV3 {
         console.error(`[CLICKSIGN V3] ⚠️ Warning: No request_signature_key received from API`);
       }
 
-      // Get document ID from envelope response (first document)
-      const documentId = envelope.relationships?.documents?.data?.[0]?.id || 
-                       envelope.documents?.[0]?.id || 
-                       'document-created-atomically';
+      // Get document ID from the addDocumentToEnvelope response
+      const documentId = document.id;
 
       return {
         envelopeId: envelope.id,
