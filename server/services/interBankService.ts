@@ -832,9 +832,15 @@ class InterBankService {
       const valorDecimal = Number(proposalData.valorTotal).toFixed(2);
       console.log('[INTER] 💰 Valor formatado:', valorDecimal);
 
-      const cobrancaData: CobrancaRequest = {
+      // Data de emissão (hoje) - formato YYYY-MM-DD
+      const hoje = new Date();
+      const dataEmissao = hoje.toISOString().split('T')[0];
+      console.log('[INTER] 📅 Data de emissão:', dataEmissao);
+
+      const cobrancaData: any = {
         seuNumero: proposalData.id.substring(0, 15), // Max 15 chars
         valorNominal: parseFloat(valorDecimal), // Garantir que é um número decimal
+        dataEmissao: dataEmissao, // Campo obrigatório segundo IA 2
         dataVencimento: proposalData.dataVencimento,
         numDiasAgenda: 30, // 30 days after due date for auto cancellation
         pagador: {
@@ -851,6 +857,15 @@ class InterBankService {
           cidade: cidadeClean,
           uf: uf,
           cep: cepLimpo
+        },
+        // Multa e mora são opcionais mas vamos incluir com valores padrão
+        multa: {
+          codigo: 'PERCENTUAL',
+          taxa: 2.00 // 2% de multa padrão
+        },
+        mora: {
+          codigo: 'TAXAMENSAL', 
+          taxa: 1.00 // 1% ao mês
         },
         mensagem: {
           linha1: 'SIMPIX - Empréstimo Pessoal',
