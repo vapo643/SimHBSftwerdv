@@ -414,8 +414,8 @@ class InterBankService {
         // Custom JSON stringifier to preserve decimal format for valorNominal
         const customStringify = (obj: any): string => {
           const json = JSON.stringify(obj, (key, value) => {
-            // Force valorNominal to have decimal format
-            if (key === 'valorNominal' && typeof value === 'number') {
+            // Force numeric fields to have decimal format
+            if ((key === 'valorNominal' || key === 'taxa' || key === 'valor') && typeof value === 'number') {
               // Return as string temporarily to preserve format
               return `__DECIMAL__${value.toFixed(2)}__`;
             }
@@ -879,6 +879,12 @@ class InterBankService {
           cidade: cidadeClean,
           uf: uf,
           cep: cepLimpo
+        },
+        // Desconto vazio (pode ser obrigatório mesmo sem valor)
+        desconto: {
+          codigo: 'PERCENTUALDATAINFORMADA',
+          taxa: 0,
+          quantidadeDias: 0
         },
         // Multa e mora são opcionais mas vamos incluir com valores padrão
         multa: {
