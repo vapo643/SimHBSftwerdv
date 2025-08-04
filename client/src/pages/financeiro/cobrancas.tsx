@@ -88,6 +88,58 @@ export default function Cobrancas() {
   const [showContactModal, setShowContactModal] = useState(false);
   const [contactType, setContactType] = useState<'whatsapp' | 'sms' | 'email'>('whatsapp');
   
+  // Função para baixar boleto com autenticação
+  const downloadBoletoPDF = async (propostaId: string, codigoSolicitacao: string) => {
+    try {
+      // Fazer requisição com autenticação usando apiRequest
+      const response = await fetch(`/api/inter-collections/${propostaId}/${codigoSolicitacao}/pdf`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${await getAuthToken()}`,
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error('Falha ao baixar boleto');
+      }
+      
+      // Converter resposta em blob
+      const blob = await response.blob();
+      
+      // Criar URL temporária para o blob
+      const url = window.URL.createObjectURL(blob);
+      
+      // Criar link temporário e clicar nele
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `boleto-${codigoSolicitacao}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      
+      // Limpar
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      toast({
+        title: "Boleto baixado",
+        description: "O boleto foi baixado com sucesso.",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro ao baixar",
+        description: "Não foi possível baixar o boleto. Tente novamente.",
+        variant: "destructive",
+      });
+    }
+  };
+  
+  // Helper para obter token de autenticação
+  const getAuthToken = async () => {
+    const { getSession } = await import('@/lib/auth');
+    const session = await getSession();
+    return session?.accessToken || '';
+  };
+  
   // Buscar propostas em cobrança
   const { data: propostas, isLoading, refetch } = useQuery({
     queryKey: ['/api/cobrancas'],
@@ -530,12 +582,12 @@ export default function Cobrancas() {
                                   </div>
                                   
                                   {/* Ações */}
-                                  {parcela.interLinkPdf && (
+                                  {parcela.interCodigoSolicitacao && (
                                     <Button
                                       size="sm"
                                       variant="ghost"
                                       className="mt-2 text-orange-400 hover:text-orange-300"
-                                      onClick={() => window.open(parcela.interLinkPdf, '_blank')}
+                                      onClick={() => downloadBoletoPDF(selectedProposta.id, parcela.interCodigoSolicitacao!)}
                                     >
                                       <Download className="h-3 w-3 mr-1" />
                                       Baixar Boleto

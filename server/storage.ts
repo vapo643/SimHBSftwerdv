@@ -73,6 +73,7 @@ export interface IStorage {
   // Inter Bank Collections
   createInterCollection(collection: InsertInterCollection): Promise<InterCollection>;
   getInterCollectionByProposalId(propostaId: string): Promise<InterCollection | undefined>;
+  getInterCollectionsByProposalId(propostaId: string): Promise<InterCollection[]>;
   getInterCollectionByCodigoSolicitacao(codigoSolicitacao: string): Promise<InterCollection | undefined>;
   updateInterCollection(codigoSolicitacao: string, updates: UpdateInterCollection): Promise<InterCollection>;
   getInterCollections(): Promise<InterCollection[]>;
@@ -649,6 +650,12 @@ export class DatabaseStorage implements IStorage {
       .where(and(eq(interCollections.propostaId, propostaId), eq(interCollections.isActive, true)))
       .limit(1);
     return result[0];
+  }
+  
+  async getInterCollectionsByProposalId(propostaId: string): Promise<InterCollection[]> {
+    return await db.select().from(interCollections)
+      .where(and(eq(interCollections.propostaId, propostaId), eq(interCollections.isActive, true)))
+      .orderBy(interCollections.dataVencimento);
   }
 
   async getInterCollectionByCodigoSolicitacao(codigoSolicitacao: string): Promise<InterCollection | undefined> {

@@ -1,0 +1,371 @@
+}
+[INTER] Creating collection for proposal: 902183dd-b5d1-4e20-8a72-79d3d3559d4d
+[INTER] 🚀 Creating collection for proposal: 902183dd-b5d1-4e20-8a72-79d3d3559d4d
+[INTER] 📍 Corrigindo cidade/UF para CEP 29165460: Serra, ES
+[INTER] 🧹 Dados limpos: {
+  nome: 'Gabriel de Jesus Santana Serri',
+  endereco: 'Rua miguel angelo',
+  bairro: 'Centro',
+  cidade: 'Serra'
+}
+[INTER] 💰 Valor formatado: 1000.00
+[INTER] 🔥🔥🔥 FINAL COBRANCA DATA BEFORE SENDING 🔥🔥🔥
+[INTER] Full object: {
+  "seuNumero": "902183dd-b5d1-4",
+  "valorNominal": 1000,
+  "dataVencimento": "2025-08-09",
+  "numDiasAgenda": 30,
+  "pagador": {
+    "nome": "Gabriel de Jesus Santana Serri",
+    "cpfCnpj": "20528464760",
+    "tipoPessoa": "FISICA",
+    "email": "gabrieldjesus238@gmail.com",
+    "ddd": "27",
+    "telefone": "998538565",
+    "endereco": "Rua miguel angelo",
+    "numero": "100",
+    "complemento": "",
+    "bairro": "Centro",
+    "cidade": "Serra",
+    "uf": "ES",
+    "cep": "29165460"
+  },
+  "desconto": {
+    "codigo": "PERCENTUALDATAINFORMADA",
+    "taxa": 0.01,
+    "quantidadeDias": 0,
+    "data": "2025-08-09"
+  },
+  "multa": {
+    "codigo": "PERCENTUAL",
+    "taxa": 2
+  },
+  "mora": {
+    "codigo": "TAXAMENSAL",
+    "taxa": 1
+  },
+  "mensagem": {
+    "linha1": "SIMPIX - Empréstimo Pessoal",
+    "linha2": "Proposta: 902183dd-b5d1-4e20-8a72-79d3d3559d4d",
+    "linha3": "Pague via PIX ou boleto bancário",
+    "linha4": "Dúvidas: contato@simpix.com.br",
+    "linha5": "www.simpix.com.br"
+  }
+}
+[INTER] Field check:
+[INTER]   - seuNumero: 902183dd-b5d1-4
+[INTER]   - valorNominal: 1000 type: number
+[INTER]   - dataVencimento: 2025-08-09
+[INTER]   - multa present? true
+[INTER]   - mora present? true
+[INTER]   - desconto present? true
+[INTER]   - mensagem present? true
+[INTER] 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
+[INTER] 📤 Creating collection: 902183dd-b5d1-4
+[INTER] 📋 COMPLETE Request data: {
+  "seuNumero": "902183dd-b5d1-4",
+  "valorNominal": 1000,
+  "dataVencimento": "2025-08-09",
+  "numDiasAgenda": 30,
+  "pagador": {
+    "nome": "Gabriel de Jesus Santana Serri",
+    "cpfCnpj": "20528464760",
+    "tipoPessoa": "FISICA",
+    "email": "gabrieldjesus238@gmail.com",
+    "ddd": "27",
+    "telefone": "998538565",
+    "endereco": "Rua miguel angelo",
+    "numero": "100",
+    "complemento": "",
+    "bairro": "Centro",
+    "cidade": "Serra",
+    "uf": "ES",
+    "cep": "29165460"
+  },
+  "desconto": {
+    "codigo": "PERCENTUALDATAINFORMADA",
+    "taxa": 0.01,
+    "quantidadeDias": 0,
+    "data": "2025-08-09"
+  },
+  "multa": {
+    "codigo": "PERCENTUAL",
+    "taxa": 2
+  },
+  "mora": {
+    "codigo": "TAXAMENSAL",
+    "taxa": 1
+  },
+  "mensagem": {
+    "linha1": "SIMPIX - Empréstimo Pessoal",
+    "linha2": "Proposta: 902183dd-b5d1-4e20-8a72-79d3d3559d4d",
+    "linha3": "Pague via PIX ou boleto bancário",
+    "linha4": "Dúvidas: contato@simpix.com.br",
+    "linha5": "www.simpix.com.br"
+  }
+}
+[INTER] ========== REQUEST DETAILS ==========
+[INTER] 🌐 FULL URL: https://cdpj.partners.bancointer.com.br/cobranca/v3/cobrancas
+[INTER] 🔧 METHOD: POST
+[INTER] 🪙 TOKEN (first 20 chars):', db12290f-57f9-4526-9...
+[INTER] ===================================
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] 🏦 CONTA CORRENTE HEADER ADDED: 346470536
+[INTER] 📦 REQUEST BODY: {"seuNumero":"902183dd-b5d1-4","valorNominal":1000,"dataVencimento":"2025-08-09","numDiasAgenda":30,"pagador":{"nome":"Gabriel de Jesus Santana Serri","cpfCnpj":"20528464760","tipoPessoa":"FISICA","email":"gabrieldjesus238@gmail.com","ddd":"27","telefone":"998538565","endereco":"Rua miguel angelo","numero":"100","complemento":"","bairro":"Centro","cidade":"Serra","uf":"ES","cep":"29165460"},"desconto":{"codigo":"PERCENTUALDATAINFORMADA","taxa":0.01,"quantidadeDias":0,"data":"2025-08-09"},"multa":{"codigo":"PERCENTUAL","taxa":2},"mora":{"codigo":"TAXAMENSAL","taxa":1},"mensagem":{"linha1":"SIMPIX - Empréstimo Pessoal","linha2":"Proposta: 902183dd-b5d1-4e20-8a72-79d3d3559d4d","linha3":"Pague via PIX ou boleto bancário","linha4":"Dúvidas: contato@simpix.com.br","linha5":"www.simpix.com.br"}}
+[INTER] 🔑 ALL HEADERS: {
+  "Authorization": "Bearer db12290f-57f9-4526-9d26-e86774c582bf",
+  "Accept": "application/json",
+  "User-Agent": "SIMPIX-Inter-Integration/1.0",
+  "x-conta-corrente": "346470536",
+  "Content-Type": "application/json"
+}
+[INTER] ========== RESPONSE DETAILS ==========
+[INTER] 📊 STATUS: 200 OK
+[INTER] 📋 RESPONSE HEADERS: {
+  'content-length': '60',
+  'content-type': 'application/json',
+  date: 'Mon, 4 Aug 2025 20:26:20 GMT',
+  server: 'istio-envoy',
+  'strict-transport-security': 'max-age=31536000; includeSubDomains',
+  traceparent: '00-c8727617abcd4c3d97ccfd5eed9cb434-b745d4470987b5ef-00',
+  'x-envoy-upstream-service-time': '404',
+  'x-rate-limit-remaining': '119',
+  'x-rate-limit-time': '1754339240333',
+  'x-upstream-time': '407'
+}
+[INTER] ✅ Response OK
+[INTER] =====================================
+[INTER] ✅ Collection created successfully: 72c6bff2-f928-4946-ba7a-e4a347cc584c
+[INTER] ✅ Collection created for proposal successfully
+[INTER] 📋 Retrieving collection: 72c6bff2-f928-4946-ba7a-e4a347cc584c
+[INTER] ========== REQUEST DETAILS ==========
+[INTER] 🌐 FULL URL: https://cdpj.partners.bancointer.com.br/cobranca/v3/cobrancas/72c6bff2-f928-4946-ba7a-e4a347cc584c
+[INTER] 🔧 METHOD: GET
+[INTER] 🪙 TOKEN (first 20 chars):', db12290f-57f9-4526-9...
+[INTER] ===================================
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] 🏦 CONTA CORRENTE HEADER ADDED: 346470536
+[INTER] 🔑 ALL HEADERS: {
+  "Authorization": "Bearer db12290f-57f9-4526-9d26-e86774c582bf",
+  "Accept": "application/json",
+  "User-Agent": "SIMPIX-Inter-Integration/1.0",
+  "x-conta-corrente": "346470536"
+}
+[INTER] ========== RESPONSE DETAILS ==========
+[INTER] 📊 STATUS: 200 OK
+[INTER] 📋 RESPONSE HEADERS: {
+  'content-length': '802',
+  'content-type': 'application/json',
+  date: 'Mon, 4 Aug 2025 20:26:20 GMT',
+  server: 'istio-envoy',
+  'strict-transport-security': 'max-age=31536000; includeSubDomains',
+  traceparent: '00-2a6f73449a94c944334cc2ca70eefd46-06d31fc42bbfb2ca-00',
+  'x-envoy-upstream-service-time': '66',
+  'x-rate-limit-remaining': '119',
+  'x-rate-limit-time': '1754339240884',
+  'x-upstream-time': '69'
+}
+[INTER] ✅ Response OK
+[INTER] =====================================
+[INTER] ✅ Collection retrieved successfully
+[INTER] ✅ Collection created successfully: 72c6bff2-f928-4946-ba7a-e4a347cc584c
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-04T20:26:21.621Z'
+}
+[2025-08-04T17:26:22.000-03:00] 🔍 INICIO - Buscando dados de formalização para proposta: 902183dd-b5d1-4e20-8a72-79d3d3559d4d
+[2025-08-04T17:26:22.000-03:00] 🔍 STEP 1 - Fazendo query direta no Supabase...
+[2025-08-04T17:26:22.000-03:00] 🔍 STEP 2 - Proposta encontrada: true
+[2025-08-04T17:26:22.000-03:00] 🔍 STEP 2.1 - Dados da proposta: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  status: 'pronto_pagamento',
+  tabela_comercial_id: 16,
+  produto_id: 3,
+  atendente_id: undefined
+}
+[2025-08-04T17:26:22.000-03:00] 🔍 STEP 3 - Buscando documentos...
+[2025-08-04T17:26:22.000-03:00] 🔍 STEP 4 - Documentos encontrados: 1
+[2025-08-04T17:26:22.000-03:00] 🔍 STEP 4.1 - Estrutura dos documentos: [
+  {
+    id: 11,
+    proposta_id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+    nome_arquivo: 'WalkingSkeletonMvp - Replit - Google Chrome 16_07_2025 09_21_37.png',
+    url: 'https://dvglgxrvhmtsixaabxha.supabase.co/storage/v1/object/sign/documents/proposta-902183dd-b5d1-4e20-8a72-79d3d3559d4d/1754064515626-WalkingSkeletonMvp%20-%20Replit%20-%20Google%20Chrome%2016_07_2025%2009_21_37.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV80OTVlMjJjYS1lMDMxLTQ0Y2YtOTM3Zi03N2M3ZWNiMTk2YzkiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJkb2N1bWVudHMvcHJvcG9zdGEtOTAyMTgzZGQtYjVkMS00ZTIwLThhNzItNzlkM2QzNTU5ZDRkLzE3NTQwNjQ1MTU2MjYtV2Fsa2luZ1NrZWxldG9uTXZwIC0gUmVwbGl0IC0gR29vZ2xlIENocm9tZSAxNl8wN18yMDI1IDA5XzIxXzM3LnBuZyIsImlhdCI6MTc1NDA2NDUxOSwiZXhwIjoxNzU0MDY4MTE5fQ.vy9PR-FS4OfuXoTuNLEstla4LgD57ZdTt1RhNZbvSCM',
+    tamanho: 0,
+    tipo: 'image/png',
+    created_at: '2025-08-01T16:08:39.611456'
+  }
+]
+[2025-08-04T17:26:22.000-03:00] 🔍 STEP 4.2 - Gerando URLs assinadas para 1 documentos...
+🔍 [FORMALIZAÇÃO] Tentando gerar URL para documento: {
+  nome: 'WalkingSkeletonMvp - Replit - Google Chrome 16_07_2025 09_21_37.png',
+  url: 'https://dvglgxrvhmtsixaabxha.supabase.co/storage/v1/object/sign/documents/proposta-902183dd-b5d1-4e20-8a72-79d3d3559d4d/1754064515626-WalkingSkeletonMvp%20-%20Replit%20-%20Google%20Chrome%2016_07_2025%2009_21_37.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV80OTVlMjJjYS1lMDMxLTQ0Y2YtOTM3Zi03N2M3ZWNiMTk2YzkiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJkb2N1bWVudHMvcHJvcG9zdGEtOTAyMTgzZGQtYjVkMS00ZTIwLThhNzItNzlkM2QzNTU5ZDRkLzE3NTQwNjQ1MTU2MjYtV2Fsa2luZ1NrZWxldG9uTXZwIC0gUmVwbGl0IC0gR29vZ2xlIENocm9tZSAxNl8wN18yMDI1IDA5XzIxXzM3LnBuZyIsImlhdCI6MTc1NDA2NDUxOSwiZXhwIjoxNzU0MDY4MTE5fQ.vy9PR-FS4OfuXoTuNLEstla4LgD57ZdTt1RhNZbvSCM',
+  tipo: 'image/png',
+  proposta_id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d'
+}
+🔍 [FORMALIZAÇÃO] Caminho extraído para URL assinada: proposta-902183dd-b5d1-4e20-8a72-79d3d3559d4d/1754064515626-WalkingSkeletonMvp%20-%20Replit%20-%20Google%20Chrome%2016_07_2025%2009_21_37.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV80OTVlMjJjYS1lMDMxLTQ0Y2YtOTM3Zi03N2M3ZWNiMTk2YzkiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJkb2N1bWVudHMvcHJvcG9zdGEtOTAyMTgzZGQtYjVkMS00ZTIwLThhNzItNzlkM2QzNTU5ZDRkLzE3NTQwNjQ1MTU2MjYtV2Fsa2luZ1NrZWxldG9uTXZwIC0gUmVwbGl0IC0gR29vZ2xlIENocm9tZSAxNl8wN18yMDI1IDA5XzIxXzM3LnBuZyIsImlhdCI6MTc1NDA2NDUxOSwiZXhwIjoxNzU0MDY4MTE5fQ.vy9PR-FS4OfuXoTuNLEstla4LgD57ZdTt1RhNZbvSCM
+[2025-08-04T17:26:23.000-03:00] ✅ URL gerada para documento: WalkingSkeletonMvp - Replit - Google Chrome 16_07_2025 09_21_37.png
+[2025-08-04T17:26:23.000-03:00] 🔍 STEP 5 - Verificando tabela_comercial_id: 16
+[2025-08-04T17:26:23.000-03:00] 🔍 STEP 5.1 - Buscando tabela comercial ID: 16
+[2025-08-04T17:26:23.000-03:00] 🔍 STEP 5.2 - Resultado da consulta tabela comercial: {
+  data: { taxa_juros: 19.7, nome_tabela: 'Flex', parceiro_id: null },
+  error: undefined,
+  hasData: true
+}
+[2025-08-04T17:26:23.000-03:00] ✅ Taxa de juros encontrada: 19.7 % da tabela "Flex"
+[2025-08-04T17:26:23.000-03:00] 🔍 STEP 6 - Processando dados JSONB...
+[2025-08-04T17:26:23.000-03:00] ✅ SUCESSO - Dados de formalização retornados para proposta 902183dd-b5d1-4e20-8a72-79d3d3559d4d: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  dataAprovacao: '2025-08-01T13:21:55',
+  temClienteData: true,
+  temCondicoesData: true,
+  totalDocumentos: 1,
+  clienteNome: 'Gabriel de Jesus Santana Serri',
+  valorEmprestimo: 1000,
+  taxaJuros: 19.7
+}
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-04T20:26:30.773Z'
+}
+[INTER] Getting collection details: 72c6bff2-f928-4946-ba7a-e4a347cc584c
+[INTER] 📋 Retrieving collection: 72c6bff2-f928-4946-ba7a-e4a347cc584c
+[INTER] ========== REQUEST DETAILS ==========
+[INTER] 🌐 FULL URL: https://cdpj.partners.bancointer.com.br/cobranca/v3/cobrancas/72c6bff2-f928-4946-ba7a-e4a347cc584c
+[INTER] 🔧 METHOD: GET
+[INTER] 🪙 TOKEN (first 20 chars):', db12290f-57f9-4526-9...
+[INTER] ===================================
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] 🏦 CONTA CORRENTE HEADER ADDED: 346470536
+[INTER] 🔑 ALL HEADERS: {
+  "Authorization": "Bearer db12290f-57f9-4526-9d26-e86774c582bf",
+  "Accept": "application/json",
+  "User-Agent": "SIMPIX-Inter-Integration/1.0",
+  "x-conta-corrente": "346470536"
+}
+[INTER] ========== RESPONSE DETAILS ==========
+[INTER] 📊 STATUS: 200 OK
+[INTER] 📋 RESPONSE HEADERS: {
+  'content-type': 'application/json',
+  date: 'Mon, 4 Aug 2025 20:26:31 GMT',
+  server: 'istio-envoy',
+  'strict-transport-security': 'max-age=31536000; includeSubDomains',
+  traceparent: '00-b86bafa53a354249ad735baf12623271-9e8fbfe915473a11-00',
+  'x-envoy-upstream-service-time': '100',
+  'x-rate-limit-remaining': '118',
+  'x-rate-limit-time': '1754339240884',
+  'x-upstream-time': '104',
+  'content-length': '1175'
+}
+[INTER] ✅ Response OK
+[INTER] =====================================
+[INTER] ✅ Collection retrieved successfully
+⚠️ [SECURITY] TOKEN_INVALID | severity=MEDIUM | FAILURE | ip=187.36.168.240 | endpoint=/api/inter/collections/72c6bff2-f928-4946-ba7a-e4a347cc584c/pdf
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-04T20:26:42.434Z'
+}
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-04T20:26:42.915Z'
+}
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-04T20:27:44.531Z'
+}
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-04T20:27:45.553Z'
+}
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-04T20:28:17.966Z'
+}
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-04T20:28:18.464Z'
+}
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-04T20:28:18.790Z'
+}
+[INTER] Getting collection details: 72c6bff2-f928-4946-ba7a-e4a347cc584c
+[INTER] 📋 Retrieving collection: 72c6bff2-f928-4946-ba7a-e4a347cc584c
+[INTER] ========== REQUEST DETAILS ==========
+[INTER] 🌐 FULL URL: https://cdpj.partners.bancointer.com.br/cobranca/v3/cobrancas/72c6bff2-f928-4946-ba7a-e4a347cc584c
+[INTER] 🔧 METHOD: GET
+[INTER] 🪙 TOKEN (first 20 chars):', db12290f-57f9-4526-9...
+[INTER] ===================================
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] 🏦 CONTA CORRENTE HEADER ADDED: 346470536
+[INTER] 🔑 ALL HEADERS: {
+  "Authorization": "Bearer db12290f-57f9-4526-9d26-e86774c582bf",
+  "Accept": "application/json",
+  "User-Agent": "SIMPIX-Inter-Integration/1.0",
+  "x-conta-corrente": "346470536"
+}
+[INTER] ========== RESPONSE DETAILS ==========
+[INTER] 📊 STATUS: 200 OK
+[INTER] 📋 RESPONSE HEADERS: {
+  'content-type': 'application/json',
+  date: 'Mon, 4 Aug 2025 20:28:19 GMT',
+  server: 'istio-envoy',
+  'strict-transport-security': 'max-age=31536000; includeSubDomains',
+  traceparent: '00-a8b74133883ec9c005d1caec6010e962-86368b15b250fba9-01',
+  'x-envoy-upstream-service-time': '156',
+  'x-rate-limit-remaining': '119',
+  'x-rate-limit-time': '1754339359442',
+  'x-upstream-time': '158',
+  'content-length': '1175'
+}
+[INTER] ✅ Response OK
+[INTER] =====================================
+[INTER] ✅ Collection retrieved successfully
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-04T20:28:31.591Z'
+}
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-04T20:28:32.338Z'
+}
+⚠️ [SECURITY] TOKEN_INVALID | severity=MEDIUM | FAILURE | ip=187.36.168.240 | endpoint=/api/inter/collections/72c6bff2-f928-4946-ba7a-e4a347cc584c/pdf

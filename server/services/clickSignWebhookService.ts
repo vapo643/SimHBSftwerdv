@@ -473,9 +473,9 @@ class ClickSignWebhookService {
       console.log(`[CLICKSIGN → INTER] Triggering boleto generation for proposal: ${proposta.id}`);
       
       // Check if collection already exists
-      const existingCollection = await storage.getInterCollectionByProposalId(proposta.id);
-      if (existingCollection) {
-        console.log(`[CLICKSIGN → INTER] Boleto already exists for proposal: ${proposta.id}`);
+      const existingCollections = await storage.getInterCollectionsByProposalId(proposta.id);
+      if (existingCollections && existingCollections.length > 0) {
+        console.log(`[CLICKSIGN → INTER] Boletos already exist for proposal: ${proposta.id}`);
         return;
       }
       
@@ -488,78 +488,114 @@ class ClickSignWebhookService {
         ? JSON.parse(proposta.condicoesData)
         : proposta.condicoesData || {};
       
-      // Generate boleto according to Inter Bank API requirements
-      const boletoData = {
-        seuNumero: proposta.id.slice(0, 15), // Max 15 chars
-        valorNominal: parseFloat(String(condicoesData.valorTotalFinanciado || condicoesData.valor || 0)),
-        dataVencimento: this.calculateDueDate(30), // 30 days from now
-        numDiasAgenda: 60, // Auto-cancel after 60 days
-        pagador: {
-          cpfCnpj: clienteData.cpf?.replace(/\D/g, '') || '',
-          tipoPessoa: 'FISICA' as const,
-          nome: clienteData.nome || '',
-          email: clienteData.email || '',
-          ddd: clienteData.telefone ? clienteData.telefone.replace(/\D/g, '').slice(0, 2) : '',
-          telefone: clienteData.telefone ? clienteData.telefone.replace(/\D/g, '').slice(2) : '',
-          endereco: clienteData.logradouro || clienteData.endereco || '',
-          numero: clienteData.numero || '',
-          complemento: clienteData.complemento || '',
-          bairro: clienteData.bairro || 'Centro',
-          cidade: clienteData.cidade || 'São Paulo',
-          uf: clienteData.uf || 'SP',
-          cep: clienteData.cep?.replace(/\D/g, '') || ''
-        },
-        mensagem: {
-          linha1: `Pagamento referente ao empréstimo`,
-          linha2: `Proposta: ${proposta.id}`,
-          linha3: `SIMPIX - Soluções Financeiras`
-        },
-        formasRecebimento: ['BOLETO', 'PIX'] as ('BOLETO' | 'PIX')[]
-      };
+      // Get number of installments and value per installment
+      const numeroParcelas = parseInt(condicoesData.prazoMeses || '1');
+      const valorParcela = parseFloat(String(condicoesData.valorParcela || 0));
       
-      const createResponse = await interBankService.emitirCobranca(boletoData);
+      console.log(`[CLICKSIGN → INTER] Creating ${numeroParcelas} boletos of R$ ${valorParcela} each`);
       
-      if (createResponse.codigoSolicitacao) {
-        // Fetch collection details
-        const interCollection = await interBankService.recuperarCobranca(createResponse.codigoSolicitacao);
-        
-        // Save to database
-        await storage.createInterCollection({
-          propostaId: proposta.id,
-          codigoSolicitacao: createResponse.codigoSolicitacao,
-          seuNumero: boletoData.seuNumero,
-          valorNominal: String(boletoData.valorNominal),
-          dataVencimento: boletoData.dataVencimento,
-          situacao: interCollection.cobranca.situacao,
-          dataSituacao: interCollection.cobranca.dataSituacao,
-          nossoNumero: interCollection.boleto?.nossoNumero || '',
-          codigoBarras: interCollection.boleto?.codigoBarras || '',
-          linhaDigitavel: interCollection.boleto?.linhaDigitavel || '',
-          pixTxid: interCollection.pix?.txid || '',
-          pixCopiaECola: interCollection.pix?.pixCopiaECola || '',
-          dataEmissao: interCollection.cobranca.dataEmissao || new Date().toISOString().split('T')[0],
-          isActive: true
-        });
-        
-        console.log(`[CLICKSIGN → INTER] ✅ Boleto created successfully: ${createResponse.codigoSolicitacao}`);
-        
+      const successfulBoletos = [];
+      const failedBoletos = [];
+      
+      // Create one boleto for each installment
+      for (let i = 0; i < numeroParcelas; i++) {
+        try {
+          const parcelaNumero = i + 1;
+          
+          // Generate boleto according to Inter Bank API requirements
+          const boletoData = {
+            seuNumero: `${proposta.id.slice(0, 12)}-${parcelaNumero}`, // Max 15 chars with installment number
+            valorNominal: valorParcela, // Use installment value, not total
+            dataVencimento: this.calculateDueDateByMonth(i + 1), // First installment in 30 days, then monthly
+            numDiasAgenda: 60, // Auto-cancel after 60 days
+            pagador: {
+              cpfCnpj: clienteData.cpf?.replace(/\D/g, '') || '',
+              tipoPessoa: 'FISICA' as const,
+              nome: clienteData.nome || '',
+              email: clienteData.email || '',
+              ddd: clienteData.telefone ? clienteData.telefone.replace(/\D/g, '').slice(0, 2) : '',
+              telefone: clienteData.telefone ? clienteData.telefone.replace(/\D/g, '').slice(2) : '',
+              endereco: clienteData.logradouro || clienteData.endereco || '',
+              numero: clienteData.numero || '',
+              complemento: clienteData.complemento || '',
+              bairro: clienteData.bairro || 'Centro',
+              cidade: clienteData.cidade || 'São Paulo',
+              uf: clienteData.uf || 'SP',
+              cep: clienteData.cep?.replace(/\D/g, '') || ''
+            },
+            mensagem: {
+              linha1: `Parcela ${parcelaNumero}/${numeroParcelas} - Empréstimo`,
+              linha2: `Proposta: ${proposta.id}`,
+              linha3: `SIMPIX - Soluções Financeiras`,
+              linha4: `Valor da parcela: R$ ${valorParcela.toFixed(2)}`,
+              linha5: `Vencimento: ${this.formatDateBR(this.calculateDueDateByMonth(i + 1))}`
+            }
+          };
+          
+          console.log(`[CLICKSIGN → INTER] Creating boleto ${parcelaNumero}/${numeroParcelas}`);
+          const createResponse = await interBankService.emitirCobranca(boletoData);
+          
+          if (createResponse.codigoSolicitacao) {
+            // Fetch collection details
+            const interCollection = await interBankService.recuperarCobranca(createResponse.codigoSolicitacao);
+            
+            // Save to database
+            await storage.createInterCollection({
+              propostaId: proposta.id,
+              codigoSolicitacao: createResponse.codigoSolicitacao,
+              seuNumero: boletoData.seuNumero,
+              valorNominal: String(boletoData.valorNominal),
+              dataVencimento: boletoData.dataVencimento,
+              situacao: interCollection.cobranca.situacao,
+              dataSituacao: interCollection.cobranca.dataSituacao,
+              nossoNumero: interCollection.boleto?.nossoNumero || '',
+              codigoBarras: interCollection.boleto?.codigoBarras || '',
+              linhaDigitavel: interCollection.boleto?.linhaDigitavel || '',
+              pixTxid: interCollection.pix?.txid || '',
+              pixCopiaECola: interCollection.pix?.pixCopiaECola || '',
+              dataEmissao: interCollection.cobranca.dataEmissao || new Date().toISOString().split('T')[0],
+              isActive: true
+            });
+            
+            successfulBoletos.push(parcelaNumero);
+            console.log(`[CLICKSIGN → INTER] ✅ Boleto ${parcelaNumero} created: ${createResponse.codigoSolicitacao}`);
+          }
+        } catch (error) {
+          console.error(`[CLICKSIGN → INTER] ❌ Error creating boleto ${i + 1}:`, error);
+          failedBoletos.push(i + 1);
+        }
+      }
+      
+      // Log final result
+      if (successfulBoletos.length > 0) {
         await storage.createPropostaLog({
           propostaId: proposta.id,
           autorId: 'clicksign-webhook',
           statusAnterior: proposta.status,
           statusNovo: 'contratos_assinados',
-          observacao: `Boleto gerado automaticamente após assinatura CCB - Código: ${createResponse.codigoSolicitacao}`
+          observacao: `${successfulBoletos.length} boletos gerados automaticamente após assinatura CCB (parcelas: ${successfulBoletos.join(', ')})`
         });
       }
+      
+      if (failedBoletos.length > 0) {
+        await storage.createPropostaLog({
+          propostaId: proposta.id,
+          autorId: 'clicksign-webhook',
+          statusAnterior: proposta.status,
+          statusNovo: 'contratos_assinados',
+          observacao: `Erro ao gerar ${failedBoletos.length} boletos (parcelas: ${failedBoletos.join(', ')})`
+        });
+      }
+      
     } catch (error) {
-      console.error(`[CLICKSIGN → INTER] ❌ Error generating boleto:`, error);
+      console.error(`[CLICKSIGN → INTER] ❌ Error generating boletos:`, error);
       
       await storage.createPropostaLog({
         propostaId: proposta.id,
         autorId: 'clicksign-webhook',
         statusAnterior: proposta.status,
         statusNovo: 'contratos_assinados',
-        observacao: `Erro ao gerar boleto automaticamente: ${(error as Error).message}`
+        observacao: `Erro ao gerar boletos automaticamente: ${(error as Error).message}`
       });
     }
   }
@@ -571,6 +607,23 @@ class ClickSignWebhookService {
     const date = new Date();
     date.setDate(date.getDate() + days);
     return date.toISOString().split('T')[0];
+  }
+  
+  /**
+   * Calculate due date by month (for installments)
+   */
+  private calculateDueDateByMonth(monthNumber: number): string {
+    const date = new Date();
+    date.setMonth(date.getMonth() + monthNumber);
+    return date.toISOString().split('T')[0];
+  }
+  
+  /**
+   * Format date to Brazilian format (DD/MM/YYYY)
+   */
+  private formatDateBR(dateString: string): string {
+    const [year, month, day] = dateString.split('-');
+    return `${day}/${month}/${year}`;
   }
 }
 
