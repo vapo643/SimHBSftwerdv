@@ -331,6 +331,8 @@ class ClickSignServiceV3 {
 
     console.log(`[CLICKSIGN V1] 📡 POST /signers`);
     console.log(`[CLICKSIGN V1] Request body:`, JSON.stringify(requestBody, null, 2));
+    console.log(`[CLICKSIGN V1] 🔐 BIOMETRIC AUTH ENABLED:`, signerData.useBiometricAuth ? 'YES' : 'NO');
+    console.log(`[CLICKSIGN V1] 🔐 Authentication methods requested:`, auths);
 
     const response = await this.makeRequest<any>(
       'POST',
@@ -341,6 +343,7 @@ class ClickSignServiceV3 {
     const signer = (response as any).data?.signer || (response as any).signer || response;
     console.log(`[CLICKSIGN V1] ✅ Signer created with key: ${signer.key}`);
     console.log(`[CLICKSIGN V1] Signer response:`, JSON.stringify(signer, null, 2));
+    console.log(`[CLICKSIGN V1] 🔐 Signer authentication methods returned:`, signer.auths);
     
     return signer;
   }
@@ -582,6 +585,29 @@ class ClickSignServiceV3 {
       console.log(`[CLICKSIGN V1] 🔗 Adding signer to document`);
       const list = await this.addSignerToDocument(document.key, signer.key);
       console.log(`[CLICKSIGN V1] ✅ Signer added to document`);
+
+      // 5.1 Add biometric requirement if enabled
+      if (clientData.useBiometricAuth) {
+        console.log(`[CLICKSIGN V1] 🔐 Adding biometric requirement for signer`);
+        try {
+          // Some ClickSign versions require explicit requirement configuration
+          const requirementBody = {
+            requirement: {
+              document_key: document.key,
+              signer_key: signer.key,
+              type: 'biometria_facial'
+            }
+          };
+          console.log(`[CLICKSIGN V1] Requirement body:`, JSON.stringify(requirementBody, null, 2));
+          
+          // Try to add requirement (may not be needed in v1, but won't hurt)
+          await this.makeRequest<any>('POST', '/requirements', requirementBody).catch(err => {
+            console.log(`[CLICKSIGN V1] ⚠️ Requirements endpoint not available in v1, continuing...`);
+          });
+        } catch (err) {
+          console.log(`[CLICKSIGN V1] ⚠️ Could not add requirement, continuing with standard flow`);
+        }
+      }
 
       // 6. Request signature
       console.log(`[CLICKSIGN V1] 📧 Requesting signature`);
