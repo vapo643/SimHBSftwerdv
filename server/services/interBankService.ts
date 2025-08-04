@@ -125,19 +125,19 @@ class InterBankService {
   } | null = null;
 
   constructor() {
-    // Auto-detect if we're using production credentials based on presence of CONTA_CORRENTE
-    const isProduction = !!process.env.CONTA_CORRENTE;
+    // Auto-detect if we're using production credentials based on presence of INTER_CONTA_CORRENTE
+    const isProduction = !!process.env.INTER_CONTA_CORRENTE;
     
     this.config = {
       environment: isProduction ? 'production' : 'sandbox',
       apiUrl: isProduction 
         ? 'https://cdpj.partners.bancointer.com.br'
         : 'https://cdpj-sandbox.partners.uatinter.co',
-      clientId: process.env.CLIENT_ID || '',
-      clientSecret: process.env.CLIENT_SECRET || '',
-      certificate: process.env.CERTIFICATE || '',
-      privateKey: process.env.PRIVATE_KEY || '',
-      contaCorrente: process.env.CONTA_CORRENTE || ''
+      clientId: process.env.INTER_CLIENT_ID || '',
+      clientSecret: process.env.INTER_CLIENT_SECRET || '',
+      certificate: process.env.INTER_CERTIFICATE || '',
+      privateKey: process.env.INTER_PRIVATE_KEY || '',
+      contaCorrente: process.env.INTER_CONTA_CORRENTE || ''
     };
     
     console.log(`[INTER] 🏦 Initialized in ${this.config.environment} mode`);
