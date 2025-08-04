@@ -53,7 +53,7 @@ interface ClientData {
 interface CobrancaRequest {
   seuNumero: string; // Max 15 chars - Unique identifier
   valorNominal: number; // 2.5 to 99999999.99
-  dataEmissao: string; // YYYY-MM-DD format - Data de emissão
+  // REMOVED dataEmissao - NOT VALID IN API v3
   dataVencimento: string; // YYYY-MM-DD format
   numDiasAgenda: number; // 0-60 days for auto cancellation
   pagador: ClientData;
@@ -61,7 +61,7 @@ interface CobrancaRequest {
     codigo: 'PERCENTUALDATAINFORMADA' | 'VALORFIXODATAINFORMADA' | 'PERCENTUAL' | 'VALORFIXO';
     taxa?: number;
     valor?: number;
-    quantidadeDias?: number;
+    data?: string; // FIXED: Added 'data' field for DATAINFORMADA codes
   };
   multa?: {
     codigo: 'PERCENTUAL' | 'VALORFIXO';
@@ -80,7 +80,7 @@ interface CobrancaRequest {
     linha4?: string;
     linha5?: string;
   };
-  formasRecebimento?: ('BOLETO' | 'PIX')[];
+  // REMOVED formasRecebimento - NOT VALID IN API v3
 }
 
 interface CobrancaResponse {
@@ -384,101 +384,162 @@ class InterBankService {
   }
 
   /**
-   * Make authenticated request to Inter API
+   * Make authenticated request to Inter API WITH mTLS
+   * CRITICAL FIX: Now properly uses HTTPS with mTLS configuration like getAccessToken
    */
   private async makeRequest(endpoint: string, method: 'GET' | 'POST' | 'PATCH' | 'DELETE' | 'PUT' = 'GET', data?: any): Promise<any> {
     try {
       const token = await this.getAccessToken();
-      const url = `${this.config.apiUrl}${endpoint}`;
-
-      const headers: Record<string, string> = {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      };
-
-      // Add account header if configured
-      if (this.config.contaCorrente) {
-        headers['x-conta-corrente'] = this.config.contaCorrente;
-        console.log('[INTER] 🏦 CONTA CORRENTE HEADER ADDED:', this.config.contaCorrente);
-      } else {
-        console.log('[INTER] ⚠️ NO CONTA CORRENTE CONFIGURED!');
-      }
-
-      const options: RequestInit = {
-        method,
-        headers
-      };
-
-      if (data && (method === 'POST' || method === 'PATCH' || method === 'PUT')) {
-        // Custom JSON stringifier to preserve decimal format for valorNominal
-        const customStringify = (obj: any): string => {
-          const json = JSON.stringify(obj, (key, value) => {
-            // Force numeric fields to have decimal format
-            if ((key === 'valorNominal' || key === 'taxa' || key === 'valor') && typeof value === 'number') {
-              // Return as string temporarily to preserve format
-              return `__DECIMAL__${value.toFixed(2)}__`;
-            }
-            return value;
-          });
-          
-          // Replace the temporary string with actual decimal number
-          return json.replace(/"__DECIMAL__([\d.]+)__"/g, '$1');
-        };
-        
-        options.body = customStringify(data);
-        console.log('[INTER] 📦 REQUEST BODY (RAW):', options.body);
-        console.log('[INTER] 📦 REQUEST BODY (PRETTY):', JSON.stringify(data, null, 2));
-      }
+      const url = new URL(`${this.config.apiUrl}${endpoint}`);
 
       console.log('[INTER] ========== REQUEST DETAILS ==========');
-      console.log(`[INTER] 🌐 FULL URL: ${url}`);
+      console.log(`[INTER] 🌐 FULL URL: ${url.toString()}`);
       console.log(`[INTER] 🔧 METHOD: ${method}`);
-      console.log('[INTER] 🔑 ALL HEADERS:', JSON.stringify(headers, null, 2));
-      console.log('[INTER] 🪙 TOKEN (first 20 chars):', token.substring(0, 20) + '...');
+      console.log(`[INTER] 🪙 TOKEN (first 20 chars):', ${token.substring(0, 20)}...`);
       console.log('[INTER] ===================================');
-      
-      const response = await fetch(url, options);
 
-      console.log('[INTER] ========== RESPONSE DETAILS ==========');
-      console.log(`[INTER] 📊 STATUS: ${response.status} ${response.statusText}`);
-      console.log('[INTER] 📋 RESPONSE HEADERS:', JSON.stringify(Object.fromEntries(response.headers.entries()), null, 2));
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.log('[INTER] ❌❌❌ ERROR RESPONSE ❌❌❌');
-        console.log(`[INTER] 🚨 Status Code: ${response.status}`);
-        console.log(`[INTER] 🚨 Status Text: ${response.statusText}`);
-        console.log(`[INTER] 🚨 Error Body (raw): "${errorText}"`);
-        console.log(`[INTER] 🚨 Error Body Length: ${errorText.length} chars`);
-        
-        // Try to parse error details if it's JSON
-        let errorDetails = errorText;
-        try {
-          if (errorText && errorText.trim()) {
-            const jsonError = JSON.parse(errorText);
-            console.log('[INTER] 📋 Error as JSON:', JSON.stringify(jsonError, null, 2));
-            errorDetails = JSON.stringify(jsonError);
-          } else {
-            console.log('[INTER] 📋 EMPTY ERROR BODY!');
+      // CRITICAL: Use HTTPS request with mTLS like getAccessToken
+      return new Promise((resolve, reject) => {
+        // Format certificates first (same logic as getAccessToken)
+        let cert = this.config.certificate;
+        let key = this.config.privateKey;
+
+        // Fix certificate format if needed
+        if (cert.includes('-----BEGIN CERTIFICATE-----') && !cert.includes('\n')) {
+          console.log('[INTER] 📋 Certificate is single-line PEM, adding line breaks...');
+          const certMatch = cert.match(/-----BEGIN CERTIFICATE-----(.*?)-----END CERTIFICATE-----/);
+          if (certMatch && certMatch[1]) {
+            const base64Content = certMatch[1].trim();
+            const formattedContent = base64Content.match(/.{1,64}/g)?.join('\n') || base64Content;
+            cert = `-----BEGIN CERTIFICATE-----\n${formattedContent}\n-----END CERTIFICATE-----`;
           }
-        } catch (e) {
-          // Not JSON, use raw text
-          console.log('[INTER] 📋 Error is not JSON, raw text:', errorText);
         }
-        console.log('[INTER] ❌❌❌ END ERROR RESPONSE ❌❌❌');
+
+        // Fix private key format if needed
+        if (key.includes('-----BEGIN') && key.includes('KEY-----') && !key.includes('\n')) {
+          console.log('[INTER] 🔑 Private key is single-line PEM, adding line breaks...');
+          const keyMatch = key.match(/-----BEGIN (.+?)-----(.*?)-----END (.+?)-----/);
+          if (keyMatch && keyMatch[2]) {
+            const keyType = keyMatch[1];
+            const base64Content = keyMatch[2].trim();
+            const formattedContent = base64Content.match(/.{1,64}/g)?.join('\n') || base64Content;
+            key = `-----BEGIN ${keyType}-----\n${formattedContent}\n-----END ${keyType}-----`;
+          }
+        }
+
+        // Prepare headers
+        const headers: Record<string, string> = {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json',
+          'User-Agent': 'SIMPIX-Inter-Integration/1.0' // Added per Claude's suggestion
+        };
+
+        // Add account header if configured
+        if (this.config.contaCorrente) {
+          headers['x-conta-corrente'] = this.config.contaCorrente;
+          console.log('[INTER] 🏦 CONTA CORRENTE HEADER ADDED:', this.config.contaCorrente);
+        } else {
+          console.log('[INTER] ⚠️ NO CONTA CORRENTE CONFIGURED!');
+        }
+
+        // Prepare body if needed
+        let body: string | undefined;
+        if (data && (method === 'POST' || method === 'PATCH' || method === 'PUT')) {
+          headers['Content-Type'] = 'application/json';
+          body = JSON.stringify(data); // NO CUSTOM STRINGIFY - Use standard JSON
+          console.log('[INTER] 📦 REQUEST BODY:', body);
+        }
+
+        console.log('[INTER] 🔑 ALL HEADERS:', JSON.stringify(headers, null, 2));
+
+        const options = {
+          hostname: url.hostname,
+          port: url.port || 443,
+          path: url.pathname + url.search,
+          method: method,
+          headers: {
+            ...headers,
+            ...(body ? { 'Content-Length': Buffer.byteLength(body) } : {})
+          },
+          cert: cert,
+          key: key,
+          rejectUnauthorized: this.config.environment === 'production',
+          requestCert: true,
+          timeout: 30000
+        };
+
+        const req = https.request(options, (res) => {
+          let responseData = '';
+          
+          console.log('[INTER] ========== RESPONSE DETAILS ==========');
+          console.log(`[INTER] 📊 STATUS: ${res.statusCode} ${res.statusMessage}`);
+          console.log('[INTER] 📋 RESPONSE HEADERS:', res.headers);
+          
+          res.on('data', (chunk) => { 
+            responseData += chunk; 
+          });
+          
+          res.on('end', () => {
+            if (!res.statusCode || res.statusCode >= 400) {
+              console.log('[INTER] ❌❌❌ ERROR RESPONSE ❌❌❌');
+              console.log(`[INTER] 🚨 Status Code: ${res.statusCode}`);
+              console.log(`[INTER] 🚨 Error Body: "${responseData}"`);
+              console.log(`[INTER] 🚨 Error Body Length: ${responseData.length} chars`);
+              
+              if (responseData.length === 0) {
+                console.log('[INTER] 📋 EMPTY ERROR BODY!');
+                console.log('[INTER] 📋 Response headers for debugging:', res.headers);
+              } else {
+                try {
+                  const errorJson = JSON.parse(responseData);
+                  console.log('[INTER] 📋 Error as JSON:', JSON.stringify(errorJson, null, 2));
+                } catch (e) {
+                  console.log('[INTER] 📋 Error is not JSON, raw text:', responseData);
+                }
+              }
+              
+              console.log('[INTER] ❌❌❌ END ERROR RESPONSE ❌❌❌');
+              reject(new Error(`Inter API error: ${res.statusCode} - ${responseData || 'Empty response'}`));
+              return;
+            }
+
+            console.log('[INTER] ✅ Response OK');
+            console.log('[INTER] =====================================');
+
+            // Handle empty responses (204 No Content or DELETE)
+            if (res.statusCode === 204 || !responseData) {
+              resolve(null);
+              return;
+            }
+
+            // Parse JSON response
+            try {
+              resolve(JSON.parse(responseData));
+            } catch (e) {
+              // Return raw text if not JSON (like PDF)
+              resolve(responseData);
+            }
+          });
+        });
+
+        req.on('error', (e) => {
+          console.error(`[INTER] ❌ Request error for ${endpoint}:`, e);
+          reject(e);
+        });
+
+        // Set timeout
+        req.setTimeout(30000, () => {
+          req.destroy();
+          reject(new Error('Request timeout'));
+        });
+
+        // Write body if present
+        if (body) {
+          req.write(body);
+        }
         
-        throw new Error(`Inter API error: ${response.status} - ${errorDetails}`);
-      }
-      console.log('[INTER] ✅ Response OK');
-      console.log('[INTER] =====================================');
-
-      // Handle empty responses (204 No Content)
-      if (response.status === 204) {
-        return null;
-      }
-
-      return await response.json();
+        req.end();
+      });
 
     } catch (error) {
       console.error(`[INTER] Request failed for ${endpoint}:`, error);
@@ -854,15 +915,12 @@ class InterBankService {
       const valorDecimal = Number(proposalData.valorTotal).toFixed(2);
       console.log('[INTER] 💰 Valor formatado:', valorDecimal);
 
-      // Data de emissão (hoje) - formato YYYY-MM-DD
-      const hoje = new Date();
-      const dataEmissao = hoje.toISOString().split('T')[0];
-      console.log('[INTER] 📅 Data de emissão:', dataEmissao);
+      // REMOVED: dataEmissao is not valid in API v3
 
       const cobrancaData: CobrancaRequest = {
         seuNumero: proposalData.id.substring(0, 15), // Max 15 chars
         valorNominal: parseFloat(valorDecimal), // Garantir que é um número decimal
-        dataEmissao: dataEmissao, // Campo obrigatório segundo IA 2
+        // REMOVED dataEmissao - NOT VALID IN API v3 per Gemini analysis
         dataVencimento: proposalData.dataVencimento,
         numDiasAgenda: 30, // 30 days after due date for auto cancellation
         pagador: {
@@ -880,11 +938,11 @@ class InterBankService {
           uf: uf,
           cep: cepLimpo
         },
-        // Desconto obrigatório mesmo com valor zero
+        // Desconto CORRIGIDO - usando 'data' ao invés de 'quantidadeDias'
         desconto: {
           codigo: 'PERCENTUALDATAINFORMADA',
           taxa: 0,
-          quantidadeDias: 0
+          data: proposalData.dataVencimento // FIXED: Using 'data' field for PERCENTUALDATAINFORMADA code
         },
         // Multa e mora são opcionais mas vamos incluir com valores padrão
         multa: {
@@ -901,9 +959,8 @@ class InterBankService {
           linha3: 'Pague via PIX ou boleto bancário',
           linha4: 'Dúvidas: contato@simpix.com.br',
           linha5: 'www.simpix.com.br'
-        },
-        // Campo obrigatório segundo a documentação oficial
-        formasRecebimento: ['BOLETO', 'PIX']
+        }
+        // REMOVED formasRecebimento - NOT VALID IN API v3 per Gemini analysis
       };
 
       console.log('[INTER] 🔥🔥🔥 FINAL COBRANCA DATA BEFORE SENDING 🔥🔥🔥');
