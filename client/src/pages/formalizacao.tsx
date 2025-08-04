@@ -1146,9 +1146,12 @@ export default function Formalizacao() {
                                                 </div>
                                                 <Badge 
                                                   variant={
-                                                    boleto.situacao === 'RECEBIDO' ? 'success' : 
+                                                    boleto.situacao === 'RECEBIDO' ? 'default' : 
                                                     boleto.situacao === 'VENCIDO' ? 'destructive' : 
                                                     'secondary'
+                                                  }
+                                                  className={
+                                                    boleto.situacao === 'RECEBIDO' ? 'bg-green-900 text-green-300 border-green-700' : ''
                                                   }
                                                 >
                                                   {boleto.situacao}
@@ -1244,9 +1247,26 @@ export default function Formalizacao() {
                                           variant="outline"
                                           onClick={async () => {
                                             try {
-                                              const codigo = interBoletoData?.codigoSolicitacao || proposta.interCodigoSolicitacao;
-                                              if (codigo) {
-                                                window.open(`/api/inter/collections/${codigo}/pdf`, '_blank');
+                                              // Usar dados das coleções já carregadas
+                                              const collections = collectionsData || [];
+                                              if (collections.length > 0) {
+                                                // Abrir o PDF do primeiro boleto
+                                                const firstCollection = collections[0];
+                                                if (firstCollection.codigoSolicitacao) {
+                                                  window.open(`/api/inter-collections/${proposta.id}/${firstCollection.codigoSolicitacao}/pdf`, '_blank');
+                                                } else {
+                                                  toast({
+                                                    title: "Erro",
+                                                    description: "Código do boleto não encontrado",
+                                                    variant: "destructive",
+                                                  });
+                                                }
+                                              } else {
+                                                toast({
+                                                  title: "Sem boletos",
+                                                  description: "Nenhum boleto foi gerado ainda para esta proposta",
+                                                  variant: "default",
+                                                });
                                               }
                                             } catch (error) {
                                               toast({
@@ -1266,17 +1286,32 @@ export default function Formalizacao() {
                                           variant="outline"
                                           onClick={async () => {
                                             try {
-                                              const codigo = interBoletoData?.codigoSolicitacao || proposta.interCodigoSolicitacao;
-                                              if (codigo) {
-                                                const response = await apiRequest(`/api/inter/collections/${codigo}`);
-                                                console.log('[INTER] Detalhes do boleto:', response);
+                                              // Buscar coleções para esta proposta
+                                              const collections = collectionsData || [];
+                                              if (collections.length > 0) {
+                                                // Mostrar informações de todas as coleções
+                                                const statusInfo = collections.map((col: any) => 
+                                                  `Parcela ${col.numeroParcela}: ${col.situacao || 'Aguardando'}`
+                                                ).join('\n');
+                                                
                                                 toast({
-                                                  title: "Informações do Boleto",
-                                                  description: `Status: ${response.data?.situacao || 'Aguardando'}`,
+                                                  title: "Status dos Boletos",
+                                                  description: statusInfo || "Nenhum boleto encontrado",
+                                                });
+                                              } else {
+                                                toast({
+                                                  title: "Sem boletos",
+                                                  description: "Nenhum boleto foi gerado ainda para esta proposta",
+                                                  variant: "default",
                                                 });
                                               }
                                             } catch (error) {
-                                              console.error('[INTER] Erro ao consultar boleto:', error);
+                                              console.error('[INTER] Erro ao consultar boletos:', error);
+                                              toast({
+                                                title: "Erro",
+                                                description: "Erro ao consultar status dos boletos",
+                                                variant: "destructive",
+                                              });
                                             }
                                           }}
                                           className="border-orange-600 text-orange-400 hover:bg-orange-600/10"
