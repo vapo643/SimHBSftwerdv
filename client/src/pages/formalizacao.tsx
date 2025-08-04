@@ -369,6 +369,7 @@ export default function Formalizacao() {
   const [showCcbViewer, setShowCcbViewer] = useState(false);
   const [clickSignData, setClickSignData] = useState<any>(null);
   const [loadingClickSign, setLoadingClickSign] = useState(false);
+  const [useBiometricAuth, setUseBiometricAuth] = useState(false);
   
   const propostaId = params?.id;
 
@@ -1095,12 +1096,33 @@ export default function Formalizacao() {
                                   <p className="text-sm text-blue-200 mb-4">
                                     Clique no botão abaixo para enviar o contrato CCB para o ClickSign e gerar o link de assinatura para o cliente.
                                   </p>
+                                  
+                                  {/* Opção de Biometria Facial */}
+                                  <div className="flex items-center space-x-2 p-3 mb-4 bg-purple-900/20 rounded-lg border border-purple-700">
+                                    <input
+                                      type="checkbox"
+                                      id="useBiometricAuth"
+                                      checked={useBiometricAuth}
+                                      onChange={(e) => setUseBiometricAuth(e.target.checked)}
+                                      className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                                    />
+                                    <label htmlFor="useBiometricAuth" className="text-sm text-gray-300 cursor-pointer">
+                                      <span className="font-medium">Usar Biometria Facial</span>
+                                      <span className="block text-xs text-gray-400 mt-0.5">
+                                        Adiciona validação facial com comparação de documento para maior segurança
+                                      </span>
+                                    </label>
+                                  </div>
+                                  
                                   <Button
                                     onClick={async () => {
                                       setLoadingClickSign(true);
                                       try {
                                         const response = await apiRequest(`/api/propostas/${proposta.id}/clicksign/enviar`, {
-                                          method: 'POST'
+                                          method: 'POST',
+                                          body: JSON.stringify({
+                                            useBiometricAuth: useBiometricAuth
+                                          })
                                         });
                                         setClickSignData(response);
                                         toast({

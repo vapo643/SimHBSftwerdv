@@ -42,6 +42,7 @@ interface SignerData {
   documentation: string; // CPF/CNPJ
   birthday?: string;
   company?: string;
+  useBiometricAuth?: boolean;
 }
 
 interface EnvelopeSignerData {
@@ -308,8 +309,12 @@ class ClickSignServiceV3 {
     console.log(`[CLICKSIGN V1] Signer data:`, {
       name: signerData.name,
       email: signerData.email,
-      documentation: signerData.documentation
+      documentation: signerData.documentation,
+      useBiometricAuth: signerData.useBiometricAuth
     });
+    
+    // Determine authentication methods
+    const auths = signerData.useBiometricAuth ? ['biometria_facial'] : ['email'];
     
     // Use simple JSON format for v1
     const requestBody = {
@@ -319,8 +324,8 @@ class ClickSignServiceV3 {
         phone_number: signerData.phone,
         documentation: signerData.documentation,
         ...(signerData.birthday && { birthday: signerData.birthday }),
-        auths: ['email'], // Email authentication
-        delivery: 'email' // Delivery method
+        auths: auths, // Dynamic authentication based on biometric preference
+        delivery: 'email' // Always use email delivery (not WhatsApp)
       }
     };
 
@@ -530,6 +535,7 @@ class ClickSignServiceV3 {
       cpf: string;
       phone: string;
       birthday?: string;
+      useBiometricAuth?: boolean;
     }
   ) {
     try {
@@ -567,7 +573,8 @@ class ClickSignServiceV3 {
         email: clientData.email,
         phone: clientData.phone,
         documentation: validatedCpf,
-        birthday: clientData.birthday
+        birthday: clientData.birthday,
+        useBiometricAuth: clientData.useBiometricAuth
       });
       console.log(`[CLICKSIGN V1] ✅ Signer created with key: ${signer.key}`);
 

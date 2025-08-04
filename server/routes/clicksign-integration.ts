@@ -275,10 +275,12 @@ router.post('/propostas/:id/clicksign/regenerar', jwtAuthMiddleware, async (req:
 router.post('/propostas/:id/clicksign/enviar', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const { id: propostaId } = req.params;
+    const { useBiometricAuth = false } = req.body;
     const userId = req.user?.id;
     const userRole = req.user?.role;
 
     console.log(`[CLICKSIGN] ${getBrasiliaTimestamp()} - Iniciando envio para ClickSign - Proposta: ${propostaId}, User: ${userId}, Role: ${userRole}`);
+    console.log(`[CLICKSIGN] Biometria Facial: ${useBiometricAuth ? 'ATIVADA' : 'DESATIVADA'}`);
 
     // Verificar se é ATENDENTE ou ADMINISTRADOR
     if (userRole !== 'ATENDENTE' && userRole !== 'ADMINISTRADOR') {
@@ -395,7 +397,8 @@ router.post('/propostas/:id/clicksign/enviar', jwtAuthMiddleware, async (req: Au
         email: clienteData.email,
         phone: clienteData.telefone || '',
         cpf: clienteData.cpf,
-        birthday: clienteData.dataNascimento
+        birthday: clienteData.dataNascimento,
+        useBiometricAuth: useBiometricAuth
       }
     );
 
