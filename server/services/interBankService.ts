@@ -399,6 +399,9 @@ class InterBankService {
       // Add account header if configured
       if (this.config.contaCorrente) {
         headers['x-conta-corrente'] = this.config.contaCorrente;
+        console.log('[INTER] 🏦 CONTA CORRENTE HEADER ADDED:', this.config.contaCorrente);
+      } else {
+        console.log('[INTER] ⚠️ NO CONTA CORRENTE CONFIGURED!');
       }
 
       const options: RequestInit = {
@@ -408,30 +411,51 @@ class InterBankService {
 
       if (data && (method === 'POST' || method === 'PATCH' || method === 'PUT')) {
         options.body = JSON.stringify(data);
+        console.log('[INTER] 📦 REQUEST BODY (RAW):', options.body);
+        console.log('[INTER] 📦 REQUEST BODY (PRETTY):', JSON.stringify(data, null, 2));
       }
 
-      console.log(`[INTER] ${method} ${endpoint}`);
-      console.log('[INTER] 🔑 Headers:', JSON.stringify(headers, null, 2));
+      console.log('[INTER] ========== REQUEST DETAILS ==========');
+      console.log(`[INTER] 🌐 FULL URL: ${url}`);
+      console.log(`[INTER] 🔧 METHOD: ${method}`);
+      console.log('[INTER] 🔑 ALL HEADERS:', JSON.stringify(headers, null, 2));
+      console.log('[INTER] 🪙 TOKEN (first 20 chars):', token.substring(0, 20) + '...');
+      console.log('[INTER] ===================================');
       
       const response = await fetch(url, options);
 
+      console.log('[INTER] ========== RESPONSE DETAILS ==========');
+      console.log(`[INTER] 📊 STATUS: ${response.status} ${response.statusText}`);
+      console.log('[INTER] 📋 RESPONSE HEADERS:', JSON.stringify(Object.fromEntries(response.headers.entries()), null, 2));
+      
       if (!response.ok) {
         const errorText = await response.text();
-        console.error(`[INTER] Error ${response.status}: ${errorText}`);
+        console.log('[INTER] ❌❌❌ ERROR RESPONSE ❌❌❌');
+        console.log(`[INTER] 🚨 Status Code: ${response.status}`);
+        console.log(`[INTER] 🚨 Status Text: ${response.statusText}`);
+        console.log(`[INTER] 🚨 Error Body (raw): "${errorText}"`);
+        console.log(`[INTER] 🚨 Error Body Length: ${errorText.length} chars`);
         
         // Try to parse error details if it's JSON
         let errorDetails = errorText;
         try {
-          const jsonError = JSON.parse(errorText);
-          console.log('[INTER] 📋 Error details:', JSON.stringify(jsonError, null, 2));
-          errorDetails = JSON.stringify(jsonError);
+          if (errorText && errorText.trim()) {
+            const jsonError = JSON.parse(errorText);
+            console.log('[INTER] 📋 Error as JSON:', JSON.stringify(jsonError, null, 2));
+            errorDetails = JSON.stringify(jsonError);
+          } else {
+            console.log('[INTER] 📋 EMPTY ERROR BODY!');
+          }
         } catch (e) {
           // Not JSON, use raw text
-          console.log('[INTER] 📋 Raw error response:', errorText);
+          console.log('[INTER] 📋 Error is not JSON, raw text:', errorText);
         }
+        console.log('[INTER] ❌❌❌ END ERROR RESPONSE ❌❌❌');
         
         throw new Error(`Inter API error: ${response.status} - ${errorDetails}`);
       }
+      console.log('[INTER] ✅ Response OK');
+      console.log('[INTER] =====================================');
 
       // Handle empty responses (204 No Content)
       if (response.status === 204) {
