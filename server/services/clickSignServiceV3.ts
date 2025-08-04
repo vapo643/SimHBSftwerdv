@@ -251,7 +251,7 @@ class ClickSignServiceV3 {
     
     console.log(`[CLICKSIGN V1] 📦 Document response:`, JSON.stringify(response, null, 2));
     
-    const document = (response as any).document || response;
+    const document = (response as any).data?.document || (response as any).document || response;
     console.log(`[CLICKSIGN V1] ✅ Document created: ${document.key}`);
     
     return document;
@@ -321,7 +321,7 @@ class ClickSignServiceV3 {
       requestBody
     );
 
-    const signer = (response as any).signer || response;
+    const signer = (response as any).data?.signer || (response as any).signer || response;
     console.log(`[CLICKSIGN V1] ✅ Signer created with key: ${signer.key}`);
     console.log(`[CLICKSIGN V1] Signer response:`, JSON.stringify(signer, null, 2));
     
@@ -485,8 +485,12 @@ class ClickSignServiceV3 {
     };
 
     console.log(`[CLICKSIGN V1] 📡 POST /lists`);
+    console.log(`[CLICKSIGN V1] Request body:`, JSON.stringify(requestBody, null, 2));
     const response = await this.makeRequest<any>('POST', '/lists', requestBody);
-    return (response as any).list || response;
+    console.log(`[CLICKSIGN V1] 📦 List response:`, JSON.stringify(response, null, 2));
+    const list = (response as any).data?.list || (response as any).list || response;
+    console.log(`[CLICKSIGN V1] ✅ List created with request_signature_key: ${list.request_signature_key}`);
+    return list;
   }
 
   /**
