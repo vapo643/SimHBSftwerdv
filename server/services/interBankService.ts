@@ -53,6 +53,7 @@ interface ClientData {
 interface CobrancaRequest {
   seuNumero: string; // Max 15 chars - Unique identifier
   valorNominal: number; // 2.5 to 99999999.99
+  dataEmissao: string; // YYYY-MM-DD format - Data de emissão
   dataVencimento: string; // YYYY-MM-DD format
   numDiasAgenda: number; // 0-60 days for auto cancellation
   pagador: ClientData;
@@ -410,7 +411,22 @@ class InterBankService {
       };
 
       if (data && (method === 'POST' || method === 'PATCH' || method === 'PUT')) {
-        options.body = JSON.stringify(data);
+        // Custom JSON stringifier to preserve decimal format for valorNominal
+        const customStringify = (obj: any): string => {
+          const json = JSON.stringify(obj, (key, value) => {
+            // Force valorNominal to have decimal format
+            if (key === 'valorNominal' && typeof value === 'number') {
+              // Return as string temporarily to preserve format
+              return `__DECIMAL__${value.toFixed(2)}__`;
+            }
+            return value;
+          });
+          
+          // Replace the temporary string with actual decimal number
+          return json.replace(/"__DECIMAL__([\d.]+)__"/g, '$1');
+        };
+        
+        options.body = customStringify(data);
         console.log('[INTER] 📦 REQUEST BODY (RAW):', options.body);
         console.log('[INTER] 📦 REQUEST BODY (PRETTY):', JSON.stringify(data, null, 2));
       }
@@ -843,7 +859,7 @@ class InterBankService {
       const dataEmissao = hoje.toISOString().split('T')[0];
       console.log('[INTER] 📅 Data de emissão:', dataEmissao);
 
-      const cobrancaData: any = {
+      const cobrancaData: CobrancaRequest = {
         seuNumero: proposalData.id.substring(0, 15), // Max 15 chars
         valorNominal: parseFloat(valorDecimal), // Garantir que é um número decimal
         dataEmissao: dataEmissao, // Campo obrigatório segundo IA 2
