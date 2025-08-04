@@ -8,6 +8,7 @@
 
 import { getBrasiliaTimestamp } from '../lib/timezone.js';
 import { clickSignSecurityService } from './clickSignSecurityService.js';
+import { cpf } from 'cpf-cnpj-validator';
 
 interface ClickSignV3Config {
   apiUrl: string;
@@ -180,6 +181,25 @@ class ClickSignServiceV3 {
     
     // Add prefix if it's pure Base64
     return `${prefix}${base64Content}`;
+  }
+
+  /**
+   * Sanitize and validate CPF
+   */
+  private sanitizeAndValidateCPF(rawCpf: string): string {
+    // Sanitize: Remove all non-numeric characters
+    const cleanCpf = rawCpf.replace(/\D/g, '');
+    
+    console.log(`[CLICKSIGN V3] 🧹 CPF sanitization: ${rawCpf} → ${cleanCpf}`);
+    
+    // Validate using the library
+    if (!cpf.isValid(cleanCpf)) {
+      console.error(`[CLICKSIGN V3] ❌ Invalid CPF: ${cleanCpf}`);
+      throw new Error('CPF do cliente é inválido. Operação abortada em ambiente de Produção.');
+    }
+    
+    console.log(`[CLICKSIGN V3] ✅ CPF validation passed: ${cleanCpf}`);
+    return cleanCpf;
   }
 
   /**
@@ -461,7 +481,7 @@ class ClickSignServiceV3 {
 
       console.log(`[CLICKSIGN V3] ✅ Document added: ${document.id}`);
 
-      // 4. Create signer
+      // 4. Create signer with validated CPF
       console.log(`[CLICKSIGN V3] Creating signer with data:`, {
         name: clientData.name,
         email: clientData.email,
@@ -469,11 +489,14 @@ class ClickSignServiceV3 {
         cpf: clientData.cpf
       });
       
+      // Validate and sanitize CPF before proceeding
+      const validatedCpf = this.sanitizeAndValidateCPF(clientData.cpf);
+      
       const signer = await this.createSigner({
         name: clientData.name,
         email: clientData.email,
         phone: clientData.phone,
-        documentation: clientData.cpf.replace(/\D/g, ''),
+        documentation: validatedCpf,
         birthday: clientData.birthday
       });
       
@@ -492,7 +515,7 @@ class ClickSignServiceV3 {
         name: clientData.name,
         email: clientData.email,
         phone: clientData.phone,
-        documentation: clientData.cpf.replace(/\D/g, ''),
+        documentation: validatedCpf,
         birthday: clientData.birthday
       });
       
