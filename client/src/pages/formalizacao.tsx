@@ -1087,12 +1087,13 @@ export default function Formalizacao() {
                                           
                                           toast({
                                             title: "Sucesso",
-                                            description: `Boleto gerado com sucesso! Código: ${response.codigoSolicitacao}`,
+                                            description: `${response.totalCriados} boleto(s) gerado(s) com sucesso!`,
                                           });
                                           
-                                          // Atualizar estado local para mostrar o código do boleto
+                                          // Atualizar estado local para mostrar os boletos
                                           setInterBoletoData(response);
                                           refetch(); // Recarregar dados da proposta
+                                          queryClient.invalidateQueries({ queryKey: ["/api/inter/collections", proposta.id] });
                                         } catch (error: any) {
                                           console.error('[INTER] Erro ao gerar boleto:', error);
                                           
@@ -1153,7 +1154,9 @@ export default function Formalizacao() {
                                               <div className="flex items-start justify-between mb-3">
                                                 <div>
                                                   <h6 className="font-medium text-orange-300 mb-1">
-                                                    {boleto.seuNumero || boleto.codigoSolicitacao}
+                                                    {boleto.numeroParcela && boleto.totalParcelas 
+                                                      ? `Parcela ${boleto.numeroParcela}/${boleto.totalParcelas}`
+                                                      : boleto.seuNumero || boleto.codigoSolicitacao}
                                                   </h6>
                                                   <div className="flex items-center gap-4 text-sm text-gray-400">
                                                     <span>Valor: R$ {boleto.valorNominal}</span>

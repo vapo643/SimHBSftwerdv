@@ -288,6 +288,8 @@ export const interCollections = pgTable("inter_collections", {
   valorTotalRecebido: decimal("valor_total_recebido", { precision: 12, scale: 2 }),
   origemRecebimento: text("origem_recebimento"), // BOLETO or PIX
   dataEmissao: text("data_emissao"),
+  numeroParcela: integer("numero_parcela"), // Número da parcela (1, 2, 3...)
+  totalParcelas: integer("total_parcelas"), // Total de parcelas
   isActive: boolean("is_active").default(true).notNull(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

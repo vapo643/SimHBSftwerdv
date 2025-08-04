@@ -10,7 +10,7 @@ import { jwtAuthMiddleware, type AuthenticatedRequest } from '../lib/jwt-auth-mi
 import { getBrasiliaTimestamp } from '../lib/timezone.js';
 import { z } from 'zod';
 import { db } from '../lib/supabase.js';
-import { interCollections } from '@shared/schema';
+import { interCollections, propostas } from '@shared/schema';
 import { eq } from 'drizzle-orm';
 
 const router = express.Router();
@@ -262,41 +262,99 @@ router.post('/collections', jwtAuthMiddleware, async (req: AuthenticatedRequest,
       });
     }
 
-    // Create collection via Inter API
-    const collectionResponse = await interBankService.criarCobrancaParaProposta({
-      id: validatedData.proposalId,
-      valorTotal: validatedData.valorTotal,
-      dataVencimento: validatedData.dataVencimento,
-      clienteData: validatedData.clienteData
-    });
+    // Buscar dados da proposta para obter o prazo (número de parcelas)
+    const [proposta] = await db.select()
+      .from(propostas)
+      .where(eq(propostas.id, validatedData.proposalId))
+      .limit(1);
+    
+    if (!proposta) {
+      return res.status(404).json({
+        success: false,
+        error: 'Proposta não encontrada'
+      });
+    }
 
-    // Fetch full collection details
-    const collectionDetails = await interBankService.recuperarCobranca(collectionResponse.codigoSolicitacao);
+    // Parse dos dados da proposta
+    const condicoesData = typeof proposta.condicoesData === 'string' 
+      ? JSON.parse(proposta.condicoesData) 
+      : proposta.condicoesData;
+    
+    const prazo = condicoesData?.prazo || 1;
+    const valorParcela = validatedData.valorTotal / prazo;
+    
+    console.log(`[INTER] Criando ${prazo} boletos de R$ ${valorParcela.toFixed(2)} cada`);
+    
+    const createdCollections = [];
+    const errors = [];
+    
+    // Criar um boleto para cada parcela
+    for (let i = 0; i < prazo; i++) {
+      try {
+        // Calcular data de vencimento para cada parcela (mensal)
+        const dataVencimento = new Date(validatedData.dataVencimento);
+        dataVencimento.setMonth(dataVencimento.getMonth() + i);
+        
+        console.log(`[INTER] Criando boleto ${i + 1}/${prazo} - Vencimento: ${dataVencimento.toISOString().split('T')[0]}`);
+        
+        // Create collection via Inter API
+        const collectionResponse = await interBankService.criarCobrancaParaProposta({
+          id: `${validatedData.proposalId}-${i + 1}`, // ID único para cada parcela
+          valorTotal: valorParcela, // Usar valor da parcela
+          dataVencimento: dataVencimento.toISOString().split('T')[0],
+          clienteData: validatedData.clienteData
+        });
 
-    // Store collection data in database
-    await db.insert(interCollections).values({
-      propostaId: validatedData.proposalId,
-      codigoSolicitacao: collectionResponse.codigoSolicitacao,
-      seuNumero: collectionDetails.cobranca.seuNumero,
-      valorNominal: collectionDetails.cobranca.valorNominal.toString(),
-      dataVencimento: collectionDetails.cobranca.dataVencimento,
-      situacao: collectionDetails.cobranca.situacao,
-      dataSituacao: collectionDetails.cobranca.dataSituacao,
-      nossoNumero: collectionDetails.boleto?.nossoNumero,
-      codigoBarras: collectionDetails.boleto?.codigoBarras,
-      linhaDigitavel: collectionDetails.boleto?.linhaDigitavel,
-      pixTxid: collectionDetails.pix?.txid,
-      pixCopiaECola: collectionDetails.pix?.pixCopiaECola,
-      dataEmissao: collectionDetails.cobranca.dataEmissao,
-      origemRecebimento: 'BOLETO',
-      isActive: true
-    });
+        // Fetch full collection details
+        const collectionDetails = await interBankService.recuperarCobranca(collectionResponse.codigoSolicitacao);
 
-    console.log(`[INTER] ✅ Collection created successfully: ${collectionResponse.codigoSolicitacao}`);
+        // Store collection data in database
+        await db.insert(interCollections).values({
+          propostaId: validatedData.proposalId,
+          codigoSolicitacao: collectionResponse.codigoSolicitacao,
+          seuNumero: collectionDetails.cobranca.seuNumero,
+          valorNominal: collectionDetails.cobranca.valorNominal.toString(),
+          dataVencimento: collectionDetails.cobranca.dataVencimento,
+          situacao: collectionDetails.cobranca.situacao,
+          dataSituacao: collectionDetails.cobranca.dataSituacao,
+          nossoNumero: collectionDetails.boleto?.nossoNumero,
+          codigoBarras: collectionDetails.boleto?.codigoBarras,
+          linhaDigitavel: collectionDetails.boleto?.linhaDigitavel,
+          pixTxid: collectionDetails.pix?.txid,
+          pixCopiaECola: collectionDetails.pix?.pixCopiaECola,
+          dataEmissao: collectionDetails.cobranca.dataEmissao,
+          origemRecebimento: 'BOLETO',
+          isActive: true,
+          numeroParcela: i + 1,
+          totalParcelas: prazo
+        });
+        
+        createdCollections.push({
+          codigoSolicitacao: collectionResponse.codigoSolicitacao,
+          parcela: i + 1,
+          valor: valorParcela,
+          vencimento: dataVencimento.toISOString().split('T')[0]
+        });
+        
+        console.log(`[INTER] ✅ Boleto ${i + 1}/${prazo} criado: ${collectionResponse.codigoSolicitacao}`);
+        
+      } catch (error) {
+        console.error(`[INTER] ❌ Erro ao criar boleto ${i + 1}:`, error);
+        errors.push({
+          parcela: i + 1,
+          erro: error instanceof Error ? error.message : 'Erro desconhecido'
+        });
+      }
+    }
+
+    console.log(`[INTER] ✅ ${createdCollections.length} boletos criados com sucesso, ${errors.length} erros`);
 
     res.json({
       success: true,
-      codigoSolicitacao: collectionResponse.codigoSolicitacao,
+      totalCriados: createdCollections.length,
+      totalErros: errors.length,
+      boletos: createdCollections,
+      erros: errors,
       proposalId: validatedData.proposalId,
       timestamp: getBrasiliaTimestamp()
     });
