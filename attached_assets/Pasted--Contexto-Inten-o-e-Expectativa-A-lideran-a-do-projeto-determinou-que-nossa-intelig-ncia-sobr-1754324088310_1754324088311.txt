@@ -1,0 +1,27 @@
+**Contexto, Intenção e Expectativa:**
+A liderança do projeto determinou que nossa inteligência sobre o estado atual do software "Simpix" está potencialmente comprometida e desatualizada. Sua missão é executar uma auditoria completa, não apenas de segurança, para estabelecer uma nova "baseline" da verdade. Você NÃO deve fazer nenhuma modificação. Sua função é executar comandos de leitura e análise e consolidar os resultados em um relatório de estado abrangente.
+
+**Roadmap de Auditoria Completa (Execute na ordem):**
+
+1.  **Análise de Dependências e Segurança:**
+    * Execute `npm audit` e apresente o sumário do resultado, listando o número de vulnerabilidades por severidade.
+    * Liste as versões exatas das seguintes dependências-chave encontradas no `package.json`: `remix`, `react`, `@supabase/supabase-js`, `express`, `tailwindcss`, `zod`.
+
+2.  **Validação da Arquitetura de Diretórios:**
+    * Execute um comando para listar a estrutura de diretórios principal dentro da pasta `/app`.
+    * O objetivo é confirmar a existência e a organização das pastas canônicas: `/app/routes`, `/app/components`, `/app/services`, `/app/utils`.
+
+3.  **Status do Gerenciamento de Estado:**
+    * Verifique o `package.json` para determinar qual biblioteca de gerenciamento de estado está instalada: `zustand` ou `jotai`.
+    * Com base na biblioteca encontrada, localize e informe o caminho para o arquivo principal de configuração do estado (o "store" de Zustand ou o diretório dos "átomos" de Jotai).
+
+4.  **Configuração de Ambiente e 'Secrets':**
+    * Verifique se existe um arquivo `.env` na raiz do projeto.
+    * Acesse a ferramenta de "Secrets" do Replit e liste apenas os **NOMES (chaves)** das variáveis de ambiente armazenadas. **NÃO REVELE OS VALORES.**
+
+5.  **Análise dos Protocolos de Versionamento:**
+    * Execute `git status` para verificar se há modificações não rastreadas ou pendentes de commit.
+    * Execute `git log -n 5 --oneline` para exibir os últimos 5 commits, fornecendo um snapshot do trabalho recente.
+
+**Formato do Relatório Final:**
+Compile todas as informações coletadas em um único relatório estruturado, utilizando os títulos numerados acima. O relatório deve ser claro, objetivo e apresentar apenas os dados brutos solicitados.
