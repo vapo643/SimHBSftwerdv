@@ -314,8 +314,9 @@ class ClickSignServiceV3 {
     });
     
     // Determine authentication methods
-    // For ClickSign v1: 'selfie' is the correct authentication type for facial biometry
-    const auths = signerData.useBiometricAuth ? ['selfie'] : ['email'];
+    // For ClickSign v1: only 'email' is valid in the auths array
+    // Biometric is controlled by boolean flags, not the auths array
+    const auths = ['email'];
     
     // Use simple JSON format for v1
     const requestBody = {
@@ -325,13 +326,15 @@ class ClickSignServiceV3 {
         phone_number: signerData.phone,
         documentation: signerData.documentation,
         ...(signerData.birthday && { birthday: signerData.birthday }),
-        auths: auths, // Dynamic authentication based on biometric preference
+        auths: auths, // Always use 'email' for v1 API
         delivery: 'email', // Always use email delivery (not WhatsApp)
         // Enable biometric authentication flags when requested
+        // Note: facial_biometrics_enabled cannot be used with selfie_enabled
         ...(signerData.useBiometricAuth && {
-          selfie_enabled: true,
-          liveness_enabled: true,
-          facial_biometrics_enabled: true
+          facial_biometrics_enabled: true,
+          // Don't enable these as they conflict with facial biometrics:
+          // selfie_enabled: false,
+          // liveness_enabled: false
         })
       }
     };
