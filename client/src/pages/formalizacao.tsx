@@ -584,6 +584,8 @@ export default function Formalizacao() {
     }
   }, [initialClickSignData]);
 
+
+
   const getStatusProgress = (status: string) => {
     const statusMap = {
       aprovado: 20,
