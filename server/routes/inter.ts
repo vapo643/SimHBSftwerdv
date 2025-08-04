@@ -9,6 +9,8 @@ import { storage } from '../storage.js';
 import { jwtAuthMiddleware, type AuthenticatedRequest } from '../lib/jwt-auth-middleware.js';
 import { getBrasiliaTimestamp } from '../lib/timezone.js';
 import { z } from 'zod';
+import { db } from '../lib/supabase.js';
+import { interCollections } from '@shared/schema';
 
 const router = express.Router();
 
@@ -242,8 +244,27 @@ router.post('/collections', jwtAuthMiddleware, async (req: AuthenticatedRequest,
       clienteData: validatedData.clienteData
     });
 
-    // TODO: Store collection data in database
-    // This will be implemented when we add the inter_collections table
+    // Fetch full collection details
+    const collectionDetails = await interBankService.recuperarCobranca(collectionResponse.codigoSolicitacao);
+
+    // Store collection data in database
+    await db.insert(interCollections).values({
+      propostaId: validatedData.proposalId,
+      codigoSolicitacao: collectionResponse.codigoSolicitacao,
+      seuNumero: collectionDetails.cobranca.seuNumero,
+      valorNominal: collectionDetails.cobranca.valorNominal.toString(),
+      dataVencimento: collectionDetails.cobranca.dataVencimento,
+      situacao: collectionDetails.cobranca.situacao,
+      dataSituacao: collectionDetails.cobranca.dataSituacao,
+      nossoNumero: collectionDetails.boleto?.nossoNumero,
+      codigoBarras: collectionDetails.boleto?.codigoBarras,
+      linhaDigitavel: collectionDetails.boleto?.linhaDigitavel,
+      pixTxid: collectionDetails.pix?.txid,
+      pixCopiaECola: collectionDetails.pix?.pixCopiaECola,
+      dataEmissao: collectionDetails.cobranca.dataEmissao,
+      origemRecebimento: 'BOLETO',
+      isActive: true
+    });
 
     console.log(`[INTER] ✅ Collection created successfully: ${collectionResponse.codigoSolicitacao}`);
 
