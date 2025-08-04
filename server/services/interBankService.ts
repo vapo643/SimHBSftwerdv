@@ -61,7 +61,8 @@ interface CobrancaRequest {
     codigo: 'PERCENTUALDATAINFORMADA' | 'VALORFIXODATAINFORMADA' | 'PERCENTUAL' | 'VALORFIXO';
     taxa?: number;
     valor?: number;
-    data?: string; // FIXED: Added 'data' field for DATAINFORMADA codes
+    data?: string; // For DATAINFORMADA codes
+    quantidadeDias?: number; // Still required by API v3
   };
   multa?: {
     codigo: 'PERCENTUAL' | 'VALORFIXO';
@@ -938,11 +939,12 @@ class InterBankService {
           uf: uf,
           cep: cepLimpo
         },
-        // Desconto CORRIGIDO - usando 'data' ao invés de 'quantidadeDias'
+        // Desconto com valores válidos para API v3
         desconto: {
           codigo: 'PERCENTUALDATAINFORMADA',
-          taxa: 0,
-          data: proposalData.dataVencimento // FIXED: Using 'data' field for PERCENTUALDATAINFORMADA code
+          taxa: 0.01, // Mínimo exigido pela API (0.01%)
+          quantidadeDias: 0, // Obrigatório para este código
+          data: proposalData.dataVencimento // Data até quando o desconto é válido
         },
         // Multa e mora são opcionais mas vamos incluir com valores padrão
         multa: {
@@ -968,7 +970,6 @@ class InterBankService {
       console.log('[INTER] Field check:');
       console.log('[INTER]   - seuNumero:', cobrancaData.seuNumero);
       console.log('[INTER]   - valorNominal:', cobrancaData.valorNominal, 'type:', typeof cobrancaData.valorNominal);
-      console.log('[INTER]   - dataEmissao:', cobrancaData.dataEmissao || 'NOT PRESENT!');
       console.log('[INTER]   - dataVencimento:', cobrancaData.dataVencimento);
       console.log('[INTER]   - multa present?', !!cobrancaData.multa);
       console.log('[INTER]   - mora present?', !!cobrancaData.mora);
