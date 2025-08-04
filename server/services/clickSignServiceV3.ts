@@ -227,13 +227,16 @@ class ClickSignServiceV3 {
    */
   async createDocumentBatch(documentData: any) {
     console.log(`[CLICKSIGN V1] 🔨 Creating document batch`);
-    console.log(`[CLICKSIGN V1] Document data:`, documentData);
+    console.log(`[CLICKSIGN V1] Document data (content_base64 length):`, documentData.content_base64?.length || 0);
     
     // Use simple JSON format for v1 API
+    // Add MIME type prefix to base64 content
+    const contentWithMimeType = `data:application/pdf;base64,${documentData.content_base64}`;
+    
     const requestBody = {
       document: {
         path: `/propostas/${Date.now()}.pdf`,
-        content_base64: documentData.content_base64,
+        content_base64: contentWithMimeType,
         deadline_at: documentData.deadline_at,
         auto_close: true,
         locale: 'pt-BR',
@@ -248,7 +251,7 @@ class ClickSignServiceV3 {
     
     console.log(`[CLICKSIGN V1] 📦 Document response:`, JSON.stringify(response, null, 2));
     
-    const document = response.document || response;
+    const document = (response as any).document || response;
     console.log(`[CLICKSIGN V1] ✅ Document created: ${document.key}`);
     
     return document;
@@ -318,19 +321,14 @@ class ClickSignServiceV3 {
       requestBody
     );
 
-    const signer = response.signer || response;
+    const signer = (response as any).signer || response;
     console.log(`[CLICKSIGN V1] ✅ Signer created with key: ${signer.key}`);
     console.log(`[CLICKSIGN V1] Signer response:`, JSON.stringify(signer, null, 2));
     
     return signer;
   }
 
-  /**
-   * Legacy method for backwards compatibility
-   */
-  async createSigner(signerData: SignerData) {
-    return this.createSignerGlobally(signerData);
-  }
+
 
   /**
    * STEP 2: Add signer to envelope using the proper endpoint
@@ -488,7 +486,7 @@ class ClickSignServiceV3 {
 
     console.log(`[CLICKSIGN V1] 📡 POST /lists`);
     const response = await this.makeRequest<any>('POST', '/lists', requestBody);
-    return response.list || response;
+    return (response as any).list || response;
   }
 
   /**
