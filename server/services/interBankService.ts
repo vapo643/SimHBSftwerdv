@@ -171,12 +171,18 @@ class InterBankService {
         'client_id': this.config.clientId,
         'client_secret': this.config.clientSecret,
         'grant_type': 'client_credentials',
-        'scope': 'boleto-cobranca.read boleto-cobranca.write webhook.write webhook.read' // Official scopes from documentation
+        'scope': 'boleto-cobranca.read boleto-cobranca.write' // Official scopes from documentation
       });
       
+      // Log client_id length for debugging
+      console.log(`[INTER] 📊 Client ID length: ${this.config.clientId.length} chars`);
+      console.log(`[INTER] 📊 Client Secret length: ${this.config.clientSecret.length} chars`);
+      
       console.log(`[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=${formBody.get('scope')}`);
+      console.log(`[INTER] 📝 Form body string length: ${formBody.toString().length} chars`);
+      console.log(`[INTER] 📝 Form body preview: ${formBody.toString().substring(0, 100)}...`);
 
-      // Não logar o form body pois contém credenciais
+      // Não logar o form body completo pois contém credenciais
       console.log(`[INTER] 🔒 Using mTLS certificate authentication`);
 
       // Prepare certificate and key in proper PEM format

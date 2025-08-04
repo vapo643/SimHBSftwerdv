@@ -75,13 +75,13 @@ router.get('/test', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) =>
 router.get('/debug-credentials', async (req, res) => {
   try {
     const credentials = {
-      clientId: process.env.INTER_CLIENT_ID ? '✅ Present (' + process.env.INTER_CLIENT_ID.substring(0, 8) + '...)' : '❌ Missing',
-      clientSecret: process.env.INTER_CLIENT_SECRET ? '✅ Present (' + process.env.INTER_CLIENT_SECRET.substring(0, 8) + '...)' : '❌ Missing',
-      certificate: process.env.INTER_CERTIFICATE ? '✅ Present (' + process.env.INTER_CERTIFICATE.length + ' chars)' : '❌ Missing',
-      privateKey: process.env.INTER_PRIVATE_KEY ? '✅ Present (' + process.env.INTER_PRIVATE_KEY.length + ' chars)' : '❌ Missing',
-      contaCorrente: process.env.INTER_CONTA_CORRENTE ? '✅ Present (' + process.env.INTER_CONTA_CORRENTE + ')' : '❌ Missing',
-      environment: process.env.NODE_ENV === 'production' ? 'production' : 'sandbox',
-      apiUrl: process.env.NODE_ENV === 'production' 
+      clientId: process.env.CLIENT_ID ? '✅ Present (' + process.env.CLIENT_ID.substring(0, 8) + '...)' : '❌ Missing',
+      clientSecret: process.env.CLIENT_SECRET ? '✅ Present (' + process.env.CLIENT_SECRET.substring(0, 8) + '...)' : '❌ Missing',
+      certificate: process.env.CERTIFICATE ? '✅ Present (' + process.env.CERTIFICATE.length + ' chars)' : '❌ Missing',
+      privateKey: process.env.PRIVATE_KEY ? '✅ Present (' + process.env.PRIVATE_KEY.length + ' chars)' : '❌ Missing',
+      contaCorrente: process.env.CONTA_CORRENTE ? '✅ Present (' + process.env.CONTA_CORRENTE + ')' : '❌ Missing',
+      environment: !!process.env.CONTA_CORRENTE ? 'production' : 'sandbox',
+      apiUrl: !!process.env.CONTA_CORRENTE 
         ? 'https://cdpj.partners.bancointer.com.br'
         : 'https://cdpj-sandbox.partners.uatinter.co'
     };
@@ -107,11 +107,60 @@ router.get('/debug-credentials', async (req, res) => {
  * Debug endpoint to check certificate format
  * GET /api/inter/debug-certificate-format
  */
+/**
+ * Test OAuth2 authentication directly
+ * GET /api/inter/test-auth
+ */
+router.get('/test-auth', async (req, res) => {
+  try {
+    console.log('[INTER] Testing OAuth2 authentication...');
+    
+    // Get credentials directly from environment
+    const config = {
+      clientId: process.env.CLIENT_ID || '',
+      clientSecret: process.env.CLIENT_SECRET || '',
+      certificate: process.env.CERTIFICATE || '',
+      privateKey: process.env.PRIVATE_KEY || '',
+      contaCorrente: process.env.CONTA_CORRENTE || ''
+    };
+    
+    // Log config status
+    console.log('[INTER] Config status:');
+    console.log(`  - Client ID: ${config.clientId ? 'Present' : 'Missing'}`);
+    console.log(`  - Client Secret: ${config.clientSecret ? 'Present' : 'Missing'}`);
+    console.log(`  - Certificate: ${config.certificate ? 'Present' : 'Missing'}`);
+    console.log(`  - Private Key: ${config.privateKey ? 'Present' : 'Missing'}`);
+    
+    // Try to get token
+    const token = await interBankService.testConnection();
+    
+    res.json({
+      success: token,
+      config: {
+        hasClientId: !!config.clientId,
+        hasClientSecret: !!config.clientSecret,
+        hasCertificate: !!config.certificate,
+        hasPrivateKey: !!config.privateKey,
+        hasContaCorrente: !!config.contaCorrente
+      },
+      timestamp: getBrasiliaTimestamp()
+    });
+    
+  } catch (error) {
+    console.error('[INTER] Auth test failed:', error);
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      timestamp: getBrasiliaTimestamp()
+    });
+  }
+});
+
 router.get('/debug-certificate-format', async (req, res) => {
   console.log('[INTER] 🔍 Debug certificate format endpoint called');
   try {
-    const cert = process.env.INTER_CERTIFICATE || '';
-    const key = process.env.INTER_PRIVATE_KEY || '';
+    const cert = process.env.CERTIFICATE || '';
+    const key = process.env.PRIVATE_KEY || '';
     
     // Check certificate format
     const certInfo = {
