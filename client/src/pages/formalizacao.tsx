@@ -38,6 +38,7 @@ import {
   TrendingUp,
   Building2,
   Printer,
+  Copy,
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -372,6 +373,8 @@ export default function Formalizacao() {
   const [clickSignData, setClickSignData] = useState<any>(null);
   const [loadingClickSign, setLoadingClickSign] = useState(false);
   const [useBiometricAuth, setUseBiometricAuth] = useState(false);
+  const [interBoletoData, setInterBoletoData] = useState<any>(null);
+  const [loadingInter, setLoadingInter] = useState(false);
   
   const propostaId = params?.id;
 
@@ -1023,31 +1026,80 @@ export default function Formalizacao() {
                                     Após a assinatura do contrato, os boletos são gerados automaticamente pelo Banco Inter para processamento do pagamento ao cliente.
                                   </p>
 
-                                  {!proposta.interBoletoGerado ? (
+                                  {!proposta.interBoletoGerado && !interBoletoData ? (
                                     // Botão para gerar boletos
                                     <Button
                                       onClick={async () => {
+                                        setLoadingInter(true);
                                         try {
-                                          const response = await apiRequest(`/api/propostas/${proposta.id}/inter/gerar-boleto`, {
-                                            method: 'POST'
+                                          // Preparar dados para a API do Inter
+                                          const dataVencimento = new Date();
+                                          dataVencimento.setDate(dataVencimento.getDate() + 5); // Vencimento em 5 dias
+                                          
+                                          const requestData = {
+                                            proposalId: proposta.id,
+                                            valorTotal: proposta.condicoes_data?.valor || 0,
+                                            dataVencimento: dataVencimento.toISOString().split('T')[0],
+                                            clienteData: {
+                                              nome: proposta.cliente_data?.nome || '',
+                                              cpf: proposta.cliente_data?.cpf || '',
+                                              email: proposta.cliente_data?.email || '',
+                                              telefone: proposta.cliente_data?.telefone || '',
+                                              endereco: proposta.cliente_data?.endereco || '',
+                                              numero: proposta.cliente_data?.numero || '',
+                                              complemento: proposta.cliente_data?.complemento || '',
+                                              bairro: proposta.cliente_data?.bairro || '',
+                                              cidade: proposta.cliente_data?.cidade || '',
+                                              uf: proposta.cliente_data?.uf || '',
+                                              cep: proposta.cliente_data?.cep || ''
+                                            }
+                                          };
+                                          
+                                          console.log('[INTER] Enviando dados para gerar boleto:', requestData);
+                                          
+                                          const response = await apiRequest('/api/inter/collections', {
+                                            method: 'POST',
+                                            body: JSON.stringify(requestData),
+                                            headers: {
+                                              'Content-Type': 'application/json'
+                                            }
                                           });
+                                          
+                                          console.log('[INTER] Resposta da API:', response);
+                                          
                                           toast({
                                             title: "Sucesso",
-                                            description: "Boletos gerados com sucesso pelo Banco Inter!",
+                                            description: `Boleto gerado com sucesso! Código: ${response.codigoSolicitacao}`,
                                           });
+                                          
+                                          // Atualizar estado local para mostrar o código do boleto
+                                          setInterBoletoData(response);
                                           refetch(); // Recarregar dados da proposta
                                         } catch (error: any) {
+                                          console.error('[INTER] Erro ao gerar boleto:', error);
                                           toast({
                                             title: "Erro",
-                                            description: error.response?.data?.message || "Erro ao gerar boletos",
+                                            description: error.response?.data?.details || error.response?.data?.error || "Erro ao gerar boletos",
                                             variant: "destructive",
                                           });
+                                        } finally {
+                                          setLoadingInter(false);
                                         }
                                       }}
+                                      disabled={loadingInter}
                                       className="w-full bg-orange-600 hover:bg-orange-700"
                                     >
-                                      <Building2 className="h-4 w-4 mr-2" />
-                                      Gerar Boletos via Banco Inter
+                                      {loadingInter ? (
+                                        <div className="flex items-center">
+                                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                          Gerando boleto...
+                                        </div>
+                                      ) : (
+                                        <div className="flex items-center">
+                                          <Building2 className="h-4 w-4 mr-2" />
+                                          Gerar Boletos via Banco Inter
+                                        </div>
+                                      )}
                                     </Button>
                                   ) : (
                                     // Boletos já gerados - mostrar opções
@@ -1057,35 +1109,85 @@ export default function Formalizacao() {
                                         <span className="text-green-300 font-medium">Boletos gerados com sucesso</span>
                                       </div>
                                       
+                                      {/* Mostrar código do boleto se disponível */}
+                                      {(interBoletoData?.codigoSolicitacao || proposta.interCodigoSolicitacao) && (
+                                        <div className="p-3 bg-gray-800 rounded border border-gray-700">
+                                          <p className="text-sm text-gray-400 mb-1">Código do Boleto:</p>
+                                          <div className="flex items-center gap-2">
+                                            <code className="flex-1 text-orange-400 font-mono">
+                                              {interBoletoData?.codigoSolicitacao || proposta.interCodigoSolicitacao}
+                                            </code>
+                                            <Button
+                                              size="sm"
+                                              variant="ghost"
+                                              onClick={() => {
+                                                const codigo = interBoletoData?.codigoSolicitacao || proposta.interCodigoSolicitacao || '';
+                                                navigator.clipboard.writeText(codigo);
+                                                toast({
+                                                  title: "Copiado!",
+                                                  description: "Código do boleto copiado para a área de transferência",
+                                                });
+                                              }}
+                                            >
+                                              <Copy className="h-3 w-3" />
+                                            </Button>
+                                          </div>
+                                        </div>
+                                      )}
+                                      
                                       <div className="grid grid-cols-2 gap-3">
                                         <Button
                                           variant="outline"
-                                          onClick={() => {
-                                            window.open(`/api/propostas/${proposta.id}/inter/boleto/imprimir`, '_blank');
+                                          onClick={async () => {
+                                            try {
+                                              const codigo = interBoletoData?.codigoSolicitacao || proposta.interCodigoSolicitacao;
+                                              if (codigo) {
+                                                window.open(`/api/inter/collections/${codigo}/pdf`, '_blank');
+                                              }
+                                            } catch (error) {
+                                              toast({
+                                                title: "Erro",
+                                                description: "Erro ao baixar PDF do boleto",
+                                                variant: "destructive",
+                                              });
+                                            }
                                           }}
                                           className="border-orange-600 text-orange-400 hover:bg-orange-600/10"
                                         >
                                           <Printer className="h-4 w-4 mr-2" />
-                                          Imprimir Boletos
+                                          Imprimir Boleto
                                         </Button>
                                         
                                         <Button
                                           variant="outline"
-                                          onClick={() => {
-                                            window.open(`/api/propostas/${proposta.id}/inter/boleto/download`, '_blank');
+                                          onClick={async () => {
+                                            try {
+                                              const codigo = interBoletoData?.codigoSolicitacao || proposta.interCodigoSolicitacao;
+                                              if (codigo) {
+                                                const response = await apiRequest(`/api/inter/collections/${codigo}`);
+                                                console.log('[INTER] Detalhes do boleto:', response);
+                                                toast({
+                                                  title: "Informações do Boleto",
+                                                  description: `Status: ${response.data?.situacao || 'Aguardando'}`,
+                                                });
+                                              }
+                                            } catch (error) {
+                                              console.error('[INTER] Erro ao consultar boleto:', error);
+                                            }
                                           }}
                                           className="border-orange-600 text-orange-400 hover:bg-orange-600/10"
                                         >
-                                          <Download className="h-4 w-4 mr-2" />
-                                          Download PDF
+                                          <FileText className="h-4 w-4 mr-2" />
+                                          Ver Detalhes
                                         </Button>
                                       </div>
                                       
                                       <div className="text-xs text-gray-400 mt-2">
                                         <p><strong>Instruções para o Cliente:</strong></p>
-                                        <p>• Boletos gerados automaticamente pelo Banco Inter</p>
+                                        <p>• Boleto gerado automaticamente pelo Banco Inter</p>
                                         <p>• Pode pagar via PIX, débito ou transferência bancária</p>
                                         <p>• Valor será creditado após compensação bancária</p>
+                                        <p>• Vencimento: {new Date(new Date().setDate(new Date().getDate() + 5)).toLocaleDateString('pt-BR')}</p>
                                       </div>
                                     </div>
                                   )}
