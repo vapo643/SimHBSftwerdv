@@ -19,10 +19,11 @@ router.get('/:propostaId', jwtAuthMiddleware, requireAnyRole, async (req: Authen
     
     console.log(`[INTER COLLECTIONS] Fetching collections for proposal: ${propostaId}`);
     
-    // Buscar collections da proposta no banco
+    // Buscar collections da proposta no banco (apenas com número de parcela preenchido)
     const collections = await db.select()
       .from(interCollections)
-      .where(eq(interCollections.propostaId, propostaId));
+      .where(eq(interCollections.propostaId, propostaId))
+      .orderBy(interCollections.numeroParcela);
     
     // Se tiver collections, buscar detalhes atualizados na API do Inter
     if (collections.length > 0) {
@@ -46,13 +47,19 @@ router.get('/:propostaId', jwtAuthMiddleware, requireAnyRole, async (req: Authen
             return {
               ...collection,
               ...details,
-              qrCode: details.qrCode,
-              codigoBarras: details.codigoBarras,
-              linkPdf: `/api/inter/collections/${propostaId}/${collection.codigoSolicitacao}/pdf`
+              qrCode: details.qrCode || collection.qrCode,
+              codigoBarras: details.codigoBarras || collection.codigoBarras,
+              linkPdf: `/api/inter/collections/${propostaId}/${collection.codigoSolicitacao}/pdf`,
+              numeroParcela: collection.numeroParcela,
+              totalParcelas: collection.totalParcelas
             };
           } catch (error) {
             console.error(`[INTER COLLECTIONS] Error fetching details for ${collection.codigoSolicitacao}:`, error);
-            return collection;
+            // Retornar dados do banco local se falhar buscar na API
+            return {
+              ...collection,
+              linkPdf: `/api/inter/collections/${propostaId}/${collection.codigoSolicitacao}/pdf`
+            };
           }
         })
       );

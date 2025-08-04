@@ -322,6 +322,7 @@ router.post('/collections', jwtAuthMiddleware, async (req: AuthenticatedRequest,
           linhaDigitavel: collectionDetails.boleto?.linhaDigitavel,
           pixTxid: collectionDetails.pix?.txid,
           pixCopiaECola: collectionDetails.pix?.pixCopiaECola,
+          qrCode: collectionDetails.pix?.qrcode?.base64 || null, // Adicionar QR code
           dataEmissao: collectionDetails.cobranca.dataEmissao,
           origemRecebimento: 'BOLETO',
           isActive: true,
