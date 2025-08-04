@@ -1,0 +1,60 @@
+}
+[INTER] Creating collection for proposal: 902183dd-b5d1-4e20-8a72-79d3d3559d4d
+[INTER] 🚀 Creating collection for proposal: 902183dd-b5d1-4e20-8a72-79d3d3559d4d
+[INTER] 📍 Corrigindo cidade/UF para CEP 29165460: Serra, ES
+[INTER] 🧹 Dados limpos: {
+  nome: 'Gabriel de Jesus Santana Serri',
+  endereco: 'Rua miguel angelo',
+  bairro: 'Centro',
+  cidade: 'Serra'
+}
+[INTER] 💰 Valor formatado: 1000.00
+[INTER] 📅 Data de emissão: 2025-08-04
+[INTER] 📤 Creating collection: 902183dd-b5d1-4
+[INTER] 📋 Request data: {
+  "seuNumero": "902183dd-b5d1-4",
+  "valorNominal": 1000,
+  "dataVencimento": "2025-08-09",
+  "numDiasAgenda": 30,
+  "pagador": {
+    "cpfCnpj": "20528464760",
+    "tipoPessoa": "FISICA",
+    "nome": "Gabriel de Jesus Santana Serri",
+    "endereco": "Rua miguel angelo",
+    "numero": "100",
+    "bairro": "Centro",
+    "cidade": "Serra",
+    "uf": "ES",
+    "cep": "29165460",
+    "email": "gabrieldjesus238@gmail.com",
+    "ddd": "27",
+    "telefone": "998538565"
+  }
+}
+[INTER] POST /cobranca/v3/cobrancas
+[INTER] Error 400: 
+[INTER] 📋 Raw error response: 
+[INTER] Request failed for /cobranca/v3/cobrancas: Error: Inter API error: 400 - 
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:432:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.emitirCobranca (/home/runner/workspace/server/services/interBankService.ts:506:24)
+    at async InterBankService.criarCobrancaParaProposta (/home/runner/workspace/server/services/interBankService.ts:879:22)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter.ts:238:32)
+[INTER] ❌ Failed to create collection: Error: Inter API error: 400 - 
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:432:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.emitirCobranca (/home/runner/workspace/server/services/interBankService.ts:506:24)
+    at async InterBankService.criarCobrancaParaProposta (/home/runner/workspace/server/services/interBankService.ts:879:22)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter.ts:238:32)
+[INTER] ❌ Failed to create collection for proposal: Error: Inter API error: 400 - 
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:432:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.emitirCobranca (/home/runner/workspace/server/services/interBankService.ts:506:24)
+    at async InterBankService.criarCobrancaParaProposta (/home/runner/workspace/server/services/interBankService.ts:879:22)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter.ts:238:32)
+[INTER] Failed to create collection: Error: Inter API error: 400 - 
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:432:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.emitirCobranca (/home/runner/workspace/server/services/interBankService.ts:506:24)
+    at async InterBankService.criarCobrancaParaProposta (/home/runner/workspace/server/services/interBankService.ts:879:22)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter.ts:238:32)

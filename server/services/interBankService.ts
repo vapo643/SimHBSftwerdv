@@ -411,6 +411,7 @@ class InterBankService {
       }
 
       console.log(`[INTER] ${method} ${endpoint}`);
+      console.log('[INTER] 🔑 Headers:', JSON.stringify(headers, null, 2));
       
       const response = await fetch(url, options);
 
@@ -481,27 +482,8 @@ class InterBankService {
     try {
       console.log(`[INTER] 📤 Creating collection: ${cobrancaData.seuNumero}`);
       
-      // Log detailed request data for debugging
-      console.log('[INTER] 📋 Request data:', JSON.stringify({
-        seuNumero: cobrancaData.seuNumero,
-        valorNominal: cobrancaData.valorNominal,
-        dataVencimento: cobrancaData.dataVencimento,
-        numDiasAgenda: cobrancaData.numDiasAgenda,
-        pagador: {
-          cpfCnpj: cobrancaData.pagador?.cpfCnpj,
-          tipoPessoa: cobrancaData.pagador?.tipoPessoa,
-          nome: cobrancaData.pagador?.nome,
-          endereco: cobrancaData.pagador?.endereco,
-          numero: cobrancaData.pagador?.numero,
-          bairro: cobrancaData.pagador?.bairro,
-          cidade: cobrancaData.pagador?.cidade,
-          uf: cobrancaData.pagador?.uf,
-          cep: cobrancaData.pagador?.cep,
-          email: cobrancaData.pagador?.email,
-          ddd: cobrancaData.pagador?.ddd,
-          telefone: cobrancaData.pagador?.telefone
-        }
-      }, null, 2));
+      // Log COMPLETE request data for debugging
+      console.log('[INTER] 📋 COMPLETE Request data:', JSON.stringify(cobrancaData, null, 2));
 
       const response = await this.makeRequest('/cobranca/v3/cobrancas', 'POST', cobrancaData);
       
