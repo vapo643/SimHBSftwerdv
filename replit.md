@@ -80,10 +80,10 @@ Formalization Interface: ✅ COMPLETELY UNIFIED - Attendant and Administrator in
 - **OWASP ZAP**: Dynamic Application Security Testing (DAST).
 - **Semgrep**: Static Application Security Testing (SAST).
 - **OWASP Dependency-Check**: Software Composition Analysis (SCA).
-- **ClickSign**: For electronic signature integration - ✅ PRODUCTION READY (API v3 mastered, webhooks implemented, full documentation)
+- **ClickSign**: For electronic signature integration - ✅ PRODUCTION READY (API v1 fully operational, webhooks implemented, full documentation)
   - Complete webhook system with HMAC validation, timestamp validation, and event deduplication
   - Automatic workflow: CCB signature → boleto generation via Inter Bank
-  - API v3 implementation ready (Envelopes instead of Lists)
+  - API v1 implementation ready (Documents → Signers → Lists → Notifications flow)
   - Critical points documented: CPF formatting, rate limits, flow order, HMAC validation
   - 130 API endpoints fully documented and understood
   - Enhanced security layer: Input validation, XSS protection, rate limiting, IP whitelisting, secure logging
@@ -93,6 +93,7 @@ Formalization Interface: ✅ COMPLETELY UNIFIED - Attendant and Administrator in
   - ✅ ARCHITECTURAL FIX (04/08/2025): All API calls now use simple JSON format (`{signer: {...}}`) instead of JSON:API format - resolved HTML response errors
   - ✅ HEADERS FIX: All endpoints now use `Content-Type: application/json` - aligned with ClickSign documentation
   - ✅ CRITICAL DISCOVERY (04/08/2025): ClickSign API v3 doesn't exist! Changed from `/api/v3` to `/api/v2` - this was causing 404 HTML responses
+  - ✅ HTTP 202 FIX (04/08/2025): Fixed handling of HTTP 202 (Accepted) status code for notifications - now correctly treats as success for asynchronous operations
 - **Banco Inter API**: For automated boleto/PIX payment generation and tracking - ✅ PRODUCTION READY (100% OPERATIONAL, production credentials working)
   - Complete OAuth 2.0 authentication with mTLS following official documentation
   - Automatic boleto generation after ClickSign signature (fully automated)  
