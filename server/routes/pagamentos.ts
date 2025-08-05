@@ -120,6 +120,32 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
       console.log(`[PAGAMENTOS DEBUG] IDs:`, propostasComStatusPronto.map(p => p.id));
     }
 
+    // NOVO DEBUG: Buscar TODAS as propostas que têm boletos, independente do status
+    console.log(`[PAGAMENTOS DEBUG] ========== ANÁLISE DE BOLETOS ==========`);
+    const todasPropostasComBoletos = await db
+      .select({
+        id: propostas.id,
+        clienteNome: propostas.clienteNome,
+        status: propostas.status,
+        ccbGerado: propostas.ccbGerado,
+        assinaturaEletronicaConcluida: propostas.assinaturaEletronicaConcluida
+      })
+      .from(interCollections)
+      .innerJoin(propostas, eq(propostas.id, interCollections.propostaId))
+      .where(sql`${propostas.deletedAt} IS NULL`);
+    
+    console.log(`[PAGAMENTOS DEBUG] Total de propostas com boletos Inter: ${todasPropostasComBoletos.length}`);
+    todasPropostasComBoletos.forEach((proposta, index) => {
+      console.log(`[PAGAMENTOS DEBUG] Proposta com boleto ${index + 1}:`, {
+        id: proposta.id,
+        clienteNome: proposta.clienteNome,
+        status: proposta.status,
+        ccbGerado: proposta.ccbGerado,
+        assinaturaEletronicaConcluida: proposta.assinaturaEletronicaConcluida
+      });
+    });
+    console.log(`[PAGAMENTOS DEBUG] ========================================`);
+
     // Buscar propostas que tenham boletos gerados no Inter Bank OU estão prontas para pagamento
     const result = await db
       .select({
