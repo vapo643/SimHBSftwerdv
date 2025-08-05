@@ -24,28 +24,28 @@ router.get('/', jwtAuthMiddleware, async (req, res) => {
           COALESCE(
             json_agg(
               json_build_object(
-                'id', ${inter_collections.id},
-                'codigoSolicitacao', ${inter_collections.codigoSolicitacao},
-                'nossoNumero', ${inter_collections.nossoNumero},
-                'seuNumero', ${inter_collections.seuNumero},
-                'valorNominal', ${inter_collections.valorNominal},
-                'dataVencimento', ${inter_collections.dataVencimento},
-                'situacao', ${inter_collections.situacao},
-                'dataSituacao', ${inter_collections.dataSituacao},
-                'linhaDigitavel', ${inter_collections.linhaDigitavel},
-                'codigoBarras', ${inter_collections.codigoBarras},
-                'pixQrCode', ${inter_collections.pixQrCode},
-                'pixCopiaECola', ${inter_collections.pixCopiaECola}
-              ) ORDER BY ${inter_collections.dataVencimento}
-            ) FILTER (WHERE ${inter_collections.id} IS NOT NULL),
+                'id', ${interCollections.id},
+                'codigoSolicitacao', ${interCollections.codigoSolicitacao},
+                'nossoNumero', ${interCollections.nossoNumero},
+                'seuNumero', ${interCollections.seuNumero},
+                'valorNominal', ${interCollections.valorNominal},
+                'dataVencimento', ${interCollections.dataVencimento},
+                'situacao', ${interCollections.situacao},
+                'dataSituacao', ${interCollections.dataSituacao},
+                'linhaDigitavel', ${interCollections.linhaDigitavel},
+                'codigoBarras', ${interCollections.codigoBarras},
+                'pixQrCode', ${interCollections.pixTxid},
+                'pixCopiaECola', ${interCollections.pixCopiaECola}
+              ) ORDER BY ${interCollections.dataVencimento}
+            ) FILTER (WHERE ${interCollections.id} IS NOT NULL),
             '[]'::json
           )
         `.as('cobrancas')
       })
       .from(propostas)
       .leftJoin(
-        inter_collections,
-        eq(propostas.id, inter_collections.propostaId)
+        interCollections,
+        eq(propostas.id, interCollections.propostaId)
       )
       .where(
         and(
@@ -54,8 +54,8 @@ router.get('/', jwtAuthMiddleware, async (req, res) => {
             eq(propostas.status, 'pago'),
             eq(propostas.status, 'aprovado')
           ),
-          isNotNull(propostas.ccb_gerado),
-          isNotNull(propostas.assinatura_eletronica_concluida)
+          isNotNull(propostas.ccbGerado),
+          isNotNull(propostas.assinaturaEletronicaConcluida)
         )
       )
       .groupBy(propostas.id);
@@ -78,7 +78,7 @@ router.get('/', jwtAuthMiddleware, async (req, res) => {
       ).length;
 
       // Calcular valores
-      const valorTotal = proposta.condicoes_data?.valorTotalFinanciado || 0;
+      const valorTotal = proposta.condicoesData?.valorTotalFinanciado || 0;
       const valorParcela = totalParcelas > 0 ? valorTotal / totalParcelas : 0;
       const valorTotalPago = parcelasPagas * valorParcela;
       const valorTotalPendente = (parcelasPendentes + parcelasVencidas) * valorParcela;
@@ -106,13 +106,13 @@ router.get('/', jwtAuthMiddleware, async (req, res) => {
       return {
         id: proposta.id,
         numeroContrato: proposta.id.slice(0, 8).toUpperCase(),
-        nomeCliente: proposta.cliente_data?.nome || 'Sem nome',
-        cpfCliente: proposta.cliente_data?.cpf || 'Sem CPF',
-        telefoneCliente: proposta.cliente_data?.telefone || 'Sem telefone',
-        emailCliente: proposta.cliente_data?.email || 'Sem email',
+        nomeCliente: proposta.clienteData?.nome || 'Sem nome',
+        cpfCliente: proposta.clienteData?.cpf || 'Sem CPF',
+        telefoneCliente: proposta.clienteData?.telefone || 'Sem telefone',
+        emailCliente: proposta.clienteData?.email || 'Sem email',
         valorTotal,
-        valorFinanciado: proposta.condicoes_data?.valor || 0,
-        quantidadeParcelas: proposta.condicoes_data?.prazo || totalParcelas,
+        valorFinanciado: proposta.condicoesData?.valor || 0,
+        quantidadeParcelas: proposta.condicoesData?.prazo || totalParcelas,
         parcelasPagas,
         parcelasPendentes,
         parcelasVencidas,
@@ -121,7 +121,7 @@ router.get('/', jwtAuthMiddleware, async (req, res) => {
         diasAtraso,
         status,
         dataContrato: proposta.createdAt,
-        ccbAssinada: !!proposta.assinatura_eletronica_concluida,
+        ccbAssinada: !!proposta.assinaturaEletronicaConcluida,
         parcelas: cobrancas.map((cobranca: any, index: number) => ({
           id: cobranca.id,
           numero: index + 1,
@@ -141,7 +141,7 @@ router.get('/', jwtAuthMiddleware, async (req, res) => {
           interNossoNumero: cobranca.nossoNumero
         })),
         documentos: {
-          ccb: proposta.ccb_path
+          ccb: proposta.ccbDocumentoUrl || proposta.caminhoCcbAssinado
         }
       };
     });
@@ -191,13 +191,10 @@ router.post('/:propostaId/atualizar-status', jwtAuthMiddleware, async (req: Auth
     // Registrar log
     await db.insert(propostaLogs).values({
       propostaId,
-      acao: 'status_cobrancas_atualizado',
-      descricao: 'Status das cobranças atualizado via dashboard',
-      dadosAnteriores: {},
-      dadosNovos: { totalCobrancas: cobrancas.length },
-      usuarioId: req.user!.id,
-      usuarioNome: req.user!.nome || 'Sistema',
-      ip: req.ip || 'unknown'
+      autorId: req.user!.id,
+      statusAnterior: null,
+      statusNovo: 'status_cobrancas_atualizado',
+      observacao: `Status das cobranças atualizado via dashboard - Total: ${cobrancas.length} cobranças`
     });
 
     res.json({ success: true, message: 'Status atualizado com sucesso' });
@@ -223,17 +220,10 @@ router.post('/contato', jwtAuthMiddleware, async (req: AuthenticatedRequest, res
     // Por enquanto, apenas registramos o log
     await db.insert(propostaLogs).values({
       propostaId: validatedData.propostaId,
-      acao: 'cobranca_enviada',
-      descricao: `Cobrança enviada via ${validatedData.tipo}`,
-      dadosAnteriores: {},
-      dadosNovos: {
-        tipo: validatedData.tipo,
-        destinatario: validatedData.destinatario,
-        mensagem: validatedData.mensagem
-      },
-      usuarioId: req.user!.id,
-      usuarioNome: req.user!.nome || 'Sistema',
-      ip: req.ip || 'unknown'
+      autorId: req.user!.id,
+      statusAnterior: null,
+      statusNovo: 'cobranca_enviada',
+      observacao: `Cobrança enviada via ${validatedData.tipo} para ${validatedData.destinatario}`
     });
 
     res.json({ success: true, message: 'Mensagem enviada com sucesso' });

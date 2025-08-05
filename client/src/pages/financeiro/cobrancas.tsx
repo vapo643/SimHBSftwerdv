@@ -8,7 +8,12 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Progress } from "@/components/ui/progress";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { 
@@ -17,6 +22,7 @@ import {
   Phone,
   MessageSquare,
   Eye,
+  EyeOff,
   Download,
   AlertCircle,
   CheckCircle2,
@@ -33,7 +39,7 @@ import {
   RefreshCw,
   Barcode
 } from "lucide-react";
-import { format, addMonths, differenceInDays, isAfter } from "date-fns";
+import { format, addMonths, differenceInDays, isAfter, startOfWeek, startOfMonth, isBefore, addDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 interface Parcela {
@@ -90,6 +96,10 @@ export default function Cobrancas() {
   const [selectedProposta, setSelectedProposta] = useState<PropostaCobranca | null>(null);
   const [showContactModal, setShowContactModal] = useState(false);
   const [contactType, setContactType] = useState<'whatsapp' | 'sms' | 'email'>('whatsapp');
+  const [dateRange, setDateRange] = useState<'todos' | 'hoje' | 'semana' | 'mes'>('todos');
+  const [showCpf, setShowCpf] = useState(false);
+  const [showBoletosModal, setShowBoletosModal] = useState(false);
+  const [selectedPropostaForBoletos, setSelectedPropostaForBoletos] = useState<PropostaCobranca | null>(null);
   
   // Função para copiar PIX ou linha digitável
   const copyPaymentCode = (code: string, type: 'pix' | 'barcode') => {
@@ -100,6 +110,26 @@ export default function Cobrancas() {
         ? "Cole no app do seu banco para pagar" 
         : "Use no internet banking para pagar",
     });
+  };
+
+  // Função para mascarar CPF/CNPJ (LGPD)
+  const maskDocument = (doc: string) => {
+    if (!doc) return '';
+    if (!showCpf) {
+      // Mascara mantendo apenas os primeiros 3 e últimos 2 dígitos
+      if (doc.length === 11) { // CPF
+        return `${doc.substring(0, 3)}.***.***-${doc.substring(9)}`;
+      } else if (doc.length === 14) { // CNPJ
+        return `${doc.substring(0, 2)}.****.****/****-${doc.substring(12)}`;
+      }
+    }
+    // Formata o documento completo
+    if (doc.length === 11) { // CPF
+      return doc.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+    } else if (doc.length === 14) { // CNPJ
+      return doc.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+    }
+    return doc;
   };
   
   // Buscar propostas em cobrança
@@ -175,11 +205,37 @@ export default function Cobrancas() {
   const propostasFiltradas = propostas?.filter(proposta => {
     const matchesSearch = proposta.nomeCliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          proposta.numeroContrato.includes(searchTerm) ||
-                         proposta.cpfCliente.includes(searchTerm);
+                         proposta.cpfCliente.includes(searchTerm) ||
+                         proposta.id.includes(searchTerm);
     
-    const matchesStatus = statusFilter === 'todos' || proposta.status === statusFilter;
+    let matchesStatus = true;
+    if (statusFilter === 'adimplente') {
+      matchesStatus = proposta.status === 'em_dia';
+    } else if (statusFilter === 'atraso_1_15') {
+      matchesStatus = proposta.status === 'inadimplente' && proposta.diasAtraso >= 1 && proposta.diasAtraso <= 15;
+    } else if (statusFilter === 'atraso_30_mais') {
+      matchesStatus = proposta.status === 'inadimplente' && proposta.diasAtraso > 30;
+    } else if (statusFilter !== 'todos') {
+      matchesStatus = proposta.status === statusFilter;
+    }
     
-    return matchesSearch && matchesStatus;
+    let matchesDate = true;
+    if (dateRange !== 'todos') {
+      const hoje = new Date();
+      const dataContrato = new Date(proposta.dataContrato);
+      
+      if (dateRange === 'hoje') {
+        matchesDate = format(dataContrato, 'yyyy-MM-dd') === format(hoje, 'yyyy-MM-dd');
+      } else if (dateRange === 'semana') {
+        const inicioSemana = startOfWeek(hoje, { weekStartsOn: 1 });
+        matchesDate = isAfter(dataContrato, inicioSemana);
+      } else if (dateRange === 'mes') {
+        const inicioMes = startOfMonth(hoje);
+        matchesDate = isAfter(dataContrato, inicioMes);
+      }
+    }
+    
+    return matchesSearch && matchesStatus && matchesDate;
   });
 
   // Estatísticas gerais
@@ -298,131 +354,256 @@ export default function Cobrancas() {
             <CardTitle>Filtros</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex gap-4">
-              <div className="flex-1">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    placeholder="Buscar por nome, CPF ou contrato..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
-                  />
+            <div className="space-y-4">
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      placeholder="Buscar por nome, CPF/CNPJ, número da proposta ou contrato..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
                 </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowCpf(!showCpf)}
+                  className="whitespace-nowrap"
+                >
+                  {showCpf ? <EyeOff className="mr-2 h-4 w-4" /> : <Eye className="mr-2 h-4 w-4" />}
+                  {showCpf ? 'Ocultar CPF' : 'Mostrar CPF'}
+                </Button>
               </div>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[200px]">
-                  <SelectValue placeholder="Filtrar por status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="todos">Todos</SelectItem>
-                  <SelectItem value="em_dia">Em dia</SelectItem>
-                  <SelectItem value="inadimplente">Inadimplente</SelectItem>
-                  <SelectItem value="quitado">Quitado</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button variant="outline" onClick={() => refetch()}>
-                <Filter className="mr-2 h-4 w-4" />
-                Atualizar
-              </Button>
+              <div className="flex gap-4">
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="w-[250px]">
+                    <SelectValue placeholder="Status de Pagamento" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="todos">Todos</SelectItem>
+                    <SelectItem value="adimplente">Adimplente</SelectItem>
+                    <SelectItem value="atraso_1_15">Em Atraso (1-15 dias)</SelectItem>
+                    <SelectItem value="atraso_30_mais">Em Atraso (+30 dias)</SelectItem>
+                    <SelectItem value="quitado">Quitado</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={dateRange} onValueChange={setDateRange}>
+                  <SelectTrigger className="w-[200px]">
+                    <SelectValue placeholder="Período" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="todos">Todos</SelectItem>
+                    <SelectItem value="hoje">Hoje</SelectItem>
+                    <SelectItem value="semana">Esta Semana</SelectItem>
+                    <SelectItem value="mes">Este Mês</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button variant="outline" onClick={() => refetch()}>
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  Atualizar
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Lista de Propostas */}
+        {/* Tabela de Propostas */}
         <Card>
           <CardHeader>
             <CardTitle>Contratos em Cobrança</CardTitle>
             <CardDescription>
-              Clique em um contrato para ver detalhes e parcelas
+              Gerenciamento completo de cobranças e pagamentos
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {isLoading ? (
-                <div>Carregando...</div>
-              ) : propostasFiltradas?.length === 0 ? (
-                <div className="text-center text-muted-foreground py-8">
-                  Nenhum contrato encontrado
-                </div>
-              ) : (
-                propostasFiltradas?.map((proposta) => (
-                  <Card 
-                    key={proposta.id} 
-                    className="cursor-pointer hover:shadow-md transition-shadow"
-                    onClick={() => setSelectedProposta(proposta)}
-                  >
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-4">
-                            <h3 className="font-semibold">{proposta.nomeCliente}</h3>
-                            <Badge className={getStatusColor(proposta.status)}>
-                              {proposta.status === 'em_dia' ? 'Em dia' : 
-                               proposta.status === 'inadimplente' ? 'Inadimplente' : 'Quitado'}
-                            </Badge>
-                            {proposta.ccbAssinada && (
-                              <Badge variant="outline" className="gap-1">
-                                <FileText className="h-3 w-3" />
-                                CCB Assinada
-                              </Badge>
-                            )}
-                          </div>
-                          <div className="text-sm text-muted-foreground">
-                            Contrato: {proposta.numeroContrato} | CPF: {proposta.cpfCliente}
-                          </div>
-                          <div className="text-sm">
-                            Parcelas: {proposta.parcelasPagas}/{proposta.quantidadeParcelas} pagas
-                            {proposta.parcelasVencidas > 0 && (
-                              <span className="text-red-600 ml-2">
-                                ({proposta.parcelasVencidas} vencidas - {proposta.diasAtraso} dias)
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        <div className="text-right space-y-1">
-                          <div className="font-semibold">
+            <ScrollArea className="w-full">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[120px]">ID/CCB</TableHead>
+                    <TableHead>Nome Cliente</TableHead>
+                    <TableHead className="w-[140px]">CPF/CNPJ</TableHead>
+                    <TableHead className="text-right">Valor Total</TableHead>
+                    <TableHead className="text-center">Status</TableHead>
+                    <TableHead className="text-center">Parcelamento</TableHead>
+                    <TableHead className="text-center">Status Detalhado</TableHead>
+                    <TableHead className="text-center">Dias Atraso</TableHead>
+                    <TableHead className="text-center">Próx. Vencimento</TableHead>
+                    <TableHead className="text-right">Ações</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {isLoading ? (
+                    <TableRow>
+                      <TableCell colSpan={10} className="text-center py-8">
+                        Carregando...
+                      </TableCell>
+                    </TableRow>
+                  ) : propostasFiltradas?.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
+                        Nenhum contrato encontrado
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    propostasFiltradas?.map((proposta) => {
+                      const parcelasPendentes = proposta.parcelas.filter(p => p.status === 'pendente').length;
+                      const parcelasEmAtraso = proposta.parcelas.filter(p => p.status === 'vencido').length;
+                      const valorPendente = proposta.parcelas
+                        .filter(p => p.status === 'pendente')
+                        .reduce((acc, p) => acc + p.valorParcela, 0);
+                      const valorEmAtraso = proposta.parcelas
+                        .filter(p => p.status === 'vencido')
+                        .reduce((acc, p) => acc + p.valorParcela, 0);
+                      const proximaParcela = proposta.parcelas
+                        .filter(p => p.status === 'pendente' || p.status === 'vencido')
+                        .sort((a, b) => new Date(a.dataVencimento).getTime() - new Date(b.dataVencimento).getTime())[0];
+                      
+                      return (
+                        <TableRow 
+                          key={proposta.id} 
+                          className="cursor-pointer hover:bg-muted/50"
+                          onClick={() => setSelectedProposta(proposta)}
+                        >
+                          <TableCell className="font-medium">
+                            <div className="space-y-1">
+                              <div className="text-xs text-muted-foreground">
+                                {proposta.id.substring(0, 8)}...
+                              </div>
+                              <div className="text-sm">{proposta.numeroContrato}</div>
+                            </div>
+                          </TableCell>
+                          <TableCell>{proposta.nomeCliente}</TableCell>
+                          <TableCell className="font-mono text-sm">
+                            {maskDocument(proposta.cpfCliente)}
+                          </TableCell>
+                          <TableCell className="text-right">
                             {new Intl.NumberFormat('pt-BR', { 
                               style: 'currency', 
                               currency: 'BRL' 
                             }).format(proposta.valorTotal)}
-                          </div>
-                          <div className="text-sm text-muted-foreground">
-                            Pendente: {new Intl.NumberFormat('pt-BR', { 
-                              style: 'currency', 
-                              currency: 'BRL' 
-                            }).format(proposta.valorTotalPendente)}
-                          </div>
-                          <div className="flex gap-2 justify-end mt-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                atualizarStatusParcelas(proposta.id);
-                              }}
-                            >
-                              <Clock className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedProposta(proposta);
-                                setShowContactModal(true);
-                              }}
-                            >
-                              <MessageSquare className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
-              )}
-            </div>
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <Badge className={getStatusColor(proposta.status)}>
+                              {proposta.status === 'em_dia' ? 'Em dia' : 
+                               proposta.status === 'inadimplente' ? 'Inadimplente' : 'Quitado'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <span className="font-medium">
+                              {proposta.parcelasPagas} de {proposta.quantidadeParcelas}
+                            </span>
+                          </TableCell>
+                          <TableCell>
+                            <div className="space-y-1 text-xs">
+                              <div className="flex justify-between">
+                                <span className="text-green-600">Pagas:</span>
+                                <span className="font-medium">{proposta.parcelasPagas}</span>
+                              </div>
+                              {parcelasPendentes > 0 && (
+                                <div className="flex justify-between">
+                                  <span className="text-yellow-600">Pendentes:</span>
+                                  <span className="font-medium">
+                                    {parcelasPendentes} ({new Intl.NumberFormat('pt-BR', { 
+                                      style: 'currency', 
+                                      currency: 'BRL',
+                                      minimumFractionDigits: 0,
+                                      maximumFractionDigits: 0
+                                    }).format(valorPendente)})
+                                  </span>
+                                </div>
+                              )}
+                              {parcelasEmAtraso > 0 && (
+                                <div className="flex justify-between">
+                                  <span className="text-red-600">Em Atraso:</span>
+                                  <span className="font-medium">
+                                    {parcelasEmAtraso} ({new Intl.NumberFormat('pt-BR', { 
+                                      style: 'currency', 
+                                      currency: 'BRL',
+                                      minimumFractionDigits: 0,
+                                      maximumFractionDigits: 0
+                                    }).format(valorEmAtraso)})
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-center">
+                            {proposta.diasAtraso > 0 ? (
+                              <span className="font-semibold text-red-600">
+                                {proposta.diasAtraso}
+                              </span>
+                            ) : (
+                              <span className="text-muted-foreground">-</span>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-center">
+                            {proximaParcela ? (
+                              <div className="space-y-1">
+                                <div className="text-sm">
+                                  {format(new Date(proximaParcela.dataVencimento), 'dd/MM/yyyy')}
+                                </div>
+                                {proximaParcela.status === 'vencido' && (
+                                  <Badge variant="destructive" className="text-xs">
+                                    Vencido
+                                  </Badge>
+                                )}
+                              </div>
+                            ) : (
+                              <span className="text-muted-foreground">-</span>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex gap-1 justify-end">
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedPropostaForBoletos(proposta);
+                                  setShowBoletosModal(true);
+                                }}
+                                title="Visualizar Boletos Inter"
+                              >
+                                <Barcode className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedProposta(proposta);
+                                  setShowContactModal(true);
+                                }}
+                                title="Registrar Contato"
+                              >
+                                <MessageSquare className="h-4 w-4" />
+                              </Button>
+                              {proposta.documentos.ccb && (
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    window.open(proposta.documentos.ccb, '_blank');
+                                  }}
+                                  title="Visualizar CCB Assinada"
+                                >
+                                  <FileText className="h-4 w-4" />
+                                </Button>
+                              )}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
+                  )}
+                </TableBody>
+              </Table>
+            </ScrollArea>
           </CardContent>
         </Card>
 
@@ -752,6 +933,119 @@ export default function Cobrancas() {
             </CardContent>
           </Card>
         )}
+
+        {/* Modal de Boletos Inter */}
+        <Dialog open={showBoletosModal} onOpenChange={setShowBoletosModal}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Boletos Banco Inter</DialogTitle>
+              <DialogDescription>
+                {selectedPropostaForBoletos?.nomeCliente} - {selectedPropostaForBoletos?.numeroContrato}
+              </DialogDescription>
+            </DialogHeader>
+            
+            {selectedPropostaForBoletos && (
+              <div className="space-y-4">
+                {selectedPropostaForBoletos.parcelas
+                  .filter(p => p.status !== 'pago')
+                  .map((parcela, index) => (
+                    <Card key={parcela.id} className="p-4">
+                      <div className="space-y-4">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h4 className="font-semibold">Parcela {parcela.numero}</h4>
+                            <p className="text-sm text-muted-foreground">
+                              Vencimento: {format(new Date(parcela.dataVencimento), 'dd/MM/yyyy')}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-semibold">
+                              {new Intl.NumberFormat('pt-BR', { 
+                                style: 'currency', 
+                                currency: 'BRL' 
+                              }).format(parcela.valorParcela)}
+                            </p>
+                            <Badge className={getParcelaStatusColor(parcela.status)}>
+                              {parcela.status === 'pago' ? 'Pago' : 
+                               parcela.status === 'vencido' ? 'Vencido' : 'Pendente'}
+                            </Badge>
+                          </div>
+                        </div>
+                        
+                        {/* PIX Copia e Cola */}
+                        {parcela.interPixCopiaECola && (
+                          <div className="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg">
+                            <p className="text-sm font-medium text-green-800 dark:text-green-300 mb-2 flex items-center gap-2">
+                              <QrCode className="h-4 w-4" />
+                              PIX Copia e Cola
+                            </p>
+                            <div className="flex items-center gap-2">
+                              <code className="flex-1 text-xs bg-white dark:bg-gray-900 p-2 rounded font-mono break-all">
+                                {parcela.interPixCopiaECola}
+                              </code>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => copyPaymentCode(parcela.interPixCopiaECola!, 'pix')}
+                              >
+                                <Copy className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Linha Digitável */}
+                        {(parcela.linhaDigitavel || parcela.codigoBarras) && (
+                          <div className="p-3 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-700 rounded-lg">
+                            <p className="text-sm font-medium text-orange-800 dark:text-orange-300 mb-2 flex items-center gap-2">
+                              <Barcode className="h-4 w-4" />
+                              Linha Digitável do Boleto
+                            </p>
+                            <div className="flex items-center gap-2">
+                              <code className="flex-1 text-xs bg-white dark:bg-gray-900 p-2 rounded font-mono break-all">
+                                {parcela.linhaDigitavel || parcela.codigoBarras}
+                              </code>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  const codigo = parcela.linhaDigitavel || parcela.codigoBarras || '';
+                                  copyPaymentCode(codigo, 'barcode');
+                                }}
+                              >
+                                <Copy className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Status do Banco Inter */}
+                        {parcela.interSituacao && (
+                          <div className="flex items-center gap-2 text-sm">
+                            <span className="text-muted-foreground">Status Inter:</span>
+                            <Badge variant={parcela.interSituacao === 'RECEBIDO' ? 'default' : 'secondary'}>
+                              {parcela.interSituacao}
+                            </Badge>
+                          </div>
+                        )}
+                      </div>
+                    </Card>
+                  ))}
+                  
+                <div className="text-center text-sm text-muted-foreground pt-4 border-t">
+                  <AlertCircle className="h-4 w-4 inline mr-2" />
+                  Banco Inter não disponibiliza download de PDF. Use PIX ou linha digitável para pagamento.
+                </div>
+              </div>
+            )}
+            
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowBoletosModal(false)}>
+                Fechar
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </DashboardLayout>
   );
