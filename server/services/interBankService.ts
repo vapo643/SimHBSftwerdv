@@ -388,7 +388,7 @@ class InterBankService {
    * Make authenticated request to Inter API WITH mTLS
    * CRITICAL FIX: Now properly uses HTTPS with mTLS configuration like getAccessToken
    */
-  private async makeRequest(endpoint: string, method: 'GET' | 'POST' | 'PATCH' | 'DELETE' | 'PUT' = 'GET', data?: any): Promise<any> {
+  private async makeRequest(endpoint: string, method: 'GET' | 'POST' | 'PATCH' | 'DELETE' | 'PUT' = 'GET', data?: any, additionalHeaders?: Record<string, string>): Promise<any> {
     try {
       const token = await this.getAccessToken();
       const url = new URL(`${this.config.apiUrl}${endpoint}`);
@@ -432,7 +432,8 @@ class InterBankService {
         const headers: Record<string, string> = {
           'Authorization': `Bearer ${token}`,
           'Accept': 'application/json',
-          'User-Agent': 'SIMPIX-Inter-Integration/1.0' // Added per Claude's suggestion
+          'User-Agent': 'SIMPIX-Inter-Integration/1.0', // Added per Claude's suggestion
+          ...additionalHeaders // Merge additional headers (like Accept: application/pdf)
         };
 
         // Add account header if configured
@@ -470,37 +471,44 @@ class InterBankService {
         };
 
         const req = https.request(options, (res) => {
-          let responseData = '';
+          const chunks: Buffer[] = [];
           
           console.log('[INTER] ========== RESPONSE DETAILS ==========');
           console.log(`[INTER] 📊 STATUS: ${res.statusCode} ${res.statusMessage}`);
           console.log('[INTER] 📋 RESPONSE HEADERS:', res.headers);
           
+          // Check if response is PDF
+          const isPdf = res.headers['content-type']?.includes('application/pdf');
+          
           res.on('data', (chunk) => { 
-            responseData += chunk; 
+            chunks.push(Buffer.from(chunk));
           });
           
           res.on('end', () => {
+            const buffer = Buffer.concat(chunks);
+            
             if (!res.statusCode || res.statusCode >= 400) {
               console.log('[INTER] ❌❌❌ ERROR RESPONSE ❌❌❌');
               console.log(`[INTER] 🚨 Status Code: ${res.statusCode}`);
-              console.log(`[INTER] 🚨 Error Body: "${responseData}"`);
-              console.log(`[INTER] 🚨 Error Body Length: ${responseData.length} chars`);
               
-              if (responseData.length === 0) {
+              const errorText = buffer.toString('utf-8');
+              console.log(`[INTER] 🚨 Error Body: "${errorText}"`);
+              console.log(`[INTER] 🚨 Error Body Length: ${errorText.length} chars`);
+              
+              if (errorText.length === 0) {
                 console.log('[INTER] 📋 EMPTY ERROR BODY!');
                 console.log('[INTER] 📋 Response headers for debugging:', res.headers);
               } else {
                 try {
-                  const errorJson = JSON.parse(responseData);
+                  const errorJson = JSON.parse(errorText);
                   console.log('[INTER] 📋 Error as JSON:', JSON.stringify(errorJson, null, 2));
                 } catch (e) {
-                  console.log('[INTER] 📋 Error is not JSON, raw text:', responseData);
+                  console.log('[INTER] 📋 Error is not JSON, raw text:', errorText);
                 }
               }
               
               console.log('[INTER] ❌❌❌ END ERROR RESPONSE ❌❌❌');
-              reject(new Error(`Inter API error: ${res.statusCode} - ${responseData || 'Empty response'}`));
+              reject(new Error(`Inter API error: ${res.statusCode} - ${errorText || 'Empty response'}`));
               return;
             }
 
@@ -508,17 +516,25 @@ class InterBankService {
             console.log('[INTER] =====================================');
 
             // Handle empty responses (204 No Content or DELETE)
-            if (res.statusCode === 204 || !responseData) {
+            if (res.statusCode === 204 || buffer.length === 0) {
               resolve(null);
+              return;
+            }
+
+            // Return buffer directly for PDF responses
+            if (isPdf) {
+              console.log(`[INTER] 📄 PDF response received (${buffer.length} bytes)`);
+              resolve(buffer);
               return;
             }
 
             // Parse JSON response
             try {
-              resolve(JSON.parse(responseData));
+              const responseText = buffer.toString('utf-8');
+              resolve(JSON.parse(responseText));
             } catch (e) {
-              // Return raw text if not JSON (like PDF)
-              resolve(responseData);
+              // Return raw text if not JSON
+              resolve(buffer.toString('utf-8'));
             }
           });
         });
@@ -705,29 +721,25 @@ class InterBankService {
     try {
       console.log(`[INTER] 📄 Getting PDF for collection: ${codigoSolicitacao}`);
 
-      const token = await this.getAccessToken();
-      const url = `${this.config.apiUrl}/cobranca/v3/cobrancas/${codigoSolicitacao}/pdf`;
-
-      const headers: Record<string, string> = {
-        'Authorization': `Bearer ${token}`,
+      // Use makeRequest instead of direct fetch to ensure proper mTLS
+      const response = await this.makeRequest(`/cobranca/v3/cobrancas/${codigoSolicitacao}/pdf`, 'GET', null, {
         'Accept': 'application/pdf'
-      };
-
-      if (this.config.contaCorrente) {
-        headers['x-conta-corrente'] = this.config.contaCorrente;
-      }
-
-      const response = await fetch(url, { headers });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`PDF request failed: ${response.status} - ${errorText}`);
-      }
-
-      const pdfBuffer = Buffer.from(await response.arrayBuffer());
+      });
       
-      console.log(`[INTER] ✅ PDF retrieved successfully (${pdfBuffer.length} bytes)`);
-      return pdfBuffer;
+      // Check if response is a Buffer
+      if (Buffer.isBuffer(response)) {
+        console.log(`[INTER] ✅ PDF retrieved successfully (${response.length} bytes)`);
+        return response;
+      }
+      
+      // If not a buffer, try to convert
+      if (typeof response === 'string') {
+        const pdfBuffer = Buffer.from(response, 'base64');
+        console.log(`[INTER] ✅ PDF retrieved and converted from base64 (${pdfBuffer.length} bytes)`);
+        return pdfBuffer;
+      }
+      
+      throw new Error('Invalid PDF response format');
 
     } catch (error) {
       console.error('[INTER] ❌ Failed to get PDF:', error);

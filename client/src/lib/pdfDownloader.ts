@@ -110,16 +110,36 @@ export class PDFDownloader {
         console.log(`[PDF_DOWNLOAD] Response headers:`, Object.fromEntries(response.headers.entries()));
 
         if (!response.ok) {
-          const errorText = await response.text();
-          console.error(`[PDF_DOWNLOAD] HTTP Error ${response.status}:`, errorText);
+          // Tentar parsear resposta de erro como JSON
+          let errorMessage: string;
+          let errorDetails: any = null;
+          
+          const contentType = response.headers.get('content-type');
+          if (contentType && contentType.includes('application/json')) {
+            try {
+              const errorJson = await response.json();
+              errorMessage = errorJson.error || response.statusText;
+              errorDetails = errorJson;
+              console.error(`[PDF_DOWNLOAD] HTTP Error ${response.status} (JSON):`, errorJson);
+            } catch {
+              errorMessage = await response.text();
+              console.error(`[PDF_DOWNLOAD] HTTP Error ${response.status} (Text):`, errorMessage);
+            }
+          } else {
+            errorMessage = await response.text();
+            console.error(`[PDF_DOWNLOAD] HTTP Error ${response.status} (Text):`, errorMessage);
+          }
           
           // Se for 401, tentar refresh do token na próxima iteração
           if (response.status === 401 && attempt < maxRetries) {
-            lastError = new Error(`Authentication failed (attempt ${attempt}): ${errorText}`);
+            lastError = new Error(`Authentication failed (attempt ${attempt}): ${errorMessage}`);
             continue;
           }
           
-          throw new Error(`HTTP ${response.status}: ${errorText || response.statusText}`);
+          // Mostrar mensagem de erro específica do servidor
+          const error = new Error(errorMessage || `HTTP ${response.status}: ${response.statusText}`);
+          (error as any).details = errorDetails;
+          throw error;
         }
 
         // Verificar content-type
@@ -218,9 +238,25 @@ export class PDFDownloader {
     // Se chegou aqui, todas as estratégias falharam
     console.error('[PDF_DOWNLOAD] ❌ All download strategies failed:', lastError);
     
+    // Mensagem de erro mais amigável baseada no erro específico
+    let errorTitle = "Erro no download";
+    let errorDescription = lastError?.message || 'Erro desconhecido';
+    
+    // Customizar mensagem baseada no tipo de erro
+    if (lastError?.message.includes('não está disponível para download')) {
+      errorTitle = "Boleto não disponível";
+      errorDescription = "O boleto ainda não foi gerado ou não está pronto para download. Tente novamente em alguns instantes.";
+    } else if (lastError?.message.includes('400')) {
+      errorTitle = "Boleto indisponível";
+      errorDescription = "O banco não conseguiu gerar o PDF do boleto. Verifique se o boleto foi criado corretamente.";
+    } else if (lastError?.message.includes('401') || lastError?.message.includes('Authentication')) {
+      errorTitle = "Erro de autenticação";
+      errorDescription = "Sua sessão expirou. Por favor, faça login novamente.";
+    }
+    
     toast({
-      title: "Erro no download",
-      description: `Não foi possível baixar o boleto: ${lastError?.message || 'Erro desconhecido'}`,
+      title: errorTitle,
+      description: errorDescription,
       variant: "destructive",
     });
     

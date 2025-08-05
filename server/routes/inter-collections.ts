@@ -100,15 +100,59 @@ router.get('/:propostaId/:codigoSolicitacao/pdf', jwtAuthMiddleware, requireAnyR
     
     // Buscar PDF na API do Inter
     const interService = interBankService;
+    
+    // Primeiro, verificar se a cobrança existe no Inter
+    console.log(`[INTER COLLECTIONS] Checking if collection exists: ${codigoSolicitacao}`);
+    try {
+      const collectionDetails = await interService.obterCobranca(codigoSolicitacao);
+      console.log(`[INTER COLLECTIONS] Collection details:`, collectionDetails);
+    } catch (checkError) {
+      console.error(`[INTER COLLECTIONS] Collection not found or error checking:`, checkError);
+    }
+    
     const pdfBuffer = await interService.obterPdfCobranca(codigoSolicitacao);
     
+    // Verificar se o PDF é válido
+    if (!pdfBuffer || pdfBuffer.length === 0) {
+      throw new Error('PDF vazio ou inválido recebido do banco');
+    }
+    
+    // Adicionar headers de segurança para evitar detecção de vírus
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="boleto-${codigoSolicitacao}.pdf"`);
-    res.send(Buffer.from(pdfBuffer));
+    res.setHeader('Content-Length', pdfBuffer.length.toString());
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Download-Options', 'noopen');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('Content-Security-Policy', "default-src 'none'");
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
     
-  } catch (error) {
+    res.send(pdfBuffer);
+    
+  } catch (error: any) {
     console.error('[INTER COLLECTIONS] Error downloading PDF:', error);
-    res.status(500).json({ error: 'Erro ao baixar PDF do boleto' });
+    
+    // Retornar erro específico ao invés de arquivo corrompido
+    if (error.message?.includes('400')) {
+      return res.status(400).json({ 
+        error: 'Boleto não está disponível para download. Verifique se o boleto foi gerado corretamente.',
+        details: 'O banco retornou erro 400 - requisição inválida'
+      });
+    }
+    
+    if (error.message?.includes('PDF vazio')) {
+      return res.status(502).json({ 
+        error: 'PDF não foi gerado pelo banco. Tente novamente em alguns instantes.',
+        details: 'O banco retornou um arquivo vazio'
+      });
+    }
+    
+    res.status(500).json({ 
+      error: 'Erro ao baixar PDF do boleto',
+      details: error.message || 'Erro desconhecido'
+    });
   }
 });
 
