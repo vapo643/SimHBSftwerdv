@@ -290,8 +290,6 @@ export const interCollections = pgTable("inter_collections", {
   dataEmissao: text("data_emissao"),
   numeroParcela: integer("numero_parcela"), // Número da parcela (1, 2, 3...)
   totalParcelas: integer("total_parcelas"), // Total de parcelas
-  qrCode: text("qr_code"), // Base64 QR code data
-  pdfPath: text("pdf_path"), // Caminho do PDF no Supabase Storage
   isActive: boolean("is_active").default(true).notNull(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

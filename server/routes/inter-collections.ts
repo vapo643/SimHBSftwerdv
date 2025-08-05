@@ -44,29 +44,12 @@ router.get('/:propostaId', jwtAuthMiddleware, requireAnyRole, async (req: Authen
                 .where(eq(interCollections.id, collection.id));
             }
             
-            // Se temos o PDF no Storage, usar URL assinada do Supabase
-            let linkPdf = null;
-            if (collection.pdfPath) {
-              try {
-                const { createServerSupabaseAdminClient } = await import('../lib/supabase');
-                const supabase = createServerSupabaseAdminClient();
-                
-                const { data: signedUrl } = await supabase.storage
-                  .from('documents')
-                  .createSignedUrl(collection.pdfPath, 3600); // 1 hora de validade
-                  
-                linkPdf = signedUrl?.signedUrl || null;
-              } catch (error) {
-                console.error(`[INTER COLLECTIONS] Erro ao gerar URL assinada para ${collection.pdfPath}:`, error);
-              }
-            }
-            
             return {
               ...collection,
               ...details,
               qrCode: details.qrCode || collection.qrCode,
               codigoBarras: details.codigoBarras || collection.codigoBarras,
-              linkPdf: linkPdf || `/api/inter/collections/${propostaId}/${collection.codigoSolicitacao}/pdf`, // Fallback para API
+              linkPdf: `/api/inter/collections/${propostaId}/${collection.codigoSolicitacao}/pdf`,
               numeroParcela: collection.numeroParcela,
               totalParcelas: collection.totalParcelas
             };
