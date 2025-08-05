@@ -203,15 +203,32 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
       console.log(`[PAGAMENTOS DEBUG] Proposta ${index + 1}:`, {
         id: proposta.id,
         clienteNome: proposta.clienteNome,
+        clienteCpf: proposta.clienteCpf,
+        valorTotalFinanciado: proposta.valorTotalFinanciado,
+        valorTac: proposta.valorTac,
+        valorIof: proposta.valorIof,
         status: proposta.status,
         temBoleto: proposta.temBoleto,
         ccbGerado: proposta.ccbGerado,
-        assinaturaEletronicaConcluida: proposta.assinaturaEletronicaConcluida
+        assinaturaEletronicaConcluida: proposta.assinaturaEletronicaConcluida,
+        lojaNome: proposta.lojaNome,
+        produtoNome: proposta.produtoNome,
+        dadosPagamentoBanco: proposta.dadosPagamentoBanco,
+        dadosPagamentoAgencia: proposta.dadosPagamentoAgencia,
+        dadosPagamentoConta: proposta.dadosPagamentoConta
       });
     });
 
     // Processar os resultados para o formato esperado pelo frontend
     const pagamentosFormatados = result.map((proposta: any) => {
+      console.log(`[PAGAMENTOS DEBUG] Processando proposta ${proposta.id}:`, {
+        clienteNome: proposta.clienteNome,
+        clienteCpf: proposta.clienteCpf,
+        valorTotalFinanciado: proposta.valorTotalFinanciado,
+        lojaNome: proposta.lojaNome,
+        produtoNome: proposta.produtoNome
+      });
+      
       // Calcular valor líquido
       const valorFinanciado = Number(proposta.valorTotalFinanciado || 0);
       const valorIof = Number(proposta.valorIof || 0);
@@ -241,7 +258,7 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
         titular: proposta.dadosPagamentoNomeTitular || proposta.clienteNome || 'N/A'
       };
 
-      return {
+      const pagamentoFormatado = {
         id: proposta.id,
         propostaId: proposta.id,
         numeroContrato: `CONT-${proposta.id.slice(0, 8).toUpperCase()}`,
@@ -273,6 +290,18 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
         loja: proposta.lojaNome || 'Não informado',
         produto: proposta.produtoNome || 'Não informado'
       };
+      
+      console.log(`[PAGAMENTOS DEBUG] Pagamento formatado para ${proposta.id}:`, {
+        numeroContrato: pagamentoFormatado.numeroContrato,
+        nomeCliente: pagamentoFormatado.nomeCliente,
+        cpfCliente: pagamentoFormatado.cpfCliente,
+        valorFinanciado: pagamentoFormatado.valorFinanciado,
+        valorLiquido: pagamentoFormatado.valorLiquido,
+        produto: pagamentoFormatado.produto,
+        loja: pagamentoFormatado.loja
+      });
+      
+      return pagamentoFormatado;
     });
 
     // Aplicar filtros
