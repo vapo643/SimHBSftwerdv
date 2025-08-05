@@ -223,6 +223,11 @@ export default function Pagamentos() {
 
   // Filtrar pagamentos
   const pagamentosFiltrados = pagamentos?.filter(pagamento => {
+    // Se não há termo de busca, retorna todos
+    if (!searchTerm || searchTerm.trim() === '') {
+      return true;
+    }
+    
     const matchesSearch = 
       pagamento.nomeCliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
       pagamento.numeroContrato.includes(searchTerm) ||
@@ -231,6 +236,14 @@ export default function Pagamentos() {
     
     return matchesSearch;
   });
+
+  // Debug para ver o que está acontecendo
+  console.log('[PAGAMENTOS FRONTEND] Dados recebidos:', pagamentos?.length);
+  console.log('[PAGAMENTOS FRONTEND] Termo de busca:', searchTerm);
+  console.log('[PAGAMENTOS FRONTEND] Dados filtrados:', pagamentosFiltrados?.length);
+  if (pagamentos?.length > 0) {
+    console.log('[PAGAMENTOS FRONTEND] Primeiro pagamento:', pagamentos[0]);
+  }
 
   // Estatísticas
   const stats = {
