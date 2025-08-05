@@ -95,8 +95,12 @@ export default function Pagamentos() {
   const [selectedPagamento, setSelectedPagamento] = useState<Pagamento | null>(null);
   const [showApprovalModal, setShowApprovalModal] = useState(false);
   const [showRejectionModal, setShowRejectionModal] = useState(false);
+  const [showSecurityVerificationModal, setShowSecurityVerificationModal] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
   const [approvalObservation, setApprovalObservation] = useState("");
+  const [verificationData, setVerificationData] = useState<any>(null);
+  const [paymentPassword, setPaymentPassword] = useState("");
+  const [paymentObservation, setPaymentObservation] = useState("");
 
   // Buscar pagamentos
   const { data: pagamentos = [], isLoading, error } = useQuery({
@@ -113,6 +117,18 @@ export default function Pagamentos() {
     },
     retry: 1,
     initialData: [],
+  });
+
+  // Buscar dados de verificação quando modal abrir
+  const { data: verificacoes, isLoading: isLoadingVerificacao } = useQuery({
+    queryKey: ['/api/pagamentos', selectedPagamento?.id, 'verificar-documentos'],
+    queryFn: async () => {
+      if (!selectedPagamento?.id) return null;
+      return await apiRequest(`/api/pagamentos/${selectedPagamento.id}/verificar-documentos`, {
+        method: 'GET',
+      });
+    },
+    enabled: showSecurityVerificationModal && !!selectedPagamento?.id,
   });
 
   // Aprovar pagamento
@@ -136,6 +152,34 @@ export default function Pagamentos() {
       toast({
         title: "Erro ao aprovar",
         description: "Não foi possível aprovar o pagamento.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Confirmar desembolso com segurança
+  const confirmarDesembolsoMutation = useMutation({
+    mutationFn: async ({ id, senha, observacoes }: { id: string; senha: string; observacoes: string }) => {
+      return await apiRequest(`/api/pagamentos/${id}/confirmar-desembolso`, {
+        method: 'POST',
+        body: JSON.stringify({ senha, observacoes }),
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Desembolso confirmado",
+        description: "O pagamento foi realizado com sucesso ao cliente.",
+        className: "bg-green-50 border-green-200",
+      });
+      setShowSecurityVerificationModal(false);
+      setPaymentPassword("");
+      setPaymentObservation("");
+      queryClient.invalidateQueries({ queryKey: ['/api/pagamentos'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro ao confirmar desembolso",
+        description: error.message || "Verifique as validações de segurança.",
         variant: "destructive",
       });
     },
@@ -509,33 +553,20 @@ export default function Pagamentos() {
                             >
                               <Eye className="h-4 w-4" />
                             </Button>
-                            {pagamento.status === 'aguardando_aprovacao' && userHasApprovalPermission() && (
-                              <>
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  className="text-green-600 hover:text-green-700"
-                                  onClick={() => {
-                                    setSelectedPagamento(pagamento);
-                                    setShowApprovalModal(true);
-                                  }}
-                                  title="Aprovar"
-                                >
-                                  <CheckCircle className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  className="text-red-600 hover:text-red-700"
-                                  onClick={() => {
-                                    setSelectedPagamento(pagamento);
-                                    setShowRejectionModal(true);
-                                  }}
-                                  title="Rejeitar"
-                                >
-                                  <XCircle className="h-4 w-4" />
-                                </Button>
-                              </>
+                            {pagamento.status === 'em_processamento' && userHasApprovalPermission() && (
+                              <Button
+                                size="sm"
+                                variant="default"
+                                className="gap-2"
+                                onClick={() => {
+                                  setSelectedPagamento(pagamento);
+                                  setShowSecurityVerificationModal(true);
+                                }}
+                                title="Revisar e Pagar"
+                              >
+                                <Shield className="h-4 w-4" />
+                                Revisar e Pagar
+                              </Button>
                             )}
                           </div>
                         </TableCell>
@@ -871,6 +902,244 @@ export default function Pagamentos() {
                 disabled={!rejectionReason.trim() || rejeitarMutation.isPending}
               >
                 {rejeitarMutation.isPending ? "Rejeitando..." : "Rejeitar Pagamento"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Modal de Verificação de Segurança para Desembolso */}
+        <Dialog open={showSecurityVerificationModal} onOpenChange={setShowSecurityVerificationModal}>
+          <DialogContent className="max-w-4xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Shield className="h-5 w-5 text-blue-600" />
+                Verificação de Segurança - Desembolso
+              </DialogTitle>
+              <DialogDescription>
+                Revise todos os detalhes antes de confirmar o desembolso do empréstimo.
+              </DialogDescription>
+            </DialogHeader>
+
+            {isLoadingVerificacao ? (
+              <div className="flex items-center justify-center py-8">
+                <RefreshCw className="h-6 w-6 animate-spin" />
+              </div>
+            ) : verificacoes && selectedPagamento ? (
+              <div className="space-y-6">
+                {/* Dados do Cliente e Valor */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Informações do Desembolso</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label>Cliente</Label>
+                        <p className="font-semibold">{selectedPagamento.nomeCliente}</p>
+                        <p className="text-sm text-muted-foreground">{formatCPF(selectedPagamento.cpfCliente)}</p>
+                      </div>
+                      <div>
+                        <Label>Valor a Pagar</Label>
+                        <p className="text-2xl font-bold text-green-600">
+                          {formatCurrency(selectedPagamento.valorLiquido)}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          Valor Financiado: {formatCurrency(selectedPagamento.valorFinanciado)}
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Checklist de Verificação */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Checklist de Verificação Automática</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3">
+                        {verificacoes.ccbAssinada ? (
+                          <CheckCircle className="h-5 w-5 text-green-600" />
+                        ) : (
+                          <XCircle className="h-5 w-5 text-red-600" />
+                        )}
+                        <span className={verificacoes.ccbAssinada ? "text-green-700" : "text-red-700"}>
+                          CCB Assinada e Localizada no Storage
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        {verificacoes.boletosGerados ? (
+                          <CheckCircle className="h-5 w-5 text-green-600" />
+                        ) : (
+                          <XCircle className="h-5 w-5 text-red-600" />
+                        )}
+                        <span className={verificacoes.boletosGerados ? "text-green-700" : "text-red-700"}>
+                          Boletos de Cobrança Registrados no Inter
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        {verificacoes.titularidadeConta ? (
+                          <CheckCircle className="h-5 w-5 text-green-600" />
+                        ) : (
+                          <AlertCircle className="h-5 w-5 text-yellow-600" />
+                        )}
+                        <span className={verificacoes.titularidadeConta ? "text-green-700" : "text-yellow-700"}>
+                          Validação de Titularidade da Conta de Destino
+                        </span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Documentação */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Documentação para Conferência</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {verificacoes.documentosCcb?.urlCcb ? (
+                      <div className="space-y-3">
+                        <Alert>
+                          <FileText className="h-4 w-4" />
+                          <AlertDescription>
+                            Visualize a CCB assinada antes de confirmar o pagamento.
+                          </AlertDescription>
+                        </Alert>
+                        <Button
+                          variant="outline"
+                          className="w-full"
+                          onClick={() => window.open(verificacoes.documentosCcb.urlCcb, '_blank')}
+                        >
+                          <FileText className="h-4 w-4 mr-2" />
+                          Visualizar CCB Assinada
+                        </Button>
+                      </div>
+                    ) : (
+                      <Alert variant="destructive">
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertDescription>
+                          CCB não encontrada. Não é possível prosseguir com o pagamento.
+                        </AlertDescription>
+                      </Alert>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Conta de Destino */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Conta de Destino do Pagamento</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      {selectedPagamento.contaBancaria.banco !== 'N/A' ? (
+                        <div className="space-y-2">
+                          <p><strong>Banco:</strong> {selectedPagamento.contaBancaria.banco}</p>
+                          <p><strong>Agência:</strong> {selectedPagamento.contaBancaria.agencia}</p>
+                          <p><strong>Conta:</strong> {selectedPagamento.contaBancaria.conta}</p>
+                          <p><strong>Tipo:</strong> {selectedPagamento.contaBancaria.tipoConta}</p>
+                          <p><strong>Titular:</strong> {selectedPagamento.contaBancaria.titular}</p>
+                        </div>
+                      ) : verificacoes.dadosPagamento?.destino?.pix ? (
+                        <div className="space-y-2">
+                          <p><strong>Tipo:</strong> PIX</p>
+                          <p><strong>Chave PIX:</strong> {verificacoes.dadosPagamento.destino.pix}</p>
+                        </div>
+                      ) : (
+                        <Alert variant="destructive">
+                          <AlertCircle className="h-4 w-4" />
+                          <AlertDescription>
+                            Dados bancários não informados. Configure antes de prosseguir.
+                          </AlertDescription>
+                        </Alert>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Confirmação Final */}
+                <Card className="border-red-200 bg-red-50">
+                  <CardHeader>
+                    <CardTitle className="text-lg text-red-800">Confirmação de Segurança</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <Label>Senha de Confirmação*</Label>
+                      <Input
+                        type="password"
+                        placeholder="Digite sua senha para confirmar"
+                        value={paymentPassword}
+                        onChange={(e) => setPaymentPassword(e.target.value)}
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label>Observações do Pagamento</Label>
+                      <Textarea
+                        placeholder="Observações sobre o desembolso (opcional)"
+                        value={paymentObservation}
+                        onChange={(e) => setPaymentObservation(e.target.value)}
+                        className="mt-1"
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            ) : null}
+
+            <DialogFooter className="gap-2">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowSecurityVerificationModal(false);
+                  setPaymentPassword("");
+                  setPaymentObservation("");
+                }}
+              >
+                Cancelar
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  setSelectedPagamento(null);
+                  setShowSecurityVerificationModal(false);
+                  setShowRejectionModal(true);
+                }}
+              >
+                <XCircle className="h-4 w-4 mr-2" />
+                Reprovar/Devolver
+              </Button>
+              <Button
+                variant="default"
+                className="bg-green-600 hover:bg-green-700"
+                onClick={() => {
+                  if (selectedPagamento && paymentPassword) {
+                    confirmarDesembolsoMutation.mutate({
+                      id: selectedPagamento.id,
+                      senha: paymentPassword,
+                      observacoes: paymentObservation
+                    });
+                  }
+                }}
+                disabled={
+                  !paymentPassword || 
+                  !verificacoes?.ccbAssinada || 
+                  !verificacoes?.boletosGerados ||
+                  confirmarDesembolsoMutation.isPending
+                }
+              >
+                {confirmarDesembolsoMutation.isPending ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    Confirmando...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                    Confirmar Desembolso e Marcar como Pago
+                  </>
+                )}
               </Button>
             </DialogFooter>
           </DialogContent>

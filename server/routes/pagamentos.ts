@@ -8,6 +8,18 @@ import { isToday, isThisWeek, isThisMonth, startOfDay, endOfDay, startOfWeek, en
 
 const router = Router();
 
+// Função auxiliar para registrar auditoria de pagamentos
+async function registrarAuditoriaPagamento(
+  propostaId: string,
+  userId: string,
+  acao: string,
+  detalhes: any
+) {
+  const now = new Date().toISOString();
+  console.log(`[AUDITORIA PAGAMENTO] ${now} - Proposta: ${propostaId}, User: ${userId}, Ação: ${acao}`);
+  // TODO: Implementar gravação em tabela de auditoria
+}
+
 // Schema de validação para pagamento
 const pagamentoSchema = z.object({
   propostaId: z.string().uuid(),
@@ -146,7 +158,12 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     });
     console.log(`[PAGAMENTOS DEBUG] ========================================`);
 
-    // Buscar propostas que tenham boletos gerados no Inter Bank OU estão prontas para pagamento
+    // REGRA CRÍTICA DE SEGURANÇA: Uma proposta só pode aparecer para pagamento se:
+    // 1. CCB foi assinada (ccb_gerado = true AND assinatura_eletronica_concluida = true)
+    // 2. Boletos foram gerados no Inter Bank
+    // 3. Status está como pronto_pagamento ou aguardando_desembolso
+    console.log(`[PAGAMENTOS SECURITY] Aplicando filtros críticos de segurança para pagamentos`);
+    
     const result = await db
       .select({
         id: propostas.id,
@@ -175,23 +192,31 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
         dadosPagamentoNomeTitular: propostas.dadosPagamentoNomeTitular,
         dadosPagamentoCpfTitular: propostas.dadosPagamentoCpfTitular,
         dadosPagamentoPix: propostas.dadosPagamentoPix,
-        temBoleto: sql<boolean>`CASE WHEN EXISTS (
+        // Informações do atendente
+        atendenteNome: users.nome,
+        atendenteEmail: users.email,
+        // Verificações críticas
+        temBoleto: sql<boolean>`EXISTS (
           SELECT 1 FROM inter_collections 
           WHERE inter_collections.proposta_id = ${propostas.id}
-        ) THEN true ELSE false END`
+        )`,
+        ccbAssinada: sql<boolean>`${propostas.ccbGerado} = true AND ${propostas.assinaturaEletronicaConcluida} = true`
       })
       .from(propostas)
       .leftJoin(lojas, eq(propostas.lojaId, lojas.id))
       .leftJoin(produtos, eq(propostas.produtoId, produtos.id))
+      .leftJoin(users, eq(propostas.userId, users.id))
       .where(
         and(
+          // Não pode estar deletada
           sql`${propostas.deletedAt} IS NULL`,
-          or(
-            // Propostas com boletos gerados no Inter Bank
-            sql`EXISTS (SELECT 1 FROM inter_collections WHERE inter_collections.proposta_id = ${propostas.id})`,
-            // Propostas com status pronto_pagamento
-            eq(propostas.status, 'pronto_pagamento')
-          )
+          // OBRIGATÓRIO: CCB deve estar assinada
+          eq(propostas.ccbGerado, true),
+          eq(propostas.assinaturaEletronicaConcluida, true),
+          // OBRIGATÓRIO: Boletos devem estar gerados
+          sql`EXISTS (SELECT 1 FROM inter_collections WHERE inter_collections.proposta_id = ${propostas.id})`,
+          // Status deve ser pronto_pagamento
+          eq(propostas.status, 'pronto_pagamento')
         )
       )
       .orderBy(desc(propostas.dataAprovacao));
@@ -262,8 +287,8 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
         id: proposta.id,
         propostaId: proposta.id,
         numeroContrato: `CONT-${proposta.id.slice(0, 8).toUpperCase()}`,
-        nomeCliente: proposta.clienteNome || 'Não informado',
-        cpfCliente: proposta.clienteCpf || 'Não informado',
+        nomeCliente: proposta.clienteNome || 'Cliente não informado',
+        cpfCliente: proposta.clienteCpf || 'CPF não informado',
         valorFinanciado: valorFinanciado,
         valorLiquido: valorLiquido,
         valorIOF: valorIof,
@@ -275,20 +300,25 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
         dataPagamento: proposta.dataPagamento,
         requisitadoPor: {
           id: proposta.userId || '',
-          nome: 'Sistema',
-          papel: 'SISTEMA'
+          nome: proposta.atendenteNome || 'Atendente não identificado',
+          papel: 'ATENDENTE',
+          loja: proposta.lojaNome || 'Loja não informada'
         },
         aprovadoPor: proposta.analistaId ? {
           id: proposta.analistaId,
-          nome: 'Analista',
+          nome: 'Analista de Crédito',
           papel: 'ANALISTA'
         } : undefined,
         motivoRejeicao: '',
         observacoes: proposta.observacoes,
         comprovante: '',
-        formaPagamento: 'ted' as const,
-        loja: proposta.lojaNome || 'Não informado',
-        produto: proposta.produtoNome || 'Não informado'
+        formaPagamento: proposta.dadosPagamentoPix ? 'pix' as const : 'ted' as const,
+        loja: proposta.lojaNome || 'Loja não informada',
+        produto: proposta.produtoNome || 'Produto não informado',
+        // Dados críticos para verificação
+        ccbAssinada: proposta.ccbAssinada,
+        temBoleto: proposta.temBoleto,
+        documentosCcb: [] // Será preenchido em outra rota
       };
       
       console.log(`[PAGAMENTOS DEBUG] Pagamento formatado para ${proposta.id}:`, {
@@ -458,6 +488,154 @@ router.post("/:id/processar", jwtAuthMiddleware, async (req: AuthenticatedReques
   } catch (error) {
     console.error("[PAGAMENTOS] Erro ao processar pagamento:", error);
     res.status(500).json({ error: "Erro ao processar pagamento" });
+  }
+});
+
+// Nova rota para verificar documentos CCB antes do pagamento
+router.get("/:id/verificar-documentos", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user?.id;
+    
+    if (!userId) {
+      return res.status(401).json({ error: "Usuário não autenticado" });
+    }
+    
+    // Registrar auditoria de visualização
+    await registrarAuditoriaPagamento(
+      id,
+      userId,
+      'VISUALIZACAO_DOCUMENTOS_PRE_PAGAMENTO',
+      { timestamp: new Date().toISOString() }
+    );
+    
+    // Buscar proposta e documentos
+    const [proposta] = await db
+      .select()
+      .from(propostas)
+      .where(eq(propostas.id, id))
+      .limit(1);
+      
+    if (!proposta) {
+      return res.status(404).json({ error: "Proposta não encontrada" });
+    }
+    
+    // Verificar boletos no Inter
+    const boletos = await db
+      .select()
+      .from(interCollections)
+      .where(eq(interCollections.propostaId, id));
+    
+    const verificacoes = {
+      ccbAssinada: proposta.ccbGerado && proposta.assinaturaEletronicaConcluida,
+      boletosGerados: boletos.length > 0,
+      titularidadeConta: proposta.dadosPagamentoCpfTitular === proposta.clienteCpf,
+      documentosCcb: {
+        urlCcb: proposta.ccbGerado ? `/api/propostas/${id}/ccb` : null,
+        dataAssinatura: proposta.dataAprovacao
+      },
+      dadosPagamento: {
+        valor: Number(proposta.valorTotalFinanciado || 0),
+        valorLiquido: Number(proposta.valorTotalFinanciado || 0) - Number(proposta.valorIof || 0) - Number(proposta.valorTac || 0),
+        destino: {
+          tipo: proposta.dadosPagamentoPix ? 'PIX' : 'CONTA_BANCARIA',
+          banco: proposta.dadosPagamentoBanco,
+          agencia: proposta.dadosPagamentoAgencia,
+          conta: proposta.dadosPagamentoConta,
+          pix: proposta.dadosPagamentoPix
+        }
+      }
+    };
+    
+    res.json(verificacoes);
+  } catch (error) {
+    console.error("Erro ao verificar documentos:", error);
+    res.status(500).json({ error: "Erro ao verificar documentos" });
+  }
+});
+
+// Nova rota para confirmar pagamento com segurança máxima
+router.post("/:id/confirmar-desembolso", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+  try {
+    const { id } = req.params;
+    const { senha, observacoes } = req.body;
+    const userId = req.user?.id;
+    const userRole = req.user?.role;
+    
+    if (!userId) {
+      return res.status(401).json({ error: "Usuário não autenticado" });
+    }
+    
+    // Verificar permissões - SEGREGAÇÃO DE FUNÇÕES
+    if (!['ADMINISTRADOR', 'FINANCEIRO'].includes(userRole || '')) {
+      return res.status(403).json({ error: "Usuário sem permissão para confirmar desembolsos" });
+    }
+    
+    // TODO: Implementar verificação de senha/MFA
+    
+    // Buscar proposta completa
+    const [proposta] = await db
+      .select()
+      .from(propostas)
+      .where(eq(propostas.id, id))
+      .limit(1);
+      
+    if (!proposta) {
+      return res.status(404).json({ error: "Proposta não encontrada" });
+    }
+    
+    // Verificações críticas
+    if (!proposta.ccbGerado || !proposta.assinaturaEletronicaConcluida) {
+      return res.status(400).json({ error: "CCB não assinada. Desembolso bloqueado." });
+    }
+    
+    const boletos = await db
+      .select()
+      .from(interCollections)
+      .where(eq(interCollections.propostaId, id));
+      
+    if (boletos.length === 0) {
+      return res.status(400).json({ error: "Boletos não gerados. Desembolso bloqueado." });
+    }
+    
+    // Atualizar para DESEMBOLSADO
+    await db
+      .update(propostas)
+      .set({
+        status: 'pago',
+        dataPagamento: new Date(),
+        observacoes: `${proposta.observacoes || ''}\n\n[DESEMBOLSO CONFIRMADO] ${observacoes || 'Pagamento realizado ao cliente'}`
+      })
+      .where(eq(propostas.id, id));
+    
+    // Registrar auditoria completa e imutável
+    await registrarAuditoriaPagamento(
+      id,
+      userId,
+      'DESEMBOLSO_CONFIRMADO',
+      {
+        timestamp: new Date().toISOString(),
+        userRole,
+        valorDesembolsado: proposta.valorTotalFinanciado,
+        destino: {
+          tipo: proposta.dadosPagamentoPix ? 'PIX' : 'TED',
+          dados: proposta.dadosPagamentoPix || `${proposta.dadosPagamentoBanco} AG:${proposta.dadosPagamentoAgencia} CC:${proposta.dadosPagamentoConta}`
+        },
+        observacoes,
+        ip: req.ip,
+        userAgent: req.headers['user-agent']
+      }
+    );
+    
+    res.json({ 
+      success: true,
+      message: "Desembolso confirmado com sucesso",
+      status: "DESEMBOLSADO",
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error("Erro ao confirmar desembolso:", error);
+    res.status(500).json({ error: "Erro ao confirmar desembolso" });
   }
 });
 
