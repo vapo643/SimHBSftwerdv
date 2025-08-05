@@ -196,23 +196,15 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
       )
       .orderBy(desc(propostas.dataAprovacao));
 
-    // Agora buscar quais propostas têm boletos
-    const propostaIds = propostasElegiveis.map(p => p.proposta.id);
-    const boletosInfo = propostaIds.length > 0 ? await db
+    // Buscar boletos de forma mais simples para evitar erro de tipos
+    const boletosInfo = await db
       .select({ 
-        propostaId: interCollections.propostaId,
-        count: sql<number>`count(*)` 
+        propostaId: interCollections.propostaId
       })
       .from(interCollections)
-      .where(
-        and(
-          sql`${interCollections.propostaId} IS NOT NULL`,
-          inArray(interCollections.propostaId, propostaIds)
-        )
-      )
-      .groupBy(interCollections.propostaId) : [];
+      .where(sql`${interCollections.propostaId} IS NOT NULL`);
     
-    const propostasComBoletosSet = new Set(boletosInfo.map(b => b.propostaId));
+    const propostasComBoletosSet = new Set(boletosInfo.map(b => b.propostaId).filter(id => id !== null));
     
     // Filtrar apenas as propostas que têm boletos
     const result = propostasElegiveis.filter(p => propostasComBoletosSet.has(p.proposta.id));
