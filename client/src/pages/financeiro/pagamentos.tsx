@@ -972,7 +972,7 @@ export default function Pagamentos() {
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
-                <Shield className="h-5 w-5 text-blue-600" />
+                <Shield className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                 Verificação de Segurança - Desembolso
               </DialogTitle>
               <DialogDescription>
@@ -1000,7 +1000,7 @@ export default function Pagamentos() {
                       </div>
                       <div>
                         <Label className="text-sm">Valor a Pagar</Label>
-                        <p className="text-xl font-bold text-green-600">
+                        <p className="text-xl font-bold text-green-600 dark:text-green-400">
                           {formatCurrency(selectedPagamento.valorLiquido)}
                         </p>
                         <p className="text-xs text-muted-foreground">
@@ -1074,7 +1074,7 @@ export default function Pagamentos() {
                         <Alert variant="destructive" className="text-xs">
                           <AlertCircle className="h-4 w-4" />
                           <AlertDescription>
-                            CCB não encontrada
+                            CCB não encontrada. Verifique se foi assinada no ClickSign.
                           </AlertDescription>
                         </Alert>
                       )}
@@ -1087,7 +1087,7 @@ export default function Pagamentos() {
                       <CardTitle className="text-base">Conta de Destino</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="bg-gray-50 p-3 rounded text-xs space-y-1">
+                      <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded text-xs space-y-1">
                         {selectedPagamento.contaBancaria.banco !== 'N/A' ? (
                           <>
                             <p><strong>Banco:</strong> {selectedPagamento.contaBancaria.banco}</p>
@@ -1102,7 +1102,7 @@ export default function Pagamentos() {
                         ) : (
                           <Alert variant="destructive" className="text-xs">
                             <AlertDescription>
-                              Dados bancários não informados
+                              Dados bancários não informados. Configure na proposta.
                             </AlertDescription>
                           </Alert>
                         )}
@@ -1112,20 +1112,23 @@ export default function Pagamentos() {
                 </div>
 
                 {/* Confirmação Final */}
-                <Card className="border-red-200 bg-red-50">
+                <Card className="border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950">
                   <CardHeader className="pb-3">
-                    <CardTitle className="text-base text-red-800">Confirmação de Segurança</CardTitle>
+                    <CardTitle className="text-base text-red-800 dark:text-red-200">Confirmação de Segurança</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
                     <div>
-                      <Label className="text-sm">Senha de Confirmação*</Label>
+                      <Label className="text-sm">Senha de Confirmação* (Segurança Adicional)</Label>
                       <Input
                         type="password"
-                        placeholder="Digite sua senha para confirmar"
+                        placeholder="Digite sua senha de segurança para desembolsos"
                         value={paymentPassword}
                         onChange={(e) => setPaymentPassword(e.target.value)}
                         className="mt-1"
                       />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Esta é uma senha adicional de segurança para desembolsos, pode ser diferente da sua senha de login.
+                      </p>
                     </div>
                     <div>
                       <Label className="text-sm">Observações (opcional)</Label>

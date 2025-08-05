@@ -1887,10 +1887,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/propostas/:id/documents", jwtAuthMiddleware, upload.single("file"), uploadPropostaDocument);
 
   // Import propostas routes
-  const { togglePropostaStatus } = await import("./routes/propostas");
+  const { togglePropostaStatus, getCcbAssinada } = await import("./routes/propostas");
   
   // Rota para alternar status entre ativa/suspensa
   app.put("/api/propostas/:id/toggle-status", jwtAuthMiddleware, togglePropostaStatus);
+  
+  // Rota para buscar CCB assinada
+  app.get("/api/propostas/:id/ccb", jwtAuthMiddleware, getCcbAssinada);
 
   // Emergency route to setup storage bucket (temporary - no auth for setup)
   app.post("/api/setup-storage", async (req, res) => {

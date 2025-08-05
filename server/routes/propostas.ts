@@ -1,6 +1,9 @@
 import { Request, Response } from "express";
 import { AuthenticatedRequest } from "../lib/jwt-auth-middleware";
 import { createServerSupabaseAdminClient } from "../lib/supabase";
+import { db } from "../lib/supabase.js";
+import { propostas } from "@shared/schema";
+import { eq } from "drizzle-orm";
 
 /**
  * Alterar status da proposta entre ativa e suspensa
@@ -92,6 +95,91 @@ export const togglePropostaStatus = async (req: AuthenticatedRequest, res: Respo
     console.error('Erro ao alterar status da proposta:', error);
     res.status(500).json({ 
       message: "Erro interno do servidor ao alterar status" 
+    });
+  }
+};
+
+/**
+ * Buscar CCB assinada da proposta (integração com ClickSign)
+ * GET /api/propostas/:id/ccb
+ */
+export const getCcbAssinada = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { id: propostaId } = req.params;
+    
+    if (!propostaId) {
+      return res.status(400).json({ message: "ID da proposta é obrigatório" });
+    }
+
+    // Buscar proposta com dados do ClickSign
+    const [proposta] = await db
+      .select()
+      .from(propostas)
+      .where(eq(propostas.id, propostaId))
+      .limit(1);
+    
+    if (!proposta) {
+      return res.status(404).json({ message: "Proposta não encontrada" });
+    }
+
+    // Verificar se CCB foi gerada e assinada
+    if (!proposta.ccbGerado || !proposta.assinaturaEletronicaConcluida) {
+      return res.status(404).json({ 
+        message: "CCB não foi gerada ou ainda não foi assinada" 
+      });
+    }
+
+    // Se temos o documento_id do ClickSign, buscar o PDF assinado
+    if (proposta.clicksignDocumentId) {
+      try {
+        // Para agora, vamos retornar uma URL simulada do ClickSign
+        // TODO: Implementar integração real com ClickSign API para buscar PDF assinado
+        const clicksignUrl = `https://app.clicksign.com/sign/documents/${proposta.clicksignDocumentId}/download`;
+        
+        return res.json({ 
+          url: clicksignUrl,
+          nome: `CCB_${proposta.clienteNome}_${propostaId}.pdf`,
+          status: 'assinado',
+          dataAssinatura: proposta.dataAprovacao,
+          fonte: 'clicksign'
+        });
+      } catch (clicksignError) {
+        console.error('Erro ao buscar PDF do ClickSign:', clicksignError);
+        // Continuar com fallback abaixo
+      }
+    }
+
+    // Fallback: buscar no Supabase Storage (se foi salvo localmente)
+    const supabase = createServerSupabaseAdminClient();
+    
+    try {
+      // Tentar buscar no storage
+      const { data: urlData } = await supabase.storage
+        .from('documents')
+        .createSignedUrl(`proposta-${propostaId}/ccb-assinada.pdf`, 3600); // 1 hora
+
+      if (urlData?.signedUrl) {
+        return res.json({ 
+          url: urlData.signedUrl,
+          nome: `CCB_${proposta.clienteNome}_${propostaId}.pdf`,
+          status: 'assinado',
+          dataAssinatura: proposta.dataAprovacao,
+          fonte: 'storage'
+        });
+      }
+    } catch (storageError) {
+      console.error('Erro ao buscar no Storage:', storageError);
+    }
+
+    // Se chegou até aqui, CCB não foi encontrada
+    return res.status(404).json({ 
+      message: "CCB assinada não encontrada. Verifique se o documento foi assinado corretamente no ClickSign." 
+    });
+
+  } catch (error) {
+    console.error('Erro ao buscar CCB:', error);
+    res.status(500).json({ 
+      message: "Erro interno do servidor ao buscar CCB" 
     });
   }
 };
