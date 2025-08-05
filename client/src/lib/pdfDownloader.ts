@@ -243,7 +243,10 @@ export class PDFDownloader {
     let errorDescription = lastError?.message || 'Erro desconhecido';
     
     // Customizar mensagem baseada no tipo de erro
-    if (lastError?.message.includes('não está disponível para download')) {
+    if (lastError?.message.includes('não disponibiliza PDF') || lastError?.message.includes('406')) {
+      errorTitle = "PDF não disponível";
+      errorDescription = "O banco Inter não permite download direto do PDF. Use o código de barras ou QR Code para pagamento.";
+    } else if (lastError?.message.includes('não está disponível para download')) {
       errorTitle = "Boleto não disponível";
       errorDescription = "O boleto ainda não foi gerado ou não está pronto para download. Tente novamente em alguns instantes.";
     } else if (lastError?.message.includes('400')) {

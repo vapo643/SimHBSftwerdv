@@ -101,16 +101,41 @@ router.get('/:propostaId/:codigoSolicitacao/pdf', jwtAuthMiddleware, requireAnyR
     // Buscar PDF na API do Inter
     const interService = interBankService;
     
-    // Primeiro, verificar se a cobrança existe no Inter
-    console.log(`[INTER COLLECTIONS] Checking if collection exists: ${codigoSolicitacao}`);
+    // Primeiro, obter os detalhes da cobrança para verificar se tem o PDF em base64
+    console.log(`[INTER COLLECTIONS] Getting collection details: ${codigoSolicitacao}`);
+    let pdfBuffer: Buffer;
+    
     try {
       const collectionDetails = await interService.obterCobranca(codigoSolicitacao);
-      console.log(`[INTER COLLECTIONS] Collection details:`, collectionDetails);
-    } catch (checkError) {
-      console.error(`[INTER COLLECTIONS] Collection not found or error checking:`, checkError);
+      console.log(`[INTER COLLECTIONS] Collection details:`, JSON.stringify(collectionDetails, null, 2));
+      
+      // Verificar se o PDF está no próprio objeto (algumas APIs retornam assim)
+      if (collectionDetails.pdf || collectionDetails.pdfBase64 || collectionDetails.linkPdf) {
+        console.log(`[INTER COLLECTIONS] PDF found in collection object`);
+        
+        if (collectionDetails.pdfBase64) {
+          pdfBuffer = Buffer.from(collectionDetails.pdfBase64, 'base64');
+        } else if (collectionDetails.pdf) {
+          pdfBuffer = Buffer.from(collectionDetails.pdf, 'base64');
+        } else {
+          // Se tiver apenas um link, tentar baixar do link
+          throw new Error('PDF link encontrado mas download via link não implementado');
+        }
+      } else {
+        // Tentar o endpoint separado de PDF
+        console.log(`[INTER COLLECTIONS] PDF not in collection object, trying separate endpoint`);
+        pdfBuffer = await interService.obterPdfCobranca(codigoSolicitacao);
+      }
+    } catch (error: any) {
+      console.error(`[INTER COLLECTIONS] Error getting collection or PDF:`, error);
+      
+      // Se for erro 406, informar que o PDF não está disponível
+      if (error.message?.includes('406')) {
+        throw new Error('O banco Inter não disponibiliza PDF para download direto. Acesse o painel do banco para visualizar o boleto.');
+      }
+      
+      throw error;
     }
-    
-    const pdfBuffer = await interService.obterPdfCobranca(codigoSolicitacao);
     
     // Verificar se o PDF é válido
     if (!pdfBuffer || pdfBuffer.length === 0) {

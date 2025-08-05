@@ -722,9 +722,8 @@ class InterBankService {
       console.log(`[INTER] 📄 Getting PDF for collection: ${codigoSolicitacao}`);
 
       // Use makeRequest instead of direct fetch to ensure proper mTLS
-      const response = await this.makeRequest(`/cobranca/v3/cobrancas/${codigoSolicitacao}/pdf`, 'GET', null, {
-        'Accept': 'application/pdf'
-      });
+      // NOTA: Não usar Accept: application/pdf - o Inter retorna erro 406
+      const response = await this.makeRequest(`/cobranca/v3/cobrancas/${codigoSolicitacao}/pdf`, 'GET');
       
       // Check if response is a Buffer
       if (Buffer.isBuffer(response)) {
