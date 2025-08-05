@@ -334,7 +334,7 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
         dataPagamento: proposta.dataPagamento,
         requisitadoPor: {
           id: proposta.userId || '',
-          nome: usuario?.nome || 'Atendente não identificado',
+          nome: 'Atendente',
           papel: 'ATENDENTE',
           loja: loja?.nomeLoja || 'Loja não informada'
         },
