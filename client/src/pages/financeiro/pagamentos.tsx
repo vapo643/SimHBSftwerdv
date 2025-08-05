@@ -969,7 +969,7 @@ export default function Pagamentos() {
 
         {/* Modal de Verificação de Segurança para Desembolso */}
         <Dialog open={showSecurityVerificationModal} onOpenChange={setShowSecurityVerificationModal}>
-          <DialogContent className="max-w-4xl">
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Shield className="h-5 w-5 text-blue-600" />
@@ -985,25 +985,25 @@ export default function Pagamentos() {
                 <RefreshCw className="h-6 w-6 animate-spin" />
               </div>
             ) : verificacoes && selectedPagamento ? (
-              <div className="space-y-6">
+              <div className="space-y-4">
                 {/* Dados do Cliente e Valor */}
                 <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Informações do Desembolso</CardTitle>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base">Informações do Desembolso</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <Label>Cliente</Label>
-                        <p className="font-semibold">{selectedPagamento.nomeCliente}</p>
-                        <p className="text-sm text-muted-foreground">{formatCPF(selectedPagamento.cpfCliente)}</p>
+                        <Label className="text-sm">Cliente</Label>
+                        <p className="font-semibold text-sm">{selectedPagamento.nomeCliente}</p>
+                        <p className="text-xs text-muted-foreground">{formatCPF(selectedPagamento.cpfCliente)}</p>
                       </div>
                       <div>
-                        <Label>Valor a Pagar</Label>
-                        <p className="text-2xl font-bold text-green-600">
+                        <Label className="text-sm">Valor a Pagar</Label>
+                        <p className="text-xl font-bold text-green-600">
                           {formatCurrency(selectedPagamento.valorLiquido)}
                         </p>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-xs text-muted-foreground">
                           Valor Financiado: {formatCurrency(selectedPagamento.valorFinanciado)}
                         </p>
                       </div>
@@ -1013,119 +1013,112 @@ export default function Pagamentos() {
 
                 {/* Checklist de Verificação */}
                 <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Checklist de Verificação Automática</CardTitle>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base">Checklist de Verificação</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-3">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-sm">
                         {verificacoes.ccbAssinada ? (
-                          <CheckCircle className="h-5 w-5 text-green-600" />
+                          <CheckCircle className="h-4 w-4 text-green-600" />
                         ) : (
-                          <XCircle className="h-5 w-5 text-red-600" />
+                          <XCircle className="h-4 w-4 text-red-600" />
                         )}
                         <span className={verificacoes.ccbAssinada ? "text-green-700" : "text-red-700"}>
-                          CCB Assinada e Localizada no Storage
+                          CCB Assinada e Localizada
                         </span>
                       </div>
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2 text-sm">
                         {verificacoes.boletosGerados ? (
-                          <CheckCircle className="h-5 w-5 text-green-600" />
+                          <CheckCircle className="h-4 w-4 text-green-600" />
                         ) : (
-                          <XCircle className="h-5 w-5 text-red-600" />
+                          <XCircle className="h-4 w-4 text-red-600" />
                         )}
                         <span className={verificacoes.boletosGerados ? "text-green-700" : "text-red-700"}>
-                          Boletos de Cobrança Registrados no Inter
+                          Boletos Registrados no Inter
                         </span>
                       </div>
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2 text-sm">
                         {verificacoes.titularidadeConta ? (
-                          <CheckCircle className="h-5 w-5 text-green-600" />
+                          <CheckCircle className="h-4 w-4 text-green-600" />
                         ) : (
-                          <AlertCircle className="h-5 w-5 text-yellow-600" />
+                          <AlertCircle className="h-4 w-4 text-yellow-600" />
                         )}
                         <span className={verificacoes.titularidadeConta ? "text-green-700" : "text-yellow-700"}>
-                          Validação de Titularidade da Conta de Destino
+                          Titularidade da Conta
                         </span>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
 
-                {/* Documentação */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Documentação para Conferência</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {verificacoes.documentosCcb?.urlCcb ? (
-                      <div className="space-y-3">
-                        <Alert>
-                          <FileText className="h-4 w-4" />
-                          <AlertDescription>
-                            Visualize a CCB assinada antes de confirmar o pagamento.
-                          </AlertDescription>
-                        </Alert>
+                {/* Documentação e Conta em duas colunas */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Documentação */}
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-base">Documentação</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {verificacoes.documentosCcb?.urlCcb ? (
                         <Button
                           variant="outline"
+                          size="sm"
                           className="w-full"
                           onClick={() => window.open(verificacoes.documentosCcb.urlCcb, '_blank')}
                         >
                           <FileText className="h-4 w-4 mr-2" />
-                          Visualizar CCB Assinada
+                          Ver CCB Assinada
                         </Button>
-                      </div>
-                    ) : (
-                      <Alert variant="destructive">
-                        <AlertCircle className="h-4 w-4" />
-                        <AlertDescription>
-                          CCB não encontrada. Não é possível prosseguir com o pagamento.
-                        </AlertDescription>
-                      </Alert>
-                    )}
-                  </CardContent>
-                </Card>
-
-                {/* Conta de Destino */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Conta de Destino do Pagamento</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                      {selectedPagamento.contaBancaria.banco !== 'N/A' ? (
-                        <div className="space-y-2">
-                          <p><strong>Banco:</strong> {selectedPagamento.contaBancaria.banco}</p>
-                          <p><strong>Agência:</strong> {selectedPagamento.contaBancaria.agencia}</p>
-                          <p><strong>Conta:</strong> {selectedPagamento.contaBancaria.conta}</p>
-                          <p><strong>Tipo:</strong> {selectedPagamento.contaBancaria.tipoConta}</p>
-                          <p><strong>Titular:</strong> {selectedPagamento.contaBancaria.titular}</p>
-                        </div>
-                      ) : verificacoes.dadosPagamento?.destino?.pix ? (
-                        <div className="space-y-2">
-                          <p><strong>Tipo:</strong> PIX</p>
-                          <p><strong>Chave PIX:</strong> {verificacoes.dadosPagamento.destino.pix}</p>
-                        </div>
                       ) : (
-                        <Alert variant="destructive">
+                        <Alert variant="destructive" className="text-xs">
                           <AlertCircle className="h-4 w-4" />
                           <AlertDescription>
-                            Dados bancários não informados. Configure antes de prosseguir.
+                            CCB não encontrada
                           </AlertDescription>
                         </Alert>
                       )}
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
+
+                  {/* Conta de Destino */}
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-base">Conta de Destino</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="bg-gray-50 p-3 rounded text-xs space-y-1">
+                        {selectedPagamento.contaBancaria.banco !== 'N/A' ? (
+                          <>
+                            <p><strong>Banco:</strong> {selectedPagamento.contaBancaria.banco}</p>
+                            <p><strong>Ag:</strong> {selectedPagamento.contaBancaria.agencia} | <strong>Conta:</strong> {selectedPagamento.contaBancaria.conta}</p>
+                            <p><strong>Titular:</strong> {selectedPagamento.contaBancaria.titular}</p>
+                          </>
+                        ) : verificacoes.dadosPagamento?.destino?.pix ? (
+                          <>
+                            <p><strong>Tipo:</strong> PIX</p>
+                            <p><strong>Chave:</strong> {verificacoes.dadosPagamento.destino.pix}</p>
+                          </>
+                        ) : (
+                          <Alert variant="destructive" className="text-xs">
+                            <AlertDescription>
+                              Dados bancários não informados
+                            </AlertDescription>
+                          </Alert>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
 
                 {/* Confirmação Final */}
                 <Card className="border-red-200 bg-red-50">
-                  <CardHeader>
-                    <CardTitle className="text-lg text-red-800">Confirmação de Segurança</CardTitle>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base text-red-800">Confirmação de Segurança</CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-4">
+                  <CardContent className="space-y-3">
                     <div>
-                      <Label>Senha de Confirmação*</Label>
+                      <Label className="text-sm">Senha de Confirmação*</Label>
                       <Input
                         type="password"
                         placeholder="Digite sua senha para confirmar"
@@ -1135,12 +1128,12 @@ export default function Pagamentos() {
                       />
                     </div>
                     <div>
-                      <Label>Observações do Pagamento</Label>
+                      <Label className="text-sm">Observações (opcional)</Label>
                       <Textarea
-                        placeholder="Observações sobre o desembolso (opcional)"
+                        placeholder="Observações sobre o desembolso"
                         value={paymentObservation}
                         onChange={(e) => setPaymentObservation(e.target.value)}
-                        className="mt-1"
+                        className="mt-1 h-20"
                       />
                     </div>
                   </CardContent>
@@ -1148,9 +1141,10 @@ export default function Pagamentos() {
               </div>
             ) : null}
 
-            <DialogFooter className="gap-2">
+            <DialogFooter className="flex flex-col sm:flex-row gap-2 pt-4">
               <Button
                 variant="outline"
+                size="sm"
                 onClick={() => {
                   setShowSecurityVerificationModal(false);
                   setPaymentPassword("");
@@ -1161,6 +1155,7 @@ export default function Pagamentos() {
               </Button>
               <Button
                 variant="destructive"
+                size="sm"
                 onClick={() => {
                   setSelectedPagamento(null);
                   setShowSecurityVerificationModal(false);
@@ -1168,10 +1163,11 @@ export default function Pagamentos() {
                 }}
               >
                 <XCircle className="h-4 w-4 mr-2" />
-                Reprovar/Devolver
+                Reprovar
               </Button>
               <Button
                 variant="default"
+                size="sm"
                 className="bg-green-600 hover:bg-green-700"
                 onClick={() => {
                   if (selectedPagamento && paymentPassword) {
@@ -1197,7 +1193,7 @@ export default function Pagamentos() {
                 ) : (
                   <>
                     <CheckCircle className="h-4 w-4 mr-2" />
-                    Confirmar Desembolso e Marcar como Pago
+                    Confirmar Desembolso
                   </>
                 )}
               </Button>
