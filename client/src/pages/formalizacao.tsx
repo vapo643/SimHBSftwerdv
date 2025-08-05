@@ -1226,22 +1226,34 @@ export default function Formalizacao() {
                                                     size="sm"
                                                     variant="outline"
                                                     onClick={async () => {
-                                                      try {
-                                                        const { PDFDownloader } = await import('@/lib/pdfDownloader');
-                                                        await PDFDownloader.downloadPdf(
-                                                          proposta.id,
-                                                          boleto.codigoSolicitacao,
-                                                          boleto.numeroParcela
-                                                        );
-                                                      } catch (error) {
-                                                        console.error('Download failed:', error);
-                                                        // Toast de erro já é mostrado pelo PDFDownloader
+                                                      // Informar que o PDF não está disponível e copiar código de barras
+                                                      if (boleto.codigoBarras) {
+                                                        try {
+                                                          await navigator.clipboard.writeText(boleto.codigoBarras);
+                                                          toast({
+                                                            title: "Código de barras copiado!",
+                                                            description: "O banco Inter não disponibiliza PDF para download. Use o código de barras copiado ou o QR Code exibido na tela.",
+                                                            variant: "default",
+                                                          });
+                                                        } catch (err) {
+                                                          toast({
+                                                            title: "Como pagar este boleto",
+                                                            description: "Use o código de barras ou QR Code PIX exibidos na tela. O banco Inter não disponibiliza PDF para download.",
+                                                            variant: "default",
+                                                          });
+                                                        }
+                                                      } else {
+                                                        toast({
+                                                          title: "Como pagar este boleto",
+                                                          description: "Use o QR Code PIX exibido na tela. O banco Inter não disponibiliza PDF para download.",
+                                                          variant: "default",
+                                                        });
                                                       }
                                                     }}
                                                     className="border-orange-700 text-orange-300 hover:bg-orange-900/20"
                                                   >
-                                                    <Download className="h-4 w-4 mr-2" />
-                                                    Baixar PDF
+                                                    <Copy className="h-4 w-4 mr-2" />
+                                                    Copiar Código
                                                   </Button>
                                                 )}
                                               </div>

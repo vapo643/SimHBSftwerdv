@@ -715,22 +715,70 @@ class InterBankService {
   }
 
   /**
-   * Get collection PDF
+   * Get collection PDF from collection details
    * NOTA: O endpoint /pdf do Inter retorna erro 406 - não suporta download direto
+   * Solução: Buscar o PDF em base64 dentro dos dados da cobrança
    */
   async obterPdfCobranca(codigoSolicitacao: string): Promise<Buffer> {
-    console.log(`[INTER] 📄 Attempting to get PDF for collection: ${codigoSolicitacao}`);
+    console.log(`[INTER] 📄 Getting PDF for collection: ${codigoSolicitacao}`);
+    console.log(`[INTER] 🔍 Using collection details approach (PDF in base64)`);
     
-    // CRITICAL: O banco Inter não permite download direto de PDF
-    // O endpoint /cobranca/v3/cobrancas/{id}/pdf retorna 406 Not Acceptable
-    // com mensagem: "Specified Accept Types [application/pdf] not supported"
-    
-    console.log(`[INTER] ⚠️ WARNING: Inter Bank API v3 does not support direct PDF download`);
-    console.log(`[INTER] ❌ The /pdf endpoint returns 406 Not Acceptable`);
-    console.log(`[INTER] 📄 Alternative: Use collection details (QR Code, barcode) from recuperarCobranca()`);
-    
-    // Lançar erro claro para evitar download de arquivo corrompido
-    throw new Error('O banco Inter não disponibiliza PDF para download direto. Use o código de barras ou QR Code para pagamento.');
+    try {
+      // ETAPA 1: Obter os dados completos da cobrança
+      const collectionDetails = await this.recuperarCobranca(codigoSolicitacao);
+      console.log(`[INTER] 📋 Collection details retrieved, checking for PDF data...`);
+      
+      // ETAPA 2: Verificar possíveis campos que contêm o PDF
+      let pdfBase64: string | undefined;
+      
+      // Tentar diferentes campos onde o PDF pode estar
+      if ((collectionDetails as any).pdf) {
+        pdfBase64 = (collectionDetails as any).pdf;
+        console.log(`[INTER] ✅ Found PDF in 'pdf' field`);
+      } else if ((collectionDetails as any).pdfBase64) {
+        pdfBase64 = (collectionDetails as any).pdfBase64;
+        console.log(`[INTER] ✅ Found PDF in 'pdfBase64' field`);
+      } else if ((collectionDetails as any).boleto?.pdf) {
+        pdfBase64 = (collectionDetails as any).boleto.pdf;
+        console.log(`[INTER] ✅ Found PDF in 'boleto.pdf' field`);
+      } else if ((collectionDetails as any).arquivoPdf) {
+        pdfBase64 = (collectionDetails as any).arquivoPdf;
+        console.log(`[INTER] ✅ Found PDF in 'arquivoPdf' field`);
+      }
+      
+      // Se não encontrou o PDF em base64, tentar gerar localmente
+      if (!pdfBase64) {
+        console.log(`[INTER] ⚠️ PDF not found in collection details`);
+        console.log(`[INTER] 📊 Available fields:`, Object.keys(collectionDetails));
+        
+        // Log the structure to understand what's available
+        console.log(`[INTER] 📋 Full collection structure:`, JSON.stringify(collectionDetails, null, 2));
+        
+        throw new Error('PDF do boleto não está disponível. Use o código de barras ou QR Code exibidos na tela para pagamento.');
+      }
+      
+      // ETAPA 3: Decodificar base64 para Buffer
+      console.log(`[INTER] 🔄 Decoding base64 PDF...`);
+      const pdfBuffer = Buffer.from(pdfBase64, 'base64');
+      
+      // Validar que é um PDF válido
+      if (pdfBuffer.length === 0) {
+        throw new Error('PDF decodificado está vazio');
+      }
+      
+      const pdfMagic = pdfBuffer.slice(0, 5).toString('utf8');
+      if (!pdfMagic.startsWith('%PDF')) {
+        console.error(`[INTER] ❌ Decoded data is not a valid PDF. Magic bytes: ${pdfMagic}`);
+        throw new Error('Dados decodificados não são um PDF válido');
+      }
+      
+      console.log(`[INTER] ✅ PDF decoded successfully (${pdfBuffer.length} bytes)`);
+      return pdfBuffer;
+      
+    } catch (error) {
+      console.error('[INTER] ❌ Failed to get PDF from collection details:', error);
+      throw error;
+    }
   }
 
   /**
