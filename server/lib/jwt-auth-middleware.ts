@@ -85,15 +85,24 @@ export async function jwtAuthMiddleware(
   next: NextFunction
 ) {
   try {
+    // Log detalhado para TODAS as rotas (diagnóstico completo)
+    console.log('[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====');
+    console.log('[JWT DEBUG] Rota acessada:', req.path);
+    console.log('[JWT DEBUG] Método:', req.method);
+    console.log('[JWT DEBUG] User-Agent:', req.headers['user-agent']);
+    console.log('[JWT DEBUG] Origin:', req.headers.origin);
+    console.log('[JWT DEBUG] Referer:', req.headers.referer);
+    
     // Step a: Validate JWT token
     const authHeader = req.headers.authorization;
+    console.log('[JWT DEBUG] Header Auth presente:', !!authHeader);
+    console.log('[JWT DEBUG] Header começa com Bearer:', authHeader?.startsWith('Bearer '));
     
-    // Debug logging para PDF downloads
+    // Debug adicional para PDF downloads
     if (req.path.includes('/pdf')) {
-      console.log('[JWT AUTH - PDF DOWNLOAD] Request path:', req.path);
-      console.log('[JWT AUTH - PDF DOWNLOAD] Auth header present:', !!authHeader);
-      console.log('[JWT AUTH - PDF DOWNLOAD] Auth header starts with Bearer:', authHeader?.startsWith('Bearer '));
-      console.log('[JWT AUTH - PDF DOWNLOAD] Auth header length:', authHeader?.length);
+      console.log('[JWT DEBUG - PDF ESPECÍFICO] Request path:', req.path);
+      console.log('[JWT DEBUG - PDF ESPECÍFICO] Auth header completo length:', authHeader?.length);
+      console.log('[JWT DEBUG - PDF ESPECÍFICO] Token preview:', authHeader?.substring(0, 50) + '...');
     }
     
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -139,6 +148,18 @@ export async function jwtAuthMiddleware(
     const supabase = createServerSupabaseAdminClient();
     const { data, error } = await supabase.auth.getUser(token);
     
+    // Log completo do erro do Supabase (CRUCIAL para diagnóstico)
+    if (error) {
+      console.error('[JWT DEBUG] Falha na validação Supabase. Erro completo:', {
+        message: error.message,
+        status: error.status,
+        code: error.code,
+        details: error.details,
+        hint: error.hint,
+        fullError: JSON.stringify(error, null, 2)
+      });
+    }
+    
     // Security-aware logging - OWASP ASVS V7.1.1
     if (process.env.NODE_ENV === 'development') {
       console.log('🔐 JWT VALIDATION:', {
@@ -152,7 +173,7 @@ export async function jwtAuthMiddleware(
     }
     
     if (error || !data.user) {
-      console.error('JWT validation failed:', error);
+      console.error('[JWT DEBUG] ==== FIM DA VALIDAÇÃO JWT (FALHA) ====');
       securityLogger.logEvent({
         type: error?.message?.includes('expired') ? SecurityEventType.TOKEN_EXPIRED : SecurityEventType.TOKEN_INVALID,
         severity: "MEDIUM",

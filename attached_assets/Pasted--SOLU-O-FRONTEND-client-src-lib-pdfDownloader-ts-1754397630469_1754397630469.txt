@@ -1,0 +1,515 @@
+// ==========================================
+// SOLUÇÃO FRONTEND - client/src/lib/pdfDownloader.ts
+// ==========================================
+
+import { apiClient } from '@/lib/apiClient';
+import { toast } from '@/hooks/use-toast';
+
+export class PDFDownloader {
+  /**
+   * ESTRATÉGIA 1: Download via API Client (Recomendada)
+   * Usa o sistema de autenticação já estabelecido
+   */
+  static async downloadPdfViaApiClient(
+    propostaId: string, 
+    codigoSolicitacao: string, 
+    numeroParcela?: number
+  ): Promise<void> {
+    try {
+      console.log('[PDF_DOWNLOAD] Starting download via API client:', {
+        propostaId,
+        codigoSolicitacao,
+        numeroParcela
+      });
+
+      // Usar o apiClient que já tem autenticação configurada
+      const response = await apiClient(`/inter/collections/${propostaId}/${codigoSolicitacao}/pdf`, {
+        method: 'GET',
+        // Configurações específicas para download de arquivo
+        responseType: 'blob',
+        timeout: 60000, // 60 segundos para downloads
+        headers: {
+          'Accept': 'application/pdf'
+        }
+      });
+
+      // Verificar se recebemos um blob válido
+      if (!response || !(response instanceof Blob)) {
+        throw new Error('Response is not a valid blob');
+      }
+
+      // Criar download
+      const url = window.URL.createObjectURL(response);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `boleto-${numeroParcela ? `parcela-${numeroParcela}` : codigoSolicitacao}.pdf`;
+      
+      // Garantir que o elemento está no DOM antes de clicar
+      document.body.appendChild(a);
+      a.click();
+      
+      // Cleanup
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      console.log('[PDF_DOWNLOAD] ✅ Download completed successfully');
+
+    } catch (error) {
+      console.error('[PDF_DOWNLOAD] ❌ Error in API client download:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * ESTRATÉGIA 2: Download via Fetch Melhorado
+   * Com retry automático e melhor tratamento de token
+   */
+  static async downloadPdfViaFetch(
+    propostaId: string, 
+    codigoSolicitacao: string, 
+    numeroParcela?: number,
+    maxRetries: number = 2
+  ): Promise<void> {
+    let lastError: Error | null = null;
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        console.log(`[PDF_DOWNLOAD] Fetch attempt ${attempt}/${maxRetries}:`, {
+          propostaId,
+          codigoSolicitacao
+        });
+
+        // Importar e obter token fresco a cada tentativa
+        const { TokenManager } = await import('@/lib/apiClient');
+        const tokenManager = TokenManager.getInstance();
+        
+        // Forçar refresh do token se não for a primeira tentativa
+        const token = await tokenManager.getValidToken(attempt > 1);
+        
+        if (!token) {
+          throw new Error('No authentication token available');
+        }
+
+        console.log(`[PDF_DOWNLOAD] Token obtained (${token.length} chars):`, token.substring(0, 20) + '...');
+
+        const url = `/api/inter/collections/${propostaId}/${codigoSolicitacao}/pdf`;
+        console.log(`[PDF_DOWNLOAD] Making request to: ${url}`);
+
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/pdf, */*',
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include', // Importante para CORS
+          cache: 'no-cache'
+        });
+
+        console.log(`[PDF_DOWNLOAD] Response status: ${response.status}`);
+        console.log(`[PDF_DOWNLOAD] Response headers:`, Object.fromEntries(response.headers.entries()));
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error(`[PDF_DOWNLOAD] HTTP Error ${response.status}:`, errorText);
+          
+          // Se for 401, tentar refresh do token na próxima iteração
+          if (response.status === 401 && attempt < maxRetries) {
+            lastError = new Error(`Authentication failed (attempt ${attempt}): ${errorText}`);
+            continue;
+          }
+          
+          throw new Error(`HTTP ${response.status}: ${errorText || response.statusText}`);
+        }
+
+        // Verificar content-type
+        const contentType = response.headers.get('content-type');
+        console.log(`[PDF_DOWNLOAD] Content-Type: ${contentType}`);
+        
+        if (contentType && !contentType.includes('application/pdf')) {
+          console.warn(`[PDF_DOWNLOAD] Unexpected content-type: ${contentType}`);
+        }
+
+        const blob = await response.blob();
+        console.log(`[PDF_DOWNLOAD] Blob size: ${blob.size} bytes, type: ${blob.type}`);
+
+        if (blob.size === 0) {
+          throw new Error('Received empty PDF file');
+        }
+
+        // Criar download
+        const blobUrl = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = `boleto-${numeroParcela ? `parcela-${numeroParcela}` : codigoSolicitacao}.pdf`;
+        a.style.display = 'none';
+        
+        document.body.appendChild(a);
+        a.click();
+        
+        // Cleanup com delay para garantir que o download iniciou
+        setTimeout(() => {
+          window.URL.revokeObjectURL(blobUrl);
+          document.body.removeChild(a);
+        }, 100);
+        
+        console.log('[PDF_DOWNLOAD] ✅ Fetch download completed successfully');
+        return; // Sucesso, sair do loop
+
+      } catch (error) {
+        lastError = error as Error;
+        console.error(`[PDF_DOWNLOAD] ❌ Fetch attempt ${attempt} failed:`, error);
+        
+        if (attempt === maxRetries) {
+          break; // Última tentativa falhou, sair do loop
+        }
+        
+        // Delay antes da próxima tentativa
+        await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+      }
+    }
+
+    // Se chegou aqui, todas as tentativas falharam
+    throw lastError || new Error('All download attempts failed');
+  }
+
+  /**
+   * ESTRATÉGIA 3: Download via POST (Fallback)
+   * Para casos onde GET não funciona devido a restrições de browser
+   */
+  static async downloadPdfViaPost(
+    propostaId: string, 
+    codigoSolicitacao: string, 
+    numeroParcela?: number
+  ): Promise<void> {
+    try {
+      console.log('[PDF_DOWNLOAD] Starting POST download:', {
+        propostaId,
+        codigoSolicitacao
+      });
+
+      const response = await apiClient(`/inter/collections/${propostaId}/${codigoSolicitacao}/pdf-download`, {
+        method: 'POST',
+        responseType: 'blob',
+        data: { // Enviar dados no body para POST
+          propostaId,
+          codigoSolicitacao,
+          downloadFormat: 'pdf'
+        }
+      });
+
+      if (!(response instanceof Blob)) {
+        throw new Error('Response is not a valid blob');
+      }
+
+      const url = window.URL.createObjectURL(response);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `boleto-${numeroParcela ? `parcela-${numeroParcela}` : codigoSolicitacao}.pdf`;
+      
+      document.body.appendChild(a);
+      a.click();
+      
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      console.log('[PDF_DOWNLOAD] ✅ POST download completed successfully');
+
+    } catch (error) {
+      console.error('[PDF_DOWNLOAD] ❌ Error in POST download:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * MÉTODO PRINCIPAL: Tenta múltiplas estratégias automaticamente
+   */
+  static async downloadPdf(
+    propostaId: string, 
+    codigoSolicitacao: string, 
+    numeroParcela?: number
+  ): Promise<void> {
+    const strategies = [
+      {
+        name: 'API Client',
+        method: () => this.downloadPdfViaApiClient(propostaId, codigoSolicitacao, numeroParcela)
+      },
+      {
+        name: 'Fetch Enhanced',
+        method: () => this.downloadPdfViaFetch(propostaId, codigoSolicitacao, numeroParcela)
+      },
+      {
+        name: 'POST Fallback',
+        method: () => this.downloadPdfViaPost(propostaId, codigoSolicitacao, numeroParcela)
+      }
+    ];
+
+    let lastError: Error | null = null;
+
+    for (const strategy of strategies) {
+      try {
+        console.log(`[PDF_DOWNLOAD] Trying strategy: ${strategy.name}`);
+        await strategy.method();
+        
+        // Sucesso - mostrar toast de sucesso
+        toast({
+          title: "Download concluído",
+          description: "O boleto foi baixado com sucesso",
+          variant: "default",
+        });
+        
+        return; // Sucesso, sair da função
+        
+      } catch (error) {
+        lastError = error as Error;
+        console.error(`[PDF_DOWNLOAD] Strategy "${strategy.name}" failed:`, error);
+        continue; // Tentar próxima estratégia
+      }
+    }
+
+    // Se chegou aqui, todas as estratégias falharam
+    console.error('[PDF_DOWNLOAD] ❌ All download strategies failed:', lastError);
+    
+    toast({
+      title: "Erro no download",
+      description: `Não foi possível baixar o boleto: ${lastError?.message || 'Erro desconhecido'}`,
+      variant: "destructive",
+    });
+    
+    throw lastError || new Error('All download strategies failed');
+  }
+}
+
+// ==========================================
+// IMPLEMENTAÇÃO NO COMPONENTE - client/src/pages/formalizacao.tsx
+// ==========================================
+
+// Substitua o onClick atual por:
+onClick={async () => {
+  try {
+    await PDFDownloader.downloadPdf(
+      proposta.id,
+      boleto.codigoSolicitacao,
+      boleto.numeroParcela
+    );
+  } catch (error) {
+    console.error('Download failed:', error);
+    // Toast de erro já é mostrado pelo PDFDownloader
+  }
+}}
+
+// ==========================================
+// BACKEND MELHORADO - server/routes/inter-collections.ts
+// ==========================================
+
+/**
+ * Download do PDF de um boleto específico - VERSÃO MELHORADA
+ * GET /api/inter/collections/:propostaId/:codigoSolicitacao/pdf
+ */
+router.get('/:propostaId/:codigoSolicitacao/pdf', jwtAuthMiddleware, requireAnyRole, async (req: AuthenticatedRequest, res) => {
+  try {
+    const { propostaId, codigoSolicitacao } = req.params;
+    
+    console.log(`[INTER COLLECTIONS] 📄 PDF Download Request:`, {
+      propostaId,
+      codigoSolicitacao,
+      userId: req.user?.id,
+      userAgent: req.headers['user-agent'],
+      authorization: req.headers.authorization ? 'Present' : 'Missing',
+      timestamp: new Date().toISOString()
+    });
+    
+    // Verificar se collection pertence à proposta
+    const collection = await db.select()
+      .from(interCollections)
+      .where(
+        eq(interCollections.propostaId, propostaId) &&
+        eq(interCollections.codigoSolicitacao, codigoSolicitacao)
+      )
+      .limit(1);
+    
+    if (collection.length === 0) {
+      console.log(`[INTER COLLECTIONS] ❌ Collection not found:`, { propostaId, codigoSolicitacao });
+      return res.status(404).json({ error: 'Boleto não encontrado' });
+    }
+
+    console.log(`[INTER COLLECTIONS] ✅ Collection found, fetching PDF from Inter API...`);
+    
+    // Buscar PDF na API do Inter
+    const interService = interBankService;
+    const pdfBuffer = await interService.obterPdfCobranca(codigoSolicitacao);
+    
+    console.log(`[INTER COLLECTIONS] ✅ PDF received from Inter API:`, {
+      bufferSize: pdfBuffer?.length || 0,
+      bufferType: typeof pdfBuffer
+    });
+
+    if (!pdfBuffer || pdfBuffer.length === 0) {
+      console.log(`[INTER COLLECTIONS] ❌ Empty PDF buffer received`);
+      return res.status(404).json({ error: 'PDF não disponível' });
+    }
+
+    // Configurar headers para download
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Length', pdfBuffer.length.toString());
+    res.setHeader('Content-Disposition', `attachment; filename="boleto-${codigoSolicitacao}.pdf"`);
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    
+    // CORS headers específicos para download
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET');
+    res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type');
+    res.setHeader('Access-Control-Expose-Headers', 'Content-Disposition, Content-Length');
+
+    console.log(`[INTER COLLECTIONS] ✅ Sending PDF to client:`, {
+      contentType: res.getHeader('Content-Type'),
+      contentLength: res.getHeader('Content-Length'),
+      contentDisposition: res.getHeader('Content-Disposition')
+    });
+
+    res.send(pdfBuffer);
+    
+  } catch (error) {
+    console.error('[INTER COLLECTIONS] ❌ Error downloading PDF:', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      propostaId: req.params.propostaId,
+      codigoSolicitacao: req.params.codigoSolicitacao
+    });
+    
+    res.status(500).json({ 
+      error: 'Erro ao baixar PDF do boleto',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+/**
+ * NOVA ROTA: Download via POST (fallback)
+ * POST /api/inter/collections/:propostaId/:codigoSolicitacao/pdf-download
+ */
+router.post('/:propostaId/:codigoSolicitacao/pdf-download', jwtAuthMiddleware, requireAnyRole, async (req: AuthenticatedRequest, res) => {
+  try {
+    const { propostaId, codigoSolicitacao } = req.params;
+    
+    console.log(`[INTER COLLECTIONS] 📄 PDF Download via POST:`, {
+      propostaId,
+      codigoSolicitacao,
+      userId: req.user?.id
+    });
+    
+    // Reutilizar a mesma lógica do GET
+    const collection = await db.select()
+      .from(interCollections)
+      .where(
+        eq(interCollections.propostaId, propostaId) &&
+        eq(interCollections.codigoSolicitacao, codigoSolicitacao)
+      )
+      .limit(1);
+    
+    if (collection.length === 0) {
+      return res.status(404).json({ error: 'Boleto não encontrado' });
+    }
+
+    const interService = interBankService;
+    const pdfBuffer = await interService.obterPdfCobranca(codigoSolicitacao);
+    
+    if (!pdfBuffer || pdfBuffer.length === 0) {
+      return res.status(404).json({ error: 'PDF não disponível' });
+    }
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Length', pdfBuffer.length.toString());
+    res.setHeader('Content-Disposition', `attachment; filename="boleto-${codigoSolicitacao}.pdf"`);
+    
+    res.send(pdfBuffer);
+    
+  } catch (error) {
+    console.error('[INTER COLLECTIONS] ❌ Error in POST PDF download:', error);
+    res.status(500).json({ 
+      error: 'Erro ao baixar PDF do boleto',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+// ==========================================
+// JWT MIDDLEWARE MELHORADO - server/lib/jwt-auth-middleware.ts
+// ==========================================
+
+export const jwtAuthMiddleware = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  const authHeader = req.headers.authorization;
+  const requestId = Math.random().toString(36).substring(7);
+  
+  console.log(`[JWT_AUTH] ${requestId} - Authentication request:`, {
+    path: req.path,
+    method: req.method,
+    hasAuthHeader: !!authHeader,
+    authHeaderFormat: authHeader ? authHeader.substring(0, 20) + '...' : 'None',
+    userAgent: req.headers['user-agent']?.substring(0, 50),
+    timestamp: new Date().toISOString()
+  });
+  
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    console.log(`[JWT_AUTH] ${requestId} - ❌ Missing or invalid auth header`);
+    return res.status(401).json({ 
+      error: 'Token de autenticação não fornecido',
+      details: 'Authorization header must be in format: Bearer <token>'
+    });
+  }
+  
+  const token = authHeader.substring(7);
+  
+  if (!token || token.length < 10) {
+    console.log(`[JWT_AUTH] ${requestId} - ❌ Invalid token format`);
+    return res.status(401).json({ 
+      error: 'Token inválido',
+      details: 'Token is too short or empty'
+    });
+  }
+  
+  try {
+    console.log(`[JWT_AUTH] ${requestId} - Validating token with Supabase...`);
+    
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const { data: { user }, error } = await supabase.auth.getUser(token);
+    
+    console.log(`[JWT_AUTH] ${requestId} - Supabase validation result:`, {
+      hasError: !!error,
+      errorMessage: error?.message,
+      hasUser: !!user,
+      userId: user?.id,
+      userEmail: user?.email
+    });
+    
+    if (error) {
+      console.log(`[JWT_AUTH] ${requestId} - ❌ Supabase error:`, error);
+      return res.status(401).json({ 
+        error: 'Token inválido',
+        details: error.message 
+      });
+    }
+    
+    if (!user) {
+      console.log(`[JWT_AUTH] ${requestId} - ❌ No user found for token`);
+      return res.status(401).json({ 
+        error: 'Token inválido',
+        details: 'No user associated with this token'
+      });
+    }
+    
+    console.log(`[JWT_AUTH] ${requestId} - ✅ Authentication successful for user:`, user.id);
+    
+    req.user = user;
+    next();
+    
+  } catch (error) {
+    console.error(`[JWT_AUTH] ${requestId} - ❌ Unexpected error:`, error);
+    return res.status(401).json({ 
+      error: 'Erro ao validar token',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+};

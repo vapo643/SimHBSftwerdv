@@ -19,6 +19,7 @@ export interface ApiClientOptions {
   requireAuth?: boolean;
   timeout?: number;
   retries?: number;
+  responseType?: 'json' | 'blob' | 'text';
 }
 
 export interface ApiResponse<T = any> {
@@ -111,10 +112,13 @@ class TokenManager {
     return TokenManager.instance;
   }
 
-  async getValidToken(): Promise<string | null> {
-    // Check if we have a valid cached token
-    if (this.cachedToken && this.tokenExpiry && Date.now() < this.tokenExpiry * 1000) {
-      return this.cachedToken;
+  async getValidToken(forceRefresh: boolean = false): Promise<string | null> {
+    // If forceRefresh is true, bypass cache
+    if (!forceRefresh) {
+      // Check if we have a valid cached token
+      if (this.cachedToken && this.tokenExpiry && Date.now() < this.tokenExpiry * 1000) {
+        return this.cachedToken;
+      }
     }
 
     // If there's already a refresh in progress, wait for it
@@ -296,14 +300,15 @@ class RequestManager {
 export async function apiClient<T = any>(
   url: string,
   options: ApiClientOptions = {}
-): Promise<ApiResponse<T>> {
+): Promise<T | ApiResponse<T>> {
   const {
     method = 'GET',
     body,
     headers: customHeaders = {},
     requireAuth = true,
     timeout = 15000,
-    retries = 2
+    retries = 2,
+    responseType = 'json'
   } = options;
 
   // PASSO 5.1: Use ApiConfig to build complete URL
@@ -360,19 +365,27 @@ export async function apiClient<T = any>(
     // PASSO 5.3: Use RequestManager for network call with timeout and retry
     const response = await RequestManager.fetchWithTimeout(fullUrl, requestConfig, timeout, retries);
 
-    // Handle non-JSON responses or empty responses
+    // Handle different response types based on responseType option
     let data: T;
     const contentType = response.headers.get('content-type');
     
-    if (contentType && contentType.includes('application/json')) {
-      data = await response.json();
-    } else if (response.status === 204 || response.status === 205) {
-      // No content responses
-      data = null as T;
+    // For blob responses, directly return the blob
+    if (responseType === 'blob') {
+      data = await response.blob() as T;
+    } else if (responseType === 'text') {
+      data = await response.text() as T;
     } else {
-      // Try to parse as text for error messages
-      const text = await response.text();
-      data = (text || null) as T;
+      // Default JSON handling
+      if (contentType && contentType.includes('application/json')) {
+        data = await response.json();
+      } else if (response.status === 204 || response.status === 205) {
+        // No content responses
+        data = null as T;
+      } else {
+        // Try to parse as text for error messages
+        const text = await response.text();
+        data = (text || null) as T;
+      }
     }
 
     // Check if response is successful
@@ -394,22 +407,35 @@ export async function apiClient<T = any>(
             let retryData: T;
             const retryContentType = retryResponse.headers.get('content-type');
             
-            if (retryContentType && retryContentType.includes('application/json')) {
-              retryData = await retryResponse.json();
-            } else if (retryResponse.status === 204 || retryResponse.status === 205) {
-              retryData = null as T;
+            // Handle different response types based on responseType option
+            if (responseType === 'blob') {
+              retryData = await retryResponse.blob() as T;
+            } else if (responseType === 'text') {
+              retryData = await retryResponse.text() as T;
             } else {
-              const retryText = await retryResponse.text();
-              retryData = (retryText || null) as T;
+              // Default JSON handling
+              if (retryContentType && retryContentType.includes('application/json')) {
+                retryData = await retryResponse.json();
+              } else if (retryResponse.status === 204 || retryResponse.status === 205) {
+                retryData = null as T;
+              } else {
+                const retryText = await retryResponse.text();
+                retryData = (retryText || null) as T;
+              }
             }
 
             if (retryResponse.ok) {
+              // Return blob directly for blob responses (for PDFDownloader compatibility)
+              if (responseType === 'blob') {
+                return retryData as T;
+              }
+              
               return {
                 data: retryData,
                 status: retryResponse.status,
                 statusText: retryResponse.statusText,
                 headers: retryResponse.headers
-              };
+              } as ApiResponse<T>;
             }
           } catch (retryError) {
             // If retry fails, fall through to original error handling
@@ -428,12 +454,17 @@ export async function apiClient<T = any>(
       );
     }
 
+    // Return blob directly for blob responses (for PDFDownloader compatibility)
+    if (responseType === 'blob' && response.ok) {
+      return data as T;
+    }
+
     return {
       data,
       status: response.status,
       statusText: response.statusText,
       headers: response.headers
-    };
+    } as ApiResponse<T>;
 
   } catch (error) {
     // Re-throw ApiError instances
@@ -501,3 +532,8 @@ export default apiClient;
  * @deprecated Use api.get, api.post, etc. instead
  */
 export const fetchWithToken = apiClient;
+
+/**
+ * Export TokenManager for components that need direct token access
+ */
+export { TokenManager };

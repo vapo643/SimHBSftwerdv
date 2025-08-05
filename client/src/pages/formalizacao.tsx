@@ -1227,44 +1227,15 @@ export default function Formalizacao() {
                                                     variant="outline"
                                                     onClick={async () => {
                                                       try {
-                                                        // Importar TokenManager para obter token válido
-                                                        const { TokenManager } = await import('@/lib/apiClient');
-                                                        const tokenManager = TokenManager.getInstance();
-                                                        const token = await tokenManager.getValidToken();
-                                                        
-                                                        if (!token) {
-                                                          throw new Error('Não autenticado');
-                                                        }
-                                                        
-                                                        const response = await fetch(boleto.linkPdf, {
-                                                          headers: {
-                                                            'Authorization': `Bearer ${token}`
-                                                          }
-                                                        });
-                                                        
-                                                        if (response.ok) {
-                                                          const blob = await response.blob();
-                                                          const url = window.URL.createObjectURL(blob);
-                                                          const a = document.createElement('a');
-                                                          a.href = url;
-                                                          a.download = `boleto-${boleto.seuNumero || boleto.codigoSolicitacao}.pdf`;
-                                                          document.body.appendChild(a);
-                                                          a.click();
-                                                          window.URL.revokeObjectURL(url);
-                                                          document.body.removeChild(a);
-                                                        } else {
-                                                          toast({
-                                                            title: "Erro",
-                                                            description: "Erro ao baixar PDF",
-                                                            variant: "destructive",
-                                                          });
-                                                        }
+                                                        const { PDFDownloader } = await import('@/lib/pdfDownloader');
+                                                        await PDFDownloader.downloadPdf(
+                                                          proposta.id,
+                                                          boleto.codigoSolicitacao,
+                                                          boleto.numeroParcela
+                                                        );
                                                       } catch (error) {
-                                                        toast({
-                                                          title: "Erro",
-                                                          description: "Erro ao baixar PDF",
-                                                          variant: "destructive",
-                                                        });
+                                                        console.error('Download failed:', error);
+                                                        // Toast de erro já é mostrado pelo PDFDownloader
                                                       }
                                                     }}
                                                     className="border-orange-700 text-orange-300 hover:bg-orange-900/20"

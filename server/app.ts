@@ -25,6 +25,10 @@ export async function createApp() {
   const corsOptions = setupCORS();
   app.use(cors(corsOptions));
   log("🔒 [SECURITY] CORS protection configured - ASVS V13.2.1");
+  
+  // Tratamento explícito para requisições OPTIONS (preflight)
+  app.options('*', cors(corsOptions));
+  log("🔒 [SECURITY] OPTIONS preflight handling configured");
 
   // Form-encoded middleware
   app.use(express.urlencoded({ extended: true }));
