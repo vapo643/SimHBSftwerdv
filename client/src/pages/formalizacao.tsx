@@ -1227,7 +1227,16 @@ export default function Formalizacao() {
                                                     variant="outline"
                                                     onClick={async () => {
                                                       try {
-                                                        const token = localStorage.getItem('token');
+                                                        // Usar o mesmo método de autenticação do apiClient
+                                                        const { default: getSupabase } = await import('@/lib/supabase');
+                                                        const supabase = getSupabase();
+                                                        const { data: { session } } = await supabase.auth.getSession();
+                                                        const token = session?.access_token;
+                                                        
+                                                        if (!token) {
+                                                          throw new Error('Não autenticado');
+                                                        }
+                                                        
                                                         const response = await fetch(boleto.linkPdf, {
                                                           headers: {
                                                             'Authorization': `Bearer ${token}`
@@ -1305,8 +1314,16 @@ export default function Formalizacao() {
                                                 // Abrir o PDF do primeiro boleto
                                                 const firstCollection = collections[0];
                                                 if (firstCollection.codigoSolicitacao) {
-                                                  // Fazer download com token JWT
-                                                  const token = localStorage.getItem('token');
+                                                  // Fazer download com token JWT do Supabase
+                                                  const { default: getSupabase } = await import('@/lib/supabase');
+                                                  const supabase = getSupabase();
+                                                  const { data: { session } } = await supabase.auth.getSession();
+                                                  const token = session?.access_token;
+                                                  
+                                                  if (!token) {
+                                                    throw new Error('Não autenticado');
+                                                  }
+                                                  
                                                   const response = await fetch(`/api/inter/collections/${proposta.id}/${firstCollection.codigoSolicitacao}/pdf`, {
                                                     headers: {
                                                       'Authorization': `Bearer ${token}`
