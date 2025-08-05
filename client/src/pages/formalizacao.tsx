@@ -1227,11 +1227,10 @@ export default function Formalizacao() {
                                                     variant="outline"
                                                     onClick={async () => {
                                                       try {
-                                                        // Usar o mesmo método de autenticação do apiClient
-                                                        const { default: getSupabase } = await import('@/lib/supabase');
-                                                        const supabase = getSupabase();
-                                                        const { data: { session } } = await supabase.auth.getSession();
-                                                        const token = session?.access_token;
+                                                        // Importar TokenManager para obter token válido
+                                                        const { TokenManager } = await import('@/lib/apiClient');
+                                                        const tokenManager = TokenManager.getInstance();
+                                                        const token = await tokenManager.getValidToken();
                                                         
                                                         if (!token) {
                                                           throw new Error('Não autenticado');
@@ -1314,11 +1313,10 @@ export default function Formalizacao() {
                                                 // Abrir o PDF do primeiro boleto
                                                 const firstCollection = collections[0];
                                                 if (firstCollection.codigoSolicitacao) {
-                                                  // Fazer download com token JWT do Supabase
-                                                  const { default: getSupabase } = await import('@/lib/supabase');
-                                                  const supabase = getSupabase();
-                                                  const { data: { session } } = await supabase.auth.getSession();
-                                                  const token = session?.access_token;
+                                                  // Importar TokenManager para obter token válido
+                                                  const { TokenManager } = await import('@/lib/apiClient');
+                                                  const tokenManager = TokenManager.getInstance();
+                                                  const token = await tokenManager.getValidToken();
                                                   
                                                   if (!token) {
                                                     throw new Error('Não autenticado');
