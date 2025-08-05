@@ -108,3 +108,4 @@ Formalization Interface: ✅ COMPLETELY UNIFIED - Attendant and Administrator in
   - **mTLS Certificates**: Properly configured and validated
   - **Integration Status**: 100% operational, ready for real transactions
   - **OAuth2 FIX (04/08/2025)**: Resolved persistent 400 error - Node.js fetch was not sending certificates properly. Solution: Implemented fallback to native HTTPS module which works perfectly. Access token now obtained successfully!
+  - **PDF DOWNLOAD LIMITATION (05/08/2025)**: Inter Bank API does NOT support PDF download. Endpoint `/pdf` returns 406 error. Solution: Removed PDF download completely, now displays PIX Copia e Cola and complete Linha Digitável (47 digits) for payment. This prevents virus detection from corrupted downloads.

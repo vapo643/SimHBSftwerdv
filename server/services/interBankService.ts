@@ -617,18 +617,49 @@ class InterBankService {
   /**
    * Get detailed collection information
    */
-  async recuperarCobranca(codigoSolicitacao: string): Promise<CobrancaDetalhada> {
+  async recuperarCobranca(codigoSolicitacao: string): Promise<any> {
     try {
       console.log(`[INTER] 📋 Retrieving collection: ${codigoSolicitacao}`);
 
       const response = await this.makeRequest(`/cobranca/v3/cobrancas/${codigoSolicitacao}`);
       
-      console.log(`[INTER] ✅ Collection retrieved successfully`);
-      return response;
+      console.log(`[INTER] 📊 Collection data:`, JSON.stringify(response, null, 2));
+      
+      // Enriquecer dados com campos adicionais
+      const enrichedData = {
+        ...response,
+        // Garantir que temos a linha digitável completa
+        linhaDigitavel: response.boleto?.linhaDigitavel || response.linhaDigitavel,
+        codigoBarras: response.boleto?.codigoBarras || response.codigoBarras,
+        // Se tiver PIX, gerar QR code
+        qrCode: response.pix?.pixCopiaECola ? this.generateQRCodeBase64(response.pix.pixCopiaECola) : null,
+        pixCopiaECola: response.pix?.pixCopiaECola || null
+      };
+      
+      console.log(`[INTER] ✅ Collection retrieved and enriched successfully`);
+      console.log(`[INTER] 📊 Linha digitável: ${enrichedData.linhaDigitavel}`);
+      console.log(`[INTER] 📊 Código de barras: ${enrichedData.codigoBarras}`);
+      console.log(`[INTER] 📊 PIX disponível: ${enrichedData.pixCopiaECola ? 'Sim' : 'Não'}`);
+      
+      return enrichedData;
 
     } catch (error) {
       console.error('[INTER] ❌ Failed to retrieve collection:', error);
       throw error;
+    }
+  }
+  
+  /**
+   * Gera QR Code em base64 a partir do código PIX
+   */
+  private generateQRCodeBase64(pixCode: string): string | null {
+    try {
+      // Por enquanto, retornar null - em produção, usar biblioteca QR code
+      console.log(`[INTER] ⚠️ QR Code generation not implemented yet`);
+      return null;
+    } catch (error) {
+      console.error('[INTER] ❌ Failed to generate QR code:', error);
+      return null;
     }
   }
 

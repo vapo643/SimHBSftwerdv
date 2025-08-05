@@ -39,6 +39,8 @@ import {
   Building2,
   Printer,
   Copy,
+  QrCode,
+  Barcode,
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -1177,47 +1179,69 @@ export default function Formalizacao() {
                                                 </Badge>
                                               </div>
                                               
-                                              {/* QR Code e Código de Barras */}
-                                              {(boleto.qrCode || boleto.codigoBarras) && (
-                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                                  {boleto.qrCode && (
-                                                    <div className="p-3 bg-gray-900 rounded border border-gray-700">
-                                                      <p className="text-xs text-gray-400 mb-2">QR Code PIX</p>
-                                                      <div className="bg-white p-2 rounded">
-                                                        <img 
-                                                          src={`data:image/png;base64,${boleto.qrCode}`} 
-                                                          alt="QR Code PIX" 
-                                                          className="w-full max-w-[150px] mx-auto"
-                                                        />
-                                                      </div>
+                                              {/* QR Code PIX e Linha Digitável */}
+                                              <div className="space-y-3">
+                                                {/* PIX - prioridade alta */}
+                                                {boleto.pixCopiaECola && (
+                                                  <div className="p-4 bg-green-900/20 border border-green-700 rounded">
+                                                    <p className="text-sm font-medium text-green-300 mb-3">
+                                                      <span className="inline-flex items-center gap-2">
+                                                        <QrCode className="h-4 w-4" />
+                                                        PIX Copia e Cola (Pagamento Instantâneo)
+                                                      </span>
+                                                    </p>
+                                                    <div className="flex items-center gap-2 p-3 bg-gray-900 rounded">
+                                                      <code className="flex-1 text-green-400 font-mono text-xs break-all">
+                                                        {boleto.pixCopiaECola}
+                                                      </code>
+                                                      <Button
+                                                        size="sm"
+                                                        variant="ghost"
+                                                        onClick={() => {
+                                                          navigator.clipboard.writeText(boleto.pixCopiaECola);
+                                                          toast({
+                                                            title: "PIX copiado!",
+                                                            description: "Cole no app do seu banco para pagar",
+                                                          });
+                                                        }}
+                                                      >
+                                                        <Copy className="h-3 w-3" />
+                                                      </Button>
                                                     </div>
-                                                  )}
-                                                  
-                                                  {boleto.codigoBarras && (
-                                                    <div className="p-3 bg-gray-900 rounded border border-gray-700">
-                                                      <p className="text-xs text-gray-400 mb-2">Código de Barras</p>
-                                                      <div className="flex items-center gap-2">
-                                                        <code className="flex-1 text-orange-400 font-mono text-xs break-all">
-                                                          {boleto.codigoBarras}
-                                                        </code>
-                                                        <Button
-                                                          size="sm"
-                                                          variant="ghost"
-                                                          onClick={() => {
-                                                            navigator.clipboard.writeText(boleto.codigoBarras);
-                                                            toast({
-                                                              title: "Copiado!",
-                                                              description: "Código de barras copiado",
-                                                            });
-                                                          }}
-                                                        >
-                                                          <Copy className="h-3 w-3" />
-                                                        </Button>
-                                                      </div>
+                                                  </div>
+                                                )}
+                                                
+                                                {/* Linha Digitável do Boleto */}
+                                                {(boleto.linhaDigitavel || boleto.codigoBarras) && (
+                                                  <div className="p-4 bg-gray-800 rounded border border-gray-700">
+                                                    <p className="text-sm font-medium text-gray-300 mb-3">
+                                                      <span className="inline-flex items-center gap-2">
+                                                        <Barcode className="h-4 w-4" />
+                                                        Linha Digitável do Boleto
+                                                      </span>
+                                                    </p>
+                                                    <div className="flex items-center gap-2 p-3 bg-gray-900 rounded">
+                                                      <code className="flex-1 text-orange-400 font-mono text-xs break-all">
+                                                        {boleto.linhaDigitavel || boleto.codigoBarras}
+                                                      </code>
+                                                      <Button
+                                                        size="sm"
+                                                        variant="ghost"
+                                                        onClick={() => {
+                                                          const codigo = boleto.linhaDigitavel || boleto.codigoBarras;
+                                                          navigator.clipboard.writeText(codigo);
+                                                          toast({
+                                                            title: "Linha digitável copiada!",
+                                                            description: "Use no internet banking para pagar",
+                                                          });
+                                                        }}
+                                                      >
+                                                        <Copy className="h-3 w-3" />
+                                                      </Button>
                                                     </div>
-                                                  )}
-                                                </div>
-                                              )}
+                                                  </div>
+                                                )}
+                                              </div>
                                               
                                               {/* Ações do boleto */}
                                               <div className="flex gap-2">
