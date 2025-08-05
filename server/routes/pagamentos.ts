@@ -137,29 +137,77 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
 
     // NOVO DEBUG: Buscar TODAS as propostas que têm boletos, independente do status
     console.log(`[PAGAMENTOS DEBUG] ========== ANÁLISE DE BOLETOS ==========`);
-    const todasPropostasComBoletos = await db
-      .select({
-        id: propostas.id,
-        clienteNome: propostas.clienteNome,
-        status: propostas.status,
-        ccbGerado: propostas.ccbGerado,
-        assinaturaEletronicaConcluida: propostas.assinaturaEletronicaConcluida
+    
+    // ESTRATÉGIA: Busca em duas etapas para evitar problemas de tipo
+    // Etapa 1: Buscar IDs de propostas que têm boletos Inter
+    const boletosDetalhados = await db
+      .select({ 
+        propostaId: interCollections.propostaId,
+        boletoId: interCollections.id,
+        codigoSolicitacao: interCollections.codigoSolicitacao,
+        valorNominal: interCollections.valorNominal,
+        situacao: interCollections.situacao,
+        nossoNumero: interCollections.nossoNumero,
+        linhaDigitavel: interCollections.linhaDigitavel,
+        pixCopiaECola: interCollections.pixCopiaECola
       })
       .from(interCollections)
-      .innerJoin(propostas, sql`${propostas.id} = ${interCollections.propostaId}::uuid`)
-      .where(sql`${propostas.deletedAt} IS NULL`);
-    
-    console.log(`[PAGAMENTOS DEBUG] Total de propostas com boletos Inter: ${todasPropostasComBoletos.length}`);
-    todasPropostasComBoletos.forEach((proposta, index) => {
-      console.log(`[PAGAMENTOS DEBUG] Proposta com boleto ${index + 1}:`, {
-        id: proposta.id,
-        clienteNome: proposta.clienteNome,
-        status: proposta.status,
-        ccbGerado: proposta.ccbGerado,
-        assinaturaEletronicaConcluida: proposta.assinaturaEletronicaConcluida
-      });
-    });
-    console.log(`[PAGAMENTOS DEBUG] ========================================`);
+      .where(
+        and(
+          sql`${interCollections.propostaId} IS NOT NULL`,
+          sql`LENGTH(${interCollections.propostaId}) = 36` // Validação básica de UUID
+        )
+      );
+
+    console.log(`[PAGAMENTOS DEBUG] Encontradas ${boletosDetalhados.length} propostas com boletos`);
+
+    if (boletosDetalhados.length === 0) {
+      console.log("[PAGAMENTOS DEBUG] Nenhuma proposta com boletos encontrada");
+      console.log(`[PAGAMENTOS DEBUG] ========================================`);
+    } else {
+      // Extrair e validar os IDs das propostas
+      const propostaIds = boletosDetalhados
+        .map(item => item.propostaId)
+        .filter(id => {
+          // Validação extra para garantir que são UUIDs válidos
+          const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+          return id && uuidRegex.test(id);
+        });
+
+      console.log(`[PAGAMENTOS DEBUG] IDs válidos de propostas: ${propostaIds.length}`);
+
+      if (propostaIds.length > 0) {
+        // Etapa 2: Buscar as propostas elegíveis usando conversão de tipos
+        const todasPropostasComBoletos = await db
+          .select({
+            id: propostas.id,
+            clienteNome: propostas.clienteNome,
+            status: propostas.status,
+            ccbGerado: propostas.ccbGerado,
+            assinaturaEletronicaConcluida: propostas.assinaturaEletronicaConcluida
+          })
+          .from(propostas)
+          .where(
+            and(
+              // Converte os IDs text para UUID para comparação segura
+              sql`${propostas.id}::text = ANY(${propostaIds})`,
+              sql`${propostas.deletedAt} IS NULL`
+            )
+          );
+        
+        console.log(`[PAGAMENTOS DEBUG] Total de propostas com boletos Inter: ${todasPropostasComBoletos.length}`);
+        todasPropostasComBoletos.forEach((proposta, index) => {
+          console.log(`[PAGAMENTOS DEBUG] Proposta com boleto ${index + 1}:`, {
+            id: proposta.id,
+            clienteNome: proposta.clienteNome,
+            status: proposta.status,
+            ccbGerado: proposta.ccbGerado,
+            assinaturaEletronicaConcluida: proposta.assinaturaEletronicaConcluida
+          });
+        });
+      }
+      console.log(`[PAGAMENTOS DEBUG] ========================================`);
+    }
 
     // REGRA CRÍTICA DE SEGURANÇA: Uma proposta só pode aparecer para pagamento se:
     // 1. CCB foi assinada (ccb_gerado = true AND assinatura_eletronica_concluida = true)
