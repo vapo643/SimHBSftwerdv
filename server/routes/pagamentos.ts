@@ -2,7 +2,7 @@ import { Router } from "express";
 import { jwtAuthMiddleware, type AuthenticatedRequest } from "../lib/jwt-auth-middleware.js";
 import { db } from "../lib/supabase.js";
 import { propostas, users, lojas, produtos, interCollections } from "@shared/schema";
-import { eq, and, or, desc, sql, gte, lte } from "drizzle-orm";
+import { eq, and, or, desc, sql, gte, lte, inArray } from "drizzle-orm";
 import { z } from "zod";
 import { isToday, isThisWeek, isThisMonth, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from "date-fns";
 
@@ -164,6 +164,14 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     // 3. Status está como pronto_pagamento ou aguardando_desembolso
     console.log(`[PAGAMENTOS SECURITY] Aplicando filtros críticos de segurança para pagamentos`);
     
+    // Primeiro buscar propostas com boletos para evitar problema de SQL
+    const propostasComBoletosIds = await db
+      .select({ propostaId: interCollections.propostaId })
+      .from(interCollections)
+      .where(sql`${interCollections.propostaId} IS NOT NULL`);
+    
+    const idsComBoletos = propostasComBoletosIds.map(p => p.propostaId).filter(id => id !== null);
+
     const result = await db
       .select({
         // Dados da proposta
@@ -186,8 +194,8 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
           // OBRIGATÓRIO: CCB deve estar assinada
           eq(propostas.ccbGerado, true),
           eq(propostas.assinaturaEletronicaConcluida, true),
-          // OBRIGATÓRIO: Boletos devem estar gerados
-          sql`EXISTS (SELECT 1 FROM inter_collections WHERE inter_collections.proposta_id = ${propostas.id})`,
+          // OBRIGATÓRIO: Boletos devem estar gerados - usando inArray seguro
+          idsComBoletos.length > 0 ? inArray(propostas.id, idsComBoletos as string[]) : sql`false`,
           // Status deve ser pronto_pagamento
           eq(propostas.status, 'pronto_pagamento')
         )
