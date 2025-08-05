@@ -104,6 +104,22 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
       }
     }
 
+    // Buscar propostas com status pronto_pagamento
+    const propostasComStatusPronto = await db
+      .select()
+      .from(propostas)
+      .where(
+        and(
+          sql`${propostas.deletedAt} IS NULL`,
+          eq(propostas.status, 'pronto_pagamento')
+        )
+      );
+    
+    console.log(`[PAGAMENTOS DEBUG] Propostas com status pronto_pagamento: ${propostasComStatusPronto.length}`);
+    if (propostasComStatusPronto.length > 0) {
+      console.log(`[PAGAMENTOS DEBUG] IDs:`, propostasComStatusPronto.map(p => p.id));
+    }
+
     // Buscar propostas que tenham boletos gerados no Inter Bank OU estão prontas para pagamento
     const result = await db
       .select({
@@ -125,10 +141,10 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
         analistaId: propostas.analistaId,
         ccbGerado: propostas.ccbGerado,
         assinaturaEletronicaConcluida: propostas.assinaturaEletronicaConcluida,
-        interCollectionId: sql<string | null>`
-          (SELECT id FROM inter_collections 
-           WHERE inter_collections.proposta_id = ${propostas.id} 
-           LIMIT 1)`
+        temBoleto: sql<boolean>`CASE WHEN EXISTS (
+          SELECT 1 FROM inter_collections 
+          WHERE inter_collections.proposta_id = ${propostas.id}
+        ) THEN true ELSE false END`
       })
       .from(propostas)
       .leftJoin(lojas, eq(propostas.lojaId, lojas.id))
@@ -137,27 +153,28 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
         and(
           sql`${propostas.deletedAt} IS NULL`,
           or(
-            // Propostas com boletos gerados
+            // Propostas com boletos gerados no Inter Bank
             sql`EXISTS (SELECT 1 FROM inter_collections WHERE inter_collections.proposta_id = ${propostas.id})`,
-            // Propostas prontas para pagamento
-            eq(propostas.status, 'pronto_pagamento'),
-            // Propostas já pagas
-            eq(propostas.status, 'pago')
+            // Propostas com status pronto_pagamento
+            eq(propostas.status, 'pronto_pagamento')
           )
         )
       )
       .orderBy(desc(propostas.dataAprovacao));
 
-    console.log(`[PAGAMENTOS DEBUG] Propostas encontradas: ${result.length}`);
-    if (result.length > 0) {
-      console.log(`[PAGAMENTOS DEBUG] Primeira proposta:`, {
-        id: result[0].id,
-        status: result[0].status,
-        ccbGerado: result[0].ccbGerado,
-        assinaturaEletronicaConcluida: result[0].assinaturaEletronicaConcluida,
-        interCollectionId: result[0].interCollectionId,
+    console.log(`[PAGAMENTOS DEBUG] Total propostas encontradas: ${result.length}`);
+    
+    // Debug: mostrar detalhes de todas as propostas encontradas
+    result.forEach((proposta, index) => {
+      console.log(`[PAGAMENTOS DEBUG] Proposta ${index + 1}:`, {
+        id: proposta.id,
+        clienteNome: proposta.clienteNome,
+        status: proposta.status,
+        temBoleto: proposta.temBoleto,
+        ccbGerado: proposta.ccbGerado,
+        assinaturaEletronicaConcluida: proposta.assinaturaEletronicaConcluida
       });
-    }
+    });
 
     // Processar os resultados para o formato esperado pelo frontend
     const pagamentosFormatados = result.map((proposta: any) => {
