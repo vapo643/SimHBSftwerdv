@@ -366,14 +366,22 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
 
     // Aplicar filtros
     let pagamentosFiltrados = pagamentosFormatados;
+    
+    console.log(`[PAGAMENTOS DEBUG] Pagamentos antes dos filtros: ${pagamentosFormatados.length}`);
+    console.log(`[PAGAMENTOS DEBUG] Filtros recebidos - status: ${status}, periodo: ${periodo}`);
 
     // Filtrar por status
     if (status && status !== 'todos') {
+      console.log(`[PAGAMENTOS DEBUG] Aplicando filtro de status: ${status}`);
+      const antesStatus = pagamentosFiltrados.length;
       pagamentosFiltrados = pagamentosFiltrados.filter(p => p.status === status);
+      console.log(`[PAGAMENTOS DEBUG] Após filtro status: ${antesStatus} -> ${pagamentosFiltrados.length}`);
     }
 
     // Filtrar por período
     if (periodo && periodo !== 'todos') {
+      console.log(`[PAGAMENTOS DEBUG] Aplicando filtro de período: ${periodo}`);
+      const antesPeriodo = pagamentosFiltrados.length;
       const now = new Date();
       pagamentosFiltrados = pagamentosFiltrados.filter(p => {
         const dataReq = new Date(p.dataRequisicao);
@@ -387,6 +395,16 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
           default:
             return true;
         }
+      });
+      console.log(`[PAGAMENTOS DEBUG] Após filtro período: ${antesPeriodo} -> ${pagamentosFiltrados.length}`);
+    }
+
+    console.log(`[PAGAMENTOS DEBUG] RESPOSTA FINAL: ${pagamentosFiltrados.length} pagamentos`);
+    if (pagamentosFiltrados.length > 0) {
+      console.log(`[PAGAMENTOS DEBUG] Primeiro pagamento:`, {
+        id: pagamentosFiltrados[0].id,
+        nomeCliente: pagamentosFiltrados[0].nomeCliente,
+        status: pagamentosFiltrados[0].status
       });
     }
 
