@@ -308,6 +308,23 @@ router.post('/collections', jwtAuthMiddleware, async (req: AuthenticatedRequest,
         // Fetch full collection details
         const collectionDetails = await interBankService.recuperarCobranca(collectionResponse.codigoSolicitacao);
 
+        // Download PDF and save to Storage
+        let pdfPath = null;
+        try {
+          console.log(`[INTER] 📄 Baixando PDF para boleto ${i + 1}/${prazo}`);
+          const pdfBuffer = await interBankService.obterPdfCobranca(collectionResponse.codigoSolicitacao);
+          pdfPath = await interBankService.salvarPdfNoStorage(
+            validatedData.proposalId, 
+            collectionResponse.codigoSolicitacao, 
+            i + 1, 
+            pdfBuffer
+          );
+          console.log(`[INTER] ✅ PDF salvo no Storage: ${pdfPath}`);
+        } catch (pdfError) {
+          console.error(`[INTER] ⚠️ Erro ao salvar PDF da parcela ${i + 1}:`, pdfError);
+          // Continua mesmo se o PDF falhar - boleto ainda é válido
+        }
+
         // Store collection data in database
         await db.insert(interCollections).values({
           propostaId: validatedData.proposalId,
@@ -322,7 +339,8 @@ router.post('/collections', jwtAuthMiddleware, async (req: AuthenticatedRequest,
           linhaDigitavel: collectionDetails.boleto?.linhaDigitavel,
           pixTxid: collectionDetails.pix?.txid,
           pixCopiaECola: collectionDetails.pix?.pixCopiaECola,
-          qrCode: collectionDetails.pix?.qrcode?.base64 || null, // Adicionar QR code
+          qrCode: (collectionDetails.pix as any)?.qrcode?.base64 || null, // Adicionar QR code
+          pdfPath: pdfPath, // Caminho do PDF no Storage
           dataEmissao: collectionDetails.cobranca.dataEmissao,
           origemRecebimento: 'BOLETO',
           isActive: true,

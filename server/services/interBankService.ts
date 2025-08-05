@@ -699,7 +699,45 @@ class InterBankService {
   }
 
   /**
-   * Get collection PDF
+   * Save PDF to Supabase Storage
+   */
+  async salvarPdfNoStorage(
+    propostaId: string, 
+    codigoSolicitacao: string, 
+    numeroParcela: number, 
+    pdfBuffer: Buffer
+  ): Promise<string> {
+    try {
+      const { createServerSupabaseAdminClient } = await import('../lib/supabase');
+      const supabase = createServerSupabaseAdminClient();
+      
+      const fileName = `boleto-${codigoSolicitacao}-parcela-${numeroParcela}.pdf`;
+      const filePath = `proposta-${propostaId}/${fileName}`;
+      
+      console.log(`[INTER] 💾 Saving PDF to storage: ${filePath}`);
+      
+      const { data, error } = await supabase.storage
+        .from('documents')
+        .upload(filePath, pdfBuffer, {
+          contentType: 'application/pdf',
+          upsert: true
+        });
+        
+      if (error) {
+        throw new Error(`Storage upload failed: ${error.message}`);
+      }
+      
+      console.log(`[INTER] ✅ PDF saved to storage successfully`);
+      return filePath;
+      
+    } catch (error) {
+      console.error('[INTER] ❌ Failed to save PDF to storage:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get collection PDF from Inter API
    */
   async obterPdfCobranca(codigoSolicitacao: string): Promise<Buffer> {
     try {
