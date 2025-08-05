@@ -126,7 +126,7 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
       .where(
         and(
           sql`${propostas.deletedAt} IS NULL`,
-          eq(propostas.status, 'pronto_pagamento')
+          inArray(propostas.status, ['pronto_pagamento', 'aprovado', 'pago'])
         )
       );
     
@@ -235,8 +235,8 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
           // OBRIGATÓRIO: CCB deve estar assinada
           eq(propostas.ccbGerado, true),
           eq(propostas.assinaturaEletronicaConcluida, true),
-          // Status deve ser pronto_pagamento
-          eq(propostas.status, 'pronto_pagamento')
+          // Status deve ser pronto_pagamento, aprovado OU pago (para histórico)
+          inArray(propostas.status, ['pronto_pagamento', 'aprovado', 'pago'])
         )
       )
       .orderBy(desc(propostas.dataAprovacao));

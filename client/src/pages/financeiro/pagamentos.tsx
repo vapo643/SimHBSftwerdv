@@ -973,10 +973,10 @@ export default function Pagamentos() {
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Shield className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                Verificação de Segurança - Desembolso
+                Verificação de Segurança - Pagamento
               </DialogTitle>
               <DialogDescription>
-                Revise todos os detalhes antes de confirmar o desembolso do empréstimo.
+                Revise todos os detalhes antes de confirmar o pagamento do empréstimo ao cliente.
               </DialogDescription>
             </DialogHeader>
 
@@ -989,7 +989,7 @@ export default function Pagamentos() {
                 {/* Dados do Cliente e Valor */}
                 <Card>
                   <CardHeader className="pb-3">
-                    <CardTitle className="text-base">Informações do Desembolso</CardTitle>
+                    <CardTitle className="text-base">Informações do Pagamento</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1121,13 +1121,13 @@ export default function Pagamentos() {
                       <Label className="text-sm">Senha de Confirmação* (Segurança Adicional)</Label>
                       <Input
                         type="password"
-                        placeholder="Digite sua senha de segurança para desembolsos"
+                        placeholder="Digite sua senha de segurança para pagamentos"
                         value={paymentPassword}
                         onChange={(e) => setPaymentPassword(e.target.value)}
                         className="mt-1"
                       />
                       <p className="text-xs text-muted-foreground mt-1">
-                        Esta é uma senha adicional de segurança para desembolsos, pode ser diferente da sua senha de login.
+                        Esta é uma senha adicional de segurança para pagamentos, pode ser diferente da sua senha de login.
                       </p>
                     </div>
                     <div>

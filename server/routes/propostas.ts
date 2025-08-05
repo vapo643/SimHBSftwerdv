@@ -129,31 +129,11 @@ export const getCcbAssinada = async (req: AuthenticatedRequest, res: Response) =
       });
     }
 
-    // Se temos o documento_id do ClickSign, buscar o PDF assinado
-    if (proposta.clicksignDocumentId) {
-      try {
-        // Para agora, vamos retornar uma URL simulada do ClickSign
-        // TODO: Implementar integração real com ClickSign API para buscar PDF assinado
-        const clicksignUrl = `https://app.clicksign.com/sign/documents/${proposta.clicksignDocumentId}/download`;
-        
-        return res.json({ 
-          url: clicksignUrl,
-          nome: `CCB_${proposta.clienteNome}_${propostaId}.pdf`,
-          status: 'assinado',
-          dataAssinatura: proposta.dataAprovacao,
-          fonte: 'clicksign'
-        });
-      } catch (clicksignError) {
-        console.error('Erro ao buscar PDF do ClickSign:', clicksignError);
-        // Continuar com fallback abaixo
-      }
-    }
-
-    // Fallback: buscar no Supabase Storage (se foi salvo localmente)
+    // Primeiro tentar buscar no Supabase Storage (onde salvo os PDFs assinados)
     const supabase = createServerSupabaseAdminClient();
     
     try {
-      // Tentar buscar no storage
+      // Tentar buscar CCB no storage primeiro
       const { data: urlData } = await supabase.storage
         .from('documents')
         .createSignedUrl(`proposta-${propostaId}/ccb-assinada.pdf`, 3600); // 1 hora
@@ -169,6 +149,18 @@ export const getCcbAssinada = async (req: AuthenticatedRequest, res: Response) =
       }
     } catch (storageError) {
       console.error('Erro ao buscar no Storage:', storageError);
+    }
+
+    // Se temos documento ID do ClickSign, retornar informações para visualização
+    if (proposta.clicksignDocumentKey) {
+      return res.json({ 
+        clicksignDocumentId: proposta.clicksignDocumentKey,
+        nome: `CCB_${proposta.clienteNome}_${propostaId}.pdf`,
+        status: 'assinado',
+        dataAssinatura: proposta.dataAprovacao,
+        fonte: 'clicksign',
+        message: 'Documento disponível no ClickSign. Acesse sua conta para visualizar.'
+      });
     }
 
     // Se chegou até aqui, CCB não foi encontrada
