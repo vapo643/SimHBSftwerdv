@@ -1038,7 +1038,7 @@ export default function Formalizacao() {
                                     Após a assinatura do contrato, os boletos são gerados automaticamente pelo Banco Inter para processamento do pagamento ao cliente.
                                   </p>
 
-                                  {(!proposta.interBoletoGerado && !interBoletoData && (!collectionsData || collectionsData.length === 0)) ? (
+                                  {(!collectionsData || collectionsData.length === 0) && !interBoletoData ? (
                                     // Botão para gerar boletos
                                     <Button
                                       onClick={async () => {
@@ -1225,7 +1225,40 @@ export default function Formalizacao() {
                                                   <Button
                                                     size="sm"
                                                     variant="outline"
-                                                    onClick={() => window.open(boleto.linkPdf, '_blank')}
+                                                    onClick={async () => {
+                                                      try {
+                                                        const token = localStorage.getItem('token');
+                                                        const response = await fetch(boleto.linkPdf, {
+                                                          headers: {
+                                                            'Authorization': `Bearer ${token}`
+                                                          }
+                                                        });
+                                                        
+                                                        if (response.ok) {
+                                                          const blob = await response.blob();
+                                                          const url = window.URL.createObjectURL(blob);
+                                                          const a = document.createElement('a');
+                                                          a.href = url;
+                                                          a.download = `boleto-${boleto.seuNumero || boleto.codigoSolicitacao}.pdf`;
+                                                          document.body.appendChild(a);
+                                                          a.click();
+                                                          window.URL.revokeObjectURL(url);
+                                                          document.body.removeChild(a);
+                                                        } else {
+                                                          toast({
+                                                            title: "Erro",
+                                                            description: "Erro ao baixar PDF",
+                                                            variant: "destructive",
+                                                          });
+                                                        }
+                                                      } catch (error) {
+                                                        toast({
+                                                          title: "Erro",
+                                                          description: "Erro ao baixar PDF",
+                                                          variant: "destructive",
+                                                        });
+                                                      }
+                                                    }}
                                                     className="border-orange-700 text-orange-300 hover:bg-orange-900/20"
                                                   >
                                                     <Download className="h-4 w-4 mr-2" />
@@ -1272,7 +1305,27 @@ export default function Formalizacao() {
                                                 // Abrir o PDF do primeiro boleto
                                                 const firstCollection = collections[0];
                                                 if (firstCollection.codigoSolicitacao) {
-                                                  window.open(`/api/inter-collections/${proposta.id}/${firstCollection.codigoSolicitacao}/pdf`, '_blank');
+                                                  // Fazer download com token JWT
+                                                  const token = localStorage.getItem('token');
+                                                  const response = await fetch(`/api/inter/collections/${proposta.id}/${firstCollection.codigoSolicitacao}/pdf`, {
+                                                    headers: {
+                                                      'Authorization': `Bearer ${token}`
+                                                    }
+                                                  });
+                                                  
+                                                  if (response.ok) {
+                                                    const blob = await response.blob();
+                                                    const url = window.URL.createObjectURL(blob);
+                                                    const a = document.createElement('a');
+                                                    a.href = url;
+                                                    a.download = `boleto-${firstCollection.seuNumero || firstCollection.codigoSolicitacao}.pdf`;
+                                                    document.body.appendChild(a);
+                                                    a.click();
+                                                    window.URL.revokeObjectURL(url);
+                                                    document.body.removeChild(a);
+                                                  } else {
+                                                    throw new Error('Erro ao baixar PDF');
+                                                  }
                                                 } else {
                                                   toast({
                                                     title: "Erro",
