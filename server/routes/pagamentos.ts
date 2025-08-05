@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { jwtAuthMiddleware, type AuthenticatedRequest } from "../lib/jwt-auth-middleware.js";
 import { db } from "../lib/supabase.js";
-import { propostas, users, lojas, produtos } from "@shared/schema";
+import { propostas, users, lojas, produtos, interCollections } from "@shared/schema";
 import { eq, and, or, desc, sql, gte, lte } from "drizzle-orm";
 import { z } from "zod";
 import { isToday, isThisWeek, isThisMonth, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from "date-fns";
@@ -42,6 +42,46 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
       return res.status(401).json({ error: "Usuário não autenticado" });
     }
 
+    // Primeiro, vamos debugar para ver quantas propostas existem com cada condição
+    const totalPropostas = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(propostas)
+      .where(sql`${propostas.deletedAt} IS NULL`);
+    
+    const propostasAprovadas = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(propostas)
+      .where(
+        and(
+          eq(propostas.status, 'aprovado'),
+          sql`${propostas.deletedAt} IS NULL`
+        )
+      );
+    
+    const propostasComCCB = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(propostas)
+      .where(
+        and(
+          eq(propostas.ccbGerado, true),
+          eq(propostas.assinaturaEletronicaConcluida, true),
+          sql`${propostas.deletedAt} IS NULL`
+        )
+      );
+
+    // Verificar também boletos gerados via Inter Bank
+    const propostasComBoletos = await db
+      .select({ 
+        count: sql<number>`count(DISTINCT ${interCollections.propostaId})` 
+      })
+      .from(interCollections)
+      .where(sql`${interCollections.propostaId} IS NOT NULL`);
+
+    console.log(`[PAGAMENTOS DEBUG] Total propostas: ${totalPropostas[0]?.count || 0}`);
+    console.log(`[PAGAMENTOS DEBUG] Propostas aprovadas: ${propostasAprovadas[0]?.count || 0}`);
+    console.log(`[PAGAMENTOS DEBUG] Propostas com CCB assinada: ${propostasComCCB[0]?.count || 0}`);
+    console.log(`[PAGAMENTOS DEBUG] Propostas com boletos Inter: ${propostasComBoletos[0]?.count || 0}`);
+
     // Buscar propostas que estão prontas para pagamento ou já foram pagas
     const result = await db
       .select({
@@ -61,6 +101,9 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
         lojaNome: lojas.nomeLoja,
         produtoNome: produtos.nomeProduto,
         analistaId: propostas.analistaId,
+        ccbGerado: propostas.ccbGerado,
+        assinaturaEletronicaConcluida: propostas.assinaturaEletronicaConcluida,
+        hasInterCollection: sql<boolean>`EXISTS (SELECT 1 FROM inter_collections WHERE inter_collections.proposta_id = ${propostas.id})`,
       })
       .from(propostas)
       .leftJoin(lojas, eq(propostas.lojaId, lojas.id))
@@ -70,12 +113,30 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
           or(
             eq(propostas.status, 'pronto_pagamento'),
             eq(propostas.status, 'pago'),
-            eq(propostas.status, 'aprovado')
+            // Incluir propostas aprovadas com CCB assinada e assinatura eletrônica concluída
+            and(
+              eq(propostas.status, 'aprovado'),
+              eq(propostas.ccbGerado, true),
+              eq(propostas.assinaturaEletronicaConcluida, true)
+            ),
+            // Incluir propostas que tenham boletos gerados no Inter Bank
+            sql`EXISTS (SELECT 1 FROM inter_collections WHERE inter_collections.proposta_id = ${propostas.id})`
           ),
           sql`${propostas.deletedAt} IS NULL`
         )
       )
       .orderBy(desc(propostas.dataAprovacao));
+
+    console.log(`[PAGAMENTOS DEBUG] Propostas encontradas: ${result.length}`);
+    if (result.length > 0) {
+      console.log(`[PAGAMENTOS DEBUG] Primeira proposta:`, {
+        id: result[0].id,
+        status: result[0].status,
+        ccbGerado: result[0].ccbGerado,
+        assinaturaEletronicaConcluida: result[0].assinaturaEletronicaConcluida,
+        hasInterCollection: result[0].hasInterCollection,
+      });
+    }
 
     // Processar os resultados para o formato esperado pelo frontend
     const pagamentosFormatados = result.map((proposta: any) => {
