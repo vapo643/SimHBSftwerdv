@@ -189,8 +189,8 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
           .from(propostas)
           .where(
             and(
-              // Converte os IDs text para UUID para comparação segura
-              sql`${propostas.id}::text = ANY(${propostaIds})`,
+              // Usar inArray do Drizzle com conversão de tipos
+              inArray(sql`${propostas.id}::text`, propostaIds),
               sql`${propostas.deletedAt} IS NULL`
             )
           );
