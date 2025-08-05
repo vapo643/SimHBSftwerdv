@@ -103,20 +103,30 @@ export default function Pagamentos() {
   const [paymentObservation, setPaymentObservation] = useState("");
 
   // Buscar pagamentos
-  const { data: pagamentos = [], isLoading, error } = useQuery({
+  const { data: pagamentos = [], isLoading, error, refetch } = useQuery({
     queryKey: ['/api/pagamentos', { status: statusFilter, periodo: periodoFilter }],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (statusFilter !== 'todos') params.append('status', statusFilter);
       if (periodoFilter !== 'todos') params.append('periodo', periodoFilter);
       
-      const response = await apiRequest(`/api/pagamentos?${params.toString()}`, {
-        method: 'GET',
-      });
-      return response as Pagamento[];
+      console.log('[PAGAMENTOS] Buscando pagamentos com filtros:', { statusFilter, periodoFilter });
+      
+      try {
+        const response = await apiRequest(`/api/pagamentos?${params.toString()}`, {
+          method: 'GET',
+        });
+        console.log('[PAGAMENTOS] Resposta recebida:', response);
+        return response as Pagamento[];
+      } catch (err) {
+        console.error('[PAGAMENTOS] Erro ao buscar:', err);
+        throw err;
+      }
     },
-    retry: 1,
-    initialData: [],
+    retry: 2,
+    staleTime: 1000, // 1 segundo
+    refetchOnWindowFocus: false,
+    enabled: true,
   });
 
   // Buscar dados de verificação quando modal abrir
@@ -326,9 +336,15 @@ export default function Pagamentos() {
               <p className="text-muted-foreground mb-4">
                 Não foi possível carregar os dados de pagamentos. Por favor, tente novamente.
               </p>
-              <Button onClick={() => window.location.reload()}>
-                Recarregar página
-              </Button>
+              <div className="flex gap-2">
+                <Button onClick={() => refetch()}>
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Tentar novamente
+                </Button>
+                <Button variant="outline" onClick={() => setLocation('/dashboard')}>
+                  Voltar ao Dashboard
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -441,7 +457,7 @@ export default function Pagamentos() {
                   <SelectItem value="mes">Este Mês</SelectItem>
                 </SelectContent>
               </Select>
-              <Button variant="outline" onClick={() => queryClient.invalidateQueries({ queryKey: ['/api/pagamentos'] })}>
+              <Button variant="outline" onClick={() => refetch()}>
                 <RefreshCw className="mr-2 h-4 w-4" />
                 Atualizar
               </Button>
@@ -481,8 +497,39 @@ export default function Pagamentos() {
                     </TableRow>
                   ) : pagamentosFiltrados?.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                        Nenhum pagamento encontrado
+                      <TableCell colSpan={8} className="text-center py-12">
+                        <div className="space-y-3">
+                          <div className="flex justify-center mb-4">
+                            <AlertCircle className="h-12 w-12 text-muted-foreground/50" />
+                          </div>
+                          <h3 className="text-lg font-medium">Nenhum pagamento disponível</h3>
+                          <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                            Para que uma proposta apareça aqui, ela precisa ter:
+                          </p>
+                          <ul className="text-sm text-muted-foreground text-left max-w-sm mx-auto space-y-1">
+                            <li className="flex items-center gap-2">
+                              <CheckCircle className="h-4 w-4 text-green-600" />
+                              CCB assinada eletronicamente
+                            </li>
+                            <li className="flex items-center gap-2">
+                              <CheckCircle className="h-4 w-4 text-green-600" />
+                              Boletos de cobrança gerados no Inter
+                            </li>
+                            <li className="flex items-center gap-2">
+                              <CheckCircle className="h-4 w-4 text-green-600" />
+                              Status "Pronto para Pagamento"
+                            </li>
+                          </ul>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => refetch()}
+                            className="mt-4"
+                          >
+                            <RefreshCw className="h-4 w-4 mr-2" />
+                            Verificar novamente
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ) : (

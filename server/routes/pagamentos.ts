@@ -166,41 +166,14 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     
     const result = await db
       .select({
-        id: propostas.id,
-        clienteNome: propostas.clienteNome,
-        clienteCpf: propostas.clienteCpf,
-        valorTotalFinanciado: propostas.valorTotalFinanciado,
-        valorTac: propostas.valorTac,
-        valorIof: propostas.valorIof,
-        status: propostas.status,
-        dataAprovacao: propostas.dataAprovacao,
-        dataPagamento: propostas.dataPagamento,
-        lojaId: propostas.lojaId,
-        produtoId: propostas.produtoId,
-        userId: propostas.userId,
-        observacoes: propostas.observacoes,
-        lojaNome: lojas.nomeLoja,
-        produtoNome: produtos.nomeProduto,
-        analistaId: propostas.analistaId,
-        ccbGerado: propostas.ccbGerado,
-        assinaturaEletronicaConcluida: propostas.assinaturaEletronicaConcluida,
-        // Dados de pagamento
-        dadosPagamentoBanco: propostas.dadosPagamentoBanco,
-        dadosPagamentoAgencia: propostas.dadosPagamentoAgencia,
-        dadosPagamentoConta: propostas.dadosPagamentoConta,
-        dadosPagamentoTipo: propostas.dadosPagamentoTipo,
-        dadosPagamentoNomeTitular: propostas.dadosPagamentoNomeTitular,
-        dadosPagamentoCpfTitular: propostas.dadosPagamentoCpfTitular,
-        dadosPagamentoPix: propostas.dadosPagamentoPix,
-        // Informações do atendente
-        atendenteNome: users.nome,
-        atendenteEmail: users.email,
-        // Verificações críticas
-        temBoleto: sql<boolean>`EXISTS (
-          SELECT 1 FROM inter_collections 
-          WHERE inter_collections.proposta_id = ${propostas.id}
-        )`,
-        ccbAssinada: sql<boolean>`${propostas.ccbGerado} = true AND ${propostas.assinaturaEletronicaConcluida} = true`
+        // Dados da proposta
+        proposta: propostas,
+        // Dados da loja
+        loja: lojas,
+        // Dados do produto
+        produto: produtos,
+        // Dados do usuário
+        usuario: users
       })
       .from(propostas)
       .leftJoin(lojas, eq(propostas.lojaId, lojas.id))
@@ -224,34 +197,35 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     console.log(`[PAGAMENTOS DEBUG] Total propostas encontradas: ${result.length}`);
     
     // Debug: mostrar detalhes de todas as propostas encontradas
-    result.forEach((proposta, index) => {
+    result.forEach((row, index) => {
       console.log(`[PAGAMENTOS DEBUG] Proposta ${index + 1}:`, {
-        id: proposta.id,
-        clienteNome: proposta.clienteNome,
-        clienteCpf: proposta.clienteCpf,
-        valorTotalFinanciado: proposta.valorTotalFinanciado,
-        valorTac: proposta.valorTac,
-        valorIof: proposta.valorIof,
-        status: proposta.status,
-        temBoleto: proposta.temBoleto,
-        ccbGerado: proposta.ccbGerado,
-        assinaturaEletronicaConcluida: proposta.assinaturaEletronicaConcluida,
-        lojaNome: proposta.lojaNome,
-        produtoNome: proposta.produtoNome,
-        dadosPagamentoBanco: proposta.dadosPagamentoBanco,
-        dadosPagamentoAgencia: proposta.dadosPagamentoAgencia,
-        dadosPagamentoConta: proposta.dadosPagamentoConta
+        id: row.proposta.id,
+        clienteNome: row.proposta.clienteNome,
+        clienteCpf: row.proposta.clienteCpf,
+        valorTotalFinanciado: row.proposta.valorTotalFinanciado,
+        valorTac: row.proposta.valorTac,
+        valorIof: row.proposta.valorIof,
+        status: row.proposta.status,
+        ccbGerado: row.proposta.ccbGerado,
+        assinaturaEletronicaConcluida: row.proposta.assinaturaEletronicaConcluida,
+        lojaNome: row.loja?.nomeLoja,
+        produtoNome: row.produto?.nomeProduto,
+        dadosPagamentoBanco: row.proposta.dadosPagamentoBanco,
+        dadosPagamentoAgencia: row.proposta.dadosPagamentoAgencia,
+        dadosPagamentoConta: row.proposta.dadosPagamentoConta
       });
     });
 
     // Processar os resultados para o formato esperado pelo frontend
-    const pagamentosFormatados = result.map((proposta: any) => {
+    const pagamentosFormatados = result.map((row: any) => {
+      const { proposta, loja, produto, usuario } = row;
+      
       console.log(`[PAGAMENTOS DEBUG] Processando proposta ${proposta.id}:`, {
         clienteNome: proposta.clienteNome,
         clienteCpf: proposta.clienteCpf,
         valorTotalFinanciado: proposta.valorTotalFinanciado,
-        lojaNome: proposta.lojaNome,
-        produtoNome: proposta.produtoNome
+        lojaNome: loja?.nomeLoja,
+        produtoNome: produto?.nomeProduto
       });
       
       // Calcular valor líquido
@@ -300,9 +274,9 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
         dataPagamento: proposta.dataPagamento,
         requisitadoPor: {
           id: proposta.userId || '',
-          nome: proposta.atendenteNome || 'Atendente não identificado',
+          nome: usuario?.nome || 'Atendente não identificado',
           papel: 'ATENDENTE',
-          loja: proposta.lojaNome || 'Loja não informada'
+          loja: loja?.nomeLoja || 'Loja não informada'
         },
         aprovadoPor: proposta.analistaId ? {
           id: proposta.analistaId,
@@ -313,12 +287,8 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
         observacoes: proposta.observacoes,
         comprovante: '',
         formaPagamento: proposta.dadosPagamentoPix ? 'pix' as const : 'ted' as const,
-        loja: proposta.lojaNome || 'Loja não informada',
-        produto: proposta.produtoNome || 'Produto não informado',
-        // Dados críticos para verificação
-        ccbAssinada: proposta.ccbAssinada,
-        temBoleto: proposta.temBoleto,
-        documentosCcb: [] // Será preenchido em outra rota
+        loja: loja?.nomeLoja || 'Loja não informada',
+        produto: produto?.nomeProduto || 'Produto não informado'
       };
       
       console.log(`[PAGAMENTOS DEBUG] Pagamento formatado para ${proposta.id}:`, {
