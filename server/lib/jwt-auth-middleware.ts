@@ -87,7 +87,19 @@ export async function jwtAuthMiddleware(
   try {
     // Step a: Validate JWT token
     const authHeader = req.headers.authorization;
+    
+    // Debug logging para PDF downloads
+    if (req.path.includes('/pdf')) {
+      console.log('[JWT AUTH - PDF DOWNLOAD] Request path:', req.path);
+      console.log('[JWT AUTH - PDF DOWNLOAD] Auth header present:', !!authHeader);
+      console.log('[JWT AUTH - PDF DOWNLOAD] Auth header starts with Bearer:', authHeader?.startsWith('Bearer '));
+      console.log('[JWT AUTH - PDF DOWNLOAD] Auth header length:', authHeader?.length);
+    }
+    
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      if (req.path.includes('/pdf')) {
+        console.error('[JWT AUTH - PDF DOWNLOAD] Missing or invalid auth header');
+      }
       securityLogger.logEvent({
         type: SecurityEventType.TOKEN_INVALID,
         severity: "MEDIUM",
@@ -101,6 +113,12 @@ export async function jwtAuthMiddleware(
     }
 
     const token = authHeader.substring(7); // Remove 'Bearer ' prefix
+    
+    // Debug logging para PDF downloads - token info
+    if (req.path.includes('/pdf')) {
+      console.log('[JWT AUTH - PDF DOWNLOAD] Token length:', token.length);
+      console.log('[JWT AUTH - PDF DOWNLOAD] Token first 20 chars:', token.substring(0, 20) + '...');
+    }
 
     // SAMM Optimization: Check token blacklist
     if (tokenBlacklist.has(token)) {
