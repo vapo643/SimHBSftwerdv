@@ -99,7 +99,7 @@ export default function Pagamentos() {
   const [approvalObservation, setApprovalObservation] = useState("");
 
   // Buscar pagamentos
-  const { data: pagamentos, isLoading } = useQuery({
+  const { data: pagamentos = [], isLoading, error } = useQuery({
     queryKey: ['/api/pagamentos', { status: statusFilter, periodo: periodoFilter }],
     queryFn: async () => {
       const params = new URLSearchParams();
@@ -111,6 +111,8 @@ export default function Pagamentos() {
       });
       return response as Pagamento[];
     },
+    retry: 1,
+    initialData: [],
   });
 
   // Aprovar pagamento
@@ -254,6 +256,41 @@ export default function Pagamentos() {
     // For now, we'll assume certain roles can approve
     return true; // Replace with actual permission check
   };
+
+  if (isLoading) {
+    return (
+      <DashboardLayout title="Pagamentos">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Carregando pagamentos...</p>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <DashboardLayout title="Pagamentos">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <Card className="w-full max-w-md">
+            <CardHeader>
+              <CardTitle className="text-red-600">Erro ao carregar pagamentos</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground mb-4">
+                Não foi possível carregar os dados de pagamentos. Por favor, tente novamente.
+              </p>
+              <Button onClick={() => window.location.reload()}>
+                Recarregar página
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout title="Pagamentos">
