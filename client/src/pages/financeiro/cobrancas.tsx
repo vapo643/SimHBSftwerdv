@@ -30,7 +30,8 @@ import {
   QrCode,
   Copy,
   Building2,
-  RefreshCw
+  RefreshCw,
+  Barcode
 } from "lucide-react";
 import { format, addMonths, differenceInDays, isAfter } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -43,10 +44,12 @@ interface Parcela {
   dataPagamento?: string;
   codigoBoleto?: string;
   linhaDigitavel?: string;
+  codigoBarras?: string;
   status: 'pago' | 'pendente' | 'vencido';
   diasAtraso?: number;
   // Inter Bank fields
   interCodigoSolicitacao?: string;
+  interPixCopiaECola?: string;
   interQrCode?: string;
   interCodigoBarras?: string;
   interSituacao?: string;
@@ -88,56 +91,15 @@ export default function Cobrancas() {
   const [showContactModal, setShowContactModal] = useState(false);
   const [contactType, setContactType] = useState<'whatsapp' | 'sms' | 'email'>('whatsapp');
   
-  // Função para baixar boleto com autenticação
-  const downloadBoletoPDF = async (propostaId: string, codigoSolicitacao: string) => {
-    try {
-      // Fazer requisição com autenticação usando apiRequest
-      const response = await fetch(`/api/inter-collections/${propostaId}/${codigoSolicitacao}/pdf`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${await getAuthToken()}`,
-        },
-      });
-      
-      if (!response.ok) {
-        throw new Error('Falha ao baixar boleto');
-      }
-      
-      // Converter resposta em blob
-      const blob = await response.blob();
-      
-      // Criar URL temporária para o blob
-      const url = window.URL.createObjectURL(blob);
-      
-      // Criar link temporário e clicar nele
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `boleto-${codigoSolicitacao}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      
-      // Limpar
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-      
-      toast({
-        title: "Boleto baixado",
-        description: "O boleto foi baixado com sucesso.",
-      });
-    } catch (error) {
-      toast({
-        title: "Erro ao baixar",
-        description: "Não foi possível baixar o boleto. Tente novamente.",
-        variant: "destructive",
-      });
-    }
-  };
-  
-  // Helper para obter token de autenticação
-  const getAuthToken = async () => {
-    const { getSession } = await import('@/lib/auth');
-    const session = await getSession();
-    return session?.accessToken || '';
+  // Função para copiar PIX ou linha digitável
+  const copyPaymentCode = (code: string, type: 'pix' | 'barcode') => {
+    navigator.clipboard.writeText(code);
+    toast({
+      title: type === 'pix' ? "PIX copiado!" : "Linha digitável copiada!",
+      description: type === 'pix' 
+        ? "Cole no app do seu banco para pagar" 
+        : "Use no internet banking para pagar",
+    });
   };
   
   // Buscar propostas em cobrança
@@ -542,36 +504,50 @@ export default function Cobrancas() {
                                     )}
                                   </div>
                                   
-                                  <div className="grid grid-cols-2 gap-2">
-                                    {/* QR Code PIX */}
-                                    {parcela.interQrCode && (
-                                      <div className="bg-white p-2 rounded">
-                                        <img 
-                                          src={`data:image/png;base64,${parcela.interQrCode}`} 
-                                          alt="QR Code PIX" 
-                                          className="w-20 h-20 mx-auto"
-                                        />
-                                        <p className="text-xs text-center mt-1 text-gray-600">PIX</p>
+                                  <div className="space-y-3">
+                                    {/* PIX Copia e Cola - prioridade alta */}
+                                    {parcela.interPixCopiaECola && (
+                                      <div className="p-3 bg-green-900/20 border border-green-700 rounded">
+                                        <p className="text-xs font-medium text-green-300 mb-2">
+                                          <span className="inline-flex items-center gap-1">
+                                            <QrCode className="h-3 w-3" />
+                                            PIX Copia e Cola (Pagamento Instantâneo)
+                                          </span>
+                                        </p>
+                                        <div className="flex items-center gap-2 p-2 bg-gray-900 rounded">
+                                          <code className="flex-1 text-green-400 font-mono text-xs break-all">
+                                            {parcela.interPixCopiaECola}
+                                          </code>
+                                          <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            onClick={() => copyPaymentCode(parcela.interPixCopiaECola!, 'pix')}
+                                          >
+                                            <Copy className="h-3 w-3" />
+                                          </Button>
+                                        </div>
                                       </div>
                                     )}
                                     
-                                    {/* Código de Barras */}
-                                    {parcela.interCodigoBarras && (
-                                      <div className="space-y-1">
-                                        <p className="text-xs text-gray-400">Código de Barras:</p>
-                                        <div className="flex items-center gap-1">
-                                          <code className="text-xs font-mono text-orange-400 truncate">
-                                            {parcela.interCodigoBarras.slice(0, 15)}...
+                                    {/* Linha Digitável */}
+                                    {(parcela.linhaDigitavel || parcela.codigoBarras) && (
+                                      <div className="p-3 bg-gray-800 rounded border border-gray-700">
+                                        <p className="text-xs font-medium text-gray-300 mb-2">
+                                          <span className="inline-flex items-center gap-1">
+                                            <Barcode className="h-3 w-3" />
+                                            Linha Digitável do Boleto
+                                          </span>
+                                        </p>
+                                        <div className="flex items-center gap-2 p-2 bg-gray-900 rounded">
+                                          <code className="flex-1 text-orange-400 font-mono text-xs break-all">
+                                            {parcela.linhaDigitavel || parcela.codigoBarras}
                                           </code>
                                           <Button
                                             size="sm"
                                             variant="ghost"
                                             onClick={() => {
-                                              navigator.clipboard.writeText(parcela.interCodigoBarras!);
-                                              toast({
-                                                title: "Copiado!",
-                                                description: "Código de barras copiado",
-                                              });
+                                              const codigo = parcela.linhaDigitavel || parcela.codigoBarras || '';
+                                              copyPaymentCode(codigo, 'barcode');
                                             }}
                                           >
                                             <Copy className="h-3 w-3" />
@@ -579,20 +555,12 @@ export default function Cobrancas() {
                                         </div>
                                       </div>
                                     )}
+                                    
+                                    {/* Informação sobre PDF */}
+                                    <p className="text-xs text-gray-500 text-center mt-2">
+                                      Banco Inter não disponibiliza PDF - Use PIX ou linha digitável
+                                    </p>
                                   </div>
-                                  
-                                  {/* Ações */}
-                                  {parcela.interCodigoSolicitacao && (
-                                    <Button
-                                      size="sm"
-                                      variant="ghost"
-                                      className="mt-2 text-orange-400 hover:text-orange-300"
-                                      onClick={() => downloadBoletoPDF(selectedProposta.id, parcela.interCodigoSolicitacao!)}
-                                    >
-                                      <Download className="h-3 w-3 mr-1" />
-                                      Baixar Boleto
-                                    </Button>
-                                  )}
                                 </div>
                               )}
                             </div>

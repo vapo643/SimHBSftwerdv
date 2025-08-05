@@ -1,303 +1,271 @@
-import { Request, Response, Router } from 'express';
-import { storage } from '../storage';
+import { Router } from 'express';
+import { jwtAuthMiddleware, type AuthenticatedRequest } from '../lib/jwt-auth-middleware.js';
+import { db } from '../lib/supabase.js';
+import { propostas, interCollections, propostaLogs } from '@shared/schema';
+import { eq, and, or, gte, isNotNull, sql } from 'drizzle-orm';
+import { interBankService } from '../services/interBankService.js';
 import { z } from 'zod';
-import { addDays, format, isAfter, differenceInDays } from 'date-fns';
-import { supabase } from '../lib/supabase';
-import { jwtAuthMiddleware } from '../lib/jwt-auth-middleware';
-import { roleGuard } from '../lib/role-guard';
-
-interface AuthenticatedRequest extends Request {
-  user?: {
-    id: string;
-    email: string;
-    role: string;
-  };
-}
 
 const router = Router();
 
-// Parâmetros de busca para cobranças
-const cobrancasQuerySchema = z.object({
-  status: z.enum(['todos', 'em_dia', 'inadimplente', 'quitado']).optional(),
-  cpf: z.string().optional(),
-  contrato: z.string().optional(),
-});
-
-// Função para calcular status da parcela
-function calcularStatusParcela(dataVencimento: Date, dataPagamento?: Date | null) {
-  const hoje = new Date();
-  
-  if (dataPagamento) {
-    return 'pago';
-  }
-  
-  if (isAfter(hoje, dataVencimento)) {
-    return 'vencido';
-  }
-  
-  return 'pendente';
-}
-
-// Função para calcular dias de atraso
-function calcularDiasAtraso(dataVencimento: Date) {
-  const hoje = new Date();
-  
-  if (isAfter(hoje, dataVencimento)) {
-    return differenceInDays(hoje, dataVencimento);
-  }
-  
-  return 0;
-}
-
-// GET /api/cobrancas - Listar propostas em cobrança
-router.get('/', jwtAuthMiddleware, roleGuard(['FINANCEIRO', 'ADMINISTRADOR', 'DIRETOR']), async (req: AuthenticatedRequest, res: Response) => {
+// Buscar todas as propostas com cobranças ativas
+router.get('/', jwtAuthMiddleware, async (req, res) => {
   try {
     const userId = req.user?.id;
-    const userRole = req.user?.role;
-    
     if (!userId) {
-      return res.status(401).json({ error: 'Usuário não autenticado' });
+      return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const { status, cpf, contrato } = cobrancasQuerySchema.parse(req.query);
-
-    // Buscar propostas aprovadas e pagas
-    const propostas = await storage.getPropostas();
-    
-    // Filtrar apenas propostas aprovadas ou pagas
-    let propostasCobranca = propostas.filter(p => 
-      p.status === 'aprovado' || p.status === 'pago' || p.status === 'pendente'
-    );
-
-    // Se não houver propostas com esses status, usar propostas existentes para demonstração
-    if (propostasCobranca.length === 0) {
-      propostasCobranca = propostas.slice(0, 5); // Pegar até 5 propostas para demonstração
-    }
-
-    // Buscar parcelas e calcular status
-    const propostasComParcelas = await Promise.all(
-      propostasCobranca.map(async (proposta) => {
-        // Buscar parcelas da proposta
-        // TODO: implementar getParcelasByPropostaId quando tabela parcelas estiver criada
-        // Por ora, vamos gerar parcelas de exemplo baseadas nos dados da proposta
-        const parcelas: any[] = [];
-        const prazo = proposta.dadosFinanciamento?.prazo || 12;
-        const valorParcela = (proposta.dadosFinanciamento?.valorTotal || 10000) / prazo;
-        const dataBase = new Date(proposta.createdAt);
-        
-        for (let i = 0; i < prazo; i++) {
-          const dataVencimento = addDays(dataBase, 30 * (i + 1));
-          const vencido = isAfter(new Date(), dataVencimento);
-          const pago = i < 2; // Simular que as 2 primeiras parcelas foram pagas
-          
-          parcelas.push({
-            id: `${proposta.id}-parcela-${i + 1}`,
-            numero: i + 1,
-            valorParcela: valorParcela,
-            dataVencimento: dataVencimento.toISOString(),
-            dataPagamento: pago ? addDays(dataVencimento, -5).toISOString() : null,
-            codigoBoleto: `BOLETO${proposta.id.substring(0, 8)}${i + 1}`,
-            linhaDigitavel: `23791.12345 67890.123456 78901.234567 8 ${Math.floor(Math.random() * 100000000000000)}`,
-            status: pago ? 'pago' : (vencido ? 'vencido' : 'pendente')
-          });
-        }
-        
-        // Buscar informações de pagamento do Inter Bank
-        const parcelasComStatus = await Promise.all(
-          parcelas.map(async (parcela) => {
-            let statusPagamento = null;
-            
-            // TODO: Integrar com API do Banco Inter quando configurada
-            // if (parcela.codigoBoleto) {
-            //   const statusInter = await interBankAPI.consultarBoleto(parcela.codigoBoleto);
-            //   if (statusInter.situacao === 'PAGO') {
-            //     parcela.dataPagamento = statusInter.dataPagamento;
-            //   }
-            // }
-            
-            const dataVencimento = new Date(parcela.dataVencimento);
-            const status = calcularStatusParcela(dataVencimento, parcela.dataPagamento);
-            const diasAtraso = status === 'vencido' ? calcularDiasAtraso(dataVencimento) : 0;
-            
-            return {
-              ...parcela,
-              status,
-              diasAtraso,
-            };
-          })
-        );
-        
-        // Calcular estatísticas
-        const parcelasPagas = parcelasComStatus.filter(p => p.status === 'pago').length;
-        const parcelasPendentes = parcelasComStatus.filter(p => p.status === 'pendente').length;
-        const parcelasVencidas = parcelasComStatus.filter(p => p.status === 'vencido').length;
-        const valorTotalPago = parcelasComStatus
-          .filter(p => p.status === 'pago')
-          .reduce((acc, p) => acc + p.valorParcela, 0);
-        const valorTotalPendente = parcelasComStatus
-          .filter(p => p.status !== 'pago')
-          .reduce((acc, p) => acc + p.valorParcela, 0);
-        const maiorAtraso = Math.max(...parcelasComStatus
-          .filter(p => p.status === 'vencido')
-          .map(p => p.diasAtraso || 0), 0);
-        
-        // Determinar status geral
-        let statusGeral = 'em_dia';
-        if (parcelasVencidas > 0) {
-          statusGeral = 'inadimplente';
-        } else if (parcelasPagas === parcelas.length) {
-          statusGeral = 'quitado';
-        }
-        
-        // Buscar documentos
-        const documentos: any = {};
-        if (proposta.ccbUrl) {
-          documentos.ccb = proposta.ccbUrl;
-        }
-        
-        // Usar estrutura JSONB correta
-        const clienteData = proposta.cliente_data || proposta.clienteData || {};
-        const condicoesData = proposta.condicoes_data || proposta.condicoesData || {};
-        
-        return {
-          id: proposta.id,
-          numeroContrato: proposta.numeroContrato || proposta.id.substring(0, 8).toUpperCase(),
-          nomeCliente: clienteData.nome || clienteData.nomeCompleto || 'Cliente não informado',
-          cpfCliente: clienteData.cpf || '000.000.000-00',
-          telefoneCliente: clienteData.telefone || 'Não informado',
-          emailCliente: clienteData.email || 'email@exemplo.com',
-          valorTotal: condicoesData.valorTotal || condicoesData.valor || 0,
-          valorFinanciado: condicoesData.valor || condicoesData.valorSolicitado || 0,
-          quantidadeParcelas: condicoesData.prazo || 0,
-          parcelasPagas,
-          parcelasPendentes,
-          parcelasVencidas,
-          valorTotalPago,
-          valorTotalPendente,
-          diasAtraso: maiorAtraso,
-          status: statusGeral,
-          dataContrato: proposta.createdAt,
-          ccbAssinada: proposta.assinatura_eletronica_concluida || false,
-          parcelas: parcelasComStatus,
-          documentos,
-        };
+    // Buscar propostas aprovadas ou pagas com cobranças
+    const propostasComCobrancas = await db
+      .select({
+        proposta: propostas,
+        cobrancas: sql<any>`
+          COALESCE(
+            json_agg(
+              json_build_object(
+                'id', ${inter_collections.id},
+                'codigoSolicitacao', ${inter_collections.codigoSolicitacao},
+                'nossoNumero', ${inter_collections.nossoNumero},
+                'seuNumero', ${inter_collections.seuNumero},
+                'valorNominal', ${inter_collections.valorNominal},
+                'dataVencimento', ${inter_collections.dataVencimento},
+                'situacao', ${inter_collections.situacao},
+                'dataSituacao', ${inter_collections.dataSituacao},
+                'linhaDigitavel', ${inter_collections.linhaDigitavel},
+                'codigoBarras', ${inter_collections.codigoBarras},
+                'pixQrCode', ${inter_collections.pixQrCode},
+                'pixCopiaECola', ${inter_collections.pixCopiaECola}
+              ) ORDER BY ${inter_collections.dataVencimento}
+            ) FILTER (WHERE ${inter_collections.id} IS NOT NULL),
+            '[]'::json
+          )
+        `.as('cobrancas')
       })
-    );
+      .from(propostas)
+      .leftJoin(
+        inter_collections,
+        eq(propostas.id, inter_collections.propostaId)
+      )
+      .where(
+        and(
+          or(
+            eq(propostas.status, 'pronto_pagamento'),
+            eq(propostas.status, 'pago'),
+            eq(propostas.status, 'aprovado')
+          ),
+          isNotNull(propostas.ccb_gerado),
+          isNotNull(propostas.assinatura_eletronica_concluida)
+        )
+      )
+      .groupBy(propostas.id);
 
-    // Aplicar filtros
-    let resultados = propostasComParcelas;
-    
-    if (status && status !== 'todos') {
-      resultados = resultados.filter(p => p.status === status);
-    }
-    
-    if (cpf) {
-      resultados = resultados.filter(p => p.cpfCliente.includes(cpf));
-    }
-    
-    if (contrato) {
-      resultados = resultados.filter(p => p.numeroContrato.includes(contrato));
-    }
+    // Formatar dados para o frontend
+    const cobrancasFormatadas = propostasComCobrancas.map(item => {
+      const proposta = item.proposta;
+      const cobrancas = item.cobrancas || [];
+      
+      // Calcular estatísticas
+      const totalParcelas = cobrancas.length;
+      const parcelasPagas = cobrancas.filter((c: any) => 
+        c.situacao === 'PAGO' || c.situacao === 'RECEBIDO'
+      ).length;
+      const parcelasPendentes = cobrancas.filter((c: any) => 
+        c.situacao === 'A_VENCER' || c.situacao === 'PENDENTE_REGISTRO'
+      ).length;
+      const parcelasVencidas = cobrancas.filter((c: any) => 
+        c.situacao === 'VENCIDO' || c.situacao === 'ATRASADO'
+      ).length;
 
-    // Ordenar por dias de atraso (decrescente)
-    resultados.sort((a, b) => b.diasAtraso - a.diasAtraso);
+      // Calcular valores
+      const valorTotal = proposta.condicoes_data?.valorTotalFinanciado || 0;
+      const valorParcela = totalParcelas > 0 ? valorTotal / totalParcelas : 0;
+      const valorTotalPago = parcelasPagas * valorParcela;
+      const valorTotalPendente = (parcelasPendentes + parcelasVencidas) * valorParcela;
 
-    res.json(resultados);
+      // Calcular dias de atraso
+      let diasAtraso = 0;
+      const parcelaVencidaMaisAntiga = cobrancas
+        .filter((c: any) => c.situacao === 'VENCIDO' || c.situacao === 'ATRASADO')
+        .sort((a: any, b: any) => new Date(a.dataVencimento).getTime() - new Date(b.dataVencimento).getTime())[0];
+      
+      if (parcelaVencidaMaisAntiga) {
+        const dataVencimento = new Date(parcelaVencidaMaisAntiga.dataVencimento);
+        const hoje = new Date();
+        diasAtraso = Math.floor((hoje.getTime() - dataVencimento.getTime()) / (1000 * 60 * 60 * 24));
+      }
+
+      // Determinar status geral
+      let status: 'em_dia' | 'inadimplente' | 'quitado' = 'em_dia';
+      if (parcelasPagas === totalParcelas && totalParcelas > 0) {
+        status = 'quitado';
+      } else if (parcelasVencidas > 0) {
+        status = 'inadimplente';
+      }
+
+      return {
+        id: proposta.id,
+        numeroContrato: proposta.id.slice(0, 8).toUpperCase(),
+        nomeCliente: proposta.cliente_data?.nome || 'Sem nome',
+        cpfCliente: proposta.cliente_data?.cpf || 'Sem CPF',
+        telefoneCliente: proposta.cliente_data?.telefone || 'Sem telefone',
+        emailCliente: proposta.cliente_data?.email || 'Sem email',
+        valorTotal,
+        valorFinanciado: proposta.condicoes_data?.valor || 0,
+        quantidadeParcelas: proposta.condicoes_data?.prazo || totalParcelas,
+        parcelasPagas,
+        parcelasPendentes,
+        parcelasVencidas,
+        valorTotalPago,
+        valorTotalPendente,
+        diasAtraso,
+        status,
+        dataContrato: proposta.createdAt,
+        ccbAssinada: !!proposta.assinatura_eletronica_concluida,
+        parcelas: cobrancas.map((cobranca: any, index: number) => ({
+          id: cobranca.id,
+          numero: index + 1,
+          valorParcela,
+          dataVencimento: cobranca.dataVencimento,
+          dataPagamento: cobranca.dataSituacao,
+          codigoBoleto: cobranca.codigoSolicitacao,
+          linhaDigitavel: cobranca.linhaDigitavel,
+          codigoBarras: cobranca.codigoBarras,
+          status: mapearStatusCobranca(cobranca.situacao),
+          diasAtraso: calcularDiasAtraso(cobranca.dataVencimento, cobranca.situacao),
+          // Dados do Inter Bank
+          interCodigoSolicitacao: cobranca.codigoSolicitacao,
+          interQrCode: cobranca.pixQrCode,
+          interPixCopiaECola: cobranca.pixCopiaECola,
+          interSituacao: cobranca.situacao,
+          interNossoNumero: cobranca.nossoNumero
+        })),
+        documentos: {
+          ccb: proposta.ccb_path
+        }
+      };
+    });
+
+    res.json(cobrancasFormatadas);
   } catch (error) {
-    console.error('Erro ao buscar cobranças:', error);
+    console.error('[COBRANÇAS] Erro ao buscar cobranças:', error);
     res.status(500).json({ error: 'Erro ao buscar cobranças' });
   }
 });
 
-// POST /api/cobrancas/:id/atualizar-status - Atualizar status das parcelas via API do Inter
-router.post('/:id/atualizar-status', jwtAuthMiddleware, roleGuard(['FINANCEIRO', 'ADMINISTRADOR', 'DIRETOR']), async (req: AuthenticatedRequest, res: Response) => {
+// Atualizar status de uma cobrança específica
+router.post('/:propostaId/atualizar-status', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
-    const { id } = req.params;
-    const userId = req.user?.id;
+    const { propostaId } = req.params;
     
-    if (!userId) {
-      return res.status(401).json({ error: 'Usuário não autenticado' });
-    }
+    // Buscar todas as cobranças da proposta
+    const cobrancas = await db
+      .select()
+      .from(interCollections)
+      .where(eq(interCollections.propostaId, propostaId));
 
-    // Buscar parcelas da proposta
-    const parcelas: any[] = []; // TODO: implementar getParcelasByPropostaId quando tabela parcelas estiver criada
-    
-    // Atualizar status de cada parcela
-    for (const parcela of parcelas) {
-      if (parcela.codigoBoleto && !parcela.dataPagamento) {
-        try {
-          // TODO: Descomentar quando API do Inter estiver configurada
-          // const statusInter = await interBankAPI.consultarBoleto(parcela.codigoBoleto);
-          const statusInter = { situacao: 'PENDENTE' };
+    // Atualizar status de cada cobrança no Banco Inter
+    for (const cobranca of cobrancas) {
+      try {
+        const detalhes = await interBankService.recuperarCobranca(cobranca.codigoSolicitacao);
+        
+        // Atualizar no banco de dados
+        await db
+          .update(interCollections)
+          .set({
+            situacao: detalhes.situacao,
+            dataSituacao: detalhes.dataSituacao,
+            nossoNumero: detalhes.nossoNumero,
+            linhaDigitavel: detalhes.linhaDigitavel || detalhes.boleto?.linhaDigitavel,
+            codigoBarras: detalhes.codigoBarras || detalhes.boleto?.codigoBarras,
+            pixCopiaECola: detalhes.pixCopiaECola || detalhes.pix?.pixCopiaECola,
+            updatedAt: new Date()
+          })
+          .where(eq(interCollections.id, cobranca.id));
           
-          if (statusInter.situacao === 'PAGO') {
-            // TODO: Atualizar parcela como paga quando tabela parcelas estiver criada
-            // await storage.updateParcela(parcela.id, {
-            //   dataPagamento: statusInter.dataPagamento,
-            //   valorPago: statusInter.valorPago || parcela.valorParcela,
-            // });
-          }
-        } catch (error) {
-          console.error(`Erro ao atualizar parcela ${parcela.id}:`, error);
-        }
+      } catch (error) {
+        console.error(`[COBRANÇAS] Erro ao atualizar cobrança ${cobranca.id}:`, error);
       }
     }
-    
+
     // Registrar log
-    await storage.createPropostaLog({
-      propostaId: id,
-      autorId: userId,
-      statusAnterior: '',
-      statusNovo: 'status_parcelas_atualizado',
-      observacao: 'Status das parcelas atualizado via API do Banco Inter'
+    await db.insert(propostaLogs).values({
+      propostaId,
+      acao: 'status_cobrancas_atualizado',
+      descricao: 'Status das cobranças atualizado via dashboard',
+      dadosAnteriores: {},
+      dadosNovos: { totalCobrancas: cobrancas.length },
+      usuarioId: req.user!.id,
+      usuarioNome: req.user!.nome || 'Sistema',
+      ip: req.ip || 'unknown'
     });
 
-    res.json({ success: true, message: 'Status das parcelas atualizado com sucesso' });
+    res.json({ success: true, message: 'Status atualizado com sucesso' });
   } catch (error) {
-    console.error('Erro ao atualizar status:', error);
-    res.status(500).json({ error: 'Erro ao atualizar status das parcelas' });
+    console.error('[COBRANÇAS] Erro ao atualizar status:', error);
+    res.status(500).json({ error: 'Erro ao atualizar status' });
   }
 });
 
-// POST /api/cobrancas/contato - Enviar mensagem de cobrança
-router.post('/contato', jwtAuthMiddleware, roleGuard(['FINANCEIRO', 'ADMINISTRADOR', 'DIRETOR']), async (req: AuthenticatedRequest, res: Response) => {
+// Enviar mensagem de cobrança
+const contatoSchema = z.object({
+  propostaId: z.string().uuid(),
+  tipo: z.enum(['whatsapp', 'sms', 'email']),
+  destinatario: z.string(),
+  mensagem: z.string()
+});
+
+router.post('/contato', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
-    const userId = req.user?.id;
+    const validatedData = contatoSchema.parse(req.body);
     
-    if (!userId) {
-      return res.status(401).json({ error: 'Usuário não autenticado' });
-    }
-
-    const { propostaId, tipo, destinatario, mensagem } = req.body;
-
-    // TODO: Registrar comunicação quando método createComunicacaoLog estiver disponível
-    // await storage.createComunicacaoLog({
-    //   propostaId,
-    //   usuarioId: userId,
-    //   tipo: tipo as any,
-    //   destinatario,
-    //   mensagem,
-    //   status: 'enviado',
-    //   dataEnvio: new Date(),
-    // });
-    
-    // Registrar log da proposta
-    await storage.createPropostaLog({
-      propostaId,
-      autorId: userId,
-      statusAnterior: '',
-      statusNovo: 'cobranca_enviada',
-      observacao: `Lembrete de cobrança enviado via ${tipo}`
+    // Aqui você implementaria a integração com serviços de envio
+    // Por enquanto, apenas registramos o log
+    await db.insert(propostaLogs).values({
+      propostaId: validatedData.propostaId,
+      acao: 'cobranca_enviada',
+      descricao: `Cobrança enviada via ${validatedData.tipo}`,
+      dadosAnteriores: {},
+      dadosNovos: {
+        tipo: validatedData.tipo,
+        destinatario: validatedData.destinatario,
+        mensagem: validatedData.mensagem
+      },
+      usuarioId: req.user!.id,
+      usuarioNome: req.user!.nome || 'Sistema',
+      ip: req.ip || 'unknown'
     });
-
-    // Aqui você pode integrar com serviços de envio real (Twilio, SendGrid, etc.)
-    // Por ora, apenas simulamos o envio
 
     res.json({ success: true, message: 'Mensagem enviada com sucesso' });
   } catch (error) {
-    console.error('Erro ao enviar contato:', error);
+    console.error('[COBRANÇAS] Erro ao enviar contato:', error);
     res.status(500).json({ error: 'Erro ao enviar mensagem' });
   }
 });
+
+// Funções auxiliares
+function mapearStatusCobranca(situacao: string): 'pago' | 'pendente' | 'vencido' {
+  switch (situacao) {
+    case 'PAGO':
+    case 'RECEBIDO':
+      return 'pago';
+    case 'VENCIDO':
+    case 'ATRASADO':
+      return 'vencido';
+    default:
+      return 'pendente';
+  }
+}
+
+function calcularDiasAtraso(dataVencimento: string, situacao: string): number {
+  if (situacao !== 'VENCIDO' && situacao !== 'ATRASADO') {
+    return 0;
+  }
+  
+  const vencimento = new Date(dataVencimento);
+  const hoje = new Date();
+  const diferenca = hoje.getTime() - vencimento.getTime();
+  return Math.max(0, Math.floor(diferenca / (1000 * 60 * 60 * 24)));
+}
 
 export default router;
