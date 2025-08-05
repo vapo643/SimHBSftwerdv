@@ -179,6 +179,7 @@ export const propostas = pgTable("propostas", {
   dadosPagamentoNomeTitular: text("dados_pagamento_nome_titular"),
   dadosPagamentoCpfTitular: text("dados_pagamento_cpf_titular"),
   dadosPagamentoPix: text("dados_pagamento_pix"), // Chave PIX se preferir
+  dadosPagamentoTipoPix: text("dados_pagamento_tipo_pix"), // CPF, Email, Telefone, Aleatória
 
   // Campos JSONB legados (mantidos para compatibilidade)
   clienteData: text("cliente_data"),
@@ -322,6 +323,38 @@ export const interCallbacks = pgTable("inter_callbacks", {
   erro: text("erro"), // Error message if processing failed
   createdAt: timestamp("created_at").defaultNow(),
   processedAt: timestamp("processed_at"),
+});
+
+// Tabela de Parcelas - Controle de pagamentos parcelados
+export const parcelas = pgTable("parcelas", {
+  id: serial("id").primaryKey(),
+  propostaId: text("proposta_id").references(() => propostas.id, { onDelete: 'cascade' }).notNull(),
+  numeroParcela: integer("numero_parcela").notNull(),
+  valorParcela: decimal("valor_parcela", { precision: 12, scale: 2 }).notNull(),
+  dataVencimento: text("data_vencimento").notNull(), // YYYY-MM-DD
+  dataPagamento: text("data_pagamento"), // YYYY-MM-DD
+  status: text("status").notNull().default("pendente"), // pendente, pago, vencido
+  codigoBoleto: text("codigo_boleto"),
+  linhaDigitavel: text("linha_digitavel"),
+  codigoBarras: text("codigo_barras"),
+  formaPagamento: text("forma_pagamento"), // boleto, pix, transferencia
+  comprovantePagamento: text("comprovante_pagamento"), // URL do comprovante
+  observacoes: text("observacoes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Observações de Cobrança - Sistema de histórico de contatos
+export const observacoesCobranca = pgTable("observacoes_cobranca", {
+  id: serial("id").primaryKey(),
+  propostaId: text("proposta_id").references(() => propostas.id, { onDelete: 'cascade' }).notNull(),
+  userId: uuid("user_id").references(() => profiles.id).notNull(),
+  userName: text("user_name").notNull(), // Nome do usuário que fez a observação
+  observacao: text("observacao").notNull(),
+  tipoContato: text("tipo_contato"), // telefone, whatsapp, sms, email, presencial
+  statusPromessa: text("status_promessa"), // promessa_pagamento, recusa, sem_contato, etc
+  dataPromessaPagamento: timestamp("data_promessa_pagamento"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 // Zod Schemas para validação

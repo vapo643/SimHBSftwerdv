@@ -12,7 +12,7 @@ import NovaProposta from "@/pages/propostas/nova";
 import FilaAnalise from "@/pages/credito/fila";
 import AnaliseManual from "@/pages/credito/analise";
 import Pagamentos from "@/pages/financeiro/pagamentos";
-import Cobrancas from "@/pages/financeiro/cobrancas";
+import CobrancasPage from "@/pages/financeiro/CobrancasPage";
 import Formalizacao from "@/pages/formalizacao";
 import TabelasComerciais from "@/pages/configuracoes/tabelas";
 import UsuariosPage from "@/pages/admin/usuarios";
@@ -71,7 +71,7 @@ function Router() {
       </Route>
       <Route path="/financeiro/cobrancas">
         <ProtectedRoute>
-          <Cobrancas />
+          <CobrancasPage />
         </ProtectedRoute>
       </Route>
       <Route path="/formalizacao">

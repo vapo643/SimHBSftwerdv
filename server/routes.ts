@@ -15,6 +15,7 @@ import { interRoutes } from "./routes/inter.js";
 import interWebhookRouter from "./routes/webhooks/inter";
 import { setupSecurityRoutes } from "./routes/security.js";
 import emailChangeRoutes from "./routes/email-change";
+import cobrancasRoutes from "./routes/cobrancas";
 import { getBrasiliaDate, formatBrazilianDateTime, generateApprovalDate, getBrasiliaTimestamp } from "./lib/timezone";
 import { securityLogger, SecurityEventType, getClientIP } from './lib/security-logger';
 import { passwordSchema, validatePassword } from "./lib/password-validator";
