@@ -167,6 +167,14 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
         analistaId: propostas.analistaId,
         ccbGerado: propostas.ccbGerado,
         assinaturaEletronicaConcluida: propostas.assinaturaEletronicaConcluida,
+        // Dados de pagamento
+        dadosPagamentoBanco: propostas.dadosPagamentoBanco,
+        dadosPagamentoAgencia: propostas.dadosPagamentoAgencia,
+        dadosPagamentoConta: propostas.dadosPagamentoConta,
+        dadosPagamentoTipo: propostas.dadosPagamentoTipo,
+        dadosPagamentoNomeTitular: propostas.dadosPagamentoNomeTitular,
+        dadosPagamentoCpfTitular: propostas.dadosPagamentoCpfTitular,
+        dadosPagamentoPix: propostas.dadosPagamentoPix,
         temBoleto: sql<boolean>`CASE WHEN EXISTS (
           SELECT 1 FROM inter_collections 
           WHERE inter_collections.proposta_id = ${propostas.id}
@@ -224,13 +232,13 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
         statusFrontend = 'cancelado';
       }
 
-      // Dados bancários mock (em produção, isso viria de outro lugar ou seria informado pelo usuário)
+      // Dados bancários da proposta ou N/A quando não disponível
       const contaBancaria = {
-        banco: 'Banco do Brasil',
-        agencia: '0001',
-        conta: '12345-6',
-        tipoConta: 'Corrente',
-        titular: proposta.clienteNome || 'Não informado'
+        banco: proposta.dadosPagamentoBanco || 'N/A',
+        agencia: proposta.dadosPagamentoAgencia || 'N/A',
+        conta: proposta.dadosPagamentoConta || 'N/A',
+        tipoConta: proposta.dadosPagamentoTipo || 'N/A',
+        titular: proposta.dadosPagamentoNomeTitular || proposta.clienteNome || 'N/A'
       };
 
       return {

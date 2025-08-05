@@ -171,6 +171,15 @@ export const propostas = pgTable("propostas", {
   clicksignSentAt: timestamp("clicksign_sent_at"),
   clicksignSignedAt: timestamp("clicksign_signed_at"),
 
+  // Dados de Pagamento (Destino do empréstimo) - Added August 5, 2025
+  dadosPagamentoBanco: text("dados_pagamento_banco"),
+  dadosPagamentoAgencia: text("dados_pagamento_agencia"),
+  dadosPagamentoConta: text("dados_pagamento_conta"),
+  dadosPagamentoTipo: text("dados_pagamento_tipo"), // 'conta_corrente', 'conta_poupanca'
+  dadosPagamentoNomeTitular: text("dados_pagamento_nome_titular"),
+  dadosPagamentoCpfTitular: text("dados_pagamento_cpf_titular"),
+  dadosPagamentoPix: text("dados_pagamento_pix"), // Chave PIX se preferir
+
   // Campos JSONB legados (mantidos para compatibilidade)
   clienteData: text("cliente_data"),
   condicoesData: text("condicoes_data"),
