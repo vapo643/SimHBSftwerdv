@@ -16,34 +16,34 @@ router.get('/', jwtAuthMiddleware, async (req, res) => {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    // Buscar propostas aprovadas ou pagas com cobranças
+    console.log('[COBRANÇAS DEBUG] ========== INÍCIO DA BUSCA ==========');
+    
+    // CRITICAL: APENAS propostas com boletos Inter devem aparecer
+    // Propostas ainda em formalização NÃO devem aparecer aqui
     const propostasComCobrancas = await db
       .select({
         proposta: propostas,
         cobrancas: sql<any>`
-          COALESCE(
-            json_agg(
-              json_build_object(
-                'id', ${interCollections.id},
-                'codigoSolicitacao', ${interCollections.codigoSolicitacao},
-                'nossoNumero', ${interCollections.nossoNumero},
-                'seuNumero', ${interCollections.seuNumero},
-                'valorNominal', ${interCollections.valorNominal},
-                'dataVencimento', ${interCollections.dataVencimento},
-                'situacao', ${interCollections.situacao},
-                'dataSituacao', ${interCollections.dataSituacao},
-                'linhaDigitavel', ${interCollections.linhaDigitavel},
-                'codigoBarras', ${interCollections.codigoBarras},
-                'pixQrCode', ${interCollections.pixTxid},
-                'pixCopiaECola', ${interCollections.pixCopiaECola}
-              ) ORDER BY ${interCollections.dataVencimento}
-            ) FILTER (WHERE ${interCollections.id} IS NOT NULL),
-            '[]'::json
+          json_agg(
+            json_build_object(
+              'id', ${interCollections.id},
+              'codigoSolicitacao', ${interCollections.codigoSolicitacao},
+              'nossoNumero', ${interCollections.nossoNumero},
+              'seuNumero', ${interCollections.seuNumero},
+              'valorNominal', ${interCollections.valorNominal},
+              'dataVencimento', ${interCollections.dataVencimento},
+              'situacao', ${interCollections.situacao},
+              'dataSituacao', ${interCollections.dataSituacao},
+              'linhaDigitavel', ${interCollections.linhaDigitavel},
+              'codigoBarras', ${interCollections.codigoBarras},
+              'pixQrCode', ${interCollections.pixTxid},
+              'pixCopiaECola', ${interCollections.pixCopiaECola}
+            ) ORDER BY ${interCollections.dataVencimento}
           )
         `.as('cobrancas')
       })
       .from(propostas)
-      .leftJoin(
+      .innerJoin(  // CRITICAL: INNER JOIN garante apenas propostas COM boletos
         interCollections,
         eq(propostas.id, interCollections.propostaId)
       )
@@ -55,13 +55,30 @@ router.get('/', jwtAuthMiddleware, async (req, res) => {
             eq(propostas.status, 'aprovado')
           ),
           isNotNull(propostas.ccbGerado),
-          isNotNull(propostas.assinaturaEletronicaConcluida)
+          isNotNull(propostas.assinaturaEletronicaConcluida),
+          isNotNull(interCollections.codigoSolicitacao)  // CRITICAL: Garantir que há boleto Inter
         )
       )
       .groupBy(propostas.id);
 
+    console.log(`[COBRANÇAS DEBUG] Propostas encontradas com boletos Inter: ${propostasComCobrancas.length}`);
+    
+    // Filtrar ainda mais para garantir que há boletos válidos
+    const propostasComBoletosValidos = propostasComCobrancas.filter(item => {
+      const cobrancas = item.cobrancas || [];
+      const temBoletosValidos = Array.isArray(cobrancas) && cobrancas.length > 0 && 
+        cobrancas.some((c: any) => c.codigoSolicitacao && c.linhaDigitavel);
+      
+      console.log(`[COBRANÇAS DEBUG] Proposta ${item.proposta.id}: ${cobrancas.length} boletos, válidos: ${temBoletosValidos}`);
+      
+      return temBoletosValidos;
+    });
+
+    console.log(`[COBRANÇAS DEBUG] Propostas FINAIS após filtro de boletos válidos: ${propostasComBoletosValidos.length}`);
+    console.log('[COBRANÇAS DEBUG] ========================================');
+
     // Formatar dados para o frontend
-    const cobrancasFormatadas = propostasComCobrancas.map(item => {
+    const cobrancasFormatadas = propostasComBoletosValidos.map(item => {
       const proposta = item.proposta;
       const cobrancas = item.cobrancas || [];
       
