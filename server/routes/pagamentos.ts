@@ -72,17 +72,39 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     // Verificar também boletos gerados via Inter Bank
     const propostasComBoletos = await db
       .select({ 
-        count: sql<number>`count(DISTINCT ${interCollections.propostaId})` 
+        count: sql<number>`count(DISTINCT ${interCollections.propostaId})`,
+        propostaId: interCollections.propostaId
       })
       .from(interCollections)
-      .where(sql`${interCollections.propostaId} IS NOT NULL`);
+      .where(sql`${interCollections.propostaId} IS NOT NULL`)
+      .groupBy(interCollections.propostaId);
 
     console.log(`[PAGAMENTOS DEBUG] Total propostas: ${totalPropostas[0]?.count || 0}`);
     console.log(`[PAGAMENTOS DEBUG] Propostas aprovadas: ${propostasAprovadas[0]?.count || 0}`);
     console.log(`[PAGAMENTOS DEBUG] Propostas com CCB assinada: ${propostasComCCB[0]?.count || 0}`);
-    console.log(`[PAGAMENTOS DEBUG] Propostas com boletos Inter: ${propostasComBoletos[0]?.count || 0}`);
+    console.log(`[PAGAMENTOS DEBUG] Propostas com boletos Inter: ${propostasComBoletos.length}`);
+    if (propostasComBoletos.length > 0) {
+      console.log(`[PAGAMENTOS DEBUG] Proposta com boleto Inter ID: ${propostasComBoletos[0].propostaId}`);
+      
+      // Debug: verificar o status dessa proposta específica
+      const [propostaComBoleto] = await db
+        .select()
+        .from(propostas)
+        .where(eq(propostas.id, propostasComBoletos[0].propostaId))
+        .limit(1);
+        
+      if (propostaComBoleto) {
+        console.log(`[PAGAMENTOS DEBUG] Status da proposta com boleto:`, {
+          id: propostaComBoleto.id,
+          status: propostaComBoleto.status,
+          ccbGerado: propostaComBoleto.ccbGerado,
+          assinaturaEletronicaConcluida: propostaComBoleto.assinaturaEletronicaConcluida,
+          clienteNome: propostaComBoleto.clienteNome
+        });
+      }
+    }
 
-    // Buscar propostas que estão prontas para pagamento ou já foram pagas
+    // Buscar propostas que tenham boletos gerados no Inter Bank OU estão prontas para pagamento
     const result = await db
       .select({
         id: propostas.id,
@@ -103,26 +125,25 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
         analistaId: propostas.analistaId,
         ccbGerado: propostas.ccbGerado,
         assinaturaEletronicaConcluida: propostas.assinaturaEletronicaConcluida,
-        hasInterCollection: sql<boolean>`EXISTS (SELECT 1 FROM inter_collections WHERE inter_collections.proposta_id = ${propostas.id})`,
+        interCollectionId: sql<string | null>`
+          (SELECT id FROM inter_collections 
+           WHERE inter_collections.proposta_id = ${propostas.id} 
+           LIMIT 1)`
       })
       .from(propostas)
       .leftJoin(lojas, eq(propostas.lojaId, lojas.id))
       .leftJoin(produtos, eq(propostas.produtoId, produtos.id))
       .where(
         and(
+          sql`${propostas.deletedAt} IS NULL`,
           or(
+            // Propostas com boletos gerados
+            sql`EXISTS (SELECT 1 FROM inter_collections WHERE inter_collections.proposta_id = ${propostas.id})`,
+            // Propostas prontas para pagamento
             eq(propostas.status, 'pronto_pagamento'),
-            eq(propostas.status, 'pago'),
-            // Incluir propostas aprovadas com CCB assinada e assinatura eletrônica concluída
-            and(
-              eq(propostas.status, 'aprovado'),
-              eq(propostas.ccbGerado, true),
-              eq(propostas.assinaturaEletronicaConcluida, true)
-            ),
-            // Incluir propostas que tenham boletos gerados no Inter Bank
-            sql`EXISTS (SELECT 1 FROM inter_collections WHERE inter_collections.proposta_id = ${propostas.id})`
-          ),
-          sql`${propostas.deletedAt} IS NULL`
+            // Propostas já pagas
+            eq(propostas.status, 'pago')
+          )
         )
       )
       .orderBy(desc(propostas.dataAprovacao));
@@ -134,7 +155,7 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
         status: result[0].status,
         ccbGerado: result[0].ccbGerado,
         assinaturaEletronicaConcluida: result[0].assinaturaEletronicaConcluida,
-        hasInterCollection: result[0].hasInterCollection,
+        interCollectionId: result[0].interCollectionId,
       });
     }
 
@@ -316,6 +337,47 @@ router.post("/:id/rejeitar", jwtAuthMiddleware, async (req: AuthenticatedRequest
   } catch (error) {
     console.error("Erro ao rejeitar pagamento:", error);
     res.status(500).json({ error: "Erro ao rejeitar pagamento" });
+  }
+});
+
+// Processar pagamento
+router.post("/:id/processar", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+  try {
+    const { id } = req.params;
+    const { comprovante } = req.body;
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ error: "Usuário não autenticado" });
+    }
+
+    // Buscar a proposta
+    const [proposta] = await db
+      .select()
+      .from(propostas)
+      .where(eq(propostas.id, id))
+      .limit(1);
+
+    if (!proposta) {
+      return res.status(404).json({ error: "Proposta não encontrada" });
+    }
+
+    // Atualizar status para pago
+    await db
+      .update(propostas)
+      .set({
+        status: 'pago',
+        dataPagamento: new Date(),
+        observacoes: `${proposta.observacoes || ''}\n\n[PAGAMENTO PROCESSADO] Empréstimo pago ao cliente`
+      })
+      .where(eq(propostas.id, id));
+
+    console.log(`[PAGAMENTOS] Pagamento processado para proposta ${id}`);
+
+    res.json({ success: true, message: "Pagamento processado com sucesso" });
+  } catch (error) {
+    console.error("[PAGAMENTOS] Erro ao processar pagamento:", error);
+    res.status(500).json({ error: "Erro ao processar pagamento" });
   }
 });
 
