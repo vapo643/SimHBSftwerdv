@@ -106,7 +106,7 @@ router.get('/:propostaId/:codigoSolicitacao/pdf', jwtAuthMiddleware, requireAnyR
     let pdfBuffer: Buffer;
     
     try {
-      const collectionDetails = await interService.obterCobranca(codigoSolicitacao);
+      const collectionDetails = await interService.recuperarCobranca(codigoSolicitacao);
       console.log(`[INTER COLLECTIONS] Collection details:`, JSON.stringify(collectionDetails, null, 2));
       
       // Verificar se o PDF está no próprio objeto (algumas APIs retornam assim)
@@ -137,10 +137,26 @@ router.get('/:propostaId/:codigoSolicitacao/pdf', jwtAuthMiddleware, requireAnyR
       throw error;
     }
     
-    // Verificar se o PDF é válido
+    // CRITICAL: Validar que é realmente um PDF antes de enviar
     if (!pdfBuffer || pdfBuffer.length === 0) {
-      throw new Error('PDF vazio ou inválido recebido do banco');
+      console.error(`[INTER COLLECTIONS] PDF buffer is empty`);
+      return res.status(404).json({
+        error: 'PDF não disponível',
+        message: 'O banco Inter não disponibiliza PDF para download direto. Use o código de barras ou QR Code para pagamento.'
+      });
     }
+    
+    // Verificar magic bytes do PDF (%PDF)
+    const pdfMagic = pdfBuffer.slice(0, 5).toString('utf8');
+    if (!pdfMagic.startsWith('%PDF')) {
+      console.error(`[INTER COLLECTIONS] Buffer is not a valid PDF. Magic bytes: ${pdfMagic.replace(/[^\x20-\x7E]/g, '.')}`);
+      return res.status(422).json({
+        error: 'PDF inválido',
+        message: 'O arquivo retornado pelo banco não é um PDF válido. Use o código de barras ou QR Code disponível na tela.'
+      });
+    }
+    
+    console.log(`[INTER COLLECTIONS] PDF validated successfully, size: ${pdfBuffer.length} bytes`);
     
     // Adicionar headers de segurança para evitar detecção de vírus
     res.setHeader('Content-Type', 'application/pdf');

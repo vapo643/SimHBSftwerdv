@@ -142,19 +142,40 @@ export class PDFDownloader {
           throw error;
         }
 
-        // Verificar content-type
+        // CRITICAL: Verificar se é realmente um PDF antes de criar blob
         const contentType = response.headers.get('content-type');
-        console.log(`[PDF_DOWNLOAD] Content-Type: ${contentType}`);
+        console.log(`[PDF_DOWNLOAD] Response Content-Type: ${contentType}`);
         
+        // Se não for PDF, verificar se é erro JSON
         if (contentType && !contentType.includes('application/pdf')) {
-          console.warn(`[PDF_DOWNLOAD] Unexpected content-type: ${contentType}`);
+          console.warn(`[PDF_DOWNLOAD] Response is not PDF, checking for error...`);
+          
+          // Se for JSON, é uma mensagem de erro
+          if (contentType.includes('application/json')) {
+            const errorData = await response.json();
+            console.error(`[PDF_DOWNLOAD] Server returned JSON error:`, errorData);
+            throw new Error(errorData.error || errorData.message || 'Erro ao baixar PDF');
+          }
+          
+          // Se não for nem PDF nem JSON, erro desconhecido
+          throw new Error(`Tipo de resposta inválido: ${contentType}`);
         }
-
+        
         const blob = await response.blob();
         console.log(`[PDF_DOWNLOAD] Blob size: ${blob.size} bytes, type: ${blob.type}`);
 
         if (blob.size === 0) {
           throw new Error('Received empty PDF file');
+        }
+        
+        // Validação adicional: verificar magic bytes do PDF
+        const arrayBuffer = await blob.slice(0, 5).arrayBuffer();
+        const bytes = new Uint8Array(arrayBuffer);
+        const pdfMagic = String.fromCharCode(...bytes);
+        
+        if (!pdfMagic.startsWith('%PDF')) {
+          console.error(`[PDF_DOWNLOAD] File is not a valid PDF. Magic bytes: ${pdfMagic}`);
+          throw new Error('Arquivo baixado não é um PDF válido');
         }
 
         // Criar download

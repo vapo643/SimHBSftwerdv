@@ -716,34 +716,21 @@ class InterBankService {
 
   /**
    * Get collection PDF
+   * NOTA: O endpoint /pdf do Inter retorna erro 406 - não suporta download direto
    */
   async obterPdfCobranca(codigoSolicitacao: string): Promise<Buffer> {
-    try {
-      console.log(`[INTER] 📄 Getting PDF for collection: ${codigoSolicitacao}`);
-
-      // Use makeRequest instead of direct fetch to ensure proper mTLS
-      // NOTA: Não usar Accept: application/pdf - o Inter retorna erro 406
-      const response = await this.makeRequest(`/cobranca/v3/cobrancas/${codigoSolicitacao}/pdf`, 'GET');
-      
-      // Check if response is a Buffer
-      if (Buffer.isBuffer(response)) {
-        console.log(`[INTER] ✅ PDF retrieved successfully (${response.length} bytes)`);
-        return response;
-      }
-      
-      // If not a buffer, try to convert
-      if (typeof response === 'string') {
-        const pdfBuffer = Buffer.from(response, 'base64');
-        console.log(`[INTER] ✅ PDF retrieved and converted from base64 (${pdfBuffer.length} bytes)`);
-        return pdfBuffer;
-      }
-      
-      throw new Error('Invalid PDF response format');
-
-    } catch (error) {
-      console.error('[INTER] ❌ Failed to get PDF:', error);
-      throw error;
-    }
+    console.log(`[INTER] 📄 Attempting to get PDF for collection: ${codigoSolicitacao}`);
+    
+    // CRITICAL: O banco Inter não permite download direto de PDF
+    // O endpoint /cobranca/v3/cobrancas/{id}/pdf retorna 406 Not Acceptable
+    // com mensagem: "Specified Accept Types [application/pdf] not supported"
+    
+    console.log(`[INTER] ⚠️ WARNING: Inter Bank API v3 does not support direct PDF download`);
+    console.log(`[INTER] ❌ The /pdf endpoint returns 406 Not Acceptable`);
+    console.log(`[INTER] 📄 Alternative: Use collection details (QR Code, barcode) from recuperarCobranca()`);
+    
+    // Lançar erro claro para evitar download de arquivo corrompido
+    throw new Error('O banco Inter não disponibiliza PDF para download direto. Use o código de barras ou QR Code para pagamento.');
   }
 
   /**
