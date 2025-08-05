@@ -223,14 +223,11 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
         // Dados da loja
         loja: lojas,
         // Dados do produto
-        produto: produtos,
-        // Dados do usuário
-        usuario: users
+        produto: produtos
       })
       .from(propostas)
       .leftJoin(lojas, eq(propostas.lojaId, lojas.id))
       .leftJoin(produtos, eq(propostas.produtoId, produtos.id))
-      .leftJoin(users, eq(propostas.userId, users.id))
       .where(
         and(
           // Não pode estar deletada
@@ -281,7 +278,7 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
 
     // Processar os resultados para o formato esperado pelo frontend
     const pagamentosFormatados = result.map((row: any) => {
-      const { proposta, loja, produto, usuario } = row;
+      const { proposta, loja, produto } = row;
       
       console.log(`[PAGAMENTOS DEBUG] Processando proposta ${proposta.id}:`, {
         clienteNome: proposta.clienteNome,
