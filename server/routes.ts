@@ -3922,12 +3922,12 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
   app.use('/api/clicksign', clickSignRouter);
   app.use('/webhooks/inter', interWebhookRouter);
 
-  // Register Inter Bank routes
-  app.use('/api/inter', interRoutes);
-  
-  // Register Inter Collections routes
+  // Register Inter Collections routes FIRST (more specific route)
   const interCollectionsRouter = (await import('./routes/inter-collections.js')).default;
   app.use('/api/inter/collections', interCollectionsRouter);
+  
+  // Register Inter Bank routes AFTER (less specific route)
+  app.use('/api/inter', interRoutes);
 
   // Register Semgrep MCP routes - Projeto Cérbero
   const securityMCPRoutes = (await import('./routes/security-mcp.js')).default;
