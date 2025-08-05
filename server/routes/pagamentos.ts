@@ -146,7 +146,7 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
         assinaturaEletronicaConcluida: propostas.assinaturaEletronicaConcluida
       })
       .from(interCollections)
-      .innerJoin(propostas, eq(propostas.id, interCollections.propostaId))
+      .innerJoin(propostas, sql`${propostas.id} = ${interCollections.propostaId}::uuid`)
       .where(sql`${propostas.deletedAt} IS NULL`);
     
     console.log(`[PAGAMENTOS DEBUG] Total de propostas com boletos Inter: ${todasPropostasComBoletos.length}`);
