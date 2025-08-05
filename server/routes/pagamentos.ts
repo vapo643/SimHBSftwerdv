@@ -99,20 +99,23 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
       console.log(`[PAGAMENTOS DEBUG] Proposta com boleto Inter ID: ${propostasComBoletos[0].propostaId}`);
       
       // Debug: verificar o status dessa proposta específica
-      const [propostaComBoleto] = await db
-        .select()
-        .from(propostas)
-        .where(eq(propostas.id, propostasComBoletos[0].propostaId))
-        .limit(1);
+      const propostaIdString = propostasComBoletos[0].propostaId;
+      if (propostaIdString) {
+        const [propostaComBoleto] = await db
+          .select()
+          .from(propostas)
+          .where(eq(propostas.id, propostaIdString))
+          .limit(1);
         
-      if (propostaComBoleto) {
-        console.log(`[PAGAMENTOS DEBUG] Status da proposta com boleto:`, {
-          id: propostaComBoleto.id,
-          status: propostaComBoleto.status,
-          ccbGerado: propostaComBoleto.ccbGerado,
-          assinaturaEletronicaConcluida: propostaComBoleto.assinaturaEletronicaConcluida,
-          clienteNome: propostaComBoleto.clienteNome
-        });
+        if (propostaComBoleto) {
+          console.log(`[PAGAMENTOS DEBUG] Status da proposta com boleto:`, {
+            id: propostaComBoleto.id,
+            status: propostaComBoleto.status,
+            ccbGerado: propostaComBoleto.ccbGerado,
+            assinaturaEletronicaConcluida: propostaComBoleto.assinaturaEletronicaConcluida,
+            clienteNome: propostaComBoleto.clienteNome
+          });
+        }
       }
     }
 
@@ -164,15 +167,8 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     // 3. Status está como pronto_pagamento ou aguardando_desembolso
     console.log(`[PAGAMENTOS SECURITY] Aplicando filtros críticos de segurança para pagamentos`);
     
-    // Primeiro buscar propostas com boletos para evitar problema de SQL
-    const propostasComBoletosIds = await db
-      .select({ propostaId: interCollections.propostaId })
-      .from(interCollections)
-      .where(sql`${interCollections.propostaId} IS NOT NULL`);
-    
-    const idsComBoletos = propostasComBoletosIds.map(p => p.propostaId).filter(id => id !== null);
-
-    const result = await db
+    // Query mais simples: buscar propostas elegíveis e verificar boletos depois
+    const propostasElegiveis = await db
       .select({
         // Dados da proposta
         proposta: propostas,
@@ -194,13 +190,32 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
           // OBRIGATÓRIO: CCB deve estar assinada
           eq(propostas.ccbGerado, true),
           eq(propostas.assinaturaEletronicaConcluida, true),
-          // OBRIGATÓRIO: Boletos devem estar gerados - usando inArray seguro
-          idsComBoletos.length > 0 ? inArray(propostas.id, idsComBoletos as string[]) : sql`false`,
           // Status deve ser pronto_pagamento
           eq(propostas.status, 'pronto_pagamento')
         )
       )
       .orderBy(desc(propostas.dataAprovacao));
+
+    // Agora buscar quais propostas têm boletos
+    const propostaIds = propostasElegiveis.map(p => p.proposta.id);
+    const boletosInfo = propostaIds.length > 0 ? await db
+      .select({ 
+        propostaId: interCollections.propostaId,
+        count: sql<number>`count(*)` 
+      })
+      .from(interCollections)
+      .where(
+        and(
+          sql`${interCollections.propostaId} IS NOT NULL`,
+          inArray(interCollections.propostaId, propostaIds)
+        )
+      )
+      .groupBy(interCollections.propostaId) : [];
+    
+    const propostasComBoletosSet = new Set(boletosInfo.map(b => b.propostaId));
+    
+    // Filtrar apenas as propostas que têm boletos
+    const result = propostasElegiveis.filter(p => propostasComBoletosSet.has(p.proposta.id));
 
     console.log(`[PAGAMENTOS DEBUG] Total propostas encontradas: ${result.length}`);
     
