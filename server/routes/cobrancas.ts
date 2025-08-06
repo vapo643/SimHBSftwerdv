@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { db } from "../lib/supabase";
-import { propostas, parcelas, observacoesCobranca, interCollections, profiles } from "@shared/schema";
+import { propostas, parcelas, observacoesCobranca, historicoObservacoesCobranca, interCollections, profiles } from "@shared/schema";
 import { eq, and, sql, desc, gte, lte, inArray, or } from "drizzle-orm";
 import { format, parseISO, differenceInDays, isAfter } from "date-fns";
 import { jwtAuthMiddleware } from "../lib/jwt-auth-middleware";
@@ -287,11 +287,22 @@ router.get("/:propostaId/ficha", async (req, res) => {
     const referencias: any[] = [];
 
     // Buscar observações/histórico
-    const observacoes = await db
+    const observacoesRaw = await db
       .select()
-      .from(observacoesCobranca)
-      .where(eq(observacoesCobranca.propostaId, propostaId))
-      .orderBy(desc(observacoesCobranca.createdAt));
+      .from(historicoObservacoesCobranca)
+      .where(eq(historicoObservacoesCobranca.propostaId, propostaId))
+      .orderBy(desc(historicoObservacoesCobranca.createdAt));
+    
+    // Mapear observações para o formato esperado pelo frontend
+    const observacoes = observacoesRaw.map(obs => ({
+      id: obs.id,
+      observacao: obs.mensagem,
+      userName: obs.criadoPor,
+      tipoContato: obs.tipoAcao,
+      statusPromessa: obs.tipoAcao,
+      createdAt: obs.createdAt,
+      dadosAcao: obs.dadosAcao
+    }));
 
     // Buscar parcelas e boletos
     const parcelasData = await db
