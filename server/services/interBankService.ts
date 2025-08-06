@@ -710,15 +710,22 @@ class InterBankService {
    */
   async editarCobranca(codigoSolicitacao: string, updateData: Partial<CobrancaRequest>): Promise<any> {
     try {
-      console.log(`[INTER] ✏️ Editing collection: ${codigoSolicitacao}`);
+      console.log(`🔍 [AUDIT-INTER] ===== EDITANDO COBRANÇA =====`);
+      console.log(`🔍 [AUDIT-INTER] Código Solicitação: ${codigoSolicitacao}`);
+      console.log(`🔍 [AUDIT-INTER] Payload Exato Enviado:`, JSON.stringify(updateData, null, 2));
 
       const response = await this.makeRequest(`/cobranca/v3/cobrancas/${codigoSolicitacao}`, 'PATCH', updateData);
       
-      console.log(`[INTER] ✅ Collection edited successfully`);
+      console.log(`🔍 [AUDIT-INTER] Resposta Completa da API:`, {
+        statusRecebido: response ? 'Success' : 'Null response',
+        dadosRetornados: JSON.stringify(response, null, 2)
+      });
+      console.log(`🔍 [AUDIT-INTER] ===== FIM EDIÇÃO =====`);
+      
       return response;
 
     } catch (error) {
-      console.error('[INTER] ❌ Failed to edit collection:', error);
+      console.error('🔍 [AUDIT-INTER] ❌ Erro ao editar cobrança:', error);
       throw error;
     }
   }
@@ -728,7 +735,9 @@ class InterBankService {
    */
   async cancelarCobranca(codigoSolicitacao: string, motivoCancelamento: string = 'CANCELAMENTO_ADMINISTRATIVO'): Promise<any> {
     try {
-      console.log(`[INTER] ❌ Cancelling collection: ${codigoSolicitacao}`);
+      console.log(`🔍 [AUDIT-INTER] ===== CANCELANDO COBRANÇA =====`);
+      console.log(`🔍 [AUDIT-INTER] Código Solicitação: ${codigoSolicitacao}`);
+      console.log(`🔍 [AUDIT-INTER] Motivo: ${motivoCancelamento}`);
 
       const response = await this.makeRequest(
         `/cobranca/v3/cobrancas/${codigoSolicitacao}/cancelamento`, 
@@ -736,11 +745,13 @@ class InterBankService {
         { motivoCancelamento }
       );
       
-      console.log(`[INTER] ✅ Collection cancelled successfully`);
+      console.log(`🔍 [AUDIT-INTER] Resposta do Cancelamento:`, JSON.stringify(response, null, 2));
+      console.log(`🔍 [AUDIT-INTER] ===== FIM CANCELAMENTO =====`);
+      
       return response;
 
     } catch (error) {
-      console.error('[INTER] ❌ Failed to cancel collection:', error);
+      console.error('🔍 [AUDIT-INTER] ❌ Erro ao cancelar cobrança:', error);
       throw error;
     }
   }

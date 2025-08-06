@@ -86,6 +86,16 @@ router.patch('/collections/batch-extend', jwtAuthMiddleware, async (req: Authent
 
     const { codigosSolicitacao, novaDataVencimento } = req.body;
 
+    // === AUDIT LOG 1: Entrada da Requisição ===
+    console.log('🔍 [AUDIT-PRORROGAR] ====== INÍCIO DA PRORROGAÇÃO ======');
+    console.log('🔍 [AUDIT-PRORROGAR] Dados recebidos do frontend:', {
+      codigosSolicitacao,
+      novaDataVencimento,
+      quantidadeBoletos: Array.isArray(codigosSolicitacao) ? codigosSolicitacao.length : 0,
+      timestamp: new Date().toISOString(),
+      usuario: req.user?.email
+    });
+
     if (!codigosSolicitacao || !Array.isArray(codigosSolicitacao) || codigosSolicitacao.length === 0) {
       return res.status(400).json({ error: 'Selecione pelo menos um boleto' });
     }
@@ -94,17 +104,47 @@ router.patch('/collections/batch-extend', jwtAuthMiddleware, async (req: Authent
       return res.status(400).json({ error: 'Nova data de vencimento é obrigatória' });
     }
 
-    console.log(`[INTER] 📝 Prorrogando ${codigosSolicitacao.length} boletos para ${novaDataVencimento}`);
-
     const results = [];
     const errors = [];
+    const auditResults = [];
 
     // Process each selected boleto
     for (const codigoSolicitacao of codigosSolicitacao) {
       try {
+        // === AUDIT LOG 2: Antes da modificação ===
+        console.log(`🔍 [AUDIT-PRORROGAR] Processando boleto ${codigoSolicitacao}`);
+        
+        // Buscar dados atuais do boleto para comparação
+        const [boletoAtual] = await db.select()
+          .from(interCollections)
+          .where(eq(interCollections.codigoSolicitacao, codigoSolicitacao))
+          .limit(1);
+        
+        console.log(`🔍 [AUDIT-PRORROGAR] Estado atual do boleto:`, {
+          codigoSolicitacao,
+          dataVencimentoAtual: boletoAtual?.dataVencimento,
+          situacao: boletoAtual?.situacao,
+          numeroParcela: boletoAtual?.numeroParcela
+        });
+
         // Update in Inter Bank API
         await interBankService.editarCobranca(codigoSolicitacao, {
           dataVencimento: novaDataVencimento
+        });
+
+        // === AUDIT LOG 3: Verificação pós-API ===
+        console.log(`🔍 [AUDIT-PRORROGAR] Verificando atualização na API do Inter...`);
+        const cobrancaAtualizada = await interBankService.recuperarCobranca(codigoSolicitacao);
+        
+        const dataVencimentoVerificada = cobrancaAtualizada.cobranca?.dataVencimento;
+        const atualizacaoConfirmada = dataVencimentoVerificada === novaDataVencimento;
+        
+        console.log(`🔍 [AUDIT-PRORROGAR] Resultado da verificação na API:`, {
+          codigoSolicitacao,
+          novaDataEnviada: novaDataVencimento,
+          dataRetornadaAPI: dataVencimentoVerificada,
+          atualizacaoConfirmada,
+          statusAPI: cobrancaAtualizada.cobranca?.situacao
         });
 
         // Update local database
@@ -116,9 +156,39 @@ router.patch('/collections/batch-extend', jwtAuthMiddleware, async (req: Authent
           })
           .where(eq(interCollections.codigoSolicitacao, codigoSolicitacao));
 
+        // === AUDIT LOG 4: Verificação do banco local ===
+        const [boletoAposUpdate] = await db.select()
+          .from(interCollections)
+          .where(eq(interCollections.codigoSolicitacao, codigoSolicitacao))
+          .limit(1);
+        
+        console.log(`🔍 [AUDIT-PRORROGAR] Verificação do banco de dados local:`, {
+          codigoSolicitacao,
+          dataVencimentoAntes: boletoAtual?.dataVencimento,
+          dataVencimentoDepois: boletoAposUpdate?.dataVencimento,
+          atualizacaoBancoConfirmada: boletoAposUpdate?.dataVencimento === novaDataVencimento
+        });
+
+        // Adicionar ao relatório de auditoria
+        auditResults.push({
+          codigoSolicitacao,
+          parcela: boletoAtual?.numeroParcela,
+          dataAnterior: boletoAtual?.dataVencimento,
+          dataNova: novaDataVencimento,
+          verificacaoAPI: {
+            dataRetornada: dataVencimentoVerificada,
+            confirmada: atualizacaoConfirmada
+          },
+          verificacaoBanco: {
+            dataGravada: boletoAposUpdate?.dataVencimento,
+            confirmada: boletoAposUpdate?.dataVencimento === novaDataVencimento
+          },
+          sucesso: atualizacaoConfirmada && (boletoAposUpdate?.dataVencimento === novaDataVencimento)
+        });
+
         results.push({ codigoSolicitacao, success: true });
       } catch (error) {
-        console.error(`[INTER] Falha ao prorrogar ${codigoSolicitacao}:`, error);
+        console.error(`🔍 [AUDIT-PRORROGAR] ❌ Erro ao prorrogar ${codigoSolicitacao}:`, error);
         errors.push({ codigoSolicitacao, error: error instanceof Error ? error.message : 'Unknown error' });
       }
     }
@@ -136,19 +206,31 @@ router.patch('/collections/batch-extend', jwtAuthMiddleware, async (req: Authent
         mensagem: `Vencimento prorrogado para ${novaDataVencimento} em ${results.length} boleto(s)`,
         criadoPor: req.user?.email || 'Sistema',
         tipoAcao: 'PRORROGACAO',
-        dadosAcao: { codigosSolicitacao, novaDataVencimento, results, errors }
+        dadosAcao: { codigosSolicitacao, novaDataVencimento, results, errors, auditoria: auditResults }
       });
     }
+
+    // === AUDIT LOG 5: Relatório Final ===
+    console.log('🔍 [AUDIT-PRORROGAR] ====== RELATÓRIO FINAL ======');
+    console.log('🔍 [AUDIT-PRORROGAR] Resumo:', {
+      totalProcessados: codigosSolicitacao.length,
+      sucessos: results.length,
+      falhas: errors.length,
+      taxaSucesso: `${(results.length / codigosSolicitacao.length * 100).toFixed(1)}%`
+    });
+    console.log('🔍 [AUDIT-PRORROGAR] Detalhes da auditoria:', JSON.stringify(auditResults, null, 2));
+    console.log('🔍 [AUDIT-PRORROGAR] ====== FIM DA PRORROGAÇÃO ======');
 
     res.json({
       success: true,
       message: `${results.length} boleto(s) prorrogado(s) com sucesso`,
       results,
-      errors
+      errors,
+      auditoria: auditResults
     });
 
   } catch (error) {
-    console.error('[INTER] Failed to batch extend:', error);
+    console.error('🔍 [AUDIT-PRORROGAR] ❌ Erro crítico:', error);
     res.status(500).json({
       error: 'Falha ao prorrogar boletos',
       details: error instanceof Error ? error.message : 'Unknown error'
@@ -171,11 +253,20 @@ router.post('/collections/settlement-discount', jwtAuthMiddleware, async (req: A
 
     const { propostaId, desconto, novasParcelas } = req.body;
 
+    // === AUDIT LOG 1: Entrada da Requisição ===
+    console.log('🔍 [AUDIT-QUITACAO] ====== INÍCIO DA QUITAÇÃO COM DESCONTO ======');
+    console.log('🔍 [AUDIT-QUITACAO] Dados recebidos do frontend:', {
+      propostaId,
+      desconto,
+      quantidadeNovasParcelas: Array.isArray(novasParcelas) ? novasParcelas.length : 0,
+      novasParcelas,
+      timestamp: new Date().toISOString(),
+      usuario: req.user?.email
+    });
+
     if (!propostaId || !desconto || !novasParcelas || !Array.isArray(novasParcelas)) {
       return res.status(400).json({ error: 'Dados incompletos' });
     }
-
-    console.log(`[INTER] 💰 Aplicando desconto de quitação para proposta ${propostaId}`);
 
     // Start database transaction
     const result = await db.transaction(async (tx) => {
@@ -201,12 +292,33 @@ router.post('/collections/settlement-discount', jwtAuthMiddleware, async (req: A
           )
         );
 
-      console.log(`[INTER] Cancelando ${boletosAtivos.length} boletos ativos`);
+      // === AUDIT LOG 2: Valor Restante da Dívida ===
+      const valorRestanteDivida = boletosAtivos.reduce((total, boleto) => {
+        return total + parseFloat(boleto.valorNominal || '0');
+      }, 0);
+
+      console.log('🔍 [AUDIT-QUITACAO] Análise da dívida atual:', {
+        quantidadeBoletosAtivos: boletosAtivos.length,
+        valorRestanteDivida: valorRestanteDivida.toFixed(2),
+        valorDesconto: desconto,
+        percentualDesconto: `${((desconto / valorRestanteDivida) * 100).toFixed(1)}%`,
+        novoValorTotal: (valorRestanteDivida - desconto).toFixed(2)
+      });
 
       // Step 3: Cancel all active boletos
       const cancelResults = [];
+      const auditCancelamentos = [];
+      
       for (const boleto of boletosAtivos) {
         try {
+          // === AUDIT LOG 3: Cancelamento de cada boleto antigo ===
+          console.log(`🔍 [AUDIT-QUITACAO] Cancelando boleto antigo:`, {
+            codigoSolicitacao: boleto.codigoSolicitacao,
+            parcela: boleto.numeroParcela,
+            valorOriginal: boleto.valorNominal,
+            dataVencimentoOriginal: boleto.dataVencimento
+          });
+          
           await interBankService.cancelarCobranca(boleto.codigoSolicitacao);
           
           // Mark as inactive with reason
@@ -220,9 +332,25 @@ router.post('/collections/settlement-discount', jwtAuthMiddleware, async (req: A
             })
             .where(eq(interCollections.codigoSolicitacao, boleto.codigoSolicitacao));
 
+          // Verificar cancelamento via API
+          const statusCancelado = await interBankService.recuperarCobranca(boleto.codigoSolicitacao);
+          
+          auditCancelamentos.push({
+            codigoSolicitacao: boleto.codigoSolicitacao,
+            situacaoAntes: boleto.situacao,
+            situacaoDepois: statusCancelado.cobranca?.situacao,
+            cancelamentoConfirmado: statusCancelado.cobranca?.situacao === 'CANCELADO'
+          });
+          
+          console.log(`🔍 [AUDIT-QUITACAO] Verificação do cancelamento:`, {
+            codigoSolicitacao: boleto.codigoSolicitacao,
+            statusRetornadoAPI: statusCancelado.cobranca?.situacao,
+            cancelamentoConfirmado: statusCancelado.cobranca?.situacao === 'CANCELADO'
+          });
+          
           cancelResults.push({ codigoSolicitacao: boleto.codigoSolicitacao, success: true });
         } catch (error) {
-          console.error(`[INTER] Erro ao cancelar ${boleto.codigoSolicitacao}:`, error);
+          console.error(`🔍 [AUDIT-QUITACAO] ❌ Erro ao cancelar ${boleto.codigoSolicitacao}:`, error);
           cancelResults.push({ 
             codigoSolicitacao: boleto.codigoSolicitacao, 
             error: error instanceof Error ? error.message : 'Unknown error' 
@@ -232,6 +360,8 @@ router.post('/collections/settlement-discount', jwtAuthMiddleware, async (req: A
 
       // Step 4: Create new boletos
       const novosBoletosData = [];
+      const auditNovosBoletosData = [];
+      
       const clienteData = {
         nome: proposta[0].clienteNome || '',
         cpf: proposta[0].clienteCpf || '',
@@ -249,7 +379,12 @@ router.post('/collections/settlement-discount', jwtAuthMiddleware, async (req: A
         const parcela = novasParcelas[i];
         
         try {
-          console.log(`[INTER] Criando novo boleto ${i + 1}/${novasParcelas.length}: R$ ${parcela.valor}`);
+          // === AUDIT LOG 4: Criação de cada novo boleto ===
+          console.log(`🔍 [AUDIT-QUITACAO] Criando novo boleto ${i + 1}/${novasParcelas.length}:`, {
+            parcela: i + 1,
+            valor: parcela.valor,
+            dataVencimento: parcela.dataVencimento
+          });
           
           // Create boleto via Inter API
           const novoBoleto = await interBankService.criarCobrancaParaProposta({
@@ -259,8 +394,21 @@ router.post('/collections/settlement-discount', jwtAuthMiddleware, async (req: A
             clienteData
           });
 
-          // Get full details
+          console.log(`🔍 [AUDIT-QUITACAO] Resposta da criação do boleto:`, {
+            codigoSolicitacao: novoBoleto.codigoSolicitacao,
+            sucesso: !!novoBoleto.codigoSolicitacao
+          });
+
+          // Get full details and verify creation
           const detalhes = await interBankService.recuperarCobranca(novoBoleto.codigoSolicitacao);
+          
+          console.log(`🔍 [AUDIT-QUITACAO] Verificação do novo boleto na API:`, {
+            codigoSolicitacao: novoBoleto.codigoSolicitacao,
+            valorConfirmado: detalhes.cobranca?.valorNominal,
+            dataVencimentoConfirmada: detalhes.cobranca?.dataVencimento,
+            situacao: detalhes.cobranca?.situacao,
+            criacaoConfirmada: true
+          });
 
           // Save to database
           await tx.insert(interCollections).values({
@@ -289,11 +437,39 @@ router.post('/collections/settlement-discount', jwtAuthMiddleware, async (req: A
             valor: parcela.valor,
             vencimento: parcela.dataVencimento
           });
+          
+          auditNovosBoletosData.push({
+            codigoSolicitacao: novoBoleto.codigoSolicitacao,
+            parcela: i + 1,
+            valorEnviado: parcela.valor,
+            valorConfirmadoAPI: detalhes.cobranca?.valorNominal,
+            dataVencimentoEnviada: parcela.dataVencimento,
+            dataVencimentoConfirmadaAPI: detalhes.cobranca?.dataVencimento,
+            situacaoAPI: detalhes.cobranca?.situacao,
+            criacaoConfirmada: true
+          });
         } catch (error) {
-          console.error(`[INTER] Erro ao criar boleto ${i + 1}:`, error);
+          console.error(`🔍 [AUDIT-QUITACAO] ❌ Erro ao criar boleto ${i + 1}:`, error);
           throw error; // Rollback transaction on error
         }
       }
+      
+      // === AUDIT LOG 5: Verificação do banco de dados ===
+      const boletosAposOperacao = await tx
+        .select()
+        .from(interCollections)
+        .where(eq(interCollections.propostaId, propostaId));
+      
+      const boletosInativos = boletosAposOperacao.filter(b => !b.isActive);
+      const boletosNovosAtivos = boletosAposOperacao.filter(b => b.isActive);
+      
+      console.log('🔍 [AUDIT-QUITACAO] Verificação do banco de dados local:', {
+        totalBoletosAntes: boletosAtivos.length,
+        totalBoletosInativos: boletosInativos.length,
+        totalBoletosNovosAtivos: boletosNovosAtivos.length,
+        boletosInativosCorretos: boletosInativos.length === boletosAtivos.length,
+        novosBoletosCorretos: boletosNovosAtivos.length === novasParcelas.length
+      });
 
       // Step 5: Save audit log
       await tx.insert(historicoObservacoesCobranca).values({
@@ -305,18 +481,41 @@ router.post('/collections/settlement-discount', jwtAuthMiddleware, async (req: A
           desconto, 
           boletosAntigos: cancelResults,
           novosBoletosData,
-          novasParcelas
+          novasParcelas,
+          auditoria: {
+            valorRestanteDivida,
+            percentualDesconto: `${((desconto / valorRestanteDivida) * 100).toFixed(1)}%`,
+            cancelamentos: auditCancelamentos,
+            novosBoletos: auditNovosBoletosData
+          }
         }
       });
 
       return {
         boletosAntigos: cancelResults,
         novosBoletosData,
-        message: `Quitação processada com sucesso. ${novosBoletosData.length} novo(s) boleto(s) criado(s).`
+        message: `Quitação processada com sucesso. ${novosBoletosData.length} novo(s) boleto(s) criado(s).`,
+        auditoria: {
+          valorRestanteDivida,
+          percentualDesconto: `${((desconto / valorRestanteDivida) * 100).toFixed(1)}%`,
+          cancelamentos: auditCancelamentos,
+          novosBoletos: auditNovosBoletosData
+        }
       };
     });
 
-    console.log(`[INTER] ✅ Desconto de quitação aplicado com sucesso`);
+    // === AUDIT LOG 6: Relatório Final ===
+    console.log('🔍 [AUDIT-QUITACAO] ====== RELATÓRIO FINAL ======');
+    console.log('🔍 [AUDIT-QUITACAO] Resumo:', {
+      valorDividaOriginal: result.auditoria.valorRestanteDivida,
+      descontoAplicado: desconto,
+      percentualDesconto: result.auditoria.percentualDesconto,
+      boletosAntigosCancelados: result.boletosAntigos.length,
+      novosBoletosData: result.novosBoletosData.length,
+      sucesso: true
+    });
+    console.log('🔍 [AUDIT-QUITACAO] Detalhes da auditoria:', JSON.stringify(result.auditoria, null, 2));
+    console.log('🔍 [AUDIT-QUITACAO] ====== FIM DA QUITAÇÃO COM DESCONTO ======');
 
     res.json({
       success: true,
