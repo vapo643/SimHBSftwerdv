@@ -72,6 +72,84 @@ router.get('/test', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) =>
 });
 
 /**
+ * Edit collection (boleto/PIX) - Update due date or apply discount
+ * PATCH /api/inter/collections/:codigoSolicitacao
+ */
+router.patch('/collections/:codigoSolicitacao', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+  try {
+    // Check user permissions - only ADMIN can modify
+    if (req.user?.role !== 'ADMINISTRADOR') {
+      return res.status(403).json({ 
+        error: 'Apenas administradores podem modificar cobranças' 
+      });
+    }
+
+    const { codigoSolicitacao } = req.params;
+    const { action, ...updateData } = req.body;
+
+    console.log(`[INTER] 📝 Modifying collection ${codigoSolicitacao}, action: ${action}`);
+
+    let payload: any = {};
+
+    // Handle different action types
+    if (action === 'prorrogar') {
+      // Extend due date
+      const { novaDataVencimento } = updateData;
+      if (!novaDataVencimento) {
+        return res.status(400).json({ error: 'Nova data de vencimento é obrigatória' });
+      }
+      payload = {
+        dataVencimento: novaDataVencimento
+      };
+    } else if (action === 'desconto') {
+      // Apply discount
+      const { valor, dataLimite } = updateData;
+      if (!valor || !dataLimite) {
+        return res.status(400).json({ error: 'Valor e data limite são obrigatórios' });
+      }
+      payload = {
+        desconto: {
+          codigo: 'VALORFIXODATAINFORMADA',
+          valor: valor,
+          data: dataLimite
+        }
+      };
+    } else {
+      return res.status(400).json({ error: 'Ação inválida' });
+    }
+
+    // Call Inter Bank API
+    const result = await interBankService.editarCobranca(codigoSolicitacao, payload);
+
+    // Update local database
+    if (action === 'prorrogar' && updateData.novaDataVencimento) {
+      await db
+        .update(interCollections)
+        .set({ 
+          dataVencimento: updateData.novaDataVencimento,
+          updatedAt: new Date(getBrasiliaTimestamp())
+        })
+        .where(eq(interCollections.codigoSolicitacao, codigoSolicitacao));
+    }
+
+    console.log(`[INTER] ✅ Collection ${codigoSolicitacao} modified successfully`);
+
+    res.json({
+      success: true,
+      message: action === 'prorrogar' ? 'Vencimento prorrogado com sucesso' : 'Desconto aplicado com sucesso',
+      data: result
+    });
+
+  } catch (error) {
+    console.error('[INTER] Failed to modify collection:', error);
+    res.status(500).json({
+      error: 'Falha ao modificar cobrança',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+/**
  * Debug endpoint to check Inter Bank credentials (temporary)
  * GET /api/inter/debug-credentials
  */
@@ -310,7 +388,7 @@ router.post('/collections', jwtAuthMiddleware, async (req: AuthenticatedRequest,
 
         // Store collection data in database
         await db.insert(interCollections).values({
-          propostaId: validatedData.proposalId,
+          proposta_id: validatedData.proposalId,
           codigoSolicitacao: collectionResponse.codigoSolicitacao,
           seuNumero: collectionDetails.cobranca.seuNumero,
           valorNominal: collectionDetails.cobranca.valorNominal.toString(),
@@ -322,7 +400,7 @@ router.post('/collections', jwtAuthMiddleware, async (req: AuthenticatedRequest,
           linhaDigitavel: collectionDetails.boleto?.linhaDigitavel,
           pixTxid: collectionDetails.pix?.txid,
           pixCopiaECola: collectionDetails.pix?.pixCopiaECola,
-          qrCode: collectionDetails.pix?.qrcode?.base64 || null, // Adicionar QR code
+
           dataEmissao: collectionDetails.cobranca.dataEmissao,
           origemRecebimento: 'BOLETO',
           isActive: true,

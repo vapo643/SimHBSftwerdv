@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { 
   Calendar,
   Search,
@@ -44,7 +45,10 @@ import {
   UserCheck,
   History,
   AlertTriangle,
-  X
+  X,
+  MoreVertical,
+  CalendarPlus,
+  Percent
 } from "lucide-react";
 import { format, parseISO, differenceInDays, isToday, isFuture, addDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -134,8 +138,67 @@ export default function CobrancasPage() {
   const [statusPromessa, setStatusPromessa] = useState("");
   const [dataPromessaPagamento, setDataPromessaPagamento] = useState("");
   
+  // Estados para modais de modificação de boletos
+  const [showProrrogarModal, setShowProrrogarModal] = useState(false);
+  const [showDescontoModal, setShowDescontoModal] = useState(false);
+  const [selectedBoleto, setSelectedBoleto] = useState<any>(null);
+  const [novaDataVencimento, setNovaDataVencimento] = useState("");
+  const [valorDesconto, setValorDesconto] = useState("");
+  const [dataLimiteDesconto, setDataLimiteDesconto] = useState("");
+  
   // Verificar se o usuário tem role de cobrança
   const isCobrancaUser = user?.role === 'COBRANÇA';
+  const isAdmin = user?.role === 'ADMINISTRADOR';
+
+  // Mutations para modificar boletos
+  const prorrogarMutation = useMutation({
+    mutationFn: async (data: { codigoSolicitacao: string; novaDataVencimento: string }) => {
+      return apiRequest(`/api/inter/collections/${data.codigoSolicitacao}`, 'PATCH', {
+        action: 'prorrogar',
+        novaDataVencimento: data.novaDataVencimento
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Sucesso",
+        description: "Vencimento prorrogado com sucesso",
+      });
+      setShowProrrogarModal(false);
+      refetch();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro",
+        description: error.message || "Falha ao prorrogar vencimento",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const descontoMutation = useMutation({
+    mutationFn: async (data: { codigoSolicitacao: string; valor: number; dataLimite: string }) => {
+      return apiRequest(`/api/inter/collections/${data.codigoSolicitacao}`, 'PATCH', {
+        action: 'desconto',
+        valor: data.valor,
+        dataLimite: data.dataLimite
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Sucesso",
+        description: "Desconto aplicado com sucesso",
+      });
+      setShowDescontoModal(false);
+      refetch();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro",
+        description: error.message || "Falha ao aplicar desconto",
+        variant: "destructive",
+      });
+    }
+  });
 
   // Buscar propostas de cobrança
   const { data: propostas, isLoading, refetch } = useQuery({
@@ -148,6 +211,12 @@ export default function CobrancasPage() {
       return apiRequest(`/api/cobrancas?${params.toString()}`);
     }
   });
+  
+  // Função para atualizar sem precisar recarregar a página
+  const handleRefresh = () => {
+    console.log("[COBRANÇAS] Atualizando dados da API do Banco Inter...");
+    refetch();
+  };
 
   // Buscar KPIs
   const { data: kpis } = useQuery({
@@ -629,17 +698,95 @@ export default function CobrancasPage() {
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          <Button
-                            size="sm"
-                            onClick={() => {
-                              setSelectedPropostaId(proposta.id);
-                              setShowFichaModal(true);
-                            }}
-                            data-testid={`button-ficha-${proposta.id}`}
-                          >
-                            <FileText className="mr-2 h-4 w-4" />
-                            Ficha
-                          </Button>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              size="sm"
+                              onClick={() => {
+                                setSelectedPropostaId(proposta.id);
+                                setShowFichaModal(true);
+                              }}
+                              data-testid={`button-ficha-${proposta.id}`}
+                            >
+                              <FileText className="mr-2 h-4 w-4" />
+                              Ficha
+                            </Button>
+                            
+                            {/* Menu de Ações - Apenas para boletos com status modificável */}
+                            {proposta.interCodigoSolicitacao && (
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button size="sm" variant="ghost">
+                                    <MoreVertical className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem
+                                    onClick={() => {
+                                      if (!isAdmin) {
+                                        toast({
+                                          title: "Acesso Negado",
+                                          description: "Apenas administradores podem prorrogar vencimentos",
+                                          variant: "destructive",
+                                        });
+                                        return;
+                                      }
+                                      const canModify = ['A_RECEBER', 'ATRASADO', 'EM_PROCESSAMENTO'].includes(
+                                        proposta.interSituacao?.toUpperCase() || ''
+                                      );
+                                      if (!canModify) {
+                                        toast({
+                                          title: "Ação não permitida",
+                                          description: "Este boleto não pode ser modificado",
+                                          variant: "destructive",
+                                        });
+                                        return;
+                                      }
+                                      setSelectedBoleto(proposta);
+                                      setShowProrrogarModal(true);
+                                    }}
+                                    disabled={!isAdmin || ['PAGO', 'CANCELADO', 'RECEBIDO'].includes(
+                                      proposta.interSituacao?.toUpperCase() || ''
+                                    )}
+                                  >
+                                    <CalendarPlus className="mr-2 h-4 w-4" />
+                                    Prorrogar Vencimento
+                                  </DropdownMenuItem>
+                                  
+                                  <DropdownMenuItem
+                                    onClick={() => {
+                                      if (!isAdmin) {
+                                        toast({
+                                          title: "Acesso Negado",
+                                          description: "Apenas administradores podem aplicar descontos",
+                                          variant: "destructive",
+                                        });
+                                        return;
+                                      }
+                                      const canModify = ['A_RECEBER', 'ATRASADO', 'EM_PROCESSAMENTO'].includes(
+                                        proposta.interSituacao?.toUpperCase() || ''
+                                      );
+                                      if (!canModify) {
+                                        toast({
+                                          title: "Ação não permitida",
+                                          description: "Este boleto não pode ser modificado",
+                                          variant: "destructive",
+                                        });
+                                        return;
+                                      }
+                                      setSelectedBoleto(proposta);
+                                      setShowDescontoModal(true);
+                                    }}
+                                    disabled={!isAdmin || ['PAGO', 'CANCELADO', 'RECEBIDO'].includes(
+                                      proposta.interSituacao?.toUpperCase() || ''
+                                    )}
+                                  >
+                                    <Percent className="mr-2 h-4 w-4" />
+                                    Aplicar Desconto
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            )}
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))
@@ -649,6 +796,147 @@ export default function CobrancasPage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Modal - Prorrogar Vencimento */}
+        <Dialog open={showProrrogarModal} onOpenChange={setShowProrrogarModal}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Prorrogar Vencimento</DialogTitle>
+              <DialogDescription>
+                Escolha a nova data de vencimento para o boleto
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="nova-data">Nova Data de Vencimento</Label>
+                <Input
+                  id="nova-data"
+                  type="date"
+                  value={novaDataVencimento}
+                  onChange={(e) => setNovaDataVencimento(e.target.value)}
+                  min={new Date().toISOString().split('T')[0]}
+                />
+              </div>
+              
+              {selectedBoleto && (
+                <div className="text-sm text-muted-foreground">
+                  <p>Contrato: {selectedBoleto.numeroContrato}</p>
+                  <p>Cliente: {selectedBoleto.nomeCliente}</p>
+                  <p>Valor: {new Intl.NumberFormat('pt-BR', { 
+                    style: 'currency', 
+                    currency: 'BRL' 
+                  }).format(selectedBoleto.valorTotal)}</p>
+                </div>
+              )}
+            </div>
+            
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setShowProrrogarModal(false)}
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={() => {
+                  if (!novaDataVencimento) {
+                    toast({
+                      title: "Erro",
+                      description: "Selecione uma nova data de vencimento",
+                      variant: "destructive",
+                    });
+                    return;
+                  }
+                  prorrogarMutation.mutate({
+                    codigoSolicitacao: selectedBoleto.interCodigoSolicitacao,
+                    novaDataVencimento
+                  });
+                }}
+                disabled={prorrogarMutation.isPending}
+              >
+                {prorrogarMutation.isPending ? "Processando..." : "Confirmar"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Modal - Aplicar Desconto */}
+        <Dialog open={showDescontoModal} onOpenChange={setShowDescontoModal}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Aplicar Desconto</DialogTitle>
+              <DialogDescription>
+                Configure o desconto fixo para o boleto
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="valor-desconto">Valor do Desconto (R$)</Label>
+                <Input
+                  id="valor-desconto"
+                  type="number"
+                  step="0.01"
+                  placeholder="0,00"
+                  value={valorDesconto}
+                  onChange={(e) => setValorDesconto(e.target.value)}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="data-limite">Data Limite do Desconto</Label>
+                <Input
+                  id="data-limite"
+                  type="date"
+                  value={dataLimiteDesconto}
+                  onChange={(e) => setDataLimiteDesconto(e.target.value)}
+                  min={new Date().toISOString().split('T')[0]}
+                />
+              </div>
+              
+              {selectedBoleto && (
+                <div className="text-sm text-muted-foreground">
+                  <p>Contrato: {selectedBoleto.numeroContrato}</p>
+                  <p>Cliente: {selectedBoleto.nomeCliente}</p>
+                  <p>Valor Original: {new Intl.NumberFormat('pt-BR', { 
+                    style: 'currency', 
+                    currency: 'BRL' 
+                  }).format(selectedBoleto.valorTotal)}</p>
+                </div>
+              )}
+            </div>
+            
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setShowDescontoModal(false)}
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={() => {
+                  if (!valorDesconto || !dataLimiteDesconto) {
+                    toast({
+                      title: "Erro",
+                      description: "Preencha todos os campos",
+                      variant: "destructive",
+                    });
+                    return;
+                  }
+                  descontoMutation.mutate({
+                    codigoSolicitacao: selectedBoleto.interCodigoSolicitacao,
+                    valor: parseFloat(valorDesconto),
+                    dataLimite: dataLimiteDesconto
+                  });
+                }}
+                disabled={descontoMutation.isPending}
+              >
+                {descontoMutation.isPending ? "Processando..." : "Aplicar Desconto"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* Modal - Ficha do Cliente */}
         <Dialog open={showFichaModal} onOpenChange={setShowFichaModal}>

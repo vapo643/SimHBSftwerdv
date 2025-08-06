@@ -96,6 +96,11 @@ router.get("/", async (req: any, res) => {
           statusCobranca = 'inadimplente';
         }
 
+        // Pegar o primeiro boleto Inter para mostrar na tabela principal
+        const primeiroBoletoPendente = boletosInter.find(b => 
+          ['A_RECEBER', 'ATRASADO', 'EM_PROCESSAMENTO'].includes(b.situacao || '')
+        ) || boletosInter[0];
+
         return {
           id: proposta.id,
           numeroContrato: proposta.id.slice(0, 8).toUpperCase(),
@@ -119,6 +124,10 @@ router.get("/", async (req: any, res) => {
           dataContrato: proposta.dataAprovacao || proposta.createdAt,
           ccbAssinada: proposta.ccbGerado && proposta.assinaturaEletronicaConcluida,
           parcelas: parcelasCompletas,
+          // Dados do Inter Bank para ações
+          interCodigoSolicitacao: primeiroBoletoPendente?.codigoSolicitacao,
+          interSituacao: primeiroBoletoPendente?.situacao,
+          interDataVencimento: primeiroBoletoPendente?.dataVencimento,
           // Dados bancários do cliente
           dadosBancarios: {
             banco: proposta.dadosPagamentoBanco,
