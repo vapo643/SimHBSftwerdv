@@ -102,6 +102,7 @@ export default function Cobrancas() {
   const [showCpf, setShowCpf] = useState(false);
   const [showBoletosModal, setShowBoletosModal] = useState(false);
   const [selectedPropostaForBoletos, setSelectedPropostaForBoletos] = useState<PropostaCobranca | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   
   // Função para copiar PIX ou linha digitável
   const copyPaymentCode = (code: string, type: 'pix' | 'barcode') => {
@@ -144,6 +145,77 @@ export default function Cobrancas() {
       return response as PropostaCobranca[];
     },
   });
+
+  // Buscar sumário do Inter Bank
+  const { data: sumarioInter, refetch: refetchSumario } = useQuery({
+    queryKey: ['/api/cobrancas/inter-sumario'],
+    enabled: !!propostas,
+    refetchInterval: 30000, // Atualiza a cada 30 segundos
+    queryFn: async () => {
+      const response = await apiRequest('/api/cobrancas/inter-sumario', {
+        method: 'GET',
+      });
+      return response;
+    },
+  });
+
+  // Função para atualizar status do boleto individual
+  const atualizarStatusBoleto = async (codigoSolicitacao: string) => {
+    try {
+      const response = await apiRequest(`/api/cobrancas/inter-status/${codigoSolicitacao}`, {
+        method: 'GET',
+      });
+      return response;
+    } catch (error) {
+      console.error('Erro ao buscar status do boleto:', error);
+      return null;
+    }
+  };
+
+  // Atualizar todos os status do Inter Bank
+  const atualizarTodosStatus = async () => {
+    setIsRefreshing(true);
+    toast({
+      title: "Atualizando status...",
+      description: "Consultando Banco Inter para obter status atualizados",
+    });
+
+    try {
+      // Buscar códigos de solicitação únicos das parcelas
+      const codigosSolicitacao = new Set<string>();
+      propostas?.forEach(proposta => {
+        proposta.parcelas.forEach(parcela => {
+          if (parcela.interCodigoSolicitacao) {
+            codigosSolicitacao.add(parcela.interCodigoSolicitacao);
+          }
+        });
+      });
+
+      // Atualizar status de cada boleto
+      const promises = Array.from(codigosSolicitacao).map(codigo => 
+        atualizarStatusBoleto(codigo)
+      );
+      
+      await Promise.all(promises);
+      
+      // Recarregar dados
+      await refetch();
+      await refetchSumario();
+      
+      toast({
+        title: "Status atualizados!",
+        description: `${codigosSolicitacao.size} boletos verificados no Banco Inter`,
+      });
+    } catch (error) {
+      toast({
+        title: "Erro na atualização",
+        description: "Não foi possível atualizar todos os status",
+        variant: "destructive",
+      });
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   // Atualizar status das parcelas via API do Banco Inter
   const atualizarStatusParcelas = async (propostaId: string) => {
@@ -349,6 +421,58 @@ export default function Cobrancas() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Sumário do Banco Inter */}
+        {sumarioInter && (
+          <Card className="border-primary/20">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Resumo Financeiro - Banco Inter</CardTitle>
+                <CardDescription>Últimos 30 dias - Atualizado em tempo real</CardDescription>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={atualizarTodosStatus}
+                disabled={isRefreshing}
+              >
+                <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+                {isRefreshing ? 'Atualizando...' : 'Atualizar Status'}
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 md:grid-cols-3">
+                <div>
+                  <div className="text-sm text-muted-foreground">Total Recebido</div>
+                  <div className="text-xl font-bold text-green-600">
+                    R$ {(sumarioInter.recebidos?.valor || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {sumarioInter.recebidos?.quantidade || 0} boletos pagos
+                  </div>
+                </div>
+                <div>
+                  <div className="text-sm text-muted-foreground">A Receber</div>
+                  <div className="text-xl font-bold text-blue-600">
+                    R$ {(sumarioInter.aReceber?.valor || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {sumarioInter.aReceber?.quantidade || 0} boletos pendentes
+                  </div>
+                </div>
+                <div>
+                  <div className="text-sm text-muted-foreground">Vencidos</div>
+                  <div className="text-xl font-bold text-red-600">
+                    R$ {(sumarioInter.vencidos?.valor || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {sumarioInter.vencidos?.quantidade || 0} boletos vencidos
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Filtros */}
         <Card>

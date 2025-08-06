@@ -411,6 +411,107 @@ router.post("/:propostaId/observacao", async (req: any, res) => {
   }
 });
 
+// GET /api/cobrancas/inter-sumario - Obter sumário financeiro do Banco Inter
+router.get("/inter-sumario", async (req: any, res) => {
+  try {
+    const userRole = req.user?.role;
+    
+    // Verificar se usuário tem permissão - aceitar tanto ADMINISTRADOR quanto COBRANÇA
+    if (!userRole || !['ADMINISTRADOR', 'COBRANCA'].includes(userRole)) {
+      console.log('[INTER-SUMARIO] Acesso negado - Role:', userRole);
+      return res.status(403).json({ message: "Acesso negado" });
+    }
+
+    const { interBankService } = await import('../services/interBankService');
+    
+    // Calcular período de 30 dias
+    const dataFinal = new Date();
+    const dataInicial = new Date();
+    dataInicial.setDate(dataInicial.getDate() - 30);
+    
+    const sumario = await interBankService.obterSumarioCobrancas({
+      dataInicial: dataInicial.toISOString().split('T')[0],
+      dataFinal: dataFinal.toISOString().split('T')[0],
+      filtrarDataPor: 'VENCIMENTO'
+    });
+
+    res.json(sumario);
+  } catch (error) {
+    console.error("Erro ao obter sumário do Inter:", error);
+    res.status(500).json({ message: "Erro ao obter sumário financeiro" });
+  }
+});
+
+// GET /api/cobrancas/inter-status/:codigoSolicitacao - Obter status individual do boleto no Banco Inter
+router.get("/inter-status/:codigoSolicitacao", async (req: any, res) => {
+  try {
+    const { codigoSolicitacao } = req.params;
+    const userRole = req.user?.role;
+    
+    // Verificar se usuário tem permissão - aceitar tanto ADMINISTRADOR quanto COBRANÇA
+    if (!userRole || !['ADMINISTRADOR', 'COBRANCA'].includes(userRole)) {
+      console.log('[INTER-STATUS] Acesso negado - Role:', userRole);
+      return res.status(403).json({ message: "Acesso negado" });
+    }
+
+    const { interBankService } = await import('../services/interBankService');
+    
+    // Buscar dados atualizados da cobrança no Inter
+    const cobranca = await interBankService.recuperarCobranca(codigoSolicitacao);
+    
+    // Atualizar status no banco local
+    if (cobranca && cobranca.cobranca) {
+      await db
+        .update(interCollections)
+        .set({
+          situacao: cobranca.cobranca.situacao,
+          valorTotalRecebido: cobranca.cobranca.valorTotalRecebido,
+          updatedAt: new Date()
+        })
+        .where(eq(interCollections.codigoSolicitacao, codigoSolicitacao));
+        
+      // Se foi pago, atualizar também a parcela correspondente
+      if (cobranca.cobranca.situacao === 'RECEBIDO' || cobranca.cobranca.situacao === 'MARCADO_RECEBIDO') {
+        const [interBoleto] = await db
+          .select()
+          .from(interCollections)
+          .where(eq(interCollections.codigoSolicitacao, codigoSolicitacao))
+          .limit(1);
+          
+        if (interBoleto && interBoleto.numeroParcela) {
+          await db
+            .update(parcelas)
+            .set({
+              status: 'pago',
+              dataPagamento: cobranca.cobranca.dataSituacao,
+              updatedAt: new Date()
+            })
+            .where(
+              and(
+                eq(parcelas.propostaId, interBoleto.propostaId),
+                eq(parcelas.numeroParcela, interBoleto.numeroParcela)
+              )
+            );
+        }
+      }
+    }
+    
+    res.json({
+      codigoSolicitacao,
+      situacao: cobranca?.cobranca?.situacao || 'DESCONHECIDO',
+      valorNominal: cobranca?.cobranca?.valorNominal,
+      valorTotalRecebido: cobranca?.cobranca?.valorTotalRecebido,
+      dataSituacao: cobranca?.cobranca?.dataSituacao,
+      pixCopiaECola: cobranca?.pix?.pixCopiaECola,
+      linhaDigitavel: cobranca?.boleto?.linhaDigitavel,
+      codigoBarras: cobranca?.boleto?.codigoBarras
+    });
+  } catch (error) {
+    console.error("Erro ao obter status do boleto:", error);
+    res.status(500).json({ message: "Erro ao obter status do boleto" });
+  }
+});
+
 // GET /api/cobrancas/exportar/inadimplentes - Exportar lista de inadimplentes para Excel
 router.get("/exportar/inadimplentes", async (req, res) => {
   try {
