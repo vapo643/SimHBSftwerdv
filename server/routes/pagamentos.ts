@@ -898,24 +898,39 @@ router.get("/:id/detalhes-completos", jwtAuthMiddleware, async (req: Authenticat
     
     console.log(`[PAGAMENTOS] Buscando detalhes completos da proposta: ${id}`);
     
-    // Buscar proposta com todos os campos relacionados
-    const result = await db
-      .select({
-        proposta: propostas,
-        loja: lojas,
-        produto: produtos,
-        usuario: profiles
-      })
+    // Buscar proposta primeiro (sem joins para evitar erros de tipo)
+    const [proposta] = await db
+      .select()
       .from(propostas)
-      .leftJoin(lojas, eq(propostas.lojaId, lojas.id))
-      .leftJoin(produtos, eq(propostas.produtoId, produtos.id))
-      .leftJoin(profiles, eq(propostas.userId, profiles.id))
       .where(eq(propostas.id, id))
       .limit(1);
     
-    if (!result.length || !result[0].proposta) {
+    if (!proposta) {
       return res.status(404).json({ error: "Proposta não encontrada" });
     }
+    
+    // Buscar dados relacionados separadamente
+    const [loja] = proposta.lojaId ? await db
+      .select()
+      .from(lojas)
+      .where(eq(lojas.id, proposta.lojaId))
+      .limit(1) : [null];
+    
+    const [produto] = proposta.produtoId ? await db
+      .select()
+      .from(produtos)
+      .where(eq(produtos.id, proposta.produtoId))
+      .limit(1) : [null];
+    
+    const [usuario] = proposta.userId ? await db
+      .select()
+      .from(profiles)
+      .where(eq(profiles.id, proposta.userId))
+      .limit(1) : [null];
+    
+    const result = [{ proposta, loja, produto, usuario }];
+    
+    // Proposta já foi validada acima
     
     const { proposta, loja, produto, usuario } = result[0];
     
