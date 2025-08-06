@@ -71,7 +71,18 @@ export default function PaymentReviewModal({ isOpen, onClose, proposta, onConfir
       const response = await apiRequest(`/api/pagamentos/${propostaId}/detalhes-completos`, {
         method: 'GET',
       });
-      console.log('[REVIEW MODAL] Dados recebidos:', response);
+      console.log('[REVIEW MODAL] Dados recebidos do backend:', response);
+      console.log('[REVIEW MODAL] Campos importantes:', {
+        clienteEmail: response?.clienteEmail,
+        clienteTelefone: response?.clienteTelefone,
+        clienteDataNascimento: response?.clienteDataNascimento,
+        clienteRenda: response?.clienteRenda,
+        prazo: response?.prazo,
+        taxaJuros: response?.taxaJuros,
+        finalidade: response?.finalidade,
+        ccbGerado: response?.ccbGerado,
+        caminhoCcbAssinado: response?.caminhoCcbAssinado
+      });
       return response;
     },
     enabled: isOpen && !!proposta?.id,

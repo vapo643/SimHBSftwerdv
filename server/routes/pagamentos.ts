@@ -937,6 +937,22 @@ router.get("/:id/detalhes-completos", jwtAuthMiddleware, async (req: Authenticat
       .where(eq(interCollections.propostaId, id))
       .orderBy(desc(interCollections.id)); // Usar id pois createdAt não existe na tabela
     
+    // Debug: verificar dados da proposta
+    console.log(`[PAGAMENTOS DEBUG] Dados da proposta encontrados:`, {
+      id: propostaData.id,
+      clienteNome: propostaData.clienteNome,
+      clienteEmail: propostaData.clienteEmail,
+      clienteTelefone: propostaData.clienteTelefone,
+      clienteDataNascimento: propostaData.clienteDataNascimento,
+      clienteRenda: propostaData.clienteRenda,
+      prazo: propostaData.prazo,
+      taxaJuros: propostaData.taxaJuros,
+      finalidade: propostaData.finalidade,
+      ccbGerado: propostaData.ccbGerado,
+      assinaturaEletronicaConcluida: propostaData.assinaturaEletronicaConcluida,
+      caminhoCcbAssinado: propostaData.caminhoCcbAssinado
+    });
+    
     // Montar resposta completa
     const respostaCompleta = {
       ...propostaData,
@@ -955,6 +971,17 @@ router.get("/:id/detalhes-completos", jwtAuthMiddleware, async (req: Authenticat
     };
     
     console.log(`[PAGAMENTOS] ✅ Detalhes completos retornados para proposta: ${id}`);
+    console.log(`[PAGAMENTOS DEBUG] Resposta enviada ao frontend - campos principais:`, {
+      hasClienteEmail: !!respostaCompleta.clienteEmail,
+      hasClienteTelefone: !!respostaCompleta.clienteTelefone,
+      hasClienteDataNascimento: !!respostaCompleta.clienteDataNascimento,
+      hasClienteRenda: !!respostaCompleta.clienteRenda,
+      hasPrazo: !!respostaCompleta.prazo,
+      hasTaxaJuros: !!respostaCompleta.taxaJuros,
+      hasFinalidade: !!respostaCompleta.finalidade,
+      hasCcbGerado: !!respostaCompleta.ccbGerado,
+      hasCaminhoCcbAssinado: !!respostaCompleta.caminhoCcbAssinado
+    });
     res.json(respostaCompleta);
     
   } catch (error) {
