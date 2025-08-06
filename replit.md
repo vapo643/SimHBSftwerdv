@@ -140,7 +140,7 @@ Projeto Cérbero Audit System: ✅ IMPLEMENTED (06/08/2025) - Complete audit sys
 - **Wouter**: Lightweight React router.
 - **Vite**: Build tool.
 - **Express.js**: Backend framework.
-- **@neondatabase/serverless**: PostgreSQL client.
+- **postgres**: PostgreSQL client for direct database connections.
 - **jwt-simple**: For JWT token handling.
 - **Helmet**: For setting HTTP security headers.
 - **express-rate-limit**: For API rate limiting.

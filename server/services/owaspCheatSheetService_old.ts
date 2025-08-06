@@ -1900,7 +1900,7 @@ export class OwaspCheatSheetService {
           description: 'Use TLS encryption for all database connections',
           currentStatus: 'implemented',
           recommendation: 'Current system uses SSL/TLS for PostgreSQL connections',
-          implementation: 'Database connections use SSL mode with Neon PostgreSQL',
+          implementation: 'Database connections use SSL mode with Supabase PostgreSQL',
           avsvMapping: ['V9.2.1', 'V9.2.2'],
           processedAt: new Date()
         },
