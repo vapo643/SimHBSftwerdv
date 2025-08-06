@@ -271,26 +271,7 @@ export default function CobrancasPage() {
     enabled: !!selectedPropostaId && showFichaModal
   });
   
-  // Buscar observações quando a ficha for aberta
-  const fetchObservacoes = async () => {
-    if (!selectedPropostaId) return;
-    setLoadingObservacoes(true);
-    try {
-      const response = await apiRequest(`/api/propostas/${selectedPropostaId}/observacoes`);
-      setObservacoes(response.observacoes || []);
-    } catch (error) {
-      console.error('Erro ao buscar observações:', error);
-    } finally {
-      setLoadingObservacoes(false);
-    }
-  };
-  
-  // Carregar observações quando o modal abrir
-  useEffect(() => {
-    if (showFichaModal && selectedPropostaId) {
-      fetchObservacoes();
-    }
-  }, [showFichaModal, selectedPropostaId]);
+  // As observações agora vêm diretamente da ficha do cliente
   
   // Função para salvar nova observação
   const handleSalvarObservacao = async () => {
@@ -298,7 +279,7 @@ export default function CobrancasPage() {
     
     setSalvandoObservacao(true);
     try {
-      const response = await apiRequest(`/api/propostas/${selectedPropostaId}/observacoes`, {
+      await apiRequest(`/api/propostas/${selectedPropostaId}/observacoes`, {
         method: 'POST',
         body: JSON.stringify({
           mensagem: novaObservacao,
@@ -306,15 +287,16 @@ export default function CobrancasPage() {
         })
       });
       
-      // Adicionar nova observação na lista
-      if (response.observacao) {
-        setObservacoes(prev => [response.observacao, ...prev]);
-        setNovaObservacao('');
-        toast({
-          title: "Sucesso",
-          description: "Observação salva com sucesso",
-        });
-      }
+      // Limpar formulário
+      setNovaObservacao('');
+      
+      // Recarregar ficha para atualizar observações
+      queryClient.invalidateQueries({ queryKey: ['/api/cobrancas/ficha', selectedPropostaId] });
+      
+      toast({
+        title: "Sucesso",
+        description: "Observação salva com sucesso",
+      });
     } catch (error) {
       console.error('Erro ao salvar observação:', error);
       toast({
@@ -1595,38 +1577,38 @@ export default function CobrancasPage() {
                         </div>
 
                         {/* Lista de observações existentes */}
-                        {loadingObservacoes ? (
+                        {loadingFicha ? (
                           <div className="text-center py-4">
                             <Loader2 className="h-6 w-6 animate-spin mx-auto" />
                             <p className="text-sm text-muted-foreground mt-2">Carregando histórico...</p>
                           </div>
-                        ) : observacoes.length === 0 ? (
+                        ) : (!fichaCliente.observacoes || fichaCliente.observacoes.length === 0) ? (
                           <div className="text-center py-4 text-muted-foreground">
                             Nenhuma observação registrada ainda.
                           </div>
                         ) : (
                           <ScrollArea className="h-[300px]">
                             <div className="space-y-3 pr-4">
-                              {observacoes.map((obs) => (
+                              {fichaCliente.observacoes.map((obs) => (
                                 <div key={obs.id} className="border rounded-lg p-3 space-y-2">
                                   <div className="flex items-start justify-between">
                                     <div className="flex-1">
                                       <div className="flex items-center gap-2">
                                         <Badge variant={
-                                          obs.tipo_acao === 'Acordo Fechado' ? 'default' :
-                                          obs.tipo_acao === 'Contato Realizado' ? 'secondary' :
-                                          obs.tipo_acao === 'Negociação em Andamento' ? 'outline' :
+                                          obs.tipoContato === 'Acordo Fechado' ? 'default' :
+                                          obs.tipoContato === 'Contato Realizado' ? 'secondary' :
+                                          obs.tipoContato === 'Negociação em Andamento' ? 'outline' :
                                           'secondary'
                                         }>
-                                          {obs.tipo_acao}
+                                          {obs.tipoContato}
                                         </Badge>
                                         <span className="text-xs text-muted-foreground">
-                                          {format(new Date(obs.created_at), "dd/MM/yyyy 'às' HH:mm")}
+                                          {format(new Date(obs.createdAt), "dd/MM/yyyy 'às' HH:mm")}
                                         </span>
                                       </div>
-                                      <p className="mt-2 text-sm">{obs.mensagem}</p>
+                                      <p className="mt-2 text-sm">{obs.observacao}</p>
                                       <p className="text-xs text-muted-foreground mt-1">
-                                        Por: {obs.criado_por}
+                                        Por: {obs.userName}
                                       </p>
                                     </div>
                                   </div>
