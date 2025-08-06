@@ -98,6 +98,7 @@ interface FichaCliente {
     interPixCopiaECola?: string;
     interLinhaDigitavel?: string;
     interCodigoBarras?: string;
+    interSituacao?: string;
   }>;
   observacoes: Array<{
     id: number;
@@ -281,6 +282,64 @@ export default function CobrancasPage() {
       default:
         return 'bg-gray-100 text-gray-800';
     }
+  };
+
+  // Função para mapear status do Inter Bank para cores
+  const getInterBankStatusColor = (status: string) => {
+    switch (status?.toUpperCase()) {
+      case 'RECEBIDO':
+      case 'MARCADO_RECEBIDO':
+        return 'bg-green-100 text-green-800';
+      case 'CANCELADO':
+      case 'EXPIRADO':
+      case 'FALHA_EMISSAO':
+        return 'bg-gray-100 text-gray-800';
+      case 'ATRASADO':
+      case 'PROTESTO':
+        return 'bg-red-100 text-red-800';
+      case 'A_RECEBER':
+      case 'EM_PROCESSAMENTO':
+      case 'EMITIDO':
+        return 'bg-blue-100 text-blue-800';
+      case 'pago':
+        return 'bg-green-100 text-green-800';
+      case 'vencido':
+        return 'bg-red-100 text-red-800';
+      case 'pendente':
+        return 'bg-yellow-100 text-yellow-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  // Função para mapear status do Inter Bank para texto de exibição
+  const getInterBankStatusLabel = (interSituacao?: string, localStatus?: string, vencida?: boolean) => {
+    // Priorizar status do Inter Bank se disponível
+    if (interSituacao) {
+      switch (interSituacao.toUpperCase()) {
+        case 'RECEBIDO':
+        case 'MARCADO_RECEBIDO':
+          return 'Pago';
+        case 'CANCELADO':
+        case 'EXPIRADO':
+        case 'FALHA_EMISSAO':
+          return 'Cancelado';
+        case 'ATRASADO':
+        case 'PROTESTO':
+          return 'Vencido';
+        case 'A_RECEBER':
+        case 'EM_PROCESSAMENTO':
+        case 'EMITIDO':
+          return 'Pendente';
+        default:
+          return interSituacao;
+      }
+    }
+    
+    // Fallback para status local
+    if (localStatus === 'pago') return 'Pago';
+    if (vencida) return 'Vencido';
+    return 'Pendente';
   };
 
   return (
@@ -786,10 +845,8 @@ export default function CobrancasPage() {
                                     Boleto
                                   </Button>
                                 )}
-                                <Badge className={getParcelaStatusColor(parcela.status)}>
-                                  {parcela.status === 'pago' ? 'Pago' : 
-                                   parcela.vencida ? 'Vencido' : 
-                                   'Pendente'}
+                                <Badge className={getInterBankStatusColor(parcela.interSituacao || parcela.status)}>
+                                  {getInterBankStatusLabel(parcela.interSituacao, parcela.status, parcela.vencida)}
                                 </Badge>
                               </div>
                             </div>
