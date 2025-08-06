@@ -78,6 +78,7 @@ Production Timeline: Software to be deployed at Eleeve loan stores by next week 
 Formalization Interface: ✅ COMPLETELY UNIFIED - Attendant and Administrator interfaces are now 100% identical. All role-based conditional rendering removed - both roles see exactly the same interface, buttons, controls, and timeline visualization. Backend RLS handles data filtering while frontend provides consistent experience for all authorized roles (August 2025).
 Collections Dashboard: ✅ IMPLEMENTED (05/08/2025) - Comprehensive financial collections system with KPIs (Total Contracts, Delinquency Rate, Total Receivable), advanced filters (CPF/CNPJ search with LGPD masking, payment status, date ranges), detailed installment tracking table, Inter Bank boleto visualization, and quick actions for contact management.
 Financial Payments: ✅ IMPLEMENTED (05/08/2025) - Complete loan disbursement interface with maker/checker approval workflow, batch payment processing, transaction history, comprehensive validation controls, and role-based approval permissions for secure fund transfers.
+Client Profile Contact Data: ✅ IMPLEMENTED (06/08/2025) - Fixed contact data display in Collections module Client Profile. Now correctly shows real client phone, email, and address data from propostas table. Fixed backend API to include enderecoCliente and cepCliente fields. Added fallback displays for missing data and protection for contact buttons when data unavailable.
 
 ## System Architecture
 
