@@ -24,7 +24,7 @@ const userSchema = z
     email: z.string().email("Formato de e-mail inválido."),
     senha: z.string().min(8, "Senha deve ter pelo menos 8 caracteres."),
     confirmarSenha: z.string().min(1, "Confirmação de senha é obrigatória."),
-    perfil: z.enum(["ADMINISTRADOR", "DIRETOR", "GERENTE", "ATENDENTE", "ANALISTA", "FINANCEIRO"]),
+    perfil: z.enum(["ADMINISTRADOR", "DIRETOR", "GERENTE", "ATENDENTE", "ANALISTA", "FINANCEIRO", "COBRANÇA"]),
     parceiroId: z.string().optional(),
     lojaId: z.string().optional(), // For ATENDENTE
     lojaIds: z.array(z.string()).optional(), // For GERENTE (multiple stores)
@@ -213,7 +213,7 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, onSubmit, onCancel, is
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <SelectTrigger><SelectValue placeholder="Selecione um perfil..." /></SelectTrigger>
                     <SelectContent>
-                        {["ADMINISTRADOR", "DIRETOR", "GERENTE", "ATENDENTE", "ANALISTA", "FINANCEIRO"].map((perfil) => (
+                        {["ADMINISTRADOR", "DIRETOR", "GERENTE", "ATENDENTE", "ANALISTA", "FINANCEIRO", "COBRANÇA"].map((perfil) => (
                           <SelectItem key={perfil} value={perfil}>
                             {perfil}
                           </SelectItem>
