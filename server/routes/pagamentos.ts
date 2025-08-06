@@ -898,9 +898,91 @@ router.get("/:id/detalhes-completos", jwtAuthMiddleware, async (req: Authenticat
     
     console.log(`[PAGAMENTOS] Buscando detalhes completos da proposta: ${id}`);
     
-    // Buscar apenas a proposta para evitar erros de tipo
+    // HOTFIX: Selecionar apenas colunas que existem, evitando created_at
     const [propostaData] = await db
-      .select()
+      .select({
+        // Campos básicos
+        id: propostas.id,
+        lojaId: propostas.lojaId,
+        produtoId: propostas.produtoId,
+        tabelaComercialId: propostas.tabelaComercialId,
+        
+        // Dados do cliente
+        clienteNome: propostas.clienteNome,
+        clienteCpf: propostas.clienteCpf,
+        clienteEmail: propostas.clienteEmail,
+        clienteTelefone: propostas.clienteTelefone,
+        clienteDataNascimento: propostas.clienteDataNascimento,
+        clienteRenda: propostas.clienteRenda,
+        clienteRg: propostas.clienteRg,
+        clienteOrgaoEmissor: propostas.clienteOrgaoEmissor,
+        clienteEstadoCivil: propostas.clienteEstadoCivil,
+        clienteNacionalidade: propostas.clienteNacionalidade,
+        clienteCep: propostas.clienteCep,
+        clienteEndereco: propostas.clienteEndereco,
+        clienteOcupacao: propostas.clienteOcupacao,
+        
+        // Dados financeiros
+        valor: propostas.valor,
+        prazo: propostas.prazo,
+        finalidade: propostas.finalidade,
+        garantia: propostas.garantia,
+        taxaJuros: propostas.taxaJuros,
+        valorTac: propostas.valorTac,
+        valorIof: propostas.valorIof,
+        valorTotalFinanciado: propostas.valorTotalFinanciado,
+        valorAprovado: propostas.valorAprovado,
+        
+        // Status e formalização
+        status: propostas.status,
+        ccbGerado: propostas.ccbGerado,
+        assinaturaEletronicaConcluida: propostas.assinaturaEletronicaConcluida,
+        biometriaConcluida: propostas.biometriaConcluida,
+        caminhoCcbAssinado: propostas.caminhoCcbAssinado,
+        ccbDocumentoUrl: propostas.ccbDocumentoUrl,
+        statusAssinatura: propostas.statusAssinatura,
+        statusBiometria: propostas.statusBiometria,
+        
+        // ClickSign
+        clicksignDocumentKey: propostas.clicksignDocumentKey,
+        clicksignSignerKey: propostas.clicksignSignerKey,
+        clicksignListKey: propostas.clicksignListKey,
+        clicksignStatus: propostas.clicksignStatus,
+        clicksignSignUrl: propostas.clicksignSignUrl,
+        clicksignSentAt: propostas.clicksignSentAt,
+        clicksignSignedAt: propostas.clicksignSignedAt,
+        
+        // Dados de pagamento
+        dadosPagamentoBanco: propostas.dadosPagamentoBanco,
+        dadosPagamentoAgencia: propostas.dadosPagamentoAgencia,
+        dadosPagamentoConta: propostas.dadosPagamentoConta,
+        dadosPagamentoTipo: propostas.dadosPagamentoTipo,
+        dadosPagamentoNomeTitular: propostas.dadosPagamentoNomeTitular,
+        dadosPagamentoCpfTitular: propostas.dadosPagamentoCpfTitular,
+        dadosPagamentoPix: propostas.dadosPagamentoPix,
+        dadosPagamentoTipoPix: propostas.dadosPagamentoTipoPix,
+        urlComprovantePagamento: propostas.urlComprovantePagamento,
+        
+        // Outros campos
+        observacoes: propostas.observacoes,
+        observacoesFormalizacao: propostas.observacoesFormalizacao,
+        userId: propostas.userId,
+        analistaId: propostas.analistaId,
+        dataAnalise: propostas.dataAnalise,
+        dataAprovacao: propostas.dataAprovacao,
+        motivoPendencia: propostas.motivoPendencia,
+        documentos: propostas.documentos,
+        documentosAdicionais: propostas.documentosAdicionais,
+        contratoGerado: propostas.contratoGerado,
+        contratoAssinado: propostas.contratoAssinado,
+        dataAssinatura: propostas.dataAssinatura,
+        dataPagamento: propostas.dataPagamento,
+        clienteData: propostas.clienteData,
+        condicoesData: propostas.condicoesData,
+        
+        // NOTA: Omitindo createdAt temporariamente devido ao erro de mapeamento
+        // createdAt: propostas.createdAt,
+      })
       .from(propostas)
       .where(eq(propostas.id, id))
       .limit(1);
