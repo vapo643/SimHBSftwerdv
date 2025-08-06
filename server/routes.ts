@@ -3937,6 +3937,10 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
   const cobrancasRouter = (await import('./routes/cobrancas.js')).default;
   app.use('/api/cobrancas', cobrancasRouter);
   
+  // Register Observações routes
+  const observacoesRouter = (await import('./routes/observacoes.js')).default;
+  app.use('/api', observacoesRouter);
+  
   // Register Pagamentos routes
   const pagamentosRouter = (await import('./routes/pagamentos.js')).default;
   app.use('/api/pagamentos', pagamentosRouter);

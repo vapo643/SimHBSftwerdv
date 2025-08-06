@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import DashboardLayout from "@/components/DashboardLayout";
@@ -49,7 +49,8 @@ import {
   MoreVertical,
   CalendarPlus,
   Percent,
-  CheckSquare
+  CheckSquare,
+  Loader2
 } from "lucide-react";
 import { format, parseISO, differenceInDays, isToday, isFuture, addDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -125,6 +126,15 @@ interface FichaCliente {
   };
 }
 
+interface Observacao {
+  id: string;
+  mensagem: string;
+  tipo_acao: string;
+  criado_por: string;
+  created_at: string;
+  dados_acao?: any;
+}
+
 export default function CobrancasPage() {
   const { toast } = useToast();
   const { user } = useAuth();
@@ -157,6 +167,12 @@ export default function CobrancasPage() {
   // Estados para Prorrogar Vencimento (seleção múltipla)
   const [boletosParaProrrogar, setBoletosParaProrrogar] = useState<string[]>([]);
   const [todosBoletosAtivos, setTodosBoletosAtivos] = useState<any[]>([]);
+  
+  // Estados para Histórico de Observações
+  const [observacoes, setObservacoes] = useState<Observacao[]>([]);
+  const [loadingObservacoes, setLoadingObservacoes] = useState(false);
+  const [salvandoObservacao, setSalvandoObservacao] = useState(false);
+  const [statusObservacao, setStatusObservacao] = useState("Outros");
   
   // Verificar se o usuário tem role de cobrança
   const isCobrancaUser = user?.role === 'COBRANÇA';
@@ -254,6 +270,62 @@ export default function CobrancasPage() {
     queryFn: () => apiRequest(`/api/cobrancas/${selectedPropostaId}/ficha`),
     enabled: !!selectedPropostaId && showFichaModal
   });
+  
+  // Buscar observações quando a ficha for aberta
+  const fetchObservacoes = async () => {
+    if (!selectedPropostaId) return;
+    setLoadingObservacoes(true);
+    try {
+      const response = await apiRequest(`/api/propostas/${selectedPropostaId}/observacoes`);
+      setObservacoes(response.observacoes || []);
+    } catch (error) {
+      console.error('Erro ao buscar observações:', error);
+    } finally {
+      setLoadingObservacoes(false);
+    }
+  };
+  
+  // Carregar observações quando o modal abrir
+  useEffect(() => {
+    if (showFichaModal && selectedPropostaId) {
+      fetchObservacoes();
+    }
+  }, [showFichaModal, selectedPropostaId]);
+  
+  // Função para salvar nova observação
+  const handleSalvarObservacao = async () => {
+    if (!selectedPropostaId || !novaObservacao.trim() || !statusObservacao) return;
+    
+    setSalvandoObservacao(true);
+    try {
+      const response = await apiRequest(`/api/propostas/${selectedPropostaId}/observacoes`, {
+        method: 'POST',
+        body: JSON.stringify({
+          mensagem: novaObservacao,
+          tipo_acao: statusObservacao
+        })
+      });
+      
+      // Adicionar nova observação na lista
+      if (response.observacao) {
+        setObservacoes(prev => [response.observacao, ...prev]);
+        setNovaObservacao('');
+        toast({
+          title: "Sucesso",
+          description: "Observação salva com sucesso",
+        });
+      }
+    } catch (error) {
+      console.error('Erro ao salvar observação:', error);
+      toast({
+        title: "Erro", 
+        description: "Não foi possível salvar a observação",
+        variant: "destructive",
+      });
+    } finally {
+      setSalvandoObservacao(false);
+    }
+  };
 
   // Mutation para adicionar observação
   const adicionarObservacaoMutation = useMutation({
@@ -1465,6 +1537,104 @@ export default function CobrancasPage() {
                           <p className="text-lg font-semibold">{fichaCliente.resumoFinanceiro.parcelasPendentes}</p>
                           <p className="text-xs text-muted-foreground">Parcelas Pendentes</p>
                         </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Histórico de Observações */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base flex items-center">
+                        <MessageSquare className="mr-2 h-4 w-4" />
+                        Histórico de Observações
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {/* Formulário para adicionar nova observação */}
+                        <div className="border-b pb-4">
+                          <div className="space-y-3">
+                            <div>
+                              <Label htmlFor="observacao-text">Nova Observação</Label>
+                              <Textarea
+                                id="observacao-text"
+                                placeholder="Digite sua observação sobre este cliente ou proposta..."
+                                value={novaObservacao}
+                                onChange={(e) => setNovaObservacao(e.target.value)}
+                                className="min-h-[80px]"
+                              />
+                            </div>
+                            <div className="flex gap-2">
+                              <Select value={statusObservacao} onValueChange={setStatusObservacao}>
+                                <SelectTrigger className="w-[250px]">
+                                  <SelectValue placeholder="Selecione o status" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="Contato Realizado">Contato Realizado</SelectItem>
+                                  <SelectItem value="Negociação em Andamento">Negociação em Andamento</SelectItem>
+                                  <SelectItem value="Acordo Fechado">Acordo Fechado</SelectItem>
+                                  <SelectItem value="Monitoramento">Monitoramento</SelectItem>
+                                  <SelectItem value="Outros">Outros</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <Button
+                                onClick={handleSalvarObservacao}
+                                disabled={!novaObservacao.trim() || !statusObservacao || salvandoObservacao}
+                              >
+                                {salvandoObservacao ? (
+                                  <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Salvando...
+                                  </>
+                                ) : (
+                                  'Salvar Observação'
+                                )}
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Lista de observações existentes */}
+                        {loadingObservacoes ? (
+                          <div className="text-center py-4">
+                            <Loader2 className="h-6 w-6 animate-spin mx-auto" />
+                            <p className="text-sm text-muted-foreground mt-2">Carregando histórico...</p>
+                          </div>
+                        ) : observacoes.length === 0 ? (
+                          <div className="text-center py-4 text-muted-foreground">
+                            Nenhuma observação registrada ainda.
+                          </div>
+                        ) : (
+                          <ScrollArea className="h-[300px]">
+                            <div className="space-y-3 pr-4">
+                              {observacoes.map((obs) => (
+                                <div key={obs.id} className="border rounded-lg p-3 space-y-2">
+                                  <div className="flex items-start justify-between">
+                                    <div className="flex-1">
+                                      <div className="flex items-center gap-2">
+                                        <Badge variant={
+                                          obs.tipo_acao === 'Acordo Fechado' ? 'default' :
+                                          obs.tipo_acao === 'Contato Realizado' ? 'secondary' :
+                                          obs.tipo_acao === 'Negociação em Andamento' ? 'outline' :
+                                          'secondary'
+                                        }>
+                                          {obs.tipo_acao}
+                                        </Badge>
+                                        <span className="text-xs text-muted-foreground">
+                                          {format(new Date(obs.created_at), "dd/MM/yyyy 'às' HH:mm")}
+                                        </span>
+                                      </div>
+                                      <p className="mt-2 text-sm">{obs.mensagem}</p>
+                                      <p className="text-xs text-muted-foreground mt-1">
+                                        Por: {obs.criado_por}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </ScrollArea>
+                        )}
                       </div>
                     </CardContent>
                   </Card>
