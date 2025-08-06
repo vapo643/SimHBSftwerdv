@@ -898,132 +898,91 @@ router.get("/:id/detalhes-completos", jwtAuthMiddleware, async (req: Authenticat
     
     console.log(`[PAGAMENTOS] Buscando detalhes completos da proposta: ${id}`);
     
-    // HOTFIX: Selecionar apenas colunas que existem, evitando created_at
-    const [propostaData] = await db
-      .select({
-        // Campos básicos
-        id: propostas.id,
-        lojaId: propostas.lojaId,
-        produtoId: propostas.produtoId,
-        tabelaComercialId: propostas.tabelaComercialId,
-        
-        // Dados do cliente
-        clienteNome: propostas.clienteNome,
-        clienteCpf: propostas.clienteCpf,
-        clienteEmail: propostas.clienteEmail,
-        clienteTelefone: propostas.clienteTelefone,
-        clienteDataNascimento: propostas.clienteDataNascimento,
-        clienteRenda: propostas.clienteRenda,
-        clienteRg: propostas.clienteRg,
-        clienteOrgaoEmissor: propostas.clienteOrgaoEmissor,
-        clienteEstadoCivil: propostas.clienteEstadoCivil,
-        clienteNacionalidade: propostas.clienteNacionalidade,
-        clienteCep: propostas.clienteCep,
-        clienteEndereco: propostas.clienteEndereco,
-        clienteOcupacao: propostas.clienteOcupacao,
-        
-        // Dados financeiros
-        valor: propostas.valor,
-        prazo: propostas.prazo,
-        finalidade: propostas.finalidade,
-        garantia: propostas.garantia,
-        taxaJuros: propostas.taxaJuros,
-        valorTac: propostas.valorTac,
-        valorIof: propostas.valorIof,
-        valorTotalFinanciado: propostas.valorTotalFinanciado,
-        valorAprovado: propostas.valorAprovado,
-        
-        // Status e formalização
-        status: propostas.status,
-        ccbGerado: propostas.ccbGerado,
-        assinaturaEletronicaConcluida: propostas.assinaturaEletronicaConcluida,
-        biometriaConcluida: propostas.biometriaConcluida,
-        caminhoCcbAssinado: propostas.caminhoCcbAssinado,
-        ccbDocumentoUrl: propostas.ccbDocumentoUrl,
-        statusAssinatura: propostas.statusAssinatura,
-        statusBiometria: propostas.statusBiometria,
-        
-        // ClickSign
-        clicksignDocumentKey: propostas.clicksignDocumentKey,
-        clicksignSignerKey: propostas.clicksignSignerKey,
-        clicksignListKey: propostas.clicksignListKey,
-        clicksignStatus: propostas.clicksignStatus,
-        clicksignSignUrl: propostas.clicksignSignUrl,
-        clicksignSentAt: propostas.clicksignSentAt,
-        clicksignSignedAt: propostas.clicksignSignedAt,
-        
-        // Dados de pagamento
-        dadosPagamentoBanco: propostas.dadosPagamentoBanco,
-        dadosPagamentoAgencia: propostas.dadosPagamentoAgencia,
-        dadosPagamentoConta: propostas.dadosPagamentoConta,
-        dadosPagamentoTipo: propostas.dadosPagamentoTipo,
-        dadosPagamentoNomeTitular: propostas.dadosPagamentoNomeTitular,
-        dadosPagamentoCpfTitular: propostas.dadosPagamentoCpfTitular,
-        dadosPagamentoPix: propostas.dadosPagamentoPix,
-        dadosPagamentoTipoPix: propostas.dadosPagamentoTipoPix,
-        urlComprovantePagamento: propostas.urlComprovantePagamento,
-        
-        // Outros campos
-        observacoes: propostas.observacoes,
-        observacoesFormalizacao: propostas.observacoesFormalizacao,
-        userId: propostas.userId,
-        analistaId: propostas.analistaId,
-        dataAnalise: propostas.dataAnalise,
-        dataAprovacao: propostas.dataAprovacao,
-        motivoPendencia: propostas.motivoPendencia,
-        documentos: propostas.documentos,
-        documentosAdicionais: propostas.documentosAdicionais,
-        contratoGerado: propostas.contratoGerado,
-        contratoAssinado: propostas.contratoAssinado,
-        dataAssinatura: propostas.dataAssinatura,
-        dataPagamento: propostas.dataPagamento,
-        clienteData: propostas.clienteData,
-        condicoesData: propostas.condicoesData,
-        
-        // NOTA: Omitindo createdAt temporariamente devido ao erro de mapeamento
-        // createdAt: propostas.createdAt,
-      })
-      .from(propostas)
-      .where(eq(propostas.id, id))
-      .limit(1);
+    // SOLUÇÃO DEFINITIVA: Usar SQL direto para evitar problemas de mapeamento do Drizzle
+    const result = await db.execute(sql`
+      SELECT 
+        id, loja_id as "lojaId", produto_id as "produtoId", tabela_comercial_id as "tabelaComercialId",
+        cliente_nome as "clienteNome", cliente_cpf as "clienteCpf", cliente_email as "clienteEmail", 
+        cliente_telefone as "clienteTelefone", cliente_data_nascimento as "clienteDataNascimento",
+        cliente_renda as "clienteRenda", cliente_rg as "clienteRg", cliente_orgao_emissor as "clienteOrgaoEmissor",
+        cliente_estado_civil as "clienteEstadoCivil", cliente_nacionalidade as "clienteNacionalidade",
+        cliente_cep as "clienteCep", cliente_endereco as "clienteEndereco", cliente_ocupacao as "clienteOcupacao",
+        valor, prazo, finalidade, garantia, taxa_juros as "taxaJuros", valor_tac as "valorTac",
+        valor_iof as "valorIof", valor_total_financiado as "valorTotalFinanciado", valor_aprovado as "valorAprovado",
+        status, ccb_gerado as "ccbGerado", assinatura_eletronica_concluida as "assinaturaEletronicaConcluida",
+        biometria_concluida as "biometriaConcluida", caminho_ccb_assinado as "caminhoCcbAssinado",
+        ccb_documento_url as "ccbDocumentoUrl", status_assinatura as "statusAssinatura", 
+        status_biometria as "statusBiometria",
+        clicksign_document_key as "clicksignDocumentKey", clicksign_signer_key as "clicksignSignerKey",
+        clicksign_list_key as "clicksignListKey", clicksign_status as "clicksignStatus",
+        clicksign_sign_url as "clicksignSignUrl", clicksign_sent_at as "clicksignSentAt",
+        clicksign_signed_at as "clicksignSignedAt",
+        dados_pagamento_banco as "dadosPagamentoBanco", dados_pagamento_agencia as "dadosPagamentoAgencia",
+        dados_pagamento_conta as "dadosPagamentoConta", dados_pagamento_tipo as "dadosPagamentoTipo",
+        dados_pagamento_nome_titular as "dadosPagamentoNomeTitular", 
+        dados_pagamento_cpf_titular as "dadosPagamentoCpfTitular",
+        dados_pagamento_pix as "dadosPagamentoPix", dados_pagamento_tipo_pix as "dadosPagamentoTipoPix",
+        url_comprovante_pagamento as "urlComprovantePagamento",
+        observacoes, observacoes_formalizacao as "observacoesFormalizacao", user_id as "userId",
+        analista_id as "analistaId", data_analise as "dataAnalise", data_aprovacao as "dataAprovacao",
+        motivo_pendencia as "motivoPendencia", documentos, documentos_adicionais as "documentosAdicionais",
+        contrato_gerado as "contratoGerado", contrato_assinado as "contratoAssinado",
+        data_assinatura as "dataAssinatura", data_pagamento as "dataPagamento",
+        cliente_data as "clienteData", condicoes_data as "condicoesData",
+        created_at as "createdAt"
+      FROM propostas 
+      WHERE id = ${id} 
+      LIMIT 1
+    `);
+    
+    const propostaData = result[0];
     
     if (!propostaData) {
       return res.status(404).json({ error: "Proposta não encontrada" });
     }
     
-    // Buscar dados relacionados separadamente se existirem
-    const [lojaData] = propostaData.lojaId ? await db
-      .select()
-      .from(lojas)
-      .where(eq(lojas.id, propostaData.lojaId))
-      .limit(1) : [null];
+    // Buscar dados relacionados usando SQL direto para evitar problemas de schema
+    let lojaData = null;
+    if (propostaData.lojaId) {
+      const lojaResult = await db.execute(sql`
+        SELECT id, nome_loja as "nomeLoja" FROM lojas WHERE id = ${propostaData.lojaId} LIMIT 1
+      `);
+      lojaData = lojaResult[0];
+    }
     
-    const [produtoData] = propostaData.produtoId ? await db
-      .select()
-      .from(produtos)
-      .where(eq(produtos.id, propostaData.produtoId))
-      .limit(1) : [null];
+    let produtoData = null;
+    if (propostaData.produtoId) {
+      const produtoResult = await db.execute(sql`
+        SELECT id, nome_produto as "nomeProduto" FROM produtos WHERE id = ${propostaData.produtoId} LIMIT 1
+      `);
+      produtoData = produtoResult[0];
+    }
     
-    const [usuarioData] = propostaData.userId ? await db
-      .select()
-      .from(profiles)
-      .where(eq(profiles.id, propostaData.userId))
-      .limit(1) : [null];
+    let usuarioData = null;
+    if (propostaData.userId) {
+      const usuarioResult = await db.execute(sql`
+        SELECT id, full_name as "fullName" FROM profiles WHERE id = ${propostaData.userId} LIMIT 1
+      `);
+      usuarioData = usuarioResult[0];
+    }
     
-    // Usar os dados obtidos separadamente
-    
-    // Buscar boletos da Inter, se existirem
+    // Buscar boletos da Inter usando SQL direto
     console.log('[DEBUG] Tentando buscar boletos para proposta:', id);
     let boletos: any[] = [];
     try {
-      boletos = await db
-        .select()
-        .from(interCollections)
-        .where(eq(interCollections.propostaId, id));
+      const boletosResult = await db.execute(sql`
+        SELECT 
+          id, codigo_solicitacao as "codigoSolicitacao", 
+          data_vencimento as "dataVencimento", valor_nominal as "valorNominal", 
+          situacao, linha_digitavel as "linhaDigitavel", 
+          pix_copia_e_cola as "pixCopiaECola"
+        FROM inter_collections 
+        WHERE proposta_id = ${id}
+      `);
+      boletos = boletosResult;
       console.log('[DEBUG] Boletos encontrados:', boletos.length);
     } catch (boletoError) {
       console.error('[DEBUG] ERRO ao buscar boletos:', boletoError);
-      // Continue sem boletos se houver erro
       boletos = [];
     }
     
