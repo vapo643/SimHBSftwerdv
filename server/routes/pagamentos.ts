@@ -935,7 +935,7 @@ router.get("/:id/detalhes-completos", jwtAuthMiddleware, async (req: Authenticat
       .select()
       .from(interCollections)
       .where(eq(interCollections.propostaId, id))
-      .orderBy(desc(interCollections.createdAt));
+      .orderBy(desc(interCollections.id)); // Usar id pois createdAt não existe na tabela
     
     // Montar resposta completa
     const respostaCompleta = {
