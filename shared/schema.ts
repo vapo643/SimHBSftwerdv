@@ -93,6 +93,7 @@ export const statusEnum = pgEnum("status", [
   "contratos_preparados",
   "contratos_assinados",
   "pronto_pagamento",
+  "pagamento_autorizado", // Novo status após confirmação de veracidade
   "pago",
   "cancelado",
   "suspensa",

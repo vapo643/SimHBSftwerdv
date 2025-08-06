@@ -45,8 +45,10 @@ import {
   PiggyBank,
   Wallet,
   ArrowUpRight,
-  ArrowDownRight
+  ArrowDownRight,
+  ShieldCheck
 } from "lucide-react";
+import PaymentReviewModal from "./pagamentos-review";
 
 interface Pagamento {
   id: string;
@@ -97,6 +99,8 @@ export default function Pagamentos() {
   const [showApprovalModal, setShowApprovalModal] = useState(false);
   const [showRejectionModal, setShowRejectionModal] = useState(false);
   const [showSecurityVerificationModal, setShowSecurityVerificationModal] = useState(false);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [selectedPropostaForReview, setSelectedPropostaForReview] = useState<any>(null);
   const [rejectionReason, setRejectionReason] = useState("");
   const [approvalObservation, setApprovalObservation] = useState("");
   const [verificationData, setVerificationData] = useState<any>(null);
@@ -272,6 +276,10 @@ export default function Pagamentos() {
         return 'bg-blue-100 text-blue-800';
       case 'em_processamento':
         return 'bg-purple-100 text-purple-800';
+      case 'pronto_pagamento':
+        return 'bg-indigo-100 text-indigo-800';
+      case 'pagamento_autorizado':
+        return 'bg-emerald-100 text-emerald-800';
       case 'pago':
         return 'bg-green-100 text-green-800';
       case 'rejeitado':
@@ -291,6 +299,10 @@ export default function Pagamentos() {
         return 'Aprovado';
       case 'em_processamento':
         return 'Em Processamento';
+      case 'pronto_pagamento':
+        return 'Pronto para Pagamento';
+      case 'pagamento_autorizado':
+        return 'Pagamento Autorizado';
       case 'pago':
         return 'Pago';
       case 'rejeitado':
@@ -369,6 +381,20 @@ export default function Pagamentos() {
   return (
     <DashboardLayout title="Pagamentos">
       <div className="space-y-6">
+        {/* Modal de Revisão e Confirmação de Veracidade */}
+        <PaymentReviewModal
+          isOpen={showReviewModal}
+          onClose={() => {
+            setShowReviewModal(false);
+            setSelectedPropostaForReview(null);
+          }}
+          proposta={selectedPropostaForReview}
+          onConfirm={() => {
+            refetch();
+            setShowReviewModal(false);
+            setSelectedPropostaForReview(null);
+          }}
+        />
         {/* KPIs Dashboard */}
         <div className="grid gap-4 md:grid-cols-4">
           <Card>
@@ -614,19 +640,19 @@ export default function Pagamentos() {
                             >
                               <Eye className="h-4 w-4" />
                             </Button>
-                            {pagamento.status === 'em_processamento' && userHasApprovalPermission() && (
+                            {(pagamento.status === 'em_processamento' || pagamento.status === 'pronto_pagamento') && userHasApprovalPermission() && (
                               <Button
                                 size="sm"
                                 variant="default"
                                 className="gap-2"
                                 onClick={() => {
-                                  setSelectedPagamento(pagamento);
-                                  setShowSecurityVerificationModal(true);
+                                  setSelectedPropostaForReview(pagamento);
+                                  setShowReviewModal(true);
                                 }}
-                                title="Revisar e Pagar"
+                                title="Confirmar Veracidade"
                               >
-                                <Shield className="h-4 w-4" />
-                                Revisar e Pagar
+                                <ShieldCheck className="h-4 w-4" />
+                                Confirmar Veracidade
                               </Button>
                             )}
                           </div>

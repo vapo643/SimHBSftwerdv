@@ -880,6 +880,111 @@ router.get("/:id/ccb-storage-status", jwtAuthMiddleware, async (req: Authenticat
   }
 });
 
+// Rota para confirmar veracidade e autorizar pagamento
+router.post("/:id/confirmar-veracidade", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user?.id;
+    const userRole = req.user?.role;
+    
+    // Verificar permissões - apenas ADMIN e FINANCEIRO podem confirmar
+    if (userRole !== 'ADMINISTRADOR' && userRole !== 'FINANCEIRO') {
+      return res.status(403).json({ error: "Sem permissão para confirmar veracidade" });
+    }
+    
+    console.log(`[PAGAMENTOS] Confirmando veracidade da proposta: ${id} por usuário: ${userId}`);
+    
+    // Buscar proposta
+    const [proposta] = await db
+      .select()
+      .from(propostas)
+      .where(eq(propostas.id, id))
+      .limit(1);
+    
+    if (!proposta) {
+      return res.status(404).json({ error: "Proposta não encontrada" });
+    }
+    
+    // Verificar se está no status correto
+    if (proposta.status !== 'pronto_pagamento') {
+      return res.status(400).json({ 
+        error: "Proposta não está pronta para pagamento",
+        statusAtual: proposta.status 
+      });
+    }
+    
+    // Verificar se CCB foi assinada
+    if (!proposta.assinaturaEletronicaConcluida) {
+      return res.status(400).json({ 
+        error: "CCB ainda não foi assinada eletronicamente" 
+      });
+    }
+    
+    // Atualizar status para pagamento_autorizado
+    await db
+      .update(propostas)
+      .set({ 
+        status: 'pagamento_autorizado'
+      })
+      .where(eq(propostas.id, id));
+    
+    // Buscar informações do usuário para o log
+    const { profiles } = await import("@shared/schema");
+    const [user] = await db
+      .select({
+        fullName: profiles.fullName,
+        role: profiles.role
+      })
+      .from(profiles)
+      .where(eq(profiles.id, userId!))
+      .limit(1);
+    
+    // Registrar na tabela de histórico de observações
+    const { historicoObservacoesCobranca } = await import("@shared/schema");
+    await db.insert(historicoObservacoesCobranca).values({
+      propostaId: id,
+      mensagem: `Veracidade dos documentos confirmada. Pagamento autorizado por ${userRole}.`,
+      criadoPor: user?.fullName || userId,
+      tipoAcao: 'CONFIRMACAO_VERACIDADE',
+      dadosAcao: {
+        autorId: userId,
+        nomeAutor: user?.fullName,
+        role: userRole,
+        statusAnterior: 'pronto_pagamento',
+        statusNovo: 'pagamento_autorizado',
+        timestamp: new Date().toISOString(),
+        ip: req.ip,
+        userAgent: req.headers['user-agent']
+      }
+    });
+    
+    console.log(`[PAGAMENTOS] ✅ Veracidade confirmada e pagamento autorizado para proposta: ${id}`);
+    
+    // Retornar os dados de pagamento (incluindo chave PIX)
+    res.json({
+      success: true,
+      message: "Veracidade confirmada e pagamento autorizado",
+      status: "pagamento_autorizado",
+      dadosPagamento: {
+        pix: proposta.dadosPagamentoPix,
+        banco: proposta.dadosPagamentoBanco,
+        agencia: proposta.dadosPagamentoAgencia,
+        conta: proposta.dadosPagamentoConta,
+        titular: proposta.clienteNome
+      },
+      autorizadoPor: {
+        id: userId,
+        nome: user?.fullName,
+        role: userRole,
+        dataAutorizacao: new Date().toISOString()
+      }
+    });
+  } catch (error) {
+    console.error("[PAGAMENTOS] Erro ao confirmar veracidade:", error);
+    res.status(500).json({ error: "Erro ao confirmar veracidade" });
+  }
+});
+
 // Rota para obter URL assinada do Supabase Storage para CCB
 router.get("/:id/ccb-url", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
