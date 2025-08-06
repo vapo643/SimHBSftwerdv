@@ -442,6 +442,130 @@ router.get("/inter-sumario", async (req: any, res) => {
   }
 });
 
+// POST /api/cobrancas/inter-sync-all - Sincronizar todos os boletos de uma proposta com Banco Inter
+router.post("/inter-sync-all", async (req: any, res) => {
+  try {
+    const { propostaId } = req.body;
+    const userRole = req.user?.role;
+    
+    // Verificar se usuário tem permissão
+    if (!userRole || !['ADMINISTRADOR', 'COBRANCA'].includes(userRole)) {
+      console.log('[INTER-SYNC-ALL] Acesso negado - Role:', userRole);
+      return res.status(403).json({ message: "Acesso negado" });
+    }
+
+    if (!propostaId) {
+      return res.status(400).json({ message: "ID da proposta é obrigatório" });
+    }
+
+    console.log(`[INTER-SYNC-ALL] Iniciando sincronização para proposta: ${propostaId}`);
+
+    // Buscar todos os boletos da proposta
+    const boletos = await db
+      .select()
+      .from(interCollections)
+      .where(eq(interCollections.propostaId, propostaId));
+
+    console.log(`[INTER-SYNC-ALL] Encontrados ${boletos.length} boletos para sincronizar`);
+
+    const { interBankService } = await import('../services/interBankService');
+    let atualizados = 0;
+    let erros = 0;
+
+    // Atualizar cada boleto
+    for (const boleto of boletos) {
+      if (!boleto.codigoSolicitacao) continue;
+      
+      try {
+        console.log(`[INTER-SYNC-ALL] Sincronizando boleto: ${boleto.codigoSolicitacao}`);
+        
+        // Buscar status atualizado no Inter
+        const cobranca = await interBankService.recuperarCobranca(boleto.codigoSolicitacao);
+        
+        if (cobranca && cobranca.cobranca) {
+          const novoStatus = cobranca.cobranca.situacao;
+          
+          console.log(`[INTER-SYNC-ALL] Boleto ${boleto.codigoSolicitacao}: ${boleto.situacao} → ${novoStatus}`);
+          
+          // Atualizar inter_collections
+          await db
+            .update(interCollections)
+            .set({
+              situacao: novoStatus,
+              valorTotalRecebido: cobranca.cobranca.valorTotalRecebido,
+              updatedAt: new Date()
+            })
+            .where(eq(interCollections.id, boleto.id));
+          
+          // Atualizar parcela correspondente se houver
+          if (boleto.numeroParcela) {
+            let novoStatusParcela: string;
+            
+            switch (novoStatus) {
+              case 'RECEBIDO':
+              case 'MARCADO_RECEBIDO':
+                novoStatusParcela = 'pago';
+                break;
+              case 'CANCELADO':
+              case 'EXPIRADO':
+              case 'FALHA_EMISSAO':
+                novoStatusParcela = 'cancelado';
+                break;
+              case 'VENCIDO':
+              case 'ATRASADO':
+              case 'PROTESTO':
+                novoStatusParcela = 'vencido';
+                break;
+              case 'A_RECEBER':
+              case 'EM_PROCESSAMENTO':
+              default:
+                novoStatusParcela = 'pendente';
+                break;
+            }
+            
+            const updateData: any = {
+              status: novoStatusParcela,
+              updatedAt: new Date()
+            };
+            
+            if (novoStatusParcela === 'pago' && cobranca.cobranca.dataSituacao) {
+              updateData.dataPagamento = cobranca.cobranca.dataSituacao;
+            }
+            
+            await db
+              .update(parcelas)
+              .set(updateData)
+              .where(
+                and(
+                  eq(parcelas.propostaId, boleto.propostaId),
+                  eq(parcelas.numeroParcela, boleto.numeroParcela)
+                )
+              );
+          }
+          
+          atualizados++;
+        }
+      } catch (error) {
+        console.error(`[INTER-SYNC-ALL] Erro ao sincronizar boleto ${boleto.codigoSolicitacao}:`, error);
+        erros++;
+      }
+    }
+
+    console.log(`[INTER-SYNC-ALL] Sincronização concluída: ${atualizados} atualizados, ${erros} erros`);
+
+    res.json({
+      success: true,
+      message: `Sincronização concluída: ${atualizados} boletos atualizados`,
+      totalBoletos: boletos.length,
+      atualizados,
+      erros
+    });
+  } catch (error) {
+    console.error('[INTER-SYNC-ALL] Erro:', error);
+    res.status(500).json({ message: "Erro ao sincronizar boletos" });
+  }
+});
+
 // GET /api/cobrancas/inter-status/:codigoSolicitacao - Obter status individual do boleto no Banco Inter
 router.get("/inter-status/:codigoSolicitacao", async (req: any, res) => {
   try {
@@ -456,43 +580,83 @@ router.get("/inter-status/:codigoSolicitacao", async (req: any, res) => {
 
     const { interBankService } = await import('../services/interBankService');
     
+    console.log(`[INTER-STATUS] Buscando status para boleto: ${codigoSolicitacao}`);
+    
     // Buscar dados atualizados da cobrança no Inter
     const cobranca = await interBankService.recuperarCobranca(codigoSolicitacao);
     
+    console.log(`[INTER-STATUS] Status recebido do Inter: ${cobranca?.cobranca?.situacao}`);
+    
     // Atualizar status no banco local
     if (cobranca && cobranca.cobranca) {
+      const novoStatus = cobranca.cobranca.situacao;
+      
+      // Atualizar inter_collections
       await db
         .update(interCollections)
         .set({
-          situacao: cobranca.cobranca.situacao,
+          situacao: novoStatus,
           valorTotalRecebido: cobranca.cobranca.valorTotalRecebido,
           updatedAt: new Date()
         })
         .where(eq(interCollections.codigoSolicitacao, codigoSolicitacao));
+      
+      console.log(`[INTER-STATUS] Status atualizado no banco: ${novoStatus}`);
         
-      // Se foi pago, atualizar também a parcela correspondente
-      if (cobranca.cobranca.situacao === 'RECEBIDO' || cobranca.cobranca.situacao === 'MARCADO_RECEBIDO') {
-        const [interBoleto] = await db
-          .select()
-          .from(interCollections)
-          .where(eq(interCollections.codigoSolicitacao, codigoSolicitacao))
-          .limit(1);
-          
-        if (interBoleto && interBoleto.numeroParcela) {
-          await db
-            .update(parcelas)
-            .set({
-              status: 'pago',
-              dataPagamento: cobranca.cobranca.dataSituacao,
-              updatedAt: new Date()
-            })
-            .where(
-              and(
-                eq(parcelas.propostaId, interBoleto.propostaId),
-                eq(parcelas.numeroParcela, interBoleto.numeroParcela)
-              )
-            );
+      // Atualizar status da parcela baseado no status do Inter
+      const [interBoleto] = await db
+        .select()
+        .from(interCollections)
+        .where(eq(interCollections.codigoSolicitacao, codigoSolicitacao))
+        .limit(1);
+        
+      if (interBoleto && interBoleto.numeroParcela) {
+        let novoStatusParcela: string;
+        
+        // Mapear status do Inter para status da parcela
+        switch (novoStatus) {
+          case 'RECEBIDO':
+          case 'MARCADO_RECEBIDO':
+            novoStatusParcela = 'pago';
+            break;
+          case 'CANCELADO':
+          case 'EXPIRADO':
+          case 'FALHA_EMISSAO':
+            novoStatusParcela = 'cancelado';
+            break;
+          case 'VENCIDO':
+          case 'ATRASADO':
+          case 'PROTESTO':
+            novoStatusParcela = 'vencido';
+            break;
+          case 'A_RECEBER':
+          case 'EM_PROCESSAMENTO':
+          default:
+            novoStatusParcela = 'pendente';
+            break;
         }
+        
+        console.log(`[INTER-STATUS] Atualizando parcela ${interBoleto.numeroParcela} para status: ${novoStatusParcela}`);
+        
+        const updateData: any = {
+          status: novoStatusParcela,
+          updatedAt: new Date()
+        };
+        
+        // Se foi pago, adicionar data de pagamento
+        if (novoStatusParcela === 'pago' && cobranca.cobranca.dataSituacao) {
+          updateData.dataPagamento = cobranca.cobranca.dataSituacao;
+        }
+        
+        await db
+          .update(parcelas)
+          .set(updateData)
+          .where(
+            and(
+              eq(parcelas.propostaId, interBoleto.propostaId),
+              eq(parcelas.numeroParcela, interBoleto.numeroParcela)
+            )
+          );
       }
     }
     

@@ -174,42 +174,58 @@ export default function Cobrancas() {
 
   // Atualizar todos os status do Inter Bank
   const atualizarTodosStatus = async () => {
+    if (isRefreshing) return;
+    
     setIsRefreshing(true);
+    let totalAtualizados = 0;
+    let totalErros = 0;
+    
     toast({
-      title: "Atualizando status...",
-      description: "Consultando Banco Inter para obter status atualizados",
+      title: "Sincronizando com Banco Inter...",
+      description: "Buscando status real de todos os boletos",
     });
-
+    
     try {
-      // Buscar códigos de solicitação únicos das parcelas
-      const codigosSolicitacao = new Set<string>();
-      propostas?.forEach(proposta => {
-        proposta.parcelas.forEach(parcela => {
-          if (parcela.interCodigoSolicitacao) {
-            codigosSolicitacao.add(parcela.interCodigoSolicitacao);
+      // Sincronizar todas as propostas
+      if (propostas && propostas.length > 0) {
+        for (const proposta of propostas) {
+          try {
+            const response = await apiRequest('/api/cobrancas/inter-sync-all', {
+              method: 'POST',
+              body: JSON.stringify({ propostaId: proposta.id }),
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            });
+            
+            if (response.atualizados) {
+              totalAtualizados += response.atualizados;
+            }
+            if (response.erros) {
+              totalErros += response.erros;
+            }
+          } catch (error) {
+            console.error(`Erro ao sincronizar proposta ${proposta.id}:`, error);
+            totalErros++;
           }
-        });
-      });
-
-      // Atualizar status de cada boleto
-      const promises = Array.from(codigosSolicitacao).map(codigo => 
-        atualizarStatusBoleto(codigo)
-      );
-      
-      await Promise.all(promises);
+        }
+      }
       
       // Recarregar dados
       await refetch();
       await refetchSumario();
       
       toast({
-        title: "Status atualizados!",
-        description: `${codigosSolicitacao.size} boletos verificados no Banco Inter`,
+        title: "Sincronização concluída",
+        description: totalErros > 0 
+          ? `${totalAtualizados} boletos atualizados, ${totalErros} erros`
+          : `${totalAtualizados} boletos sincronizados com sucesso`,
+        variant: totalErros > 0 ? "default" : undefined,
       });
     } catch (error) {
       toast({
-        title: "Erro na atualização",
-        description: "Não foi possível atualizar todos os status",
+        title: "Erro ao sincronizar",
+        description: "Falha ao conectar com o Banco Inter",
         variant: "destructive",
       });
     } finally {
@@ -477,7 +493,19 @@ export default function Cobrancas() {
         {/* Filtros */}
         <Card>
           <CardHeader>
-            <CardTitle>Filtros</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle>Filtros</CardTitle>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={atualizarTodosStatus}
+                disabled={isRefreshing}
+                className="border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white"
+              >
+                <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+                {isRefreshing ? 'Sincronizando...' : 'Sincronizar com Banco Inter'}
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
