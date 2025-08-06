@@ -79,6 +79,7 @@ Formalization Interface: ✅ COMPLETELY UNIFIED - Attendant and Administrator in
 Collections Dashboard: ✅ IMPLEMENTED (05/08/2025) - Comprehensive financial collections system with KPIs (Total Contracts, Delinquency Rate, Total Receivable), advanced filters (CPF/CNPJ search with LGPD masking, payment status, date ranges), detailed installment tracking table, Inter Bank boleto visualization, and quick actions for contact management.
 Financial Payments: ✅ IMPLEMENTED (05/08/2025) - Complete loan disbursement interface with maker/checker approval workflow, batch payment processing, transaction history, comprehensive validation controls, and role-based approval permissions for secure fund transfers.
 Client Profile Contact Data: ✅ IMPLEMENTED (06/08/2025) - Fixed contact data display in Collections module Client Profile. Now correctly shows real client phone, email, and address data from propostas table. Fixed backend API to include enderecoCliente and cepCliente fields. Added fallback displays for missing data and protection for contact buttons when data unavailable.
+Real-time Boleto Status Sync: ✅ IMPLEMENTED (06/08/2025) - Complete synchronization system with Inter Bank API for real-time boleto status updates. Comprehensive status mapping (RECEBIDO→pago, CANCELADO→cancelado, ATRASADO→vencido, A_RECEBER→pendente) with automatic parcela updates. Sync button in Collections interface successfully tested with 14 boletos updated from real Inter Bank data.
 
 ## System Architecture
 

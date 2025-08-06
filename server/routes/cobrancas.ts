@@ -3,6 +3,7 @@ import { db } from "../lib/supabase";
 import { propostas, parcelas, observacoesCobranca, interCollections, profiles } from "@shared/schema";
 import { eq, and, sql, desc, gte, lte, inArray, or } from "drizzle-orm";
 import { format, parseISO, differenceInDays, isAfter } from "date-fns";
+import { jwtAuthMiddleware } from "../lib/jwt-auth-middleware";
 
 const router = Router();
 
@@ -443,10 +444,12 @@ router.get("/inter-sumario", async (req: any, res) => {
 });
 
 // POST /api/cobrancas/inter-sync-all - Sincronizar todos os boletos de uma proposta com Banco Inter
-router.post("/inter-sync-all", async (req: any, res) => {
+router.post("/inter-sync-all", jwtAuthMiddleware, async (req: any, res) => {
   try {
     const { propostaId } = req.body;
     const userRole = req.user?.role;
+    
+    console.log(`[INTER-SYNC-ALL] Usuario: ${req.user?.id}, Role: ${userRole}`);
     
     // Verificar se usuário tem permissão
     if (!userRole || !['ADMINISTRADOR', 'COBRANCA'].includes(userRole)) {
@@ -502,22 +505,21 @@ router.post("/inter-sync-all", async (req: any, res) => {
             let novoStatusParcela: string;
             
             switch (novoStatus) {
-              case 'RECEBIDO':
-              case 'MARCADO_RECEBIDO':
+              case 'RECEBIDO':           // Pagamento confirmado
+              case 'MARCADO_RECEBIDO':   // Marcado como recebido manualmente
                 novoStatusParcela = 'pago';
                 break;
-              case 'CANCELADO':
-              case 'EXPIRADO':
-              case 'FALHA_EMISSAO':
+              case 'CANCELADO':          // Boleto cancelado
+              case 'EXPIRADO':           // Boleto expirado
+              case 'FALHA_EMISSAO':      // Falha na emissão
                 novoStatusParcela = 'cancelado';
                 break;
-              case 'VENCIDO':
-              case 'ATRASADO':
-              case 'PROTESTO':
+              case 'ATRASADO':           // Vencido e em atraso
+              case 'PROTESTO':           // Em protesto
                 novoStatusParcela = 'vencido';
                 break;
-              case 'A_RECEBER':
-              case 'EM_PROCESSAMENTO':
+              case 'A_RECEBER':          // Aguardando pagamento
+              case 'EM_PROCESSAMENTO':   // Processando
               default:
                 novoStatusParcela = 'pendente';
                 break;
