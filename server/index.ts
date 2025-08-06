@@ -14,6 +14,10 @@ import { registerRoutes } from "./routes";
   const securityWS = setupSecurityWebSocket(server);
   log('🔐 Security WebSocket initialized');
 
+  // Initialize CCB Sync Service
+  const { ccbSyncService } = await import('./services/ccbSyncService.js');
+  log('🔄 CCB Sync Service initialized - Auto downloading signed CCBs');
+
   // Initialize autonomous security scanners
   const { getSecurityScanner } = await import('./lib/autonomous-security-scanner');
   const { getVulnerabilityDetector } = await import('./lib/vulnerability-detector');

@@ -1346,53 +1346,72 @@ router.get("/:id/ccb-url", jwtAuthMiddleware, async (req: AuthenticatedRequest, 
       return res.status(404).json({ error: "Proposta não encontrada" });
     }
     
-    // Verificar se tem caminho da CCB assinada no Storage
+    // Se não tem caminho ou arquivo não existe, forçar sincronização
     if (!proposta.caminhoCcbAssinado) {
-      // Se não tem, mas tem chave do ClickSign e está assinada, baixar e salvar
-      if (proposta.clicksignDocumentKey && proposta.assinaturaEletronicaConcluida) {
-        console.log(`[PAGAMENTOS] CCB não está no Storage, baixando do ClickSign...`);
-        
-        const { clickSignService } = await import('../services/clickSignService.js');
-        const pdfBuffer = await clickSignService.downloadSignedDocument(proposta.clicksignDocumentKey);
-        
-        // Salvar no Storage
-        const filename = `CCB_${proposta.id}_assinada.pdf`;
-        const storagePath = `ccb/assinadas/${proposta.id}/${filename}`;
-        
-        const { error: uploadError } = await supabase.storage
-          .from('documents')
-          .upload(storagePath, pdfBuffer, {
-            contentType: 'application/pdf',
-            upsert: true
-          });
-        
-        if (!uploadError) {
-          // Atualizar o caminho no banco usando SQL direto
-          await db.execute(sql`
-            UPDATE propostas 
-            SET caminho_ccb_assinado = ${storagePath} 
-            WHERE id = ${id}
-          `);
-          
-          console.log(`[PAGAMENTOS] ✅ CCB salva no Storage: ${storagePath}`);
-          
-          // Gerar URL assinada (válida por 1 hora)
-          const { data: urlData, error: urlError } = await supabase.storage
-            .from('documents')
-            .createSignedUrl(storagePath, 3600);
-          
-          if (urlData?.signedUrl) {
-            return res.json({
-              url: urlData.signedUrl,
-              source: 'clicksign_downloaded',
-              storagePath,
-              expiresIn: 3600
-            });
-          }
-        }
+      console.log(`[PAGAMENTOS] CCB não tem caminho no banco, forçando sincronização...`);
+      
+      // Verificar se tem chave do ClickSign e está assinada
+      if (!proposta.clicksignDocumentKey || !proposta.assinaturaEletronicaConcluida) {
+        return res.status(404).json({ 
+          error: "CCB não está assinada ainda",
+          details: "O documento precisa ser assinado primeiro"
+        });
       }
       
-      return res.status(404).json({ error: "CCB assinada não disponível" });
+      // Forçar sincronização usando o serviço
+      const { ccbSyncService } = await import('../services/ccbSyncService.js');
+      const syncSuccess = await ccbSyncService.forceSyncProposal(id);
+      
+      if (!syncSuccess) {
+        console.log(`[PAGAMENTOS] ❌ Falha na sincronização da CCB`);
+        return res.status(500).json({ 
+          error: "Erro ao sincronizar CCB do ClickSign",
+          details: "Tente novamente em alguns instantes"
+        });
+      }
+      
+      // Buscar novamente após sincronização
+      const updatedResult = await db.execute(sql`
+        SELECT caminho_ccb_assinado as "caminhoCcbAssinado"
+        FROM propostas 
+        WHERE id = ${id} 
+        LIMIT 1
+      `);
+      
+      const updatedProposta = updatedResult[0];
+      
+      if (!updatedProposta?.caminhoCcbAssinado) {
+        return res.status(500).json({ 
+          error: "Erro ao obter caminho do CCB após sincronização" 
+        });
+      }
+      
+      proposta.caminhoCcbAssinado = updatedProposta.caminhoCcbAssinado;
+    }
+    
+    // Verificar se o arquivo existe no Storage
+    const pathParts = proposta.caminhoCcbAssinado.split('/');
+    const folderPath = pathParts.slice(0, -1).join('/');
+    const fileName = pathParts[pathParts.length - 1];
+    
+    const { data: files, error: listError } = await supabase.storage
+      .from('documents')
+      .list(folderPath);
+    
+    const fileExists = files && files.some(f => f.name === fileName);
+    
+    if (!fileExists) {
+      console.log(`[PAGAMENTOS] Arquivo não existe no Storage, forçando re-sincronização...`);
+      
+      // Forçar re-sincronização
+      const { ccbSyncService } = await import('../services/ccbSyncService.js');
+      const syncSuccess = await ccbSyncService.forceSyncProposal(id);
+      
+      if (!syncSuccess) {
+        return res.status(500).json({ 
+          error: "CCB não encontrada no Storage e falha ao re-sincronizar" 
+        });
+      }
     }
     
     // Gerar URL assinada do Storage (válida por 1 hora)
