@@ -929,9 +929,9 @@ router.get("/:id/detalhes-completos", jwtAuthMiddleware, async (req: Authenticat
     // Montar resposta completa
     const respostaCompleta = {
       ...proposta,
-      lojaNome: loja?.nome,
-      produtoNome: produto?.nome,
-      usuarioNome: usuario?.fullName,
+      lojaNome: loja?.nomeLoja,
+      produtoNome: produto?.nomeProduto,
+      usuarioNome: usuario?.name,
       boletos: boletos.map(b => ({
         id: b.id,
         codigo: b.codigoSolicitacao,

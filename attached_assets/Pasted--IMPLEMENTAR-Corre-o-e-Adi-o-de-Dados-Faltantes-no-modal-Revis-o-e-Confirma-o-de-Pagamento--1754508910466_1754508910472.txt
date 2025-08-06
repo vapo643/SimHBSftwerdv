@@ -1,0 +1,31 @@
+**IMPLEMENTAR:** Correção e Adição de Dados Faltantes no modal "Revisão e Confirmação de Pagamento" (Confirmar Veracidade).
+
+**CONTEXT:** A auditoria manual revelou que dados essenciais do cliente e do empréstimo, bem como o botão para visualizar a CCB assinada, ainda estão ausentes do modal. Para que a equipe financeira possa "Confirmar a Veracidade" de uma proposta, ela precisa ter acesso a TODAS as informações críticas em uma única tela.
+
+**CURRENT STATE:** O modal abre, mas a seção de revisão de dados está incompleta, impedindo a validação humana.
+
+**EXPECTED (Estado Final de Sucesso):** Um modal de "Revisão e Confirmação" completo, que exiba todos os dados listados abaixo e possua um botão funcional para visualizar a CCB assinada.
+
+**CONSTRAINTS (Roadmap de Implementação Cirúrgico):**
+
+**1. Exibição de Dados do Cliente e Empréstimo:**
+    - **Ação:** Modifique o backend e o frontend para garantir que os seguintes campos sejam buscados no banco de dados e exibidos claramente no modal:
+        - `Email`
+        - `Data de Nascimento`
+        - `Telefone`
+        - `Renda`
+        - `Prazo` (do empréstimo)
+        - `Taxa de Juros`
+        - `Finalidade` (do empréstimo)
+
+**2. Implementação do Botão "Visualizar CCB Assinada":**
+    - **Ação:** Na seção "Documentos" do modal, adicione um botão com o texto "Visualizar CCB Assinada".
+    - **Implementação:** Este botão deve chamar o endpoint `GET /api/pagamentos/:id/ccb-url` (que já existe) para obter a URL assinada do Supabase Storage e, em seguida, abrir o documento em uma nova aba do navegador.
+
+**INTEGRAÇÃO:** A causa mais provável da falha é que a query Drizzle no backend, que alimenta o modal, não está selecionando (`select`) todos os campos necessários da tabela `propostas`. Sua primeira ação deve ser verificar e corrigir esta query.
+
+**BANCO:** Verifique os nomes exatos das colunas na tabela `propostas` (ex: `clienteEmail`, `clienteDataNascimento`, etc.) para garantir que sua query esteja correta.
+
+**TESTE:**
+- Após a implementação, abra o modal para a proposta de teste. Valide que **TODOS** os sete campos de dados listados agora são exibidos corretamente.
+- Valide também que o botão "Visualizar CCB Assinada" está presente e abre o PDF correto em uma nova aba.
