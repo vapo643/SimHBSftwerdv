@@ -898,41 +898,37 @@ router.get("/:id/detalhes-completos", jwtAuthMiddleware, async (req: Authenticat
     
     console.log(`[PAGAMENTOS] Buscando detalhes completos da proposta: ${id}`);
     
-    // Buscar proposta primeiro (sem joins para evitar erros de tipo)
-    const [proposta] = await db
+    // Buscar apenas a proposta para evitar erros de tipo
+    const [propostaData] = await db
       .select()
       .from(propostas)
       .where(eq(propostas.id, id))
       .limit(1);
     
-    if (!proposta) {
+    if (!propostaData) {
       return res.status(404).json({ error: "Proposta não encontrada" });
     }
     
-    // Buscar dados relacionados separadamente
-    const [loja] = proposta.lojaId ? await db
+    // Buscar dados relacionados separadamente se existirem
+    const [lojaData] = propostaData.lojaId ? await db
       .select()
       .from(lojas)
-      .where(eq(lojas.id, proposta.lojaId))
+      .where(eq(lojas.id, propostaData.lojaId))
       .limit(1) : [null];
     
-    const [produto] = proposta.produtoId ? await db
+    const [produtoData] = propostaData.produtoId ? await db
       .select()
       .from(produtos)
-      .where(eq(produtos.id, proposta.produtoId))
+      .where(eq(produtos.id, propostaData.produtoId))
       .limit(1) : [null];
     
-    const [usuario] = proposta.userId ? await db
+    const [usuarioData] = propostaData.userId ? await db
       .select()
       .from(profiles)
-      .where(eq(profiles.id, proposta.userId))
+      .where(eq(profiles.id, propostaData.userId))
       .limit(1) : [null];
     
-    const result = [{ proposta, loja, produto, usuario }];
-    
-    // Proposta já foi validada acima
-    
-    const { proposta, loja, produto, usuario } = result[0];
+    // Usar os dados obtidos separadamente
     
     // Buscar boletos da Inter, se existirem
     const boletos = await db
@@ -943,10 +939,10 @@ router.get("/:id/detalhes-completos", jwtAuthMiddleware, async (req: Authenticat
     
     // Montar resposta completa
     const respostaCompleta = {
-      ...proposta,
-      lojaNome: loja?.nomeLoja,
-      produtoNome: produto?.nomeProduto,
-      usuarioNome: usuario?.fullName,
+      ...propostaData,
+      lojaNome: lojaData?.nomeLoja,
+      produtoNome: produtoData?.nomeProduto,
+      usuarioNome: usuarioData?.fullName,
       boletos: boletos.map(b => ({
         id: b.id,
         codigo: b.codigoSolicitacao,
