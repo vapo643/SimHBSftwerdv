@@ -7,6 +7,70 @@ Simpix is a full-stack TypeScript application designed for comprehensive credit 
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+
+## Effective Prompt Guidelines
+
+Based on implementation patterns, these prompt structures work best:
+
+### Anti-Failure Prompt Template:
+```
+IMPLEMENTAR: [funcionalidade específica]
+DADOS REAIS: usar [tabela/registro específico existente]
+ROLES: [role A] pode [ação], [role B] só pode [ação limitada]  
+INTEGRAÇÃO: conectar com [sistema existente]
+TESTE: validar com [cenário específico]
+BANCO: verificar se [colunas/enums] existem
+```
+
+### Critical Pre-Implementation Checklist:
+- [ ] Verificar schema do banco vs código Drizzle
+- [ ] Confirmar roles/enums existem no banco
+- [ ] Testar com dados reais de propostas existentes
+- [ ] Validar permissões por role antes de codificar
+- [ ] Integrar com APIs já configuradas (não recriar)
+
+### Most Effective Prompt Patterns:
+1. **Context + Current State + Expected**: "Estou na tela X, deveria mostrar Y mas aparece Z"
+2. **Role-Based Specification**: "Admin vê tudo, COBRANÇA vê apenas inadimplentes"  
+3. **Data Reference**: "Usar proposta PROP-1753723342043 que já tem boletos"
+4. **Integration Requirement**: "Conectar com Inter Bank API já configurada"
+
+### Common Implementation Gaps to Avoid:
+- Schema mismatch (código vs banco real)
+- Role enum não atualizado no banco
+- Filtros aplicados incorretamente (todos vs específicos)
+- Não validar dados reais existentes
+- Ignorar integrações já funcionais
+
+### Real-World Examples from Recent Implementations:
+
+**❌ Problema Típico:**
+```
+Prompt: "implementar sistema de cobranças"
+Resultado: Erro database "codigo_boleto does not exist"
+Causa: Não verifiquei se colunas existiam no banco
+```
+
+**✅ Solução Melhorada:**
+```
+IMPLEMENTAR: sistema de cobranças
+DADOS REAIS: propostas já aprovadas com status pago/pronto_pagamento
+ROLES: ADMINISTRADOR vê tudo, COBRANÇA vê só inadimplentes 
+INTEGRAÇÃO: usar Inter Bank API já configurada
+BANCO: verificar se parcelas tem colunas de boleto
+TESTE: validar com usuário admin vs usuário cobrança
+```
+
+### Phrases That Prevent Implementation Gaps:
+- "Verificar se as colunas/enums existem no banco antes de implementar"
+- "Testar com dados reais da proposta [ID específico]"
+- "Garantir que funciona para ambos os roles: ADMIN e [ROLE]"
+- "Conectar com [API] já configurada, não recriar"
+
+---
+
+## Implementation Status
+
 CCB Generation: ✅ IMPLEMENTED - Uses custom PDF template provided by user instead of agent-generated formatting to ensure professional results without text overlapping. System now fills user's exact template with proposal data.
 Inter Bank API: Complete integration for automated boleto generation with focus on anti-fragile RBAC system and comprehensive automated proposal lifecycle management.
 Security: "Redobrada" (doubled) security measures required for banking/loan data - maximum OWASP Top 10 compliance is critical.
