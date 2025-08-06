@@ -48,6 +48,7 @@ import {
 } from "lucide-react";
 import { format, parseISO, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface FichaCliente {
   cliente: {
@@ -120,6 +121,7 @@ interface FichaCliente {
 
 export default function CobrancasPage() {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("todos");
   const [atrasoFilter, setAtrasoFilter] = useState<string>("todos");
@@ -130,6 +132,9 @@ export default function CobrancasPage() {
   const [tipoContato, setTipoContato] = useState("");
   const [statusPromessa, setStatusPromessa] = useState("");
   const [dataPromessaPagamento, setDataPromessaPagamento] = useState("");
+  
+  // Verificar se o usuário tem role de cobrança
+  const isCobrancaUser = user?.role === 'COBRANÇA';
 
   // Buscar propostas de cobrança
   const { data: propostas, isLoading, refetch } = useQuery({
@@ -281,6 +286,22 @@ export default function CobrancasPage() {
   return (
     <DashboardLayout title="Cobranças">
       <div className="space-y-6">
+        {/* Alerta para usuários de cobrança */}
+        {isCobrancaUser && (
+          <Card className="border-orange-200 bg-orange-50">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5 text-orange-600" />
+                <div>
+                  <h3 className="font-semibold text-orange-800">Modo Cobrança Ativo</h3>
+                  <p className="text-sm text-orange-700">
+                    Você está visualizando apenas contratos: <strong>inadimplentes</strong>, <strong>em atraso</strong> ou que <strong>vencem nos próximos 3 dias</strong>.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
         {/* KPIs Dashboard */}
         <div className="grid gap-4 md:grid-cols-4">
           <Card>

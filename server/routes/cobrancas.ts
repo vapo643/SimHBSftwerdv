@@ -7,11 +7,12 @@ import { format, parseISO, differenceInDays, isAfter } from "date-fns";
 const router = Router();
 
 // GET /api/cobrancas - Lista todas as propostas com informações de cobrança
-router.get("/", async (req, res) => {
+router.get("/", async (req: any, res) => {
   try {
     const { status, atraso } = req.query;
+    const userRole = req.user?.role || '';
     
-    // Buscar todas as propostas com parcelas
+    // Buscar todas as propostas com parcelas (não apenas inadimplentes)
     const propostasData = await db
       .select()
       .from(propostas)
@@ -129,12 +130,37 @@ router.get("/", async (req, res) => {
     // Aplicar filtros
     let propostasFiltradas = propostasComCobranca;
     
+    // FILTRO AUTOMÁTICO PARA USUÁRIOS DE COBRANÇA
+    // Usuários com role "COBRANÇA" veem apenas: inadimplentes, em atraso ou que vencem em 3 dias
+    if (userRole === 'COBRANÇA') {
+      const hoje = new Date();
+      const em3Dias = new Date();
+      em3Dias.setDate(hoje.getDate() + 3);
+      
+      propostasFiltradas = propostasComCobranca.filter(p => {
+        // Inadimplentes ou em atraso
+        if (p.status === 'inadimplente' || p.diasAtraso > 0) {
+          return true;
+        }
+        
+        // Parcelas que vencem nos próximos 3 dias
+        const temParcelaVencendoEm3Dias = p.parcelas.some(parcela => {
+          if (parcela.status === 'pago') return false;
+          const dataVencimento = parseISO(parcela.dataVencimento);
+          return dataVencimento <= em3Dias && dataVencimento >= hoje;
+        });
+        
+        return temParcelaVencendoEm3Dias;
+      });
+    }
+    
+    // Aplicar filtros manuais da interface (se não for usuário de cobrança ou se for filtro adicional)
     if (status === 'inadimplente') {
-      propostasFiltradas = propostasComCobranca.filter(p => p.status === 'inadimplente');
+      propostasFiltradas = propostasFiltradas.filter(p => p.status === 'inadimplente');
     } else if (status === 'em_dia') {
-      propostasFiltradas = propostasComCobranca.filter(p => p.status === 'em_dia');
+      propostasFiltradas = propostasFiltradas.filter(p => p.status === 'em_dia');
     } else if (status === 'quitado') {
-      propostasFiltradas = propostasComCobranca.filter(p => p.status === 'quitado');
+      propostasFiltradas = propostasFiltradas.filter(p => p.status === 'quitado');
     }
 
     if (atraso === '1-15') {
@@ -340,7 +366,7 @@ router.get("/:propostaId/ficha", async (req, res) => {
 });
 
 // POST /api/cobrancas/:propostaId/observacao - Adicionar observação
-router.post("/:propostaId/observacao", async (req, res) => {
+router.post("/:propostaId/observacao", async (req: any, res) => {
   try {
     const { propostaId } = req.params;
     const { observacao, tipoContato, statusPromessa, dataPromessaPagamento } = req.body;
