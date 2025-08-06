@@ -213,27 +213,37 @@ export default function PaymentReviewModal({ isOpen, onClose, proposta, onConfir
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label>Nome Completo</Label>
-                      <p className="text-sm font-medium">{dadosProposta.clienteNome || dadosProposta.nomeCliente}</p>
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{dadosProposta.cliente_nome || dadosProposta.clienteNome || dadosProposta.nomeCliente}</p>
                     </div>
                     <div>
                       <Label>CPF</Label>
-                      <p className="text-sm font-medium">{formatCPF(dadosProposta.clienteCpf || dadosProposta.cpfCliente)}</p>
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{formatCPF(dadosProposta.cliente_cpf || dadosProposta.clienteCpf || dadosProposta.cpfCliente)}</p>
                     </div>
                     <div>
                       <Label>E-mail</Label>
-                      <p className="text-sm">{dadosProposta.clienteEmail || 'Não informado'}</p>
+                      <p className="text-sm text-gray-900 dark:text-gray-100">{dadosProposta.cliente_email || dadosProposta.clienteEmail || 'Não informado'}</p>
                     </div>
                     <div>
                       <Label>Telefone</Label>
-                      <p className="text-sm">{dadosProposta.clienteTelefone || 'Não informado'}</p>
+                      <p className="text-sm text-gray-900 dark:text-gray-100">{dadosProposta.cliente_telefone || dadosProposta.clienteTelefone || 'Não informado'}</p>
                     </div>
                     <div>
                       <Label>Data de Nascimento</Label>
-                      <p className="text-sm">{dadosProposta.clienteDataNascimento || 'Não informado'}</p>
+                      <p className="text-sm text-gray-900 dark:text-gray-100">
+                        {dadosProposta.cliente_data_nascimento || dadosProposta.clienteDataNascimento 
+                          ? format(new Date(dadosProposta.cliente_data_nascimento || dadosProposta.clienteDataNascimento), 'dd/MM/yyyy', { locale: ptBR })
+                          : 'Não informado'
+                        }
+                      </p>
                     </div>
                     <div>
                       <Label>Renda</Label>
-                      <p className="text-sm">{dadosProposta.clienteRenda ? formatCurrency(Number(dadosProposta.clienteRenda)) : 'Não informado'}</p>
+                      <p className="text-sm text-gray-900 dark:text-gray-100">
+                        {(dadosProposta.cliente_renda || dadosProposta.clienteRenda) 
+                          ? formatCurrency(Number(dadosProposta.cliente_renda || dadosProposta.clienteRenda)) 
+                          : 'Não informado'
+                        }
+                      </p>
                     </div>
                   </div>
                 </CardContent>
@@ -261,11 +271,11 @@ export default function PaymentReviewModal({ isOpen, onClose, proposta, onConfir
                     </div>
                     <div>
                       <Label>Prazo</Label>
-                      <p className="text-sm">{dadosProposta.prazo || dadosProposta.numeroParcelas || 0} parcelas</p>
+                      <p className="text-sm text-gray-900 dark:text-gray-100">{dadosProposta.prazo || dadosProposta.numeroParcelas || 'Não informado'} {dadosProposta.prazo ? 'parcelas' : ''}</p>
                     </div>
                     <div>
                       <Label>Taxa de Juros</Label>
-                      <p className="text-sm">{dadosProposta.taxaJuros || '0'}% ao mês</p>
+                      <p className="text-sm text-gray-900 dark:text-gray-100">{dadosProposta.taxa_juros || dadosProposta.taxaJuros || 'Não informado'}{(dadosProposta.taxa_juros || dadosProposta.taxaJuros) ? '% ao mês' : ''}</p>
                     </div>
                     <div>
                       <Label>IOF</Label>
@@ -281,7 +291,7 @@ export default function PaymentReviewModal({ isOpen, onClose, proposta, onConfir
 
                   <div>
                     <Label>Finalidade</Label>
-                    <p className="text-sm">{dadosProposta.finalidade || 'Não informado'}</p>
+                    <p className="text-sm text-gray-900 dark:text-gray-100">{dadosProposta.finalidade || 'Não informado'}</p>
                   </div>
                 </CardContent>
               </Card>
@@ -298,11 +308,11 @@ export default function PaymentReviewModal({ isOpen, onClose, proposta, onConfir
                 <CardContent className="space-y-4">
                   {/* Status da CCB */}
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <div className="flex items-center gap-3">
                         <FileText className="h-5 w-5 text-blue-600" />
                         <div>
-                          <p className="font-medium">CCB - Cédula de Crédito Bancário</p>
+                          <p className="font-medium text-gray-900 dark:text-gray-100">CCB - Cédula de Crédito Bancário</p>
                           <p className="text-sm text-muted-foreground">
                             {dadosProposta.ccbGerado ? 'Gerada' : 'Não gerada'} | 
                             {dadosProposta.assinaturaEletronicaConcluida ? ' Assinada' : ' Não assinada'}
@@ -311,18 +321,33 @@ export default function PaymentReviewModal({ isOpen, onClose, proposta, onConfir
                       </div>
                       <div className="flex gap-2">
                         {dadosProposta.assinaturaEletronicaConcluida ? (
-                          <Badge className="bg-green-100 text-green-800">
+                          <Badge className="bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100">
                             <CheckCircle className="h-3 w-3 mr-1" />
                             Assinada
                           </Badge>
                         ) : (
-                          <Badge variant="secondary">Pendente</Badge>
+                          <Badge variant="secondary" className="dark:bg-gray-700 dark:text-gray-200">Pendente</Badge>
                         )}
                         {dadosProposta.assinaturaEletronicaConcluida && (
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={handleViewCCB}
+                            onClick={() => {
+                              // First check if CCB is stored locally
+                              const ccbPath = dadosProposta.caminho_ccb_assinado || dadosProposta.ccb_documento_url;
+                              console.log('🔍 [CCB DEBUG] CCB Path encontrado:', ccbPath);
+                              
+                              if (ccbPath) {
+                                // Open CCB from local storage
+                                const ccbUrl = `/api/documentos/download?path=${encodeURIComponent(ccbPath)}`;
+                                console.log('🔍 [CCB DEBUG] Abrindo CCB local:', ccbUrl);
+                                window.open(ccbUrl, '_blank');
+                              } else {
+                                // Fallback to ClickSign
+                                console.log('🔍 [CCB DEBUG] CCB local não encontrada, tentando ClickSign...');
+                                handleViewCCB();
+                              }
+                            }}
                             disabled={isLoadingCcbUrl}
                           >
                             {isLoadingCcbUrl ? (
@@ -339,18 +364,21 @@ export default function PaymentReviewModal({ isOpen, onClose, proposta, onConfir
                     </div>
 
                     {/* Informações do Storage */}
-                    {ccbStatus && (
-                      <div className="text-sm text-muted-foreground pl-12">
-                        {ccbStatus.status?.salvaNoStorage ? (
-                          <span className="flex items-center gap-1 text-green-600">
-                            <Check className="h-3 w-3" />
-                            CCB armazenada no sistema
-                          </span>
-                        ) : (
-                          <span>CCB será baixada do ClickSign quando visualizada</span>
-                        )}
-                      </div>
-                    )}
+                    <div className="text-sm text-muted-foreground pl-12">
+                      {(dadosProposta.caminho_ccb_assinado || dadosProposta.ccb_documento_url) ? (
+                        <span className="flex items-center gap-1 text-green-600 dark:text-green-400">
+                          <Check className="h-3 w-3" />
+                          CCB armazenada no sistema: {dadosProposta.caminho_ccb_assinado || dadosProposta.ccb_documento_url}
+                        </span>
+                      ) : ccbStatus?.status?.salvaNoStorage ? (
+                        <span className="flex items-center gap-1 text-green-600 dark:text-green-400">
+                          <Check className="h-3 w-3" />
+                          CCB armazenada no sistema
+                        </span>
+                      ) : (
+                        <span className="text-gray-600 dark:text-gray-400">CCB será baixada do ClickSign quando visualizada</span>
+                      )}
+                    </div>
                   </div>
 
                   {/* Status de Formalização */}
