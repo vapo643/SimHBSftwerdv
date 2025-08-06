@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { jwtAuthMiddleware, type AuthenticatedRequest } from "../lib/jwt-auth-middleware.js";
-import { db } from "../lib/supabase.js";
+import { db, supabase } from "../lib/supabase.js";
 import { propostas, users, lojas, produtos, interCollections } from "@shared/schema";
 import { eq, and, or, desc, sql, gte, lte, inArray } from "drizzle-orm";
 import { z } from "zod";
@@ -687,7 +687,7 @@ router.post("/:id/confirmar-desembolso", jwtAuthMiddleware, async (req: Authenti
   }
 });
 
-// Rota para buscar CCB assinada da ClickSign
+// Rota para buscar CCB assinada (primeiro tenta Supabase Storage, depois ClickSign)
 router.get("/:id/ccb-assinada", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const { id } = req.params;
@@ -719,8 +719,38 @@ router.get("/:id/ccb-assinada", jwtAuthMiddleware, async (req: AuthenticatedRequ
       return res.status(400).json({ error: "CCB ainda não foi assinada eletronicamente" });
     }
     
+    const filename = `CCB_${proposta.id}_assinada.pdf`;
+    
+    // ESTRATÉGIA 1: Tentar buscar do Supabase Storage primeiro (mais rápido e econômico)
+    if (proposta.caminhoCcbAssinado) {
+      try {
+        console.log(`[PAGAMENTOS] Tentando buscar CCB do Supabase Storage: ${proposta.caminhoCcbAssinado}`);
+        
+        // Baixar o arquivo do Storage
+        const { data, error } = await supabase.storage
+          .from('documents')
+          .download(proposta.caminhoCcbAssinado);
+        
+        if (!error && data) {
+          console.log(`[PAGAMENTOS] ✅ CCB encontrada no Supabase Storage`);
+          const buffer = Buffer.from(await data.arrayBuffer());
+          
+          res.setHeader('Content-Type', 'application/pdf');
+          res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
+          res.setHeader('Content-Length', buffer.length.toString());
+          res.send(buffer);
+          return;
+        }
+        
+        console.log(`[PAGAMENTOS] ⚠️ CCB não encontrada no Storage, tentando ClickSign...`);
+      } catch (storageError) {
+        console.error('[PAGAMENTOS] Erro ao buscar do Storage:', storageError);
+      }
+    }
+    
+    // ESTRATÉGIA 2: Se não encontrou no Storage, buscar da ClickSign e salvar
     if (!proposta.clicksignDocumentKey) {
-      return res.status(400).json({ error: "Chave do documento ClickSign não encontrada" });
+      return res.status(400).json({ error: "CCB assinada não encontrada" });
     }
     
     // Importar o serviço ClickSign
@@ -731,15 +761,34 @@ router.get("/:id/ccb-assinada", jwtAuthMiddleware, async (req: AuthenticatedRequ
       console.log(`[PAGAMENTOS] Baixando documento da ClickSign: ${proposta.clicksignDocumentKey}`);
       const pdfBuffer = await clickSignService.downloadSignedDocument(proposta.clicksignDocumentKey);
       
-      // Definir o nome do arquivo
-      const filename = `CCB_${proposta.id}_assinada.pdf`;
+      // Salvar no Supabase Storage para próximas requisições
+      const storagePath = `ccb/assinadas/${proposta.id}/${filename}`;
+      
+      console.log(`[PAGAMENTOS] Salvando CCB no Supabase Storage: ${storagePath}`);
+      const { error: uploadError } = await supabase.storage
+        .from('documents')
+        .upload(storagePath, pdfBuffer, {
+          contentType: 'application/pdf',
+          upsert: true
+        });
+      
+      if (!uploadError) {
+        // Atualizar o caminho no banco de dados
+        await db
+          .update(propostas)
+          .set({ caminhoCcbAssinado: storagePath })
+          .where(eq(propostas.id, id));
+        
+        console.log(`[PAGAMENTOS] ✅ CCB salva no Storage e caminho atualizado no banco`);
+      } else {
+        console.error('[PAGAMENTOS] Erro ao salvar no Storage:', uploadError);
+      }
       
       // Enviar o PDF como resposta
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
       res.setHeader('Content-Length', pdfBuffer.length.toString());
       
-      // Log de sucesso
       console.log(`[PAGAMENTOS] ✅ CCB assinada enviada com sucesso: ${filename} (${pdfBuffer.length} bytes)`);
       
       res.send(pdfBuffer);
@@ -761,6 +810,163 @@ router.get("/:id/ccb-assinada", jwtAuthMiddleware, async (req: AuthenticatedRequ
   } catch (error) {
     console.error("[PAGAMENTOS] Erro ao buscar CCB assinada:", error);
     res.status(500).json({ error: "Erro ao buscar CCB assinada" });
+  }
+});
+
+// Rota para verificar status de armazenamento da CCB
+router.get("/:id/ccb-storage-status", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+  try {
+    const { id } = req.params;
+    
+    const [proposta] = await db
+      .select({
+        id: propostas.id,
+        ccbGerado: propostas.ccbGerado,
+        assinaturaEletronicaConcluida: propostas.assinaturaEletronicaConcluida,
+        caminhoCcbAssinado: propostas.caminhoCcbAssinado,
+        clicksignDocumentKey: propostas.clicksignDocumentKey,
+        ccbDocumentoUrl: propostas.ccbDocumentoUrl
+      })
+      .from(propostas)
+      .where(eq(propostas.id, id))
+      .limit(1);
+    
+    if (!proposta) {
+      return res.status(404).json({ error: "Proposta não encontrada" });
+    }
+    
+    // Verificar se existe no Storage
+    let existsInStorage = false;
+    let storageUrl = null;
+    
+    if (proposta.caminhoCcbAssinado) {
+      const { data: files } = await supabase.storage
+        .from('documents')
+        .list(proposta.caminhoCcbAssinado.split('/').slice(0, -1).join('/'));
+      
+      existsInStorage = files ? files.some(f => proposta.caminhoCcbAssinado?.includes(f.name)) : false;
+      
+      if (existsInStorage) {
+        const { data: urlData } = await supabase.storage
+          .from('documents')
+          .createSignedUrl(proposta.caminhoCcbAssinado, 3600);
+        storageUrl = urlData?.signedUrl;
+      }
+    }
+    
+    res.json({
+      status: {
+        ccbGerada: proposta.ccbGerado,
+        assinadaEletronicamente: proposta.assinaturaEletronicaConcluida,
+        temChaveClickSign: !!proposta.clicksignDocumentKey,
+        salvaNoStorage: existsInStorage
+      },
+      paths: {
+        storagePathAssinada: proposta.caminhoCcbAssinado,
+        storagePathOriginal: proposta.ccbDocumentoUrl,
+        clickSignKey: proposta.clicksignDocumentKey
+      },
+      urls: {
+        storageUrl: storageUrl,
+        expiresIn: storageUrl ? 3600 : null
+      },
+      recommendation: !existsInStorage && proposta.assinaturaEletronicaConcluida 
+        ? "CCB assinada mas não está no Storage. Use o endpoint /ccb-url para baixar e armazenar."
+        : "CCB disponível no Storage"
+    });
+  } catch (error) {
+    console.error("[PAGAMENTOS] Erro ao verificar status da CCB:", error);
+    res.status(500).json({ error: "Erro ao verificar status" });
+  }
+});
+
+// Rota para obter URL assinada do Supabase Storage para CCB
+router.get("/:id/ccb-url", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+  try {
+    const { id } = req.params;
+    
+    console.log(`[PAGAMENTOS] Gerando URL assinada para CCB da proposta: ${id}`);
+    
+    // Buscar dados da proposta
+    const [proposta] = await db
+      .select()
+      .from(propostas)
+      .where(eq(propostas.id, id))
+      .limit(1);
+    
+    if (!proposta) {
+      return res.status(404).json({ error: "Proposta não encontrada" });
+    }
+    
+    // Verificar se tem caminho da CCB assinada no Storage
+    if (!proposta.caminhoCcbAssinado) {
+      // Se não tem, mas tem chave do ClickSign e está assinada, baixar e salvar
+      if (proposta.clicksignDocumentKey && proposta.assinaturaEletronicaConcluida) {
+        console.log(`[PAGAMENTOS] CCB não está no Storage, baixando do ClickSign...`);
+        
+        const { clickSignService } = await import('../services/clickSignService.js');
+        const pdfBuffer = await clickSignService.downloadSignedDocument(proposta.clicksignDocumentKey);
+        
+        // Salvar no Storage
+        const filename = `CCB_${proposta.id}_assinada.pdf`;
+        const storagePath = `ccb/assinadas/${proposta.id}/${filename}`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from('documents')
+          .upload(storagePath, pdfBuffer, {
+            contentType: 'application/pdf',
+            upsert: true
+          });
+        
+        if (!uploadError) {
+          // Atualizar o caminho no banco
+          await db
+            .update(propostas)
+            .set({ caminhoCcbAssinado: storagePath })
+            .where(eq(propostas.id, id));
+          
+          console.log(`[PAGAMENTOS] ✅ CCB salva no Storage: ${storagePath}`);
+          
+          // Gerar URL assinada (válida por 1 hora)
+          const { data: urlData, error: urlError } = await supabase.storage
+            .from('documents')
+            .createSignedUrl(storagePath, 3600);
+          
+          if (urlData?.signedUrl) {
+            return res.json({
+              url: urlData.signedUrl,
+              source: 'clicksign_downloaded',
+              storagePath,
+              expiresIn: 3600
+            });
+          }
+        }
+      }
+      
+      return res.status(404).json({ error: "CCB assinada não disponível" });
+    }
+    
+    // Gerar URL assinada do Storage (válida por 1 hora)
+    const { data: urlData, error: urlError } = await supabase.storage
+      .from('documents')
+      .createSignedUrl(proposta.caminhoCcbAssinado, 3600);
+    
+    if (urlError || !urlData?.signedUrl) {
+      console.error('[PAGAMENTOS] Erro ao gerar URL assinada:', urlError);
+      return res.status(500).json({ error: "Erro ao gerar URL para visualização" });
+    }
+    
+    console.log(`[PAGAMENTOS] ✅ URL assinada gerada para: ${proposta.caminhoCcbAssinado}`);
+    
+    res.json({
+      url: urlData.signedUrl,
+      source: 'supabase_storage',
+      storagePath: proposta.caminhoCcbAssinado,
+      expiresIn: 3600
+    });
+  } catch (error) {
+    console.error("[PAGAMENTOS] Erro ao gerar URL da CCB:", error);
+    res.status(500).json({ error: "Erro ao gerar URL da CCB" });
   }
 });
 
