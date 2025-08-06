@@ -687,4 +687,81 @@ router.post("/:id/confirmar-desembolso", jwtAuthMiddleware, async (req: Authenti
   }
 });
 
+// Rota para buscar CCB assinada da ClickSign
+router.get("/:id/ccb-assinada", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user?.id;
+    
+    if (!userId) {
+      return res.status(401).json({ error: "Usuário não autenticado" });
+    }
+    
+    console.log(`[PAGAMENTOS] Buscando CCB assinada para proposta: ${id}`);
+    
+    // Buscar dados da proposta incluindo a chave do documento ClickSign
+    const [proposta] = await db
+      .select()
+      .from(propostas)
+      .where(eq(propostas.id, id))
+      .limit(1);
+    
+    if (!proposta) {
+      return res.status(404).json({ error: "Proposta não encontrada" });
+    }
+    
+    // Verificar se a CCB foi gerada e assinada
+    if (!proposta.ccbGerado) {
+      return res.status(400).json({ error: "CCB não foi gerada para esta proposta" });
+    }
+    
+    if (!proposta.assinaturaEletronicaConcluida) {
+      return res.status(400).json({ error: "CCB ainda não foi assinada eletronicamente" });
+    }
+    
+    if (!proposta.clicksignDocumentKey) {
+      return res.status(400).json({ error: "Chave do documento ClickSign não encontrada" });
+    }
+    
+    // Importar o serviço ClickSign
+    const { clickSignService } = await import('../services/clickSignService.js');
+    
+    try {
+      // Baixar o documento assinado da ClickSign
+      console.log(`[PAGAMENTOS] Baixando documento da ClickSign: ${proposta.clicksignDocumentKey}`);
+      const pdfBuffer = await clickSignService.downloadSignedDocument(proposta.clicksignDocumentKey);
+      
+      // Definir o nome do arquivo
+      const filename = `CCB_${proposta.id}_assinada.pdf`;
+      
+      // Enviar o PDF como resposta
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
+      res.setHeader('Content-Length', pdfBuffer.length.toString());
+      
+      // Log de sucesso
+      console.log(`[PAGAMENTOS] ✅ CCB assinada enviada com sucesso: ${filename} (${pdfBuffer.length} bytes)`);
+      
+      res.send(pdfBuffer);
+    } catch (clickSignError: any) {
+      console.error('[PAGAMENTOS] Erro ao baixar CCB da ClickSign:', clickSignError);
+      
+      // Tratar erros específicos
+      if (clickSignError.message?.includes('still being processed')) {
+        return res.status(202).json({ 
+          error: "O documento ainda está sendo processado pela ClickSign. Tente novamente em alguns momentos." 
+        });
+      }
+      
+      return res.status(500).json({ 
+        error: "Erro ao baixar o documento assinado",
+        details: clickSignError.message 
+      });
+    }
+  } catch (error) {
+    console.error("[PAGAMENTOS] Erro ao buscar CCB assinada:", error);
+    res.status(500).json({ error: "Erro ao buscar CCB assinada" });
+  }
+});
+
 export default router;

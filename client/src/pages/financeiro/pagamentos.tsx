@@ -17,6 +17,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { api } from "@/lib/apiClient";
 import { format, isToday, isThisWeek, isThisMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { 
@@ -1065,7 +1066,58 @@ export default function Pagamentos() {
                           variant="outline"
                           size="sm"
                           className="w-full"
-                          onClick={() => window.open(verificacoes.documentosCcb.urlCcb, '_blank')}
+                          onClick={async () => {
+                            try {
+                              console.log('[CCB] Buscando CCB assinada para proposta:', selectedPagamento.id);
+                              
+                              // Fazer a requisição para baixar a CCB assinada usando api diretamente
+                              const response = await api.get(`/api/pagamentos/${selectedPagamento.id}/ccb-assinada`, {
+                                responseType: 'blob'
+                              });
+                              
+                              console.log('[CCB] Resposta recebida:', response);
+                              
+                              // Verificar se recebemos um blob
+                              if (response.data instanceof Blob) {
+                                const blob = response.data;
+                                const url = window.URL.createObjectURL(blob);
+                                window.open(url, '_blank');
+                                
+                                // Limpar a URL após um tempo
+                                setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+                                
+                                toast({
+                                  title: "CCB aberta",
+                                  description: "O documento foi aberto em uma nova aba",
+                                });
+                              } else {
+                                // Se não for um blob, pode ser um erro
+                                console.error('[CCB] Resposta não é um blob:', response);
+                                toast({
+                                  title: "Erro ao abrir CCB",
+                                  description: "Formato de resposta inesperado",
+                                  variant: "destructive"
+                                });
+                              }
+                            } catch (error: any) {
+                              console.error('[CCB] Erro ao buscar CCB assinada:', error);
+                              
+                              // Tratar erros específicos
+                              let errorMessage = "Erro ao carregar documento assinado";
+                              
+                              if (error.response?.data?.error) {
+                                errorMessage = error.response.data.error;
+                              } else if (error.message) {
+                                errorMessage = error.message;
+                              }
+                              
+                              toast({
+                                title: "Erro ao buscar CCB",
+                                description: errorMessage,
+                                variant: "destructive"
+                              });
+                            }
+                          }}
                         >
                           <FileText className="h-4 w-4 mr-2" />
                           Ver CCB Assinada

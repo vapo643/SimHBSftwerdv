@@ -144,6 +144,57 @@ class ClickSignService {
   }
 
   /**
+   * Download signed document from ClickSign
+   */
+  async downloadSignedDocument(documentKey: string): Promise<Buffer> {
+    try {
+      console.log(`[CLICKSIGN] 📥 Downloading signed document: ${documentKey}`);
+      
+      if (!this.config.apiToken) {
+        throw new Error('ClickSign API token not configured');
+      }
+
+      if (!documentKey) {
+        throw new Error('Document key is required');
+      }
+
+      // ClickSign API endpoint for downloading documents
+      const downloadUrl = `${this.config.apiUrl}/documents/${documentKey}/download?access_token=${this.config.apiToken}`;
+      
+      const response = await fetch(downloadUrl, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/pdf'
+        }
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`[CLICKSIGN] ❌ Download failed: ${response.status} - ${errorText}`);
+        
+        // If document is not ready, ClickSign returns specific status
+        if (response.status === 202) {
+          throw new Error('Document is still being processed. Please try again in a few moments.');
+        }
+        
+        throw new Error(`Failed to download document: ${response.status} ${response.statusText}`);
+      }
+
+      // Get the PDF buffer
+      const arrayBuffer = await response.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+      
+      console.log(`[CLICKSIGN] ✅ Document downloaded successfully: ${buffer.length} bytes`);
+      return buffer;
+    } catch (error) {
+      console.error('[CLICKSIGN] ❌ Document download failed:', error);
+      throw error;
+    }
+  }
+
+
+
+  /**
    * Create a signer for the document
    */
   async createSigner(clientData: ClientData): Promise<ClickSignSigner> {
