@@ -5,6 +5,15 @@ import { propostas, users, lojas, produtos, interCollections } from "@shared/sch
 import { eq, and, or, desc, sql, gte, lte, inArray } from "drizzle-orm";
 import { z } from "zod";
 import { isToday, isThisWeek, isThisMonth, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from "date-fns";
+import multer from "multer";
+
+// Configuração do multer para upload de arquivos
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB
+  },
+});
 
 const router = Router();
 
@@ -944,7 +953,7 @@ router.post("/:id/confirmar-veracidade", jwtAuthMiddleware, async (req: Authenti
     await db.insert(historicoObservacoesCobranca).values({
       propostaId: id,
       mensagem: `Veracidade dos documentos confirmada. Pagamento autorizado por ${userRole}.`,
-      criadoPor: user?.fullName || userId,
+      criadoPor: user?.fullName || userId || 'sistema',
       tipoAcao: 'CONFIRMACAO_VERACIDADE',
       dadosAcao: {
         autorId: userId,
@@ -982,6 +991,184 @@ router.post("/:id/confirmar-veracidade", jwtAuthMiddleware, async (req: Authenti
   } catch (error) {
     console.error("[PAGAMENTOS] Erro ao confirmar veracidade:", error);
     res.status(500).json({ error: "Erro ao confirmar veracidade" });
+  }
+});
+
+// Rota para marcar pagamento como pago
+router.post("/:id/marcar-pago", jwtAuthMiddleware, upload.single('comprovante'), async (req: AuthenticatedRequest, res) => {
+  try {
+    const { id } = req.params;
+    const { observacoes } = req.body;
+    const userId = req.user?.id;
+    const userRole = req.user?.role;
+    
+    console.log(`[PAGAMENTOS] 🔍 [AUDIT] Iniciando marcação como pago - Proposta: ${id}`);
+    console.log(`[PAGAMENTOS] 🔍 [AUDIT] Usuário: ${userId} | Role: ${userRole}`);
+    
+    // Verificar se o usuário tem permissão (apenas ADMIN e FINANCEIRO)
+    if (!userRole || !['ADMINISTRADOR', 'FINANCEIRO'].includes(userRole)) {
+      console.log(`[PAGAMENTOS] ⛔ [AUDIT] Acesso negado - Role insuficiente: ${userRole}`);
+      return res.status(403).json({ 
+        error: "Acesso negado. Apenas ADMIN e FINANCEIRO podem marcar pagamentos como pagos." 
+      });
+    }
+    
+    // Buscar proposta
+    const [proposta] = await db
+      .select()
+      .from(propostas)
+      .where(eq(propostas.id, id))
+      .limit(1);
+    
+    if (!proposta) {
+      console.log(`[PAGAMENTOS] ❌ [AUDIT] Proposta não encontrada: ${id}`);
+      return res.status(404).json({ error: "Proposta não encontrada" });
+    }
+    
+    // Verificar se a proposta está no status correto
+    if (proposta.status !== 'pagamento_autorizado') {
+      console.log(`[PAGAMENTOS] ⚠️ [AUDIT] Status inválido para pagamento - Atual: ${proposta.status}, Esperado: pagamento_autorizado`);
+      return res.status(400).json({ 
+        error: "Apenas propostas com status 'pagamento_autorizado' podem ser marcadas como pagas",
+        statusAtual: proposta.status 
+      });
+    }
+    
+    let comprovanteUrl = null;
+    
+    // Processar upload do comprovante se fornecido
+    if (req.file) {
+      console.log(`[PAGAMENTOS] 📄 [AUDIT] Processando upload de comprovante - Arquivo: ${req.file.originalname}`);
+      console.log(`[PAGAMENTOS] 📄 [AUDIT] Tamanho: ${req.file.size} bytes | Tipo: ${req.file.mimetype}`);
+      
+      // Validar tipo de arquivo
+      const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
+      if (!allowedTypes.includes(req.file.mimetype)) {
+        console.log(`[PAGAMENTOS] ❌ [AUDIT] Tipo de arquivo inválido: ${req.file.mimetype}`);
+        return res.status(400).json({ 
+          error: "Tipo de arquivo não permitido. Use PDF, JPG ou PNG." 
+        });
+      }
+      
+      // Validar tamanho (máximo 5MB)
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (req.file.size > maxSize) {
+        console.log(`[PAGAMENTOS] ❌ [AUDIT] Arquivo muito grande: ${req.file.size} bytes`);
+        return res.status(400).json({ 
+          error: "Arquivo muito grande. Máximo 5MB permitido." 
+        });
+      }
+      
+      try {
+        // Upload para Supabase Storage
+        const { supabase } = await import('../lib/supabase.js');
+        const fileName = `comprovante_${Date.now()}_${req.file.originalname}`;
+        const filePath = `comprovantes/${id}/${fileName}`;
+        
+        console.log(`[PAGAMENTOS] 📤 [AUDIT] Fazendo upload para Storage - Caminho: ${filePath}`);
+        
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('documents')
+          .upload(filePath, req.file.buffer, {
+            contentType: req.file.mimetype,
+            cacheControl: '3600',
+            upsert: false
+          });
+        
+        if (uploadError) {
+          console.error(`[PAGAMENTOS] ❌ [AUDIT] Erro no upload:`, uploadError);
+          return res.status(500).json({ 
+            error: "Erro ao fazer upload do comprovante",
+            details: uploadError.message 
+          });
+        }
+        
+        // Gerar URL pública
+        const { data: urlData } = supabase.storage
+          .from('documents')
+          .getPublicUrl(filePath);
+        
+        comprovanteUrl = urlData.publicUrl;
+        console.log(`[PAGAMENTOS] ✅ [AUDIT] Upload concluído - URL: ${comprovanteUrl}`);
+        
+      } catch (error) {
+        console.error(`[PAGAMENTOS] ❌ [AUDIT] Erro no processamento do arquivo:`, error);
+        return res.status(500).json({ 
+          error: "Erro ao processar arquivo de comprovante" 
+        });
+      }
+    }
+    
+    // Atualizar status para pago e salvar URL do comprovante
+    const updateData: any = { 
+      status: 'pago',
+      dataPagamento: new Date()
+    };
+    
+    if (comprovanteUrl) {
+      updateData.urlComprovantePagamento = comprovanteUrl;
+    }
+    
+    await db
+      .update(propostas)
+      .set(updateData)
+      .where(eq(propostas.id, id));
+    
+    console.log(`[PAGAMENTOS] ✅ [AUDIT] Status atualizado para 'pago' - Proposta: ${id}`);
+    
+    // Buscar informações do usuário para o log
+    const { profiles } = await import("@shared/schema");
+    const [user] = await db
+      .select({
+        fullName: profiles.fullName,
+        role: profiles.role
+      })
+      .from(profiles)
+      .where(eq(profiles.id, userId!))
+      .limit(1);
+    
+    // Registrar na tabela de histórico de observações
+    const { historicoObservacoesCobranca } = await import("@shared/schema");
+    const mensagemLog = `Proposta marcada como paga por ${user?.fullName || userId}. ${observacoes ? `Observações: ${observacoes}` : ''}${comprovanteUrl ? ' Comprovante anexado.' : ''}`;
+    
+    await db.insert(historicoObservacoesCobranca).values({
+      propostaId: id,
+      mensagem: mensagemLog,
+      criadoPor: user?.fullName || userId || 'sistema',
+      tipoAcao: 'MARCACAO_PAGO',
+      dadosAcao: {
+        autorId: userId,
+        nomeAutor: user?.fullName,
+        role: userRole,
+        statusAnterior: 'pagamento_autorizado',
+        statusNovo: 'pago',
+        observacoes: observacoes || null,
+        comprovanteUrl: comprovanteUrl || null,
+        timestamp: new Date().toISOString(),
+        ip: req.ip,
+        userAgent: req.headers['user-agent']
+      }
+    });
+    
+    console.log(`[PAGAMENTOS] 🔍 [AUDIT] Registro de auditoria criado - Ação: MARCACAO_PAGO`);
+    console.log(`[PAGAMENTOS] ✅ [AUDIT] Processo concluído com sucesso - Proposta ${id} marcada como paga`);
+    
+    res.json({
+      success: true,
+      message: "Pagamento marcado como pago com sucesso",
+      status: "pago",
+      comprovanteUrl: comprovanteUrl,
+      marcadoPor: {
+        id: userId,
+        nome: user?.fullName,
+        role: userRole,
+        dataMarcacao: new Date().toISOString()
+      }
+    });
+    
+  } catch (error) {
+    console.error("[PAGAMENTOS] ❌ [AUDIT] Erro ao marcar como pago:", error);
+    res.status(500).json({ error: "Erro ao marcar pagamento como pago" });
   }
 });
 

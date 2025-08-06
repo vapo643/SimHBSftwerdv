@@ -49,6 +49,7 @@ import {
   ShieldCheck
 } from "lucide-react";
 import PaymentReviewModal from "./pagamentos-review";
+import MarcarPagoModal from "./marcar-pago-modal";
 
 interface Pagamento {
   id: string;
@@ -101,6 +102,8 @@ export default function Pagamentos() {
   const [showSecurityVerificationModal, setShowSecurityVerificationModal] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [selectedPropostaForReview, setSelectedPropostaForReview] = useState<any>(null);
+  const [showMarcarPagoModal, setShowMarcarPagoModal] = useState(false);
+  const [selectedPropostaForPago, setSelectedPropostaForPago] = useState<any>(null);
   const [rejectionReason, setRejectionReason] = useState("");
   const [approvalObservation, setApprovalObservation] = useState("");
   const [verificationData, setVerificationData] = useState<any>(null);
@@ -395,6 +398,21 @@ export default function Pagamentos() {
             setSelectedPropostaForReview(null);
           }}
         />
+
+        {/* Modal de Marcar como Pago */}
+        <MarcarPagoModal
+          isOpen={showMarcarPagoModal}
+          onClose={() => {
+            setShowMarcarPagoModal(false);
+            setSelectedPropostaForPago(null);
+          }}
+          proposta={selectedPropostaForPago}
+          onConfirm={() => {
+            refetch();
+            setShowMarcarPagoModal(false);
+            setSelectedPropostaForPago(null);
+          }}
+        />
         {/* KPIs Dashboard */}
         <div className="grid gap-4 md:grid-cols-4">
           <Card>
@@ -653,6 +671,21 @@ export default function Pagamentos() {
                               >
                                 <ShieldCheck className="h-4 w-4" />
                                 Confirmar Veracidade
+                              </Button>
+                            )}
+                            {pagamento.status === 'pagamento_autorizado' && userHasApprovalPermission() && (
+                              <Button
+                                size="sm"
+                                variant="default"
+                                className="gap-2 bg-green-600 hover:bg-green-700"
+                                onClick={() => {
+                                  setSelectedPropostaForPago(pagamento);
+                                  setShowMarcarPagoModal(true);
+                                }}
+                                title="Marcar como Pago"
+                              >
+                                <Banknote className="h-4 w-4" />
+                                Marcar como Pago
                               </Button>
                             )}
                           </div>

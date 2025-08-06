@@ -182,6 +182,9 @@ export const propostas = pgTable("propostas", {
   dadosPagamentoPix: text("dados_pagamento_pix"), // Chave PIX se preferir
   dadosPagamentoTipoPix: text("dados_pagamento_tipo_pix"), // CPF, Email, Telefone, Aleatória
 
+  // Comprovante de Pagamento - Added August 6, 2025
+  urlComprovantePagamento: text("url_comprovante_pagamento"), // URL do comprovante no Supabase Storage
+
   // Campos JSONB legados (mantidos para compatibilidade)
   clienteData: text("cliente_data"),
   condicoesData: text("condicoes_data"),
