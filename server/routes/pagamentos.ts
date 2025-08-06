@@ -934,8 +934,7 @@ router.get("/:id/detalhes-completos", jwtAuthMiddleware, async (req: Authenticat
     const boletos = await db
       .select()
       .from(interCollections)
-      .where(eq(interCollections.propostaId, id))
-      .orderBy(desc(interCollections.id)); // Usar id pois createdAt não existe na tabela
+      .where(eq(interCollections.propostaId, id));
     
     // Debug: verificar dados da proposta
     console.log(`[PAGAMENTOS DEBUG] Dados da proposta encontrados:`, {
