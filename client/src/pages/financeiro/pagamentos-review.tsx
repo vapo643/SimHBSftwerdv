@@ -50,24 +50,41 @@ export default function PaymentReviewModal({ isOpen, onClose, proposta, onConfir
   const [pixKeyVisible, setPixKeyVisible] = useState(false);
   const [ccbUrl, setCcbUrl] = useState<string | null>(null);
   
+  // Buscar dados completos da proposta quando o modal abrir
+  const { data: propostaCompleta, isLoading: isLoadingProposta } = useQuery({
+    queryKey: ['/api/pagamentos', proposta?.propostaId || proposta?.id, 'detalhes'],
+    queryFn: async () => {
+      const propostaId = proposta?.propostaId || proposta?.id;
+      if (!propostaId) return null;
+      
+      console.log('[REVIEW MODAL] Buscando dados completos da proposta:', propostaId);
+      const response = await apiRequest(`/api/pagamentos/${propostaId}/detalhes`, {
+        method: 'GET',
+      });
+      console.log('[REVIEW MODAL] Dados recebidos:', response);
+      return response;
+    },
+    enabled: isOpen && !!proposta,
+  });
+  
   // Buscar status da CCB no Storage
   const { data: ccbStatus, isLoading: isLoadingCcbStatus } = useQuery({
-    queryKey: ['/api/pagamentos', proposta?.id, 'ccb-storage-status'],
+    queryKey: ['/api/pagamentos', propostaCompleta?.id, 'ccb-storage-status'],
     queryFn: async () => {
-      if (!proposta?.id) return null;
-      return await apiRequest(`/api/pagamentos/${proposta.id}/ccb-storage-status`, {
+      if (!propostaCompleta?.id) return null;
+      return await apiRequest(`/api/pagamentos/${propostaCompleta.id}/ccb-storage-status`, {
         method: 'GET',
       });
     },
-    enabled: isOpen && !!proposta?.id,
+    enabled: isOpen && !!propostaCompleta?.id,
   });
 
   // Buscar URL da CCB quando necessário
   const { data: ccbUrlData, isLoading: isLoadingCcbUrl, refetch: refetchCcbUrl } = useQuery({
-    queryKey: ['/api/pagamentos', proposta?.id, 'ccb-url'],
+    queryKey: ['/api/pagamentos', propostaCompleta?.id, 'ccb-url'],
     queryFn: async () => {
-      if (!proposta?.id) return null;
-      return await apiRequest(`/api/pagamentos/${proposta.id}/ccb-url`, {
+      if (!propostaCompleta?.id) return null;
+      return await apiRequest(`/api/pagamentos/${propostaCompleta.id}/ccb-url`, {
         method: 'GET',
       });
     },
@@ -77,7 +94,8 @@ export default function PaymentReviewModal({ isOpen, onClose, proposta, onConfir
   // Confirmar veracidade
   const confirmarVeracidadeMutation = useMutation({
     mutationFn: async () => {
-      return await apiRequest(`/api/pagamentos/${proposta.id}/confirmar-veracidade`, {
+      const propostaId = proposta?.propostaId || proposta?.id;
+      return await apiRequest(`/api/pagamentos/${propostaId}/confirmar-veracidade`, {
         method: 'POST',
         body: JSON.stringify({ observacoes }),
       });
@@ -132,6 +150,9 @@ export default function PaymentReviewModal({ isOpen, onClose, proposta, onConfir
     return cleaned.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
   };
 
+  // Use os dados completos da proposta, ou os dados básicos se ainda estiver carregando
+  const dadosProposta = propostaCompleta || proposta;
+  
   if (!proposta) return null;
 
   return (
@@ -144,10 +165,17 @@ export default function PaymentReviewModal({ isOpen, onClose, proposta, onConfir
               Revisão e Confirmação de Pagamento
             </DialogTitle>
             <DialogDescription>
-              Verifique todos os dados antes de autorizar o pagamento
+              {isLoadingProposta ? "Carregando dados..." : "Verifique todos os dados antes de autorizar o pagamento"}
             </DialogDescription>
           </DialogHeader>
-
+          
+          {/* Mostrar loading spinner enquanto carrega dados */}
+          {isLoadingProposta ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+              <span className="ml-2">Carregando dados da proposta...</span>
+            </div>
+          ) : (
           <Tabs defaultValue="dados" className="mt-4">
             <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="dados">Dados do Cliente</TabsTrigger>
@@ -165,27 +193,27 @@ export default function PaymentReviewModal({ isOpen, onClose, proposta, onConfir
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label>Nome Completo</Label>
-                      <p className="text-sm font-medium">{proposta.clienteNome}</p>
+                      <p className="text-sm font-medium">{dadosProposta.clienteNome || dadosProposta.nomeCliente}</p>
                     </div>
                     <div>
                       <Label>CPF</Label>
-                      <p className="text-sm font-medium">{formatCPF(proposta.clienteCpf)}</p>
+                      <p className="text-sm font-medium">{formatCPF(dadosProposta.clienteCpf || dadosProposta.cpfCliente)}</p>
                     </div>
                     <div>
                       <Label>E-mail</Label>
-                      <p className="text-sm">{proposta.clienteEmail}</p>
+                      <p className="text-sm">{dadosProposta.clienteEmail || 'Não informado'}</p>
                     </div>
                     <div>
                       <Label>Telefone</Label>
-                      <p className="text-sm">{proposta.clienteTelefone}</p>
+                      <p className="text-sm">{dadosProposta.clienteTelefone || 'Não informado'}</p>
                     </div>
                     <div>
                       <Label>Data de Nascimento</Label>
-                      <p className="text-sm">{proposta.clienteDataNascimento}</p>
+                      <p className="text-sm">{dadosProposta.clienteDataNascimento || 'Não informado'}</p>
                     </div>
                     <div>
                       <Label>Renda</Label>
-                      <p className="text-sm">{formatCurrency(Number(proposta.clienteRenda))}</p>
+                      <p className="text-sm">{dadosProposta.clienteRenda ? formatCurrency(Number(dadosProposta.clienteRenda)) : 'Não informado'}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -202,30 +230,30 @@ export default function PaymentReviewModal({ isOpen, onClose, proposta, onConfir
                     <div>
                       <Label>Valor Solicitado</Label>
                       <p className="text-lg font-semibold text-green-600">
-                        {formatCurrency(Number(proposta.valor))}
+                        {formatCurrency(Number(dadosProposta.valor || dadosProposta.valorFinanciado || 0))}
                       </p>
                     </div>
                     <div>
                       <Label>Valor Total Financiado</Label>
                       <p className="text-lg font-semibold">
-                        {formatCurrency(Number(proposta.valorTotalFinanciado))}
+                        {formatCurrency(Number(dadosProposta.valorTotalFinanciado || dadosProposta.valorFinanciado || 0))}
                       </p>
                     </div>
                     <div>
                       <Label>Prazo</Label>
-                      <p className="text-sm">{proposta.prazo} parcelas</p>
+                      <p className="text-sm">{dadosProposta.prazo || dadosProposta.numeroParcelas || 0} parcelas</p>
                     </div>
                     <div>
                       <Label>Taxa de Juros</Label>
-                      <p className="text-sm">{proposta.taxaJuros}% ao mês</p>
+                      <p className="text-sm">{dadosProposta.taxaJuros || '0'}% ao mês</p>
                     </div>
                     <div>
                       <Label>IOF</Label>
-                      <p className="text-sm">{formatCurrency(Number(proposta.valorIof))}</p>
+                      <p className="text-sm">{formatCurrency(Number(dadosProposta.valorIof || dadosProposta.valorIOF || 0))}</p>
                     </div>
                     <div>
                       <Label>TAC</Label>
-                      <p className="text-sm">{formatCurrency(Number(proposta.valorTac))}</p>
+                      <p className="text-sm">{formatCurrency(Number(dadosProposta.valorTac || dadosProposta.valorTAC || 0))}</p>
                     </div>
                   </div>
 
@@ -233,7 +261,7 @@ export default function PaymentReviewModal({ isOpen, onClose, proposta, onConfir
 
                   <div>
                     <Label>Finalidade</Label>
-                    <p className="text-sm">{proposta.finalidade}</p>
+                    <p className="text-sm">{dadosProposta.finalidade || 'Não informado'}</p>
                   </div>
                 </CardContent>
               </Card>
@@ -256,13 +284,13 @@ export default function PaymentReviewModal({ isOpen, onClose, proposta, onConfir
                         <div>
                           <p className="font-medium">CCB - Cédula de Crédito Bancário</p>
                           <p className="text-sm text-muted-foreground">
-                            {proposta.ccbGerado ? 'Gerada' : 'Não gerada'} | 
-                            {proposta.assinaturaEletronicaConcluida ? ' Assinada' : ' Não assinada'}
+                            {dadosProposta.ccbGerado ? 'Gerada' : 'Não gerada'} | 
+                            {dadosProposta.assinaturaEletronicaConcluida ? ' Assinada' : ' Não assinada'}
                           </p>
                         </div>
                       </div>
                       <div className="flex gap-2">
-                        {proposta.assinaturaEletronicaConcluida ? (
+                        {dadosProposta.assinaturaEletronicaConcluida ? (
                           <Badge className="bg-green-100 text-green-800">
                             <CheckCircle className="h-3 w-3 mr-1" />
                             Assinada
@@ -270,7 +298,7 @@ export default function PaymentReviewModal({ isOpen, onClose, proposta, onConfir
                         ) : (
                           <Badge variant="secondary">Pendente</Badge>
                         )}
-                        {proposta.assinaturaEletronicaConcluida && (
+                        {dadosProposta.assinaturaEletronicaConcluida && (
                           <Button
                             size="sm"
                             variant="outline"
@@ -281,7 +309,7 @@ export default function PaymentReviewModal({ isOpen, onClose, proposta, onConfir
                               <Loader2 className="h-4 w-4 animate-spin" />
                             ) : (
                               <>
-                                <Eye className="h-4 w-4 mr-2" />
+                                <ExternalLink className="h-4 w-4 mr-2" />
                                 Ver CCB Assinada
                               </>
                             )}
@@ -310,7 +338,7 @@ export default function PaymentReviewModal({ isOpen, onClose, proposta, onConfir
                     <Label>Status de Formalização</Label>
                     <div className="grid grid-cols-2 gap-2">
                       <div className="flex items-center gap-2">
-                        {proposta.ccbGerado ? (
+                        {dadosProposta.ccbGerado ? (
                           <CheckCircle className="h-4 w-4 text-green-600" />
                         ) : (
                           <AlertCircle className="h-4 w-4 text-gray-400" />
@@ -318,7 +346,7 @@ export default function PaymentReviewModal({ isOpen, onClose, proposta, onConfir
                         <span className="text-sm">CCB Gerada</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        {proposta.assinaturaEletronicaConcluida ? (
+                        {dadosProposta.assinaturaEletronicaConcluida ? (
                           <CheckCircle className="h-4 w-4 text-green-600" />
                         ) : (
                           <AlertCircle className="h-4 w-4 text-gray-400" />
@@ -329,7 +357,7 @@ export default function PaymentReviewModal({ isOpen, onClose, proposta, onConfir
                   </div>
 
                   {/* Alerta se documentos não estiverem completos */}
-                  {(!proposta.ccbGerado || !proposta.assinaturaEletronicaConcluida) && (
+                  {(!dadosProposta.ccbGerado || !dadosProposta.assinaturaEletronicaConcluida) && (
                     <Alert variant="destructive">
                       <AlertTriangle className="h-4 w-4" />
                       <AlertDescription>
@@ -362,21 +390,21 @@ export default function PaymentReviewModal({ isOpen, onClose, proposta, onConfir
                       <div className="space-y-3">
                         <div>
                           <Label>Banco</Label>
-                          <p className="text-sm">{proposta.dadosPagamentoBanco || 'Não informado'}</p>
+                          <p className="text-sm">{dadosProposta.dadosPagamentoBanco || dadosProposta.contaBancaria?.banco || 'Não informado'}</p>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                           <div>
                             <Label>Agência</Label>
-                            <p className="text-sm">{proposta.dadosPagamentoAgencia || '****'}</p>
+                            <p className="text-sm">{dadosProposta.dadosPagamentoAgencia || dadosProposta.contaBancaria?.agencia || '****'}</p>
                           </div>
                           <div>
                             <Label>Conta</Label>
-                            <p className="text-sm">{proposta.dadosPagamentoConta || '****'}</p>
+                            <p className="text-sm">{dadosProposta.dadosPagamentoConta || dadosProposta.contaBancaria?.conta || '****'}</p>
                           </div>
                         </div>
                         <div>
                           <Label>Titular</Label>
-                          <p className="text-sm">{proposta.clienteNome}</p>
+                          <p className="text-sm">{dadosProposta.clienteNome || dadosProposta.nomeCliente || dadosProposta.contaBancaria?.titular}</p>
                         </div>
                       </div>
                     </>
@@ -394,13 +422,13 @@ export default function PaymentReviewModal({ isOpen, onClose, proposta, onConfir
                           <div>
                             <Label>Chave PIX</Label>
                             <p className="text-lg font-mono font-semibold">
-                              {proposta.dadosPagamentoPix || proposta.clienteCpf}
+                              {dadosProposta.dadosPagamentoPix || dadosProposta.clienteCpf || dadosProposta.cpfCliente}
                             </p>
                           </div>
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => copyToClipboard(proposta.dadosPagamentoPix || proposta.clienteCpf)}
+                            onClick={() => copyToClipboard(dadosProposta.dadosPagamentoPix || dadosProposta.clienteCpf || dadosProposta.cpfCliente)}
                           >
                             <Copy className="h-4 w-4 mr-2" />
                             Copiar
@@ -412,19 +440,19 @@ export default function PaymentReviewModal({ isOpen, onClose, proposta, onConfir
                         <div className="grid grid-cols-2 gap-4 text-sm">
                           <div>
                             <Label>Banco</Label>
-                            <p>{proposta.dadosPagamentoBanco}</p>
+                            <p>{dadosProposta.dadosPagamentoBanco || dadosProposta.contaBancaria?.banco}</p>
                           </div>
                           <div>
                             <Label>Titular</Label>
-                            <p>{proposta.clienteNome}</p>
+                            <p>{dadosProposta.clienteNome || dadosProposta.nomeCliente || dadosProposta.contaBancaria?.titular}</p>
                           </div>
                           <div>
                             <Label>Agência</Label>
-                            <p>{proposta.dadosPagamentoAgencia}</p>
+                            <p>{dadosProposta.dadosPagamentoAgencia || dadosProposta.contaBancaria?.agencia}</p>
                           </div>
                           <div>
                             <Label>Conta</Label>
-                            <p>{proposta.dadosPagamentoConta}</p>
+                            <p>{dadosProposta.dadosPagamentoConta || dadosProposta.contaBancaria?.conta}</p>
                           </div>
                         </div>
                       </div>
@@ -433,7 +461,7 @@ export default function PaymentReviewModal({ isOpen, onClose, proposta, onConfir
                 </CardContent>
               </Card>
 
-              {!pixKeyVisible && proposta.status === 'pronto_pagamento' && (
+              {!pixKeyVisible && (dadosProposta.status === 'pronto_pagamento' || dadosProposta.status === 'em_processamento') && (
                 <Card className="border-orange-200 bg-orange-50">
                   <CardHeader>
                     <CardTitle className="text-lg flex items-center gap-2">
@@ -468,7 +496,7 @@ export default function PaymentReviewModal({ isOpen, onClose, proposta, onConfir
                       className="w-full"
                       size="lg"
                       onClick={() => setShowConfirmDialog(true)}
-                      disabled={!proposta.assinaturaEletronicaConcluida}
+                      disabled={!dadosProposta.assinaturaEletronicaConcluida}
                     >
                       <Shield className="h-5 w-5 mr-2" />
                       Confirmar Veracidade e Liberar Pagamento
@@ -478,11 +506,28 @@ export default function PaymentReviewModal({ isOpen, onClose, proposta, onConfir
               )}
             </TabsContent>
           </Tabs>
+          )}  {/* Fechamento do condicional de loading */}
 
           <DialogFooter>
-            <Button variant="outline" onClick={onClose}>
-              Fechar
-            </Button>
+            {!isLoadingProposta && !pixKeyVisible && (dadosProposta.status === 'pronto_pagamento' || dadosProposta.status === 'em_processamento') ? (
+              <>
+                <Button variant="outline" onClick={onClose}>
+                  Cancelar
+                </Button>
+                <Button
+                  size="lg"
+                  onClick={() => setShowConfirmDialog(true)}
+                  disabled={!dadosProposta.assinaturaEletronicaConcluida}
+                >
+                  <Shield className="h-5 w-5 mr-2" />
+                  Confirmar e Liberar PIX
+                </Button>
+              </>
+            ) : (
+              <Button variant="outline" onClick={onClose}>
+                Fechar
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>

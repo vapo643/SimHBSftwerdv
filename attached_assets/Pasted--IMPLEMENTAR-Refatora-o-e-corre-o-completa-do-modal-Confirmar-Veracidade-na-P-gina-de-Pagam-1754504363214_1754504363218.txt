@@ -1,0 +1,31 @@
+**IMPLEMENTAR:** Refatoração e correção completa do modal "Confirmar Veracidade" na "Página de Pagamentos do Financeiro".
+
+**CONTEXT:** O teste de validação da funcionalidade falhou catastroficamente. O modal não está a carregar NENHUM dado da proposta selecionada (cliente, financeiro, documento), e os botões de ação estão ausentes ou não funcionais. A causa provável é que a lógica do modal não está buscando os dados dinâmicos da proposta selecionada.
+
+**CURRENT STATE:** Ao clicar em "Confirmar Veracidade", o modal abre, mas está quebrado: dados do cliente e financeiros estão ausentes, o visualizador de documento está branco e com status incorretos, e o botão para liberar o PIX não existe.
+
+**EXPECTED (Estado Final de Sucesso):** Um modal 100% funcional que:
+1.  Exibe os dados corretos do cliente e os detalhes financeiros do empréstimo.
+2.  Exibe os status de formalização corretos (ex: "CCB Gerada", "Assinatura Concluída").
+3.  Fornece um botão funcional "Ver CCB Assinada" que abre o PDF assinado do Supabase Storage.
+4.  Possui um botão funcional "Confirmar e Liberar PIX" que, ao ser clicado, executa a lógica de backend e revela a chave PIX do cliente na UI principal.
+
+**CONSTRAINTS (Roadmap de Correção Cirúrgico):**
+
+**1. Correção do Fluxo de Dados (Causa Raiz):**
+    - **Ação:** Investigue o componente do modal. A sua primeira e mais importante tarefa é garantir que, ao ser aberto, ele receba o `propostaId` da proposta selecionada na tabela.
+    - **Implementação:** Use este `propostaId` para fazer uma nova chamada ao backend para buscar todos os dados atualizados e específicos daquela proposta. TODOS os dados exibidos no modal devem vir desta nova busca, não de dados herdados da tabela.
+
+**2. Correção da Exibição de Dados (Sintomas 1 e 4):**
+    - **Ação:** Popule o modal com os dados do cliente (nome, etc.) e os dados financeiros (valor do empréstimo, etc.) retornados pela busca de dados do passo anterior.
+    - **Implementação:** Garanta que os status de formalização (ex: "CCB Gerada", "Assinatura Concluída") também sejam preenchidos com os dados reais da proposta.
+
+**3. Refatoração da Visualização da CCB (Sintomas 2 e 3):**
+    - **Ação:** Remova completamente o visualizador de PDF que está bugado dentro do modal.
+    - **Implementação:** Substitua-o por um botão simples com o texto "Ver CCB Assinada". Ao ser clicado, este botão deve chamar o endpoint `/api/pagamentos/:id/ccb-url` (que já existe e gera uma URL assinada do Supabase Storage) e abrir o PDF em uma nova aba do navegador.
+
+**4. Implementação da Ação Principal (Sintoma 5):**
+    - **Ação:** Adicione o botão de ação principal no rodapé do modal com o texto "Confirmar e Liberar PIX".
+    - **Implementação:** Certifique-se de que este botão chame o endpoint `POST /api/pagamentos/:id/confirmar-veracidade` para executar a lógica de backend (mudar status para `pagamento_autorizado`, registrar auditoria) e, em caso de sucesso, feche o modal e atualize a UI da página principal para exibir a chave PIX.
+
+**DADOS REAIS:** Utilize a proposta de teste clonada que criamos. Toda a validação deve ser feita contra esta proposta.

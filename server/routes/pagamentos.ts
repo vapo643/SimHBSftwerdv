@@ -889,6 +889,69 @@ router.get("/:id/ccb-storage-status", jwtAuthMiddleware, async (req: Authenticat
   }
 });
 
+// Rota para buscar detalhes completos da proposta
+router.get("/:id/detalhes-completos", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user?.id;
+    const userRole = req.user?.role;
+    
+    console.log(`[PAGAMENTOS] Buscando detalhes completos da proposta: ${id}`);
+    
+    // Buscar proposta com todos os campos relacionados
+    const result = await db
+      .select({
+        proposta: propostas,
+        loja: lojas,
+        produto: produtos,
+        usuario: users
+      })
+      .from(propostas)
+      .leftJoin(lojas, eq(propostas.lojaId, lojas.id))
+      .leftJoin(produtos, eq(propostas.produtoId, produtos.id))
+      .leftJoin(users, eq(propostas.userId, users.id))
+      .where(eq(propostas.id, id))
+      .limit(1);
+    
+    if (!result.length || !result[0].proposta) {
+      return res.status(404).json({ error: "Proposta não encontrada" });
+    }
+    
+    const { proposta, loja, produto, usuario } = result[0];
+    
+    // Buscar boletos da Inter, se existirem
+    const boletos = await db
+      .select()
+      .from(interCollections)
+      .where(eq(interCollections.propostaId, id))
+      .orderBy(desc(interCollections.createdAt));
+    
+    // Montar resposta completa
+    const respostaCompleta = {
+      ...proposta,
+      lojaNome: loja?.nome,
+      produtoNome: produto?.nome,
+      usuarioNome: usuario?.fullName,
+      boletos: boletos.map(b => ({
+        id: b.id,
+        codigo: b.codigoSolicitacao,
+        dataVencimento: b.dataVencimento,
+        valor: b.valorNominal,
+        status: b.situacao,
+        linhaDigitavel: b.linhaDigitavel,
+        pixCopiaECola: b.pixCopiaECola
+      }))
+    };
+    
+    console.log(`[PAGAMENTOS] ✅ Detalhes completos retornados para proposta: ${id}`);
+    res.json(respostaCompleta);
+    
+  } catch (error) {
+    console.error("[PAGAMENTOS] Erro ao buscar detalhes completos:", error);
+    res.status(500).json({ error: "Erro ao buscar detalhes da proposta" });
+  }
+});
+
 // Rota para confirmar veracidade e autorizar pagamento
 router.post("/:id/confirmar-veracidade", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
