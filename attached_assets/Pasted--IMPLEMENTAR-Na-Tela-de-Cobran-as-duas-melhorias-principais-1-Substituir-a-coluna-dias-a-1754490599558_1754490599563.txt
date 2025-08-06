@@ -1,0 +1,33 @@
+**IMPLEMENTAR:** Na "Tela de Cobranças", duas melhorias principais:
+1.  Substituir a coluna "dias atraso" pela nova e mais inteligente coluna "Status Vencimento".
+2.  Tornar o botão "Atualizar" funcional, permitindo que o usuário recarregue os dados da tela sob demanda.
+
+**CONTEXT:** A coluna "dias atraso" atual é limitada e não oferece a inteligência necessária para a equipe de cobranças. A nova coluna "Status Vencimento" fornecerá informações contextuais (se um boleto está vencido, a vencer, etc.). O botão "Atualizar" dará ao usuário o controle para consultar os dados mais recentes da API do Banco Inter sem precisar recarregar a página inteira.
+
+**CURRENT STATE:** A tabela de cobranças possui uma coluna estática chamada "dias atraso". Um botão "Atualizar" existe na interface, mas está inativo.
+
+**EXPECTED (Estado Final de Sucesso):**
+
+**1. Funcionalidade da Coluna "Status Vencimento":**
+    - O cabeçalho da coluna na tabela deve ser "Status Vencimento".
+    - O valor exibido em cada linha deve ser calculado dinamicamente no frontend com base na `dataVencimento` e na `situacao` do boleto, que vêm da API do Inter.
+    - **A lógica deve ser a seguinte:**
+        - Se a `situacao` for `PAGO` ou `CANCELADO`, exiba "Pago" ou "Cancelado".
+        - Se a data de vencimento for anterior à data de hoje, exiba "Vencido há X dias".
+        - Se a data de vencimento for hoje, exiba "Vence hoje".
+        - Se a data de vencimento for nos próximos 7 dias, exiba "Vence em X dias".
+        - Para todos os outros casos, exiba a data de vencimento no formato `dd/mm/aaaa`.
+
+**2. Funcionalidade do Botão "Atualizar":**
+    - Ao ser clicado, o botão deve acionar uma função que busca novamente todos os dados da "Tela de Cobranças" a partir do nosso backend.
+    - Durante a busca, um indicador de carregamento (loading state) deve ser exibido na tela.
+    - Ao final da busca, a tabela deve ser atualizada com os novos dados.
+    - **Log de Evento:** A função acionada pelo botão deve obrigatoriamente disparar um log no console do Replit no seguinte formato para depuração: `console.log('[COBRANÇAS] Atualizando dados da API do Banco Inter...')`.
+
+**INTEGRAÇÃO:**
+- A lógica de cálculo do "Status Vencimento" deve ser implementada no frontend (React).
+- O botão "Atualizar" deve chamar o endpoint do backend já existente que busca os dados para a "Tela de Cobranças" (o que usa a função `pesquisarCobrancas` do `interBankService`).
+
+**TESTE:**
+- Valide se a coluna "Status Vencimento" mostra os textos corretos para boletos em diferentes situações (pago, vencido, a vencer).
+- Clique no botão "Atualizar", confirme que o log aparece no console do Replit e que a interface reflete quaisquer mudanças de status.

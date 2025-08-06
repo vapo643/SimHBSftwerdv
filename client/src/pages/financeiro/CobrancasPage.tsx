@@ -46,7 +46,7 @@ import {
   AlertTriangle,
   X
 } from "lucide-react";
-import { format, parseISO, differenceInDays } from "date-fns";
+import { format, parseISO, differenceInDays, isToday, isFuture, addDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -342,6 +342,56 @@ export default function CobrancasPage() {
     return 'Pendente';
   };
 
+  // Função para calcular o Status de Vencimento inteligente
+  const getStatusVencimento = (proposta: any) => {
+    // Se tem situação do Inter Bank, verificar status especiais
+    if (proposta.interSituacao) {
+      const situacao = proposta.interSituacao.toUpperCase();
+      if (situacao === 'RECEBIDO' || situacao === 'MARCADO_RECEBIDO') {
+        return { text: 'Pago', color: 'text-green-600' };
+      }
+      if (situacao === 'CANCELADO' || situacao === 'EXPIRADO' || situacao === 'FALHA_EMISSAO') {
+        return { text: 'Cancelado', color: 'text-gray-600' };
+      }
+    }
+
+    // Se o status local indica pago
+    if (proposta.status === 'quitado' || proposta.status === 'pago') {
+      return { text: 'Pago', color: 'text-green-600' };
+    }
+
+    // Calcular baseado na data de vencimento
+    const hoje = new Date();
+    const dataVencimento = proposta.dataProximoVencimento ? parseISO(proposta.dataProximoVencimento) : null;
+    
+    if (!dataVencimento) {
+      return { text: 'Sem vencimento', color: 'text-gray-500' };
+    }
+
+    // Se já venceu
+    if (proposta.diasAtraso > 0) {
+      return { text: `Vencido há ${proposta.diasAtraso} dias`, color: 'text-red-600 font-semibold' };
+    }
+
+    // Se vence hoje
+    if (isToday(dataVencimento)) {
+      return { text: 'Vence hoje', color: 'text-orange-600 font-semibold' };
+    }
+
+    // Se vence nos próximos 7 dias
+    const diasParaVencer = differenceInDays(dataVencimento, hoje);
+    if (diasParaVencer > 0 && diasParaVencer <= 7) {
+      return { text: `Vence em ${diasParaVencer} dias`, color: 'text-yellow-600' };
+    }
+
+    // Para todos os outros casos, mostrar a data de vencimento
+    if (isFuture(dataVencimento)) {
+      return { text: format(dataVencimento, 'dd/MM/yyyy'), color: 'text-gray-600' };
+    }
+
+    return { text: 'Em dia', color: 'text-green-600' };
+  };
+
   return (
     <DashboardLayout title="Cobranças">
       <div className="space-y-6">
@@ -429,7 +479,10 @@ export default function CobrancasPage() {
                 variant="outline" 
                 size="sm" 
                 className="w-full"
-                onClick={() => refetch()}
+                onClick={() => {
+                  console.log('[COBRANÇAS] Atualizando dados da API do Banco Inter...');
+                  refetch();
+                }}
               >
                 <RefreshCw className="mr-2 h-4 w-4" />
                 Atualizar
@@ -519,7 +572,7 @@ export default function CobrancasPage() {
                     <TableHead>Telefone</TableHead>
                     <TableHead>Valor Total</TableHead>
                     <TableHead>Parcelas</TableHead>
-                    <TableHead>Dias Atraso</TableHead>
+                    <TableHead>Status Vencimento</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Ações</TableHead>
                   </TableRow>
@@ -559,13 +612,14 @@ export default function CobrancasPage() {
                           {proposta.parcelasPagas}/{proposta.quantidadeParcelas}
                         </TableCell>
                         <TableCell>
-                          {proposta.diasAtraso > 0 ? (
-                            <span className="text-red-600 font-semibold">
-                              {proposta.diasAtraso} dias
-                            </span>
-                          ) : (
-                            <span className="text-green-600">Em dia</span>
-                          )}
+                          {(() => {
+                            const statusInfo = getStatusVencimento(proposta);
+                            return (
+                              <span className={statusInfo.color}>
+                                {statusInfo.text}
+                              </span>
+                            );
+                          })()}
                         </TableCell>
                         <TableCell>
                           <Badge className={getStatusColor(proposta.status)}>
