@@ -50,21 +50,31 @@ export default function PaymentReviewModal({ isOpen, onClose, proposta, onConfir
   const [pixKeyVisible, setPixKeyVisible] = useState(false);
   const [ccbUrl, setCcbUrl] = useState<string | null>(null);
   
+  // Debug: log when modal opens or props change
+  React.useEffect(() => {
+    if (isOpen) {
+      console.log('🔍 [REVIEW MODAL DEBUG] Modal opened with proposta:', proposta);
+      console.log('🔍 [REVIEW MODAL DEBUG] Proposta ID:', proposta?.id);
+      console.log('🔍 [REVIEW MODAL DEBUG] All proposta keys:', Object.keys(proposta || {}));
+    }
+  }, [isOpen, proposta]);
+  
   // Buscar dados completos da proposta quando o modal abrir
   const { data: propostaCompleta, isLoading: isLoadingProposta } = useQuery({
-    queryKey: ['/api/pagamentos', proposta?.propostaId || proposta?.id, 'detalhes'],
+    queryKey: ['/api/pagamentos', proposta?.id, 'detalhes-completos'],
     queryFn: async () => {
-      const propostaId = proposta?.propostaId || proposta?.id;
+      const propostaId = proposta?.id;
       if (!propostaId) return null;
       
+      console.log('[REVIEW MODAL] Proposta recebida:', proposta);
       console.log('[REVIEW MODAL] Buscando dados completos da proposta:', propostaId);
-      const response = await apiRequest(`/api/pagamentos/${propostaId}/detalhes`, {
+      const response = await apiRequest(`/api/pagamentos/${propostaId}/detalhes-completos`, {
         method: 'GET',
       });
       console.log('[REVIEW MODAL] Dados recebidos:', response);
       return response;
     },
-    enabled: isOpen && !!proposta,
+    enabled: isOpen && !!proposta?.id,
   });
   
   // Buscar status da CCB no Storage
@@ -94,13 +104,15 @@ export default function PaymentReviewModal({ isOpen, onClose, proposta, onConfir
   // Confirmar veracidade
   const confirmarVeracidadeMutation = useMutation({
     mutationFn: async () => {
-      const propostaId = proposta?.propostaId || proposta?.id;
+      const propostaId = proposta?.id;
+      console.log('[REVIEW MODAL] Confirmando veracidade para proposta:', propostaId);
       return await apiRequest(`/api/pagamentos/${propostaId}/confirmar-veracidade`, {
         method: 'POST',
         body: JSON.stringify({ observacoes }),
       });
     },
     onSuccess: (data) => {
+      console.log('✅ [REVIEW MODAL] Veracidade confirmada com sucesso:', data);
       toast({
         title: "✅ Veracidade Confirmada",
         description: "Pagamento autorizado com sucesso. Chave PIX liberada.",
@@ -112,6 +124,7 @@ export default function PaymentReviewModal({ isOpen, onClose, proposta, onConfir
       onConfirm();
     },
     onError: (error: any) => {
+      console.error('❌ [REVIEW MODAL] Erro ao confirmar veracidade:', error);
       toast({
         title: "Erro ao confirmar veracidade",
         description: error.message || "Não foi possível confirmar a veracidade.",
@@ -153,7 +166,14 @@ export default function PaymentReviewModal({ isOpen, onClose, proposta, onConfir
   // Use os dados completos da proposta, ou os dados básicos se ainda estiver carregando
   const dadosProposta = propostaCompleta || proposta;
   
-  if (!proposta) return null;
+  console.log('🔍 [REVIEW MODAL DEBUG] dadosProposta final:', dadosProposta);
+  console.log('🔍 [REVIEW MODAL DEBUG] isLoadingProposta:', isLoadingProposta);
+  console.log('🔍 [REVIEW MODAL DEBUG] propostaCompleta:', propostaCompleta);
+  
+  if (!proposta) {
+    console.log('⚠️ [REVIEW MODAL DEBUG] Proposta não encontrada, fechando modal');
+    return null;
+  }
 
   return (
     <>
