@@ -931,10 +931,19 @@ router.get("/:id/detalhes-completos", jwtAuthMiddleware, async (req: Authenticat
     // Usar os dados obtidos separadamente
     
     // Buscar boletos da Inter, se existirem
-    const boletos = await db
-      .select()
-      .from(interCollections)
-      .where(eq(interCollections.propostaId, id));
+    console.log('[DEBUG] Tentando buscar boletos para proposta:', id);
+    let boletos: any[] = [];
+    try {
+      boletos = await db
+        .select()
+        .from(interCollections)
+        .where(eq(interCollections.propostaId, id));
+      console.log('[DEBUG] Boletos encontrados:', boletos.length);
+    } catch (boletoError) {
+      console.error('[DEBUG] ERRO ao buscar boletos:', boletoError);
+      // Continue sem boletos se houver erro
+      boletos = [];
+    }
     
     // Debug: verificar dados da proposta
     console.log(`[PAGAMENTOS DEBUG] Dados da proposta encontrados:`, {

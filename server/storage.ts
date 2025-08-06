@@ -676,7 +676,7 @@ export class DatabaseStorage implements IStorage {
   async getInterCollections(): Promise<InterCollection[]> {
     return await db.select().from(interCollections)
       .where(eq(interCollections.isActive, true))
-      .orderBy(desc(interCollections.createdAt));
+      .orderBy(desc(interCollections.id));
   }
 
   // Inter Bank Webhooks
@@ -718,7 +718,7 @@ export class DatabaseStorage implements IStorage {
   async getUnprocessedInterCallbacks(): Promise<InterCallback[]> {
     return await db.select().from(interCallbacks)
       .where(eq(interCallbacks.processado, false))
-      .orderBy(interCallbacks.createdAt);
+      .orderBy(desc(interCallbacks.id));
   }
 
   async markInterCallbackAsProcessed(id: number, erro?: string): Promise<void> {
