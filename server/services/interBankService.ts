@@ -726,7 +726,7 @@ class InterBankService {
   /**
    * Cancel a collection
    */
-  async cancelarCobranca(codigoSolicitacao: string, motivoCancelamento: string): Promise<any> {
+  async cancelarCobranca(codigoSolicitacao: string, motivoCancelamento: string = 'CANCELAMENTO_ADMINISTRATIVO'): Promise<any> {
     try {
       console.log(`[INTER] ❌ Cancelling collection: ${codigoSolicitacao}`);
 

@@ -48,7 +48,8 @@ import {
   X,
   MoreVertical,
   CalendarPlus,
-  Percent
+  Percent,
+  CheckSquare
 } from "lucide-react";
 import { format, parseISO, differenceInDays, isToday, isFuture, addDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -146,24 +147,45 @@ export default function CobrancasPage() {
   const [valorDesconto, setValorDesconto] = useState("");
   const [dataLimiteDesconto, setDataLimiteDesconto] = useState("");
   
+  // Estados para Desconto de Quitação (multi-etapas)
+  const [etapaDesconto, setEtapaDesconto] = useState(1);
+  const [debtInfo, setDebtInfo] = useState<any>(null);
+  const [novoValorQuitacao, setNovoValorQuitacao] = useState(0);
+  const [quantidadeParcelas, setQuantidadeParcelas] = useState(1);
+  const [novasParcelas, setNovasParcelas] = useState<Array<{valor: number, dataVencimento: string}>>([]);
+  
+  // Estados para Prorrogar Vencimento (seleção múltipla)
+  const [boletosParaProrrogar, setBoletosParaProrrogar] = useState<string[]>([]);
+  const [todosBoletosAtivos, setTodosBoletosAtivos] = useState<any[]>([]);
+  
   // Verificar se o usuário tem role de cobrança
   const isCobrancaUser = user?.role === 'COBRANÇA';
   const isAdmin = user?.role === 'ADMINISTRADOR';
 
-  // Mutations para modificar boletos
+  // Buscar informações de dívida para desconto de quitação
+  const { data: debtData, isLoading: loadingDebt, refetch: refetchDebt } = useQuery({
+    queryKey: ['/api/inter/collections/proposal', selectedPropostaId],
+    enabled: !!selectedPropostaId && showDescontoModal,
+    queryFn: async () => {
+      return apiRequest(`/api/inter/collections/proposal/${selectedPropostaId}`);
+    }
+  });
+
+  // Mutation para prorrogar vencimento em lote
   const prorrogarMutation = useMutation({
-    mutationFn: async (data: { codigoSolicitacao: string; novaDataVencimento: string }) => {
-      return apiRequest(`/api/inter/collections/${data.codigoSolicitacao}`, 'PATCH', {
-        action: 'prorrogar',
-        novaDataVencimento: data.novaDataVencimento
+    mutationFn: async (data: { codigosSolicitacao: string[]; novaDataVencimento: string }) => {
+      return apiRequest('/api/inter/collections/batch-extend', {
+        method: 'PATCH',
+        body: JSON.stringify(data)
       });
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       toast({
         title: "Sucesso",
-        description: "Vencimento prorrogado com sucesso",
+        description: result.message || "Vencimento(s) prorrogado(s) com sucesso",
       });
       setShowProrrogarModal(false);
+      setBoletosParaProrrogar([]);
       refetch();
     },
     onError: (error: any) => {
@@ -175,26 +197,28 @@ export default function CobrancasPage() {
     }
   });
 
-  const descontoMutation = useMutation({
-    mutationFn: async (data: { codigoSolicitacao: string; valor: number; dataLimite: string }) => {
-      return apiRequest(`/api/inter/collections/${data.codigoSolicitacao}`, 'PATCH', {
-        action: 'desconto',
-        valor: data.valor,
-        dataLimite: data.dataLimite
+  // Mutation para aplicar desconto de quitação
+  const descontoQuitacaoMutation = useMutation({
+    mutationFn: async (data: { propostaId: string; desconto: number; novasParcelas: Array<{valor: number, dataVencimento: string}> }) => {
+      return apiRequest('/api/inter/collections/settlement-discount', {
+        method: 'POST',
+        body: JSON.stringify(data)
       });
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       toast({
         title: "Sucesso",
-        description: "Desconto aplicado com sucesso",
+        description: result.message || "Desconto de quitação aplicado com sucesso",
       });
       setShowDescontoModal(false);
+      setEtapaDesconto(1);
+      setNovasParcelas([]);
       refetch();
     },
     onError: (error: any) => {
       toast({
         title: "Erro",
-        description: error.message || "Falha ao aplicar desconto",
+        description: error.message || "Falha ao aplicar desconto de quitação",
         variant: "destructive",
       });
     }
@@ -742,6 +766,11 @@ export default function CobrancasPage() {
                                         return;
                                       }
                                       setSelectedBoleto(proposta);
+                                      setSelectedPropostaId(proposta.id);
+                                      // Buscar boletos ativos da proposta
+                                      apiRequest(`/api/inter/collections/proposal/${proposta.id}`).then((data) => {
+                                        setTodosBoletosAtivos(data.boletosAtivos || []);
+                                      });
                                       setShowProrrogarModal(true);
                                     }}
                                     disabled={!isAdmin || ['PAGO', 'CANCELADO', 'RECEBIDO'].includes(
@@ -774,6 +803,12 @@ export default function CobrancasPage() {
                                         return;
                                       }
                                       setSelectedBoleto(proposta);
+                                      setSelectedPropostaId(proposta.id);
+                                      // Buscar informações de dívida
+                                      apiRequest(`/api/inter/collections/proposal/${proposta.id}`).then((data) => {
+                                        setDebtInfo(data);
+                                        setNovoValorQuitacao(data.valorRestante * 0.5); // Sugerir 50% de desconto inicial
+                                      });
                                       setShowDescontoModal(true);
                                     }}
                                     disabled={!isAdmin || ['PAGO', 'CANCELADO', 'RECEBIDO'].includes(
@@ -797,17 +832,73 @@ export default function CobrancasPage() {
           </CardContent>
         </Card>
 
-        {/* Modal - Prorrogar Vencimento */}
-        <Dialog open={showProrrogarModal} onOpenChange={setShowProrrogarModal}>
-          <DialogContent>
+        {/* Modal - Prorrogar Vencimento (Seleção Múltipla) */}
+        <Dialog open={showProrrogarModal} onOpenChange={(open) => {
+          setShowProrrogarModal(open);
+          if (!open) {
+            setBoletosParaProrrogar([]);
+            setNovaDataVencimento("");
+          }
+        }}>
+          <DialogContent className="max-w-2xl">
             <DialogHeader>
-              <DialogTitle>Prorrogar Vencimento</DialogTitle>
+              <DialogTitle>Prorrogar Vencimento de Boletos</DialogTitle>
               <DialogDescription>
-                Escolha a nova data de vencimento para o boleto
+                Selecione os boletos e escolha a nova data de vencimento
               </DialogDescription>
             </DialogHeader>
             
             <div className="space-y-4 py-4">
+              {/* Lista de boletos para seleção */}
+              <div className="space-y-2">
+                <Label>Boletos Disponíveis</Label>
+                <div className="max-h-60 overflow-y-auto border rounded-lg p-2 space-y-2">
+                  {todosBoletosAtivos.length > 0 ? (
+                    todosBoletosAtivos.map((boleto) => (
+                      <div 
+                        key={boleto.codigoSolicitacao}
+                        className="flex items-center space-x-3 p-2 hover:bg-muted rounded-lg cursor-pointer"
+                        onClick={() => {
+                          if (boletosParaProrrogar.includes(boleto.codigoSolicitacao)) {
+                            setBoletosParaProrrogar(prev => 
+                              prev.filter(c => c !== boleto.codigoSolicitacao)
+                            );
+                          } else {
+                            setBoletosParaProrrogar(prev => 
+                              [...prev, boleto.codigoSolicitacao]
+                            );
+                          }
+                        }}
+                      >
+                        <div className="flex items-center justify-center w-5 h-5">
+                          {boletosParaProrrogar.includes(boleto.codigoSolicitacao) ? (
+                            <CheckSquare className="h-5 w-5 text-primary" />
+                          ) : (
+                            <div className="w-5 h-5 border-2 border-gray-300 rounded" />
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium">
+                            Parcela {boleto.numeroParcela} - {new Intl.NumberFormat('pt-BR', { 
+                              style: 'currency', 
+                              currency: 'BRL' 
+                            }).format(boleto.valor)}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            Vencimento atual: {new Date(boleto.dataVencimento).toLocaleDateString('pt-BR')}
+                          </p>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-muted-foreground p-4 text-center">
+                      Carregando boletos ativos...
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Campo de nova data */}
               <div className="space-y-2">
                 <Label htmlFor="nova-data">Nova Data de Vencimento</Label>
                 <Input
@@ -819,14 +910,12 @@ export default function CobrancasPage() {
                 />
               </div>
               
-              {selectedBoleto && (
-                <div className="text-sm text-muted-foreground">
-                  <p>Contrato: {selectedBoleto.numeroContrato}</p>
-                  <p>Cliente: {selectedBoleto.nomeCliente}</p>
-                  <p>Valor: {new Intl.NumberFormat('pt-BR', { 
-                    style: 'currency', 
-                    currency: 'BRL' 
-                  }).format(selectedBoleto.valorTotal)}</p>
+              {/* Resumo da seleção */}
+              {boletosParaProrrogar.length > 0 && (
+                <div className="bg-muted p-3 rounded-lg">
+                  <p className="text-sm font-medium">
+                    {boletosParaProrrogar.length} boleto(s) selecionado(s)
+                  </p>
                 </div>
               )}
             </div>
@@ -834,12 +923,23 @@ export default function CobrancasPage() {
             <DialogFooter>
               <Button
                 variant="outline"
-                onClick={() => setShowProrrogarModal(false)}
+                onClick={() => {
+                  setShowProrrogarModal(false);
+                  setBoletosParaProrrogar([]);
+                }}
               >
                 Cancelar
               </Button>
               <Button
                 onClick={() => {
+                  if (boletosParaProrrogar.length === 0) {
+                    toast({
+                      title: "Erro",
+                      description: "Selecione pelo menos um boleto",
+                      variant: "destructive",
+                    });
+                    return;
+                  }
                   if (!novaDataVencimento) {
                     toast({
                       title: "Erro",
@@ -849,91 +949,331 @@ export default function CobrancasPage() {
                     return;
                   }
                   prorrogarMutation.mutate({
-                    codigoSolicitacao: selectedBoleto.interCodigoSolicitacao,
+                    codigosSolicitacao: boletosParaProrrogar,
                     novaDataVencimento
                   });
                 }}
-                disabled={prorrogarMutation.isPending}
+                disabled={prorrogarMutation.isPending || boletosParaProrrogar.length === 0}
               >
-                {prorrogarMutation.isPending ? "Processando..." : "Confirmar"}
+                {prorrogarMutation.isPending ? "Processando..." : `Prorrogar ${boletosParaProrrogar.length} Boleto(s)`}
               </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
 
-        {/* Modal - Aplicar Desconto */}
-        <Dialog open={showDescontoModal} onOpenChange={setShowDescontoModal}>
-          <DialogContent>
+        {/* Modal - Aplicar Desconto de Quitação (Multi-etapas) */}
+        <Dialog open={showDescontoModal} onOpenChange={(open) => {
+          setShowDescontoModal(open);
+          if (!open) {
+            setEtapaDesconto(1);
+            setDebtInfo(null);
+            setNovasParcelas([]);
+          }
+        }}>
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Aplicar Desconto</DialogTitle>
+              <DialogTitle>
+                Desconto para Quitação - Etapa {etapaDesconto} de 3
+              </DialogTitle>
               <DialogDescription>
-                Configure o desconto fixo para o boleto
+                {etapaDesconto === 1 && "Análise da dívida atual"}
+                {etapaDesconto === 2 && "Configurar novo valor e parcelamento"}
+                {etapaDesconto === 3 && "Confirmar operação"}
               </DialogDescription>
             </DialogHeader>
             
             <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="valor-desconto">Valor do Desconto (R$)</Label>
-                <Input
-                  id="valor-desconto"
-                  type="number"
-                  step="0.01"
-                  placeholder="0,00"
-                  value={valorDesconto}
-                  onChange={(e) => setValorDesconto(e.target.value)}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="data-limite">Data Limite do Desconto</Label>
-                <Input
-                  id="data-limite"
-                  type="date"
-                  value={dataLimiteDesconto}
-                  onChange={(e) => setDataLimiteDesconto(e.target.value)}
-                  min={new Date().toISOString().split('T')[0]}
-                />
-              </div>
-              
-              {selectedBoleto && (
-                <div className="text-sm text-muted-foreground">
-                  <p>Contrato: {selectedBoleto.numeroContrato}</p>
-                  <p>Cliente: {selectedBoleto.nomeCliente}</p>
-                  <p>Valor Original: {new Intl.NumberFormat('pt-BR', { 
-                    style: 'currency', 
-                    currency: 'BRL' 
-                  }).format(selectedBoleto.valorTotal)}</p>
+              {/* Etapa 1: Análise da Dívida */}
+              {etapaDesconto === 1 && (
+                <div className="space-y-4">
+                  {loadingDebt || !debtInfo ? (
+                    <div className="flex items-center justify-center p-8">
+                      <RefreshCw className="animate-spin h-8 w-8 text-primary" />
+                    </div>
+                  ) : (
+                    <>
+                      <div className="bg-muted p-4 rounded-lg space-y-2">
+                        <h3 className="font-semibold text-lg">Resumo da Dívida</h3>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <p className="text-sm text-muted-foreground">Valor Total Financiado</p>
+                            <p className="text-lg font-bold">
+                              {new Intl.NumberFormat('pt-BR', { 
+                                style: 'currency', 
+                                currency: 'BRL' 
+                              }).format(debtInfo.valorTotal)}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-muted-foreground">Valor Já Pago</p>
+                            <p className="text-lg font-bold text-green-600">
+                              {new Intl.NumberFormat('pt-BR', { 
+                                style: 'currency', 
+                                currency: 'BRL' 
+                              }).format(debtInfo.valorPago)}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-muted-foreground">Valor Restante</p>
+                            <p className="text-lg font-bold text-orange-600">
+                              {new Intl.NumberFormat('pt-BR', { 
+                                style: 'currency', 
+                                currency: 'BRL' 
+                              }).format(debtInfo.valorRestante)}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-muted-foreground">Boletos Ativos</p>
+                            <p className="text-lg font-bold">
+                              {debtInfo.totalBoletosAtivos}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {debtInfo.boletosAtivos?.length > 0 && (
+                        <div className="border rounded-lg p-4">
+                          <h4 className="font-medium mb-2">Boletos Ativos</h4>
+                          <div className="space-y-2 max-h-40 overflow-y-auto">
+                            {debtInfo.boletosAtivos.map((b: any, idx: number) => (
+                              <div key={idx} className="flex justify-between text-sm p-2 bg-muted rounded">
+                                <span>Parcela {b.numeroParcela}</span>
+                                <span>{new Intl.NumberFormat('pt-BR', { 
+                                  style: 'currency', 
+                                  currency: 'BRL' 
+                                }).format(b.valor)}</span>
+                                <span>Venc: {new Date(b.dataVencimento).toLocaleDateString('pt-BR')}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              )}
+
+              {/* Etapa 2: Configurar Novo Valor */}
+              {etapaDesconto === 2 && debtInfo && (
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="novo-valor">Novo Valor para Quitação (R$)</Label>
+                    <Input
+                      id="novo-valor"
+                      type="number"
+                      step="0.01"
+                      value={novoValorQuitacao}
+                      onChange={(e) => {
+                        const valor = parseFloat(e.target.value);
+                        setNovoValorQuitacao(valor);
+                        // Recalcular parcelas
+                        if (valor > 0 && quantidadeParcelas > 0) {
+                          const valorParcela = valor / quantidadeParcelas;
+                          const parcelas = [];
+                          for (let i = 0; i < quantidadeParcelas; i++) {
+                            const dataVenc = new Date();
+                            dataVenc.setMonth(dataVenc.getMonth() + i + 1);
+                            parcelas.push({
+                              valor: valorParcela,
+                              dataVencimento: dataVenc.toISOString().split('T')[0]
+                            });
+                          }
+                          setNovasParcelas(parcelas);
+                        }
+                      }}
+                      placeholder="0.00"
+                      max={debtInfo.valorRestante}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Máximo: {new Intl.NumberFormat('pt-BR', { 
+                        style: 'currency', 
+                        currency: 'BRL' 
+                      }).format(debtInfo.valorRestante)}
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="parcelas">Quantidade de Parcelas</Label>
+                    <Select
+                      value={quantidadeParcelas.toString()}
+                      onValueChange={(value) => {
+                        const qtd = parseInt(value);
+                        setQuantidadeParcelas(qtd);
+                        // Recalcular parcelas
+                        if (novoValorQuitacao > 0) {
+                          const valorParcela = novoValorQuitacao / qtd;
+                          const parcelas = [];
+                          for (let i = 0; i < qtd; i++) {
+                            const dataVenc = new Date();
+                            dataVenc.setMonth(dataVenc.getMonth() + i + 1);
+                            parcelas.push({
+                              valor: valorParcela,
+                              dataVencimento: dataVenc.toISOString().split('T')[0]
+                            });
+                          }
+                          setNovasParcelas(parcelas);
+                        }
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {[1, 2, 3, 4, 5, 6, 12, 24].map(n => (
+                          <SelectItem key={n} value={n.toString()}>
+                            {n} {n === 1 ? 'parcela' : 'parcelas'}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {novoValorQuitacao > 0 && (
+                    <div className="bg-green-50 p-3 rounded-lg">
+                      <p className="text-sm font-medium text-green-800">
+                        Desconto aplicado: {new Intl.NumberFormat('pt-BR', { 
+                          style: 'currency', 
+                          currency: 'BRL' 
+                        }).format(debtInfo.valorRestante - novoValorQuitacao)}
+                      </p>
+                      <p className="text-xs text-green-600">
+                        ({((1 - novoValorQuitacao / debtInfo.valorRestante) * 100).toFixed(1)}% de desconto)
+                      </p>
+                    </div>
+                  )}
+
+                  {novasParcelas.length > 0 && (
+                    <div className="border rounded-lg p-3">
+                      <h4 className="font-medium mb-2">Novas Parcelas</h4>
+                      <div className="space-y-1 max-h-40 overflow-y-auto">
+                        {novasParcelas.map((p, idx) => (
+                          <div key={idx} className="flex justify-between text-sm">
+                            <span>Parcela {idx + 1}</span>
+                            <span>{new Intl.NumberFormat('pt-BR', { 
+                              style: 'currency', 
+                              currency: 'BRL' 
+                            }).format(p.valor)}</span>
+                            <span>{new Date(p.dataVencimento).toLocaleDateString('pt-BR')}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Etapa 3: Confirmação */}
+              {etapaDesconto === 3 && debtInfo && (
+                <div className="space-y-4">
+                  <div className="bg-amber-50 border border-amber-200 p-4 rounded-lg">
+                    <div className="flex items-start space-x-2">
+                      <AlertTriangle className="h-5 w-5 text-amber-600 mt-0.5" />
+                      <div className="flex-1">
+                        <h4 className="font-medium text-amber-900">Atenção!</h4>
+                        <p className="text-sm text-amber-700 mt-1">
+                          Esta operação irá:
+                        </p>
+                        <ul className="text-sm text-amber-700 mt-2 space-y-1 list-disc list-inside">
+                          <li>Cancelar {debtInfo.totalBoletosAtivos} boleto(s) ativo(s)</li>
+                          <li>Criar {quantidadeParcelas} novo(s) boleto(s)</li>
+                          <li>Aplicar desconto de {new Intl.NumberFormat('pt-BR', { 
+                            style: 'currency', 
+                            currency: 'BRL' 
+                          }).format(debtInfo.valorRestante - novoValorQuitacao)}</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-muted p-4 rounded-lg space-y-3">
+                    <h4 className="font-semibold">Resumo Final</h4>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <p className="text-muted-foreground">Dívida Anterior</p>
+                        <p className="font-medium">{new Intl.NumberFormat('pt-BR', { 
+                          style: 'currency', 
+                          currency: 'BRL' 
+                        }).format(debtInfo.valorRestante)}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Novo Valor</p>
+                        <p className="font-medium text-green-600">{new Intl.NumberFormat('pt-BR', { 
+                          style: 'currency', 
+                          currency: 'BRL' 
+                        }).format(novoValorQuitacao)}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Desconto Total</p>
+                        <p className="font-medium">{new Intl.NumberFormat('pt-BR', { 
+                          style: 'currency', 
+                          currency: 'BRL' 
+                        }).format(debtInfo.valorRestante - novoValorQuitacao)}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Nova Quantidade de Parcelas</p>
+                        <p className="font-medium">{quantidadeParcelas}x</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
             
             <DialogFooter>
+              {etapaDesconto > 1 && (
+                <Button
+                  variant="outline"
+                  onClick={() => setEtapaDesconto(etapaDesconto - 1)}
+                >
+                  Voltar
+                </Button>
+              )}
               <Button
                 variant="outline"
-                onClick={() => setShowDescontoModal(false)}
+                onClick={() => {
+                  setShowDescontoModal(false);
+                  setEtapaDesconto(1);
+                }}
               >
                 Cancelar
               </Button>
-              <Button
-                onClick={() => {
-                  if (!valorDesconto || !dataLimiteDesconto) {
-                    toast({
-                      title: "Erro",
-                      description: "Preencha todos os campos",
-                      variant: "destructive",
-                    });
-                    return;
+              {etapaDesconto < 3 ? (
+                <Button
+                  onClick={() => {
+                    if (etapaDesconto === 1 && debtInfo) {
+                      setEtapaDesconto(2);
+                    } else if (etapaDesconto === 2 && novoValorQuitacao > 0 && novasParcelas.length > 0) {
+                      setEtapaDesconto(3);
+                    } else {
+                      toast({
+                        title: "Erro",
+                        description: "Configure todos os campos necessários",
+                        variant: "destructive",
+                      });
+                    }
+                  }}
+                  disabled={
+                    (etapaDesconto === 1 && !debtInfo) ||
+                    (etapaDesconto === 2 && (!novoValorQuitacao || novasParcelas.length === 0))
                   }
-                  descontoMutation.mutate({
-                    codigoSolicitacao: selectedBoleto.interCodigoSolicitacao,
-                    valor: parseFloat(valorDesconto),
-                    dataLimite: dataLimiteDesconto
-                  });
-                }}
-                disabled={descontoMutation.isPending}
-              >
-                {descontoMutation.isPending ? "Processando..." : "Aplicar Desconto"}
-              </Button>
+                >
+                  Próximo
+                </Button>
+              ) : (
+                <Button
+                  onClick={() => {
+                    descontoQuitacaoMutation.mutate({
+                      propostaId: selectedPropostaId,
+                      desconto: debtInfo.valorRestante - novoValorQuitacao,
+                      novasParcelas
+                    });
+                  }}
+                  disabled={descontoQuitacaoMutation.isPending}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  {descontoQuitacaoMutation.isPending ? "Processando..." : "Confirmar Quitação"}
+                </Button>
+              )}
             </DialogFooter>
           </DialogContent>
         </Dialog>

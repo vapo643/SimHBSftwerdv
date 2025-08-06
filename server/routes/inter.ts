@@ -10,8 +10,8 @@ import { jwtAuthMiddleware, type AuthenticatedRequest } from '../lib/jwt-auth-mi
 import { getBrasiliaTimestamp } from '../lib/timezone.js';
 import { z } from 'zod';
 import { db } from '../lib/supabase.js';
-import { interCollections, propostas } from '@shared/schema';
-import { eq } from 'drizzle-orm';
+import { interCollections, propostas, historicoObservacoesCobranca } from '@shared/schema';
+import { eq, and } from 'drizzle-orm';
 
 const router = express.Router();
 
@@ -72,78 +72,261 @@ router.get('/test', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) =>
 });
 
 /**
- * Edit collection (boleto/PIX) - Update due date or apply discount
- * PATCH /api/inter/collections/:codigoSolicitacao
+ * Batch update collection due dates - Prorrogar Vencimento
+ * PATCH /api/inter/collections/batch-extend
  */
-router.patch('/collections/:codigoSolicitacao', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+router.patch('/collections/batch-extend', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
-    // Check user permissions - only ADMIN can modify
+    // Check user permissions
     if (req.user?.role !== 'ADMINISTRADOR') {
       return res.status(403).json({ 
         error: 'Apenas administradores podem modificar cobranças' 
       });
     }
 
-    const { codigoSolicitacao } = req.params;
-    const { action, ...updateData } = req.body;
+    const { codigosSolicitacao, novaDataVencimento } = req.body;
 
-    console.log(`[INTER] 📝 Modifying collection ${codigoSolicitacao}, action: ${action}`);
-
-    let payload: any = {};
-
-    // Handle different action types
-    if (action === 'prorrogar') {
-      // Extend due date
-      const { novaDataVencimento } = updateData;
-      if (!novaDataVencimento) {
-        return res.status(400).json({ error: 'Nova data de vencimento é obrigatória' });
-      }
-      payload = {
-        dataVencimento: novaDataVencimento
-      };
-    } else if (action === 'desconto') {
-      // Apply discount
-      const { valor, dataLimite } = updateData;
-      if (!valor || !dataLimite) {
-        return res.status(400).json({ error: 'Valor e data limite são obrigatórios' });
-      }
-      payload = {
-        desconto: {
-          codigo: 'VALORFIXODATAINFORMADA',
-          valor: valor,
-          data: dataLimite
-        }
-      };
-    } else {
-      return res.status(400).json({ error: 'Ação inválida' });
+    if (!codigosSolicitacao || !Array.isArray(codigosSolicitacao) || codigosSolicitacao.length === 0) {
+      return res.status(400).json({ error: 'Selecione pelo menos um boleto' });
     }
 
-    // Call Inter Bank API
-    const result = await interBankService.editarCobranca(codigoSolicitacao, payload);
-
-    // Update local database
-    if (action === 'prorrogar' && updateData.novaDataVencimento) {
-      await db
-        .update(interCollections)
-        .set({ 
-          dataVencimento: updateData.novaDataVencimento,
-          updatedAt: new Date(getBrasiliaTimestamp())
-        })
-        .where(eq(interCollections.codigoSolicitacao, codigoSolicitacao));
+    if (!novaDataVencimento) {
+      return res.status(400).json({ error: 'Nova data de vencimento é obrigatória' });
     }
 
-    console.log(`[INTER] ✅ Collection ${codigoSolicitacao} modified successfully`);
+    console.log(`[INTER] 📝 Prorrogando ${codigosSolicitacao.length} boletos para ${novaDataVencimento}`);
+
+    const results = [];
+    const errors = [];
+
+    // Process each selected boleto
+    for (const codigoSolicitacao of codigosSolicitacao) {
+      try {
+        // Update in Inter Bank API
+        await interBankService.editarCobranca(codigoSolicitacao, {
+          dataVencimento: novaDataVencimento
+        });
+
+        // Update local database
+        await db
+          .update(interCollections)
+          .set({ 
+            dataVencimento: novaDataVencimento,
+            updatedAt: new Date(getBrasiliaTimestamp())
+          })
+          .where(eq(interCollections.codigoSolicitacao, codigoSolicitacao));
+
+        results.push({ codigoSolicitacao, success: true });
+      } catch (error) {
+        console.error(`[INTER] Falha ao prorrogar ${codigoSolicitacao}:`, error);
+        errors.push({ codigoSolicitacao, error: error instanceof Error ? error.message : 'Unknown error' });
+      }
+    }
+
+    // Save audit log
+    const proposta = await db
+      .select({ propostaId: interCollections.propostaId })
+      .from(interCollections)
+      .where(eq(interCollections.codigoSolicitacao, codigosSolicitacao[0]))
+      .limit(1);
+
+    if (proposta.length > 0) {
+      await db.insert(historicoObservacoesCobranca).values({
+        propostaId: proposta[0].propostaId,
+        mensagem: `Vencimento prorrogado para ${novaDataVencimento} em ${results.length} boleto(s)`,
+        criadoPor: req.user?.email || 'Sistema',
+        tipoAcao: 'PRORROGACAO',
+        dadosAcao: { codigosSolicitacao, novaDataVencimento, results, errors }
+      });
+    }
 
     res.json({
       success: true,
-      message: action === 'prorrogar' ? 'Vencimento prorrogado com sucesso' : 'Desconto aplicado com sucesso',
-      data: result
+      message: `${results.length} boleto(s) prorrogado(s) com sucesso`,
+      results,
+      errors
     });
 
   } catch (error) {
-    console.error('[INTER] Failed to modify collection:', error);
+    console.error('[INTER] Failed to batch extend:', error);
     res.status(500).json({
-      error: 'Falha ao modificar cobrança',
+      error: 'Falha ao prorrogar boletos',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+/**
+ * Apply settlement discount - Desconto para Quitação
+ * POST /api/inter/collections/settlement-discount
+ */
+router.post('/collections/settlement-discount', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+  try {
+    // Check user permissions
+    if (req.user?.role !== 'ADMINISTRADOR') {
+      return res.status(403).json({ 
+        error: 'Apenas administradores podem aplicar descontos de quitação' 
+      });
+    }
+
+    const { propostaId, desconto, novasParcelas } = req.body;
+
+    if (!propostaId || !desconto || !novasParcelas || !Array.isArray(novasParcelas)) {
+      return res.status(400).json({ error: 'Dados incompletos' });
+    }
+
+    console.log(`[INTER] 💰 Aplicando desconto de quitação para proposta ${propostaId}`);
+
+    // Start database transaction
+    const result = await db.transaction(async (tx) => {
+      // Step 1: Get proposal data
+      const proposta = await tx
+        .select()
+        .from(propostas)
+        .where(eq(propostas.id, propostaId))
+        .limit(1);
+
+      if (proposta.length === 0) {
+        throw new Error('Proposta não encontrada');
+      }
+
+      // Step 2: Get all active boletos
+      const boletosAtivos = await tx
+        .select()
+        .from(interCollections)
+        .where(
+          and(
+            eq(interCollections.propostaId, propostaId),
+            eq(interCollections.isActive, true)
+          )
+        );
+
+      console.log(`[INTER] Cancelando ${boletosAtivos.length} boletos ativos`);
+
+      // Step 3: Cancel all active boletos
+      const cancelResults = [];
+      for (const boleto of boletosAtivos) {
+        try {
+          await interBankService.cancelarCobranca(boleto.codigoSolicitacao);
+          
+          // Mark as inactive with reason
+          await tx
+            .update(interCollections)
+            .set({ 
+              isActive: false,
+              motivoCancelamento: `Substituído por quitação com desconto de R$ ${desconto}`,
+              situacao: 'CANCELADO',
+              updatedAt: new Date(getBrasiliaTimestamp())
+            })
+            .where(eq(interCollections.codigoSolicitacao, boleto.codigoSolicitacao));
+
+          cancelResults.push({ codigoSolicitacao: boleto.codigoSolicitacao, success: true });
+        } catch (error) {
+          console.error(`[INTER] Erro ao cancelar ${boleto.codigoSolicitacao}:`, error);
+          cancelResults.push({ 
+            codigoSolicitacao: boleto.codigoSolicitacao, 
+            error: error instanceof Error ? error.message : 'Unknown error' 
+          });
+        }
+      }
+
+      // Step 4: Create new boletos
+      const novosBoletosData = [];
+      const clienteData = {
+        nome: proposta[0].clienteNome || '',
+        cpf: proposta[0].clienteCpf || '',
+        email: proposta[0].clienteEmail || '',
+        telefone: proposta[0].clienteTelefone || '',
+        endereco: proposta[0].clienteEndereco || '',
+        numero: proposta[0].clienteNumero || '',
+        bairro: proposta[0].clienteBairro || '',
+        cidade: proposta[0].clienteCidade || '',
+        uf: proposta[0].clienteUf || '',
+        cep: proposta[0].clienteCep || ''
+      };
+
+      for (let i = 0; i < novasParcelas.length; i++) {
+        const parcela = novasParcelas[i];
+        
+        try {
+          console.log(`[INTER] Criando novo boleto ${i + 1}/${novasParcelas.length}: R$ ${parcela.valor}`);
+          
+          // Create boleto via Inter API
+          const novoBoleto = await interBankService.criarCobrancaParaProposta({
+            id: `${propostaId}-QUIT-${i + 1}`,
+            valorTotal: parcela.valor,
+            dataVencimento: parcela.dataVencimento,
+            clienteData
+          });
+
+          // Get full details
+          const detalhes = await interBankService.recuperarCobranca(novoBoleto.codigoSolicitacao);
+
+          // Save to database
+          await tx.insert(interCollections).values({
+            proposta_id: propostaId,
+            codigoSolicitacao: novoBoleto.codigoSolicitacao,
+            seuNumero: detalhes.cobranca.seuNumero,
+            valorNominal: detalhes.cobranca.valorNominal.toString(),
+            dataVencimento: parcela.dataVencimento,
+            situacao: detalhes.cobranca.situacao,
+            dataSituacao: detalhes.cobranca.dataSituacao,
+            nossoNumero: detalhes.boleto?.nossoNumero,
+            codigoBarras: detalhes.boleto?.codigoBarras,
+            linhaDigitavel: detalhes.boleto?.linhaDigitavel,
+            pixTxid: detalhes.pix?.txid,
+            pixCopiaECola: detalhes.pix?.pixCopiaECola,
+            dataEmissao: detalhes.cobranca.dataEmissao,
+            origemRecebimento: 'BOLETO',
+            isActive: true,
+            numeroParcela: i + 1,
+            totalParcelas: novasParcelas.length
+          });
+
+          novosBoletosData.push({
+            codigoSolicitacao: novoBoleto.codigoSolicitacao,
+            parcela: i + 1,
+            valor: parcela.valor,
+            vencimento: parcela.dataVencimento
+          });
+        } catch (error) {
+          console.error(`[INTER] Erro ao criar boleto ${i + 1}:`, error);
+          throw error; // Rollback transaction on error
+        }
+      }
+
+      // Step 5: Save audit log
+      await tx.insert(historicoObservacoesCobranca).values({
+        propostaId: propostaId,
+        mensagem: `Desconto de quitação de R$ ${desconto} aplicado. ${boletosAtivos.length} boletos antigos cancelados e substituídos por ${novasParcelas.length} nova(s) parcela(s).`,
+        criadoPor: req.user?.email || 'Sistema',
+        tipoAcao: 'DESCONTO_QUITACAO',
+        dadosAcao: { 
+          desconto, 
+          boletosAntigos: cancelResults,
+          novosBoletosData,
+          novasParcelas
+        }
+      });
+
+      return {
+        boletosAntigos: cancelResults,
+        novosBoletosData,
+        message: `Quitação processada com sucesso. ${novosBoletosData.length} novo(s) boleto(s) criado(s).`
+      };
+    });
+
+    console.log(`[INTER] ✅ Desconto de quitação aplicado com sucesso`);
+
+    res.json({
+      success: true,
+      ...result
+    });
+
+  } catch (error) {
+    console.error('[INTER] Failed to apply settlement discount:', error);
+    res.status(500).json({
+      error: 'Falha ao aplicar desconto de quitação',
       details: error instanceof Error ? error.message : 'Unknown error'
     });
   }
@@ -607,6 +790,66 @@ router.post('/collections/:codigoSolicitacao/cancel', jwtAuthMiddleware, async (
  * Get collections summary/metrics
  * GET /api/inter/summary
  */
+/**
+ * Get collections info for a proposal - Calculate remaining debt
+ * GET /api/inter/collections/proposal/:propostaId
+ */
+router.get('/collections/proposal/:propostaId', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+  try {
+    const { propostaId } = req.params;
+
+    // Get proposal data
+    const proposta = await db
+      .select()
+      .from(propostas)
+      .where(eq(propostas.id, propostaId))
+      .limit(1);
+
+    if (proposta.length === 0) {
+      return res.status(404).json({ error: 'Proposta não encontrada' });
+    }
+
+    // Get all collections for this proposal
+    const boletos = await db
+      .select()
+      .from(interCollections)
+      .where(eq(interCollections.propostaId, propostaId));
+
+    // Calculate remaining debt
+    const valorTotal = Number(proposta[0].valorTotalFinanciado) || 0;
+    const valorPago = boletos
+      .filter(b => b.situacao === 'RECEBIDO' || b.situacao === 'PAGO')
+      .reduce((sum, b) => sum + Number(b.valorTotalRecebido || b.valorNominal), 0);
+    
+    const valorRestante = valorTotal - valorPago;
+
+    // Get active boletos
+    const boletosAtivos = boletos.filter(b => b.isActive && 
+      !['RECEBIDO', 'PAGO', 'CANCELADO'].includes(b.situacao || ''));
+
+    res.json({
+      valorTotal,
+      valorPago,
+      valorRestante,
+      boletosAtivos: boletosAtivos.map(b => ({
+        codigoSolicitacao: b.codigoSolicitacao,
+        valor: Number(b.valorNominal),
+        dataVencimento: b.dataVencimento,
+        situacao: b.situacao,
+        numeroParcela: b.numeroParcela
+      })),
+      totalBoletosAtivos: boletosAtivos.length
+    });
+
+  } catch (error) {
+    console.error('[INTER] Failed to get proposal collections:', error);
+    res.status(500).json({
+      error: 'Falha ao buscar informações de cobrança',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
 router.get('/summary', jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const { dataInicial, dataFinal, filtrarDataPor } = req.query;

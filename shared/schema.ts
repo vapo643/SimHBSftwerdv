@@ -301,8 +301,20 @@ export const interCollections = pgTable("inter_collections", {
   numeroParcela: integer("numero_parcela"), // Número da parcela (1, 2, 3...)
   totalParcelas: integer("total_parcelas"), // Total de parcelas
   isActive: boolean("is_active").default(true).notNull(),
+  motivoCancelamento: text("motivo_cancelamento"), // Razão do cancelamento
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Tabela de histórico e observações de cobrança
+export const historicoObservacoesCobranca = pgTable("historico_observacoes_cobranca", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  propostaId: text("proposta_id").references(() => propostas.id).notNull(),
+  mensagem: text("mensagem").notNull(),
+  criadoPor: text("criado_por").notNull(), // Email do usuário
+  tipoAcao: text("tipo_acao"), // DESCONTO_QUITACAO, PRORROGACAO, OBSERVACAO, etc
+  dadosAcao: jsonb("dados_acao"), // JSON com detalhes da ação
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const interWebhooks = pgTable("inter_webhooks", {
