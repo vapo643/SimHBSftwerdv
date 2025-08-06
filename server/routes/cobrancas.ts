@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { db } from "../lib/supabase";
-import { propostas, parcelas, observacoesCobranca, referenciaPessoal, interCollections, profiles } from "@shared/schema";
+import { propostas, parcelas, observacoesCobranca, interCollections, profiles } from "@shared/schema";
 import { eq, and, sql, desc, gte, lte, inArray, or } from "drizzle-orm";
 import { format, parseISO, differenceInDays, isAfter } from "date-fns";
 
@@ -12,14 +12,16 @@ router.get("/", async (req: any, res) => {
     const { status, atraso } = req.query;
     const userRole = req.user?.role || '';
     
-    // Buscar todas as propostas com parcelas (não apenas inadimplentes)
+    // Buscar apenas propostas com CCB assinado e assinatura eletrônica concluída
     const propostasData = await db
       .select()
       .from(propostas)
       .where(
         and(
           sql`${propostas.deletedAt} IS NULL`,
-          inArray(propostas.status, ['aprovado', 'pronto_pagamento', 'pago'])
+          inArray(propostas.status, ['aprovado', 'pronto_pagamento', 'pago']),
+          eq(propostas.ccbGerado, true),
+          eq(propostas.assinaturaEletronicaConcluida, true)
         )
       )
       .orderBy(desc(propostas.createdAt));
@@ -85,12 +87,12 @@ router.get("/", async (req: any, res) => {
           };
         });
 
-        // Determinar status geral
+        // Determinar status geral - só marcar como quitado se todas as parcelas foram pagas
         let statusCobranca = 'em_dia';
-        if (parcelasVencidas > 0) {
-          statusCobranca = 'inadimplente';
-        } else if (parcelasPagas === parcelasData.length) {
+        if (parcelasPagas === parcelasData.length && parcelasData.length > 0) {
           statusCobranca = 'quitado';
+        } else if (parcelasVencidas > 0) {
+          statusCobranca = 'inadimplente';
         }
 
         return {
@@ -127,8 +129,21 @@ router.get("/", async (req: any, res) => {
       })
     );
 
+    // Filtrar apenas propostas que têm boletos gerados (no Inter ou nas parcelas)
+    const propostasComBoletos = propostasComCobranca.filter(p => {
+      // Verifica se tem parcelas com boletos OU se tem boletos no Inter
+      return p.parcelas.length > 0 && (
+        p.parcelas.some(parcela => 
+          parcela.interPixCopiaECola || 
+          parcela.interLinhaDigitavel || 
+          parcela.interCodigoBarras ||
+          parcela.codigoBoleto
+        )
+      );
+    });
+
     // Aplicar filtros
-    let propostasFiltradas = propostasComCobranca;
+    let propostasFiltradas = propostasComBoletos;
     
     // FILTRO AUTOMÁTICO PARA USUÁRIOS DE COBRANÇA
     // Usuários com role "COBRANÇA" veem apenas: inadimplentes, em atraso ou que vencem em 3 dias
@@ -137,7 +152,7 @@ router.get("/", async (req: any, res) => {
       const em3Dias = new Date();
       em3Dias.setDate(hoje.getDate() + 3);
       
-      propostasFiltradas = propostasComCobranca.filter(p => {
+      propostasFiltradas = propostasComBoletos.filter(p => {
         // Inadimplentes ou em atraso
         if (p.status === 'inadimplente' || p.diasAtraso > 0) {
           return true;
@@ -256,11 +271,8 @@ router.get("/:propostaId/ficha", async (req, res) => {
       return res.status(404).json({ message: "Proposta não encontrada" });
     }
 
-    // Buscar referências pessoais
-    const referencias = await db
-      .select()
-      .from(referenciaPessoal)
-      .where(eq(referenciaPessoal.propostaId, propostaId));
+    // Referências pessoais
+    const referencias: any[] = [];
 
     // Buscar observações/histórico
     const observacoes = await db
