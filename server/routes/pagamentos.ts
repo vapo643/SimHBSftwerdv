@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { jwtAuthMiddleware, type AuthenticatedRequest } from "../lib/jwt-auth-middleware.js";
 import { db, supabase } from "../lib/supabase.js";
-import { propostas, users, lojas, produtos, interCollections } from "@shared/schema";
+import { propostas, users, profiles, lojas, produtos, interCollections } from "@shared/schema";
 import { eq, and, or, desc, sql, gte, lte, inArray } from "drizzle-orm";
 import { z } from "zod";
 import { isToday, isThisWeek, isThisMonth, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from "date-fns";
@@ -904,12 +904,12 @@ router.get("/:id/detalhes-completos", jwtAuthMiddleware, async (req: Authenticat
         proposta: propostas,
         loja: lojas,
         produto: produtos,
-        usuario: users
+        usuario: profiles
       })
       .from(propostas)
       .leftJoin(lojas, eq(propostas.lojaId, lojas.id))
       .leftJoin(produtos, eq(propostas.produtoId, produtos.id))
-      .leftJoin(users, eq(propostas.userId, users.id))
+      .leftJoin(profiles, eq(propostas.userId, profiles.id))
       .where(eq(propostas.id, id))
       .limit(1);
     
@@ -931,7 +931,7 @@ router.get("/:id/detalhes-completos", jwtAuthMiddleware, async (req: Authenticat
       ...proposta,
       lojaNome: loja?.nomeLoja,
       produtoNome: produto?.nomeProduto,
-      usuarioNome: usuario?.name,
+      usuarioNome: usuario?.fullName,
       boletos: boletos.map(b => ({
         id: b.id,
         codigo: b.codigoSolicitacao,
