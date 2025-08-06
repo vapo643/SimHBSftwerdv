@@ -102,6 +102,8 @@ router.get("/", async (req: any, res) => {
           cpfCliente: proposta.clienteCpf || '',
           telefoneCliente: proposta.clienteTelefone || '',
           emailCliente: proposta.clienteEmail || '',
+          enderecoCliente: proposta.clienteEndereco || '',
+          cepCliente: proposta.clienteCep || '',
           valorTotal: Number(proposta.valorTotalFinanciado) || 0,
           valorFinanciado: Number(proposta.valor) || 0,
           quantidadeParcelas: parcelasData.length,

@@ -69,6 +69,8 @@ interface PropostaCobranca {
   cpfCliente: string;
   telefoneCliente: string;
   emailCliente: string;
+  enderecoCliente?: string;
+  cepCliente?: string;
   valorTotal: number;
   valorFinanciado: number;
   quantidadeParcelas: number;
@@ -390,7 +392,7 @@ export default function Cobrancas() {
                     <SelectItem value="quitado">Quitado</SelectItem>
                   </SelectContent>
                 </Select>
-                <Select value={dateRange} onValueChange={setDateRange}>
+                <Select value={dateRange} onValueChange={(value) => setDateRange(value as "todos" | "hoje" | "semana" | "mes")}>
                   <SelectTrigger className="w-[200px]">
                     <SelectValue placeholder="Período" />
                   </SelectTrigger>
@@ -789,12 +791,27 @@ export default function Cobrancas() {
                       </div>
                       <div>
                         <label className="text-sm font-medium">Telefone</label>
-                        <p className="text-sm text-muted-foreground">{selectedProposta.telefoneCliente}</p>
+                        <p className="text-sm text-muted-foreground">{selectedProposta.telefoneCliente || 'Não informado'}</p>
                       </div>
                     </div>
                     <div>
                       <label className="text-sm font-medium">E-mail</label>
-                      <p className="text-sm text-muted-foreground">{selectedProposta.emailCliente}</p>
+                      <p className="text-sm text-muted-foreground">{selectedProposta.emailCliente || 'Não informado'}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium">Endereço</label>
+                      <p className="text-sm text-muted-foreground">
+                        {selectedProposta.enderecoCliente ? (
+                          <>
+                            {selectedProposta.enderecoCliente}
+                            {selectedProposta.cepCliente && (
+                              <span className="block">CEP: {selectedProposta.cepCliente}</span>
+                            )}
+                          </>
+                        ) : (
+                          'Não informado'
+                        )}
+                      </p>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
@@ -818,7 +835,15 @@ export default function Cobrancas() {
                     <Button
                       variant="outline"
                       onClick={() => {
-                        window.open(`https://wa.me/55${selectedProposta.telefoneCliente.replace(/\D/g, '')}`, '_blank');
+                        if (selectedProposta.telefoneCliente) {
+                          window.open(`https://wa.me/55${selectedProposta.telefoneCliente.replace(/\D/g, '')}`, '_blank');
+                        } else {
+                          toast({
+                            title: "Telefone não disponível",
+                            description: "O cliente não possui telefone cadastrado.",
+                            variant: "destructive"
+                          });
+                        }
                       }}
                     >
                       <Phone className="h-4 w-4 mr-2" />
@@ -827,7 +852,15 @@ export default function Cobrancas() {
                     <Button
                       variant="outline"
                       onClick={() => {
-                        window.open(`tel:${selectedProposta.telefoneCliente}`, '_blank');
+                        if (selectedProposta.telefoneCliente) {
+                          window.open(`tel:${selectedProposta.telefoneCliente}`, '_blank');
+                        } else {
+                          toast({
+                            title: "Telefone não disponível",
+                            description: "O cliente não possui telefone cadastrado.",
+                            variant: "destructive"
+                          });
+                        }
                       }}
                     >
                       <Phone className="h-4 w-4 mr-2" />
