@@ -51,7 +51,7 @@ export default function PaymentReviewModal({ isOpen, onClose, proposta, onConfir
   const [ccbUrl, setCcbUrl] = useState<string | null>(null);
   
   // Debug: log when modal opens or props change
-  React.useEffect(() => {
+  useEffect(() => {
     if (isOpen) {
       console.log('🔍 [REVIEW MODAL DEBUG] Modal opened with proposta:', proposta);
       console.log('🔍 [REVIEW MODAL DEBUG] Proposta ID:', proposta?.id);
