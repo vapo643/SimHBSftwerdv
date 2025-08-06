@@ -827,18 +827,19 @@ router.get("/:id/ccb-storage-status", jwtAuthMiddleware, async (req: Authenticat
   try {
     const { id } = req.params;
     
-    const [proposta] = await db
-      .select({
-        id: propostas.id,
-        ccbGerado: propostas.ccbGerado,
-        assinaturaEletronicaConcluida: propostas.assinaturaEletronicaConcluida,
-        caminhoCcbAssinado: propostas.caminhoCcbAssinado,
-        clicksignDocumentKey: propostas.clicksignDocumentKey,
-        ccbDocumentoUrl: propostas.ccbDocumentoUrl
-      })
-      .from(propostas)
-      .where(eq(propostas.id, id))
-      .limit(1);
+    // Buscar dados da proposta usando SQL direto para evitar problemas de schema
+    const result = await db.execute(sql`
+      SELECT 
+        id, ccb_gerado as "ccbGerado", 
+        assinatura_eletronica_concluida as "assinaturaEletronicaConcluida",
+        caminho_ccb_assinado as "caminhoCcbAssinado",
+        clicksign_document_key as "clicksignDocumentKey",
+        ccb_documento_url as "ccbDocumentoUrl"
+      FROM propostas 
+      WHERE id = ${id} 
+      LIMIT 1
+    `);
+    const proposta = result[0];
     
     if (!proposta) {
       return res.status(404).json({ error: "Proposta não encontrada" });
@@ -1329,12 +1330,17 @@ router.get("/:id/ccb-url", jwtAuthMiddleware, async (req: AuthenticatedRequest, 
     
     console.log(`[PAGAMENTOS] Gerando URL assinada para CCB da proposta: ${id}`);
     
-    // Buscar dados da proposta
-    const [proposta] = await db
-      .select()
-      .from(propostas)
-      .where(eq(propostas.id, id))
-      .limit(1);
+    // Buscar dados da proposta usando SQL direto para evitar problemas de schema
+    const result = await db.execute(sql`
+      SELECT 
+        id, caminho_ccb_assinado as "caminhoCcbAssinado", 
+        clicksign_document_key as "clicksignDocumentKey",
+        assinatura_eletronica_concluida as "assinaturaEletronicaConcluida"
+      FROM propostas 
+      WHERE id = ${id} 
+      LIMIT 1
+    `);
+    const proposta = result[0];
     
     if (!proposta) {
       return res.status(404).json({ error: "Proposta não encontrada" });
@@ -1361,11 +1367,12 @@ router.get("/:id/ccb-url", jwtAuthMiddleware, async (req: AuthenticatedRequest, 
           });
         
         if (!uploadError) {
-          // Atualizar o caminho no banco
-          await db
-            .update(propostas)
-            .set({ caminhoCcbAssinado: storagePath })
-            .where(eq(propostas.id, id));
+          // Atualizar o caminho no banco usando SQL direto
+          await db.execute(sql`
+            UPDATE propostas 
+            SET caminho_ccb_assinado = ${storagePath} 
+            WHERE id = ${id}
+          `);
           
           console.log(`[PAGAMENTOS] ✅ CCB salva no Storage: ${storagePath}`);
           

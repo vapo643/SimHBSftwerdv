@@ -1,0 +1,44 @@
+}
+[PAGAMENTOS] Gerando URL assinada para CCB da proposta: 902183dd-b5d1-4e20-8a72-79d3d3559d4d
+[PAGAMENTOS] Erro ao gerar URL assinada: StorageApiError: Object not found
+    at <anonymous> (/home/runner/workspace/node_modules/@supabase/storage-js/src/lib/fetch.ts:30:16)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5) {
+  __isStorageError: true,
+  status: 400
+}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /902183dd-b5d1-4e20-8a72-79d3d3559d4d/ccb-url
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/financeiro/pagamentos
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-06T20:47:30.509Z'
+}
+[PAGAMENTOS] Gerando URL assinada para CCB da proposta: 902183dd-b5d1-4e20-8a72-79d3d3559d4d
+[PAGAMENTOS] Erro ao gerar URL assinada: StorageApiError: Object not found
+    at <anonymous> (/home/runner/workspace/node_modules/@supabase/storage-js/src/lib/fetch.ts:30:16)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5) {
+  __isStorageError: true,
+  status: 400
+}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/debug/me
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/financeiro/pagamentos
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-06T20:47:49.685Z'
