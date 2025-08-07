@@ -1175,10 +1175,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { createServerSupabaseAdminClient } = await import('./lib/supabase');
       const supabase = createServerSupabaseAdminClient();
       
-      // Buscar dados da proposta
+      // Buscar dados da proposta - usar caminho_ccb (não caminho_ccb_assinado)
       const { data: proposta, error } = await supabase
         .from('propostas')
-        .select('ccb_gerado, caminho_ccb_assinado')
+        .select('ccb_gerado, caminho_ccb')
         .eq('id', id)
         .single();
       
@@ -1186,19 +1186,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'Proposta não encontrada' });
       }
       
-      if (!proposta.ccb_gerado || !proposta.caminho_ccb_assinado) {
+      if (!proposta.ccb_gerado || !proposta.caminho_ccb) {
         return res.status(404).json({ message: 'CCB não gerada para esta proposta' });
       }
       
-      // Gerar URL assinada
-      // CORREÇÃO: Lidar com diferentes formatos de path
-      let ccbPath = proposta.caminho_ccb_assinado;
-      
-      // Se o caminho contém uma URL completa, extrair apenas o caminho do arquivo
-      const documentsIndex = ccbPath.indexOf('/documents/');
-      if (documentsIndex !== -1) {
-        ccbPath = ccbPath.substring(documentsIndex + '/documents/'.length);
-      }
+      // Gerar URL assinada usando caminho correto
+      const ccbPath = proposta.caminho_ccb;
       
       console.log(`[CCB URL] Gerando URL assinada para CCB: ${ccbPath}`);
       
@@ -1207,9 +1200,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .createSignedUrl(ccbPath, 3600); // 1 hora
       
       if (urlError || !signedUrlData) {
-        console.error('Erro ao gerar URL assinada:', urlError);
-        console.error('Caminho tentado:', ccbPath);
-        return res.status(500).json({ message: 'Erro ao gerar URL do documento' });
+        console.error('❌ [CCB URL] Erro ao gerar URL assinada:', urlError);
+        console.error('❌ [CCB URL] Caminho tentado:', ccbPath);
+        
+        // 🔄 FALLBACK: Regenerar CCB se não encontrado (conforme error_docs/storage_errors.md)
+        if ((urlError as any)?.status === 400 || urlError.message?.includes('Object not found')) {
+          console.log('🔄 [CCB URL] Arquivo não encontrado, tentando regenerar CCB...');
+          try {
+            const { ccbGenerationService } = await import('./services/ccbGenerationService');
+            const newCcb = await ccbGenerationService.generateCCB(id);
+            if (newCcb.success) {
+              // Tentar novamente com o novo arquivo
+              const { data: newSignedUrl } = await supabase.storage
+                .from('documents')
+                .createSignedUrl(newCcb.pdfPath!, 3600);
+                
+              if (newSignedUrl) {
+                res.setHeader('X-Content-Type-Options', 'nosniff');
+                res.setHeader('X-Frame-Options', 'DENY');
+                res.setHeader('Content-Security-Policy', "default-src 'none'; object-src 'none';");
+                return res.json({ 
+                  url: newSignedUrl.signedUrl,
+                  filename: `CCB-${id}.pdf`,
+                  contentType: 'application/pdf',
+                  regenerated: true
+                });
+              }
+            }
+          } catch (regenError) {
+            console.error('❌ [CCB URL] Erro na regeneração:', regenError);
+          }
+        }
+        
+        return res.status(500).json({ 
+          message: 'Erro ao gerar URL do documento',
+          details: urlError.message
+        });
       }
       
       // Retornar com headers de segurança

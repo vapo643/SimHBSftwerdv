@@ -1,0 +1,133 @@
+IMPLEMENTAR:
+Re-arquitetura completa do serviço de geração de Cédula de Crédito Bancário (CCB), utilizando a biblioteca pdf-lib para preencher um template PDF existente, resolvendo a falha crítica de formatação.
+
+CONTEXT:
+A funcionalidade de geração de CCB está com uma falha crítica e inaceitável. O método atual, que tenta "transcrever" o texto de um template para um novo PDF em branco, é fundamentalmente errado. Ele resulta em um documento final desformatado, ilegível, sem a logo da empresa e sem as caixas de formatação originais (os "quadradinhos"). A causa raiz é a falta de uma ferramenta adequada para manipulação de PDFs. A nova estratégia mandatória é abandonar o método de transcrição e passar a editar diretamente o template PDF existente usando a biblioteca pdf-lib.
+
+CURRENT STATE:
+O sistema localiza o template template_ccb.pdf. No entanto, em vez de preencher os campos vazios deste arquivo, o Agente tenta extrair o texto dele, cria um novo PDF em branco e tenta colar o texto extraído. Esse processo destrói 100% do layout, remove a logo e causa sobreposição de textos.
+
+EXPECTED (Estado Final de Sucesso):
+Uma função de backend (Node.js/TypeScript) robusta que:
+
+Carrega o arquivo de template template_ccb.pdf original que já existe no sistema.
+
+Utiliza a biblioteca pdf-lib para desenhar os dados da proposta (nome, CPF, valores, etc.) sobre o template, em coordenadas (X, Y) específicas.
+
+Preserva integralmente (100%) o design, layout, caixas de preenchimento e a logo do template original.
+
+Retorna o buffer do novo PDF preenchido, visualmente perfeito e pronto para ser enviado para assinatura.
+
+CONSTRAINTS (Roadmap de Implementação Detalhado e Inequívoco):
+
+ATENÇÃO, AGENTE: Siga este plano EXATAMENTE. Você NÃO deve tentar ler ou transcrever o texto do PDF. Você NÃO deve criar um PDF em branco. Você DEVE carregar o template existente e desenhar texto sobre ele usando pdf-lib.
+
+1. Instalação da Ferramenta Correta:
+
+Ação: Execute imediatamente no terminal do ambiente de desenvolvimento:
+
+Bash
+
+npm install pdf-lib
+2. Criação/Refatoração do Serviço de Geração de PDF:
+
+Ação: Crie ou refatore o módulo de serviço responsável. Assumindo uma estrutura padrão, localize ou crie server/services/pdfGeneratorService.ts.
+
+Implementação: Crie a função assíncrona principal: async function generateCcbFromTemplate(propostaData: any): Promise<Buffer>.
+
+3. Lógica de Implementação com pdf-lib:
+
+Ação: Dentro da função generateCcbFromTemplate, implemente RIGOROSAMENTE a seguinte lógica:
+a. Importações:
+
+TypeScript
+
+import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
+import fs from 'fs/promises';
+b. Ler o Template: Use fs.promises.readFile (ou o módulo fs apropriado para a versão do Node) para ler o arquivo do template PDF existente. Confirme a rota correta.
+
+TypeScript
+
+const templatePath = 'path/to/your/template_ccb.pdf'; // AJUSTE O CAMINHO REAL
+const existingPdfBytes = await fs.readFile(templatePath);
+c. Carregar o Documento:
+
+TypeScript
+
+const pdfDoc = await PDFDocument.load(existingPdfBytes);
+d. Preparar Fontes (Recomendado para consistência):
+
+TypeScript
+
+const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+e. Obter a Página: Obtenha a primeira página (ou as páginas relevantes).
+
+TypeScript
+
+const pages = pdfDoc.getPages();
+const firstPage = pages[0];
+f. Desenhar o Texto (Etapa Crítica): Use page.drawText() para inserir os dados da propostaData. Você DEVE especificar as coordenadas (X, Y).
+
+TypeScript
+
+firstPage.drawText(propostaData.nomeCliente || '', {
+    x: 50, // Coordenada horizontal (ESTIMATIVA INICIAL - AJUSTAR)
+    y: 700, // Coordenada vertical (ESTIMATIVA INICIAL - AJUSTAR)
+    size: 12,
+    font: helveticaFont,
+    color: rgb(0, 0, 0),
+});
+firstPage.drawText(propostaData.cpf || '', {
+    x: 50, // AJUSTAR
+    y: 650, // AJUSTAR
+    size: 12,
+    font: helveticaFont,
+    color: rgb(0, 0, 0),
+});
+// Repita para os outros campos...
+g. Salvar o Documento:
+
+TypeScript
+
+const pdfBytes = await pdfDoc.save();
+h. Retornar:
+
+TypeScript
+
+return Buffer.from(pdfBytes);
+4. Integração:
+
+Ação: Modifique o controller ou a rota do Express.js que atualmente gera a CCB. Remova toda a lógica antiga e falha de geração de PDF e substitua pela chamada ao novo serviço.
+
+Implementação no Controller (Exemplo):
+
+TypeScript
+
+try {
+    const data = req.body; // Ou de onde os dados da proposta vierem
+    const pdfBuffer = await pdfGeneratorService.generateCcbFromTemplate(data);
+
+    // Configurar Headers para download do PDF
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'attachment; filename=ccb_preenchida.pdf');
+    res.send(pdfBuffer);
+} catch (error) {
+    console.error("Erro ao gerar CCB:", error);
+    res.status(500).send("Erro interno ao gerar PDF");
+}
+DICA PARA VOCÊ, AGENTE (Gerenciamento do Processo Iterativo):
+A parte mais desafiadora será encontrar as coordenadas (X, Y) exatas (passo 3f). Este é um processo manual de tentativa e erro.
+
+Importante sobre Coordenadas: No pdf-lib (e na maioria das bibliotecas de PDF), a coordenada (0,0) fica no canto INFERIOR ESQUERDO da página. Aumentar Y move o texto para CIMA. Aumentar X move o texto para a DIREITA.
+
+Comece Pequeno: NÃO TENTE FAZER TODOS OS CAMPOS DE UMA VEZ. Comece com valores aproximados (como os do exemplo) apenas para o nome do cliente e o CPF.
+
+Itere: Gere um PDF de teste e apresente o resultado (o código modificado e o PDF gerado).
+
+Aguarde Feedback: O Executor Humano irá revisar e fornecer feedback de ajuste (e.g., "Mover o Nome 5 pixels para cima (aumentar Y) e 10 pixels para a direita (aumentar X)").
+
+Ajuste: Modifique as coordenadas no código e repita até que o alinhamento de todos os campos esteja perfeito.
+
+TESTE (Critério de Aceite Inicial):
+
+O critério de sucesso para a primeira entrega é a geração de um PDF que seja visualmente idêntico ao template original (com logo e caixas corretas), mas contendo o nome do cliente e o CPF preenchidos (mesmo que desalinhados inicialmente). Isso validará que a abordagem com pdf-lib está funcional e que o método de transcrição foi abandonado.

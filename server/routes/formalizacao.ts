@@ -163,15 +163,39 @@ router.get('/:proposalId/ccb', jwtAuthMiddleware, async (req, res) => {
       });
     }
 
-    // Gerar URL assinada para download direto (válida por 1 hora)
-    const { data: signedUrl, error } = await supabase.storage
+    // ✅ CORREÇÃO: Usar admin client para gerar URLs assinadas (conforme error_docs/storage_errors.md)
+    const { createServerSupabaseAdminClient } = await import('../lib/supabase');
+    const adminSupabase = createServerSupabaseAdminClient();
+    
+    const { data: signedUrl, error } = await adminSupabase.storage
       .from('documents')
       .createSignedUrl(proposal.caminho_ccb as string, 3600);
 
     if (error) {
       console.error('❌ [FORMALIZACAO] Erro ao gerar URL assinada:', error);
+      
+      // 🔄 FALLBACK: Se arquivo não existe, tentar regenerar CCB automaticamente
+      if ((error as any)?.status === 400 || error.message?.includes('Object not found')) {
+        console.log('🔄 [FORMALIZACAO] Arquivo não encontrado, tentando regenerar CCB...');
+        try {
+          const newCcb = await ccbGenerationService.generateCCB(proposalId);
+          if (newCcb.success) {
+            return res.json({
+              success: true,
+              ccbPath: newCcb.pdfPath,
+              signedUrl: await ccbGenerationService.getPublicUrl(newCcb.pdfPath!),
+              generatedAt: new Date().toISOString(),
+              regenerated: true
+            });
+          }
+        } catch (regenError) {
+          console.error('❌ [FORMALIZACAO] Erro na regeneração:', regenError);
+        }
+      }
+      
       return res.status(500).json({ 
-        error: 'Erro ao gerar URL de acesso' 
+        error: 'Erro ao gerar URL de acesso',
+        details: error.message
       });
     }
 

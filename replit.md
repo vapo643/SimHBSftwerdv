@@ -7,6 +7,13 @@ Simpix is a full-stack TypeScript application for comprehensive credit managemen
 Preferred communication style: Simple, everyday language.
 Focus: CCB template generation over UI visualization.
 Language: Portuguese, studying software architecture.
+Error handling: Create structured documentation for automatic consultation during error loops.
+
+## Recent Changes (2025-08-07)
+- ✅ Error Documentation System implemented in `/error_docs/`
+- ✅ Storage error fixes: Admin client for Supabase Storage operations
+- ✅ CCB regeneration fallback for missing files
+- ✅ "Gerar CCB Novamente" button enhanced with template validation info
 
 ## System Architecture
 
@@ -38,8 +45,8 @@ Language: Portuguese, studying software architecture.
     - OWASP ASVS Level 1 compliance and SAMM v1.5 integration
     - Anti-fragile RBAC implementation
 - **Credit Simulation**: Real-time credit simulation API using Tabela Price, IOF, TAC, and CET calculations, integrated with commercial tables.
-- **Document Management**: Secure private bucket for document storage with signed URLs, organized folder structure, and multi-format support.
-- **PDF Generation**: Template-based CCB generation using user's exact PDF template with `pdf-lib` for precise field filling. Fully implemented and tested with Supabase Storage integration.
+- **Document Management**: Secure private bucket for document storage with signed URLs, organized folder structure, and multi-format support. Enhanced with admin client authentication and automatic fallback for missing files.
+- **PDF Generation**: Template-based CCB generation using user's exact PDF template with `pdf-lib` for precise field filling. Fully implemented and tested with Supabase Storage integration. Includes automatic regeneration fallback and admin client for Storage operations.
 - **Payment Workflow**: Complete payment queue system with batch processing, multiple payment methods, and formalization tracking integration.
 - **Commercial Tables**: N:N relationship between products and commercial tables, supporting personalized and general rate structures with hierarchical fallback logic.
 
@@ -72,3 +79,4 @@ Language: Portuguese, studying software architecture.
 - **OWASP Dependency-Check**: Software Composition Analysis (SCA).
 - **ClickSign**: Electronic signature integration with HMAC validation, event deduplication, and automated workflow for CCB signature to boleto generation. Supports regenerating signature links.
 - **Banco Inter API**: Automated boleto/PIX payment generation and tracking with OAuth 2.0 authentication (mTLS), and webhook system for payment notifications.
+- **Error Documentation System**: Structured error documentation in `/error_docs/` with categorized .md files for automatic consultation during error loops. Includes tested solutions and prevention strategies.
