@@ -1,11 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 // Import dinâmico para usar função correta com Service Role Key
-import { securityLogger, SecurityEventType } from './simple-security-logger';
-
-// Simple helper function for getting client IP
-function getClientIP(req: any): string {
-  return req.ip || req.connection.remoteAddress || req.socket.remoteAddress || 'unknown';
-}
+import { securityLogger, SecurityEventType, getClientIP } from './security-logger';
 
 export interface AuthenticatedRequest extends Request {
   user?: {

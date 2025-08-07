@@ -9,22 +9,24 @@ Focus: CCB template generation over UI visualization.
 Language: Portuguese, studying software architecture.
 Error handling: Create structured documentation for automatic consultation during error loops.
 
-## Recent Changes (2025-08-07 - v3)
-- ✅ **DRAG-AND-DROP FIELD POSITIONER IMPLEMENTED:** Complete visual field positioning system:
-  - `DragDropFieldPositioner.tsx` - Intuitive drag-and-drop interface for field positioning
-  - `FieldPositioner.tsx` - Full page with instructions and usage tips  
-  - `useFieldPositioner.ts` - React hook for saving/loading field positions
-  - `/api/field-positioner` - Backend API for coordinate persistence
-  - `/api/template/ccb-template.pdf` - Direct PDF template serving for visual mapping
-  - Real CCB template (564KB) displayed as background using iframe
-  - JWT authentication integrated for secure coordinate saving
-  - Automatic conversion between visual coordinates and PDF coordinates
-  - Pre-defined field templates with sample data for quick positioning
-  - Live coordinate display and property editing (font size, alignment, bold)
-  - Export functionality that updates `ccbCoordinates.ts` directly
-- ✅ **AUTHENTICATION FIXES:** Resolved JWT token issues in field positioner API calls
-- ✅ **TEMPLATE PDF INTEGRATION:** Template now displays correctly for visual field mapping
-- ✅ **COORDINATE SYSTEM REFINED:** Manual mapping instructions simplified, Y conversion formula documented
+## Recent Changes (2025-08-07)
+- ✅ **CRITICAL FIX:** CCB template conflict resolved - all routes now use `ccbGenerationService.ts` with pdf-lib
+- ✅ Legacy services renamed: `ccbGenerator.ts.LEGADO_PDFKit`, `ccbTemplateGenerator.ts.LEGADO_v1`, etc.
+- ✅ `clicksign-integration.ts` corrected to use template-based CCB generation (preserves logo/formatting)
+- ✅ `/ccb-url` endpoint enhanced to always fetch latest version from storage
+- ✅ Error Documentation System implemented in `/error_docs/`
+- ✅ Storage error fixes: Admin client for Supabase Storage operations
+- ✅ **BREAKTHROUGH:** Template file issue resolved - replaced 16KB generic with 564KB real Simpix template
+- ✅ **COORDINATE MAPPING SYSTEM:** Implemented professional field positioning architecture:
+  - `ccbFieldMapping.ts` - Pre-defined coordinates for all CCB fields
+  - `ccbCoordinateMapper.ts` - Dynamic adjustment system with presets
+  - `ccb-coordinate-test.ts` - Testing endpoints for iterative refinement
+  - Template now displays with Simpix logo and properly positioned data fields
+- ✅ **URL ROUTING FIX:** Resolved "Erro ao carregar status do CCB" caused by malformed API URLs:
+  - Frontend now consistently uses `/api/formalizacao/{id}/ccb` endpoint
+  - Fixed DocumentViewer to handle `ccb_gerado: false` state gracefully
+  - Removed special character "✓" that caused pdf-lib encoding errors
+  - Eliminated "[OBJECT] [OBJECT]" errors from URL parsing issues
 
 ## System Architecture
 

@@ -1,267 +1,233 @@
 /**
- * Coordenadas CCB - MAPEAMENTO MANUAL
+ * FASE 3: Estrutura de Mapeamento de Coordenadas da CCB
+ * Baseado na resposta da IA externa
  * 
- * IMPORTANTE: Coordenadas são onde o TEXTO INICIA (primeira letra)
- * - X: usar valor direto onde clicou
- * - Y: converter com fórmula Y_PDF = 842.25 - Y_visual
- * 
- * Sistema PDF: origem no canto inferior esquerdo, Y cresce para cima
+ * IMPORTANTE: Todos os valores X e Y são PLACEHOLDERS (0).
+ * Use o PDF de DEBUG (generateCoordinateGridPDF) para preencher com valores reais.
  */
 
-export interface CCBFieldConfig {
-  x: number;
-  y: number;
-  fontSize?: number;
-  bold?: boolean;
-  align?: 'left' | 'center' | 'right';
-  maxWidth?: number;
+export interface FieldCoordinate {
+    x: number;
+    y: number;
+    fontSize: number;
+    bold?: boolean;
+    maxWidth?: number; // Essencial para campos multi-linha (endereços, descrições)
+    align?: 'left' | 'center' | 'right'; // Alinhamento do texto
 }
 
-export interface CCBCoordinates {
-  page1: Record<string, CCBFieldConfig>;
-  page2: Record<string, CCBFieldConfig>;
-  page3: Record<string, CCBFieldConfig>;
-  page4: Record<string, CCBFieldConfig>;
-  page5: Record<string, CCBFieldConfig>;
-  page6: Record<string, CCBFieldConfig>;
-  page7: Record<string, CCBFieldConfig>;
-  page8: Record<string, CCBFieldConfig>;
-}
+// Padrões de Fonte
+const FN = 10; // Fonte Normal
+const FL = 12; // Fonte Grande
+const FT = 14; // Fonte Título
+const FG = 16; // Fonte Grande (destaque)
 
-export const ccbCoordinates: CCBCoordinates = {
-  page1: {
-    // Cabeçalho
-    numeroCCB: { x: 150, y: 750, fontSize: 12, bold: true },
-    dataEmissao: { x: 300, y: 750, fontSize: 10 },
-    finalidadeOperacao: { x: 450, y: 750, fontSize: 10 },
-    
-    // Seção I - EMITENTE
-    emitenteNome: { x: 150, y: 650, fontSize: 11, bold: true },
-    emitenteCPF: { x: 300, y: 700, fontSize: 11 },
-    emitenteRG: { x: 250, y: 650, fontSize: 10 },
-    emitenteExpedidor: { x: 350, y: 650, fontSize: 10 },
-    emitenteNacionalidade: { x: 450, y: 650, fontSize: 10 },
-    emitenteLocalNascimento: { x: 500, y: 650, fontSize: 10 },
-    emitenteEstadoCivil: { x: 150, y: 600, fontSize: 10 },
-    emitenteEndereco: { x: 200, y: 600, fontSize: 10, maxWidth: 180 },
-    emitenteCEP: { x: 400, y: 600, fontSize: 10 },
-    emitenteCidade: { x: 450, y: 600, fontSize: 10 },
-    emitenteUF: { x: 550, y: 600, fontSize: 10 },
-    
-    // Seção II - CREDOR ORIGINÁRIO
-    credorRazaoSocial: { x: 150, y: 500, fontSize: 11, bold: true },
-    credorCNPJ: { x: 400, y: 500, fontSize: 11 },
-    credorEndereco: { x: 150, y: 450, fontSize: 10, maxWidth: 180 },
-    credorCEP: { x: 350, y: 450, fontSize: 10 },
-    credorCidade: { x: 450, y: 450, fontSize: 10 },
-    credorUF: { x: 550, y: 450, fontSize: 10 },
-    
-    // Valores e Condições
-    valorPrincipal: { x: 200, y: 400, fontSize: 12, bold: true },
-    dataEmissaoValor: { x: 350, y: 400, fontSize: 10 },
-    vencimentoParcela: { x: 500, y: 400, fontSize: 10 },
-    vencimentoUltimaParcela: { x: 200, y: 350, fontSize: 10 },
-    prazoAmortizacao: { x: 350, y: 350, fontSize: 10 },
-    percentualIndice: { x: 500, y: 350, fontSize: 10 },
-    taxaJurosEfetivaMensal: { x: 200, y: 300, fontSize: 11, bold: true },
-    taxaJurosEfetivaAnual: { x: 350, y: 300, fontSize: 11, bold: true },
-    iof: { x: 450, y: 300, fontSize: 10 },
-    pracaPagamento: { x: 500, y: 300, fontSize: 10 },
-    
-    // CET e Taxas
-    custoEfetivoTotal: { x: 250, y: 200, fontSize: 12, bold: true },
-    tarifaTED: { x: 350, y: 200, fontSize: 10 },
-    tac: { x: 400, y: 200, fontSize: 10 },
-    taxaCredito: { x: 500, y: 200, fontSize: 10 },
-    
-    // Liberação
-    dataLiberacaoRecurso: { x: 250, y: 150, fontSize: 10 },
-    valorLiquidoLiberado: { x: 400, y: 150, fontSize: 11, bold: true },
-    valorLiquidoLiberadoEmissor: { x: 500, y: 150, fontSize: 11 }
-  },
-  
-  page2: {
-    // Dados Bancários do Emitente
-    emitenteBancoNumero: { x: 250, y: 650, fontSize: 10 },
-    emitenteAgenciaNumero: { x: 350, y: 650, fontSize: 10 },
-    emitenteContaNumero: { x: 450, y: 650, fontSize: 10 },
-    emitenteTipoConta: { x: 550, y: 650, fontSize: 10 },
-    
-    // Emitente Empresa (se aplicável)
-    emitenteEmpresaRazaoSocial: { x: 250, y: 650, fontSize: 11 },
-    emitenteEmpresaCNPJ: { x: 150, y: 600, fontSize: 11 },
-    
-    // Dados Bancários para Pagamento
-    pagamentoBancoNumero: { x: 400, y: 650, fontSize: 10 },
-    pagamentoAgenciaNumero: { x: 500, y: 650, fontSize: 10 },
-    pagamentoContaNumero: { x: 400, y: 600, fontSize: 10 },
-    pagamentoTipoConta: { x: 500, y: 600, fontSize: 10 },
-    
-    // Descrição dos Serviços
-    descricaoServicosFinanciados: { x: 150, y: 550, fontSize: 10, maxWidth: 400 },
-    
-    // Quitação de Dívidas
-    instituicaoFavorecida: { x: 250, y: 550, fontSize: 10 },
-    numeroContratoQuitacao: { x: 450, y: 550, fontSize: 10 },
-    linhaDigitavelBoleto: { x: 250, y: 500, fontSize: 10, maxWidth: 300 },
-    
-    // Fluxo de Pagamento (primeira parcela)
-    fluxoPagamentoParcela: { x: 200, y: 500, fontSize: 10 },
-    fluxoPagamentoDataVencimento: { x: 350, y: 500, fontSize: 10 },
-    fluxoPagamentoValor: { x: 500, y: 500, fontSize: 11, bold: true }
-  },
-  
-  page3: {
-    // Página 3 - Condições Gerais e Termos
-    // Geralmente contém texto padrão, não precisa de campos dinâmicos
-  },
-  
-  page4: {
-    // Página 4 - Condições Gerais continuação
-    // Geralmente contém texto padrão, não precisa de campos dinâmicos
-  },
-  
-  page5: {
-    // Página 5 - Cláusulas e Condições
-    // Geralmente contém texto padrão, não precisa de campos dinâmicos
-  },
-  
-  page6: {
-    // Página 6 - Disposições Finais
-    // Geralmente contém texto padrão, não precisa de campos dinâmicos
-  },
-  
-  page7: {
-    // Página 7 - Assinaturas
-    // Os campos de assinatura são gerenciados pelo ClickSign
-  },
-  
-  page8: {
-    // Tabela de Pagamento - até 6 linhas
-    tabelaPagamentoData1: { x: 150, y: 700, fontSize: 10 },
-    tabelaPagamentoValor1: { x: 300, y: 700, fontSize: 10, bold: true },
-    tabelaPagamentoBoleto1: { x: 400, y: 700, fontSize: 9, maxWidth: 180 },
-    
-    tabelaPagamentoData2: { x: 150, y: 650, fontSize: 10 },
-    tabelaPagamentoValor2: { x: 300, y: 650, fontSize: 10, bold: true },
-    tabelaPagamentoBoleto2: { x: 400, y: 650, fontSize: 9, maxWidth: 180 },
-    
-    tabelaPagamentoData3: { x: 150, y: 600, fontSize: 10 },
-    tabelaPagamentoValor3: { x: 300, y: 600, fontSize: 10, bold: true },
-    tabelaPagamentoBoleto3: { x: 400, y: 600, fontSize: 9, maxWidth: 180 },
-    
-    tabelaPagamentoData4: { x: 150, y: 550, fontSize: 10 },
-    tabelaPagamentoValor4: { x: 300, y: 550, fontSize: 10, bold: true },
-    tabelaPagamentoBoleto4: { x: 400, y: 550, fontSize: 9, maxWidth: 180 },
-    
-    tabelaPagamentoData5: { x: 150, y: 500, fontSize: 10 },
-    tabelaPagamentoValor5: { x: 300, y: 500, fontSize: 10, bold: true },
-    tabelaPagamentoBoleto5: { x: 400, y: 500, fontSize: 9, maxWidth: 180 },
-    
-    tabelaPagamentoData6: { x: 150, y: 450, fontSize: 10 },
-    tabelaPagamentoValor6: { x: 300, y: 450, fontSize: 10, bold: true },
-    tabelaPagamentoBoleto6: { x: 400, y: 450, fontSize: 9, maxWidth: 180 }
-  }
+// ATENÇÃO: TODOS OS VALORES X e Y SÃO PLACEHOLDERS (0). 
+// USE O PDF DE DEBUG (FASE 2) PARA PREENCHER COM VALORES REAIS.
+
+export const CCB_FIELD_COORDINATES: Record<string, Record<string, FieldCoordinate>> = {
+    // PÁGINA 1 - CAPA E IDENTIFICAÇÃO
+    page1: {
+        numeroCCB: { x: 450, y: 750, fontSize: FL, bold: true, align: 'right' },
+        dataEmissao: { x: 450, y: 730, fontSize: FN, align: 'right' },
+        nomeCliente: { x: 297, y: 400, fontSize: FT, bold: true, align: 'center' },
+        cpfCliente: { x: 297, y: 380, fontSize: FL, align: 'center' },
+        valorTotalFinanciado: { x: 297, y: 350, fontSize: FG, bold: true, align: 'center' },
+        quantidadeParcelas: { x: 297, y: 330, fontSize: FL, align: 'center' },
+        valorParcela: { x: 297, y: 310, fontSize: FL, align: 'center' },
+    },
+
+    // PÁGINA 2 - QUALIFICAÇÃO DO EMITENTE
+    page2: {
+        nomeCompleto: { x: 150, y: 700, fontSize: FN },
+        cpf: { x: 150, y: 680, fontSize: FN },
+        rg_orgao: { x: 150, y: 660, fontSize: FN }, // Combine RG e Órgão Expedidor
+        dataNascimento: { x: 150, y: 640, fontSize: FN },
+        estadoCivil: { x: 150, y: 620, fontSize: FN },
+        nomeConjuge: { x: 150, y: 600, fontSize: FN }, // Condicional
+        cpfConjuge: { x: 150, y: 580, fontSize: FN },  // Condicional
+        profissao: { x: 150, y: 560, fontSize: FN },
+        // Use maxWidth para endereços longos
+        enderecoResidencial: { x: 150, y: 540, fontSize: FN, maxWidth: 400 },
+        cep: { x: 150, y: 500, fontSize: FN },
+        telefoneCelular: { x: 150, y: 480, fontSize: FN },
+        email: { x: 150, y: 460, fontSize: FN },
+        
+        // Dados profissionais
+        empresa: { x: 150, y: 420, fontSize: FN },
+        cargo: { x: 150, y: 400, fontSize: FN },
+        rendaMensal: { x: 150, y: 380, fontSize: FN },
+        
+        // Referências
+        referencia1Nome: { x: 150, y: 340, fontSize: FN },
+        referencia1Telefone: { x: 350, y: 340, fontSize: FN },
+        referencia2Nome: { x: 150, y: 320, fontSize: FN },
+        referencia2Telefone: { x: 350, y: 320, fontSize: FN },
+    },
+
+    // PÁGINA 3 - DADOS DO CRÉDITO
+    page3: {
+        valorPrincipal: { x: 200, y: 700, fontSize: FL, bold: true },
+        taxaJurosMensal: { x: 200, y: 680, fontSize: FN },
+        taxaJurosAnual: { x: 400, y: 680, fontSize: FN },
+        cetMensal: { x: 200, y: 660, fontSize: FN },
+        cetAnual: { x: 400, y: 660, fontSize: FN },
+        iof: { x: 200, y: 640, fontSize: FN },
+        tac: { x: 400, y: 640, fontSize: FN },
+        seguro: { x: 200, y: 620, fontSize: FN },
+        valorTotalEncargos: { x: 200, y: 600, fontSize: FL, bold: true },
+        valorTotalPagar: { x: 200, y: 580, fontSize: FG, bold: true },
+        
+        formaPagamento: { x: 200, y: 540, fontSize: FN },
+        quantidadeParcelas: { x: 200, y: 520, fontSize: FL, bold: true },
+        valorParcela: { x: 400, y: 520, fontSize: FL, bold: true },
+        primeiroVencimento: { x: 200, y: 500, fontSize: FN },
+        ultimoVencimento: { x: 400, y: 500, fontSize: FN },
+        diaVencimento: { x: 200, y: 480, fontSize: FN },
+        
+        // Tabela comercial
+        tabelaComercial: { x: 200, y: 440, fontSize: FN },
+        codigoTabela: { x: 400, y: 440, fontSize: FN },
+    },
+
+    // PÁGINA 4 - CONDIÇÕES GERAIS (geralmente texto padrão, mas pode ter campos)
+    page4: {
+        // Campos dinâmicos dentro do texto de condições
+        taxaJurosRepete: { x: 250, y: 600, fontSize: FN, bold: true },
+        multaAtraso: { x: 250, y: 580, fontSize: FN, bold: true },
+        jurosMora: { x: 250, y: 560, fontSize: FN, bold: true },
+    },
+
+    // PÁGINA 5 - GARANTIAS (Condicional - só preencher se houver garantia)
+    page5: {
+        tipoGarantia: { x: 150, y: 700, fontSize: FL, bold: true },
+        descricaoBem: { x: 150, y: 680, fontSize: FN, maxWidth: 400 },
+        valorBem: { x: 150, y: 640, fontSize: FL, bold: true },
+        
+        // Se for veículo
+        marcaModelo: { x: 150, y: 620, fontSize: FN },
+        anoFabricacao: { x: 150, y: 600, fontSize: FN },
+        placa: { x: 350, y: 600, fontSize: FN },
+        chassi: { x: 150, y: 580, fontSize: FN },
+        renavam: { x: 350, y: 580, fontSize: FN },
+    },
+
+    // PÁGINA 6 - DECLARAÇÕES (geralmente texto padrão com alguns campos)
+    page6: {
+        nomeDeclarante: { x: 200, y: 400, fontSize: FN, bold: true },
+        cpfDeclarante: { x: 200, y: 380, fontSize: FN },
+        dataDeclaracao: { x: 200, y: 360, fontSize: FN },
+    },
+
+    // PÁGINA 7 - AUTORIZAÇÃO DE DÉBITO
+    page7: {
+        banco: { x: 200, y: 650, fontSize: FN },
+        agencia: { x: 200, y: 630, fontSize: FN },
+        contaCorrente: { x: 400, y: 630, fontSize: FN },
+        tipoConta: { x: 200, y: 610, fontSize: FN },
+        
+        valorParcelaDebito: { x: 200, y: 570, fontSize: FL, bold: true },
+        diaVencimentoDebito: { x: 400, y: 570, fontSize: FL, bold: true },
+        
+        // Dados do pagamento
+        formaPagamentoEscolhida: { x: 200, y: 530, fontSize: FN },
+        
+        // Se for boleto
+        codigoBarras: { x: 100, y: 480, fontSize: 8, maxWidth: 400 },
+        linhaDigitavel: { x: 100, y: 460, fontSize: 8, maxWidth: 400 },
+        
+        // Se for PIX
+        chavePix: { x: 200, y: 440, fontSize: FN },
+        qrCodePix: { x: 200, y: 420, fontSize: 8, maxWidth: 200 },
+    },
+
+    // PÁGINA 8 - ASSINATURAS
+    page8: {
+        localEData: { x: 100, y: 700, fontSize: FN },
+        
+        // Linha de assinatura do Emitente (cliente)
+        linhaAssinaturaEmitente: { x: 100, y: 600, fontSize: 1 }, // Linha visual
+        nomeEmitenteAssinatura: { x: 100, y: 580, fontSize: FN },
+        cpfEmitenteAssinatura: { x: 100, y: 565, fontSize: 9 },
+        
+        // Linha de assinatura do Cônjuge (se aplicável)
+        linhaAssinaturaConjuge: { x: 350, y: 600, fontSize: 1 },
+        nomeConjugeAssinatura: { x: 350, y: 580, fontSize: FN },
+        cpfConjugeAssinatura: { x: 350, y: 565, fontSize: 9 },
+        
+        // Testemunha 1
+        linhaAssinaturaTestemunha1: { x: 100, y: 480, fontSize: 1 },
+        nomeTestemunha1: { x: 100, y: 460, fontSize: FN },
+        cpfTestemunha1: { x: 100, y: 445, fontSize: 9 },
+        
+        // Testemunha 2
+        linhaAssinaturaTestemunha2: { x: 350, y: 480, fontSize: 1 },
+        nomeTestemunha2: { x: 350, y: 460, fontSize: FN },
+        cpfTestemunha2: { x: 350, y: 445, fontSize: 9 },
+        
+        // Credor (Simpix)
+        linhaAssinaturaCredor: { x: 225, y: 360, fontSize: 1 },
+        razaoSocialCredor: { x: 225, y: 340, fontSize: FN, align: 'center' },
+        cnpjCredor: { x: 225, y: 325, fontSize: 9, align: 'center' },
+        
+        // Código de verificação e protocolo (assinatura eletrônica)
+        codigoVerificacao: { x: 100, y: 250, fontSize: 9 },
+        protocoloAssinatura: { x: 300, y: 250, fontSize: 9 },
+        hashDocumento: { x: 100, y: 235, fontSize: 8, maxWidth: 400 },
+        dataHoraAssinatura: { x: 100, y: 220, fontSize: 9 },
+        ipAssinatura: { x: 300, y: 220, fontSize: 9 },
+    },
 };
 
 /**
- * Função auxiliar para obter configuração de campo
+ * Função auxiliar para obter coordenadas de um campo específico
  */
-export function getFieldConfig(page: number, fieldName: string): CCBFieldConfig | null {
-  const pageKey = `page${page}` as keyof CCBCoordinates;
-  const pageConfig = ccbCoordinates[pageKey];
-  return pageConfig?.[fieldName] || null;
+export function getFieldCoordinate(page: string, field: string): FieldCoordinate | null {
+    const pageCoords = CCB_FIELD_COORDINATES[page];
+    if (!pageCoords) return null;
+    
+    return pageCoords[field] || null;
 }
 
 /**
- * Lista de todos os campos mapeados por página
+ * Função para converter coordenadas do topo para base (Y invertido)
  */
-export const mappedFields = {
-  page1: Object.keys(ccbCoordinates.page1),
-  page2: Object.keys(ccbCoordinates.page2),
-  page3: Object.keys(ccbCoordinates.page3),
-  page4: Object.keys(ccbCoordinates.page4),
-  page5: Object.keys(ccbCoordinates.page5),
-  page6: Object.keys(ccbCoordinates.page6),
-  page7: Object.keys(ccbCoordinates.page7),
-  page8: Object.keys(ccbCoordinates.page8)
+export function yFromTop(pageHeight: number, pixelsFromTop: number): number {
+    return pageHeight - pixelsFromTop;
+}
+
+/**
+ * Configuração de páginas padrão A4
+ */
+export const A4_CONFIG = {
+    width: 595.276,  // pontos
+    height: 841.890, // pontos
 };
 
 /**
- * Mapeamento de campos da proposta para campos CCB
+ * Mapeamento de campos de dados para campos do template
+ * Relaciona os dados que vêm do sistema com as posições no PDF
  */
-export const proposalToCCBMapping = {
-  // Página 1
-  numeroCCB: (data: any) => data.numero_ccb || `CCB-${new Date().getFullYear()}-${data.id?.slice(0, 8)}`,
-  dataEmissao: (data: any) => formatDate(data.created_at || new Date()),
-  finalidadeOperacao: () => "EMPRÉSTIMO PESSOAL",
-  
-  // Emitente
-  emitenteNome: (data: any) => data.cliente_data?.nome_completo || '',
-  emitenteCPF: (data: any) => formatCPF(data.cliente_data?.cpf || ''),
-  emitenteRG: (data: any) => data.cliente_data?.rg || '',
-  emitenteExpedidor: (data: any) => data.cliente_data?.orgao_expedidor || '',
-  emitenteNacionalidade: (data: any) => data.cliente_data?.nacionalidade || 'Brasileiro(a)',
-  emitenteLocalNascimento: (data: any) => data.cliente_data?.naturalidade || '',
-  emitenteEstadoCivil: (data: any) => data.cliente_data?.estado_civil || '',
-  emitenteEndereco: (data: any) => formatAddress(data.cliente_data),
-  emitenteCEP: (data: any) => formatCEP(data.cliente_data?.cep || ''),
-  emitenteCidade: (data: any) => data.cliente_data?.cidade || '',
-  emitenteUF: (data: any) => data.cliente_data?.estado || '',
-  
-  // Credor
-  credorRazaoSocial: () => "SIMPIX LTDA",
-  credorCNPJ: () => "12.345.678/0001-90", // Substituir pelo CNPJ real
-  credorEndereco: () => "Rua Example, 123",
-  credorCEP: () => "01234-567",
-  credorCidade: () => "São Paulo",
-  credorUF: () => "SP",
-  
-  // Valores
-  valorPrincipal: (data: any) => formatCurrency(data.condicoes_credito?.valor_emprestimo || 0),
-  taxaJurosEfetivaMensal: (data: any) => `${data.condicoes_credito?.taxa_juros || 0}%`,
-  taxaJurosEfetivaAnual: (data: any) => `${((data.condicoes_credito?.taxa_juros || 0) * 12).toFixed(2)}%`,
-  custoEfetivoTotal: (data: any) => `${data.condicoes_credito?.cet || 0}%`,
-  
-  // Página 8 - Tabela de Pagamento
-  tabelaPagamentoData1: (data: any) => formatDate(data.parcelas?.[0]?.data_vencimento),
-  tabelaPagamentoValor1: (data: any) => formatCurrency(data.parcelas?.[0]?.valor),
-  // ... continuar para outras parcelas
+export const DATA_TO_FIELD_MAPPING = {
+    // Página 1
+    'numero_ccb': 'numeroCCB',
+    'data_emissao': 'dataEmissao',
+    'cliente_data.nome_completo': 'nomeCliente',
+    'cliente_data.cpf': 'cpfCliente',
+    'condicoes_data.valor_financiado_formatado': 'valorTotalFinanciado',
+    'condicoes_data.prazo_meses': 'quantidadeParcelas',
+    'condicoes_data.valor_parcela_formatado': 'valorParcela',
+    
+    // Página 2
+    'cliente_data.rg': 'rg_orgao',
+    'cliente_data.data_nascimento': 'dataNascimento',
+    'cliente_data.estado_civil': 'estadoCivil',
+    'cliente_data.nome_conjuge': 'nomeConjuge',
+    'cliente_data.cpf_conjuge': 'cpfConjuge',
+    'cliente_data.profissao': 'profissao',
+    'calculados.endereco_completo_cliente': 'enderecoResidencial',
+    'cliente_data.cep': 'cep',
+    'cliente_data.telefone_celular': 'telefoneCelular',
+    'cliente_data.email': 'email',
+    
+    // ... mapear todos os outros campos
 };
-
-// Funções auxiliares de formatação
-function formatDate(date: string | Date): string {
-  if (!date) return '';
-  const d = new Date(date);
-  return d.toLocaleDateString('pt-BR');
-}
-
-function formatCPF(cpf: string): string {
-  if (!cpf) return '';
-  return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
-}
-
-function formatCEP(cep: string): string {
-  if (!cep) return '';
-  return cep.replace(/(\d{5})(\d{3})/, '$1-$2');
-}
-
-function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL'
-  }).format(value);
-}
-
-function formatAddress(clienteData: any): string {
-  if (!clienteData) return '';
-  const parts = [
-    clienteData.endereco,
-    clienteData.numero,
-    clienteData.complemento,
-    clienteData.bairro
-  ].filter(Boolean);
-  return parts.join(', ');
-}
-
-export default ccbCoordinates;

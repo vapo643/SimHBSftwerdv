@@ -3,17 +3,6 @@ import { setupVite, serveStatic, log } from "./vite";
 import { config, logConfigStatus, isAppOperational } from "./lib/config";
 import { registerRoutes } from "./routes";
 
-// Global error handlers to prevent server crashes
-process.on('uncaughtException', (error) => {
-  console.log('⚠️ [GLOBAL] Uncaught Exception (non-fatal):', error.message);
-  console.log('ℹ️ [GLOBAL] Server continues running...');
-});
-
-process.on('unhandledRejection', (reason, promise) => {
-  console.log('⚠️ [GLOBAL] Unhandled Rejection (non-fatal):', reason);
-  console.log('ℹ️ [GLOBAL] Server continues running...');
-});
-
 (async () => {
   const app = await createApp();
   
@@ -73,78 +62,77 @@ process.on('unhandledRejection', (reason, promise) => {
     log("ℹ️  Configure DATABASE_URL in Secrets to enable full functionality");
   }
 
-  // Initialize storage bucket on startup (completely non-blocking)
+  // Initialize storage bucket on startup
   async function initializeStorage() {
-    // Run in background - don't block server startup
-    setTimeout(async () => {
-      try {
-        log('📦 Checking storage buckets (background task)...');
-        const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-        const supabase = createServerSupabaseAdminClient();
-        
-        // Use timeout to prevent hanging
-        const storagePromise = supabase.storage.listBuckets();
-        const timeoutPromise = new Promise<any>((_, reject) => 
-          setTimeout(() => reject(new Error('Storage timeout')), 3000)
-        );
-        
-        const result = await Promise.race([storagePromise, timeoutPromise]);
-        const { data: buckets, error: listError } = result;
-    
-        if (listError) {
-          log('⚠️ Could not list buckets (background):', listError.message);
+    try {
+      const { createServerSupabaseAdminClient } = await import('./lib/supabase');
+      const supabase = createServerSupabaseAdminClient();
+      
+      log('📦 Checking storage buckets...');
+      
+      // Check existing buckets
+      const { data: buckets, error: listError } = await supabase.storage.listBuckets();
+      
+      if (listError) {
+        log('⚠️ Could not list buckets:', listError.message);
+        return;
+      }
+      
+      const documentsExists = buckets.some(bucket => bucket.name === 'documents');
+      
+      if (documentsExists) {
+        // Check if it's public or private
+        const documentsBucket = buckets.find(bucket => bucket.name === 'documents');
+        if (documentsBucket && documentsBucket.public === true) {
+          log('⚠️ Storage bucket "documents" exists but is PUBLIC. Need to recreate as PRIVATE.');
+          
+          // Delete the public bucket
+          log('🗑️ Deleting public bucket...');
+          const { error: deleteError } = await supabase.storage.deleteBucket('documents');
+          if (deleteError) {
+            log('❌ Could not delete bucket:', deleteError.message);
+            return;
+          }
+          log('✅ Public bucket deleted.');
+        } else {
+          log('✅ Storage bucket "documents" already exists as PRIVATE');
           return;
         }
-    
-        const documentsExists = buckets?.some((bucket: any) => bucket.name === 'documents');
-        
-        if (documentsExists) {
-          // Check if it's public or private
-          const documentsBucket = buckets?.find((bucket: any) => bucket.name === 'documents');
-          if (documentsBucket && documentsBucket.public === true) {
-            log('⚠️ Storage bucket "documents" exists but is PUBLIC. Need to recreate as PRIVATE.');
-            
-            // Delete the public bucket
-            log('🗑️ Deleting public bucket...');
-            const { error: deleteError } = await supabase.storage.deleteBucket('documents');
-            if (deleteError) {
-              log('❌ Could not delete bucket:', deleteError.message);
-              return;
-            }
-            log('✅ Public bucket deleted.');
-          } else {
-            log('✅ Storage bucket "documents" already exists as PRIVATE');
-            return;
-          }
-        }
-        
-        if (!documentsExists) {
-          // Create documents bucket AS PRIVATE
-          log('🔨 Creating PRIVATE storage bucket "documents"...');
-          const { data: bucket, error: createError } = await supabase.storage.createBucket('documents', {
-            public: false, // PRIVATE bucket for security
-            fileSizeLimit: 52428800, // 50MB
-            allowedMimeTypes: [
-              'application/pdf',
-              'image/jpeg', 
-              'image/jpg',
-              'image/png',
-              'image/gif'
-            ]
-          });
-          
-          if (createError) {
-            log('❌ Failed to create bucket:', createError.message);
-            return;
-          }
-          
-          log('✅ Storage bucket "documents" created successfully!');
-        }
-        
-      } catch (error) {
-        log('⚠️ Storage initialization error (background):', error instanceof Error ? error.message : 'Unknown error');
       }
-    }, 500); // Start after 500ms
+      
+      // Delete existing public bucket if it exists (to recreate as private)
+      if (documentsExists) {
+        log('🗑️ Deleting existing public bucket to recreate as private...');
+        const { error: deleteError } = await supabase.storage.deleteBucket('documents');
+        if (deleteError) {
+          log('⚠️ Could not delete bucket:', deleteError.message);
+        }
+      }
+      
+      // Create documents bucket AS PRIVATE
+      log('🔨 Creating PRIVATE storage bucket "documents"...');
+      const { data: bucket, error: createError } = await supabase.storage.createBucket('documents', {
+        public: false, // PRIVATE bucket for security
+        fileSizeLimit: 52428800, // 50MB
+        allowedMimeTypes: [
+          'application/pdf',
+          'image/jpeg', 
+          'image/jpg',
+          'image/png',
+          'image/gif'
+        ]
+      });
+      
+      if (createError) {
+        log('❌ Failed to create bucket:', createError.message);
+        return;
+      }
+      
+      log('✅ Storage bucket "documents" created successfully!');
+      
+    } catch (error) {
+      log('⚠️ Storage initialization error:', error instanceof Error ? error.message : 'Unknown error');
+    }
   }
 
   // Start server on configured port
@@ -158,10 +146,8 @@ process.on('unhandledRejection', (reason, promise) => {
       log(`🚀 Server running on port ${config.port}`);
       log(`🌍 Environment: ${config.nodeEnv}`);
       
-      // Initialize storage bucket (completely non-blocking)
-      initializeStorage().catch((error) => {
-        log('⚠️ Storage initialization failed (non-critical):', error instanceof Error ? error.message : 'Unknown error');
-      });
+      // Initialize storage bucket
+      await initializeStorage();
     }
   );
 })();

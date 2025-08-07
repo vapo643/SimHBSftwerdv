@@ -12,7 +12,8 @@ import { db } from '../lib/supabase';
 import { sql } from 'drizzle-orm';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { fillCCBTemplate } from '../utils/ccbFieldFiller';
+import { SIMPIX_CCB_MAPPING, TEST_COORDINATES, yFromTop, formatTextWithLineBreaks } from './ccbFieldMapping';
+import { CoordinateAdjustment, applyCoordinateAdjustments } from './ccbCoordinateMapper';
 
 interface PropostaData {
   id: string;
@@ -24,8 +25,6 @@ interface PropostaData {
   cliente_cep?: string;
   cliente_email?: string;
   cliente_telefone?: string;
-  cliente_data?: any;  // Dados completos do cliente
-  condicoes_data?: any; // Dados completos das condições
   valor_emprestimo: number;
   prazo_meses: number;
   taxa_juros: number;
@@ -47,70 +46,128 @@ export class CCBGenerationService {
 
   /**
    * Gera CCB preenchendo o template PDF com dados da proposta
-   * USA COORDENADAS MAPEADAS DO DEBUG GRID
+   * MÉTODO CORRETO: Carrega template e desenha texto sobre ele, preservando layout
    */
   async generateCCB(proposalId: string): Promise<{ success: boolean; pdfPath?: string; error?: string }> {
+    return this.generateCCBWithAdjustments(proposalId, []);
+  }
+
+  /**
+   * Gera CCB com ajustes de coordenadas personalizados
+   */
+  async generateCCBWithAdjustments(proposalId: string, adjustments: CoordinateAdjustment[] = []): Promise<{ success: boolean; pdfPath?: string; error?: string }> {
     try {
-      console.log(`📄 [CCB] Iniciando geração com COORDENADAS MAPEADAS para proposta ${proposalId}`);
-      
-      // 1. Buscar dados completos da proposta
+      console.log(`📄 [CCB] Iniciando geração CORRETA para proposta ${proposalId}`);
+      console.log(`📄 [CCB] Template path: ${this.templatePath}`);
+
+      // 1. Buscar dados da proposta
       const proposalData = await this.getProposalData(proposalId);
       if (!proposalData) {
         return { success: false, error: 'Proposta não encontrada ou dados incompletos' };
       }
 
-      // 2. Buscar parcelas se existirem
-      const parcelas = await db.execute(sql`
-        SELECT * FROM parcelas 
-        WHERE proposta_id = ${proposalId} 
-        ORDER BY numero_parcela
-      `);
-
-      console.log('📄 [CCB] Dados carregados:', {
-        proposta: proposalId,
-        cliente: proposalData.cliente_nome,
-        valor: proposalData.valor_emprestimo,
-        parcelas: parcelas.length
+      console.log('📄 [CCB] Dados da proposta carregados:', {
+        nome: proposalData.cliente_nome,
+        cpf: proposalData.cliente_cpf,
+        valor: proposalData.valor_emprestimo
       });
 
-      // 3. Usar o novo sistema de preenchimento com coordenadas mapeadas
-      const ccbData = {
-        proposta: {
-          ...proposalData,
-          cliente_data: {
-            nome_completo: proposalData.cliente_nome,
-            cpf: proposalData.cliente_cpf,
-            rg: proposalData.cliente_data?.rg || '',
-            orgao_expedidor: proposalData.cliente_data?.orgao_expedidor || '',
-            nacionalidade: proposalData.cliente_data?.nacionalidade || 'Brasileiro(a)',
-            naturalidade: proposalData.cliente_data?.naturalidade || '',
-            estado_civil: proposalData.cliente_data?.estado_civil || '',
-            endereco: proposalData.cliente_endereco,
-            numero: proposalData.cliente_data?.numero || '',
-            complemento: proposalData.cliente_data?.complemento || '',
-            bairro: proposalData.cliente_data?.bairro || '',
-            cep: proposalData.cliente_cep,
-            cidade: proposalData.cliente_cidade,
-            estado: proposalData.cliente_estado
-          },
-          condicoes_credito: {
-            valor_emprestimo: proposalData.valor_emprestimo,
-            taxa_juros: proposalData.taxa_juros,
-            prazo_meses: proposalData.prazo_meses,
-            valor_parcela: proposalData.valor_parcela,
-            cet: proposalData.condicoes_data?.cet || 0
-          }
-        },
-        parcelas: parcelas,
-        cliente: proposalData.cliente_data,
-        tabela: proposalData.condicoes_data
-      };
-
-      // 4. Gerar PDF usando novo sistema de coordenadas
-      const pdfBytes = await fillCCBTemplate(ccbData);
-      console.log('📄 [CCB] PDF gerado com coordenadas mapeadas do DEBUG GRID');
+      // 2. CARREGAR TEMPLATE PDF EXISTENTE (NÃO criar novo!)
+      console.log('📄 [CCB] Carregando template PDF existente...');
+      const templateBytes = await fs.readFile(this.templatePath);
+      console.log(`📄 [CCB] Template carregado: ${templateBytes.length} bytes`);
+      const pdfDoc = await PDFDocument.load(templateBytes);
+      console.log(`📄 [CCB] PDF carregado: ${pdfDoc.getPageCount()} páginas`);
       
-      // 5. Upload para Supabase Storage
+      // 3. Preparar fonte para desenhar texto
+      const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+      
+      // 4. Obter a primeira página do template
+      const pages = pdfDoc.getPages();
+      const firstPage = pages[0];
+      const { width, height } = firstPage.getSize();
+      
+      console.log(`📄 [CCB] Dimensões da página: ${width}x${height}`);
+      
+      // 5. DESENHAR TEXTO SOBRE O TEMPLATE usando mapeamento de coordenadas
+      
+      // Aplicar ajustes de coordenadas se fornecidos (via parâmetro adjustments)
+      const mapping = adjustments && adjustments.length > 0 ? applyCoordinateAdjustments(adjustments) : SIMPIX_CCB_MAPPING;
+      
+      console.log(`📄 [CCB] Preenchimento com mapeamento SIMPIX (${adjustments?.length || 0} ajustes aplicados)...`);
+      
+      // DADOS DO CLIENTE
+      const nomeCoord = mapping.nomeCliente;
+      firstPage.drawText(proposalData.cliente_nome || '', {
+        x: nomeCoord.x,
+        y: yFromTop(height, 120), // 120px do topo
+        size: nomeCoord.size,
+        font: helveticaFont,
+        color: rgb(0, 0, 0),
+      });
+      console.log(`📄 [CCB] Nome: "${proposalData.cliente_nome}" em x:${nomeCoord.x}, y:${yFromTop(height, 120)}`);
+      
+      const cpfCoord = mapping.cpfCliente;
+      firstPage.drawText(this.formatCPF(proposalData.cliente_cpf) || '', {
+        x: cpfCoord.x,
+        y: yFromTop(height, 145), // 145px do topo
+        size: cpfCoord.size,
+        font: helveticaFont,
+        color: rgb(0, 0, 0),
+      });
+      console.log(`📄 [CCB] CPF: "${this.formatCPF(proposalData.cliente_cpf)}" em x:${cpfCoord.x}, y:${yFromTop(height, 145)}`);
+      
+      // DADOS DO EMPRÉSTIMO
+      const valorCoord = mapping.valorEmprestimo;
+      firstPage.drawText(this.formatCurrency(proposalData.valor_emprestimo), {
+        x: valorCoord.x,
+        y: yFromTop(height, 240), // 240px do topo
+        size: valorCoord.size,
+        font: helveticaFont,
+        color: rgb(0, 0, 0),
+      });
+      console.log(`📄 [CCB] Valor: "${this.formatCurrency(proposalData.valor_emprestimo)}" em x:${valorCoord.x}, y:${yFromTop(height, 240)}`);
+      
+      const parcelasCoord = mapping.numeroParcelas;
+      firstPage.drawText(`${proposalData.prazo_meses}x`, {
+        x: parcelasCoord.x,
+        y: yFromTop(height, 270), // 270px do topo
+        size: parcelasCoord.size,
+        font: helveticaFont,
+        color: rgb(0, 0, 0),
+      });
+      console.log(`📄 [CCB] Parcelas: "${proposalData.prazo_meses}x" em x:${parcelasCoord.x}, y:${yFromTop(height, 270)}`);
+      
+      const valorParcelaCoord = mapping.valorParcela;
+      firstPage.drawText(this.formatCurrency(proposalData.valor_parcela), {
+        x: valorParcelaCoord.x,
+        y: yFromTop(height, 300), // 300px do topo
+        size: valorParcelaCoord.size,
+        font: helveticaFont,
+        color: rgb(0, 0, 0),
+      });
+      console.log(`📄 [CCB] Valor parcela: "${this.formatCurrency(proposalData.valor_parcela)}" em x:${valorParcelaCoord.x}, y:${yFromTop(height, 300)}`);
+      
+      // DATA DE EMISSÃO
+      const dataCoord = mapping.dataEmissao;
+      const dataAtual = format(new Date(), "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
+      firstPage.drawText(dataAtual, {
+        x: dataCoord.x,
+        y: yFromTop(height, 650), // 650px do topo (parte inferior)
+        size: dataCoord.size,
+        font: helveticaFont,
+        color: rgb(0, 0, 0),
+      });
+      console.log(`📄 [CCB] Data: "${dataAtual}" em x:${dataCoord.x}, y:${yFromTop(height, 650)}`);
+      
+      // TEXTO DE TESTE PARA VALIDAÇÃO VISUAL (removido temporariamente devido ao encoding)
+      console.log(`📄 [CCB] Template Simpix aplicado com sucesso - dados posicionados`);
+      
+      // 6. Salvar PDF com dados preenchidos
+      const pdfBytes = await pdfDoc.save();
+      console.log('📄 [CCB] PDF preenchido gerado com sucesso');
+      
+      // 7. Upload para Supabase Storage
       const fileName = `ccb_${proposalId}_${Date.now()}.pdf`;
       const filePath = `ccb/${proposalId}/${fileName}`;
       
@@ -127,7 +184,7 @@ export class CCBGenerationService {
         return { success: false, error: 'Erro ao fazer upload do PDF' };
       }
 
-      // 6. Atualizar banco de dados
+      // 8. Atualizar banco de dados
       await db.execute(sql`
         UPDATE propostas 
         SET 
@@ -137,10 +194,10 @@ export class CCBGenerationService {
         WHERE id = ${proposalId}
       `);
 
-      console.log(`✅ [CCB] Geração concluída com COORDENADAS MAPEADAS!`);
-      console.log(`✅ [CCB] Arquivo: ${filePath}`);
-      console.log(`✅ [CCB] 55+ campos posicionados com precisão`);
-      console.log(`✅ [CCB] Template Simpix preservado 100%`);
+      console.log(`✅ [CCB] Geração CORRETA concluída! Arquivo: ${filePath}`);
+      console.log(`✅ [CCB] IMPORTANTE: Template preservado com logo e formatação`);
+      console.log(`✅ [CCB] Dados preenchidos: Nome, CPF e Valor`);
+      console.log(`✅ [CCB] Próximo passo: Ajustar coordenadas conforme feedback visual`);
       
       return { success: true, pdfPath: filePath };
 
@@ -208,8 +265,6 @@ export class CCBGenerationService {
         cliente_cep: clienteData.cep || '',
         cliente_email: clienteData.email || '',
         cliente_telefone: clienteData.telefone || '',
-        cliente_data: clienteData,  // Incluir dados completos
-        condicoes_data: condicoesData, // Incluir dados completos
         valor_emprestimo: valorBase,
         prazo_meses: prazo,
         taxa_juros: taxaJuros,

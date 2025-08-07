@@ -7,7 +7,6 @@ import { requireAdmin, requireManagerOrAdmin, requireAnyRole, requireRoles } fro
 import { enforceRoutePermissions, requireAnalyst, requireFinanceiro, filterProposalsByRole } from "./lib/role-based-access";
 import { insertPropostaSchema, updatePropostaSchema, insertGerenteLojaSchema, insertLojaSchema, updateLojaSchema, propostaLogs, propostas } from "@shared/schema";
 import { z } from "zod";
-import path from 'path';
 import multer from "multer";
 import originationRoutes from "./routes/origination.routes";
 import { clickSignRouter } from "./routes/clicksign.js";
@@ -18,16 +17,10 @@ import { setupSecurityRoutes } from "./routes/security.js";
 import emailChangeRoutes from "./routes/email-change";
 import cobrancasRoutes from "./routes/cobrancas";
 import { getBrasiliaDate, formatBrazilianDateTime, generateApprovalDate, getBrasiliaTimestamp } from "./lib/timezone";
-import { securityLogger, SecurityEventType } from './lib/simple-security-logger';
-
-// Simple helper function for getting client IP  
-function getClientIP(req: any): string {
-  return req.ip || req.connection.remoteAddress || req.socket.remoteAddress || 'unknown';
-}
+import { securityLogger, SecurityEventType, getClientIP } from './lib/security-logger';
 import { passwordSchema, validatePassword } from "./lib/password-validator";
 import { timingNormalizerMiddleware } from "./middleware/timing-normalizer";
 import timingSecurityRoutes from "./routes/timing-security";
-import fieldPositionerRoutes from "./routes/field-positioner";
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -4035,48 +4028,6 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
   // CCB Diagnostics routes
   const ccbDiagnosticsRouter = (await import('./routes/ccb-diagnostics')).default;
   app.use('/api/ccb-diagnostics', ccbDiagnosticsRouter);
-  
-  // CCB Coordinate Mapper routes
-  const ccbCoordinateMapperRouter = (await import('./routes/ccb-coordinate-mapper')).default;
-  app.use('/api/ccb-mapper', ccbCoordinateMapperRouter);
-  
-  // Field Positioner routes
-  const fieldPositionerRouter = (await import('./routes/field-positioner')).default;
-  app.use('/api/field-positioner', fieldPositionerRouter);
-  
-  // Template PDF routes (public endpoints for PDF serving)
-  const templatePdfRouter = (await import('./routes/template-pdf')).default;
-  app.use('/api/template', templatePdfRouter);
-
-  // PDF Upload routes (authenticated PDF upload and management)
-  const pdfUploadRouter = (await import('./routes/pdf-upload')).default;
-  app.use('/api/pdf-upload', pdfUploadRouter);
-
-  // Public PDF endpoint (no auth) for iframe viewing
-  app.get('/public/template.pdf', async (req, res) => {
-    try {
-      const templatePath = path.resolve(process.cwd(), 'server/templates/template_ccb.pdf');
-      
-      console.log('📄 [PUBLIC PDF] Serving template without auth');
-      
-      // Set headers for PDF viewing
-      res.set({
-        'Content-Type': 'application/pdf',
-        'Content-Disposition': 'inline; filename="template_ccb.pdf"',
-        'Cache-Control': 'public, max-age=3600',
-        'Access-Control-Allow-Origin': '*'
-      });
-
-      res.sendFile(templatePath);
-    } catch (error) {
-      console.error('❌ [PUBLIC PDF] Error:', error);
-      res.status(404).send('Template not found');
-    }
-  });
-
-  // CCB Coordinate Debug routes  
-  const ccbCoordinateDebugRouter = (await import('./routes/ccb-coordinate-debug')).default;
-  app.use('/api/ccb-debug', ccbCoordinateDebugRouter);
 
   // Register Semgrep MCP routes - Projeto Cérbero
   const securityMCPRoutes = (await import('./routes/security-mcp.js')).default;
