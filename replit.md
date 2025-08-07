@@ -9,7 +9,7 @@ Focus: CCB template generation over UI visualization.
 Language: Portuguese, studying software architecture.
 Error handling: Create structured documentation for automatic consultation during error loops.
 
-## Recent Changes (2025-08-07)
+## Recent Changes (2025-08-07 - v2)
 - ✅ **CRITICAL FIX:** CCB template conflict resolved - all routes now use `ccbGenerationService.ts` with pdf-lib
 - ✅ Legacy services renamed: `ccbGenerator.ts.LEGADO_PDFKit`, `ccbTemplateGenerator.ts.LEGADO_v1`, etc.
 - ✅ `clicksign-integration.ts` corrected to use template-based CCB generation (preserves logo/formatting)
@@ -27,6 +27,13 @@ Error handling: Create structured documentation for automatic consultation durin
   - Fixed DocumentViewer to handle `ccb_gerado: false` state gracefully
   - Removed special character "✓" that caused pdf-lib encoding errors
   - Eliminated "[OBJECT] [OBJECT]" errors from URL parsing issues
+- ✅ **MASSIVE COORDINATE MAPPING UPDATE:** User provided complete coordinate mapping from DEBUG GRID analysis:
+  - Processed 55+ field coordinates across pages 1, 2 and 8 of CCB template
+  - Created `server/config/ccbCoordinates.ts` with all mapped positions
+  - Implemented `server/utils/ccbFieldFiller.ts` for automatic field population
+  - Updated `ccbGenerationService.ts` to use new coordinate-based system
+  - All fields now positioned with pixel-perfect accuracy based on actual measurements
+  - Brazilian formatting (CPF, CEP, currency) automatically applied to all fields
 
 ## System Architecture
 
