@@ -158,57 +158,110 @@ class ClickSignService {
         throw new Error('Document key is required');
       }
 
-      // Correct ClickSign API endpoint - just /downloads/{key}
-      const downloadUrl = `${this.config.apiUrl}/downloads/${documentKey}?access_token=${this.config.apiToken}`;
-      
-      console.log(`[CLICKSIGN] 🔗 Download URL: ${this.config.apiUrl}/downloads/${documentKey}?access_token=***`);
-      
-      const response = await fetch(downloadUrl, {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/pdf',
-          'Content-Type': 'application/json'
-        }
-      });
+      // Strategy: Try multiple endpoints based on ClickSign documentation
+      const endpoints = [
+        `/downloads/${documentKey}`,  // Original attempt
+        `/documents/${documentKey}/download`,  // Standard RESTful pattern
+        `/documents/${documentKey}`,  // Simple document access
+        `/lists/${documentKey}/download`,  // Legacy lists API
+        `/lists/${documentKey}`,  // Legacy lists access
+      ];
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`[CLICKSIGN] ❌ Download failed: ${response.status} - ${errorText.substring(0, 500)}`);
+      console.log(`[CLICKSIGN] 🔍 Testing ${endpoints.length} possible endpoints for document: ${documentKey}`);
+
+      for (let i = 0; i < endpoints.length; i++) {
+        const endpoint = endpoints[i];
+        const downloadUrl = `${this.config.apiUrl}${endpoint}?access_token=${this.config.apiToken}`;
         
-        // If document is not ready, ClickSign returns specific status
-        if (response.status === 202) {
-          throw new Error('Document is still being processed. Please try again in a few moments.');
-        }
+        console.log(`[CLICKSIGN] 🔗 Attempt ${i + 1}/${endpoints.length}: ${this.config.apiUrl}${endpoint}?access_token=***`);
         
-        // Try alternative endpoint if first one fails
-        if (response.status === 404) {
-          console.log(`[CLICKSIGN] 🔄 Trying alternative endpoint...`);
-          const altUrl = `${this.config.apiUrl}/documents/${documentKey}?access_token=${this.config.apiToken}`;
-          
-          const altResponse = await fetch(altUrl, {
+        try {
+          const response = await fetch(downloadUrl, {
             method: 'GET',
             headers: {
-              'Accept': 'application/pdf'
+              'Accept': 'application/pdf',
+              'Authorization': `Bearer ${this.config.apiToken}`,
+              'User-Agent': 'Simpix-Integration/1.0'
             }
           });
-          
-          if (altResponse.ok) {
-            const arrayBuffer = await altResponse.arrayBuffer();
-            const buffer = Buffer.from(arrayBuffer);
-            console.log(`[CLICKSIGN] ✅ Document downloaded via alternative endpoint: ${buffer.length} bytes`);
-            return buffer;
+
+          console.log(`[CLICKSIGN] 📊 Response ${i + 1}: Status ${response.status}, Content-Type: ${response.headers.get('content-type')}`);
+
+          if (response.ok) {
+            const contentType = response.headers.get('content-type');
+            
+            // Check if it's actually a PDF
+            if (contentType && contentType.includes('application/pdf')) {
+              const arrayBuffer = await response.arrayBuffer();
+              const buffer = Buffer.from(arrayBuffer);
+              
+              // Validate PDF magic bytes
+              if (buffer.length > 4 && buffer.toString('ascii', 0, 4) === '%PDF') {
+                console.log(`[CLICKSIGN] ✅ SUCCESS! Document downloaded via endpoint ${endpoint}: ${buffer.length} bytes`);
+                return buffer;
+              } else {
+                console.log(`[CLICKSIGN] ⚠️ Response not a valid PDF from ${endpoint}`);
+              }
+            } else if (contentType && contentType.includes('application/json')) {
+              // Could be JSON with download URL
+              const jsonResponse = await response.json();
+              console.log(`[CLICKSIGN] 📋 JSON Response from ${endpoint}:`, JSON.stringify(jsonResponse, null, 2));
+              
+              // Check if JSON contains download URL
+              if (jsonResponse.download_url || jsonResponse.downloadUrl) {
+                const pdfUrl = jsonResponse.download_url || jsonResponse.downloadUrl;
+                console.log(`[CLICKSIGN] 🔗 Found PDF URL in JSON: ${pdfUrl}`);
+                
+                const pdfResponse = await fetch(pdfUrl);
+                if (pdfResponse.ok) {
+                  const pdfBuffer = Buffer.from(await pdfResponse.arrayBuffer());
+                  if (pdfBuffer.length > 4 && pdfBuffer.toString('ascii', 0, 4) === '%PDF') {
+                    console.log(`[CLICKSIGN] ✅ SUCCESS! PDF downloaded from URL: ${pdfBuffer.length} bytes`);
+                    return pdfBuffer;
+                  }
+                }
+              }
+            } else {
+              const textResponse = await response.text();
+              console.log(`[CLICKSIGN] 📄 Text response from ${endpoint}:`, textResponse.substring(0, 200));
+            }
+          } else {
+            const errorText = await response.text();
+            console.log(`[CLICKSIGN] ❌ Endpoint ${endpoint} failed: ${response.status} - ${errorText.substring(0, 200)}`);
           }
+        } catch (endpointError) {
+          console.log(`[CLICKSIGN] ❌ Error with endpoint ${endpoint}:`, endpointError instanceof Error ? endpointError.message : endpointError);
         }
-        
-        throw new Error(`Failed to download document: ${response.status} ${response.statusText}`);
       }
 
-      // Get the PDF buffer
-      const arrayBuffer = await response.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
+      // If all endpoints failed, check if document exists with a simple GET
+      console.log(`[CLICKSIGN] 🔍 All download endpoints failed. Checking document existence...`);
       
-      console.log(`[CLICKSIGN] ✅ Document downloaded successfully: ${buffer.length} bytes`);
-      return buffer;
+      try {
+        const checkUrl = `${this.config.apiUrl}/documents/${documentKey}?access_token=${this.config.apiToken}`;
+        const checkResponse = await fetch(checkUrl, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${this.config.apiToken}`
+          }
+        });
+
+        if (checkResponse.ok) {
+          const docInfo = await checkResponse.json();
+          console.log(`[CLICKSIGN] 📋 Document info:`, JSON.stringify(docInfo, null, 2));
+          
+          if (docInfo.status && docInfo.status !== 'signed') {
+            throw new Error(`Document is not ready for download. Status: ${docInfo.status}`);
+          }
+        } else {
+          console.log(`[CLICKSIGN] ❌ Document check failed: ${checkResponse.status}`);
+        }
+      } catch (checkError) {
+        console.log(`[CLICKSIGN] ⚠️ Could not check document status:`, checkError instanceof Error ? checkError.message : checkError);
+      }
+
+      throw new Error(`Failed to download document from any endpoint. Document key: ${documentKey}`);
     } catch (error) {
       console.error('[CLICKSIGN] ❌ Document download failed:', error);
       throw error;
