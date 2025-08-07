@@ -22,6 +22,11 @@ Error handling: Create structured documentation for automatic consultation durin
   - `ccbCoordinateMapper.ts` - Dynamic adjustment system with presets
   - `ccb-coordinate-test.ts` - Testing endpoints for iterative refinement
   - Template now displays with Simpix logo and properly positioned data fields
+- ✅ **URL ROUTING FIX:** Resolved "Erro ao carregar status do CCB" caused by malformed API URLs:
+  - Frontend now consistently uses `/api/formalizacao/{id}/ccb` endpoint
+  - Fixed DocumentViewer to handle `ccb_gerado: false` state gracefully
+  - Removed special character "✓" that caused pdf-lib encoding errors
+  - Eliminated "[OBJECT] [OBJECT]" errors from URL parsing issues
 
 ## System Architecture
 

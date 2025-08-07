@@ -31,38 +31,45 @@ export function DocumentViewer({ propostaId, documents, ccbDocumentoUrl }: Docum
   const [ccbRealUrl, setCcbRealUrl] = useState<string | null>(null);
   const [ccbLoading, setCcbLoading] = useState(false);
 
-  // Fetch real CCB URL if we have a CCB endpoint URL
+  // Fetch real CCB URL - sempre usar endpoint padrão da API
   useEffect(() => {
     const fetchCcbUrl = async () => {
-      if (ccbDocumentoUrl && ccbDocumentoUrl.startsWith('/api/propostas/')) {
+      if (propostaId) {
         setCcbLoading(true);
         try {
           const { api } = await import('@/lib/apiClient');
-          const response = await api.get(ccbDocumentoUrl);
-          setCcbRealUrl(response.data?.url || response.url);
+          // ✅ CORREÇÃO: Sempre usar endpoint padrão para buscar CCB
+          const response = await api.get(`/api/formalizacao/${propostaId}/ccb`);
+          
+          if (response.ccb_gerado === false) {
+            // CCB ainda não foi gerada - não mostrar na lista
+            setCcbRealUrl(null);
+          } else if (response.publicUrl) {
+            setCcbRealUrl(response.publicUrl);
+          } else {
+            setCcbRealUrl(null);
+          }
         } catch (error) {
-          console.error('Erro ao buscar URL da CCB:', error);
+          console.error('Erro ao buscar status da CCB:', error);
           setCcbRealUrl(null);
         } finally {
           setCcbLoading(false);
         }
-      } else if (ccbDocumentoUrl) {
-        setCcbRealUrl(ccbDocumentoUrl);
       }
     };
 
     fetchCcbUrl();
-  }, [ccbDocumentoUrl]);
+  }, [propostaId]);
 
-  // Prepare all documents list including CCB
+  // Prepare all documents list including CCB (apenas se foi gerada)
   const allDocuments: Document[] = [
     ...documents,
-    // Show loading state while fetching CCB URL, or show actual CCB when ready
-    ...(ccbDocumentoUrl ? [{
+    // Mostrar CCB apenas se foi carregada com sucesso
+    ...(ccbRealUrl ? [{
       name: "CCB - Cédula de Crédito Bancário",
-      url: ccbLoading ? "#loading" : (ccbRealUrl || "#error"),
+      url: ccbRealUrl,
       type: "application/pdf",
-      uploadDate: ccbLoading ? "Carregando..." : "Sistema"
+      uploadDate: "Sistema"
     }] : [])
   ];
 

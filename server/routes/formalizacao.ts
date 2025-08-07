@@ -158,8 +158,10 @@ router.get('/:proposalId/ccb', jwtAuthMiddleware, async (req, res) => {
     const proposal = result[0];
 
     if (!proposal.ccb_gerado || !proposal.caminho_ccb) {
-      return res.status(404).json({ 
-        error: 'CCB ainda não foi gerado' 
+      return res.status(200).json({ 
+        ccb_gerado: false,
+        message: 'CCB ainda não foi gerado para esta proposta',
+        status: 'pendente'
       });
     }
 

@@ -512,10 +512,19 @@ export default function Formalizacao() {
   // Função para visualizar CCB
   const viewCCB = async (propostaId: string) => {
     try {
-      const response = await apiRequest(`/api/propostas/${propostaId}/ccb-url`);
-      if (response.url) {
+      // ✅ CORREÇÃO: Usar endpoint de formalização padrão
+      const response = await apiRequest(`/api/formalizacao/${propostaId}/ccb`);
+      if (response.ccb_gerado === false) {
+        toast({
+          title: "CCB não disponível",
+          description: "A CCB ainda não foi gerada para esta proposta",
+          variant: "destructive",
+        });
+        return;
+      }
+      if (response.publicUrl) {
         // Abrir em nova aba
-        window.open(response.url, '_blank');
+        window.open(response.publicUrl, '_blank');
       }
     } catch (error) {
       console.error('Erro ao visualizar CCB:', error);
@@ -1531,8 +1540,17 @@ export default function Formalizacao() {
                                   <Button
                                     onClick={async () => {
                                       try {
-                                        const response = await apiRequest(`/api/propostas/${proposta.id}/ccb-url`);
-                                        setCcbUrl(response.url);
+                                        // ✅ CORREÇÃO: Usar endpoint de formalização correto
+                                        const response = await apiRequest(`/api/formalizacao/${proposta.id}/ccb`);
+                                        if (response.ccb_gerado === false) {
+                                          toast({
+                                            title: "CCB não disponível",
+                                            description: "A CCB ainda não foi gerada para esta proposta",
+                                            variant: "destructive",
+                                          });
+                                          return;
+                                        }
+                                        setCcbUrl(response.publicUrl);
                                         setShowCcbViewer(true);
                                       } catch (error) {
                                         toast({
