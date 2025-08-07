@@ -4028,6 +4028,10 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
   // CCB Diagnostics routes
   const ccbDiagnosticsRouter = (await import('./routes/ccb-diagnostics')).default;
   app.use('/api/ccb-diagnostics', ccbDiagnosticsRouter);
+  
+  // CCB Coordinate Mapper routes
+  const ccbCoordinateMapperRouter = (await import('./routes/ccb-coordinate-mapper')).default;
+  app.use('/api/ccb-mapper', ccbCoordinateMapperRouter);
 
   // Register Semgrep MCP routes - Projeto Cérbero
   const securityMCPRoutes = (await import('./routes/security-mcp.js')).default;
