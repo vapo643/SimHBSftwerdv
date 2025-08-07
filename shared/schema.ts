@@ -159,6 +159,8 @@ export const propostas = pgTable("propostas", {
   
   // New formalization tracking fields (January 29, 2025)
   ccbGerado: boolean("ccb_gerado").notNull().default(false),
+  caminhoCcb: text("caminho_ccb"), // Caminho do CCB gerado
+  ccbGeradoEm: timestamp("ccb_gerado_em"), // Data de geração do CCB
   assinaturaEletronicaConcluida: boolean("assinatura_eletronica_concluida").notNull().default(false),
   biometriaConcluida: boolean("biometria_concluida").notNull().default(false),
   caminhoCcbAssinado: text("caminho_ccb_assinado"),
