@@ -4070,6 +4070,37 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
     res.json({ message: "Valid test response", timestamp: new Date().toISOString() });
   });
 
+  // 🧪 CCB TEST ENDPOINT: Generate CCB without auth for coordinate testing
+  app.post("/api/test/generate-ccb/:proposalId", async (req, res) => {
+    try {
+      const { proposalId } = req.params;
+      console.log('🧪 [CCB TEST] Generating CCB for proposal:', proposalId);
+      
+      const { ccbGenerationService } = await import('./services/ccbGenerationService');
+      const result = await ccbGenerationService.generateCCB(proposalId);
+      
+      if (!result.success) {
+        return res.status(500).json({
+          success: false,
+          error: result.error
+        });
+      }
+      
+      console.log('✅ [CCB TEST] CCB generated successfully:', result.pdfPath);
+      res.json({
+        success: true,
+        message: 'CCB gerado com sucesso para teste',
+        pdfPath: result.pdfPath
+      });
+    } catch (error) {
+      console.error('❌ [CCB TEST] Error:', error);
+      res.status(500).json({
+        success: false,
+        error: error instanceof Error ? error.message : 'Erro desconhecido'
+      });
+    }
+  });
+
   app.get("/api/test/timing-invalid", timingNormalizerMiddleware, async (req, res) => {
     // Immediate response for invalid ID  
     res.status(404).json({ message: "Invalid test response", timestamp: new Date().toISOString() });
