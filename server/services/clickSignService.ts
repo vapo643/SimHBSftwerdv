@@ -158,23 +158,46 @@ class ClickSignService {
         throw new Error('Document key is required');
       }
 
-      // ClickSign API endpoint for downloading documents
-      const downloadUrl = `${this.config.apiUrl}/documents/${documentKey}/download?access_token=${this.config.apiToken}`;
+      // Correct ClickSign API endpoint - just /downloads/{key}
+      const downloadUrl = `${this.config.apiUrl}/downloads/${documentKey}?access_token=${this.config.apiToken}`;
+      
+      console.log(`[CLICKSIGN] 🔗 Download URL: ${this.config.apiUrl}/downloads/${documentKey}?access_token=***`);
       
       const response = await fetch(downloadUrl, {
         method: 'GET',
         headers: {
-          'Accept': 'application/pdf'
+          'Accept': 'application/pdf',
+          'Content-Type': 'application/json'
         }
       });
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error(`[CLICKSIGN] ❌ Download failed: ${response.status} - ${errorText}`);
+        console.error(`[CLICKSIGN] ❌ Download failed: ${response.status} - ${errorText.substring(0, 500)}`);
         
         // If document is not ready, ClickSign returns specific status
         if (response.status === 202) {
           throw new Error('Document is still being processed. Please try again in a few moments.');
+        }
+        
+        // Try alternative endpoint if first one fails
+        if (response.status === 404) {
+          console.log(`[CLICKSIGN] 🔄 Trying alternative endpoint...`);
+          const altUrl = `${this.config.apiUrl}/documents/${documentKey}?access_token=${this.config.apiToken}`;
+          
+          const altResponse = await fetch(altUrl, {
+            method: 'GET',
+            headers: {
+              'Accept': 'application/pdf'
+            }
+          });
+          
+          if (altResponse.ok) {
+            const arrayBuffer = await altResponse.arrayBuffer();
+            const buffer = Buffer.from(arrayBuffer);
+            console.log(`[CLICKSIGN] ✅ Document downloaded via alternative endpoint: ${buffer.length} bytes`);
+            return buffer;
+          }
         }
         
         throw new Error(`Failed to download document: ${response.status} ${response.statusText}`);
