@@ -15,6 +15,303 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useFieldPositioner } from '@/hooks/useFieldPositioner';
 import { useToast } from '@/hooks/use-toast';
 
+// PDF Upload Component
+const PDFUploader: React.FC<{ onPdfUploaded: (url: string) => void }> = ({ onPdfUploaded }) => {
+  const [isDragOver, setIsDragOver] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const { toast } = useToast();
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+
+    const files = Array.from(e.dataTransfer.files);
+    const pdfFile = files.find(file => file.type === 'application/pdf');
+
+    if (!pdfFile) {
+      toast({
+        title: "Arquivo Inválido",
+        description: "Por favor, selecione um arquivo PDF.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    await uploadPdf(pdfFile);
+  };
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      await uploadPdf(file);
+    }
+  };
+
+  const uploadPdf = async (file: File) => {
+    setIsUploading(true);
+    try {
+      // Create form data for upload
+      const formData = new FormData();
+      formData.append('template', file);
+
+      // Get auth token
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+
+      // Upload to server
+      const response = await fetch('/api/pdf-upload/upload', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error('Upload failed');
+      }
+
+      const result = await response.json();
+      
+      if (result.success) {
+        // Use the server URL for the uploaded PDF
+        onPdfUploaded(result.accessUrl);
+        
+        toast({
+          title: "PDF Carregado",
+          description: `${file.name} foi enviado e está pronto para uso!`
+        });
+      } else {
+        throw new Error(result.error || 'Upload failed');
+      }
+
+    } catch (error) {
+      console.error('PDF upload error:', error);
+      
+      // Fallback to local URL for immediate use
+      const tempUrl = URL.createObjectURL(file);
+      onPdfUploaded(tempUrl);
+      
+      toast({
+        title: "PDF Carregado (Local)",
+        description: `${file.name} carregado localmente. Upload para servidor falhou.`,
+        variant: "default"
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const loadDefaultTemplate = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/template/template-info', {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      const info = await response.json();
+      
+      if (info.exists) {
+        onPdfUploaded('/public/template.pdf');
+        toast({
+          title: "Template Carregado",
+          description: "Template CCB padrão carregado com sucesso!"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar o template padrão.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  return (
+    <div className="text-center space-y-4 p-8">
+      <h3 className="text-lg font-medium text-gray-700">Carregar Template PDF</h3>
+      
+      {/* Upload Area */}
+      <div
+        className={`border-2 border-dashed rounded-lg p-8 transition-colors ${
+          isDragOver 
+            ? 'border-blue-500 bg-blue-50' 
+            : 'border-gray-300 bg-white hover:border-gray-400'
+        }`}
+        onDrop={handleDrop}
+        onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
+        onDragLeave={() => setIsDragOver(false)}
+      >
+        <div className="space-y-4">
+          <div className="mx-auto w-16 h-16 text-gray-400">
+            📄
+          </div>
+          
+          {isUploading ? (
+            <div>
+              <p className="text-gray-600">Carregando PDF...</p>
+              <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                <div className="bg-blue-600 h-2 rounded-full animate-pulse" style={{ width: '60%' }}></div>
+              </div>
+            </div>
+          ) : (
+            <>
+              <p className="text-gray-600">
+                Arraste e solte um arquivo PDF aqui
+              </p>
+              <p className="text-sm text-gray-500">ou</p>
+              <label className="cursor-pointer">
+                <input
+                  type="file"
+                  accept=".pdf"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                />
+                <Button className="bg-blue-600 hover:bg-blue-700">
+                  Selecionar Arquivo PDF
+                </Button>
+              </label>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Default Template Option */}
+      <div className="border-t pt-4">
+        <p className="text-sm text-gray-500 mb-2">ou use o template padrão:</p>
+        <Button 
+          variant="outline" 
+          onClick={loadDefaultTemplate}
+          className="w-full"
+        >
+          Carregar Template CCB Padrão
+        </Button>
+      </div>
+
+      {/* Debug Options */}
+      <div className="border-t pt-4 space-y-2">
+        <p className="text-xs text-gray-400">Debug:</p>
+        <div className="flex gap-2 justify-center">
+          <Button 
+            size="sm" 
+            variant="ghost"
+            onClick={async () => {
+              const response = await fetch('/api/template/test');
+              const result = await response.json();
+              console.log('Template test:', result);
+              toast({ title: "Debug", description: JSON.stringify(result) });
+            }}
+          >
+            Testar API
+          </Button>
+          <Button 
+            size="sm" 
+            variant="ghost"
+            onClick={() => window.open('/public/template.pdf', '_blank')}
+          >
+            Abrir PDF Direto
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// PDF Viewer Component with fallbacks
+const PDFViewer: React.FC<{
+  pdfUrl: string;
+  zoom: number;
+  currentPage: number;
+  onLoadError: () => void;
+}> = ({ pdfUrl, zoom, currentPage, onLoadError }) => {
+  const [loadMethod, setLoadMethod] = useState<'iframe' | 'object' | 'embed' | 'failed'>('iframe');
+  const [hasError, setHasError] = useState(false);
+
+  const handleError = () => {
+    if (!hasError) {
+      setHasError(true);
+      
+      // Try different loading methods in sequence
+      if (loadMethod === 'iframe') {
+        setLoadMethod('object');
+      } else if (loadMethod === 'object') {
+        setLoadMethod('embed');
+      } else if (loadMethod === 'embed') {
+        setLoadMethod('failed');
+        onLoadError();
+      }
+    }
+  };
+
+  // Reset error state when URL changes
+  React.useEffect(() => {
+    setHasError(false);
+    setLoadMethod('iframe');
+  }, [pdfUrl]);
+
+  const commonStyles = {
+    transform: `scale(${zoom})`,
+    transformOrigin: 'top left',
+    width: `${100 / zoom}%`,
+    height: `${100 / zoom}%`
+  };
+
+  if (loadMethod === 'iframe') {
+    return (
+      <iframe
+        src={`${pdfUrl}#page=${currentPage}`}
+        className="w-full h-full border-0"
+        style={commonStyles}
+        title={`Template CCB - Página ${currentPage}`}
+        onError={handleError}
+        onLoad={() => console.log('📄 Iframe loaded successfully')}
+      />
+    );
+  }
+
+  if (loadMethod === 'object') {
+    return (
+      <object
+        data={`${pdfUrl}#page=${currentPage}`}
+        type="application/pdf"
+        className="w-full h-full"
+        style={commonStyles}
+        onError={handleError}
+      >
+        <p>PDF cannot be displayed. <a href={pdfUrl} target="_blank">Open in new tab</a></p>
+      </object>
+    );
+  }
+
+  if (loadMethod === 'embed') {
+    return (
+      <embed
+        src={`${pdfUrl}#page=${currentPage}`}
+        type="application/pdf"
+        className="w-full h-full"
+        style={commonStyles}
+        onError={handleError}
+      />
+    );
+  }
+
+  // Fallback when all methods fail
+  return (
+    <div className="w-full h-full flex items-center justify-center bg-gray-50">
+      <div className="text-center space-y-4">
+        <div className="text-4xl text-gray-400">📄</div>
+        <div>
+          <p className="text-gray-600 mb-2">Não foi possível exibir o PDF diretamente</p>
+          <Button onClick={() => window.open(pdfUrl, '_blank')}>
+            Abrir PDF em Nova Aba
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 interface FieldPosition {
   id: string;
   name: string;
@@ -286,42 +583,22 @@ const DragDropFieldPositioner: React.FC<DragDropFieldPositionerProps> = ({
                 <div className="absolute inset-0">
                   {/* Try multiple approaches for PDF display */}
                   
-                  {/* Primary: iframe approach */}
-                  <iframe
-                    src={`${templatePdfUrl}#page=${currentPage}&view=FitH&toolbar=0&navpanes=0`}
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      width: '100%',
-                      height: '100%',
-                      border: 'none',
-                      pointerEvents: 'none',
-                      opacity: 0.8,
-                      zIndex: 1
-                    }}
-                    title={`Template CCB - Página ${currentPage}`}
-                    onLoad={() => console.log('✅ PDF iframe loaded')}
-                    onError={() => console.error('❌ PDF iframe failed')}
-                  />
-
-                  {/* Fallback: embed approach */}
-                  <embed
-                    src={`${templatePdfUrl}#page=${currentPage}&view=FitH&toolbar=0&navpanes=0`}
-                    type="application/pdf"
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      width: '100%',
-                      height: '100%',
-                      border: 'none',
-                      pointerEvents: 'none',
-                      opacity: 0.6,
-                      zIndex: 0
-                    }}
-                    title={`Template CCB Fallback - Página ${currentPage}`}
-                  />
+                  {/* Enhanced PDF Viewer with multiple fallbacks */}
+                  <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', opacity: 0.8, zIndex: 1 }}>
+                    <PDFViewer 
+                      pdfUrl={templatePdfUrl} 
+                      zoom={1} 
+                      currentPage={currentPage}
+                      onLoadError={() => {
+                        toast({
+                          title: "Erro ao carregar PDF",
+                          description: "Tentando abrir em nova aba...",
+                          variant: "default"
+                        });
+                        window.open(templatePdfUrl, '_blank');
+                      }}
+                    />
+                  </div>
                   
                   {/* Debug info and controls */}
                   <div className="absolute top-2 right-2 bg-black bg-opacity-70 text-white text-xs p-2 rounded space-y-1">
@@ -335,24 +612,20 @@ const DragDropFieldPositioner: React.FC<DragDropFieldPositionerProps> = ({
                       >
                         Abrir PDF
                       </Button>
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        className="text-xs px-1 py-0"
+                        onClick={() => setTemplatePdfUrl(null)}
+                      >
+                        Trocar PDF
+                      </Button>
                     </div>
                   </div>
                 </div>
               ) : (
                 <div className="absolute inset-0 bg-gray-100 flex items-center justify-center">
-                  <div className="text-center">
-                    <p className="text-gray-500 mb-2">Carregando template PDF...</p>
-                    <Button 
-                      onClick={async () => {
-                        const response = await fetch('/api/template/test');
-                        const result = await response.json();
-                        console.log('Template test result:', result);
-                      }}
-                      className="text-xs"
-                    >
-                      Testar PDF
-                    </Button>
-                  </div>
+                  <PDFUploader onPdfUploaded={setTemplatePdfUrl} />
                 </div>
               )}
               

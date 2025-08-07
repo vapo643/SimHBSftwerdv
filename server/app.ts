@@ -7,7 +7,12 @@ import { config } from "./lib/config";
 import { log } from "./vite";
 import { setupSecurityHeaders, additionalSecurityHeaders, setupCORS } from "./lib/security-headers";
 import { inputSanitizerMiddleware } from "./lib/input-sanitizer";
-import { securityLogger, SecurityEventType, getClientIP } from "./lib/security-logger";
+import { securityLogger, SecurityEventType } from "./lib/simple-security-logger";
+
+// Simple helper function for getting client IP
+function getClientIP(req: any): string {
+  return req.ip || req.connection.remoteAddress || req.socket.remoteAddress || 'unknown';
+}
 import { urlTokenValidator } from "./middleware/url-token-validator";
 import { csrfProtection } from "./middleware/csrfProtection";
 import { strictCSP } from "./middleware/strictCSP";

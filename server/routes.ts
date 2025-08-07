@@ -18,7 +18,12 @@ import { setupSecurityRoutes } from "./routes/security.js";
 import emailChangeRoutes from "./routes/email-change";
 import cobrancasRoutes from "./routes/cobrancas";
 import { getBrasiliaDate, formatBrazilianDateTime, generateApprovalDate, getBrasiliaTimestamp } from "./lib/timezone";
-import { securityLogger, SecurityEventType, getClientIP } from './lib/security-logger';
+import { securityLogger, SecurityEventType } from './lib/simple-security-logger';
+
+// Simple helper function for getting client IP  
+function getClientIP(req: any): string {
+  return req.ip || req.connection.remoteAddress || req.socket.remoteAddress || 'unknown';
+}
 import { passwordSchema, validatePassword } from "./lib/password-validator";
 import { timingNormalizerMiddleware } from "./middleware/timing-normalizer";
 import timingSecurityRoutes from "./routes/timing-security";
@@ -4042,6 +4047,10 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
   // Template PDF routes (public endpoints for PDF serving)
   const templatePdfRouter = (await import('./routes/template-pdf')).default;
   app.use('/api/template', templatePdfRouter);
+
+  // PDF Upload routes (authenticated PDF upload and management)
+  const pdfUploadRouter = (await import('./routes/pdf-upload')).default;
+  app.use('/api/pdf-upload', pdfUploadRouter);
 
   // Public PDF endpoint (no auth) for iframe viewing
   app.get('/public/template.pdf', async (req, res) => {
