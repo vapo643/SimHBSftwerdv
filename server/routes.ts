@@ -17,6 +17,7 @@ import { setupSecurityRoutes } from "./routes/security.js";
 import emailChangeRoutes from "./routes/email-change";
 import cobrancasRoutes from "./routes/cobrancas";
 import monitoringRoutes from "./routes/monitoring";
+import ccbIntelligentTestRoutes from "./routes/ccb-intelligent-test";
 import { getBrasiliaDate, formatBrazilianDateTime, generateApprovalDate, getBrasiliaTimestamp } from "./lib/timezone";
 import { securityLogger, SecurityEventType, getClientIP } from './lib/security-logger';
 import { passwordSchema, validatePassword } from "./lib/password-validator";
@@ -4016,6 +4017,9 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
   
   // Register Monitoring routes (Admin only)
   app.use('/api/monitoring', jwtAuthMiddleware, requireAdmin, monitoringRoutes);
+  
+  // Register CCB V2 Intelligent Test routes
+  app.use('/api/ccb-test-v2', ccbIntelligentTestRoutes);
   
   // Register Observações routes
   const observacoesRouter = (await import('./routes/observacoes.js')).default;
