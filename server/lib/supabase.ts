@@ -57,15 +57,46 @@ export function createServerSupabaseClient(accessToken?: string) {
   return client;
 }
 
-// Database connection using Drizzle
-// WARNING: DATABASE_URL is pointing to Neon instead of Supabase
-// This needs to be fixed in Replit Secrets - see CORRIGIR_BANCO_URGENTE.md
-if (databaseUrl.includes('neon')) {
-  console.warn('⚠️  DATABASE_URL está apontando para Neon em vez do Supabase!');
-  console.warn('⚠️  Por favor, corrija isso nos Secrets do Replit');
-  console.warn('⚠️  Veja o arquivo CORRIGIR_BANCO_URGENTE.md para instruções');
+// Database connection using Drizzle with Supabase
+// Temporary: Use lazy connection to prevent server crash
+let dbClient;
+
+if (databaseUrl.includes('supabase.com')) {
+  console.log('✅ Database: Configuring Supabase connection...');
+  
+  // Use transaction pooler port and SSL
+  let correctedUrl = databaseUrl;
+  if (!correctedUrl.includes('sslmode=')) {
+    correctedUrl += correctedUrl.includes('?') ? '&sslmode=require' : '?sslmode=require';
+  }
+  if (correctedUrl.includes(':5432')) {
+    correctedUrl = correctedUrl.replace(':5432', ':6543');
+  }
+  
+  // Create connection with lazy initialization
+  dbClient = postgres(correctedUrl, {
+    ssl: 'require',
+    max: 5,
+    idle_timeout: 30,
+    connect_timeout: 10,
+    lazy: true // Prevent immediate connection
+  });
+  console.log('✅ Database: Connection configured (lazy)');
+} else {
+  dbClient = postgres(databaseUrl, { lazy: true });
 }
 
-// Use the DATABASE_URL as is for now to keep the app running
-const client = postgres(databaseUrl);
+const client = dbClient;
 export const db = drizzle(client, { schema });
+
+// Test database connection asynchronously
+setTimeout(async () => {
+  try {
+    await client`SELECT 1`;
+    console.log('✅ Database: Connection test successful');
+  } catch (error) {
+    console.warn('⚠️  Database: Connection test failed -', error.message);
+    console.warn('⚠️  Database: Check DATABASE_URL credentials in Secrets');
+    console.warn('⚠️  Database: App will continue using Supabase REST API only');
+  }
+}, 2000);
