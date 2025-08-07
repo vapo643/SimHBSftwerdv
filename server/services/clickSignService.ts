@@ -257,6 +257,11 @@ class ClickSignService {
           }
         } catch (endpointError) {
           console.log(`[CLICKSIGN] ❌ Error with endpoint ${endpoint}:`, endpointError instanceof Error ? endpointError.message : endpointError);
+          
+          // If it's a "not signed yet" error, propagate immediately
+          if (endpointError instanceof Error && endpointError.message.includes('not signed yet')) {
+            throw endpointError;
+          }
         }
       }
 
