@@ -65,6 +65,8 @@ const DragDropFieldPositioner: React.FC<DragDropFieldPositionerProps> = ({
     const loadTemplate = async () => {
       try {
         const token = localStorage.getItem('token');
+        console.log('🔍 Loading template info with token:', token ? 'Present' : 'Missing');
+        
         const response = await fetch('/api/template/template-info', {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -72,13 +74,17 @@ const DragDropFieldPositioner: React.FC<DragDropFieldPositionerProps> = ({
         });
         const info = await response.json();
         
+        console.log('📄 Template info response:', info);
+        
         if (info.exists) {
-          setTemplatePdfUrl('/api/template/ccb-template.pdf');
+          // Use public endpoint for PDF viewing (no auth required)
+          setTemplatePdfUrl('/public/template.pdf');
+          console.log('✅ Template PDF URL set successfully');
         } else {
-          console.warn('Template PDF not found');
+          console.warn('❌ Template PDF not found:', info);
         }
       } catch (error) {
-        console.error('Error loading template info:', error);
+        console.error('❌ Error loading template info:', error);
       }
     };
 
@@ -276,21 +282,78 @@ const DragDropFieldPositioner: React.FC<DragDropFieldPositionerProps> = ({
               onMouseLeave={handleMouseUp}
             >
               {/* PDF Background */}
-              {templatePdfUrl && (
-                <iframe
-                  src={`${templatePdfUrl}#page=${currentPage}&view=FitH`}
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '100%',
-                    border: 'none',
-                    pointerEvents: 'none', // Allow clicks to pass through
-                    opacity: 0.8
-                  }}
-                  title={`Template CCB - Página ${currentPage}`}
-                />
+              {templatePdfUrl ? (
+                <div className="absolute inset-0">
+                  {/* Try multiple approaches for PDF display */}
+                  
+                  {/* Primary: iframe approach */}
+                  <iframe
+                    src={`${templatePdfUrl}#page=${currentPage}&view=FitH&toolbar=0&navpanes=0`}
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: '100%',
+                      border: 'none',
+                      pointerEvents: 'none',
+                      opacity: 0.8,
+                      zIndex: 1
+                    }}
+                    title={`Template CCB - Página ${currentPage}`}
+                    onLoad={() => console.log('✅ PDF iframe loaded')}
+                    onError={() => console.error('❌ PDF iframe failed')}
+                  />
+
+                  {/* Fallback: embed approach */}
+                  <embed
+                    src={`${templatePdfUrl}#page=${currentPage}&view=FitH&toolbar=0&navpanes=0`}
+                    type="application/pdf"
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: '100%',
+                      border: 'none',
+                      pointerEvents: 'none',
+                      opacity: 0.6,
+                      zIndex: 0
+                    }}
+                    title={`Template CCB Fallback - Página ${currentPage}`}
+                  />
+                  
+                  {/* Debug info and controls */}
+                  <div className="absolute top-2 right-2 bg-black bg-opacity-70 text-white text-xs p-2 rounded space-y-1">
+                    <div>PDF: {templatePdfUrl?.split('/').pop()}</div>
+                    <div>Página: {currentPage}/8</div>
+                    <div className="flex gap-1">
+                      <Button 
+                        size="sm" 
+                        className="text-xs px-1 py-0"
+                        onClick={() => window.open(templatePdfUrl, '_blank')}
+                      >
+                        Abrir PDF
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="absolute inset-0 bg-gray-100 flex items-center justify-center">
+                  <div className="text-center">
+                    <p className="text-gray-500 mb-2">Carregando template PDF...</p>
+                    <Button 
+                      onClick={async () => {
+                        const response = await fetch('/api/template/test');
+                        const result = await response.json();
+                        console.log('Template test result:', result);
+                      }}
+                      className="text-xs"
+                    >
+                      Testar PDF
+                    </Button>
+                  </div>
+                </div>
               )}
               
               {/* Overlay for field positioning */}

@@ -10,41 +10,8 @@ import path from 'path';
 
 const router = Router();
 
-// Protect all routes
-router.use(jwtAuthMiddleware);
-
-/**
- * Serve the CCB template PDF for visual mapping
- */
-router.get('/ccb-template.pdf', async (req, res) => {
-  try {
-    const templatePath = path.resolve(process.cwd(), 'server/templates/template_ccb.pdf');
-    
-    // Check if template exists
-    await fs.access(templatePath);
-    
-    // Set appropriate headers
-    res.set({
-      'Content-Type': 'application/pdf',
-      'Content-Disposition': 'inline; filename="template_ccb.pdf"',
-      'Cache-Control': 'public, max-age=3600' // Cache for 1 hour
-    });
-
-    // Send the file
-    res.sendFile(templatePath);
-    
-    console.log('📄 [TEMPLATE PDF] Template CCB served for visual mapping');
-
-  } catch (error) {
-    console.error('❌ [TEMPLATE PDF] Error serving template:', error);
-    res.status(404).json({ error: 'Template PDF not found' });
-  }
-});
-
-/**
- * Get template info (dimensions, pages, etc.)
- */
-router.get('/template-info', async (req, res) => {
+// Template info requires auth
+router.get('/template-info', jwtAuthMiddleware, async (req, res) => {
   try {
     const templatePath = path.resolve(process.cwd(), 'server/templates/template_ccb.pdf');
     
@@ -70,5 +37,66 @@ router.get('/template-info', async (req, res) => {
     });
   }
 });
+
+/**
+ * Test endpoint to verify PDF accessibility (no auth needed for testing)
+ */
+router.get('/test', async (req, res) => {
+  try {
+    const templatePath = path.resolve(process.cwd(), 'server/templates/template_ccb.pdf');
+    const exists = await fs.access(templatePath).then(() => true).catch(() => false);
+    const stats = exists ? await fs.stat(templatePath) : null;
+    
+    res.json({
+      message: 'Template PDF test - OK',
+      templatePath,
+      exists,
+      size: stats?.size || 0,
+      pdfUrl: '/api/template/ccb-template.pdf',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * Serve the CCB template PDF for visual mapping (no auth for iframe compatibility)
+ */
+router.get('/ccb-template.pdf', async (req, res) => {
+  try {
+    const templatePath = path.resolve(process.cwd(), 'server/templates/template_ccb.pdf');
+    
+    console.log('📄 [TEMPLATE PDF] Request for template:', {
+      path: templatePath,
+      exists: await fs.access(templatePath).then(() => true).catch(() => false)
+    });
+    
+    // Check if template exists
+    await fs.access(templatePath);
+    
+    // Set appropriate headers for PDF viewing
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': 'inline; filename="template_ccb.pdf"',
+      'Cache-Control': 'public, max-age=3600',
+      'X-Frame-Options': 'SAMEORIGIN', // Allow iframe from same origin
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET',
+      'Access-Control-Allow-Headers': 'Authorization, Content-Type'
+    });
+
+    // Send the file
+    res.sendFile(templatePath);
+    
+    console.log('✅ [TEMPLATE PDF] Template CCB served successfully for visual mapping');
+
+  } catch (error) {
+    console.error('❌ [TEMPLATE PDF] Error serving template:', error);
+    res.status(404).json({ error: 'Template PDF not found', path: path.resolve(process.cwd(), 'server/templates/template_ccb.pdf') });
+  }
+});
+
+
 
 export default router;

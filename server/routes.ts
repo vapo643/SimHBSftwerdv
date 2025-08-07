@@ -7,6 +7,7 @@ import { requireAdmin, requireManagerOrAdmin, requireAnyRole, requireRoles } fro
 import { enforceRoutePermissions, requireAnalyst, requireFinanceiro, filterProposalsByRole } from "./lib/role-based-access";
 import { insertPropostaSchema, updatePropostaSchema, insertGerenteLojaSchema, insertLojaSchema, updateLojaSchema, propostaLogs, propostas } from "@shared/schema";
 import { z } from "zod";
+import path from 'path';
 import multer from "multer";
 import originationRoutes from "./routes/origination.routes";
 import { clickSignRouter } from "./routes/clicksign.js";
@@ -4038,9 +4039,31 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
   const fieldPositionerRouter = (await import('./routes/field-positioner')).default;
   app.use('/api/field-positioner', fieldPositionerRouter);
   
-  // Template PDF routes
+  // Template PDF routes (public endpoints for PDF serving)
   const templatePdfRouter = (await import('./routes/template-pdf')).default;
   app.use('/api/template', templatePdfRouter);
+
+  // Public PDF endpoint (no auth) for iframe viewing
+  app.get('/public/template.pdf', async (req, res) => {
+    try {
+      const templatePath = path.resolve(process.cwd(), 'server/templates/template_ccb.pdf');
+      
+      console.log('📄 [PUBLIC PDF] Serving template without auth');
+      
+      // Set headers for PDF viewing
+      res.set({
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': 'inline; filename="template_ccb.pdf"',
+        'Cache-Control': 'public, max-age=3600',
+        'Access-Control-Allow-Origin': '*'
+      });
+
+      res.sendFile(templatePath);
+    } catch (error) {
+      console.error('❌ [PUBLIC PDF] Error:', error);
+      res.status(404).send('Template not found');
+    }
+  });
 
   // CCB Coordinate Debug routes  
   const ccbCoordinateDebugRouter = (await import('./routes/ccb-coordinate-debug')).default;
