@@ -49,6 +49,7 @@ const DragDropFieldPositioner: React.FC<DragDropFieldPositionerProps> = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [showSettings, setShowSettings] = useState(false);
   const [newFieldName, setNewFieldName] = useState('');
+  const [templatePdfUrl, setTemplatePdfUrl] = useState<string | null>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
 
@@ -58,6 +59,31 @@ const DragDropFieldPositioner: React.FC<DragDropFieldPositionerProps> = ({
       setFields(loadedPositions);
     }
   }, [loadedPositions]);
+
+  // Load template PDF URL
+  useEffect(() => {
+    const loadTemplate = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/template/template-info', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        const info = await response.json();
+        
+        if (info.exists) {
+          setTemplatePdfUrl('/api/template/ccb-template.pdf');
+        } else {
+          console.warn('Template PDF not found');
+        }
+      } catch (error) {
+        console.error('Error loading template info:', error);
+      }
+    };
+
+    loadTemplate();
+  }, []);
 
   // Predefined field templates
   const fieldTemplates = [
@@ -243,16 +269,41 @@ const DragDropFieldPositioner: React.FC<DragDropFieldPositionerProps> = ({
               style={{ 
                 width: '100%', 
                 height: `${(pageHeight / pageWidth) * 100}vh`,
-                maxHeight: '80vh',
-                backgroundImage: templateImageUrl ? `url(${templateImageUrl})` : undefined,
-                backgroundSize: 'contain',
-                backgroundRepeat: 'no-repeat',
-                backgroundPosition: 'center'
+                maxHeight: '80vh'
               }}
               onMouseMove={handleMouseMove}
               onMouseUp={handleMouseUp}
               onMouseLeave={handleMouseUp}
             >
+              {/* PDF Background */}
+              {templatePdfUrl && (
+                <iframe
+                  src={`${templatePdfUrl}#page=${currentPage}&view=FitH`}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    border: 'none',
+                    pointerEvents: 'none', // Allow clicks to pass through
+                    opacity: 0.8
+                  }}
+                  title={`Template CCB - Página ${currentPage}`}
+                />
+              )}
+              
+              {/* Overlay for field positioning */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  zIndex: 10
+                }}
+              >
               {currentPageFields.map((field) => (
                 <div
                   key={field.id}
@@ -270,7 +321,9 @@ const DragDropFieldPositioner: React.FC<DragDropFieldPositionerProps> = ({
                     padding: '2px 4px',
                     border: '1px solid #ccc',
                     borderRadius: '3px',
-                    minWidth: '80px'
+                    minWidth: '80px',
+                    zIndex: 15, // Above PDF but below overlays
+                    backgroundColor: selectedField === field.id ? 'rgba(59, 130, 246, 0.1)' : 'rgba(254, 240, 138, 0.9)'
                   }}
                   onMouseDown={(e) => handleMouseDown(e, field.id)}
                   title={`${field.name} (${field.x}, ${Math.round(convertToPDF(field.y))})`}
@@ -283,13 +336,14 @@ const DragDropFieldPositioner: React.FC<DragDropFieldPositionerProps> = ({
               ))}
               
               {currentPageFields.length === 0 && (
-                <div className="absolute inset-0 flex items-center justify-center text-gray-500">
-                  <div className="text-center">
+                <div className="absolute inset-0 flex items-center justify-center text-gray-500" style={{ zIndex: 20 }}>
+                  <div className="text-center bg-white bg-opacity-80 p-4 rounded">
                     <Move className="h-12 w-12 mx-auto mb-4 opacity-50" />
                     <p>Arraste campos aqui ou clique em "Adicionar Campo"</p>
                   </div>
                 </div>
               )}
+              </div>
             </div>
           </CardContent>
         </Card>

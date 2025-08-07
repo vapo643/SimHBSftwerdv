@@ -4037,6 +4037,10 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
   // Field Positioner routes
   const fieldPositionerRouter = (await import('./routes/field-positioner')).default;
   app.use('/api/field-positioner', fieldPositionerRouter);
+  
+  // Template PDF routes
+  const templatePdfRouter = (await import('./routes/template-pdf')).default;
+  app.use('/api/template', templatePdfRouter);
 
   // CCB Coordinate Debug routes  
   const ccbCoordinateDebugRouter = (await import('./routes/ccb-coordinate-debug')).default;

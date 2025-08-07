@@ -30,10 +30,12 @@ export function useFieldPositioner() {
   // Save positions mutation
   const savePositionsMutation = useMutation({
     mutationFn: async (positions: FieldPosition[]) => {
+      const token = localStorage.getItem('token');
       const response = await fetch('/api/field-positioner/save-positions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({ positions }),
       });
