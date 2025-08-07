@@ -44,13 +44,13 @@ router.get('/:proposalId/status', jwtAuthMiddleware, async (req, res) => {
       WHERE id = ${proposalId}
     `);
 
-    if (!result.rows || result.rows.length === 0) {
+    if (!result || result.length === 0) {
       return res.status(404).json({ 
         error: 'Proposta não encontrada' 
       });
     }
 
-    const proposal = result.rows[0];
+    const proposal = result[0];
 
     // Buscar timeline de eventos
     const logsResult = await db.execute(sql`
@@ -69,7 +69,7 @@ router.get('/:proposalId/status', jwtAuthMiddleware, async (req, res) => {
     res.json({
       success: true,
       proposal,
-      timeline: logsResult.rows || []
+      timeline: logsResult || []
     });
 
   } catch (error) {
@@ -149,13 +149,13 @@ router.get('/:proposalId/ccb', jwtAuthMiddleware, async (req, res) => {
       WHERE id = ${proposalId}
     `);
 
-    if (!result.rows || result.rows.length === 0) {
+    if (!result || result.length === 0) {
       return res.status(404).json({ 
         error: 'Proposta não encontrada' 
       });
     }
 
-    const proposal = result.rows[0];
+    const proposal = result[0];
 
     if (!proposal.ccb_gerado || !proposal.caminho_ccb) {
       return res.status(404).json({ 
@@ -166,7 +166,7 @@ router.get('/:proposalId/ccb', jwtAuthMiddleware, async (req, res) => {
     // Gerar URL assinada para download direto (válida por 1 hora)
     const { data: signedUrl, error } = await supabase.storage
       .from('documents')
-      .createSignedUrl(proposal.caminho_ccb, 3600);
+      .createSignedUrl(proposal.caminho_ccb as string, 3600);
 
     if (error) {
       console.error('❌ [FORMALIZACAO] Erro ao gerar URL assinada:', error);
@@ -258,7 +258,7 @@ router.get('/:proposalId/timeline', jwtAuthMiddleware, async (req, res) => {
 
     res.json({
       success: true,
-      timeline: result.rows || []
+      timeline: result || []
     });
 
   } catch (error) {

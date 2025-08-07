@@ -3950,7 +3950,7 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
   app.use('/api/pagamentos', pagamentosRouter);
   
   // Register Formalização routes
-  const formalizacaoRouter = (await import('./routes/formalizacao.js')).default;
+  const formalizacaoRouter = (await import('./routes/formalizacao')).default;
   app.use('/api/formalizacao', formalizacaoRouter);
 
   // Register Semgrep MCP routes - Projeto Cérbero
