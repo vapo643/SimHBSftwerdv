@@ -4024,6 +4024,10 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
   // Register Formalização routes
   const formalizacaoRouter = (await import('./routes/formalizacao')).default;
   app.use('/api/formalizacao', formalizacaoRouter);
+  
+  // CCB Diagnostics routes
+  const ccbDiagnosticsRouter = (await import('./routes/ccb-diagnostics')).default;
+  app.use('/api/ccb-diagnostics', ccbDiagnosticsRouter);
 
   // Register Semgrep MCP routes - Projeto Cérbero
   const securityMCPRoutes = (await import('./routes/security-mcp.js')).default;
