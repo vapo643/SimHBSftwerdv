@@ -73,13 +73,16 @@ class ClickSignService {
   private config: ClickSignConfig;
 
   constructor() {
+    // SEMPRE usar API de produção - conforme solicitado pelo usuário
     this.config = {
-      apiUrl: process.env.NODE_ENV === 'production' 
-        ? 'https://app.clicksign.com/api/v1'
-        : 'https://sandbox.clicksign.com/api/v1',
+      apiUrl: 'https://app.clicksign.com/api/v1',
       apiToken: process.env.CLICKSIGN_API_TOKEN || '',
-      environment: process.env.NODE_ENV === 'production' ? 'production' : 'sandbox'
+      environment: 'production'
     };
+
+    console.log('[CLICKSIGN V1] 🚀 Initialized in PRODUCTION mode (legal signatures)');
+    console.log('[CLICKSIGN V1] API URL:', this.config.apiUrl);
+    console.log('[CLICKSIGN V1] Token configured:', this.config.apiToken ? `${this.config.apiToken.substring(0, 12)}...` : 'NOT CONFIGURED');
 
     if (!this.config.apiToken) {
       console.warn('[CLICKSIGN] ⚠️ API token not configured. ClickSign integration will not work.');
