@@ -210,11 +210,11 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
                   size="sm"
                   onClick={() => regenerateCCBMutation.mutate()}
                   disabled={regenerateCCBMutation.isPending || isGenerating}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 border-blue-500 text-blue-600 hover:bg-blue-50"
                   data-testid="button-regenerate-ccb"
                 >
                   <RefreshCw className={`h-4 w-4 ${isGenerating ? 'animate-spin' : ''}`} />
-                  Regenerar
+                  {isGenerating ? 'Gerando...' : 'Gerar CCB Novamente'}
                 </Button>
               </div>
             </div>
@@ -224,6 +224,10 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
               <p>• Documento preenchido com os dados da proposta</p>
               <p>• Pronto para envio à assinatura eletrônica</p>
               <p>• Formato PDF com campos permanentes</p>
+              <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded text-blue-700">
+                <p className="font-medium text-sm">🔄 Teste de Template:</p>
+                <p className="text-xs">Use "Gerar CCB Novamente" para verificar se está usando o template original correto e preenchendo dados em cima do PDF fornecido.</p>
+              </div>
             </div>
           </div>
         ) : (
@@ -261,6 +265,10 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
               <p>• O documento será gerado automaticamente</p>
               <p>• Todos os campos serão preenchidos com os dados atuais</p>
               <p>• Após geração, você poderá visualizar e baixar o PDF</p>
+              <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded text-yellow-700">
+                <p className="font-medium text-sm">📄 Template Original:</p>
+                <p className="text-xs">O sistema usará o template PDF personalizado da Simpix (server/templates/template_ccb.pdf) e preencherá os campos em cima do documento original.</p>
+              </div>
             </div>
           </div>
         )}
