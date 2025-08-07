@@ -51,13 +51,19 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
         variant: 'default'
       });
       
-      // Invalidar queries relacionadas
-      queryClient.invalidateQueries({ queryKey: ['ccb', proposalId] });
+      // Invalidar queries relacionadas - usar chaves corretas
+      queryClient.invalidateQueries({ queryKey: [`/api/formalizacao/${proposalId}/ccb`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/propostas/${proposalId}/ccb-url`] });
       queryClient.invalidateQueries({ queryKey: ['proposta', proposalId] });
       queryClient.invalidateQueries({ queryKey: ['formalizacao-status', proposalId] });
       
       setIsGenerating(false);
       onCCBGenerated?.();
+      
+      // Forçar refetch após 500ms
+      setTimeout(() => {
+        queryClient.refetchQueries({ queryKey: [`/api/formalizacao/${proposalId}/ccb`] });
+      }, 500);
     },
     onError: (error: any) => {
       setIsGenerating(false);
@@ -80,15 +86,22 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
     onSuccess: () => {
       toast({
         title: 'CCB Regenerado!',
-        description: 'O documento foi regenerado com sucesso.',
+        description: 'O documento foi regenerado com sucesso com o novo template.',
         variant: 'default'
       });
       
-      // Invalidar queries
-      queryClient.invalidateQueries({ queryKey: ['ccb', proposalId] });
+      // Invalidar queries - usar a chave correta
+      queryClient.invalidateQueries({ queryKey: [`/api/formalizacao/${proposalId}/ccb`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/propostas/${proposalId}/ccb-url`] });
       queryClient.invalidateQueries({ queryKey: ['proposta', proposalId] });
+      queryClient.invalidateQueries({ queryKey: ['formalizacao-status', proposalId] });
       
       setIsGenerating(false);
+      
+      // Forçar refetch após 500ms para garantir atualização
+      setTimeout(() => {
+        queryClient.refetchQueries({ queryKey: [`/api/formalizacao/${proposalId}/ccb`] });
+      }, 500);
     },
     onError: (error: any) => {
       setIsGenerating(false);
@@ -225,8 +238,9 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
               <p>• Pronto para envio à assinatura eletrônica</p>
               <p>• Formato PDF com campos permanentes</p>
               <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded text-blue-700">
-                <p className="font-medium text-sm">🔄 Teste de Template:</p>
-                <p className="text-xs">Use "Gerar CCB Novamente" para verificar se está usando o template original correto e preenchendo dados em cima do PDF fornecido.</p>
+                <p className="font-medium text-sm">✅ Nova Arquitetura CCB:</p>
+                <p className="text-xs">Agora usando pdf-lib para preservar 100% do template original com logo e formatação.</p>
+                <p className="text-xs mt-1">Clique em "Gerar CCB Novamente" para criar nova versão com dados atualizados.</p>
               </div>
             </div>
           </div>
