@@ -3924,6 +3924,10 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
 
   // Register ClickSign routes
   app.use('/api/clicksign', clickSignRouter);
+  
+  // Register Webhook routes (ClickSign and Inter)
+  const webhookRouter = (await import('./routes/webhooks')).default;
+  app.use('/api/webhooks', webhookRouter);
   app.use('/webhooks/inter', interWebhookRouter);
 
   // Register Inter Collections routes FIRST (more specific route)

@@ -14,9 +14,10 @@ import { registerRoutes } from "./routes";
   const securityWS = setupSecurityWebSocket(server);
   log('🔐 Security WebSocket initialized');
 
-  // Initialize CCB Sync Service
-  const { ccbSyncService } = await import('./services/ccbSyncService.js');
-  log('🔄 CCB Sync Service initialized - Auto downloading signed CCBs');
+  // Initialize refactored CCB Sync Service (now as fallback polling)
+  const { ccbSyncService } = await import('./services/ccbSyncServiceRefactored');
+  ccbSyncService.startAutoSync(6); // Poll every 6 hours as safety net
+  log('🔄 CCB Sync Service initialized - Webhook primary, polling fallback every 6 hours');
 
   // Initialize autonomous security scanners
   const { getSecurityScanner } = await import('./lib/autonomous-security-scanner');
