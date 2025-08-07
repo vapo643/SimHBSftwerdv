@@ -115,13 +115,20 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
 
   const handleDownload = () => {
     if (ccbStatus?.signedUrl) {
-      window.open(ccbStatus.signedUrl, '_blank');
+      // Adicionar timestamp para forçar download da versão mais recente
+      const urlWithTimestamp = `${ccbStatus.signedUrl}&t=${Date.now()}`;
+      window.open(urlWithTimestamp, '_blank');
     }
   };
 
   const handleView = () => {
+    // Forçar refetch da URL mais recente antes de visualizar
+    queryClient.refetchQueries({ queryKey: [`/api/formalizacao/${proposalId}/ccb`] });
+    
     if (ccbStatus?.signedUrl) {
-      window.open(ccbStatus.signedUrl, '_blank');
+      // Adicionar timestamp para garantir versão mais recente
+      const urlWithTimestamp = `${ccbStatus.signedUrl}&t=${Date.now()}`;
+      window.open(urlWithTimestamp, '_blank');
     }
   };
 

@@ -1172,29 +1172,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       
+      console.log(`[CCB URL] Buscando URL para proposta: ${id}`);
+      
       const { createServerSupabaseAdminClient } = await import('./lib/supabase');
       const supabase = createServerSupabaseAdminClient();
       
-      // Buscar dados da proposta - usar caminho_ccb (não caminho_ccb_assinado)
+      // ✅ CORREÇÃO: Buscar dados MAIS RECENTES da proposta (força busca sem cache)
       const { data: proposta, error } = await supabase
         .from('propostas')
-        .select('ccb_gerado, caminho_ccb')
+        .select('ccb_gerado, caminho_ccb, ccb_gerado_em')
         .eq('id', id)
         .single();
       
       if (error || !proposta) {
+        console.log(`[CCB URL] ❌ Proposta não encontrada: ${error?.message}`);
         return res.status(404).json({ message: 'Proposta não encontrada' });
       }
       
-      if (!proposta.ccb_gerado || !proposta.caminho_ccb) {
-        return res.status(404).json({ message: 'CCB não gerada para esta proposta' });
+      if (!proposta.ccb_gerado) {
+        console.log(`[CCB URL] ❌ CCB não foi gerada ainda`);
+        return res.status(404).json({ message: 'CCB não foi gerada para esta proposta' });
+      }
+
+      // ✅ ESTRATÉGIA TRIPLA: Sempre verificar se há versão mais recente no storage
+      console.log(`[CCB URL] 💾 Caminho no banco: ${proposta.caminho_ccb || 'nenhum'}`);
+      
+      // Sempre buscar arquivos no storage para garantir versão mais recente
+      const { data: files } = await supabase.storage
+        .from('documents')
+        .list(`ccb/${id}`, { sortBy: { column: 'created_at', order: 'desc' } });
+      
+      let ccbPath = proposta.caminho_ccb; // Fallback para caminho do banco
+      
+      if (files && files.length > 0) {
+        // Sempre usar o arquivo mais recente do storage (mais confiável)
+        const latestFile = files[0];
+        const latestPath = `ccb/${id}/${latestFile.name}`;
+        
+        console.log(`[CCB URL] 📁 Arquivo mais recente no storage: ${latestFile.name} (${latestFile.created_at})`);
+        
+        // Usar arquivo mais recente se for diferente do banco ou se banco não tiver caminho
+        if (!ccbPath || latestPath !== ccbPath) {
+          ccbPath = latestPath;
+          console.log(`[CCB URL] ✅ Usando arquivo mais recente: ${ccbPath}`);
+        } else {
+          console.log(`[CCB URL] ✅ Banco está atualizado com a versão mais recente`);
+        }
+      } else {
+        console.log(`[CCB URL] ⚠️ Nenhum arquivo encontrado no storage para CCB/${id}`);
       }
       
-      // Gerar URL assinada usando caminho correto
-      const ccbPath = proposta.caminho_ccb;
+      if (!ccbPath) {
+        console.log(`[CCB URL] ❌ Nenhum arquivo CCB encontrado`);
+        return res.status(404).json({ message: 'Arquivo CCB não encontrado' });
+      }
       
-      console.log(`[CCB URL] Gerando URL assinada para CCB: ${ccbPath}`);
+      console.log(`[CCB URL] 🔗 Gerando URL assinada para: ${ccbPath}`);
+      console.log(`[CCB URL] 📅 CCB gerado em: ${proposta.ccb_gerado_em}`);
       
+      // Gerar URL assinada com cache-busting para forçar atualização
       const { data: signedUrlData, error: urlError } = await supabase.storage
         .from('documents')
         .createSignedUrl(ccbPath, 3600); // 1 hora
