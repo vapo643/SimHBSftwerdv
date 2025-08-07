@@ -1,0 +1,276 @@
+}
+[PAGAMENTOS CCB-URL] 🚀 Iniciando fluxo para proposta: 902183dd-b5d1-4e20-8a72-79d3d3559d4d
+[PAGAMENTOS CCB-URL] 📁 Caminho esperado no Storage: ccb/assinadas/902183dd-b5d1-4e20-8a72-79d3d3559d4d/ccb_assinada.pdf
+[PAGAMENTOS CCB-URL] ⚠️ CACHE MISS - Baixando do ClickSign...
+[PAGAMENTOS CCB-URL] 📥 Baixando documento: f8f372f6-b7f4-4117-8249-7511718aa1e1
+[CLICKSIGN] 📥 Downloading signed document: f8f372f6-b7f4-4117-8249-7511718aa1e1
+[CLICKSIGN] 🔍 Testing 5 possible endpoints for document: f8f372f6-b7f4-4117-8249-7511718aa1e1
+[CLICKSIGN] 🔗 Attempt 1/5: https://app.clicksign.com/api/v1/downloads/f8f372f6-b7f4-4117-8249-7511718aa1e1?access_token=***
+[CLICKSIGN] 📊 Response 1: Status 404, Content-Type: application/pdf; charset=utf-8
+[CLICKSIGN] ❌ Endpoint /downloads/f8f372f6-b7f4-4117-8249-7511718aa1e1 failed: 404 - <!--
+  toggle_internationalization_errors_pages_enabled
+  TODO: Remove this file
+-->
+<!DOCTYPE html>
+<html>
+<head>
+<title>Clicksign</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=
+[CLICKSIGN] 🔗 Attempt 2/5: https://app.clicksign.com/api/v1/documents/f8f372f6-b7f4-4117-8249-7511718aa1e1/download?access_token=***
+[CLICKSIGN] 📊 Response 2: Status 404, Content-Type: application/pdf; charset=utf-8
+[CLICKSIGN] ❌ Endpoint /documents/f8f372f6-b7f4-4117-8249-7511718aa1e1/download failed: 404 - <!--
+  toggle_internationalization_errors_pages_enabled
+  TODO: Remove this file
+-->
+<!DOCTYPE html>
+<html>
+<head>
+<title>Clicksign</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=
+[CLICKSIGN] 🔗 Attempt 3/5: https://app.clicksign.com/api/v1/documents/f8f372f6-b7f4-4117-8249-7511718aa1e1?access_token=***
+[CLICKSIGN] 📊 Response 3: Status 200, Content-Type: application/json; charset=utf-8
+[CLICKSIGN] 📋 JSON Response from /documents/f8f372f6-b7f4-4117-8249-7511718aa1e1: {
+  "document": {
+    "key": "f8f372f6-b7f4-4117-8249-7511718aa1e1",
+    "account_key": "a736652b-8d4e-495a-a8bf-75f14501e522",
+    "path": "/propostas/1754414193831.pdf",
+    "filename": "1754414193831.pdf",
+    "uploaded_at": "2025-08-05T17:16:34.236Z",
+    "updated_at": "2025-08-05T17:16:35.046Z",
+    "finished_at": null,
+    "deadline_at": "2025-09-04T14:16:33.831-03:00",
+    "status": "running",
+    "auto_close": true,
+    "locale": "pt-BR",
+    "metadata": {},
+    "sequence_enabled": false,
+    "signable_group": 1,
+    "remind_interval": null,
+    "block_after_refusal": true,
+    "preview": true,
+    "downloads": {
+      "original_file_url": "https://clicksign-content-production.s3.amazonaws.com/2025/08/05/17/16/34/15a7c481-2b60-43ae-9c2b-c57aab7c8f52/1754414193831.pdf?X-Amz-Expires=299&X-Amz-Date=20250807T131050Z&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEFQaCXVzLWVhc3QtMSJIMEYCIQDahBV6ApOjFgIVuCjWPF5c7SNBu366dmU%2BB3hmKKzZCgIhAJv5e8NOgGPWe8RC8xBm%2F3XakEa%2FmyxUfverdJbEm8ySKroFCI3%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEQABoMNjk2OTc2MzYwOTY3IgypVS%2B58VD%2FMNKxF%2BUqjgXXRGAgLQqNokk5quU3PD%2BuM%2F6KX3Lfr2mV9EqsaOEY%2Blyj1CxoRVDmodT6y89CybVNm%2FHc6wEv6HbDKEyfPNzhx0RPqi0bMJqrZ2HvgppFvXgFhvcIASzbuG3Zwn8CgXldlrpHo8ObVtcOhNDEbU3RRym5hc47SwUNY%2B0Mxvdz8CFTd5Ye%2FfD8Atjwuc%2FTBhQhn38IwAsM7cvW9%2F3shQ0UifKB7%2FEiaztno7RIGyS5CO9AKLonaH2TsEPXSIHlyvggQHiWg%2FAeW%2Bl8Os2aUdzzxjRagj92%2FmfcoObqRZ8TIg%2B3dPdfy2uKny3baJ7Qvz2d5VGrRA7Pf5T1wopgIdg0ETAqES6UJtAmE7nGZnlyNDW2SqBKpSoR%2FsTgx3b%2BUdFBysAQ42gXorwY8gHYwykal7jg9v92azX3EQiXXoIvGr7yCx4e21gIRCts9CC4ZB3IpULCTwvb2FLyRjdkFq%2FQG5RBkMDfpwD%2FAbQFIsV2orNSmo6Be4iIM%2BIfJHKgx%2F3rmPyaakOnT%2FtB5aEn6zhJZIc43PNsdBx%2FwNorFevnrO2MhWZ5LN84jKpqWbOI1PDz5s7cQy0x8ELIVmPXIjsCpFNNksmVP4vwMuCjEy6uHrF9TE6UOiMUsE8Jx3Ea6q1YyUmq1DaDTv%2Fku5DCCQ1RogDIy8jTMAGJqfiy%2B0%2Bfqg3SIy89AiNjGdlL3G4sVLDiortRj2Dfy9N%2FXnY5Ferlc61r244atvnOcN0%2FFPuwhzxTUTAaQJrK7xcXQj9jvXi82mK4sarijjS08iXs5%2FACqeATFokoO4w7S4nXUm1T%2BYcMG4urG9%2F6ag4E%2F9rXyg8aFhwVt3aqg77ZVJg8BypFWk%2BPb8lJDHJZzrUIBegwuaTSxAY6sAGW3wYuIplJgeszfqRp33UG0itEuX2w3nv1iv1Cag%2FwR%2F2XJ%2FjuIApgC03i5NRqNOIaGPBsHHPPdpQesU7gUVOa%2FS2AuMh22HWgNzBrJN4%2FZwCBeLg2uhcdV%2FqtGJbIDu0ikoE5O2J1WOfVCUikFvi3q3SrxHbh5M7gPB7b%2FTZJZPbaxL9K5nzHlFFMTE3i3HP2oNKcZ4s1b1jGFcemUeUVH0rP9OdYDXdaC34IA%2BDzcg%3D%3D&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIA2ERYHIYDQQRCBI2K%2F20250807%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-SignedHeaders=host&X-Amz-Signature=61d7343907063a1d0227b4716d5877e59893ede56869240936f0f70415b32791"
+    },
+    "template": null,
+    "signers": [
+      {
+        "list_key": "80c3a5c5-0bcd-4995-a485-c39ecea23095",
+        "key": "88e579b5-5913-44cb-ba9a-97df67ceb416",
+        "request_signature_key": "cb2d9120-ca3a-4400-a107-cffd833bd2c9",
+        "email": "gabrieldjesus238@gmail.com",
+        "name": "Gabriel de Jesus Santana Serri",
+        "has_documentation": true,
+        "documentation": "205.284.647-60",
+        "birthday": "2005-09-17",
+        "phone_number": "27998538565",
+        "sign_as": "sign",
+        "delivery": "email",
+        "refusable": false,
+        "url": "https://app.clicksign.com/sign/cb2d9120-ca3a-4400-a107-cffd833bd2c9",
+        "auths": [
+          "email"
+        ],
+        "created_at": "2025-08-05T17:16:34.865Z"
+      }
+    ],
+    "events": [
+      {
+        "name": "add_signer",
+        "data": {
+          "user": {
+            "email": "gabrielserri238@gmail.com",
+            "name": "Gabriel de jesus"
+          },
+          "account": {
+            "key": "a736652b-8d4e-495a-a8bf-75f14501e522"
+          },
+          "signers": [
+            {
+              "sign_as": "sign",
+              "key": "88e579b5-5913-44cb-ba9a-97df67ceb416",
+              "email": "gabrieldjesus238@gmail.com",
+              "name": "Gabriel de Jesus Santana Serri",
+              "birthday": "2005-09-17",
+              "documentation": "205.284.647-60",
+              "has_documentation": true,
+              "created_at": "2025-08-05T14:16:34.865-03:00",
+              "auths": [
+                "email"
+              ],
+              "selfie_enabled": false,
+              "handwritten_enabled": false,
+              "official_document_enabled": false,
+              "liveness_enabled": false,
+              "facial_biometrics_enabled": false,
+              "communicate_by": "email",
+              "list_key": "80c3a5c5-0bcd-4995-a485-c39ecea23095",
+              "url": "https://app.clicksign.com/sign/88e579b5-5913-44cb-ba9a-97df67ceb416",
+              "read_receipts?": false
+            }
+          ]
+        },
+        "occurred_at": "2025-08-05T17:16:35.072Z"
+      },
+      {
+        "name": "upload",
+        "data": {
+          "user": {
+            "email": "gabrielserri238@gmail.com",
+            "name": "Gabriel de jesus"
+          },
+          "account": {
+            "key": "a736652b-8d4e-495a-a8bf-75f14501e522"
+          },
+          "deadline_at": "2025-09-04T14:16:33.831-03:00",
+          "auto_close": true,
+          "locale": "pt-BR"
+        },
+        "occurred_at": "2025-08-05T17:16:34.339Z"
+      }
+    ],
+    "attachments": [],
+    "links": {
+      "self": "/accounts/589323/folders/175010236/documents/f8f372f6-b7f4-4117-8249-7511718aa1e1"
+    }
+  }
+}
+[CLICKSIGN] 🔗 Attempt 4/5: https://app.clicksign.com/api/v1/lists/f8f372f6-b7f4-4117-8249-7511718aa1e1/download?access_token=***
+[CLICKSIGN] 📊 Response 4: Status 404, Content-Type: application/pdf; charset=utf-8
+[CLICKSIGN] ❌ Endpoint /lists/f8f372f6-b7f4-4117-8249-7511718aa1e1/download failed: 404 - <!--
+  toggle_internationalization_errors_pages_enabled
+  TODO: Remove this file
+-->
+<!DOCTYPE html>
+<html>
+<head>
+<title>Clicksign</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=
+[CLICKSIGN] 🔗 Attempt 5/5: https://app.clicksign.com/api/v1/lists/f8f372f6-b7f4-4117-8249-7511718aa1e1?access_token=***
+[CLICKSIGN] 📊 Response 5: Status 404, Content-Type: application/json; charset=utf-8
+[CLICKSIGN] ❌ Endpoint /lists/f8f372f6-b7f4-4117-8249-7511718aa1e1 failed: 404 - <!--
+  toggle_internationalization_errors_pages_enabled
+  TODO: Remove this file
+-->
+<!DOCTYPE html>
+<html>
+<head>
+<title>Clicksign</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=
+[CLICKSIGN] 🔍 All download endpoints failed. Checking document existence...
+[CLICKSIGN] 📋 Document info: {
+  "document": {
+    "key": "f8f372f6-b7f4-4117-8249-7511718aa1e1",
+    "account_key": "a736652b-8d4e-495a-a8bf-75f14501e522",
+    "path": "/propostas/1754414193831.pdf",
+    "filename": "1754414193831.pdf",
+    "uploaded_at": "2025-08-05T17:16:34.236Z",
+    "updated_at": "2025-08-05T17:16:35.046Z",
+    "finished_at": null,
+    "deadline_at": "2025-09-04T14:16:33.831-03:00",
+    "status": "running",
+    "auto_close": true,
+    "locale": "pt-BR",
+    "metadata": {},
+    "sequence_enabled": false,
+    "signable_group": 1,
+    "remind_interval": null,
+    "block_after_refusal": true,
+    "preview": true,
+    "downloads": {
+      "original_file_url": "https://clicksign-content-production.s3.amazonaws.com/2025/08/05/17/16/34/15a7c481-2b60-43ae-9c2b-c57aab7c8f52/1754414193831.pdf?X-Amz-Expires=299&X-Amz-Date=20250807T131050Z&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEFUaCXVzLWVhc3QtMSJHMEUCIDNfbS%2BB7fqnhxJadYsTA7sn%2BqZC6hIUJBxWooEO93YbAiEAh1P1awMrfgCU82xRXnhlddgkDTEMkIOuBg9EZZftJq8quwUIjv%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARAAGgw2OTY5NzYzNjA5NjciDKjauBDwKwsOasIjTyqPBU960%2Fd%2FpxazqYmcctbj8Ow1iIbSwtMwS6Ilg5Lf1NUY1XwoRpc3GAd6ZUgc%2B0du5bC1qKna9A626Yrg48q3ZGKB8Jubz5n3GywZ%2FxVPCnBh7jGJNVqqMwdAsDGojYTx1NmiDMAzss%2Beqffjp6%2BqbT46nch9p5h3hDGHiW6hoAQ0usB1OA7kVL5NelTvYoDUpNNsd8ugkWjXgz0rL5CoRhxkwBXWKMpMIHS5VpZNPjyDWWZ3%2BJFzl7i4aEMN9anwqDE%2BkUWYe%2BLHg7lHLcX71GdBwvVrswDsiKdTFOuIx2BolJvSA8yxhQtb7b%2FAyDL5S3At0ERsXbnSFfcB7YKLdsrIuk5ACoppbc0kCtX3OEW%2BcyfW5zRSG643N3QRf49q2RQvPPrHqDrMjC6utN9Ao2W7UXG%2BhfNe08jTvwFY12IQ8oivMReP2BESjhk8n0a222AlIBibf6k0Z7HkoFfVwuTGbfJWFi%2BbP9bwSjEuSoMBiS4gse%2BRutR5Z5X38Y%2FrAOLxILiMq9DwMlPd8rUoB9pZmF35zXdPgbj3qFo2ou8qbBmI6188FDkV7hRIEfkOtuf2tz7CWbfuXf7om%2FwkryRHQkxbw6ScFQs%2BvBn46tuJdyUzYCBpyg%2BWzThXqcK0bdPDvA0yW86oHgtfqYjdZkYX3Bx%2FoTy%2BpH1mzexlIULF4ta7I6ikyVvIEpXsW8IBWMMfMd8bAbugoD4f7RU25XoEA8q7xXSm4d90C2543k6SYLTyr%2Fm7liyJgIjDGGxH1OanCuDIMpjnQX3KdedMTCvdyJ2Hrv6vxcBwfsQlE0VAqBaa6nwK5NF8pNd0NEcpOVUNtjodGD8d%2FQi8WJsksx5x1ns1noGEB7iIGlG0hIIw5MHSxAY6sQF5iAV%2BykVo3tcWR9erN5E%2Bs1Qno0o5aoIto6XSl0Ft6x0F74rYdRHPpyd1juQVeYgcCj9yueoc9qGkJXeB9quvUoVcuXDVFBIFnCGYqQr1SDYKK7vnpTOh5TrVBoZ7KZYl3cy4Ye7yyaRzlGkSVOCbS1nH%2BiHyX5%2BnZOntmpMOHHhydVbOWvX%2BPY%2FpU2Fk66WCaC6S6viY3yyWcvEfP0CdK5694Os%2BAngZ2Ynkki%2FURP4%3D&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIA2ERYHIYD3ECRZJOA%2F20250807%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-SignedHeaders=host&X-Amz-Signature=33b9b8cddd1a361166aeb543e8ed17d803dd9c1f72a8e6bb96478282c18fec71"
+    },
+    "template": null,
+    "signers": [
+      {
+        "list_key": "80c3a5c5-0bcd-4995-a485-c39ecea23095",
+        "key": "88e579b5-5913-44cb-ba9a-97df67ceb416",
+        "request_signature_key": "cb2d9120-ca3a-4400-a107-cffd833bd2c9",
+        "email": "gabrieldjesus238@gmail.com",
+        "name": "Gabriel de Jesus Santana Serri",
+        "has_documentation": true,
+        "documentation": "205.284.647-60",
+        "birthday": "2005-09-17",
+        "phone_number": "27998538565",
+        "sign_as": "sign",
+        "delivery": "email",
+        "refusable": false,
+        "url": "https://app.clicksign.com/sign/cb2d9120-ca3a-4400-a107-cffd833bd2c9",
+        "auths": [
+          "email"
+        ],
+        "created_at": "2025-08-05T17:16:34.865Z"
+      }
+    ],
+    "events": [
+      {
+        "name": "add_signer",
+        "data": {
+          "user": {
+            "email": "gabrielserri238@gmail.com",
+            "name": "Gabriel de jesus"
+          },
+          "account": {
+            "key": "a736652b-8d4e-495a-a8bf-75f14501e522"
+          },
+          "signers": [
+            {
+              "sign_as": "sign",
+              "key": "88e579b5-5913-44cb-ba9a-97df67ceb416",
+              "email": "gabrieldjesus238@gmail.com",
+              "name": "Gabriel de Jesus Santana Serri",
+              "birthday": "2005-09-17",
+              "documentation": "205.284.647-60",
+              "has_documentation": true,
+              "created_at": "2025-08-05T14:16:34.865-03:00",
+              "auths": [
+                "email"
+              ],
+              "selfie_enabled": false,
+              "handwritten_enabled": false,
+              "official_document_enabled": false,
+              "liveness_enabled": false,
+              "facial_biometrics_enabled": false,
+              "communicate_by": "email",
+              "list_key": "80c3a5c5-0bcd-4995-a485-c39ecea23095",
+              "url": "https://app.clicksign.com/sign/88e579b5-5913-44cb-ba9a-97df67ceb416",
+              "read_receipts?": false
+            }
+          ]
+        },
+        "occurred_at": "2025-08-05T17:16:35.072Z"
+      },
+      {
+        "name": "upload",
+        "data": {
+          "user": {
+            "email": "gabrielserri238@gmail.com",
+            "name": "Gabriel de jesus"
+          },
+          "account": {
+            "key": "a736652b-8d4e-495a-a8bf-75f14501e522"
+          },
+          "deadline_at": "2025-09-04T14:16:33.831-03:00",
+          "auto_close": true,
+          "locale": "pt-BR"
+        },
+        "occurred_at": "2025-08-05T17:16:34.339Z"
+      }
+    ],
+    "attachments": [],
+    "links": {
+      "self": "/accounts/589323/folders/175010236/documents/f8f372f6-b7f4-4117-8249-7511718aa1e1"
+    }
+  }
+}
+[CLICKSIGN] ❌ Document download failed: Error: Failed to download document from any endpoint. Document key: f8f372f6-b7f4-4117-8249-7511718aa1e1
+    at ClickSignService.downloadSignedDocument (/home/runner/workspace/server/services/clickSignService.ts:267:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes/pagamentos.ts:1394:27)
+[PAGAMENTOS CCB-URL] ❌ Erro ao baixar/salvar CCB: Error: Failed to download document from any endpoint. Document key: f8f372f6-b7f4-4117-8249-7511718aa1e1
+    at ClickSignService.downloadSignedDocument (/home/runner/workspace/server/services/clickSignService.ts:267:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes/pagamentos.ts:1394:27)

@@ -1429,11 +1429,22 @@ router.get("/:id/ccb-url", jwtAuthMiddleware, async (req: AuthenticatedRequest, 
         actualFilePath = storagePath;
         console.log(`[PAGAMENTOS CCB-URL] ✅ Arquivo salvo e banco atualizado`);
         
-      } catch (downloadError) {
+      } catch (downloadError: any) {
         console.error(`[PAGAMENTOS CCB-URL] ❌ Erro ao baixar/salvar CCB:`, downloadError);
+        
+        // Se o erro é que o documento ainda não foi assinado, informar status específico
+        if (downloadError.message && downloadError.message.includes('not signed yet')) {
+          return res.status(202).json({ 
+            error: "CCB ainda não foi assinada",
+            details: "O documento está aguardando assinatura eletrônica. Tente novamente em alguns minutos.",
+            status: "pending_signature",
+            retryAfter: 300 // 5 minutos
+          });
+        }
+        
         return res.status(500).json({ 
           error: "Erro ao obter CCB do ClickSign",
-          details: "Tente novamente em alguns instantes"
+          details: downloadError.message || "Tente novamente em alguns instantes"
         });
       }
     }

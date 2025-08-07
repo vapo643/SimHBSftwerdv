@@ -210,18 +210,41 @@ class ClickSignService {
               const jsonResponse = await response.json();
               console.log(`[CLICKSIGN] 📋 JSON Response from ${endpoint}:`, JSON.stringify(jsonResponse, null, 2));
               
-              // Check if JSON contains download URL
-              if (jsonResponse.download_url || jsonResponse.downloadUrl) {
-                const pdfUrl = jsonResponse.download_url || jsonResponse.downloadUrl;
-                console.log(`[CLICKSIGN] 🔗 Found PDF URL in JSON: ${pdfUrl}`);
+              // Check document status
+              if (jsonResponse.document) {
+                const doc = jsonResponse.document;
+                console.log(`[CLICKSIGN] 📊 Document status: ${doc.status}`);
                 
-                const pdfResponse = await fetch(pdfUrl);
-                if (pdfResponse.ok) {
-                  const pdfBuffer = Buffer.from(await pdfResponse.arrayBuffer());
-                  if (pdfBuffer.length > 4 && pdfBuffer.toString('ascii', 0, 4) === '%PDF') {
-                    console.log(`[CLICKSIGN] ✅ SUCCESS! PDF downloaded from URL: ${pdfBuffer.length} bytes`);
-                    return pdfBuffer;
+                if (doc.status === 'running') {
+                  throw new Error(`Document is not signed yet. Status: ${doc.status}. Please wait for signature completion.`);
+                }
+                
+                // Check for various download URL patterns
+                const downloadUrl = 
+                  jsonResponse.download_url || 
+                  jsonResponse.downloadUrl ||
+                  doc.download_url ||
+                  doc.downloadUrl ||
+                  (doc.downloads && doc.downloads.original_file_url) ||
+                  (doc.downloads && doc.downloads.signed_file_url);
+                
+                if (downloadUrl) {
+                  console.log(`[CLICKSIGN] 🔗 Found PDF URL in JSON: ${downloadUrl.substring(0, 100)}...`);
+                  
+                  const pdfResponse = await fetch(downloadUrl);
+                  if (pdfResponse.ok) {
+                    const pdfBuffer = Buffer.from(await pdfResponse.arrayBuffer());
+                    if (pdfBuffer.length > 4 && pdfBuffer.toString('ascii', 0, 4) === '%PDF') {
+                      console.log(`[CLICKSIGN] ✅ SUCCESS! PDF downloaded from URL: ${pdfBuffer.length} bytes`);
+                      return pdfBuffer;
+                    } else {
+                      console.log(`[CLICKSIGN] ⚠️ Downloaded file is not a valid PDF`);
+                    }
+                  } else {
+                    console.log(`[CLICKSIGN] ❌ Failed to download from URL: ${pdfResponse.status}`);
                   }
+                } else {
+                  console.log(`[CLICKSIGN] ⚠️ No download URL found in JSON response`);
                 }
               }
             } else {
