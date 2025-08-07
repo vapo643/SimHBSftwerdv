@@ -118,11 +118,27 @@ export const propostas = pgTable("propostas", {
   // Cliente dados adicionais (novos campos normalizados)
   clienteRg: text("cliente_rg"),
   clienteOrgaoEmissor: text("cliente_orgao_emissor"),
+  clienteRgUf: text("cliente_rg_uf"),
+  clienteRgDataEmissao: text("cliente_rg_data_emissao"),
   clienteEstadoCivil: text("cliente_estado_civil"),
   clienteNacionalidade: text("cliente_nacionalidade").default("Brasileira"),
+  clienteLocalNascimento: text("cliente_local_nascimento"),
+  
+  // Endereço detalhado
   clienteCep: text("cliente_cep"),
-  clienteEndereco: text("cliente_endereco"),
+  clienteEndereco: text("cliente_endereco"), // Campo legado - mantido para compatibilidade
+  clienteLogradouro: text("cliente_logradouro"),
+  clienteNumero: text("cliente_numero"),
+  clienteComplemento: text("cliente_complemento"),
+  clienteBairro: text("cliente_bairro"),
+  clienteCidade: text("cliente_cidade"),
+  clienteUf: text("cliente_uf"),
   clienteOcupacao: text("cliente_ocupacao"),
+  
+  // Dados para Pessoa Jurídica
+  tipoPessoa: text("tipo_pessoa").default("PF"), // PF ou PJ
+  clienteRazaoSocial: text("cliente_razao_social"),
+  clienteCnpj: text("cliente_cnpj"),
 
   // Empréstimo dados
   valor: decimal("valor", { precision: 15, scale: 2 }),
@@ -134,6 +150,20 @@ export const propostas = pgTable("propostas", {
   valorTac: decimal("valor_tac", { precision: 10, scale: 2 }),
   valorIof: decimal("valor_iof", { precision: 10, scale: 2 }),
   valorTotalFinanciado: decimal("valor_total_financiado", { precision: 15, scale: 2 }),
+  valorLiquidoLiberado: decimal("valor_liquido_liberado", { precision: 15, scale: 2 }),
+  
+  // Dados financeiros detalhados
+  jurosModalidade: text("juros_modalidade").default("pre_fixado"), // pre_fixado ou pos_fixado
+  periodicidadeCapitalizacao: text("periodicidade_capitalizacao").default("mensal"),
+  taxaJurosAnual: decimal("taxa_juros_anual", { precision: 5, scale: 2 }),
+  pracaPagamento: text("praca_pagamento").default("São Paulo"),
+  formaPagamento: text("forma_pagamento").default("boleto"), // boleto, pix, debito
+  anoBase: integer("ano_base").default(365),
+  tarifaTed: decimal("tarifa_ted", { precision: 10, scale: 2 }).default("10.00"),
+  taxaCredito: decimal("taxa_credito", { precision: 10, scale: 2 }),
+  dataLiberacao: timestamp("data_liberacao"),
+  formaLiberacao: text("forma_liberacao").default("deposito"), // deposito, ted, pix
+  calculoEncargos: text("calculo_encargos"),
 
   // Status e análise
   status: text("status").notNull(),
@@ -175,14 +205,25 @@ export const propostas = pgTable("propostas", {
   clicksignSignedAt: timestamp("clicksign_signed_at"),
 
   // Dados de Pagamento (Destino do empréstimo) - Added August 5, 2025
+  // Opção 1: Dados Bancários
   dadosPagamentoBanco: text("dados_pagamento_banco"),
+  dadosPagamentoCodigoBanco: text("dados_pagamento_codigo_banco"), // Código do banco (001, 237, etc)
   dadosPagamentoAgencia: text("dados_pagamento_agencia"),
   dadosPagamentoConta: text("dados_pagamento_conta"),
+  dadosPagamentoDigito: text("dados_pagamento_digito"), // Dígito da conta
   dadosPagamentoTipo: text("dados_pagamento_tipo"), // 'conta_corrente', 'conta_poupanca'
   dadosPagamentoNomeTitular: text("dados_pagamento_nome_titular"),
   dadosPagamentoCpfTitular: text("dados_pagamento_cpf_titular"),
-  dadosPagamentoPix: text("dados_pagamento_pix"), // Chave PIX se preferir
-  dadosPagamentoTipoPix: text("dados_pagamento_tipo_pix"), // CPF, Email, Telefone, Aleatória
+  
+  // Opção 2: PIX (relacionado à conta bancária)
+  dadosPagamentoPix: text("dados_pagamento_pix"), // Chave PIX
+  dadosPagamentoTipoPix: text("dados_pagamento_tipo_pix"), // CPF, CNPJ, Email, Telefone, Aleatória
+  dadosPagamentoPixBanco: text("dados_pagamento_pix_banco"), // Banco do PIX
+  dadosPagamentoPixNomeTitular: text("dados_pagamento_pix_nome_titular"), // Nome do titular do PIX
+  dadosPagamentoPixCpfTitular: text("dados_pagamento_pix_cpf_titular"), // CPF do titular do PIX
+  
+  // Método escolhido
+  metodoPagamento: text("metodo_pagamento").default("conta_bancaria"), // conta_bancaria ou pix
 
   // Comprovante de Pagamento - Added August 6, 2025
   urlComprovantePagamento: text("url_comprovante_pagamento"), // URL do comprovante no Supabase Storage
@@ -202,9 +243,12 @@ export const tabelasComerciais = pgTable("tabelas_comerciais", {
   id: serial("id").primaryKey(),
   nomeTabela: text("nome_tabela").notNull(),
   taxaJuros: decimal("taxa_juros", { precision: 5, scale: 2 }).notNull(),
+  taxaJurosAnual: decimal("taxa_juros_anual", { precision: 5, scale: 2 }), // Calculado da mensal
   prazos: integer("prazos").array().notNull(),
   parceiroId: integer("parceiro_id").references(() => parceiros.id),
   comissao: decimal("comissao", { precision: 5, scale: 2 }).notNull().default("0.00"),
+  calculoEncargos: text("calculo_encargos"), // Fórmula de cálculo
+  cetFormula: text("cet_formula"), // Como calcular CET
   createdAt: timestamp("created_at").defaultNow(),
   deletedAt: timestamp("deleted_at"), // Soft delete column
 });
@@ -224,6 +268,14 @@ export const produtos = pgTable("produtos", {
   isActive: boolean("is_active").notNull().default(true),
   tacValor: decimal("tac_valor", { precision: 10, scale: 2 }).default("0"),
   tacTipo: text("tac_tipo").notNull().default("fixo"),
+  
+  // Novos campos para CCB
+  modalidadeJuros: text("modalidade_juros").default("pre_fixado"), // pre_fixado ou pos_fixado
+  periodicidadeCapitalizacao: text("periodicidade_capitalizacao").default("mensal"),
+  anoBase: integer("ano_base").default(365),
+  tarifaTedPadrao: decimal("tarifa_ted_padrao", { precision: 10, scale: 2 }).default("10.00"),
+  taxaCreditoPadrao: decimal("taxa_credito_padrao", { precision: 10, scale: 2 }).default("50.00"),
+  
   createdAt: timestamp("created_at").defaultNow(),
   deletedAt: timestamp("deleted_at"), // Soft delete column
 });
@@ -286,6 +338,29 @@ export const referenciaPessoal = pgTable("referencia_pessoal", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Configuração da Empresa (Credor)
+export const configuracaoEmpresa = pgTable("configuracao_empresa", {
+  id: serial("id").primaryKey(),
+  
+  // Dados da Simpix (Credor)
+  razaoSocial: text("razao_social").notNull().default("SIMPIX LTDA"),
+  cnpj: text("cnpj").notNull().default("00.000.000/0001-00"),
+  endereco: text("endereco").notNull().default("Av. Paulista, 1000"),
+  complemento: text("complemento").default("10º andar"),
+  bairro: text("bairro").default("Bela Vista"),
+  cep: text("cep").notNull().default("01310-100"),
+  cidade: text("cidade").notNull().default("São Paulo"),
+  uf: text("uf").notNull().default("SP"),
+  telefone: text("telefone").default("(11) 3000-0000"),
+  email: text("email").default("contato@simpix.com.br"),
+  
+  // Configurações de CCB
+  pracaPagamentoPadrao: text("praca_pagamento_padrao").default("São Paulo"),
+  anoBasePadrao: integer("ano_base_padrao").default(365),
+  
+  createdAt: timestamp("created_at").defaultNow()
+});
+
 // Banco Inter Integration Tables
 export const interCollections = pgTable("inter_collections", {
   id: serial("id").primaryKey(),
@@ -306,6 +381,12 @@ export const interCollections = pgTable("inter_collections", {
   dataEmissao: text("data_emissao"),
   numeroParcela: integer("numero_parcela"), // Número da parcela (1, 2, 3...)
   totalParcelas: integer("total_parcelas"), // Total de parcelas
+  
+  // Novos campos para CCB
+  vencimentoPrimeiraParcela: text("vencimento_primeira_parcela"),
+  vencimentoUltimaParcela: text("vencimento_ultima_parcela"),
+  formaPagamento: text("forma_pagamento"), // boleto, pix, debito
+  
   isActive: boolean("is_active").default(true).notNull(),
   motivoCancelamento: text("motivo_cancelamento"), // Razão do cancelamento
   createdAt: timestamp("created_at").defaultNow(),

@@ -415,7 +415,7 @@ export class FieldDetector {
         const adjustedCoord = CoordinateAdjuster.smartAdjust(fieldName, coord);
         
         // Obter valor do campo
-        const value = this.getFieldValue(fieldName, data);
+        const value = await this.getFieldValue(fieldName, data);
         if (!value) {
           this.log(`Campo ${fieldName}: Sem valor para preencher`);
           continue;
@@ -502,36 +502,124 @@ export class FieldDetector {
   /**
    * Obtém valor do campo dos dados
    */
-  private getFieldValue(fieldName: string, data: any): string {
-    // Mapeamento corrigido e completo de campos para dados
+  private async getFieldValue(fieldName: string, data: any): Promise<string> {
+    // Buscar configuração da empresa (vamos simular por enquanto)
+    const configEmpresa = {
+      razaoSocial: 'SIMPIX LTDA',
+      cnpj: '00.000.000/0001-00',
+      endereco: 'Av. Paulista, 1000',
+      complemento: '10º andar',
+      bairro: 'Bela Vista',
+      cep: '01310-100',
+      cidade: 'São Paulo',
+      uf: 'SP'
+    };
+    
+    // Formatar endereço completo do cliente
+    const enderecoClienteCompleto = this.formatarEnderecoCompleto(data);
+    
+    // Formatar endereço completo do credor
+    const enderecoCredorCompleto = `${configEmpresa.endereco}, ${configEmpresa.complemento} - ${configEmpresa.bairro} - ${configEmpresa.cidade}/${configEmpresa.uf} - CEP ${configEmpresa.cep}`;
+    
+    // Determinar se é PF ou PJ
+    const isPJ = data.tipoPessoa === 'PJ';
+    const nomeOuRazao = isPJ ? (data.clienteRazaoSocial || data.clienteNome) : data.clienteNome;
+    const documentoIdentificacao = isPJ ? (data.clienteCnpj || data.clienteCpf) : data.clienteCpf;
+    
+    // Mapeamento completo com TODOS os campos novos
     const fieldMap: { [key: string]: string } = {
       // PÁGINA 1 - IDENTIFICAÇÃO E VALORES
       numeroCedula: data.id ? `CCB-${data.id.slice(0, 8).toUpperCase()}` : '',
-      dataEmissao: data.dataAprovacao ? new Date(data.dataAprovacao).toLocaleDateString('pt-BR') : 
+      dataEmissao: data.dataLiberacao ? new Date(data.dataLiberacao).toLocaleDateString('pt-BR') :
+                   data.dataAprovacao ? new Date(data.dataAprovacao).toLocaleDateString('pt-BR') : 
                    data.createdAt ? new Date(data.createdAt).toLocaleDateString('pt-BR') : 
                    new Date().toLocaleDateString('pt-BR'),
       finalidadeOperacao: data.finalidade || 'Capital de Giro',
-      cpfCnpj: data.clienteCpf || '',
-      nomeRazaoSocial: data.clienteNome || '',
-      rg: data.clienteRg || '', // CORRIGIDO: Agora usa clienteRg do banco
-      enderecoEmitente: data.clienteEndereco || '', // CORRIGIDO: Usa clienteEndereco do banco
-      razaoSocialCredor: 'SIMPIX LTDA',
-      enderecoCredor: 'Av. Paulista, 1000 - Bela Vista - São Paulo/SP - CEP 01310-100',
+      
+      // Dados do cliente COMPLETOS
+      cpfCnpj: documentoIdentificacao || '',
+      nomeRazaoSocial: nomeOuRazao || '',
+      rg: data.clienteRg || '',
+      rgOrgaoExpedidor: data.clienteOrgaoEmissor || data.clienteOrgaoExpedidor || '',
+      rgUf: data.clienteRgUf || '',
+      rgDataEmissao: data.clienteRgDataEmissao || '',
+      enderecoEmitente: enderecoClienteCompleto,
+      cidadeEmitente: data.clienteCidade || '',
+      ufEmitente: data.clienteUf || '',
+      cepEmitente: data.clienteCep || '',
+      nacionalidade: data.clienteNacionalidade || 'Brasileira',
+      estadoCivil: data.clienteEstadoCivil || '',
+      localNascimento: data.clienteLocalNascimento || '',
+      
+      // Dados do credor (empresa)
+      razaoSocialCredor: configEmpresa.razaoSocial,
+      cnpjCredor: configEmpresa.cnpj,
+      enderecoCredor: enderecoCredorCompleto,
+      cidadeCredor: configEmpresa.cidade,
+      ufCredor: configEmpresa.uf,
+      cepCredor: configEmpresa.cep,
+      
+      // Valores e taxas COMPLETOS
       valorPrincipal: this.formatCurrency(data.valor),
+      valorTac: this.formatCurrency(data.valorTac || data.tacValor || 50),
+      valorIof: this.formatCurrency(data.valorIof || this.calcularIOF(data.valor, data.prazo)),
+      valorTotalFinanciado: this.formatCurrency(data.valorTotalFinanciado || this.calcularTotalFinanciado(data)),
+      valorLiquidoLiberado: this.formatCurrency(data.valorLiquidoLiberado || this.calcularLiquidoLiberado(data)),
+      
+      // Juros e modalidades
+      jurosModalidade: data.jurosModalidade || data.modalidadeJuros || 'Pré-Fixados',
+      periodicidadeCapitalizacao: data.periodicidadeCapitalizacao || 'Mensal',
+      taxaJurosMensal: this.formatPercentual(data.taxaJuros || 2.5),
+      taxaJurosAnual: this.formatPercentual(data.taxaJurosAnual || this.calcularTaxaAnual(data.taxaJuros)),
       custoEfetivoTotal: this.calculateCET(data.taxaJuros, data.prazo),
       
-      // PÁGINA 2 - DADOS BANCÁRIOS CORRIGIDOS
-      numeroBancoEmitente: this.extractBankCode(data.dadosPagamentoBanco),
-      contaNumeroEmitente: this.formatAccountNumber(data.dadosPagamentoAgencia, data.dadosPagamentoConta),
-      nomeInstituicaoFavorecida: data.dadosPagamentoBanco || '',
+      // Prazos e datas
+      prazoAmortizacao: `${data.prazo || 1} meses`,
+      dataVencimentoPrimeira: this.calculateVencimento(data.dataLiberacao || data.createdAt, 1),
+      dataVencimentoUltima: this.calculateVencimento(data.dataLiberacao || data.createdAt, data.prazo || 1),
+      dataLiberacaoRecurso: data.dataLiberacao ? new Date(data.dataLiberacao).toLocaleDateString('pt-BR') : '',
+      
+      // Formas de pagamento
+      formaPagamento: data.formaPagamento || 'Boleto Bancário',
+      formaLiberacao: data.formaLiberacao || 'Depósito em Conta',
+      pracaPagamento: data.pracaPagamento || configEmpresa.cidade,
+      anoBase: `${data.anoBase || 365} dias`,
+      
+      // Tarifas
+      tarifaTed: this.formatCurrency(data.tarifaTed || 10),
+      taxaCredito: this.formatCurrency(data.taxaCredito || 50),
+      
+      // PÁGINA 2 - DADOS BANCÁRIOS COMPLETOS
+      // Detectar se é PIX ou conta bancária
+      numeroBancoEmitente: data.metodoPagamento === 'pix' ? 
+        this.extractBankCode(data.dadosPagamentoPixBanco) :
+        (data.dadosPagamentoCodigoBanco || this.extractBankCode(data.dadosPagamentoBanco)),
+      
+      contaNumeroEmitente: data.metodoPagamento === 'pix' ?
+        `PIX: ${data.dadosPagamentoPix}` :
+        this.formatAccountNumber(data.dadosPagamentoAgencia, data.dadosPagamentoConta, data.dadosPagamentoDigito),
+      
+      nomeInstituicaoFavorecida: data.metodoPagamento === 'pix' ?
+        data.dadosPagamentoPixBanco :
+        data.dadosPagamentoBanco || '',
+      
+      tipoContaEmitente: data.dadosPagamentoTipo || 'Conta Corrente',
+      nomeTitularConta: data.metodoPagamento === 'pix' ?
+        data.dadosPagamentoPixNomeTitular :
+        data.dadosPagamentoNomeTitular || '',
+      
+      cpfTitularConta: data.metodoPagamento === 'pix' ?
+        data.dadosPagamentoPixCpfTitular :
+        data.dadosPagamentoCpfTitular || '',
+      
       numeroContrato: data.id || '',
-      linhaDigitavelBoleto: data.linhaDigitavel || '', // Será preenchido pela integração Inter
+      linhaDigitavelBoleto: await this.buscarLinhaDigitavel(data.id) || '',
       
       // PÁGINA 8 - PAGAMENTOS
       ...this.generatePaymentFields(data)
     };
     
-    return fieldMap[fieldName] || '';
+    return await Promise.resolve(fieldMap[fieldName] || '');
   }
   
   /**
@@ -638,13 +726,13 @@ export class FieldDetector {
   }
   
   /**
-   * Formata número da conta com agência
+   * Formata número da conta com agência e dígito
    */
-  private formatAccountNumber(agencia: string, conta: string): string {
+  private formatAccountNumber(agencia: string, conta: string, digito?: string): string {
     if (!agencia && !conta) return '';
     
     const agenciaFormatted = agencia || '';
-    const contaFormatted = conta || '';
+    const contaFormatted = conta ? (digito ? `${conta}-${digito}` : conta) : '';
     
     if (agenciaFormatted && contaFormatted) {
       return `Ag: ${agenciaFormatted} / C/C: ${contaFormatted}`;
@@ -654,6 +742,91 @@ export class FieldDetector {
       return `C/C: ${contaFormatted}`;
     }
     
+    return '';
+  }
+  
+  /**
+   * Formata endereço completo do cliente
+   */
+  private formatarEnderecoCompleto(data: any): string {
+    // Se tiver endereço detalhado, usar
+    if (data.clienteLogradouro) {
+      const partes = [
+        data.clienteLogradouro,
+        data.clienteNumero ? `nº ${data.clienteNumero}` : '',
+        data.clienteComplemento,
+        data.clienteBairro,
+        data.clienteCidade ? `${data.clienteCidade}/${data.clienteUf || ''}` : '',
+        data.clienteCep ? `CEP ${data.clienteCep}` : ''
+      ].filter(Boolean);
+      
+      return partes.join(', ');
+    }
+    
+    // Senão, usar campo legado
+    return data.clienteEndereco || '';
+  }
+  
+  /**
+   * Calcula IOF
+   */
+  private calcularIOF(valor: number, prazo: number): number {
+    if (!valor || !prazo) return 0;
+    
+    // IOF = 0,38% + 0,0082% ao dia
+    const iofFixo = valor * 0.0038;
+    const iofDiario = valor * 0.000082 * (prazo * 30); // Aproximado
+    
+    return iofFixo + iofDiario;
+  }
+  
+  /**
+   * Calcula valor total financiado
+   */
+  private calcularTotalFinanciado(data: any): number {
+    const valor = Number(data.valor) || 0;
+    const tac = Number(data.valorTac || data.tacValor) || 50;
+    const iof = Number(data.valorIof) || this.calcularIOF(valor, data.prazo);
+    
+    return valor + tac + iof;
+  }
+  
+  /**
+   * Calcula valor líquido liberado
+   */
+  private calcularLiquidoLiberado(data: any): number {
+    const valor = Number(data.valor) || 0;
+    const tac = Number(data.valorTac || data.tacValor) || 50;
+    const tarifaTed = Number(data.tarifaTed) || 10;
+    const taxaCredito = Number(data.taxaCredito) || 50;
+    
+    return valor - tac - tarifaTed - taxaCredito;
+  }
+  
+  /**
+   * Calcula taxa anual a partir da mensal
+   */
+  private calcularTaxaAnual(taxaMensal: number): number {
+    if (!taxaMensal) return 0;
+    
+    // Taxa anual = ((1 + taxa_mensal)^12 - 1) * 100
+    return (Math.pow(1 + taxaMensal / 100, 12) - 1) * 100;
+  }
+  
+  /**
+   * Formata percentual
+   */
+  private formatPercentual(valor: number): string {
+    if (!valor) return '0,00%';
+    return `${valor.toFixed(2).replace('.', ',')}%`;
+  }
+  
+  /**
+   * Busca linha digitável do boleto
+   */
+  private async buscarLinhaDigitavel(propostaId: string): Promise<string> {
+    // TODO: Implementar busca real na tabela inter_collections
+    // Por enquanto retorna vazio
     return '';
   }
   
