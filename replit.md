@@ -16,7 +16,12 @@ Error handling: Create structured documentation for automatic consultation durin
 - ✅ `/ccb-url` endpoint enhanced to always fetch latest version from storage
 - ✅ Error Documentation System implemented in `/error_docs/`
 - ✅ Storage error fixes: Admin client for Supabase Storage operations
-- ✅ **TEMPLATE FIX:** Replaced generic template with actual Simpix CCB template containing logo (CCB SIMPIX (1)_1754063031025.pdf)
+- ✅ **BREAKTHROUGH:** Template file issue resolved - replaced 16KB generic with 564KB real Simpix template
+- ✅ **COORDINATE MAPPING SYSTEM:** Implemented professional field positioning architecture:
+  - `ccbFieldMapping.ts` - Pre-defined coordinates for all CCB fields
+  - `ccbCoordinateMapper.ts` - Dynamic adjustment system with presets
+  - `ccb-coordinate-test.ts` - Testing endpoints for iterative refinement
+  - Template now displays with Simpix logo and properly positioned data fields
 
 ## System Architecture
 
@@ -49,7 +54,7 @@ Error handling: Create structured documentation for automatic consultation durin
     - Anti-fragile RBAC implementation
 - **Credit Simulation**: Real-time credit simulation API using Tabela Price, IOF, TAC, and CET calculations, integrated with commercial tables.
 - **Document Management**: Secure private bucket for document storage with signed URLs, organized folder structure, and multi-format support. Enhanced with admin client authentication and automatic fallback for missing files.
-- **PDF Generation**: Template-based CCB generation using user's exact PDF template with `pdf-lib` for precise field filling. Fully implemented and tested with Supabase Storage integration. Includes automatic regeneration fallback and admin client for Storage operations.
+- **PDF Generation**: Template-based CCB generation using authentic Simpix template (564KB) with `pdf-lib` for precise field filling. **BREAKTHROUGH RESOLUTION:** Discovered and fixed critical template file issue (was using 16KB generic instead of real Simpix template). Includes professional coordinate mapping system for accurate field positioning, dynamic adjustment capabilities, and comprehensive testing framework.
 - **Payment Workflow**: Complete payment queue system with batch processing, multiple payment methods, and formalization tracking integration.
 - **Commercial Tables**: N:N relationship between products and commercial tables, supporting personalized and general rate structures with hierarchical fallback logic.
 

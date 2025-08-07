@@ -161,7 +161,7 @@ export class CCBGenerationService {
       console.log(`📄 [CCB] Data: "${dataAtual}" em x:${dataCoord.x}, y:${yFromTop(height, 650)}`);
       
       // TEXTO DE TESTE PARA VALIDAÇÃO VISUAL (removível após ajustes)
-      const testText = adjustments && adjustments.length > 0 ? '✓ CCB COM AJUSTES' : '✓ CCB PADRÃO';
+      const testText = adjustments && adjustments.length > 0 ? '[OK] CCB COM AJUSTES' : '[OK] CCB PADRAO';
       firstPage.drawText(testText, {
         x: TEST_COORDINATES.testTitle.x,
         y: yFromTop(height, 50), // 50px do topo
