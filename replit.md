@@ -10,10 +10,12 @@ Language: Portuguese, studying software architecture.
 Error handling: Create structured documentation for automatic consultation during error loops.
 
 ## Recent Changes (2025-08-07)
+- ✅ **CRITICAL FIX:** CCB template conflict resolved - all routes now use `ccbGenerationService.ts` with pdf-lib
+- ✅ Legacy services renamed: `ccbGenerator.ts.LEGADO_PDFKit`, `ccbTemplateGenerator.ts.LEGADO_v1`, etc.
+- ✅ `clicksign-integration.ts` corrected to use template-based CCB generation (preserves logo/formatting)
+- ✅ `/ccb-url` endpoint enhanced to always fetch latest version from storage
 - ✅ Error Documentation System implemented in `/error_docs/`
 - ✅ Storage error fixes: Admin client for Supabase Storage operations
-- ✅ CCB regeneration fallback for missing files
-- ✅ "Gerar CCB Novamente" button enhanced with template validation info
 
 ## System Architecture
 

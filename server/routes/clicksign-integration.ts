@@ -136,9 +136,13 @@ router.post('/propostas/:id/clicksign/regenerar', jwtAuthMiddleware, async (req:
     if (!proposta.caminhoCcbAssinado) {
       console.log(`[CLICKSIGN] 🔄 CCB path not found, generating new CCB for proposal: ${propostaId}`);
       
-      // Generate new CCB
-      const { generateCCB } = await import("../services/ccbGenerator");
-      const ccbPath = await generateCCB(propostaId);
+      // Generate new CCB using TEMPLATE SERVICE (pdf-lib)
+      const { ccbGenerationService } = await import("../services/ccbGenerationService");
+      const result = await ccbGenerationService.generateCCB(propostaId);
+      if (!result.success) {
+        throw new Error(`Erro ao gerar CCB: ${result.error}`);
+      }
+      const ccbPath = result.pdfPath!;
       
       // Update proposal with new CCB path
       await db
@@ -177,9 +181,13 @@ router.post('/propostas/:id/clicksign/regenerar', jwtAuthMiddleware, async (req:
       } catch (fileError) {
         console.log(`[CLICKSIGN] ⚠️ Existing CCB file not found, generating new one: ${fileError instanceof Error ? fileError.message : 'Unknown error'}`);
         
-        // Generate new CCB if file doesn't exist
-        const { generateCCB } = await import("../services/ccbGenerator");
-        const ccbPath = await generateCCB(propostaId);
+        // Generate new CCB using TEMPLATE SERVICE (pdf-lib)
+        const { ccbGenerationService } = await import("../services/ccbGenerationService");
+        const result = await ccbGenerationService.generateCCB(propostaId);
+        if (!result.success) {
+          throw new Error(`Erro ao gerar CCB: ${result.error}`);
+        }
+        const ccbPath = result.pdfPath!;
         
         // Update proposal with new CCB path
         await db
