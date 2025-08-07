@@ -5,6 +5,8 @@ Simpix is a full-stack TypeScript application for comprehensive credit managemen
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
+Focus: CCB template generation over UI visualization.
+Language: Portuguese, studying software architecture.
 
 ## System Architecture
 
@@ -37,7 +39,7 @@ Preferred communication style: Simple, everyday language.
     - Anti-fragile RBAC implementation
 - **Credit Simulation**: Real-time credit simulation API using Tabela Price, IOF, TAC, and CET calculations, integrated with commercial tables.
 - **Document Management**: Secure private bucket for document storage with signed URLs, organized folder structure, and multi-format support.
-- **PDF Generation**: Template-based CCB generation using user's exact PDF template with `pdf-lib` for precise field filling.
+- **PDF Generation**: Template-based CCB generation using user's exact PDF template with `pdf-lib` for precise field filling. Fully implemented and tested with Supabase Storage integration.
 - **Payment Workflow**: Complete payment queue system with batch processing, multiple payment methods, and formalization tracking integration.
 - **Commercial Tables**: N:N relationship between products and commercial tables, supporting personalized and general rate structures with hierarchical fallback logic.
 

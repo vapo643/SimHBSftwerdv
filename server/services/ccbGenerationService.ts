@@ -6,7 +6,7 @@
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import fs from 'fs/promises';
 import path from 'path';
-import { supabase } from '../lib/supabase';
+import { createServerSupabaseAdminClient } from '../lib/supabase';
 import { db } from '../lib/supabase';
 import { sql } from 'drizzle-orm';
 import { format } from 'date-fns';
@@ -71,7 +71,8 @@ export class CCBGenerationService {
       const fileName = `ccb_${proposalId}_${Date.now()}.pdf`;
       const filePath = `ccb/${proposalId}/${fileName}`;
       
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      const supabaseAdmin = createServerSupabaseAdminClient();
+      const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
         .from('documents')
         .upload(filePath, pdfBytes, {
           contentType: 'application/pdf',
@@ -93,22 +94,7 @@ export class CCBGenerationService {
         WHERE id = ${proposalId}
       `);
 
-      // 9. Registrar log
-      await db.execute(sql`
-        INSERT INTO proposta_logs (
-          proposta_id,
-          acao,
-          detalhes,
-          usuario_id,
-          created_at
-        ) VALUES (
-          ${proposalId},
-          'CCB_GERADO',
-          ${{ caminho: filePath, tamanho: pdfBytes.length }},
-          'system',
-          NOW()
-        )
-      `);
+      // 9. Log será registrado pela aplicação principal
 
       console.log(`✅ [CCB] Geração concluída para proposta ${proposalId}`);
       return { success: true, pdfPath: filePath };
@@ -133,30 +119,26 @@ export class CCBGenerationService {
           p.cliente_nome,
           p.cliente_cpf,
           p.cliente_endereco,
-          p.cliente_cidade,
-          p.cliente_estado,
           p.cliente_cep,
-          p.valor_liberado,
+          p.valor as valor_liberado,
           p.prazo,
           p.taxa_juros,
-          p.valor_total,
-          p.valor_parcela,
-          p.data_primeiro_vencimento,
-          p.numero_contrato,
+          p.valor_aprovado as valor_total,
+          (p.valor_aprovado / p.prazo) as valor_parcela,
           p.created_at,
-          pr.nome as produto_nome,
-          l.nome as loja_nome
+          pr.nome_produto as produto_nome,
+          l.nome_loja as loja_nome
         FROM propostas p
         LEFT JOIN produtos pr ON p.produto_id = pr.id
         LEFT JOIN lojas l ON p.loja_id = l.id
         WHERE p.id = ${proposalId}
       `);
 
-      if (!result.rows || result.rows.length === 0) {
+      if (!result || result.length === 0) {
         return null;
       }
 
-      return result.rows[0] as PropostaData;
+      return result[0] as PropostaData;
     } catch (error) {
       console.error('❌ [CCB] Erro ao buscar dados da proposta:', error);
       return null;
@@ -370,7 +352,8 @@ export class CCBGenerationService {
    */
   async getPublicUrl(filePath: string): Promise<string | null> {
     try {
-      const { data } = supabase.storage
+      const supabaseAdmin = createServerSupabaseAdminClient();
+      const { data } = supabaseAdmin.storage
         .from('documents')
         .getPublicUrl(filePath);
       
@@ -392,7 +375,7 @@ export class CCBGenerationService {
         WHERE id = ${proposalId}
       `);
 
-      const proposal = result.rows[0];
+      const proposal = result[0];
       return proposal?.ccb_gerado === true && !!proposal?.caminho_ccb;
     } catch (error) {
       console.error('❌ [CCB] Erro ao verificar status:', error);
