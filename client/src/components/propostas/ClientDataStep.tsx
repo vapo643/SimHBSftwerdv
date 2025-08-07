@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { useProposal, useProposalActions } from "@/contexts/ProposalContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -24,12 +24,19 @@ import {
   FileText,
   CheckCircle2,
   XCircle,
-  Loader2
+  Loader2,
+  Search,
+  AlertCircle,
+  Save
 } from "lucide-react";
 import CurrencyInput from "@/components/ui/CurrencyInput";
 import InputMask from "react-input-mask";
 import axios from "axios";
 import { cpf as cpfValidator, cnpj as cnpjValidator } from "cpf-cnpj-validator";
+import { commonBanks, brazilianBanks } from "@/utils/brazilianBanks";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { Progress } from "@/components/ui/progress";
 
 // Validation helpers
 const validateCPF = (cpf: string): { isValid: boolean; message: string | null } => {
@@ -58,11 +65,11 @@ const validateCNPJ = (cnpj: string): { isValid: boolean; message: string | null 
   };
 };
 
-const validateEmail = (email: string): string | null => {
+const validateEmail = (email: string): { isValid: boolean; message: string | null } => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!email) return 'Email é obrigatório';
-  if (!emailRegex.test(email)) return 'Email inválido';
-  return null;
+  if (!email) return { isValid: false, message: 'Email é obrigatório' };
+  if (!emailRegex.test(email)) return { isValid: false, message: 'Email inválido' };
+  return { isValid: true, message: null };
 };
 
 const validatePhone = (phone: string): string | null => {
@@ -81,32 +88,42 @@ export function ClientDataStep() {
   const { state } = useProposal();
   const { updateClient, setError, clearError } = useProposalActions();
   const { clientData, errors } = state;
+  const { toast } = useToast();
   
   // Estados para validação visual
   const [cpfValidation, setCpfValidation] = useState<{ isValid: boolean; message: string | null }>({ isValid: false, message: null });
   const [cnpjValidation, setCnpjValidation] = useState<{ isValid: boolean; message: string | null }>({ isValid: false, message: null });
+  const [emailValidation, setEmailValidation] = useState<{ isValid: boolean; message: string | null }>({ isValid: false, message: null });
   const [loadingCep, setLoadingCep] = useState(false);
+  const [loadingCpfData, setLoadingCpfData] = useState(false);
+  const [autoSaved, setAutoSaved] = useState(false);
+  const [progress, setProgress] = useState(0);
   
-  // Função para buscar CEP
+  // Função para buscar CEP usando nosso backend
   const fetchAddressByCep = useCallback(async (cep: string) => {
     const cleanCep = cep.replace(/\D/g, '');
     if (cleanCep.length !== 8) return;
     
     setLoadingCep(true);
     try {
-      const response = await axios.get(`https://viacep.com.br/ws/${cleanCep}/json/`);
-      const data = response.data;
+      const data = await apiRequest(`/api/cep/${cleanCep}`, {
+        method: 'GET'
+      });
       
-      if (!data.erro) {
+      if (data && data.logradouro) {
         // Auto-preencher os campos de endereço
         updateClient({
           logradouro: data.logradouro || '',
           bairro: data.bairro || '',
-          cidade: data.localidade || '',
-          estado: data.uf || '',
+          cidade: data.cidade || '',
+          estado: data.estado || '',
         });
         
         clearError('cep');
+        toast({
+          title: 'CEP encontrado!',
+          description: 'Endereço preenchido automaticamente.',
+        });
       } else {
         setError('cep', 'CEP não encontrado');
       }
@@ -116,7 +133,75 @@ export function ClientDataStep() {
     } finally {
       setLoadingCep(false);
     }
-  }, [updateClient, setError, clearError]);
+  }, [updateClient, setError, clearError, toast]);
+  
+  // Função para buscar dados existentes do cliente por CPF
+  const fetchClientDataByCpf = useCallback(async (cpf: string) => {
+    const cleanCPF = cpf.replace(/\D/g, '');
+    if (cleanCPF.length !== 11) return;
+    
+    setLoadingCpfData(true);
+    try {
+      const response = await apiRequest(`/api/clientes/cpf/${cleanCPF}`, {
+        method: 'GET'
+      });
+      
+      if (response && response.exists) {
+        const data = response.data;
+        
+        // Mostrar diálogo confirmando que encontrou dados
+        const userConfirmed = window.confirm(
+          `Cliente já cadastrado!\n\nEncontramos dados de: ${data.nome}\n\nDeseja usar os dados existentes para esta nova proposta?`
+        );
+        
+        if (userConfirmed) {
+          // Preencher todos os campos com dados existentes
+          updateClient({
+            nome: data.nome,
+            email: data.email,
+            telefone: data.telefone,
+            dataNascimento: data.dataNascimento,
+            rg: data.rg,
+            orgaoEmissor: data.orgaoEmissor,
+            rgUf: data.rgUf,
+            rgDataEmissao: data.rgDataEmissao,
+            localNascimento: data.localNascimento,
+            estadoCivil: data.estadoCivil,
+            nacionalidade: data.nacionalidade,
+            cep: data.cep,
+            logradouro: data.logradouro,
+            numero: data.numero,
+            complemento: data.complemento,
+            bairro: data.bairro,
+            cidade: data.cidade,
+            estado: data.estado,
+            ocupacao: data.ocupacao,
+            rendaMensal: data.rendaMensal,
+            telefoneEmpresa: data.telefoneEmpresa,
+            metodoPagamento: data.metodoPagamento,
+            dadosPagamentoBanco: data.dadosPagamentoBanco,
+            dadosPagamentoAgencia: data.dadosPagamentoAgencia,
+            dadosPagamentoConta: data.dadosPagamentoConta,
+            dadosPagamentoDigito: data.dadosPagamentoDigito,
+            dadosPagamentoPix: data.dadosPagamentoPix,
+            dadosPagamentoTipoPix: data.dadosPagamentoTipoPix,
+            dadosPagamentoPixBanco: data.dadosPagamentoPixBanco,
+            dadosPagamentoPixNomeTitular: data.dadosPagamentoPixNomeTitular,
+            dadosPagamentoPixCpfTitular: data.dadosPagamentoPixCpfTitular,
+          });
+          
+          toast({
+            title: 'Dados carregados!',
+            description: 'Dados do cliente preenchidos automaticamente.',
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao buscar dados do cliente:', error);
+    } finally {
+      setLoadingCpfData(false);
+    }
+  }, [updateClient, toast]);
 
   // Handlers
   const handleTipoPessoaChange = (checked: boolean) => {
@@ -136,6 +221,10 @@ export function ClientDataStep() {
       setError('cpf', validation.message);
     } else {
       clearError('cpf');
+      // Buscar dados existentes quando CPF for válido
+      if (validation.isValid) {
+        fetchClientDataByCpf(value);
+      }
     }
   };
 
@@ -153,9 +242,11 @@ export function ClientDataStep() {
 
   const handleEmailChange = (value: string) => {
     updateClient({ email: value });
-    const error = validateEmail(value);
-    if (error) {
-      setError('email', error);
+    const validation = validateEmail(value);
+    setEmailValidation(validation);
+    
+    if (validation.message) {
+      setError('email', validation.message);
     } else {
       clearError('email');
     }
@@ -194,9 +285,79 @@ export function ClientDataStep() {
       clearError('nome');
     }
   };
+  
+  // Calcular progresso do formulário
+  useEffect(() => {
+    const requiredFields = [
+      clientData.nome,
+      clientData.cpf || clientData.cnpj,
+      clientData.email,
+      clientData.telefone,
+      clientData.dataNascimento,
+      clientData.cep,
+      clientData.logradouro,
+      clientData.numero,
+      clientData.cidade,
+      clientData.estado,
+      clientData.ocupacao,
+      clientData.rendaMensal,
+    ];
+    
+    const filledFields = requiredFields.filter(field => field && field.toString().trim() !== '').length;
+    const totalFields = requiredFields.length;
+    const progressValue = Math.round((filledFields / totalFields) * 100);
+    setProgress(progressValue);
+  }, [clientData]);
+  
+  // Auto-save no localStorage
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      localStorage.setItem('proposalDraft', JSON.stringify(clientData));
+      setAutoSaved(true);
+      setTimeout(() => setAutoSaved(false), 2000);
+    }, 1000);
+    
+    return () => clearTimeout(timer);
+  }, [clientData]);
+  
+  // Carregar dados salvos do localStorage
+  useEffect(() => {
+    const savedData = localStorage.getItem('proposalDraft');
+    if (savedData && !clientData.nome) {
+      const parsed = JSON.parse(savedData);
+      updateClient(parsed);
+      toast({
+        title: 'Dados recuperados',
+        description: 'Seus dados foram restaurados da sessão anterior.',
+      });
+    }
+  }, []);
 
   return (
     <div className="space-y-6">
+      {/* Indicador de Progresso e Auto-Save */}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-medium">Progresso do Formulário</span>
+              <span className="text-sm text-muted-foreground">{progress}% completo</span>
+            </div>
+            <Progress value={progress} className="h-2" />
+            {autoSaved && (
+              <p className="text-xs text-green-600 flex items-center gap-1">
+                <Save className="h-3 w-3" /> Dados salvos automaticamente
+              </p>
+            )}
+            {loadingCpfData && (
+              <p className="text-xs text-blue-600 flex items-center gap-1">
+                <Loader2 className="h-3 w-3 animate-spin" /> Buscando dados do cliente...
+              </p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Tipo de Pessoa */}
       <Card>
         <CardHeader>
@@ -550,15 +711,34 @@ export function ClientDataStep() {
 
           <div>
             <Label htmlFor="email">E-mail *</Label>
-            <Input
-              id="email"
-              type="email"
-              value={clientData.email}
-              onChange={(e) => handleEmailChange(e.target.value)}
-              className={errors.email ? "border-destructive focus:border-destructive" : ""}
-              data-testid="input-email"
-            />
+            <div className="relative">
+              <Input
+                id="email"
+                type="email"
+                value={clientData.email}
+                onChange={(e) => handleEmailChange(e.target.value)}
+                className={`${
+                  errors.email ? "border-destructive focus:border-destructive" : 
+                  emailValidation.isValid && clientData.email ? "border-green-500 focus:border-green-500" : ""
+                } pr-10`}
+                data-testid="input-email"
+              />
+              {clientData.email && emailValidation.message === null && (
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                  {emailValidation.isValid ? (
+                    <CheckCircle2 className="h-4 w-4 text-green-500" />
+                  ) : (
+                    <XCircle className="h-4 w-4 text-red-500" />
+                  )}
+                </div>
+              )}
+            </div>
             {errors.email && <p className="mt-1 text-sm text-destructive">{errors.email}</p>}
+            {clientData.email && !errors.email && emailValidation.isValid && (
+              <p className="mt-1 text-xs text-green-600 flex items-center gap-1">
+                <CheckCircle2 className="h-3 w-3" /> E-mail válido
+              </p>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -823,16 +1003,18 @@ export function ClientDataStep() {
                       <SelectValue placeholder="Selecione o banco..." />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="001">001 - Banco do Brasil</SelectItem>
-                      <SelectItem value="033">033 - Santander</SelectItem>
-                      <SelectItem value="104">104 - Caixa Econômica</SelectItem>
-                      <SelectItem value="237">237 - Bradesco</SelectItem>
-                      <SelectItem value="341">341 - Itaú</SelectItem>
-                      <SelectItem value="077">077 - Inter</SelectItem>
-                      <SelectItem value="260">260 - Nubank</SelectItem>
-                      <SelectItem value="336">336 - C6 Bank</SelectItem>
-                      <SelectItem value="290">290 - PagBank</SelectItem>
-                      <SelectItem value="212">212 - Banco Original</SelectItem>
+                      <div className="text-xs text-muted-foreground px-2 py-1 font-semibold">Bancos Populares</div>
+                      {commonBanks.map((bank) => (
+                        <SelectItem key={bank.code} value={bank.code}>
+                          {bank.code} - {bank.name}
+                        </SelectItem>
+                      ))}
+                      <div className="text-xs text-muted-foreground px-2 py-1 font-semibold mt-2">Todos os Bancos</div>
+                      {brazilianBanks.filter(b => !commonBanks.find(c => c.code === b.code)).map((bank) => (
+                        <SelectItem key={bank.code} value={bank.code}>
+                          {bank.code} - {bank.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -919,16 +1101,18 @@ export function ClientDataStep() {
                       <SelectValue placeholder="Selecione o banco..." />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="001">001 - Banco do Brasil</SelectItem>
-                      <SelectItem value="033">033 - Santander</SelectItem>
-                      <SelectItem value="104">104 - Caixa Econômica</SelectItem>
-                      <SelectItem value="237">237 - Bradesco</SelectItem>
-                      <SelectItem value="341">341 - Itaú</SelectItem>
-                      <SelectItem value="077">077 - Inter</SelectItem>
-                      <SelectItem value="260">260 - Nubank</SelectItem>
-                      <SelectItem value="336">336 - C6 Bank</SelectItem>
-                      <SelectItem value="290">290 - PagBank</SelectItem>
-                      <SelectItem value="212">212 - Banco Original</SelectItem>
+                      <div className="text-xs text-muted-foreground px-2 py-1 font-semibold">Bancos Populares</div>
+                      {commonBanks.map((bank) => (
+                        <SelectItem key={bank.code} value={bank.code}>
+                          {bank.code} - {bank.name}
+                        </SelectItem>
+                      ))}
+                      <div className="text-xs text-muted-foreground px-2 py-1 font-semibold mt-2">Todos os Bancos</div>
+                      {brazilianBanks.filter(b => !commonBanks.find(c => c.code === b.code)).map((bank) => (
+                        <SelectItem key={bank.code} value={bank.code}>
+                          {bank.code} - {bank.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
