@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useCallback } from "react";
 import { useProposal, useProposalActions } from "@/contexts/ProposalContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -21,26 +21,41 @@ import {
   Building2, 
   CreditCard,
   Smartphone,
-  FileText
+  FileText,
+  CheckCircle2,
+  XCircle,
+  Loader2
 } from "lucide-react";
 import CurrencyInput from "@/components/ui/CurrencyInput";
 import InputMask from "react-input-mask";
+import axios from "axios";
+import { cpf as cpfValidator, cnpj as cnpjValidator } from "cpf-cnpj-validator";
 
 // Validation helpers
-const validateCPF = (cpf: string): string | null => {
+const validateCPF = (cpf: string): { isValid: boolean; message: string | null } => {
   const cleanCPF = cpf.replace(/\D/g, '');
-  if (cleanCPF.length < 11) return 'CPF deve ter 11 dígitos';
-  if (cleanCPF.length > 11) return 'CPF inválido';
-  if (/^(\d)\1{10}$/.test(cleanCPF)) return 'CPF inválido';
-  return null;
+  if (cleanCPF.length === 0) return { isValid: false, message: null };
+  if (cleanCPF.length < 11) return { isValid: false, message: 'CPF deve ter 11 dígitos' };
+  if (cleanCPF.length > 11) return { isValid: false, message: 'CPF inválido' };
+  
+  const isValid = cpfValidator.isValid(cpf);
+  return {
+    isValid,
+    message: isValid ? null : 'CPF inválido'
+  };
 };
 
-const validateCNPJ = (cnpj: string): string | null => {
+const validateCNPJ = (cnpj: string): { isValid: boolean; message: string | null } => {
   const cleanCNPJ = cnpj.replace(/\D/g, '');
-  if (cleanCNPJ.length < 14) return 'CNPJ deve ter 14 dígitos';
-  if (cleanCNPJ.length > 14) return 'CNPJ inválido';
-  if (/^(\d)\1{13}$/.test(cleanCNPJ)) return 'CNPJ inválido';
-  return null;
+  if (cleanCNPJ.length === 0) return { isValid: false, message: null };
+  if (cleanCNPJ.length < 14) return { isValid: false, message: 'CNPJ deve ter 14 dígitos' };
+  if (cleanCNPJ.length > 14) return { isValid: false, message: 'CNPJ inválido' };
+  
+  const isValid = cnpjValidator.isValid(cnpj);
+  return {
+    isValid,
+    message: isValid ? null : 'CNPJ inválido'
+  };
 };
 
 const validateEmail = (email: string): string | null => {
@@ -66,6 +81,42 @@ export function ClientDataStep() {
   const { state } = useProposal();
   const { updateClient, setError, clearError } = useProposalActions();
   const { clientData, errors } = state;
+  
+  // Estados para validação visual
+  const [cpfValidation, setCpfValidation] = useState<{ isValid: boolean; message: string | null }>({ isValid: false, message: null });
+  const [cnpjValidation, setCnpjValidation] = useState<{ isValid: boolean; message: string | null }>({ isValid: false, message: null });
+  const [loadingCep, setLoadingCep] = useState(false);
+  
+  // Função para buscar CEP
+  const fetchAddressByCep = useCallback(async (cep: string) => {
+    const cleanCep = cep.replace(/\D/g, '');
+    if (cleanCep.length !== 8) return;
+    
+    setLoadingCep(true);
+    try {
+      const response = await axios.get(`https://viacep.com.br/ws/${cleanCep}/json/`);
+      const data = response.data;
+      
+      if (!data.erro) {
+        // Auto-preencher os campos de endereço
+        updateClient({
+          logradouro: data.logradouro || '',
+          bairro: data.bairro || '',
+          cidade: data.localidade || '',
+          estado: data.uf || '',
+        });
+        
+        clearError('cep');
+      } else {
+        setError('cep', 'CEP não encontrado');
+      }
+    } catch (error) {
+      console.error('Erro ao buscar CEP:', error);
+      setError('cep', 'Erro ao buscar CEP');
+    } finally {
+      setLoadingCep(false);
+    }
+  }, [updateClient, setError, clearError]);
 
   // Handlers
   const handleTipoPessoaChange = (checked: boolean) => {
@@ -78,9 +129,11 @@ export function ClientDataStep() {
 
   const handleCPFChange = (value: string) => {
     updateClient({ cpf: value });
-    const error = validateCPF(value);
-    if (error) {
-      setError('cpf', error);
+    const validation = validateCPF(value);
+    setCpfValidation(validation);
+    
+    if (validation.message) {
+      setError('cpf', validation.message);
     } else {
       clearError('cpf');
     }
@@ -88,9 +141,11 @@ export function ClientDataStep() {
 
   const handleCNPJChange = (value: string) => {
     updateClient({ cnpj: value });
-    const error = validateCNPJ(value);
-    if (error) {
-      setError('cnpj', error);
+    const validation = validateCNPJ(value);
+    setCnpjValidation(validation);
+    
+    if (validation.message) {
+      setError('cnpj', validation.message);
     } else {
       clearError('cnpj');
     }
@@ -123,6 +178,11 @@ export function ClientDataStep() {
       setError('cep', error);
     } else {
       clearError('cep');
+      // Auto-buscar endereço quando CEP for válido
+      const cleanCep = value.replace(/\D/g, '');
+      if (cleanCep.length === 8) {
+        fetchAddressByCep(value);
+      }
     }
   };
 
@@ -189,23 +249,48 @@ export function ClientDataStep() {
               </div>
               <div>
                 <Label htmlFor="cnpj">CNPJ *</Label>
-                <InputMask
-                  mask="99.999.999/9999-99"
-                  value={clientData.cnpj || ''}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleCNPJChange(e.target.value)}
-                >
-                  {(inputProps: any) => (
-                    <Input
-                      {...inputProps}
-                      id="cnpj"
-                      type="text"
-                      placeholder="00.000.000/0000-00"
-                      className={errors.cnpj ? "border-destructive focus:border-destructive" : ""}
-                      data-testid="input-cnpj"
-                    />
+                <div className="relative">
+                  <InputMask
+                    mask="99.999.999/9999-99"
+                    value={clientData.cnpj || ''}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleCNPJChange(e.target.value)}
+                  >
+                    {(inputProps: any) => (
+                      <Input
+                        {...inputProps}
+                        id="cnpj"
+                        type="text"
+                        placeholder="00.000.000/0000-00"
+                        className={`${
+                          errors.cnpj ? "border-destructive focus:border-destructive" : 
+                          cnpjValidation.isValid && clientData.cnpj ? "border-green-500 focus:border-green-500" : ""
+                        } pr-10`}
+                        data-testid="input-cnpj"
+                      />
+                    )}
+                  </InputMask>
+                  {clientData.cnpj && cnpjValidation.message === null && (
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                      {cnpjValidation.isValid ? (
+                        <CheckCircle2 className="h-4 w-4 text-green-500" />
+                      ) : (
+                        <XCircle className="h-4 w-4 text-red-500" />
+                      )}
+                    </div>
                   )}
-                </InputMask>
+                </div>
                 {errors.cnpj && <p className="mt-1 text-sm text-destructive">{errors.cnpj}</p>}
+                {clientData.cnpj && !errors.cnpj && (
+                  <p className={`mt-1 text-xs flex items-center gap-1 ${
+                    cnpjValidation.isValid ? "text-green-600" : "text-red-600"
+                  }`}>
+                    {cnpjValidation.isValid ? (
+                      <><CheckCircle2 className="h-3 w-3" /> CNPJ válido</>
+                    ) : (
+                      <><XCircle className="h-3 w-3" /> CNPJ inválido</>
+                    )}
+                  </p>
+                )}
               </div>
               <div>
                 <Label htmlFor="nome">Representante Legal *</Label>
@@ -225,23 +310,48 @@ export function ClientDataStep() {
             <>
               <div>
                 <Label htmlFor="cpf">CPF *</Label>
-                <InputMask
-                  mask="999.999.999-99"
-                  value={clientData.cpf}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleCPFChange(e.target.value)}
-                >
-                  {(inputProps: any) => (
-                    <Input
-                      {...inputProps}
-                      id="cpf"
-                      type="text"
-                      placeholder="000.000.000-00"
-                      className={errors.cpf ? "border-destructive focus:border-destructive" : ""}
-                      data-testid="input-cpf"
-                    />
+                <div className="relative">
+                  <InputMask
+                    mask="999.999.999-99"
+                    value={clientData.cpf}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleCPFChange(e.target.value)}
+                  >
+                    {(inputProps: any) => (
+                      <Input
+                        {...inputProps}
+                        id="cpf"
+                        type="text"
+                        placeholder="000.000.000-00"
+                        className={`${
+                          errors.cpf ? "border-destructive focus:border-destructive" : 
+                          cpfValidation.isValid && clientData.cpf ? "border-green-500 focus:border-green-500" : ""
+                        } pr-10`}
+                        data-testid="input-cpf"
+                      />
+                    )}
+                  </InputMask>
+                  {clientData.cpf && cpfValidation.message === null && (
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                      {cpfValidation.isValid ? (
+                        <CheckCircle2 className="h-4 w-4 text-green-500" />
+                      ) : (
+                        <XCircle className="h-4 w-4 text-red-500" />
+                      )}
+                    </div>
                   )}
-                </InputMask>
+                </div>
                 {errors.cpf && <p className="mt-1 text-sm text-destructive">{errors.cpf}</p>}
+                {clientData.cpf && !errors.cpf && (
+                  <p className={`mt-1 text-xs flex items-center gap-1 ${
+                    cpfValidation.isValid ? "text-green-600" : "text-red-600"
+                  }`}>
+                    {cpfValidation.isValid ? (
+                      <><CheckCircle2 className="h-3 w-3" /> CPF válido</>
+                    ) : (
+                      <><XCircle className="h-3 w-3" /> CPF inválido</>
+                    )}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -467,23 +577,50 @@ export function ClientDataStep() {
         <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <Label htmlFor="cep">CEP</Label>
-            <InputMask
-              mask="99999-999"
-              value={clientData.cep}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleCEPChange(e.target.value)}
-            >
-              {(inputProps: any) => (
-                <Input
-                  {...inputProps}
-                  id="cep"
-                  type="text"
-                  placeholder="00000-000"
-                  className={errors.cep ? "border-destructive focus:border-destructive" : ""}
-                  data-testid="input-cep"
-                />
+            <div className="relative">
+              <InputMask
+                mask="99999-999"
+                value={clientData.cep}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleCEPChange(e.target.value)}
+              >
+                {(inputProps: any) => (
+                  <Input
+                    {...inputProps}
+                    id="cep"
+                    type="text"
+                    placeholder="00000-000"
+                    className={`${
+                      errors.cep ? "border-destructive focus:border-destructive" : 
+                      clientData.logradouro && !loadingCep ? "border-green-500 focus:border-green-500" : ""
+                    } pr-10`}
+                    data-testid="input-cep"
+                  />
+                )}
+              </InputMask>
+              {loadingCep && (
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                  <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
+                </div>
               )}
-            </InputMask>
+              {!loadingCep && clientData.logradouro && (
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                </div>
+              )}
+            </div>
             {errors.cep && <p className="mt-1 text-sm text-destructive">{errors.cep}</p>}
+            {loadingCep && (
+              <p className="mt-1 text-xs text-blue-600 flex items-center gap-1">
+                <Loader2 className="h-3 w-3 animate-spin" />
+                Buscando endereço...
+              </p>
+            )}
+            {!loadingCep && clientData.logradouro && !errors.cep && (
+              <p className="mt-1 text-xs text-green-600 flex items-center gap-1">
+                <CheckCircle2 className="h-3 w-3" />
+                Endereço encontrado e preenchido automaticamente
+              </p>
+            )}
           </div>
 
           <div className="md:col-span-2">
