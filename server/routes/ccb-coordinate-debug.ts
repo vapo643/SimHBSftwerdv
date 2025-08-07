@@ -6,7 +6,7 @@ import { Router } from 'express';
 import CCBCoordinateDebugger, { CoordinateTest } from '../utils/ccbCoordinateDebugger';
 
 const router = Router();
-const debugger = new CCBCoordinateDebugger();
+const coordinateDebugger = new CCBCoordinateDebugger();
 
 /**
  * Testa uma coordenada específica com diferentes interpretações
@@ -21,7 +21,7 @@ router.post('/test-single-coordinate', async (req, res) => {
 
     console.log(`🧪 [COORD API] Testando coordenada única: (${x}, ${y})`);
 
-    const pdfBuffer = await debugger.testCoordinateInterpretations(
+    const pdfBuffer = await coordinateDebugger.testCoordinateInterpretations(
       Number(x), 
       Number(y), 
       String(testText), 
@@ -62,7 +62,7 @@ router.post('/test-multiple-coordinates', async (req, res) => {
       referenceType: coord.referenceType || 'left'
     }));
 
-    const pdfBuffer = await debugger.testMultipleCoordinates(coordinateTests);
+    const pdfBuffer = await coordinateDebugger.testMultipleCoordinates(coordinateTests);
 
     res.set({
       'Content-Type': 'application/pdf',
@@ -90,8 +90,8 @@ router.post('/convert-coordinates', async (req, res) => {
 
     const converted = coordinates.map((coord: any) => {
       const newY = fromVisual 
-        ? debugger.convertVisualToPDF(coord.y, pageHeight)
-        : debugger.convertPDFToVisual(coord.y, pageHeight);
+        ? coordinateDebugger.convertVisualToPDF(coord.y, pageHeight)
+        : coordinateDebugger.convertPDFToVisual(coord.y, pageHeight);
 
       return {
         ...coord,

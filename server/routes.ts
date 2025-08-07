@@ -21,6 +21,7 @@ import { securityLogger, SecurityEventType, getClientIP } from './lib/security-l
 import { passwordSchema, validatePassword } from "./lib/password-validator";
 import { timingNormalizerMiddleware } from "./middleware/timing-normalizer";
 import timingSecurityRoutes from "./routes/timing-security";
+import fieldPositionerRoutes from "./routes/field-positioner";
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -4032,6 +4033,10 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
   // CCB Coordinate Mapper routes
   const ccbCoordinateMapperRouter = (await import('./routes/ccb-coordinate-mapper')).default;
   app.use('/api/ccb-mapper', ccbCoordinateMapperRouter);
+  
+  // Field Positioner routes
+  const fieldPositionerRouter = (await import('./routes/field-positioner')).default;
+  app.use('/api/field-positioner', fieldPositionerRouter);
 
   // CCB Coordinate Debug routes  
   const ccbCoordinateDebugRouter = (await import('./routes/ccb-coordinate-debug')).default;

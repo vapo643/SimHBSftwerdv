@@ -29,6 +29,7 @@ import AlterarEmail from "@/pages/configuracoes/alterar-email";
 import Configuracoes from "@/pages/configuracoes";
 import AceiteAtendente from "@/pages/aceite-atendente";
 import CoordinateMapper from "@/pages/CoordinateMapper";
+import FieldPositioner from "@/pages/FieldPositioner";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -153,6 +154,11 @@ function Router() {
       <Route path="/ccb/coordinate-mapper">
         <ProtectedRoute>
           <CoordinateMapper />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/ccb/field-positioner">
+        <ProtectedRoute>
+          <FieldPositioner />
         </ProtectedRoute>
       </Route>
       <Route path="/">
