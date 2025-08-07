@@ -84,43 +84,93 @@ function ProposalForm() {
       // NOVO FLUXO: Criar proposta primeiro, depois upload com ID real
       // 1. PRIMEIRO: Criar a proposta sem documentos
       const proposalData = {
-        // Cliente data - matching schema field names
+        // ===== TIPO DE PESSOA E DADOS BÁSICOS =====
+        tipoPessoa: state.clientData.tipoPessoa, // PF ou PJ
+        
+        // Dados Pessoa Física
         clienteNome: state.clientData.nome,
         clienteCpf: state.clientData.cpf,
+        
+        // Dados Pessoa Jurídica (quando aplicável)
+        clienteRazaoSocial: state.clientData.razaoSocial || null,
+        clienteCnpj: state.clientData.cnpj || null,
+        
+        // ===== DOCUMENTAÇÃO COMPLETA (RG) =====
+        clienteRg: state.clientData.rg,
+        clienteOrgaoEmissor: state.clientData.orgaoEmissor,
+        clienteRgUf: state.clientData.rgUf, // NOVO: UF de emissão do RG
+        clienteRgDataEmissao: state.clientData.rgDataEmissao, // NOVO: Data de emissão do RG
+        
+        // ===== DADOS PESSOAIS =====
         clienteEmail: state.clientData.email,
         clienteTelefone: state.clientData.telefone,
         clienteDataNascimento: state.clientData.dataNascimento,
-        clienteRenda: state.clientData.rendaMensal,
-        clienteRg: state.clientData.rg,
-        clienteOrgaoEmissor: state.clientData.orgaoEmissor,
+        clienteLocalNascimento: state.clientData.localNascimento, // NOVO: Local de nascimento
         clienteEstadoCivil: state.clientData.estadoCivil,
         clienteNacionalidade: state.clientData.nacionalidade,
+        
+        // ===== ENDEREÇO DETALHADO =====
         clienteCep: state.clientData.cep,
-        clienteEndereco: state.clientData.endereco,
+        clienteLogradouro: state.clientData.logradouro, // NOVO: Rua/Avenida separado
+        clienteNumero: state.clientData.numero, // NOVO: Número do imóvel
+        clienteComplemento: state.clientData.complemento, // NOVO: Complemento
+        clienteBairro: state.clientData.bairro, // NOVO: Bairro
+        clienteCidade: state.clientData.cidade, // NOVO: Cidade
+        clienteUf: state.clientData.estado, // NOVO: Estado/UF
+        
+        // Manter endereço concatenado para compatibilidade
+        clienteEndereco: `${state.clientData.logradouro || ''}, ${state.clientData.numero || ''}${state.clientData.complemento ? ', ' + state.clientData.complemento : ''}, ${state.clientData.bairro || ''}, ${state.clientData.cidade || ''}/${state.clientData.estado || ''} - CEP: ${state.clientData.cep || ''}`.trim(),
+        
+        // ===== DADOS PROFISSIONAIS =====
         clienteOcupacao: state.clientData.ocupacao,
+        clienteRenda: state.clientData.rendaMensal,
         clienteTelefoneEmpresa: state.clientData.telefoneEmpresa,
         
-        // Personal references
+        // ===== MÉTODO DE PAGAMENTO =====
+        metodoPagamento: state.clientData.metodoPagamento, // 'conta_bancaria' ou 'pix'
+        
+        // Dados bancários (quando conta_bancaria)
+        dadosPagamentoBanco: state.clientData.dadosPagamentoBanco || null,
+        dadosPagamentoAgencia: state.clientData.dadosPagamentoAgencia || null,
+        dadosPagamentoConta: state.clientData.dadosPagamentoConta || null,
+        dadosPagamentoDigito: state.clientData.dadosPagamentoDigito || null,
+        
+        // Dados PIX (quando pix)
+        dadosPagamentoPix: state.clientData.dadosPagamentoPix || null, // Chave PIX
+        dadosPagamentoTipoPix: state.clientData.dadosPagamentoTipoPix || null, // Tipo da chave
+        dadosPagamentoPixBanco: state.clientData.dadosPagamentoPixBanco || null,
+        dadosPagamentoPixNomeTitular: state.clientData.dadosPagamentoPixNomeTitular || null,
+        dadosPagamentoPixCpfTitular: state.clientData.dadosPagamentoPixCpfTitular || null,
+        
+        // ===== REFERÊNCIAS PESSOAIS =====
         referenciaPessoal: state.personalReferences,
         
-        // Loan data
+        // ===== DADOS DO EMPRÉSTIMO =====
         produtoId: state.loanData.produtoId,
         tabelaComercialId: state.loanData.tabelaComercialId,
         valor: parseFloat(state.loanData.valorSolicitado.replace(/[^\d,]/g, '').replace(',', '.')),
         prazo: state.loanData.prazo,
         
-        // Additional fields from simulation
+        // Valores calculados da simulação
         valorTac: state.simulation?.valorTAC ? parseFloat(state.simulation.valorTAC) : 0,
         valorIof: state.simulation?.valorIOF ? parseFloat(state.simulation.valorIOF) : 0,
         valorTotalFinanciado: state.simulation?.valorTotalFinanciado ? parseFloat(state.simulation.valorTotalFinanciado) : 0,
         
-        // IMPORTANTE: Definir status como aguardando_analise quando enviado com todos os campos
-        status: 'aguardando_analise',
+        // Data de carência (se houver)
+        dataCarencia: state.loanData.dataCarencia || null,
+        incluirTac: state.loanData.incluirTac,
         
-        // Required fields
+        // ===== DADOS ADMINISTRATIVOS =====
+        status: 'aguardando_analise',
         lojaId: state.context?.atendente?.loja?.id,
         finalidade: 'Empréstimo pessoal',
         garantia: 'Sem garantia',
+        
+        // ===== CAMPOS OPCIONAIS PARA CCB =====
+        // Estes podem ser preenchidos posteriormente ou com valores padrão
+        formaLiberacao: 'deposito', // Como será liberado: deposito, ted, pix
+        formaPagamento: 'boleto', // Como cliente pagará: boleto, pix, debito
+        pracaPagamento: 'São Paulo', // Cidade de pagamento
       };
 
       console.log(`[DEBUG] Criando proposta primeiro...`);

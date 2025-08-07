@@ -10,7 +10,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { User, Phone, Mail, Calendar, MapPin, Briefcase } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { 
+  User, 
+  Phone, 
+  Mail, 
+  MapPin, 
+  Briefcase, 
+  Building2, 
+  CreditCard,
+  Smartphone,
+  FileText
+} from "lucide-react";
 import CurrencyInput from "@/components/ui/CurrencyInput";
 import InputMask from "react-input-mask";
 
@@ -19,8 +31,15 @@ const validateCPF = (cpf: string): string | null => {
   const cleanCPF = cpf.replace(/\D/g, '');
   if (cleanCPF.length < 11) return 'CPF deve ter 11 dígitos';
   if (cleanCPF.length > 11) return 'CPF inválido';
-  // Simple CPF validation (just checking format for now)
   if (/^(\d)\1{10}$/.test(cleanCPF)) return 'CPF inválido';
+  return null;
+};
+
+const validateCNPJ = (cnpj: string): string | null => {
+  const cleanCNPJ = cnpj.replace(/\D/g, '');
+  if (cleanCNPJ.length < 14) return 'CNPJ deve ter 14 dígitos';
+  if (cleanCNPJ.length > 14) return 'CNPJ inválido';
+  if (/^(\d)\1{13}$/.test(cleanCNPJ)) return 'CNPJ inválido';
   return null;
 };
 
@@ -48,7 +67,15 @@ export function ClientDataStep() {
   const { updateClient, setError, clearError } = useProposalActions();
   const { clientData, errors } = state;
 
-  // Real-time validation handlers
+  // Handlers
+  const handleTipoPessoaChange = (checked: boolean) => {
+    updateClient({ 
+      tipoPessoa: checked ? 'PJ' : 'PF',
+      // Clear PJ fields if switching to PF
+      ...(!checked && { razaoSocial: '', cnpj: '' })
+    });
+  };
+
   const handleCPFChange = (value: string) => {
     updateClient({ cpf: value });
     const error = validateCPF(value);
@@ -56,6 +83,16 @@ export function ClientDataStep() {
       setError('cpf', error);
     } else {
       clearError('cpf');
+    }
+  };
+
+  const handleCNPJChange = (value: string) => {
+    updateClient({ cnpj: value });
+    const error = validateCNPJ(value);
+    if (error) {
+      setError('cnpj', error);
+    } else {
+      clearError('cnpj');
     }
   };
 
@@ -100,79 +137,127 @@ export function ClientDataStep() {
 
   return (
     <div className="space-y-6">
+      {/* Tipo de Pessoa */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Building2 className="h-5 w-5" />
+            Tipo de Pessoa
+          </CardTitle>
+          <CardDescription>
+            Selecione se é Pessoa Física ou Jurídica
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center space-x-4">
+            <Label htmlFor="tipo-pessoa" className="text-base">Pessoa Física</Label>
+            <Switch
+              id="tipo-pessoa"
+              checked={clientData.tipoPessoa === 'PJ'}
+              onCheckedChange={handleTipoPessoaChange}
+              data-testid="switch-tipo-pessoa"
+            />
+            <Label htmlFor="tipo-pessoa" className="text-base">Pessoa Jurídica</Label>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Dados Pessoais / Empresa */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <User className="h-5 w-5" />
-            Dados Pessoais
+            {clientData.tipoPessoa === 'PJ' ? 'Dados da Empresa' : 'Dados Pessoais'}
           </CardTitle>
           <CardDescription>
-            Informações básicas do cliente
+            {clientData.tipoPessoa === 'PJ' ? 'Informações da empresa' : 'Informações básicas do cliente'}
           </CardDescription>
         </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="cpf">CPF *</Label>
-            <InputMask
-              mask="999.999.999-99"
-              value={clientData.cpf}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleCPFChange(e.target.value)}
-            >
-              {(inputProps: any) => (
+          {clientData.tipoPessoa === 'PJ' ? (
+            <>
+              <div className="md:col-span-2">
+                <Label htmlFor="razaoSocial">Razão Social *</Label>
                 <Input
-                  {...inputProps}
-                  id="cpf"
+                  id="razaoSocial"
                   type="text"
-                  placeholder="000.000.000-00"
-                  className={errors.cpf ? "border-destructive focus:border-destructive" : ""}
+                  value={clientData.razaoSocial || ''}
+                  onChange={(e) => updateClient({ razaoSocial: e.target.value })}
+                  placeholder="Nome da empresa"
+                  data-testid="input-razao-social"
                 />
-              )}
-            </InputMask>
-            {errors.cpf && <p className="mt-1 text-sm text-destructive">{errors.cpf}</p>}
-          </div>
+              </div>
+              <div>
+                <Label htmlFor="cnpj">CNPJ *</Label>
+                <InputMask
+                  mask="99.999.999/9999-99"
+                  value={clientData.cnpj || ''}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleCNPJChange(e.target.value)}
+                >
+                  {(inputProps: any) => (
+                    <Input
+                      {...inputProps}
+                      id="cnpj"
+                      type="text"
+                      placeholder="00.000.000/0000-00"
+                      className={errors.cnpj ? "border-destructive focus:border-destructive" : ""}
+                      data-testid="input-cnpj"
+                    />
+                  )}
+                </InputMask>
+                {errors.cnpj && <p className="mt-1 text-sm text-destructive">{errors.cnpj}</p>}
+              </div>
+              <div>
+                <Label htmlFor="nome">Representante Legal *</Label>
+                <Input
+                  id="nome"
+                  type="text"
+                  value={clientData.nome}
+                  onChange={(e) => handleNameChange(e.target.value)}
+                  className={errors.nome ? "border-destructive focus:border-destructive" : ""}
+                  placeholder="Nome do representante"
+                  data-testid="input-nome-representante"
+                />
+                {errors.nome && <p className="mt-1 text-sm text-destructive">{errors.nome}</p>}
+              </div>
+            </>
+          ) : (
+            <>
+              <div>
+                <Label htmlFor="cpf">CPF *</Label>
+                <InputMask
+                  mask="999.999.999-99"
+                  value={clientData.cpf}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleCPFChange(e.target.value)}
+                >
+                  {(inputProps: any) => (
+                    <Input
+                      {...inputProps}
+                      id="cpf"
+                      type="text"
+                      placeholder="000.000.000-00"
+                      className={errors.cpf ? "border-destructive focus:border-destructive" : ""}
+                      data-testid="input-cpf"
+                    />
+                  )}
+                </InputMask>
+                {errors.cpf && <p className="mt-1 text-sm text-destructive">{errors.cpf}</p>}
+              </div>
 
-          <div>
-            <Label htmlFor="nome">Nome Completo *</Label>
-            <Input
-              id="nome"
-              type="text"
-              value={clientData.nome}
-              onChange={(e) => handleNameChange(e.target.value)}
-              className={errors.nome ? "border-destructive focus:border-destructive" : ""}
-            />
-            {errors.nome && <p className="mt-1 text-sm text-destructive">{errors.nome}</p>}
-          </div>
-
-          <div>
-            <Label htmlFor="rg">RG</Label>
-            <Input
-              id="rg"
-              type="text"
-              value={clientData.rg}
-              onChange={(e) => updateClient({ rg: e.target.value })}
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="orgaoEmissor">Órgão Emissor</Label>
-            <Input
-              id="orgaoEmissor"
-              type="text"
-              placeholder="SSP-SP"
-              value={clientData.orgaoEmissor}
-              onChange={(e) => updateClient({ orgaoEmissor: e.target.value })}
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="dataEmissao">Data de Emissão</Label>
-            <Input
-              id="dataEmissao"
-              type="date"
-              value={clientData.dataEmissao}
-              onChange={(e) => updateClient({ dataEmissao: e.target.value })}
-            />
-          </div>
+              <div>
+                <Label htmlFor="nome">Nome Completo *</Label>
+                <Input
+                  id="nome"
+                  type="text"
+                  value={clientData.nome}
+                  onChange={(e) => handleNameChange(e.target.value)}
+                  className={errors.nome ? "border-destructive focus:border-destructive" : ""}
+                  data-testid="input-nome"
+                />
+                {errors.nome && <p className="mt-1 text-sm text-destructive">{errors.nome}</p>}
+              </div>
+            </>
+          )}
 
           <div>
             <Label htmlFor="dataNascimento">Data de Nascimento</Label>
@@ -182,8 +267,21 @@ export function ClientDataStep() {
               value={clientData.dataNascimento}
               onChange={(e) => updateClient({ dataNascimento: e.target.value })}
               className={errors.dataNascimento ? "border-red-500" : ""}
+              data-testid="input-data-nascimento"
             />
             {errors.dataNascimento && <p className="mt-1 text-sm text-red-500">{errors.dataNascimento}</p>}
+          </div>
+
+          <div>
+            <Label htmlFor="localNascimento">Local de Nascimento</Label>
+            <Input
+              id="localNascimento"
+              type="text"
+              placeholder="Cidade - UF"
+              value={clientData.localNascimento}
+              onChange={(e) => updateClient({ localNascimento: e.target.value })}
+              data-testid="input-local-nascimento"
+            />
           </div>
 
           <div>
@@ -192,7 +290,7 @@ export function ClientDataStep() {
               value={clientData.estadoCivil}
               onValueChange={(value) => updateClient({ estadoCivil: value })}
             >
-              <SelectTrigger>
+              <SelectTrigger data-testid="select-estado-civil">
                 <SelectValue placeholder="Selecione..." />
               </SelectTrigger>
               <SelectContent>
@@ -212,11 +310,102 @@ export function ClientDataStep() {
               type="text"
               value={clientData.nacionalidade}
               onChange={(e) => updateClient({ nacionalidade: e.target.value })}
+              data-testid="input-nacionalidade"
             />
           </div>
         </CardContent>
       </Card>
 
+      {/* Documentação Completa */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="h-5 w-5" />
+            Documento de Identidade
+          </CardTitle>
+          <CardDescription>
+            Informações completas do RG
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="rg">RG</Label>
+            <Input
+              id="rg"
+              type="text"
+              value={clientData.rg}
+              onChange={(e) => updateClient({ rg: e.target.value })}
+              data-testid="input-rg"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="orgaoEmissor">Órgão Emissor</Label>
+            <Input
+              id="orgaoEmissor"
+              type="text"
+              placeholder="SSP, Detran, etc."
+              value={clientData.orgaoEmissor}
+              onChange={(e) => updateClient({ orgaoEmissor: e.target.value })}
+              data-testid="input-orgao-emissor"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="rgUf">UF de Emissão</Label>
+            <Select
+              value={clientData.rgUf}
+              onValueChange={(value) => updateClient({ rgUf: value })}
+            >
+              <SelectTrigger data-testid="select-rg-uf">
+                <SelectValue placeholder="Selecione..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="AC">AC</SelectItem>
+                <SelectItem value="AL">AL</SelectItem>
+                <SelectItem value="AP">AP</SelectItem>
+                <SelectItem value="AM">AM</SelectItem>
+                <SelectItem value="BA">BA</SelectItem>
+                <SelectItem value="CE">CE</SelectItem>
+                <SelectItem value="DF">DF</SelectItem>
+                <SelectItem value="ES">ES</SelectItem>
+                <SelectItem value="GO">GO</SelectItem>
+                <SelectItem value="MA">MA</SelectItem>
+                <SelectItem value="MT">MT</SelectItem>
+                <SelectItem value="MS">MS</SelectItem>
+                <SelectItem value="MG">MG</SelectItem>
+                <SelectItem value="PA">PA</SelectItem>
+                <SelectItem value="PB">PB</SelectItem>
+                <SelectItem value="PR">PR</SelectItem>
+                <SelectItem value="PE">PE</SelectItem>
+                <SelectItem value="PI">PI</SelectItem>
+                <SelectItem value="RJ">RJ</SelectItem>
+                <SelectItem value="RN">RN</SelectItem>
+                <SelectItem value="RS">RS</SelectItem>
+                <SelectItem value="RO">RO</SelectItem>
+                <SelectItem value="RR">RR</SelectItem>
+                <SelectItem value="SC">SC</SelectItem>
+                <SelectItem value="SP">SP</SelectItem>
+                <SelectItem value="SE">SE</SelectItem>
+                <SelectItem value="TO">TO</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <Label htmlFor="rgDataEmissao">Data de Emissão do RG</Label>
+            <Input
+              id="rgDataEmissao"
+              type="date"
+              value={clientData.rgDataEmissao}
+              onChange={(e) => updateClient({ rgDataEmissao: e.target.value })}
+              data-testid="input-rg-data-emissao"
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Contato */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -224,7 +413,7 @@ export function ClientDataStep() {
             Contato
           </CardTitle>
           <CardDescription>
-            Informações de contato do cliente
+            Informações de contato
           </CardDescription>
         </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -242,6 +431,7 @@ export function ClientDataStep() {
                   type="tel"
                   placeholder="(11) 98765-4321"
                   className={errors.telefone ? "border-destructive focus:border-destructive" : ""}
+                  data-testid="input-telefone"
                 />
               )}
             </InputMask>
@@ -256,20 +446,22 @@ export function ClientDataStep() {
               value={clientData.email}
               onChange={(e) => handleEmailChange(e.target.value)}
               className={errors.email ? "border-destructive focus:border-destructive" : ""}
+              data-testid="input-email"
             />
             {errors.email && <p className="mt-1 text-sm text-destructive">{errors.email}</p>}
           </div>
         </CardContent>
       </Card>
 
+      {/* Endereço Detalhado */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <MapPin className="h-5 w-5" />
-            Endereço
+            Endereço Detalhado
           </CardTitle>
           <CardDescription>
-            Endereço residencial completo
+            Endereço completo para o CCB
           </CardDescription>
         </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -287,6 +479,7 @@ export function ClientDataStep() {
                   type="text"
                   placeholder="00000-000"
                   className={errors.cep ? "border-destructive focus:border-destructive" : ""}
+                  data-testid="input-cep"
                 />
               )}
             </InputMask>
@@ -294,15 +487,17 @@ export function ClientDataStep() {
           </div>
 
           <div className="md:col-span-2">
-            <Label htmlFor="endereco">Endereço</Label>
+            <Label htmlFor="logradouro">Logradouro (Rua/Avenida)</Label>
             <Input
-              id="endereco"
+              id="logradouro"
               type="text"
-              value={clientData.endereco}
-              onChange={(e) => updateClient({ endereco: e.target.value })}
-              className={errors.endereco ? "border-destructive" : ""}
+              placeholder="Ex: Rua das Flores, Avenida Brasil"
+              value={clientData.logradouro}
+              onChange={(e) => updateClient({ logradouro: e.target.value })}
+              className={errors.logradouro ? "border-destructive" : ""}
+              data-testid="input-logradouro"
             />
-            {errors.endereco && <p className="mt-1 text-sm text-destructive">{errors.endereco}</p>}
+            {errors.logradouro && <p className="mt-1 text-sm text-destructive">{errors.logradouro}</p>}
           </div>
 
           <div>
@@ -312,6 +507,7 @@ export function ClientDataStep() {
               type="text"
               value={clientData.numero}
               onChange={(e) => updateClient({ numero: e.target.value })}
+              data-testid="input-numero"
             />
           </div>
 
@@ -320,9 +516,10 @@ export function ClientDataStep() {
             <Input
               id="complemento"
               type="text"
-              placeholder="Apto, Casa, etc."
+              placeholder="Apto, Bloco, Sala, etc."
               value={clientData.complemento}
               onChange={(e) => updateClient({ complemento: e.target.value })}
+              data-testid="input-complemento"
             />
           </div>
 
@@ -333,6 +530,7 @@ export function ClientDataStep() {
               type="text"
               value={clientData.bairro}
               onChange={(e) => updateClient({ bairro: e.target.value })}
+              data-testid="input-bairro"
             />
           </div>
 
@@ -343,6 +541,7 @@ export function ClientDataStep() {
               type="text"
               value={clientData.cidade}
               onChange={(e) => updateClient({ cidade: e.target.value })}
+              data-testid="input-cidade"
             />
           </div>
 
@@ -352,7 +551,7 @@ export function ClientDataStep() {
               value={clientData.estado}
               onValueChange={(value) => updateClient({ estado: value })}
             >
-              <SelectTrigger>
+              <SelectTrigger data-testid="select-estado">
                 <SelectValue placeholder="Selecione..." />
               </SelectTrigger>
               <SelectContent>
@@ -389,6 +588,7 @@ export function ClientDataStep() {
         </CardContent>
       </Card>
 
+      {/* Dados Profissionais */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -408,6 +608,7 @@ export function ClientDataStep() {
               value={clientData.ocupacao}
               onChange={(e) => updateClient({ ocupacao: e.target.value })}
               className={errors.ocupacao ? "border-destructive" : ""}
+              data-testid="input-ocupacao"
             />
             {errors.ocupacao && <p className="mt-1 text-sm text-destructive">{errors.ocupacao}</p>}
           </div>
@@ -419,22 +620,18 @@ export function ClientDataStep() {
               value={clientData.rendaMensal}
               onChange={(e) => updateClient({ rendaMensal: e.target.value })}
               className={errors.rendaMensal ? "border-destructive" : ""}
+              data-testid="input-renda-mensal"
             />
             {errors.rendaMensal && <p className="mt-1 text-sm text-destructive">{errors.rendaMensal}</p>}
           </div>
 
           <div className="md:col-span-2">
-            <Label htmlFor="telefoneEmpresa">Telefone da Empresa *</Label>
+            <Label htmlFor="telefoneEmpresa">Telefone da Empresa</Label>
             <InputMask
               mask="(99) 9999-9999"
               value={clientData.telefoneEmpresa}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 updateClient({ telefoneEmpresa: e.target.value });
-                if (!e.target.value.replace(/\D/g, '')) {
-                  setError('telefoneEmpresa', 'Telefone da empresa é obrigatório');
-                } else {
-                  clearError('telefoneEmpresa');
-                }
               }}
             >
               {(inputProps: any) => (
@@ -444,11 +641,194 @@ export function ClientDataStep() {
                   type="tel"
                   placeholder="(11) 3456-7890"
                   className={errors.telefoneEmpresa ? "border-destructive focus:border-destructive" : ""}
+                  data-testid="input-telefone-empresa"
                 />
               )}
             </InputMask>
             {errors.telefoneEmpresa && <p className="mt-1 text-sm text-destructive">{errors.telefoneEmpresa}</p>}
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Dados de Pagamento */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <CreditCard className="h-5 w-5" />
+            Dados para Recebimento
+          </CardTitle>
+          <CardDescription>
+            Escolha como deseja receber o valor do empréstimo
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Tabs value={clientData.metodoPagamento} onValueChange={(value: any) => updateClient({ metodoPagamento: value })}>
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="conta_bancaria" data-testid="tab-conta-bancaria">
+                <CreditCard className="h-4 w-4 mr-2" />
+                Conta Bancária
+              </TabsTrigger>
+              <TabsTrigger value="pix" data-testid="tab-pix">
+                <Smartphone className="h-4 w-4 mr-2" />
+                PIX
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="conta_bancaria" className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <div>
+                  <Label htmlFor="banco">Banco</Label>
+                  <Select
+                    value={clientData.dadosPagamentoBanco || ''}
+                    onValueChange={(value) => updateClient({ dadosPagamentoBanco: value })}
+                  >
+                    <SelectTrigger data-testid="select-banco">
+                      <SelectValue placeholder="Selecione o banco..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="001">001 - Banco do Brasil</SelectItem>
+                      <SelectItem value="033">033 - Santander</SelectItem>
+                      <SelectItem value="104">104 - Caixa Econômica</SelectItem>
+                      <SelectItem value="237">237 - Bradesco</SelectItem>
+                      <SelectItem value="341">341 - Itaú</SelectItem>
+                      <SelectItem value="077">077 - Inter</SelectItem>
+                      <SelectItem value="260">260 - Nubank</SelectItem>
+                      <SelectItem value="336">336 - C6 Bank</SelectItem>
+                      <SelectItem value="290">290 - PagBank</SelectItem>
+                      <SelectItem value="212">212 - Banco Original</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="agencia">Agência</Label>
+                  <Input
+                    id="agencia"
+                    type="text"
+                    placeholder="0000"
+                    value={clientData.dadosPagamentoAgencia || ''}
+                    onChange={(e) => updateClient({ dadosPagamentoAgencia: e.target.value })}
+                    data-testid="input-agencia"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="conta">Conta</Label>
+                  <Input
+                    id="conta"
+                    type="text"
+                    placeholder="00000-0"
+                    value={clientData.dadosPagamentoConta || ''}
+                    onChange={(e) => updateClient({ dadosPagamentoConta: e.target.value })}
+                    data-testid="input-conta"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="digito">Dígito</Label>
+                  <Input
+                    id="digito"
+                    type="text"
+                    placeholder="0"
+                    maxLength={2}
+                    value={clientData.dadosPagamentoDigito || ''}
+                    onChange={(e) => updateClient({ dadosPagamentoDigito: e.target.value })}
+                    data-testid="input-digito"
+                  />
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="pix" className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <div>
+                  <Label htmlFor="tipoPix">Tipo de Chave PIX</Label>
+                  <Select
+                    value={clientData.dadosPagamentoTipoPix || ''}
+                    onValueChange={(value) => updateClient({ dadosPagamentoTipoPix: value })}
+                  >
+                    <SelectTrigger data-testid="select-tipo-pix">
+                      <SelectValue placeholder="Selecione o tipo..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="cpf">CPF</SelectItem>
+                      <SelectItem value="cnpj">CNPJ</SelectItem>
+                      <SelectItem value="email">E-mail</SelectItem>
+                      <SelectItem value="telefone">Telefone</SelectItem>
+                      <SelectItem value="aleatoria">Chave Aleatória</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="chavePix">Chave PIX</Label>
+                  <Input
+                    id="chavePix"
+                    type="text"
+                    placeholder="Digite a chave PIX"
+                    value={clientData.dadosPagamentoPix || ''}
+                    onChange={(e) => updateClient({ dadosPagamentoPix: e.target.value })}
+                    data-testid="input-chave-pix"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="pixBanco">Banco do PIX</Label>
+                  <Select
+                    value={clientData.dadosPagamentoPixBanco || ''}
+                    onValueChange={(value) => updateClient({ dadosPagamentoPixBanco: value })}
+                  >
+                    <SelectTrigger data-testid="select-pix-banco">
+                      <SelectValue placeholder="Selecione o banco..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="001">001 - Banco do Brasil</SelectItem>
+                      <SelectItem value="033">033 - Santander</SelectItem>
+                      <SelectItem value="104">104 - Caixa Econômica</SelectItem>
+                      <SelectItem value="237">237 - Bradesco</SelectItem>
+                      <SelectItem value="341">341 - Itaú</SelectItem>
+                      <SelectItem value="077">077 - Inter</SelectItem>
+                      <SelectItem value="260">260 - Nubank</SelectItem>
+                      <SelectItem value="336">336 - C6 Bank</SelectItem>
+                      <SelectItem value="290">290 - PagBank</SelectItem>
+                      <SelectItem value="212">212 - Banco Original</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="pixNomeTitular">Nome do Titular</Label>
+                  <Input
+                    id="pixNomeTitular"
+                    type="text"
+                    placeholder="Nome completo"
+                    value={clientData.dadosPagamentoPixNomeTitular || ''}
+                    onChange={(e) => updateClient({ dadosPagamentoPixNomeTitular: e.target.value })}
+                    data-testid="input-pix-nome-titular"
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <Label htmlFor="pixCpfTitular">CPF/CNPJ do Titular</Label>
+                  <InputMask
+                    mask={clientData.dadosPagamentoPixCpfTitular && clientData.dadosPagamentoPixCpfTitular.length > 14 ? "99.999.999/9999-99" : "999.999.999-99"}
+                    value={clientData.dadosPagamentoPixCpfTitular || ''}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateClient({ dadosPagamentoPixCpfTitular: e.target.value })}
+                  >
+                    {(inputProps: any) => (
+                      <Input
+                        {...inputProps}
+                        id="pixCpfTitular"
+                        type="text"
+                        placeholder="CPF ou CNPJ do titular"
+                        data-testid="input-pix-cpf-titular"
+                      />
+                    )}
+                  </InputMask>
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
     </div>

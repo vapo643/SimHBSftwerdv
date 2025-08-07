@@ -46,25 +46,34 @@ interface OriginationContext {
 
 // Client data interface
 interface ClientData {
+  // Tipo de pessoa
+  tipoPessoa: 'PF' | 'PJ';
+  
   // Dados pessoais
   cpf: string;
   nome: string;
   email: string;
   telefone: string;
   
+  // Dados PJ (quando aplicável)
+  razaoSocial?: string;
+  cnpj?: string;
+  
   // Documentação
   rg: string;
   orgaoEmissor: string;
-  dataEmissao: string;
+  rgUf: string;  // NOVO: UF do RG
+  rgDataEmissao: string;  // NOVO: Data de emissão do RG
   dataNascimento: string;
+  localNascimento: string;  // NOVO: Local de nascimento
   
   // Informações adicionais
   estadoCivil: string;
   nacionalidade: string;
   
-  // Endereço
+  // Endereço detalhado
   cep: string;
-  endereco: string;
+  logradouro: string;  // NOVO: Rua/Avenida separado
   numero: string;
   complemento?: string;
   bairro: string;
@@ -75,6 +84,22 @@ interface ClientData {
   ocupacao: string;
   rendaMensal: string;
   telefoneEmpresa: string;
+  
+  // Dados de pagamento
+  metodoPagamento: 'conta_bancaria' | 'pix';
+  
+  // Dados bancários (quando conta_bancaria)
+  dadosPagamentoBanco?: string;
+  dadosPagamentoAgencia?: string;
+  dadosPagamentoConta?: string;
+  dadosPagamentoDigito?: string;
+  
+  // Dados PIX (quando pix)
+  dadosPagamentoPix?: string;  // Chave PIX
+  dadosPagamentoTipoPix?: string;  // Tipo da chave (cpf, email, telefone, aleatoria)
+  dadosPagamentoPixBanco?: string;
+  dadosPagamentoPixNomeTitular?: string;
+  dadosPagamentoPixCpfTitular?: string;
 }
 
 // Loan data interface
@@ -152,18 +177,23 @@ type ProposalAction =
 const initialState: ProposalState = {
   context: null,
   clientData: {
+    tipoPessoa: 'PF',
     cpf: '',
     nome: '',
     email: '',
     telefone: '',
+    razaoSocial: '',
+    cnpj: '',
     rg: '',
     orgaoEmissor: '',
-    dataEmissao: '',
+    rgUf: '',
+    rgDataEmissao: '',
     dataNascimento: '',
+    localNascimento: '',
     estadoCivil: '',
     nacionalidade: 'Brasileira',
     cep: '',
-    endereco: '',
+    logradouro: '',
     numero: '',
     complemento: '',
     bairro: '',
@@ -172,6 +202,16 @@ const initialState: ProposalState = {
     ocupacao: '',
     rendaMensal: '',
     telefoneEmpresa: '',
+    metodoPagamento: 'conta_bancaria',
+    dadosPagamentoBanco: '',
+    dadosPagamentoAgencia: '',
+    dadosPagamentoConta: '',
+    dadosPagamentoDigito: '',
+    dadosPagamentoPix: '',
+    dadosPagamentoTipoPix: '',
+    dadosPagamentoPixBanco: '',
+    dadosPagamentoPixNomeTitular: '',
+    dadosPagamentoPixCpfTitular: '',
   },
   loanData: {
     produtoId: null,
