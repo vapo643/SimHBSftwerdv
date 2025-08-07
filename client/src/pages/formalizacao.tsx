@@ -48,6 +48,7 @@ import RefreshButton from "@/components/RefreshButton";
 import { useAuth } from "@/contexts/AuthContext";
 import { EtapaFormalizacaoControl } from "@/components/propostas/EtapaFormalizacaoControl";
 import { DocumentViewer } from "@/components/DocumentViewer";
+import { CCBViewer } from "@/components/CCBViewer";
 
 interface Proposta {
   id: string;
@@ -865,6 +866,18 @@ export default function Formalizacao() {
 
                       // Se é uma etapa interativa, mostra o controle (independente do role)
                       if (step.interactive && step.etapa) {
+                        // Para a etapa de CCB, mostrar o CCBViewer
+                        if (step.etapa === 'ccb_gerado') {
+                          return (
+                            <div key={step.id} className="mb-4">
+                              <CCBViewer 
+                                proposalId={proposta.id} 
+                                onCCBGenerated={() => refetch()} 
+                              />
+                            </div>
+                          );
+                        }
+                        
                         // Para a etapa de assinatura eletrônica, mostrar interface customizada
                         if (step.etapa === 'assinatura_eletronica' && proposta.ccbGerado) {
                           return (
