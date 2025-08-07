@@ -58,5 +58,14 @@ export function createServerSupabaseClient(accessToken?: string) {
 }
 
 // Database connection using Drizzle
+// WARNING: DATABASE_URL is pointing to Neon instead of Supabase
+// This needs to be fixed in Replit Secrets - see CORRIGIR_BANCO_URGENTE.md
+if (databaseUrl.includes('neon')) {
+  console.warn('⚠️  DATABASE_URL está apontando para Neon em vez do Supabase!');
+  console.warn('⚠️  Por favor, corrija isso nos Secrets do Replit');
+  console.warn('⚠️  Veja o arquivo CORRIGIR_BANCO_URGENTE.md para instruções');
+}
+
+// Use the DATABASE_URL as is for now to keep the app running
 const client = postgres(databaseUrl);
 export const db = drizzle(client, { schema });
