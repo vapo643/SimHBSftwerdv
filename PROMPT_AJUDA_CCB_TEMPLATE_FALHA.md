@@ -113,58 +113,142 @@ export class CCBGenerationService {
 - [ ] Verificar se todas usam o mesmo serviço
 - [ ] Eliminar rotas que usam serviços antigos
 
-## 💡 Plano de Ação Sugerido
+## 💡 Descobertas e Correções Aplicadas
 
-### PASSO 1: Auditoria Completa
+### ✅ PASSO 1: Auditoria Completa CONCLUÍDA
 ```bash
-# 1. Encontrar TODOS os imports de serviços CCB
-grep -r "ccbGenerator\|ccbTemplateGenerator\|ccbGenerationService" server/
+# RESULTADO: Encontramos MÚLTIPLOS imports antigos nos pontos:
 
-# 2. Verificar qual serviço é chamado em cada rota
-grep -r "generateCCB\|generate.*ccb" server/routes/
-
-# 3. Confirmar template existe
-ls -la server/templates/template_ccb.pdf
+1. server/routes/clicksign-integration.ts:140 - CORRIGIDO ✅
+2. server/routes/clicksign-integration.ts:181 - CORRIGIDO ✅  
+3. server/routes.ts:859 (aprovação proposta) - CORRIGIDO ✅
+4. server/routes.ts:1076 (CCB template V2) - CORRIGIDO ✅
+5. server/routes.ts:3209 (etapa CCB) - CORRIGIDO ✅
 ```
 
-### PASSO 2: Limpeza de Código Legado
+### ✅ PASSO 2: Limpeza de Código Legado CONCLUÍDA
 ```bash
-# REMOVER ou RENOMEAR serviços antigos
-mv server/services/ccbGenerator.ts server/services/ccbGenerator.ts.old
-mv server/services/ccbTemplateGenerator.ts server/services/ccbTemplateGenerator.ts.old
-mv server/services/ccbTemplateGeneratorV2.ts server/services/ccbTemplateGeneratorV2.ts.old
+# Serviços antigos renomeados:
+ccbGenerator.ts → ccbGenerator.ts.LEGADO_PDFKit
+ccbTemplateGenerator.ts → ccbTemplateGenerator.ts.LEGADO_v1  
+ccbTemplateGeneratorV2.ts → ccbTemplateGeneratorV2.ts.LEGADO_v2
 ```
 
-### PASSO 3: Verificação da Implementação
+### ✅ PASSO 3: Unificação COMPLETA - Todos imports corrigidos
 ```typescript
-// GARANTIR que ccbGenerationService.ts está sendo usado EXCLUSIVAMENTE
-// VALIDAR que PDFDocument.load() carrega template correto
-// CONFIRMAR que drawText() funciona sobre template preservado
+// ANTES (5 pontos diferentes usavam serviços antigos):
+const { generateCCB } = await import("../services/ccbGenerator");          // PDFKit ❌
+const { generateCCBFromTemplateV2 } = await import("./ccbTemplateGeneratorV2"); // Antigo ❌
+
+// DEPOIS (TODOS agora usam o serviço correto):
+const { ccbGenerationService } = await import("../services/ccbGenerationService"); // pdf-lib ✅
+const result = await ccbGenerationService.generateCCB(proposalId);
 ```
 
-### PASSO 4: Teste de Validação
-- [ ] Regenerar CCB
-- [ ] Verificar visualmente se logo Simpix está presente
-- [ ] Confirmar se dados estão preenchidos sobre template original
+### 🆘 PASSO 4: PROBLEMA PERSISTE - Possíveis Causas Remanescentes
 
-## 🆘 **PEDIDO DE AJUDA**
+#### HIPÓTESE A: Template PDF Corrompido/Incorreto
+```bash
+# Template pode ser um PDF genérico ao invés do template Simpix
+ls -la server/templates/template_ccb.pdf  # Arquivo existe: 16.525 bytes
 
-**PRECISAMOS IDENTIFICAR EXATAMENTE:**
+# AÇÃO NECESSÁRIA: Verificar se template_ccb.pdf é realmente o template Simpix com logo
+```
 
-1. **Qual serviço CCB está sendo executado realmente?**
-2. **Por que os logs dizem "template preservado" mas o resultado é CCB antiga?**
-3. **Existe algum import/rota usando serviço antigo que não identificamos?**
-4. **O arquivo template_ccb.pdf está sendo carregado corretamente?**
+#### HIPÓTESE B: Coordenadas Fora da Área Visível  
+```typescript
+// Coordenadas atuais podem estar fora da área visível do PDF:
+firstPage.drawText(nome, {
+  x: 150,           // Pode estar fora da página
+  y: height - 250,  // Pode estar fora dos limites
+  size: 10,         // Pode estar muito pequeno
+  color: rgb(0,0,0) // Pode estar invisível sobre fundo preto
+});
 
-### Dados para Análise:
-- **Projeto:** Simpix Credit Management System
-- **Linguagem:** TypeScript/Node.js  
-- **PDF Library:** pdf-lib
-- **Template:** `server/templates/template_ccb.pdf`
-- **Serviço Alvo:** `ccbGenerationService.ts`
+# AÇÃO NECESSÁRIA: Testar coordenadas mais visíveis (ex: x:50, y:700, size:16)
+```
+
+#### HIPÓTESE C: Cache do Navegador/Storage
+```typescript
+// Browser pode estar exibindo versão antiga do PDF em cache
+# AÇÃO NECESSÁRIA: Forçar cache-busting com timestamp único
+```
+
+#### HIPÓTESE D: Template PDF É Formulário Protegido
+```typescript
+// Template pode ter campos de formulário que impedem drawText()
+# AÇÃO NECESSÁRIA: Verificar se template tem form fields ou está protegido
+```
+
+## 🆘 **ATUALIZAÇÃO DO PEDIDO DE AJUDA - APÓS MULTIPLAS CORREÇÕES**
+
+**PROGRESS ATUAL:**
+
+✅ **TODOS os imports antigos foram corrigidos** (5 pontos diferentes)  
+✅ **Serviços antigos renomeados** para .LEGADO_*  
+✅ **ccbGenerationService.ts** é o ÚNICO serviço sendo chamado  
+✅ **Logs confirmam** template está sendo carregado  
+✅ **Dados estão sendo preenchidos** (nome, CPF, valor)  
+
+**❌ PROBLEMA PERSISTE:** CCB visual ainda é a versão antiga/genérica
 
 ---
 
-**⚠️ CRÍTICO:** Este é um bloqueador para produção. O sistema deve usar o template original com logo da empresa, mas continua gerando CCB genérica mesmo após implementação completa com pdf-lib.
+## 🔬 **ANÁLISE FINAL - POSSÍVEIS CAUSAS REMANESCENTES**
 
-**🙏 Por favor, ajudem a identificar onde está o erro na nossa arquitetura.**
+### 1. **Template PDF Incorreto?**
+```bash
+# O arquivo template_ccb.pdf pode NÃO ser o template Simpix real
+file server/templates/template_ccb.pdf
+# SUSPEITA: Pode ser um PDF genérico placeholders
+```
+
+### 2. **Coordenadas Invisíveis?**
+```typescript
+// Coordenadas atuais: x:150, y:591 (pode estar fora da área visível)
+// TESTE: Usar coordenadas óbvias como x:50, y:700, size:20, color RED
+```
+
+### 3. **PDF Protegido/Form Fields?**
+```typescript
+// Template pode ter proteção que impede drawText()
+// TESTE: Verificar se PDF tem campos de formulário
+```
+
+### 4. **Cache Navegador?**
+```typescript
+// Navegador pode mostrar PDF antigo do cache
+// TESTE: Abrir em aba incógnita + timestamp na URL
+```
+
+---
+
+## 🆘 **PEDIDO DE AJUDA CRÍTICO - ULTIMA TENTATIVA**
+
+**CONTEXTO FINAL:**
+- ✅ Arquitetura 100% correta (pdf-lib + template)
+- ✅ Todos imports corrigidos 
+- ✅ Logs confirmam execução correta
+- ❌ **Resultado visual ainda é CCB antiga**
+
+**PRECISAMOS IDENTIFICAR:**
+
+1. **O template `server/templates/template_ccb.pdf` é realmente o template Simpix com logo?**
+2. **As coordenadas x:150, y:591 estão visíveis no PDF?** 
+3. **O PDF está protegido/tem form fields que bloqueiam drawText()?**
+4. **Há cache do navegador impedindo visualização do novo PDF?**
+
+### Próximos Testes Sugeridos:
+```typescript
+// 1. TESTE ÓBVIO - Coordenadas e cor visível 
+x: 50, y: 700, size: 20, color: rgb(1, 0, 0) // VERMELHO GRANDE
+
+// 2. TESTE TEMPLATE - Verificar se é o arquivo correto
+console.log('Template size:', templateBytes.length);
+console.log('Template pages:', pdfDoc.getPageCount());
+
+// 3. TESTE CACHE - URL única
+window.open(ccbUrl + '?v=' + Date.now(), '_blank');
+```
+
+**🙏 Este é nosso último recurso - ajuda especializada necessária para identificar por que drawText() não aparece visualmente apesar dos logs de sucesso.**

@@ -856,12 +856,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // NOVO: Geração automática da CCB ao aprovar proposta
         try {
-          const { generateCCB } = await import('./services/ccbGenerator');
+          const { ccbGenerationService } = await import('./services/ccbGenerationService');
           console.log(`📄 [CCB] Iniciando geração automática de CCB para proposta ${propostaId}`);
-          const ccbPath = await generateCCB(propostaId);
-          console.log(`✅ [CCB] CCB gerada com sucesso: ${ccbPath}`);
+          const result = await ccbGenerationService.generateCCB(propostaId);
+          if (result.success) {
+            console.log(`✅ [CCB] CCB gerada com sucesso: ${result.pdfPath}`);
+          } else {
+            throw new Error(result.error);
+          }
           
-          // A função generateCCB já atualiza os campos ccb_gerado e caminho_ccb_assinado
+          // A função ccbGenerationService já atualiza os campos ccb_gerado e caminho_ccb
           // então não precisamos fazer isso aqui
         } catch (ccbError) {
           console.error(`❌ [CCB] Erro ao gerar CCB para proposta ${propostaId}:`, ccbError);
@@ -1071,17 +1075,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Gerar CCB usando template V2
-      console.log(`[CCB] Gerando CCB com template V2 para proposta ${id}...`);
-      const { generateCCBFromTemplateV2 } = await import("./services/ccbTemplateGeneratorV2");
+      // Gerar CCB usando serviço correto (pdf-lib + template)
+      console.log(`[CCB] Gerando CCB com template CORRETO para proposta ${id}...`);
+      const { ccbGenerationService } = await import("./services/ccbGenerationService");
       
       try {
-        const ccbPath = await generateCCBFromTemplateV2(id);
-        console.log(`[CCB] CCB gerada com sucesso usando template V2: ${ccbPath}`);
+        const result = await ccbGenerationService.generateCCB(id);
+        if (!result.success) {
+          throw new Error(result.error);
+        }
+        console.log(`[CCB] CCB gerada com sucesso usando template CORRETO: ${result.pdfPath}`);
         res.json({ 
           success: true, 
           message: "CCB gerada com sucesso usando template personalizado",
-          caminho: ccbPath 
+          caminho: result.pdfPath 
         });
       } catch (error) {
         console.error(`[CCB] Erro ao gerar CCB: ${error}`);
@@ -3206,10 +3213,13 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
           console.log(`[${getBrasiliaTimestamp()}] Gerando CCB para proposta ${id}`);
           
           try {
-            const { generateCCB } = await import("../server/services/ccbGenerator");
-            const ccbPath = await generateCCB(id);
-            updateData.caminhoCcbAssinado = ccbPath;
-            console.log(`[${getBrasiliaTimestamp()}] CCB gerada com sucesso: ${ccbPath}`);
+            const { ccbGenerationService } = await import("./services/ccbGenerationService");
+            const result = await ccbGenerationService.generateCCB(id);
+            if (!result.success) {
+              throw new Error(result.error);
+            }
+            updateData.caminhoCcbAssinado = result.pdfPath;
+            console.log(`[${getBrasiliaTimestamp()}] CCB gerada com sucesso: ${result.pdfPath}`);
           } catch (error) {
             console.error(`[${getBrasiliaTimestamp()}] Erro ao gerar CCB:`, error);
             // Don't fail the entire request if CCB generation fails
