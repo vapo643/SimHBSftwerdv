@@ -503,28 +503,31 @@ export class FieldDetector {
    * Obtém valor do campo dos dados
    */
   private getFieldValue(fieldName: string, data: any): string {
-    // Mapeamento inteligente de campos para dados
+    // Mapeamento corrigido e completo de campos para dados
     const fieldMap: { [key: string]: string } = {
-      numeroCedula: data.numeroCcb || 'CCB-' + data.id?.slice(0, 8),
-      dataEmissao: data.dataEmissao || new Date().toLocaleDateString('pt-BR'),
-      finalidadeOperacao: data.finalidade || 'Empréstimo Pessoal',
-      cpfCnpj: data.clienteCpf || data.cpf,
-      nomeRazaoSocial: data.clienteNome || data.nome,
-      rg: data.clienteRg || data.rg || '',
-      enderecoEmitente: data.clienteEndereco || data.endereco || '',
+      // PÁGINA 1 - IDENTIFICAÇÃO E VALORES
+      numeroCedula: data.id ? `CCB-${data.id.slice(0, 8).toUpperCase()}` : '',
+      dataEmissao: data.dataAprovacao ? new Date(data.dataAprovacao).toLocaleDateString('pt-BR') : 
+                   data.createdAt ? new Date(data.createdAt).toLocaleDateString('pt-BR') : 
+                   new Date().toLocaleDateString('pt-BR'),
+      finalidadeOperacao: data.finalidade || 'Capital de Giro',
+      cpfCnpj: data.clienteCpf || '',
+      nomeRazaoSocial: data.clienteNome || '',
+      rg: data.clienteRg || '', // CORRIGIDO: Agora usa clienteRg do banco
+      enderecoEmitente: data.clienteEndereco || '', // CORRIGIDO: Usa clienteEndereco do banco
       razaoSocialCredor: 'SIMPIX LTDA',
-      enderecoCredor: 'Rua Principal, 123 - Centro - São Paulo/SP',
-      valorPrincipal: this.formatCurrency(data.valor || data.valorEmprestimo),
-      custoEfetivoTotal: data.cet || '2,5% a.m.',
+      enderecoCredor: 'Av. Paulista, 1000 - Bela Vista - São Paulo/SP - CEP 01310-100',
+      valorPrincipal: this.formatCurrency(data.valor),
+      custoEfetivoTotal: this.calculateCET(data.taxaJuros, data.prazo),
       
-      // Dados bancários
-      numeroBancoEmitente: data.banco || '',
-      contaNumeroEmitente: data.conta || '',
+      // PÁGINA 2 - DADOS BANCÁRIOS CORRIGIDOS
+      numeroBancoEmitente: this.extractBankCode(data.dadosPagamentoBanco),
+      contaNumeroEmitente: this.formatAccountNumber(data.dadosPagamentoAgencia, data.dadosPagamentoConta),
       nomeInstituicaoFavorecida: data.dadosPagamentoBanco || '',
-      numeroContrato: data.id?.slice(0, 10) || '',
-      linhaDigitavelBoleto: data.linhaDigitavel || '',
+      numeroContrato: data.id || '',
+      linhaDigitavelBoleto: data.linhaDigitavel || '', // Será preenchido pela integração Inter
       
-      // Pagamentos (até 6 parcelas)
+      // PÁGINA 8 - PAGAMENTOS
       ...this.generatePaymentFields(data)
     };
     
@@ -532,18 +535,28 @@ export class FieldDetector {
   }
   
   /**
-   * Gera campos de pagamento dinamicamente
+   * Gera campos de pagamento dinamicamente com cálculo de parcelas
    */
   private generatePaymentFields(data: any): { [key: string]: string } {
     const fields: { [key: string]: string } = {};
     const numParcelas = Math.min(data.prazo || 1, 6);
-    const valorParcela = data.valorParcela || (data.valor / numParcelas);
+    const valorParcela = this.calculateParcela(data.valor, data.taxaJuros, data.prazo);
     
     for (let i = 1; i <= numParcelas; i++) {
-      const vencimento = this.calculateVencimento(data.dataVencimento, i - 1);
+      const vencimento = this.calculateVencimento(
+        data.dataAprovacao || data.createdAt || new Date().toISOString(), 
+        i
+      );
       fields[`dataPagamento${i}`] = vencimento;
       fields[`valorPagamento${i}`] = this.formatCurrency(valorParcela);
-      fields[`linhaDigitavel${i}`] = data[`linhaDigitavel${i}`] || '';
+      fields[`linhaDigitavel${i}`] = ''; // Será preenchido quando boletos forem gerados
+    }
+    
+    // Preencher campos vazios restantes
+    for (let i = numParcelas + 1; i <= 6; i++) {
+      fields[`dataPagamento${i}`] = '';
+      fields[`valorPagamento${i}`] = '';
+      fields[`linhaDigitavel${i}`] = '';
     }
     
     return fields;
@@ -561,16 +574,132 @@ export class FieldDetector {
   /**
    * Calcula data de vencimento
    */
-  private calculateVencimento(dataBase: string, mesesAdicionais: number): string {
+  private calculateVencimento(dataBase: string | Date, mesesAdicionais: number): string {
+    let data: Date;
+    
     if (!dataBase) {
-      const hoje = new Date();
-      hoje.setMonth(hoje.getMonth() + mesesAdicionais + 1);
-      return hoje.toLocaleDateString('pt-BR');
+      data = new Date();
+    } else if (typeof dataBase === 'string') {
+      // Verifica se é formato ISO ou BR
+      if (dataBase.includes('/')) {
+        const [dia, mes, ano] = dataBase.split('/').map(Number);
+        data = new Date(ano, mes - 1, dia);
+      } else {
+        data = new Date(dataBase);
+      }
+    } else {
+      data = dataBase;
     }
     
-    const [dia, mes, ano] = dataBase.split('/').map(Number);
-    const data = new Date(ano, mes - 1 + mesesAdicionais, dia);
+    // Adiciona meses para calcular vencimento
+    data.setMonth(data.getMonth() + mesesAdicionais);
     return data.toLocaleDateString('pt-BR');
+  }
+  
+  /**
+   * Extrai código do banco do nome
+   */
+  private extractBankCode(bankName: string): string {
+    if (!bankName) return '';
+    
+    const bankCodes: { [key: string]: string } = {
+      'banco do brasil': '001',
+      'bb': '001',
+      'bradesco': '237',
+      'itaú': '341',
+      'itau': '341',
+      'santander': '033',
+      'caixa': '104',
+      'caixa economica': '104',
+      'cef': '104',
+      'inter': '077',
+      'banco inter': '077',
+      'nubank': '260',
+      'sicoob': '756',
+      'sicredi': '748',
+      'banrisul': '041'
+    };
+    
+    const normalizedBank = bankName.toLowerCase().trim();
+    
+    // Busca direta
+    if (bankCodes[normalizedBank]) {
+      return bankCodes[normalizedBank];
+    }
+    
+    // Busca parcial
+    for (const [name, code] of Object.entries(bankCodes)) {
+      if (normalizedBank.includes(name)) {
+        return code;
+      }
+    }
+    
+    return '';
+  }
+  
+  /**
+   * Formata número da conta com agência
+   */
+  private formatAccountNumber(agencia: string, conta: string): string {
+    if (!agencia && !conta) return '';
+    
+    const agenciaFormatted = agencia || '';
+    const contaFormatted = conta || '';
+    
+    if (agenciaFormatted && contaFormatted) {
+      return `Ag: ${agenciaFormatted} / C/C: ${contaFormatted}`;
+    } else if (agenciaFormatted) {
+      return `Ag: ${agenciaFormatted}`;
+    } else if (contaFormatted) {
+      return `C/C: ${contaFormatted}`;
+    }
+    
+    return '';
+  }
+  
+  /**
+   * Calcula CET (Custo Efetivo Total)
+   */
+  private calculateCET(taxaJuros: number | string, prazo: number): string {
+    // Converte taxa para número se necessário
+    const taxa = typeof taxaJuros === 'string' ? parseFloat(taxaJuros) : taxaJuros;
+    
+    if (!taxa || !prazo) return '2,5% a.m.'; // Valor padrão
+    
+    // CET simplificado: taxa + IOF + TAC/prazo
+    const iofPercentual = 0.38; // IOF de 0,38%
+    const tacValor = 50; // TAC de R$ 50
+    const valorMedio = 5000; // Valor médio estimado para cálculo
+    
+    const tacPercentual = (tacValor / valorMedio) * 100 / prazo;
+    const cetMensal = taxa + (iofPercentual / prazo) + tacPercentual;
+    
+    // Calcula CET anual
+    const cetAnual = (Math.pow(1 + cetMensal / 100, 12) - 1) * 100;
+    
+    return `${cetMensal.toFixed(2)}% a.m. / ${cetAnual.toFixed(2)}% a.a.`;
+  }
+  
+  /**
+   * Calcula valor da parcela usando Tabela Price
+   */
+  private calculateParcela(valor: number | string, taxaJuros: number | string, prazo: number): number {
+    // Converte valores para número
+    const principal = typeof valor === 'string' ? parseFloat(valor) : valor;
+    const taxa = typeof taxaJuros === 'string' ? parseFloat(taxaJuros) : taxaJuros;
+    
+    if (!principal || !prazo) return 0;
+    
+    // Se não tiver taxa, retorna divisão simples
+    if (!taxa) {
+      return principal / prazo;
+    }
+    
+    // Tabela Price: P = V * (i * (1+i)^n) / ((1+i)^n - 1)
+    const i = taxa / 100; // Taxa em decimal
+    const parcela = principal * (i * Math.pow(1 + i, prazo)) / (Math.pow(1 + i, prazo) - 1);
+    
+    return parcela;
   }
   
   /**
