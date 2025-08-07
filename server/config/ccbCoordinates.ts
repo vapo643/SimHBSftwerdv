@@ -1,9 +1,11 @@
 /**
- * Coordenadas CCB mapeadas com base no DEBUG GRID PDF
- * Gerado em: ${new Date().toISOString()}
+ * Coordenadas CCB - MAPEAMENTO MANUAL
  * 
- * Sistema de coordenadas: origem no canto inferior esquerdo (padrão PDF)
- * Y cresce de baixo para cima, X cresce da esquerda para direita
+ * IMPORTANTE: Coordenadas são onde o TEXTO INICIA (primeira letra)
+ * - X: usar valor direto onde clicou
+ * - Y: converter com fórmula Y_PDF = 842.25 - Y_visual
+ * 
+ * Sistema PDF: origem no canto inferior esquerdo, Y cresce para cima
  */
 
 export interface CCBFieldConfig {

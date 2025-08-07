@@ -76,10 +76,10 @@ export async function fillCCBTemplate(data: CCBData): Promise<Buffer> {
             xPosition = config.x - textWidth;
           }
           
-          // Desenhar texto
+          // Desenhar texto (coordenadas já no formato PDF correto)
           page.drawText(value, {
             x: xPosition,
-            y: config.y,
+            y: config.y, // Coordenada já convertida manualmente
             size: fontSize,
             font: font,
             color: rgb(0, 0, 0),
