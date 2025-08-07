@@ -1,166 +1,133 @@
-# 🎯 GUIA COMPLETO: Como Fornecer 100% das Coordenadas CCB
+# Guia Completo: Mapeamento de Coordenadas CCB
 
-## PASSO 1: BAIXE O PDF COM GRADE DE COORDENADAS
+## 🎯 PROBLEMA IDENTIFICADO
+
+Suas coordenadas foram mapeadas no sistema **VISUAL** (topo = 0), mas o PDF usa sistema **NATIVO** (base = 0).
+
+## 📍 SISTEMAS DE COORDENADAS
+
+### 1. Sistema VISUAL (Ferramenta de Mapeamento)
+```
+┌─────────────────┐ ← (0,0) ORIGEM
+│                 │
+│     PÁGINA      │ ↓ Y cresce para BAIXO
+│                 │
+│                 │
+└─────────────────┘
+```
+
+### 2. Sistema PDF (pdf-lib)
+```
+┌─────────────────┐
+│                 │
+│     PÁGINA      │ ↑ Y cresce para CIMA  
+│                 │
+│                 │
+└─────────────────┘ ← (0,0) ORIGEM
+```
+
+## 🔧 COMO CORRIGIR
+
+### Opção 1: Converter Y Visual → Y PDF
+```javascript
+const pageHeight = 842.25; // A4 em points
+const pdfY = pageHeight - visualY;
+
+// Exemplo:
+// Visual Y = 100 (100px do topo)
+// PDF Y = 842.25 - 100 = 742.25
+```
+
+### Opção 2: Informar Tipo de Referência
+Suas coordenadas são do:
+- ✅ **CENTRO** do campo? (mais comum)
+- ❌ **INÍCIO** do texto (esquerda)?
+- ❌ **FIM** do texto (direita)?
+
+## 🧪 FERRAMENTAS DE TESTE CRIADAS
+
+### 1. Teste de Coordenada Única
+```bash
+POST /api/ccb-debug/test-single-coordinate
+{
+  "x": 150,
+  "y": 100,
+  "testText": "TESTE",
+  "page": 1
+}
+```
+
+### 2. Interface Visual
+```
+http://seu-app.com/coordinate-mapper
+```
+
+### 3. Conversão Automática
+```bash
+POST /api/ccb-debug/convert-coordinates
+{
+  "coordinates": [
+    {"x": 150, "y": 100, "field": "nome"}
+  ],
+  "fromVisual": true,
+  "pageHeight": 842.25
+}
+```
+
+## 🎯 PROCESSO DE CALIBRAÇÃO
+
+### Passo 1: Testar Uma Coordenada
+1. Pegue um campo que você sabe a posição (ex: nome)
+2. Use `/test-single-coordinate` com seus valores
+3. Baixe o PDF de teste
+4. Veja qual interpretação ficou correta:
+   - **LEFT**: Texto começa na coordenada
+   - **CENTER**: Texto fica centralizado na coordenada  
+   - **RIGHT**: Texto termina na coordenada
+
+### Passo 2: Ajustar Sistema
+Com base no teste, escolha:
+- **Se LEFT ficou certo**: Usar coordenadas como estão
+- **Se CENTER ficou certo**: Marcar todas como `align: 'center'`
+- **Se Y ficou invertido**: Converter Y = 842.25 - Y_original
+
+### Passo 3: Aplicar Correção
+```javascript
+// Exemplo de correção no ccbCoordinates.ts
+export const ccbCoordinates = {
+  page1: {
+    nomeCliente: { 
+      x: 150, 
+      y: 742.25, // Era 100, convertido: 842.25 - 100
+      fontSize: 11,
+      align: 'center' // Baseado no teste
+    }
+  }
+}
+```
+
+## 🚀 TESTE RÁPIDO
+
+Vou gerar um PDF de teste agora com sua coordenada (150, 100):
 
 ```bash
-# Execute este comando para baixar o PDF de diagnóstico:
-curl -o template_ccb_DEBUG_GRID.pdf "http://localhost:5000/api/ccb-diagnostics/generate-grid"
+# Comando executado:
+curl -X POST "/api/ccb-debug/test-single-coordinate" \
+-d '{"x": 150, "y": 100, "testText": "NOME DO CLIENTE", "page": 1}'
 ```
 
-✅ **PDF gerado com sucesso!** Agora você tem um arquivo `template_ccb_DEBUG_GRID.pdf` com:
-- Grade de coordenadas sobreposta no template
-- Linhas verticais e horizontais numeradas
-- Coordenadas X e Y marcadas a cada 50 pontos
-- Pontos de referência importantes
+O PDF mostrará 4 interpretações:
+- 🔴 **Ponto vermelho**: Coordenada exata
+- 🔵 **NOME DO CLIENTE (LEFT)**: Texto começando na coordenada
+- 🟢 **NOME DO CLIENTE (CENTER)**: Texto centralizado na coordenada
+- 🟣 **NOME DO CLIENTE (RIGHT)**: Texto terminando na coordenada
 
-## PASSO 2: VISUALIZE E MAPEIE
+## ❓ PRÓXIMAS AÇÕES
 
-### Como Ler as Coordenadas:
-- **Eixo X:** Cresce da ESQUERDA para DIREITA
-- **Eixo Y:** Cresce de BAIXO para CIMA (não do topo!)
-- **Origem (0,0):** Canto INFERIOR ESQUERDO da página
-- **Unidade:** Pontos (1 polegada = 72 pontos)
+**Qual interpretação ficou correta no seu template?**
 
-### Dimensões do Template:
-- **Largura:** 595.5 pontos
-- **Altura:** 842.25 pontos
+1. Se **CENTER** ficou certo → Marcar todos os campos como `align: 'center'`
+2. Se **Y estava invertido** → Converter todos: `Y = 842.25 - Y_original`
+3. Se **LEFT** ficou certo → Usar coordenadas normalmente
 
-## PASSO 3: IDENTIFIQUE OS CAMPOS POR PÁGINA
-
-### 📄 PÁGINA 1 - CAPA E IDENTIFICAÇÃO
-Procure no PDF e anote as coordenadas onde devem aparecer:
-
-```typescript
-// Exemplo de como preencher:
-page1: {
-    numeroCCB: { x: 450, y: 750, fontSize: 12, bold: true, align: 'right' },
-    //          ↑     ↑     ↑        ↑         ↑
-    //         X=450 Y=750 Tamanho  Negrito   Alinhado à direita
-    
-    dataEmissao: { x: 450, y: 730, fontSize: 10, align: 'right' },
-    nomeCliente: { x: 297, y: 400, fontSize: 14, bold: true, align: 'center' },
-    cpfCliente: { x: 297, y: 380, fontSize: 12, align: 'center' },
-    // ... continue para todos os campos
-},
-```
-
-### 📄 PÁGINA 2 - QUALIFICAÇÃO DO EMITENTE
-Campos principais a mapear:
-- Nome completo
-- CPF, RG, Órgão expedidor
-- Data de nascimento
-- Estado civil
-- Nome/CPF do cônjuge (se aplicável)
-- Profissão
-- Endereço residencial completo
-- CEP, telefone, email
-- Dados profissionais
-- Referências pessoais
-
-### 📄 PÁGINA 3 - DADOS DO CRÉDITO
-Campos financeiros a mapear:
-- Valor principal
-- Taxas de juros (mensal/anual)
-- CET (mensal/anual)
-- IOF, TAC, Seguro
-- Valor total a pagar
-- Forma de pagamento
-- Parcelas e vencimentos
-
-### 📄 PÁGINAS 4-8
-Continue o mesmo processo para garantias, declarações, autorização de débito e assinaturas.
-
-## PASSO 4: ATUALIZE O ARQUIVO DE COORDENADAS
-
-Abra o arquivo: `server/config/ccbCoordinates.ts`
-
-Substitua os valores `0` pelas coordenadas reais que você identificou:
-
-```typescript
-// ANTES (placeholder):
-numeroCCB: { x: 0, y: 0, fontSize: 12, bold: true },
-
-// DEPOIS (coordenada real):
-numeroCCB: { x: 450, y: 750, fontSize: 12, bold: true, align: 'right' },
-```
-
-## PASSO 5: TESTE SUAS COORDENADAS
-
-```bash
-# Gere um PDF de teste com suas coordenadas:
-curl -o template_ccb_TEST.pdf "http://localhost:5000/api/ccb-diagnostics/test-fill"
-```
-
-## FERRAMENTAS AUXILIARES
-
-### Converter de Topo para Base (se necessário):
-```typescript
-// Se você mediu do topo da página:
-const yFromTop = (pageHeight: number, pixelsFromTop: number) => {
-    return pageHeight - pixelsFromTop;
-};
-
-// Exemplo: Campo a 100 pontos do topo em página de 842.25 de altura
-const yReal = yFromTop(842.25, 100); // = 742.25
-```
-
-### Alinhamentos Disponíveis:
-- `align: 'left'` - Alinhado à esquerda (padrão)
-- `align: 'center'` - Centralizado
-- `align: 'right'` - Alinhado à direita
-
-### Para Campos Multi-linha:
-```typescript
-enderecoResidencial: { 
-    x: 150, 
-    y: 540, 
-    fontSize: 10, 
-    maxWidth: 400  // ← Largura máxima para quebra automática
-},
-```
-
-## DICAS IMPORTANTES
-
-### ✅ MEDIÇÃO PRECISA:
-1. Use o zoom máximo no PDF
-2. Posicione o cursor no início exato onde o texto deve começar
-3. Leia as coordenadas X,Y na grade
-4. Para texto centralizado, meça o centro do campo
-
-### ✅ TESTE ITERATIVO:
-1. Atualize algumas coordenadas
-2. Gere o PDF de teste
-3. Verifique se está correto
-4. Ajuste conforme necessário
-5. Repita até ficar perfeito
-
-### ✅ CAMPOS CONDICIONAIS:
-Alguns campos só aparecem em certas condições:
-- Nome/CPF do cônjuge (apenas se casado)
-- Dados de garantia (apenas se houver)
-- Referências (podem variar)
-
-## PROCESSO RECOMENDADO
-
-### Ordem de Mapeamento:
-1. **Página 1 primeiro** (mais simples, poucos campos)
-2. **Teste** com PDF de diagnóstico
-3. **Página 2** (dados pessoais)
-4. **Página 3** (dados financeiros - mais críticos)
-5. **Páginas 4-8** (completar o restante)
-
-### Validação Final:
-- Todos os campos importantes mapeados
-- Textos não sobrepostos
-- Alinhamentos corretos
-- Tamanhos de fonte apropriados
-
-## RESULTADO ESPERADO
-
-Após mapear 100% das coordenadas, você terá:
-- CCBs geradas com layout perfeito
-- Todos os campos no lugar correto
-- Formatação profissional
-- Template Simpix preservado com dados dinâmicos
-
-**Tempo estimado:** 2-3 horas para mapeamento completo e preciso de todas as 8 páginas.
+**Diga qual ficou correto que eu ajusto todas as coordenadas automaticamente!**

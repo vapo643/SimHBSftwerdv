@@ -4033,6 +4033,10 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
   const ccbCoordinateMapperRouter = (await import('./routes/ccb-coordinate-mapper')).default;
   app.use('/api/ccb-mapper', ccbCoordinateMapperRouter);
 
+  // CCB Coordinate Debug routes  
+  const ccbCoordinateDebugRouter = (await import('./routes/ccb-coordinate-debug')).default;
+  app.use('/api/ccb-debug', ccbCoordinateDebugRouter);
+
   // Register Semgrep MCP routes - Projeto Cérbero
   const securityMCPRoutes = (await import('./routes/security-mcp.js')).default;
   app.use('/api/security/mcp', securityMCPRoutes);
