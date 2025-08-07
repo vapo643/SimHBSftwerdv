@@ -66,7 +66,9 @@ export class CCBGenerationService {
       // 2. CARREGAR TEMPLATE PDF EXISTENTE (NÃO criar novo!)
       console.log('📄 [CCB] Carregando template PDF existente...');
       const templateBytes = await fs.readFile(this.templatePath);
+      console.log(`📄 [CCB] Template carregado: ${templateBytes.length} bytes`);
       const pdfDoc = await PDFDocument.load(templateBytes);
+      console.log(`📄 [CCB] PDF carregado: ${pdfDoc.getPageCount()} páginas`);
       
       // 3. Preparar fonte para desenhar texto
       const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
@@ -79,42 +81,53 @@ export class CCBGenerationService {
       console.log(`📄 [CCB] Dimensões da página: ${width}x${height}`);
       
       // 5. DESENHAR TEXTO SOBRE O TEMPLATE (método correto)
-      // Começando com nome e CPF para teste inicial
-      const fontSize = 10;
-      const textColor = rgb(0, 0, 0);
+      // TESTE VISUAL ÓBVIO - Seguindo exemplo da documentação pdf-lib
+      const fontSize = 30; // Aumentado para garantir visibilidade
+      const textColor = rgb(0.95, 0.1, 0.1); // VERMELHO para destacar
       
-      // NOME DO CLIENTE - Coordenada inicial aproximada
-      firstPage.drawText(proposalData.cliente_nome || '', {
-        x: 150, // Coordenada X inicial (ajustar conforme feedback)
-        y: height - 250, // Coordenada Y inicial (ajustar conforme feedback)
-        size: fontSize,
+      // TESTE GRANDE E VISÍVEL NO CENTRO DA PÁGINA
+      firstPage.drawText('TESTE CCB TEMPLATE', {
+        x: 50, // Próximo da margem esquerda
+        y: height / 2 + 200, // Centro da página + offset
+        size: 40, // BEM GRANDE
         font: helveticaFont,
-        color: textColor,
+        color: rgb(1, 0, 0), // VERMELHO PURO
       });
       
-      console.log(`📄 [CCB] Nome desenhado em x:150, y:${height - 250}`);
+      console.log(`📄 [CCB] TESTE VISUAL desenhado em x:50, y:${height/2 + 200}, size:40, COR VERMELHA`);
       
-      // CPF DO CLIENTE - Coordenada inicial aproximada
-      firstPage.drawText(this.formatCPF(proposalData.cliente_cpf) || '', {
-        x: 150, // Coordenada X inicial
-        y: height - 270, // Logo abaixo do nome
-        size: fontSize,
+      // NOME DO CLIENTE - Posição mais visível
+      firstPage.drawText(proposalData.cliente_nome || 'NOME DO CLIENTE', {
+        x: 50, // Margem esquerda
+        y: height - 100, // Topo da página
+        size: 20, // Tamanho médio
         font: helveticaFont,
-        color: textColor,
+        color: rgb(0, 0, 0), // Preto
       });
       
-      console.log(`📄 [CCB] CPF desenhado em x:150, y:${height - 270}`);
+      console.log(`📄 [CCB] Nome desenhado em x:50, y:${height - 100}, size:20`);
       
-      // VALOR DO EMPRÉSTIMO - Teste adicional
-      firstPage.drawText(this.formatCurrency(proposalData.valor_emprestimo), {
-        x: 150,
-        y: height - 350,
-        size: fontSize,
+      // CPF DO CLIENTE - Logo abaixo
+      firstPage.drawText(this.formatCPF(proposalData.cliente_cpf) || 'CPF: XXX.XXX.XXX-XX', {
+        x: 50,
+        y: height - 130,
+        size: 18,
         font: helveticaFont,
-        color: textColor,
+        color: rgb(0, 0, 0),
       });
       
-      console.log(`📄 [CCB] Valor desenhado em x:150, y:${height - 350}`);
+      console.log(`📄 [CCB] CPF desenhado em x:50, y:${height - 130}, size:18`);
+      
+      // VALOR DO EMPRÉSTIMO - Destacado
+      firstPage.drawText(`VALOR: ${this.formatCurrency(proposalData.valor_emprestimo)}`, {
+        x: 50,
+        y: height - 160,
+        size: 22,
+        font: helveticaFont,
+        color: rgb(0, 0.5, 0), // Verde para destacar valor
+      });
+      
+      console.log(`📄 [CCB] Valor desenhado em x:50, y:${height - 160}, size:22, COR VERDE`);
       
       // 6. Salvar PDF com dados preenchidos
       const pdfBytes = await pdfDoc.save();

@@ -16,6 +16,7 @@ Error handling: Create structured documentation for automatic consultation durin
 - ✅ `/ccb-url` endpoint enhanced to always fetch latest version from storage
 - ✅ Error Documentation System implemented in `/error_docs/`
 - ✅ Storage error fixes: Admin client for Supabase Storage operations
+- ✅ **TEMPLATE FIX:** Replaced generic template with actual Simpix CCB template containing logo (CCB SIMPIX (1)_1754063031025.pdf)
 
 ## System Architecture
 
