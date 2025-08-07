@@ -16,6 +16,7 @@ import interWebhookRouter from "./routes/webhooks/inter";
 import { setupSecurityRoutes } from "./routes/security.js";
 import emailChangeRoutes from "./routes/email-change";
 import cobrancasRoutes from "./routes/cobrancas";
+import monitoringRoutes from "./routes/monitoring";
 import { getBrasiliaDate, formatBrazilianDateTime, generateApprovalDate, getBrasiliaTimestamp } from "./lib/timezone";
 import { securityLogger, SecurityEventType, getClientIP } from './lib/security-logger';
 import { passwordSchema, validatePassword } from "./lib/password-validator";
@@ -4012,6 +4013,9 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
   // Register Cobranças routes
   const cobrancasRouter = (await import('./routes/cobrancas.js')).default;
   app.use('/api/cobrancas', cobrancasRouter);
+  
+  // Register Monitoring routes (Admin only)
+  app.use('/api/monitoring', jwtAuthMiddleware, requireAdmin, monitoringRoutes);
   
   // Register Observações routes
   const observacoesRouter = (await import('./routes/observacoes.js')).default;

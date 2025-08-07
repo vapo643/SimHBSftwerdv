@@ -1,46 +1,43 @@
-# ⚠️ CONFIGURAÇÃO CRÍTICA DO BANCO DE DADOS
+# ✅ CONFIGURAÇÃO DO BANCO DE DADOS - RESOLVIDA
 
-## PROBLEMA DETECTADO
-O sistema está usando um banco Neon em vez do Supabase. Isso precisa ser corrigido URGENTEMENTE.
-
-## STATUS ATUAL
-- ❌ DATABASE_URL está apontando para: `neon.tech`
-- ❌ Variáveis PG* estão configuradas para Neon
+## STATUS ATUAL (07/08/2025)
+- ✅ DATABASE_URL está corretamente apontando para: `supabase.com`
+- ✅ Conexão com PostgreSQL funcionando (versão 17.4)
+- ✅ Todas as tabelas do sistema estão acessíveis
 - ✅ Supabase Client está funcionando via REST API
-- ✅ Aplicação está parcialmente funcional
+- ✅ Aplicação está totalmente funcional
 
-## COMO CORRIGIR
+## PROBLEMA ANTERIOR (RESOLVIDO)
+O sistema estava usando um banco Neon em vez do Supabase. Este problema foi corrigido.
 
-### Opção 1: Atualizar DATABASE_URL (RECOMENDADO)
-1. Acesse o painel do Supabase: https://supabase.com/dashboard/projects
-2. Clique no projeto: `dvglgxrvhmtsixaabxha`
-3. Vá em Settings → Database
-4. Copie a "Connection string" → "Transaction pooler"
-5. Substitua [YOUR-PASSWORD] pela senha do banco
-6. No Replit, vá em Tools → Secrets
-7. Atualize DATABASE_URL com a URL correta do Supabase
+## VERIFICAÇÃO REALIZADA
+```sql
+-- Banco de dados confirmado:
+current_database: postgres
+version: PostgreSQL 17.4
 
-A URL deve ter este formato:
-```
-postgresql://postgres.dvglgxrvhmtsixaabxha:[SUA-SENHA]@aws-0-us-east-1.pooler.supabase.com:6543/postgres
-```
-
-### Opção 2: Adicionar SUPABASE_DB_PASSWORD
-Se você tem a senha do banco Supabase:
-1. No Replit, vá em Tools → Secrets
-2. Adicione: `SUPABASE_DB_PASSWORD` = [senha do banco Supabase]
-3. Reinicie o servidor
-
-## CONSEQUÊNCIAS SE NÃO CORRIGIR
-- Inconsistência de dados entre Neon e Supabase
-- Falhas em operações que usam Drizzle diretamente
-- Possível perda de dados
-- Problemas de segurança e compliance
-
-## VERIFICAÇÃO
-Após corrigir, o servidor deve mostrar:
-```
-✅ Database: Connected (Supabase)
+-- Principais tabelas verificadas:
+- propostas (344 kB)
+- proposta_logs (128 kB)
+- inter_collections (104 kB)
+- profiles (80 kB)
+- parceiros (48 kB)
+- produtos (48 kB)
 ```
 
-Sem nenhum aviso sobre Neon.
+## CONFIGURAÇÃO ATUAL CORRETA
+A URL do banco está no formato correto:
+```
+postgresql://postgres.[project-id]:[password]@aws-0-us-east-1.pooler.supabase.com:6543/postgres
+```
+
+## MONITORAMENTO
+Para verificar o status da conexão a qualquer momento:
+1. Verificar logs do servidor para mensagens de conexão
+2. Executar query de teste: `SELECT 1`
+3. Verificar se não há erros de conexão no console
+
+## HISTÓRICO
+- **07/08/2025**: Problema identificado e resolvido
+- **Antes**: Sistema apontava incorretamente para Neon
+- **Depois**: Sistema corrigido para usar Supabase
