@@ -12,6 +12,8 @@ import { db } from '../lib/supabase';
 import { sql } from 'drizzle-orm';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { SIMPIX_CCB_MAPPING, TEST_COORDINATES, yFromTop, formatTextWithLineBreaks } from './ccbFieldMapping';
+import { CoordinateAdjustment, applyCoordinateAdjustments } from './ccbCoordinateMapper';
 
 interface PropostaData {
   id: string;
@@ -47,6 +49,13 @@ export class CCBGenerationService {
    * MÉTODO CORRETO: Carrega template e desenha texto sobre ele, preservando layout
    */
   async generateCCB(proposalId: string): Promise<{ success: boolean; pdfPath?: string; error?: string }> {
+    return this.generateCCBWithAdjustments(proposalId, []);
+  }
+
+  /**
+   * Gera CCB com ajustes de coordenadas personalizados
+   */
+  async generateCCBWithAdjustments(proposalId: string, adjustments: CoordinateAdjustment[] = []): Promise<{ success: boolean; pdfPath?: string; error?: string }> {
     try {
       console.log(`📄 [CCB] Iniciando geração CORRETA para proposta ${proposalId}`);
       console.log(`📄 [CCB] Template path: ${this.templatePath}`);
@@ -80,54 +89,87 @@ export class CCBGenerationService {
       
       console.log(`📄 [CCB] Dimensões da página: ${width}x${height}`);
       
-      // 5. DESENHAR TEXTO SOBRE O TEMPLATE (método correto)
-      // TESTE VISUAL ÓBVIO - Seguindo exemplo da documentação pdf-lib
-      const fontSize = 30; // Aumentado para garantir visibilidade
-      const textColor = rgb(0.95, 0.1, 0.1); // VERMELHO para destacar
+      // 5. DESENHAR TEXTO SOBRE O TEMPLATE usando mapeamento de coordenadas
       
-      // TESTE GRANDE E VISÍVEL NO CENTRO DA PÁGINA
-      firstPage.drawText('TESTE CCB TEMPLATE', {
-        x: 50, // Próximo da margem esquerda
-        y: height / 2 + 200, // Centro da página + offset
-        size: 40, // BEM GRANDE
-        font: helveticaFont,
-        color: rgb(1, 0, 0), // VERMELHO PURO
-      });
+      // Aplicar ajustes de coordenadas se fornecidos (via parâmetro adjustments)
+      const mapping = adjustments && adjustments.length > 0 ? applyCoordinateAdjustments(adjustments) : SIMPIX_CCB_MAPPING;
       
-      console.log(`📄 [CCB] TESTE VISUAL desenhado em x:50, y:${height/2 + 200}, size:40, COR VERMELHA`);
+      console.log(`📄 [CCB] Preenchimento com mapeamento SIMPIX (${adjustments?.length || 0} ajustes aplicados)...`);
       
-      // NOME DO CLIENTE - Posição mais visível
-      firstPage.drawText(proposalData.cliente_nome || 'NOME DO CLIENTE', {
-        x: 50, // Margem esquerda
-        y: height - 100, // Topo da página
-        size: 20, // Tamanho médio
-        font: helveticaFont,
-        color: rgb(0, 0, 0), // Preto
-      });
-      
-      console.log(`📄 [CCB] Nome desenhado em x:50, y:${height - 100}, size:20`);
-      
-      // CPF DO CLIENTE - Logo abaixo
-      firstPage.drawText(this.formatCPF(proposalData.cliente_cpf) || 'CPF: XXX.XXX.XXX-XX', {
-        x: 50,
-        y: height - 130,
-        size: 18,
+      // DADOS DO CLIENTE
+      const nomeCoord = mapping.nomeCliente;
+      firstPage.drawText(proposalData.cliente_nome || '', {
+        x: nomeCoord.x,
+        y: yFromTop(height, 120), // 120px do topo
+        size: nomeCoord.size,
         font: helveticaFont,
         color: rgb(0, 0, 0),
       });
+      console.log(`📄 [CCB] Nome: "${proposalData.cliente_nome}" em x:${nomeCoord.x}, y:${yFromTop(height, 120)}`);
       
-      console.log(`📄 [CCB] CPF desenhado em x:50, y:${height - 130}, size:18`);
-      
-      // VALOR DO EMPRÉSTIMO - Destacado
-      firstPage.drawText(`VALOR: ${this.formatCurrency(proposalData.valor_emprestimo)}`, {
-        x: 50,
-        y: height - 160,
-        size: 22,
+      const cpfCoord = mapping.cpfCliente;
+      firstPage.drawText(this.formatCPF(proposalData.cliente_cpf) || '', {
+        x: cpfCoord.x,
+        y: yFromTop(height, 145), // 145px do topo
+        size: cpfCoord.size,
         font: helveticaFont,
-        color: rgb(0, 0.5, 0), // Verde para destacar valor
+        color: rgb(0, 0, 0),
       });
+      console.log(`📄 [CCB] CPF: "${this.formatCPF(proposalData.cliente_cpf)}" em x:${cpfCoord.x}, y:${yFromTop(height, 145)}`);
       
-      console.log(`📄 [CCB] Valor desenhado em x:50, y:${height - 160}, size:22, COR VERDE`);
+      // DADOS DO EMPRÉSTIMO
+      const valorCoord = mapping.valorEmprestimo;
+      firstPage.drawText(this.formatCurrency(proposalData.valor_emprestimo), {
+        x: valorCoord.x,
+        y: yFromTop(height, 240), // 240px do topo
+        size: valorCoord.size,
+        font: helveticaFont,
+        color: rgb(0, 0, 0),
+      });
+      console.log(`📄 [CCB] Valor: "${this.formatCurrency(proposalData.valor_emprestimo)}" em x:${valorCoord.x}, y:${yFromTop(height, 240)}`);
+      
+      const parcelasCoord = mapping.numeroParcelas;
+      firstPage.drawText(`${proposalData.prazo_meses}x`, {
+        x: parcelasCoord.x,
+        y: yFromTop(height, 270), // 270px do topo
+        size: parcelasCoord.size,
+        font: helveticaFont,
+        color: rgb(0, 0, 0),
+      });
+      console.log(`📄 [CCB] Parcelas: "${proposalData.prazo_meses}x" em x:${parcelasCoord.x}, y:${yFromTop(height, 270)}`);
+      
+      const valorParcelaCoord = mapping.valorParcela;
+      firstPage.drawText(this.formatCurrency(proposalData.valor_parcela), {
+        x: valorParcelaCoord.x,
+        y: yFromTop(height, 300), // 300px do topo
+        size: valorParcelaCoord.size,
+        font: helveticaFont,
+        color: rgb(0, 0, 0),
+      });
+      console.log(`📄 [CCB] Valor parcela: "${this.formatCurrency(proposalData.valor_parcela)}" em x:${valorParcelaCoord.x}, y:${yFromTop(height, 300)}`);
+      
+      // DATA DE EMISSÃO
+      const dataCoord = mapping.dataEmissao;
+      const dataAtual = format(new Date(), "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
+      firstPage.drawText(dataAtual, {
+        x: dataCoord.x,
+        y: yFromTop(height, 650), // 650px do topo (parte inferior)
+        size: dataCoord.size,
+        font: helveticaFont,
+        color: rgb(0, 0, 0),
+      });
+      console.log(`📄 [CCB] Data: "${dataAtual}" em x:${dataCoord.x}, y:${yFromTop(height, 650)}`);
+      
+      // TEXTO DE TESTE PARA VALIDAÇÃO VISUAL (removível após ajustes)
+      const testText = adjustments && adjustments.length > 0 ? '✓ CCB COM AJUSTES' : '✓ CCB PADRÃO';
+      firstPage.drawText(testText, {
+        x: TEST_COORDINATES.testTitle.x,
+        y: yFromTop(height, 50), // 50px do topo
+        size: TEST_COORDINATES.testTitle.size,
+        font: helveticaFont,
+        color: rgb(...TEST_COORDINATES.testTitle.color),
+      });
+      console.log(`📄 [CCB] Teste visual: "${testText}" em x:${TEST_COORDINATES.testTitle.x}, y:${yFromTop(height, 50)}`);
       
       // 6. Salvar PDF com dados preenchidos
       const pdfBytes = await pdfDoc.save();
