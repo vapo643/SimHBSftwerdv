@@ -1,0 +1,184 @@
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+content-script.js:22 Document already loaded, running initialization immediately
+content-script.js:4 Attempting to initialize AdUnit
+content-script.js:6 AdUnit initialized successfully
+webcomponents-ce.js:33 Uncaught Error: A custom element with name 'mce-autosize-textarea' has already been defined.
+    at Aa (webcomponents-ce.js:33:363)
+    at m.define (webcomponents-ce.js:33:133)
+    at overlay_bundle.js:147:5559
+    at D (overlay_bundle.js:44:680)
+    at overlay_bundle.js:158:392Understand this error
+content.js:208 Object
+AuthContext.tsx:161 🔐 [AUTH EVENT] SIGNED_IN Object
+formalizacao.tsx:409 🔍 [DEBUG] Buscando dados de formalização para proposta: 902183dd-b5d1-4e20-8a72-79d3d3559d4d
+AuthContext.tsx:161 🔐 [AUTH EVENT] INITIAL_SESSION Object
+apiClient.ts:161 🔐 [TOKEN MANAGER] Fresh token obtained, length: 767
+apiClient.ts:338 [PASSO 3 - ENVIO] Object
+apiClient.ts:338 [PASSO 3 - ENVIO] Object
+apiClient.ts:338 [PASSO 3 - ENVIO] Object
+apiClient.ts:338 [PASSO 3 - ENVIO] Object
+2AuthContext.tsx:95 🔐 [AUTH RESTORED] User profile loaded with valid token
+formalizacao.tsx:411 🔍 [DEBUG] Dados recebidos do backend: Object
+formalizacao.tsx:412 🔍 [DEBUG] Cliente Data: Object
+formalizacao.tsx:413 🔍 [DEBUG] Condicoes Data: Object
+formalizacao.tsx:414 🔍 [DEBUG] Data Aprovação: 2025-08-01T13:21:55
+formalizacao.tsx:415 🔍 [DEBUG] Documentos - Total: 1
+formalizacao.tsx:416 🔍 [DEBUG] Documentos - Estrutura: Array(1)
+formalizacao.tsx:417 🔍 [DEBUG] Primeiro documento: Object
+apiClient.ts:338 [PASSO 3 - ENVIO] Object
+/api/formalizacao/902183dd-b5d1-4e20-8a72-79d3d3559d4d/ccb:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)Understand this error
+formalizacao.tsx:166 Fazendo requisição para /api/propostas/formalizacao
+apiClient.ts:338 [PASSO 3 - ENVIO] Object
+formalizacao.tsx:168 Resposta do endpoint formalizacao: Array(19)
+formalizacao.tsx:177 Propostas com dados parseados: Array(19)
+formalizacao.tsx:409 🔍 [DEBUG] Buscando dados de formalização para proposta: bcf0ae07-cbf4-4127-a4f9-926bffa8ff43
+apiClient.ts:338 [PASSO 3 - ENVIO] Object
+apiClient.ts:338 [PASSO 3 - ENVIO] Object
+formalizacao.tsx:411 🔍 [DEBUG] Dados recebidos do backend: Object
+formalizacao.tsx:412 🔍 [DEBUG] Cliente Data: Object
+formalizacao.tsx:413 🔍 [DEBUG] Condicoes Data: Object
+formalizacao.tsx:414 🔍 [DEBUG] Data Aprovação: 2025-08-06T16:02:21
+formalizacao.tsx:415 🔍 [DEBUG] Documentos - Total: 5
+formalizacao.tsx:416 🔍 [DEBUG] Documentos - Estrutura: Array(5)
+formalizacao.tsx:417 🔍 [DEBUG] Primeiro documento: Object
+apiClient.ts:338 [PASSO 3 - ENVIO] Object
+/api/formalizacao/bcf0ae07-cbf4-4127-a4f9-926bffa8ff43/ccb:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)Understand this error
+apiClient.ts:338 [PASSO 3 - ENVIO] Object
+apiClient.ts:338 [PASSO 3 - ENVIO] Object
+formalizacao.tsx:409 🔍 [DEBUG] Buscando dados de formalização para proposta: bcf0ae07-cbf4-4127-a4f9-926bffa8ff43
+apiClient.ts:338 [PASSO 3 - ENVIO] Object
+formalizacao.tsx:409 🔍 [DEBUG] Buscando dados de formalização para proposta: bcf0ae07-cbf4-4127-a4f9-926bffa8ff43
+apiClient.ts:338 [PASSO 3 - ENVIO] Object
+formalizacao.tsx:411 🔍 [DEBUG] Dados recebidos do backend: Object
+formalizacao.tsx:412 🔍 [DEBUG] Cliente Data: Object
+formalizacao.tsx:413 🔍 [DEBUG] Condicoes Data: Object
+formalizacao.tsx:414 🔍 [DEBUG] Data Aprovação: 2025-08-06T16:02:21
+formalizacao.tsx:415 🔍 [DEBUG] Documentos - Total: 5
+formalizacao.tsx:416 🔍 [DEBUG] Documentos - Estrutura: Array(5)
+formalizacao.tsx:417 🔍 [DEBUG] Primeiro documento: Object
+apiClient.ts:338 [PASSO 3 - ENVIO] Object
+formalizacao.tsx:411 🔍 [DEBUG] Dados recebidos do backend: Object
+formalizacao.tsx:412 🔍 [DEBUG] Cliente Data: Object
+formalizacao.tsx:413 🔍 [DEBUG] Condicoes Data: Object
+formalizacao.tsx:414 🔍 [DEBUG] Data Aprovação: 2025-08-06T16:02:21
+formalizacao.tsx:415 🔍 [DEBUG] Documentos - Total: 5
+formalizacao.tsx:416 🔍 [DEBUG] Documentos - Estrutura: Array(5)
+formalizacao.tsx:417 🔍 [DEBUG] Primeiro documento: Object
+formalizacao.tsx:409 🔍 [DEBUG] Buscando dados de formalização para proposta: bcf0ae07-cbf4-4127-a4f9-926bffa8ff43
+apiClient.ts:338 [PASSO 3 - ENVIO] Object
+formalizacao.tsx:411 🔍 [DEBUG] Dados recebidos do backend: Object
+formalizacao.tsx:412 🔍 [DEBUG] Cliente Data: Object
+formalizacao.tsx:413 🔍 [DEBUG] Condicoes Data: Object
+formalizacao.tsx:414 🔍 [DEBUG] Data Aprovação: 2025-08-06T16:02:21
+formalizacao.tsx:415 🔍 [DEBUG] Documentos - Total: 5
+formalizacao.tsx:416 🔍 [DEBUG] Documentos - Estrutura: Array(5)
+formalizacao.tsx:417 🔍 [DEBUG] Primeiro documento: Object
+useIdleTimer.ts:108 🔍 [IDLE TIMER] Tab became hidden, timer continues
+AuthContext.tsx:161 🔐 [AUTH EVENT] SIGNED_IN Object
+apiClient.ts:338 [PASSO 3 - ENVIO] Object
+AuthContext.tsx:95 🔐 [AUTH RESTORED] User profile loaded with valid token
+useIdleTimer.ts:108 🔍 [IDLE TIMER] Tab became hidden, timer continues
+AuthContext.tsx:161 🔐 [AUTH EVENT] SIGNED_IN Object
+apiClient.ts:338 [PASSO 3 - ENVIO] Object
+AuthContext.tsx:95 🔐 [AUTH RESTORED] User profile loaded with valid token
+useIdleTimer.ts:108 🔍 [IDLE TIMER] Tab became hidden, timer continues
+AuthContext.tsx:161 🔐 [AUTH EVENT] SIGNED_IN Object
+apiClient.ts:338 [PASSO 3 - ENVIO] Object
+apiClient.ts:338 [PASSO 3 - ENVIO] Object
+213chunk-276SZO74.js?v=24e77ffb:521 Warning: Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.
+    at ProposalForm (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/propostas/nova.tsx:42:21)
+    at main
+    at div
+    at div
+    at DashboardLayout (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/DashboardLayout.tsx:49:43)
+    at ProposalProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ProposalContext.tsx:172:36)
+    at NovaProposta
+    at ProtectedRoute (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ProtectedRoute.tsx:21:42)
+    at Route (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=24e77ffb:323:16)
+    at Switch (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=24e77ffb:379:17)
+    at Router
+    at Provider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-3RXG37ZK.js?v=24e77ffb:38:15)
+    at TooltipProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=24e77ffb:64:5)
+    at AuthProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/AuthContext.tsx:24:32)
+    at ThemeProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ThemeContext.tsx:20:33)
+    at QueryClientProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=24e77ffb:2805:3)
+    at App
+printWarning @ chunk-276SZO74.js?v=24e77ffb:521Understand this error
+chunk-276SZO74.js?v=24e77ffb:521 Warning: findDOMNode is deprecated and will be removed in the next major release. Instead, add a ref directly to the element you want to reference. Learn more about using refs safely here: https://reactjs.org/link/strict-mode-find-node
+    at InputElement2 (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/react-input-mask.js?v=24e77ffb:497:34)
+    at div
+    at div
+    at _c9 (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ui/card.tsx:82:12)
+    at div
+    at _c (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ui/card.tsx:20:11)
+    at div
+    at ClientDataStep (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/propostas/ClientDataStep.tsx:57:21)
+    at div
+    at https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-DVHSTOKX.js?v=24e77ffb:42:13
+    at Presence (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-ED5C5U6M.js?v=24e77ffb:24:11)
+    at https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tabs.js?v=24e77ffb:176:13
+    at _c5 (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ui/tabs.tsx:72:12)
+    at div
+    at div
+    at https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-DVHSTOKX.js?v=24e77ffb:42:13
+    at Provider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-3RXG37ZK.js?v=24e77ffb:38:15)
+    at https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tabs.js?v=24e77ffb:54:7
+    at ProposalForm (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/propostas/nova.tsx:42:21)
+    at main
+    at div
+    at div
+    at DashboardLayout (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/DashboardLayout.tsx:49:43)
+    at ProposalProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ProposalContext.tsx:172:36)
+    at NovaProposta
+    at ProtectedRoute (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ProtectedRoute.tsx:21:42)
+    at Route (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=24e77ffb:323:16)
+    at Switch (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=24e77ffb:379:17)
+    at Router
+    at Provider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-3RXG37ZK.js?v=24e77ffb:38:15)
+    at TooltipProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=24e77ffb:64:5)
+    at AuthProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/AuthContext.tsx:24:32)
+    at ThemeProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ThemeContext.tsx:20:33)
+    at QueryClientProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=24e77ffb:2805:3)
+    at App
+printWarning @ chunk-276SZO74.js?v=24e77ffb:521Understand this error
+AuthContext.tsx:95 🔐 [AUTH RESTORED] User profile loaded with valid token
+apiClient.ts:338 [PASSO 3 - ENVIO] Object
+apiClient.ts:338 [PASSO 3 - ENVIO] Object
+apiClient.ts:338 [PASSO 3 - ENVIO] Object
+apiClient.ts:338 [PASSO 3 - ENVIO] Object
+apiClient.ts:338 [PASSO 3 - ENVIO] Object
+apiClient.ts:338 [PASSO 3 - ENVIO] Object
+apiClient.ts:338 [PASSO 3 - ENVIO] Object
+apiClient.ts:338 [PASSO 3 - ENVIO] Object
+apiClient.ts:338 [PASSO 3 - ENVIO] Object
+apiClient.ts:338 [PASSO 3 - ENVIO] Object
+apiClient.ts:338 [PASSO 3 - ENVIO] Object
+apiClient.ts:338 [PASSO 3 - ENVIO] Object
+apiClient.ts:338 [PASSO 3 - ENVIO] Object
+formalizacao.tsx:166 Fazendo requisição para /api/propostas/formalizacao
+apiClient.ts:338 [PASSO 3 - ENVIO] Object
+formalizacao.tsx:168 Resposta do endpoint formalizacao: Array(20)
+formalizacao.tsx:177 Propostas com dados parseados: Array(20)
+formalizacao.tsx:409 🔍 [DEBUG] Buscando dados de formalização para proposta: 6492cfeb-8b66-4fa7-beb6-c7998be61b78
+apiClient.ts:338 [PASSO 3 - ENVIO] Object
+apiClient.ts:338 [PASSO 3 - ENVIO] Object
+formalizacao.tsx:411 🔍 [DEBUG] Dados recebidos do backend: Object
+formalizacao.tsx:412 🔍 [DEBUG] Cliente Data: Object
+formalizacao.tsx:413 🔍 [DEBUG] Condicoes Data: Object
+formalizacao.tsx:414 🔍 [DEBUG] Data Aprovação: 2025-08-07T11:16:14
+formalizacao.tsx:415 🔍 [DEBUG] Documentos - Total: 0
+formalizacao.tsx:416 🔍 [DEBUG] Documentos - Estrutura: Array(0)
+formalizacao.tsx:417 🔍 [DEBUG] Primeiro documento: undefined
+apiClient.ts:338 [PASSO 3 - ENVIO] Object
+/api/formalizacao/6492cfeb-8b66-4fa7-beb6-c7998be61b78/ccb:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)Understand this error
+apiClient.ts:338 [PASSO 3 - ENVIO] Object
+/api/propostas/6492cfeb-8b66-4fa7-beb6-c7998be61b78/clicksign/regenerar:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)Understand this error
+useIdleTimer.ts:108 🔍 [IDLE TIMER] Tab became hidden, timer continues
+AuthContext.tsx:161 🔐 [AUTH EVENT] SIGNED_IN Object
+apiClient.ts:338 [PASSO 3 - ENVIO] Object
+AuthContext.tsx:95 🔐 [AUTH RESTORED] User profile loaded with valid token
+useIdleTimer.ts:108 🔍 [IDLE TIMER] Tab became hidden, timer continues
+6492cfeb-8b66-4fa7-beb6-c7998be61b78:1 Unchecked runtime.lastError: The message port closed before a response was received.Understand this error
+AuthContext.tsx:161 🔐 [AUTH EVENT] SIGNED_IN Object
+apiClient.ts:338 [PASSO 3 - ENVIO] Object
+AuthContext.tsx:95 🔐 [AUTH RESTORED] User profile loaded with valid token

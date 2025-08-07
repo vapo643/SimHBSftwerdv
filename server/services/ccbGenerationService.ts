@@ -3,7 +3,7 @@
  * Utiliza template PDF existente e preenche com dados da proposta
  */
 
-import { PDFDocument, PDFForm, PDFTextField, rgb } from 'pdf-lib';
+import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import fs from 'fs/promises';
 import path from 'path';
 import { supabase } from '../lib/supabase';
@@ -54,14 +54,15 @@ export class CCBGenerationService {
       const templateBytes = await fs.readFile(this.templatePath);
       const pdfDoc = await PDFDocument.load(templateBytes);
       
-      // 3. Acessar formulário do PDF
-      const form = pdfDoc.getForm();
+      // 3. Adicionar fonte
+      const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
       
-      // 4. Mapear e preencher campos
-      await this.fillFormFields(form, proposalData);
+      // 4. Pegar a primeira página
+      const pages = pdfDoc.getPages();
+      const firstPage = pages[0];
       
-      // 5. Achatar formulário (tornar campos permanentes)
-      form.flatten();
+      // 5. Adicionar texto nas posições corretas
+      await this.addTextToPage(firstPage, font, proposalData);
       
       // 6. Salvar PDF preenchido
       const pdfBytes = await pdfDoc.save();
@@ -163,104 +164,178 @@ export class CCBGenerationService {
   }
 
   /**
-   * Preenche os campos do formulário PDF
+   * Adiciona texto diretamente na página do PDF
    */
-  private async fillFormFields(form: PDFForm, data: PropostaData): Promise<void> {
+  private async addTextToPage(page: any, font: any, data: PropostaData): Promise<void> {
     try {
-      // Listar todos os campos disponíveis (para debug)
-      const fields = form.getFields();
-      console.log('📋 [CCB] Campos disponíveis no template:', fields.map(f => f.getName()));
-
-      // Mapear campos comuns (ajustar conforme o template real)
-      const fieldMappings: Record<string, string | number> = {
-        // Dados do Cliente
-        'nome_cliente': data.cliente_nome || '',
-        'cpf_cliente': this.formatCPF(data.cliente_cpf) || '',
-        'endereco_cliente': data.cliente_endereco || '',
-        'cidade_cliente': data.cliente_cidade || '',
-        'estado_cliente': data.cliente_estado || '',
-        'cep_cliente': this.formatCEP(data.cliente_cep) || '',
-        
-        // Dados do Contrato
-        'numero_contrato': data.numero_contrato || `SIMPIX-${data.id.slice(0, 8).toUpperCase()}`,
-        'data_emissao': format(new Date(), 'dd/MM/yyyy', { locale: ptBR }),
-        'valor_principal': this.formatCurrency(data.valor_liberado),
-        'valor_total': this.formatCurrency(data.valor_total),
-        'valor_parcela': this.formatCurrency(data.valor_parcela),
-        'quantidade_parcelas': String(data.prazo),
-        'taxa_juros': `${data.taxa_juros}% ao mês`,
-        'data_primeiro_vencimento': data.data_primeiro_vencimento 
-          ? format(new Date(data.data_primeiro_vencimento), 'dd/MM/yyyy', { locale: ptBR })
-          : format(new Date(), 'dd/MM/yyyy', { locale: ptBR }),
-        
-        // Dados da Empresa (fixos por enquanto)
-        'nome_credor': 'SIMPIX SOLUÇÕES FINANCEIRAS LTDA',
-        'cnpj_credor': '00.000.000/0001-00',
-        'endereco_credor': 'Av. Principal, 1000 - Centro',
-        'cidade_credor': 'São Paulo - SP'
-      };
-
-      // Preencher campos
-      for (const [fieldName, value] of Object.entries(fieldMappings)) {
-        try {
-          const field = form.getTextField(fieldName);
-          if (field) {
-            field.setText(String(value));
-            // Opcional: estilizar o campo
-            field.setFontSize(10);
-            field.updateAppearances();
-          } else {
-            console.log(`⚠️ [CCB] Campo não encontrado: ${fieldName}`);
-          }
-        } catch (fieldError) {
-          // Campo pode não existir no template, continuar
-          console.log(`⚠️ [CCB] Campo ${fieldName} não pode ser preenchido`);
-        }
+      const { width, height } = page.getSize();
+      const fontSize = 10;
+      const color = rgb(0, 0, 0);
+      
+      // Coordenadas baseadas no template CCB fornecido
+      // Ajustadas para corresponder ao layout do PDF
+      
+      // SEÇÃO I - EMITENTE
+      // Nome/Razão Social
+      page.drawText(data.cliente_nome || '', {
+        x: 50,
+        y: height - 175,
+        size: fontSize,
+        font,
+        color
+      });
+      
+      // CPF/CNPJ
+      page.drawText(this.formatCPF(data.cliente_cpf) || '', {
+        x: 450,
+        y: height - 175,
+        size: fontSize,
+        font,
+        color
+      });
+      
+      // Endereço
+      if (data.cliente_endereco) {
+        page.drawText(data.cliente_endereco, {
+          x: 50,
+          y: height - 230,
+          size: fontSize,
+          font,
+          color
+        });
       }
-
-      // Tentar preencher campos genéricos se existirem
-      this.tryFillGenericFields(form, data);
+      
+      // CEP
+      if (data.cliente_cep) {
+        page.drawText(this.formatCEP(data.cliente_cep), {
+          x: 320,
+          y: height - 230,
+          size: fontSize,
+          font,
+          color
+        });
+      }
+      
+      // Cidade
+      if (data.cliente_cidade) {
+        page.drawText(data.cliente_cidade, {
+          x: 400,
+          y: height - 230,
+          size: fontSize,
+          font,
+          color
+        });
+      }
+      
+      // UF
+      if (data.cliente_estado) {
+        page.drawText(data.cliente_estado, {
+          x: 540,
+          y: height - 230,
+          size: fontSize,
+          font,
+          color
+        });
+      }
+      
+      // SEÇÃO III - CONDIÇÕES E CARACTERÍSTICAS
+      // Valor de Principal
+      page.drawText(this.formatCurrency(data.valor_liberado), {
+        x: 50,
+        y: height - 380,
+        size: fontSize,
+        font,
+        color
+      });
+      
+      // Data de Emissão
+      page.drawText(format(new Date(), 'dd/MM/yyyy', { locale: ptBR }), {
+        x: 175,
+        y: height - 380,
+        size: fontSize,
+        font,
+        color
+      });
+      
+      // Prazo de Amortização
+      page.drawText(`${data.prazo} mês(es)`, {
+        x: 50,
+        y: height - 410,
+        size: fontSize,
+        font,
+        color
+      });
+      
+      // Taxa de Juros
+      page.drawText(`${data.taxa_juros}%`, {
+        x: 370,
+        y: height - 410,
+        size: fontSize,
+        font,
+        color
+      });
+      
+      // Valor da Parcela (adicionando na tabela de parcelas)
+      const numParcelas = data.prazo || 12;
+      const valorParcela = this.formatCurrency(data.valor_parcela);
+      let yPosition = height - 570;
+      
+      for (let i = 1; i <= Math.min(numParcelas, 12); i++) {
+        // Número da parcela
+        page.drawText(String(i), {
+          x: 50,
+          y: yPosition,
+          size: fontSize,
+          font,
+          color
+        });
+        
+        // Valor da parcela
+        page.drawText(valorParcela, {
+          x: 450,
+          y: yPosition,
+          size: fontSize,
+          font,
+          color
+        });
+        
+        yPosition -= 20;
+      }
+      
+      // Número da Cédula (usando o ID da proposta)
+      page.drawText(data.id, {
+        x: 50,
+        y: height - 115,
+        size: fontSize,
+        font,
+        color
+      });
+      
+      // Data de Emissão (no cabeçalho)
+      page.drawText(format(new Date(), 'dd/MM/yyyy', { locale: ptBR }), {
+        x: 250,
+        y: height - 115,
+        size: fontSize,
+        font,
+        color
+      });
+      
+      // Finalidade da Operação
+      page.drawText('Empréstimo Pessoal', {
+        x: 450,
+        y: height - 115,
+        size: fontSize,
+        font,
+        color
+      });
 
     } catch (error) {
-      console.error('❌ [CCB] Erro ao preencher campos:', error);
+      console.error('❌ [CCB] Erro ao adicionar texto:', error);
       throw error;
     }
   }
 
-  /**
-   * Tenta preencher campos com nomes genéricos
-   */
-  private tryFillGenericFields(form: PDFForm, data: PropostaData): void {
-    const genericMappings = [
-      { patterns: ['nome', 'name', 'cliente'], value: data.cliente_nome },
-      { patterns: ['cpf', 'documento'], value: this.formatCPF(data.cliente_cpf) },
-      { patterns: ['valor', 'principal'], value: this.formatCurrency(data.valor_liberado) },
-      { patterns: ['parcela'], value: this.formatCurrency(data.valor_parcela) },
-      { patterns: ['prazo', 'meses'], value: String(data.prazo) },
-      { patterns: ['juros', 'taxa'], value: `${data.taxa_juros}%` }
-    ];
 
-    const fields = form.getFields();
-    
-    for (const field of fields) {
-      const fieldName = field.getName().toLowerCase();
-      
-      for (const mapping of genericMappings) {
-        if (mapping.patterns.some(pattern => fieldName.includes(pattern))) {
-          try {
-            if (field instanceof PDFTextField && mapping.value) {
-              field.setText(String(mapping.value));
-              field.updateAppearances();
-              console.log(`✅ [CCB] Campo genérico preenchido: ${field.getName()}`);
-              break;
-            }
-          } catch (error) {
-            // Ignorar erros em campos genéricos
-          }
-        }
-      }
-    }
-  }
 
   /**
    * Formata CPF

@@ -31,24 +31,7 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
 
   // Query para buscar status do CCB
   const { data: ccbStatus, isLoading, error } = useQuery<CCBStatus>({
-    queryKey: ['ccb', proposalId],
-    queryFn: async () => {
-      const response = await fetch(`/api/formalizacao/${proposalId}/ccb`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      
-      if (response.status === 404) {
-        return null;
-      }
-      
-      if (!response.ok) {
-        throw new Error('Erro ao buscar CCB');
-      }
-      
-      return response.json();
-    },
+    queryKey: [`/api/formalizacao/${proposalId}/ccb`],
     refetchInterval: isGenerating ? 2000 : false // Poll enquanto gera
   });
 
