@@ -93,6 +93,48 @@ export class CCBGenerationService {
       console.log("📊 [CCB] ========== MAPEAMENTO DE DADOS PARA CCB ==========");
       
       // DADOS PRINCIPAIS (usar campos diretos da tabela propostas)
+      // CORREÇÃO 1: Extrair campos de endereço da string concatenada
+      let enderecoParseado = {
+        logradouro: "",
+        numero: "",
+        complemento: "",
+        bairro: "",
+        cidade: "",
+        estado: "",
+        cep: ""
+      };
+      
+      // Parse do endereço concatenado se existir
+      const enderecoCompleto = proposalData.cliente_data?.endereco || "";
+      if (enderecoCompleto && enderecoCompleto !== "NÃO INFORMADO") {
+        // Exemplo: "Rua Miguel Angelo, 675, Casa, Parque Residencial Laranjeiras, Serra/ES - CEP: 29165-460"
+        const partes = enderecoCompleto.split(",").map(s => s.trim());
+        
+        if (partes.length >= 4) {
+          enderecoParseado.logradouro = partes[0] || ""; // "Rua Miguel Angelo"
+          enderecoParseado.numero = partes[1] || ""; // "675"
+          enderecoParseado.complemento = partes[2] || ""; // "Casa"
+          enderecoParseado.bairro = partes[3] || ""; // "Parque Residencial Laranjeiras"
+          
+          // Extrair cidade/estado do último elemento
+          const ultimaParte = partes[partes.length - 1] || "";
+          const cidadeEstadoMatch = ultimaParte.match(/([^\/]+)\/(\w+)\s*-?\s*CEP:\s*([\d-]+)/);
+          if (cidadeEstadoMatch) {
+            enderecoParseado.cidade = cidadeEstadoMatch[1].trim();
+            enderecoParseado.estado = cidadeEstadoMatch[2].trim();
+            enderecoParseado.cep = cidadeEstadoMatch[3].trim();
+          } else if (ultimaParte.includes("/")) {
+            const [cidade, resto] = ultimaParte.split("/");
+            enderecoParseado.cidade = cidade.trim();
+            const estadoCepMatch = resto.match(/(\w+)\s*-?\s*CEP:\s*([\d-]+)/);
+            if (estadoCepMatch) {
+              enderecoParseado.estado = estadoCepMatch[1].trim();
+              enderecoParseado.cep = estadoCepMatch[2].trim();
+            }
+          }
+        }
+      }
+      
       const dadosCliente = {
         // Dados diretos da tabela propostas
         nome: proposalData.cliente_nome || (proposalData.cliente_data?.nome) || "NÃO INFORMADO",
@@ -102,23 +144,28 @@ export class CCBGenerationService {
         estadoCivil: proposalData.cliente_estado_civil || (proposalData.cliente_data?.estadoCivil) || "NÃO INFORMADO",
         nacionalidade: proposalData.cliente_nacionalidade || (proposalData.cliente_data?.nacionalidade) || "BRASILEIRA",
         endereco: proposalData.cliente_endereco || (proposalData.cliente_data?.endereco) || "NÃO INFORMADO",
-        cidade: proposalData.cliente_cidade || (proposalData.cliente_data?.cidade) || "NÃO INFORMADO",
-        uf: proposalData.cliente_uf || (proposalData.cliente_data?.uf) || "NÃO INFORMADO",
-        cep: proposalData.cliente_cep || (proposalData.cliente_data?.cep) || "NÃO INFORMADO",
+        cidade: enderecoParseado.cidade || proposalData.cliente_cidade || (proposalData.cliente_data?.cidade) || "NÃO INFORMADO",
+        uf: enderecoParseado.estado || proposalData.cliente_uf || (proposalData.cliente_data?.uf) || "NÃO INFORMADO",
+        cep: enderecoParseado.cep || proposalData.cliente_cep || (proposalData.cliente_data?.cep) || "NÃO INFORMADO",
         rgUf: proposalData.cliente_rg_uf || (proposalData.cliente_data?.rgUf) || "NÃO INFORMADO",
         rgDataEmissao: proposalData.cliente_rg_data_emissao || (proposalData.cliente_data?.rgDataEmissao) || "NÃO INFORMADO",
         localNascimento: proposalData.cliente_local_nascimento || (proposalData.cliente_data?.localNascimento) || "NÃO INFORMADO",
-        // Campos adicionais de endereço
-        logradouro: proposalData.cliente_data?.logradouro || "",
-        numero: proposalData.cliente_data?.numero || "",
-        complemento: proposalData.cliente_data?.complemento || "",
-        bairro: proposalData.cliente_data?.bairro || "",
-        estado: proposalData.cliente_data?.estado || proposalData.cliente_data?.uf || "NÃO INFORMADO",
+        // Campos de endereço separados (parseados)
+        logradouro: enderecoParseado.logradouro || proposalData.cliente_data?.logradouro || "",
+        numero: enderecoParseado.numero || proposalData.cliente_data?.numero || "",
+        complemento: enderecoParseado.complemento || proposalData.cliente_data?.complemento || "",
+        bairro: enderecoParseado.bairro || proposalData.cliente_data?.bairro || "",
+        estado: enderecoParseado.estado || proposalData.cliente_data?.estado || proposalData.cliente_data?.uf || "NÃO INFORMADO",
         // Campos para PJ
         tipo: proposalData.cliente_data?.tipo || "PF",
         razaoSocial: proposalData.cliente_data?.razaoSocial || "",
         cnpj: proposalData.cliente_data?.cnpj || ""
       };
+      
+      console.log("📊 [CCB] Endereço parseado:", {
+        original: enderecoCompleto,
+        parseado: enderecoParseado
+      });
       
       // CONDIÇÕES FINANCEIRAS
       const condicoesFinanceiras = {
@@ -132,19 +179,26 @@ export class CCBGenerationService {
         cet: proposalData.condicoes_data?.cet || 0
       };
       
-      // DADOS DE PAGAMENTO
+      // CORREÇÃO 2: Buscar dados bancários do JSON cliente_data se não existirem nos campos diretos
       const dadosPagamento = {
-        codigoBanco: proposalData.dados_pagamento_codigo_banco || "NÃO INFORMADO",
-        banco: proposalData.dados_pagamento_banco || "NÃO INFORMADO",
-        agencia: proposalData.dados_pagamento_agencia || "NÃO INFORMADO",
-        conta: proposalData.dados_pagamento_conta || "NÃO INFORMADO",
-        digito: proposalData.dados_pagamento_digito || "NÃO INFORMADO",
-        tipoConta: proposalData.dados_pagamento_tipo || "NÃO INFORMADO",
-        nomeTitular: proposalData.dados_pagamento_nome_titular || dadosCliente.nome,
-        cpfTitular: proposalData.dados_pagamento_cpf_titular || dadosCliente.cpf,
-        chavePix: proposalData.dados_pagamento_pix || "NÃO INFORMADO",
-        tipoPix: proposalData.dados_pagamento_tipo_pix || "NÃO INFORMADO"
+        codigoBanco: proposalData.dados_pagamento_codigo_banco || proposalData.cliente_data?.banco || "NÃO INFORMADO",
+        banco: proposalData.dados_pagamento_banco || proposalData.cliente_data?.banco || "NÃO INFORMADO",
+        agencia: proposalData.dados_pagamento_agencia || proposalData.cliente_data?.agencia || "NÃO INFORMADO",
+        conta: proposalData.dados_pagamento_conta || proposalData.cliente_data?.conta || "NÃO INFORMADO",
+        digito: proposalData.dados_pagamento_digito || proposalData.cliente_data?.digito || "NÃO INFORMADO",
+        tipoConta: proposalData.dados_pagamento_tipo || proposalData.cliente_data?.tipoConta || "NÃO INFORMADO",
+        nomeTitular: proposalData.dados_pagamento_nome_titular || proposalData.cliente_data?.nomeTitular || dadosCliente.nome,
+        cpfTitular: proposalData.dados_pagamento_cpf_titular || proposalData.cliente_data?.cpfTitular || dadosCliente.cpf,
+        chavePix: proposalData.dados_pagamento_pix || proposalData.cliente_data?.chavePix || proposalData.cliente_data?.pix || "NÃO INFORMADO",
+        tipoPix: proposalData.dados_pagamento_tipo_pix || proposalData.cliente_data?.tipoPix || "NÃO INFORMADO"
       };
+      
+      console.log("📊 [CCB] Dados de pagamento mapeados:", {
+        banco: dadosPagamento.banco,
+        agencia: dadosPagamento.agencia,
+        conta: dadosPagamento.conta,
+        pix: dadosPagamento.chavePix
+      });
       
       // DADOS DA LOJA/CREDOR
       const dadosLoja = {
@@ -159,7 +213,7 @@ export class CCBGenerationService {
       console.log("📊 [CCB] Condições:", `R$ ${condicoesFinanceiras.valor} em ${condicoesFinanceiras.prazo}x`);
       console.log("📊 [CCB] Pagamento via:", dadosPagamento.banco || dadosPagamento.chavePix);
       
-      // Buscar parcelas da tabela parcelas
+      // CORREÇÃO 3: Gerar parcelas se não existirem
       let parcelas: any[] = [];
       try {
         const parcelasResult = await db.execute(sql`
@@ -173,7 +227,29 @@ export class CCBGenerationService {
           ORDER BY numero_parcela ASC
         `);
         parcelas = parcelasResult || [];
-        console.log("📊 [CCB] Parcelas encontradas:", parcelas.length);
+        console.log("📊 [CCB] Parcelas encontradas na tabela:", parcelas.length);
+        
+        // Se não há parcelas, gerar baseado nas condições financeiras
+        if (parcelas.length === 0 && condicoesFinanceiras.prazo > 0) {
+          console.log("📊 [CCB] Gerando parcelas automaticamente...");
+          const valorParcela = (condicoesFinanceiras.valorTotalFinanciado || condicoesFinanceiras.valor) / condicoesFinanceiras.prazo;
+          const dataBase = new Date();
+          
+          for (let i = 0; i < condicoesFinanceiras.prazo; i++) {
+            const dataVencimento = new Date(dataBase);
+            dataVencimento.setMonth(dataVencimento.getMonth() + i + 1);
+            
+            parcelas.push({
+              numero_parcela: i + 1,
+              data_vencimento: dataVencimento.toISOString().split('T')[0],
+              valor_parcela: valorParcela,
+              vencimento: dataVencimento.toISOString().split('T')[0], // compatibilidade
+              valor: valorParcela, // compatibilidade
+              status: 'pendente'
+            });
+          }
+          console.log(`📊 [CCB] ${parcelas.length} parcelas geradas automaticamente`);
+        }
       } catch (parcelasError) {
         console.warn("⚠️ [CCB] Erro ao buscar parcelas:", parcelasError);
         parcelas = [];
@@ -311,23 +387,32 @@ export class CCBGenerationService {
         });
       }
 
-      // ENDEREÇO COMPLETO (SEPARADO)
+      // ENDEREÇO COMPLETO (SEPARADO COM CORREÇÃO)
       if (USER_CCB_COORDINATES.enderecoCliente) {
-        const enderecoCompleto = [
+        // Montar endereço dos campos separados se disponíveis
+        const enderecoMontado = [
           dadosCliente.logradouro,
           dadosCliente.numero,
           dadosCliente.complemento,
           dadosCliente.bairro
-        ].filter(Boolean).join(", ") || dadosCliente.endereco || "";
+        ].filter(Boolean).join(", ");
         
-        if (enderecoCompleto && enderecoCompleto !== "NÃO INFORMADO") {
-          firstPage.drawText(enderecoCompleto, {
+        // Usar endereço montado ou fallback para endereço completo
+        const enderecoFinal = enderecoMontado || dadosCliente.endereco || "";
+        
+        if (enderecoFinal && enderecoFinal !== "NÃO INFORMADO") {
+          // Limitar o endereço para caber no campo (max 50 caracteres)
+          const enderecoTruncado = enderecoFinal.length > 50 ? enderecoFinal.substring(0, 47) + "..." : enderecoFinal;
+          
+          firstPage.drawText(enderecoTruncado, {
             x: USER_CCB_COORDINATES.enderecoCliente.x,
             y: USER_CCB_COORDINATES.enderecoCliente.y,
             size: USER_CCB_COORDINATES.enderecoCliente.fontSize,
             font: helveticaFont,
             color: rgb(0, 0, 0),
           });
+          
+          console.log("📊 [CCB] Endereço renderizado:", enderecoTruncado);
         }
       }
 

@@ -1,0 +1,31 @@
+**BUG:** O fluxo de dados da tela de "Nova Proposta" para a geração da CCB em PDF está corrompido em três pontos críticos:
+1.  **Endereço:** Os campos de endereço estão a ser unidos incorretamente em uma única string na "Nova Proposta", o que causa uma renderização completamente errada e em local aleatório na CCB.
+2.  **Dados Bancários:** As informações bancárias do cliente, embora inseridas na "Nova Proposta", estão a desaparecer e aparecem como "NÃO INFORMADO" na CCB.
+3.  **Parcelas:** As parcelas do empréstimo (o cronograma de pagamento) não estão a ser impressas na CCB, deixando o contrato incompleto.
+
+**PROCESSO SISTEMÁTICO (Roadmap de Correção):**
+
+**1. Auditoria e Correção do Banco de Dados (Causa Raiz):**
+    - **Ação:** Sua primeira tarefa é auditar a tabela `propostas`. Verifique como os dados de `endereço` e `dados_bancarios` estão a ser salvos.
+    - **Validação:** Confirme que estes dados são salvos como objetos JSON estruturados, com chaves separadas (ex: "rua", "cidade", "cep" para o endereço; "banco", "agencia", "conta" para os dados bancários).
+    - **Correção:** Se os dados estiverem a ser salvos como uma string única e concatenada, **corrija a API de 'Nova Proposta' primeiro** para garantir que ela salve os dados de forma estruturada e correta no banco de dados.
+
+**2. Correção do Fluxo de Endereço:**
+    - **Ação:** Garanta que no formulário de "Nova Proposta" os campos de endereço sejam `inputs` separados.
+    - **Implementação:** Na função `generateCcbFromTemplate` (`pdfGeneratorService.ts`), certifique-se de que você está a ler os campos de endereço individuais do objeto `cliente_data`. Use o documento `MAPEAMENTO_COMPLETO_CCB_COORDENADAS.md` para renderizar CADA PARTE do endereço (Rua, Bairro, CEP, etc.) em sua coordenada exata no PDF, usando chamadas `page.drawText()` separadas.
+
+**3. Correção do Fluxo de Dados Bancários:**
+    - **Ação:** Rastreie o fluxo dos `dados_bancarios` (Banco, Agência, Conta, Chave PIX) desde o formulário de "Nova Proposta" até a função `generateCcbFromTemplate`.
+    - **Implementação:** Use `console.log` para depurar o objeto `propostaData` em cada etapa e identificar onde a informação está a ser perdida. Corrija a falha e renderize os dados bancários corretos nas suas coordenadas exatas na Página 2 da CCB.
+
+**4. Implementação da Renderização das Parcelas:**
+    - **Ação:** Dentro da função `generateCcbFromTemplate`, implemente um loop (`forEach`) sobre o array `parcelas` recebido no objeto `propostaData`.
+    - **Implementação:** Para cada `parcela` no array, use `page.drawText()` para imprimir o `Número`, `Vencimento` e `Valor` da parcela nas coordenadas X e Y exatas, conforme especificado em `MAPEAMENTO_COMPLETO_CCB_COORDENADAS.md` (Páginas 2 e 3).
+
+**5. Validação Final (Protocolo 5-CHECK):**
+    - **Ação Obrigatória:** Após as correções, execute `get_latest_lsp_diagnostics` e corrija TODOS os erros de LSP antes de continuar.
+    - **Teste Obrigatório:** Gere uma CCB para uma proposta de teste completa e valide VISUALMENTE que:
+        - O endereço está separado e nos locais corretos.
+        - Os dados bancários aparecem corretamente.
+        - TODAS as parcelas estão listadas nas Páginas 2 e 3 nos locais corretos.
+    - **Relatório Final:** Declare "pronto" apenas após LSP estar com 0 erros e o teste visual for 100% bem-sucedido.
