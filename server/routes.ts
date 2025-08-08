@@ -20,6 +20,7 @@ import monitoringRoutes from "./routes/monitoring";
 import ccbIntelligentTestRoutes from "./routes/ccb-intelligent-test";
 import ccbCorrectedRoutes from "./routes/ccb-test-corrected";
 import clienteRoutes from "./routes/cliente-routes";
+import gestaoContratosRoutes from "./routes/gestao-contratos";
 import { getBrasiliaDate, formatBrazilianDateTime, generateApprovalDate, getBrasiliaTimestamp } from "./lib/timezone";
 import { securityLogger, SecurityEventType, getClientIP } from './lib/security-logger';
 import { passwordSchema, validatePassword } from "./lib/password-validator";
@@ -4259,6 +4260,9 @@ app.get("/api/propostas/metricas", jwtAuthMiddleware, async (req: AuthenticatedR
 
   // ClickSign Integration routes
   app.use('/api', clicksignIntegrationRoutes);
+
+  // Gestão de Contratos routes (ADMIN e DIRETOR apenas)
+  app.use('/api', gestaoContratosRoutes);
 
   const httpServer = createServer(app);
   return httpServer;
