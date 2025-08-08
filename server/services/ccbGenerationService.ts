@@ -92,8 +92,43 @@ export class CCBGenerationService {
       // Extrair dados detalhados
       const clienteData = proposalData.cliente_data || {};
       const condicoesData = proposalData.condicoes_data || {};
-      const dataPagamento = proposalData.data_pagamento || {};
-      const parcelas = proposalData.parcelas || [];
+      
+      // Construir objeto de dados de pagamento dos campos individuais
+      const dataPagamento = {
+        codigo_banco: proposalData.dados_pagamento_codigo_banco,
+        banco: proposalData.dados_pagamento_banco,
+        agencia: proposalData.dados_pagamento_agencia,
+        conta: proposalData.dados_pagamento_conta,
+        digito: proposalData.dados_pagamento_digito,
+        tipo_conta: proposalData.dados_pagamento_tipo,
+        nome_titular: proposalData.dados_pagamento_nome_titular,
+        cpf_titular: proposalData.dados_pagamento_cpf_titular,
+        chave_pix: proposalData.dados_pagamento_pix,
+        tipo_pix: proposalData.dados_pagamento_tipo_pix,
+        pix_banco: proposalData.dados_pagamento_pix_banco,
+        pix_nome_titular: proposalData.dados_pagamento_pix_nome_titular,
+        pix_cpf_titular: proposalData.dados_pagamento_pix_cpf_titular,
+      };
+      
+      // Buscar parcelas da tabela parcelas
+      let parcelas = [];
+      try {
+        const parcelasResult = await db.execute(sql`
+          SELECT 
+            numero_parcela,
+            data_vencimento,
+            valor_parcela,
+            status
+          FROM parcelas 
+          WHERE proposta_id = ${proposalId}
+          ORDER BY numero_parcela ASC
+        `);
+        parcelas = parcelasResult || [];
+        console.log("📊 [CCB] Parcelas encontradas:", parcelas.length);
+      } catch (parcelasError) {
+        console.warn("⚠️ [CCB] Erro ao buscar parcelas:", parcelasError);
+        parcelas = [];
+      }
 
       // ========================================
       // PÁGINA 1 - DADOS PRINCIPAIS
@@ -729,12 +764,22 @@ export class CCBGenerationService {
           p.id,
           p.cliente_data,
           p.condicoes_data,
-          p.data_pagamento,
-          p.parcelas,
           p.valor_aprovado,
           p.created_at,
           p.ccb_gerado_em,
-          p.cidade_emissao,
+          p.dados_pagamento_banco,
+          p.dados_pagamento_agencia,
+          p.dados_pagamento_conta,
+          p.dados_pagamento_tipo,
+          p.dados_pagamento_nome_titular,
+          p.dados_pagamento_cpf_titular,
+          p.dados_pagamento_pix,
+          p.dados_pagamento_tipo_pix,
+          p.dados_pagamento_codigo_banco,
+          p.dados_pagamento_digito,
+          p.dados_pagamento_pix_banco,
+          p.dados_pagamento_pix_nome_titular,
+          p.dados_pagamento_pix_cpf_titular,
           pr.nome_produto as produto_nome,
           l.nome_loja as loja_nome,
           l.cnpj as loja_cnpj,
@@ -760,9 +805,10 @@ export class CCBGenerationService {
       console.log("📊 [CCB] ID da Proposta:", proposta.id);
       console.log("📊 [CCB] Cliente Data presente:", !!proposta.cliente_data);
       console.log("📊 [CCB] Condicoes Data presente:", !!proposta.condicoes_data);
-      console.log("📊 [CCB] Data Pagamento presente:", !!proposta.data_pagamento);
-      console.log("📊 [CCB] Parcelas presente:", !!proposta.parcelas);
-      console.log("📊 [CCB] Parcelas quantidade:", proposta.parcelas?.length || 0);
+      console.log("📊 [CCB] Dados Pagamento Banco:", proposta.dados_pagamento_banco);
+      console.log("📊 [CCB] Dados Pagamento Agencia:", proposta.dados_pagamento_agencia);
+      console.log("📊 [CCB] Dados Pagamento Conta:", proposta.dados_pagamento_conta);
+      console.log("📊 [CCB] PIX presente:", !!proposta.dados_pagamento_pix);
       
       // Log detalhado dos dados
       if (proposta.cliente_data) {
@@ -770,9 +816,6 @@ export class CCBGenerationService {
       }
       if (proposta.condicoes_data) {
         console.log("📊 [CCB] Condicoes Data campos:", Object.keys(proposta.condicoes_data));
-      }
-      if (proposta.data_pagamento) {
-        console.log("📊 [CCB] Data Pagamento campos:", Object.keys(proposta.data_pagamento));
       }
       
       console.log("📊 [CCB] ========== FIM DA AUDITORIA ==========");
