@@ -596,7 +596,7 @@ export default function AnaliseManual() {
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                   <div>
                     <Label htmlFor="status">Decisão</Label>
-                    <Select onValueChange={value => setValue("status", value as any)}>
+                    <Select onValueChange={value => setValue("status", value as unknown)}>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecione uma decisão" />
                       </SelectTrigger>
@@ -763,7 +763,7 @@ export default function AnaliseManual() {
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <div>
                   <Label htmlFor="status">Decisão</Label>
-                  <Select onValueChange={value => setValue("status", value as any)}>
+                  <Select onValueChange={value => setValue("status", value as unknown)}>
                     <SelectTrigger>
                       <SelectValue placeholder="Selecione uma decisão" />
                     </SelectTrigger>

@@ -137,10 +137,12 @@ const ConfiguracaoComercialForm: React.FC = () => {
         description: "Tabela comercial personalizada criada com sucesso!",
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const errorMessage =
+        error instanceof Error ? error.message : "Erro ao criar tabela comercial";
       toast({
         title: "Erro!",
-        description: error.message || "Erro ao criar tabela comercial",
+        description: errorMessage,
         variant: "destructive",
       });
     },

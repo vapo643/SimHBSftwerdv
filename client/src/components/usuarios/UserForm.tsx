@@ -95,10 +95,7 @@ const UserForm: React.FC<UserFormProps> = ({
   } = useUserFormData();
 
   // Use server-side store fetching when needed
-  const {
-    data: serverStores = [],
-    isLoading: isServerStoresLoading,
-  } = useStoresByPartner(
+  const { data: serverStores = [], isLoading: isServerStoresLoading } = useStoresByPartner(
     selectedParceiroId ? parseInt(selectedParceiroId) : null,
     !canFilterClientSide && !!selectedParceiroId
   );

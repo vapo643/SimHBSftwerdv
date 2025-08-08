@@ -120,7 +120,7 @@ export class PDFDownloader {
         if (!response.ok) {
           // Tentar parsear resposta de erro como JSON
           let errorMessage: string;
-          let errorDetails: any = null;
+          let errorDetails: unknown = null;
 
           const contentType = response.headers.get("content-type");
           if (contentType && contentType.includes("application/json")) {
@@ -148,7 +148,7 @@ export class PDFDownloader {
           const error = new Error(
             errorMessage || `HTTP ${response.status}: ${response.statusText}`
           );
-          (error as any).details = errorDetails;
+          (error as unknown).details = errorDetails;
           throw error;
         }
 

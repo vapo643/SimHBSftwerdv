@@ -51,10 +51,12 @@ export const EtapaFormalizacaoControl: React.FC<EtapaFormalizacaoControlProps> =
         onUpdate();
       }
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const errorMessage =
+        error instanceof Error ? error.message : "Ocorreu um erro ao atualizar a etapa";
       toast({
         title: "Erro ao atualizar etapa",
-        description: error.response?.data?.message || "Ocorreu um erro ao atualizar a etapa",
+        description: errorMessage,
         variant: "destructive",
       });
     },

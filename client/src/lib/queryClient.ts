@@ -1,7 +1,7 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 import { api } from "./apiClient";
 
-async function throwIfResNotOk(res: Response) {
+async function _throwIfResNotOk(res: Response) {
   if (!res.ok) {
     const text = (await res.text()) || res.statusText;
     throw new Error(`${res.status}: ${text}`);
@@ -11,7 +11,7 @@ async function throwIfResNotOk(res: Response) {
 export async function apiRequest(
   url: string,
   options: { method: string; body?: unknown } = { method: "GET" }
-): Promise<any> {
+): Promise<unknown> {
   const { method, body } = options;
 
   // Use the new api client methods

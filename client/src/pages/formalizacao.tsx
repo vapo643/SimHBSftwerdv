@@ -398,10 +398,10 @@ export default function Formalizacao() {
   const { user } = useAuth();
   const [ccbUrl, setCcbUrl] = useState<string | null>(null);
   const [showCcbViewer, setShowCcbViewer] = useState(false);
-  const [clickSignData, setClickSignData] = useState<any>(null);
+  const [clickSignData, setClickSignData] = useState<unknown>(null);
   const [loadingClickSign, setLoadingClickSign] = useState(false);
   const [useBiometricAuth, setUseBiometricAuth] = useState(false);
-  const [interBoletoData, setInterBoletoData] = useState<any>(null);
+  const [interBoletoData, setInterBoletoData] = useState<unknown>(null);
   const [loadingInter, setLoadingInter] = useState(false);
   const [boletosGerados, setBoletosGerados] = useState<any[]>([]);
 
@@ -443,7 +443,7 @@ export default function Formalizacao() {
   const form = useForm<UpdateFormalizacaoForm>({
     resolver: zodResolver(updateFormalizacaoSchema),
     defaultValues: {
-      status: proposta?.status as any,
+      status: proposta?.status as unknown,
       documentosAdicionais: proposta?.documentosAdicionais || [],
       contratoGerado: proposta?.contratoGerado || false,
       contratoAssinado: proposta?.contratoAssinado || false,
@@ -2118,7 +2118,7 @@ export default function Formalizacao() {
                     <select
                       className="w-full rounded-md border border-gray-600 bg-gray-700 p-2 text-white"
                       value={form.watch("status") || proposta.status}
-                      onChange={e => form.setValue("status", e.target.value as any)}
+                      onChange={e => form.setValue("status", e.target.value as unknown)}
                     >
                       <option value="aprovado">Aprovado</option>
                       <option value="documentos_enviados">Documentos Enviados</option>

@@ -707,7 +707,9 @@ export default function Pagamentos() {
                   </div>
                   <div>
                     <Label htmlFor="metodoPagamento">Método de Pagamento</Label>
-                    <Select onValueChange={value => form.setValue("metodoPagamento", value as any)}>
+                    <Select
+                      onValueChange={value => form.setValue("metodoPagamento", value as unknown)}
+                    >
                       <SelectTrigger className="mt-1">
                         <SelectValue placeholder="Selecione o método" />
                       </SelectTrigger>

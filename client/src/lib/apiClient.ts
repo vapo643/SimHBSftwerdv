@@ -13,7 +13,7 @@ import { getSupabase } from "./supabase";
 
 export interface ApiClientOptions {
   method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
-  body?: any;
+  body?: unknown;
   headers?: Record<string, string>;
   requireAuth?: boolean;
   timeout?: number;
@@ -45,7 +45,7 @@ export enum ApiErrorCode {
 export class ApiError extends Error {
   public readonly code: ApiErrorCode;
   public readonly isRetryable: boolean;
-  public readonly data?: any; // Store full response data
+  public readonly data?: unknown; // Store full response data
 
   constructor(
     message: string,
@@ -53,7 +53,7 @@ export class ApiError extends Error {
     public statusText: string,
     public response?: Response,
     code?: ApiErrorCode,
-    data?: any // Add data parameter
+    data?: unknown // Add data parameter
   ) {
     super(message);
     this.name = "ApiError";
@@ -452,7 +452,7 @@ export async function apiClient<T = any>(
                 headers: retryResponse.headers,
               } as ApiResponse<T>;
             }
-          } catch (retryError) {
+          } catch (_retryError) {
             // If retry fails, fall through to original error handling
           }
         }
@@ -460,7 +460,7 @@ export async function apiClient<T = any>(
 
       // PASSO 5.5: Use enhanced ApiError class with full response data
       throw new ApiError(
-        (data as any)?.message || (data as string) || `HTTP Error ${response.status}`,
+        (data as unknown)?.message || (data as string) || `HTTP Error ${response.status}`,
         response.status,
         response.statusText,
         response,
@@ -528,19 +528,19 @@ export const api = {
 
   post: <T = any>(
     url: string,
-    body?: any,
+    body?: unknown,
     options: Omit<ApiClientOptions, "method" | "body"> = {}
   ) => apiClient<T>(url, { ...options, method: "POST", body }),
 
   put: <T = any>(
     url: string,
-    body?: any,
+    body?: unknown,
     options: Omit<ApiClientOptions, "method" | "body"> = {}
   ) => apiClient<T>(url, { ...options, method: "PUT", body }),
 
   patch: <T = any>(
     url: string,
-    body?: any,
+    body?: unknown,
     options: Omit<ApiClientOptions, "method" | "body"> = {}
   ) => apiClient<T>(url, { ...options, method: "PATCH", body }),
 

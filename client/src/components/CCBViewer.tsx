@@ -69,11 +69,13 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
         queryClient.refetchQueries({ queryKey: [`/api/formalizacao/${proposalId}/ccb`] });
       }, 500);
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       setIsGenerating(false);
+      const errorMessage =
+        error instanceof Error ? error.message : "Ocorreu um erro ao gerar o documento.";
       toast({
         title: "Erro ao gerar CCB",
-        description: error.message || "Ocorreu um erro ao gerar o documento.",
+        description: errorMessage,
         variant: "destructive",
       });
     },
@@ -107,11 +109,13 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
         queryClient.refetchQueries({ queryKey: [`/api/formalizacao/${proposalId}/ccb`] });
       }, 500);
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       setIsGenerating(false);
+      const errorMessage =
+        error instanceof Error ? error.message : "Ocorreu um erro ao regenerar o documento.";
       toast({
         title: "Erro ao regenerar CCB",
-        description: error.message || "Ocorreu um erro ao regenerar o documento.",
+        description: errorMessage,
         variant: "destructive",
       });
     },

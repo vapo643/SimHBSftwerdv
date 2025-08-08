@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { ProposalProvider, useProposal, useProposalActions } from "@/contexts/ProposalContext";
 import { useProposalEffects } from "@/hooks/useProposalEffects";
@@ -8,19 +8,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import {
-  DollarSign,
-  FileText,
-  AlertCircle,
-  Loader2,
-  CheckCircle2,
-  User,
-} from "lucide-react";
+import { DollarSign, FileText, AlertCircle, Loader2, CheckCircle2, User } from "lucide-react";
 import { ClientDataStep } from "@/components/propostas/ClientDataStep";
 import { LoanConditionsStep } from "@/components/propostas/LoanConditionsStep";
 import { DocumentsStep } from "@/components/propostas/DocumentsStep";
 import { PersonalReferencesStep } from "@/components/propostas/PersonalReferencesStep";
-
 
 // Component that uses the ProposalContext
 function ProposalForm() {

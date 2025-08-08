@@ -26,7 +26,7 @@ interface DocumentViewerProps {
 }
 
 export function DocumentViewer({ propostaId, documents }: DocumentViewerProps) {
-  const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
+  const [_selectedDocument, setSelectedDocument] = useState<Document | null>(null);
   const [ccbRealUrl, setCcbRealUrl] = useState<string | null>(null);
   const [_ccbLoading, setCcbLoading] = useState(false);
 

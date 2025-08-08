@@ -1,5 +1,5 @@
 import React from "react";
-import { Controller } from "react-hook-form";
+import { Controller, UseFormRegister, Control, FieldErrors } from "react-hook-form";
 import { z } from "zod";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -31,17 +31,17 @@ const _clienteSchema = z.object({
 
 type _ClienteFormData = z.infer<typeof _clienteSchema>;
 
-interface DadosClienteFormProps {
-  register: any;
-  control: any;
-  errors: any;
+interface FormData {
+  [key: string]: unknown;
 }
 
-const DadosClienteForm: React.FC<DadosClienteFormProps> = ({
-  register,
-  control,
-  errors,
-}) => {
+interface DadosClienteFormProps {
+  register: UseFormRegister<FormData>;
+  control: Control<FormData>;
+  errors: FieldErrors<FormData>;
+}
+
+const DadosClienteForm: React.FC<DadosClienteFormProps> = ({ register, control, errors }) => {
   // O handleSubmit é gerenciado pelo componente pai
   return (
     <div className="max-h-[70vh] space-y-4 overflow-y-auto p-1">

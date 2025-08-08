@@ -344,7 +344,7 @@ export function ClientDataStep() {
         description: "Seus dados foram restaurados da sessão anterior.",
       });
     }
-  }, []);
+  }, [clientData.nome, toast, updateClient]);
 
   return (
     <div className="space-y-6">
