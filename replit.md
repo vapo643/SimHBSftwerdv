@@ -17,6 +17,14 @@ Error handling: Create structured documentation for automatic consultation durin
   - Paginação, loading states e empty states implementados
   - TanStack Query para gerenciamento de estado
   - Item adicionado ao menu lateral para usuários autorizados
+- ✅ **CRITICAL FIX:** Menu lateral responsivo implementado definitivamente:
+  - Estado sidebarOpen com useState para controle de visibilidade
+  - useEffect para fechar menu com tecla Escape
+  - Botão hamburger mobile (lg:hidden) no header
+  - Overlay com backdrop-blur-sm para UX adequada
+  - Sidebar com transform/transition para animação suave
+  - Links com onClick={handleNavClick} para fechar menu ao navegar
+  - Documentação em `/error_docs/SIDEBAR_MENU_RESPONSIVE_FIX.md` para evitar reincidência
 
 ## Recent Changes (2025-08-07)
 - ✅ **CRITICAL FIX:** CCB template conflict resolved - all routes now use `ccbGenerationService.ts` with pdf-lib

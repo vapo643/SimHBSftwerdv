@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { signOut } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
@@ -22,6 +22,8 @@ import {
   Store, // Adicionando o ícone para lojas
   Shield, // Adicionando o ícone para segurança OWASP
   Receipt, // Adicionando o ícone para cobranças
+  Menu, // Ícone do menu hamburger
+  X, // Ícone para fechar
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -42,8 +44,24 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
   const [location] = useLocation();
   const { toast } = useToast();
   const { user } = useAuth();
-  
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  // Fechar menu com Escape e ao navegar
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setSidebarOpen(false);
+      }
+    };
+    
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, []);
+
+  // Fechar menu ao navegar (mobile)
+  const handleNavClick = () => {
+    setSidebarOpen(false);
+  };
 
   // 🔒 PERMISSÕES RÍGIDAS SEGUNDO DOCUMENTO OFICIAL
   // ATENDENTE: Dashboard, criação e formalização
@@ -139,7 +157,17 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
     <div className="grid min-h-screen w-full lg:grid-cols-[280px_1fr] overflow-hidden">
       {/* Pilar 12 - Progressive Enhancement: Offline Status Banner */}
       <OfflineIndicator variant="banner" />
-      <div className="hidden border-r bg-card text-card-foreground lg:block">
+      
+      {/* Mobile Sidebar Overlay */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm lg:hidden" 
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+      
+      {/* Sidebar */}
+      <div className={`fixed inset-y-0 left-0 z-50 w-72 border-r bg-card text-card-foreground transform transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 lg:w-280 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:block`}>
         <div className="flex h-full max-h-screen flex-col gap-2">
           <div className="flex h-16 items-center justify-between border-b px-6">
             <Link to="/dashboard" className="flex items-center gap-2 font-semibold">
@@ -197,6 +225,7 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
                     <Link 
                       key={item.name} 
                       href={item.href}
+                      onClick={handleNavClick}
                       className={`group flex items-center gap-3 rounded-xl px-3 py-3 transition-all duration-200 ${
                         isActive
                           ? `bg-gradient-to-r ${item.gradient} text-white shadow-lg transform scale-105`
@@ -222,6 +251,7 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
                   </div>
                   <Link 
                     href="/financeiro/pagamentos"
+                    onClick={handleNavClick}
                     className={`group flex items-center gap-3 rounded-xl px-3 py-3 transition-all duration-200 ${
                       location === "/financeiro/pagamentos"
                         ? "bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg transform scale-105"
@@ -235,6 +265,7 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
                   </Link>
                   <Link 
                     href="/financeiro/cobrancas"
+                    onClick={handleNavClick}
                     className={`group flex items-center gap-3 rounded-xl px-3 py-3 transition-all duration-200 ${
                       location === "/financeiro/cobrancas"
                         ? "bg-gradient-to-r from-purple-500 to-pink-600 text-white shadow-lg transform scale-105"
@@ -260,6 +291,7 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
                     </div>
                     <Link 
                       href="/admin/usuarios"
+                      onClick={handleNavClick}
                       className={`group flex items-center gap-3 rounded-xl px-3 py-3 transition-all duration-200 ${
                         location === "/admin/usuarios"
                           ? "bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-lg transform scale-105"
@@ -374,6 +406,15 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
       </div>
       <div className="flex flex-col">
         <header className="bg-muted/40 flex h-14 items-center gap-4 border-b px-6 lg:h-[60px]">
+          {/* Mobile menu button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="lg:hidden"
+            onClick={() => setSidebarOpen(true)}
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
           <div className="flex-1">
             <h1 className="text-lg font-semibold">{title}</h1>
           </div>
