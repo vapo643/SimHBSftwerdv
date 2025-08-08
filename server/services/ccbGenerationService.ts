@@ -107,7 +107,17 @@ export class CCBGenerationService {
         cep: proposalData.cliente_cep || (proposalData.cliente_data?.cep) || "NÃO INFORMADO",
         rgUf: proposalData.cliente_rg_uf || (proposalData.cliente_data?.rgUf) || "NÃO INFORMADO",
         rgDataEmissao: proposalData.cliente_rg_data_emissao || (proposalData.cliente_data?.rgDataEmissao) || "NÃO INFORMADO",
-        localNascimento: proposalData.cliente_local_nascimento || (proposalData.cliente_data?.localNascimento) || "NÃO INFORMADO"
+        localNascimento: proposalData.cliente_local_nascimento || (proposalData.cliente_data?.localNascimento) || "NÃO INFORMADO",
+        // Campos adicionais de endereço
+        logradouro: proposalData.cliente_data?.logradouro || "",
+        numero: proposalData.cliente_data?.numero || "",
+        complemento: proposalData.cliente_data?.complemento || "",
+        bairro: proposalData.cliente_data?.bairro || "",
+        estado: proposalData.cliente_data?.estado || proposalData.cliente_data?.uf || "NÃO INFORMADO",
+        // Campos para PJ
+        tipo: proposalData.cliente_data?.tipo || "PF",
+        razaoSocial: proposalData.cliente_data?.razaoSocial || "",
+        cnpj: proposalData.cliente_data?.cnpj || ""
       };
       
       // CONDIÇÕES FINANCEIRAS
@@ -118,7 +128,8 @@ export class CCBGenerationService {
         valorTac: proposalData.valor_tac || (proposalData.condicoes_data?.valorTac) || 0,
         valorIof: proposalData.valor_iof || (proposalData.condicoes_data?.valorIof) || 0,
         valorTotalFinanciado: proposalData.valor_total_financiado || 0,
-        valorLiquidoLiberado: proposalData.valor_liquido_liberado || 0
+        valorLiquidoLiberado: proposalData.valor_liquido_liberado || 0,
+        cet: proposalData.condicoes_data?.cet || 0
       };
       
       // DADOS DE PAGAMENTO
@@ -303,13 +314,13 @@ export class CCBGenerationService {
       // ENDEREÇO COMPLETO (SEPARADO)
       if (USER_CCB_COORDINATES.enderecoCliente) {
         const enderecoCompleto = [
-          clienteData.logradouro,
-          clienteData.numero,
-          clienteData.complemento,
-          clienteData.bairro
-        ].filter(Boolean).join(", ") || clienteData.endereco || "";
+          dadosCliente.logradouro,
+          dadosCliente.numero,
+          dadosCliente.complemento,
+          dadosCliente.bairro
+        ].filter(Boolean).join(", ") || dadosCliente.endereco || "";
         
-        if (enderecoCompleto) {
+        if (enderecoCompleto && enderecoCompleto !== "NÃO INFORMADO") {
           firstPage.drawText(enderecoCompleto, {
             x: USER_CCB_COORDINATES.enderecoCliente.x,
             y: USER_CCB_COORDINATES.enderecoCliente.y,
@@ -320,8 +331,8 @@ export class CCBGenerationService {
         }
       }
 
-      if (USER_CCB_COORDINATES.cepCliente && clienteData.cep) {
-        firstPage.drawText(this.formatCEP(clienteData.cep), {
+      if (USER_CCB_COORDINATES.cepCliente && dadosCliente.cep && dadosCliente.cep !== "NÃO INFORMADO") {
+        firstPage.drawText(this.formatCEP(dadosCliente.cep), {
           x: USER_CCB_COORDINATES.cepCliente.x,
           y: USER_CCB_COORDINATES.cepCliente.y,
           size: USER_CCB_COORDINATES.cepCliente.fontSize,
@@ -330,8 +341,8 @@ export class CCBGenerationService {
         });
       }
 
-      if (USER_CCB_COORDINATES.cidadeCliente && clienteData.cidade) {
-        firstPage.drawText(clienteData.cidade, {
+      if (USER_CCB_COORDINATES.cidadeCliente && dadosCliente.cidade && dadosCliente.cidade !== "NÃO INFORMADO") {
+        firstPage.drawText(dadosCliente.cidade, {
           x: USER_CCB_COORDINATES.cidadeCliente.x,
           y: USER_CCB_COORDINATES.cidadeCliente.y,
           size: USER_CCB_COORDINATES.cidadeCliente.fontSize,
@@ -340,8 +351,8 @@ export class CCBGenerationService {
         });
       }
 
-      if (USER_CCB_COORDINATES.ufCliente && clienteData.estado) {
-        firstPage.drawText(clienteData.estado, {
+      if (USER_CCB_COORDINATES.ufCliente && dadosCliente.estado && dadosCliente.estado !== "NÃO INFORMADO") {
+        firstPage.drawText(dadosCliente.estado, {
           x: USER_CCB_COORDINATES.ufCliente.x,
           y: USER_CCB_COORDINATES.ufCliente.y,
           size: USER_CCB_COORDINATES.ufCliente.fontSize,
@@ -482,7 +493,7 @@ export class CCBGenerationService {
 
       // TAXAS E ENCARGOS
       if (USER_CCB_COORDINATES.taxaJurosEfetivaMensal) {
-        const taxaMensal = condicoesData.taxa_juros || 0;
+        const taxaMensal = condicoesFinanceiras.taxaJuros || 0;
         firstPage.drawText(`${taxaMensal}% a.m.`, {
           x: USER_CCB_COORDINATES.taxaJurosEfetivaMensal.x,
           y: USER_CCB_COORDINATES.taxaJurosEfetivaMensal.y,
@@ -493,7 +504,7 @@ export class CCBGenerationService {
       }
 
       if (USER_CCB_COORDINATES.taxaJurosEfetivaAnual) {
-        const taxaAnual = ((1 + (condicoesData.taxa_juros || 0) / 100) ** 12 - 1) * 100;
+        const taxaAnual = ((1 + (condicoesFinanceiras.taxaJuros || 0) / 100) ** 12 - 1) * 100;
         firstPage.drawText(`${taxaAnual.toFixed(2)}% a.a.`, {
           x: USER_CCB_COORDINATES.taxaJurosEfetivaAnual.x,
           y: USER_CCB_COORDINATES.taxaJurosEfetivaAnual.y,
@@ -504,7 +515,7 @@ export class CCBGenerationService {
       }
 
       if (USER_CCB_COORDINATES.iof) {
-        const iof = condicoesData.valorIof || 0;
+        const iof = condicoesFinanceiras.valorIof || 0;
         firstPage.drawText(this.formatCurrency(iof), {
           x: USER_CCB_COORDINATES.iof.x,
           y: USER_CCB_COORDINATES.iof.y,
@@ -515,7 +526,7 @@ export class CCBGenerationService {
       }
 
       if (USER_CCB_COORDINATES.pracaPagamento) {
-        const praca = proposalData.cidade_emissao || clienteData.cidade || "São Paulo";
+        const praca = proposalData.cidade_emissao || dadosCliente.cidade || "São Paulo";
         firstPage.drawText(praca, {
           x: USER_CCB_COORDINATES.pracaPagamento.x,
           y: USER_CCB_COORDINATES.pracaPagamento.y,
@@ -536,7 +547,7 @@ export class CCBGenerationService {
       }
 
       if (USER_CCB_COORDINATES.tac) {
-        const tac = condicoesData.valorTac || 0;
+        const tac = condicoesFinanceiras.valorTac || 0;
         firstPage.drawText(this.formatCurrency(tac), {
           x: USER_CCB_COORDINATES.tac.x,
           y: USER_CCB_COORDINATES.tac.y,
@@ -557,7 +568,7 @@ export class CCBGenerationService {
       }
 
       if (USER_CCB_COORDINATES.custoEfetivoTotal) {
-        const cet = condicoesData.cet || 0;
+        const cet = condicoesFinanceiras.cet || 0;
         firstPage.drawText(`${cet}%`, {
           x: USER_CCB_COORDINATES.custoEfetivoTotal.x,
           y: USER_CCB_COORDINATES.custoEfetivoTotal.y,
@@ -579,9 +590,9 @@ export class CCBGenerationService {
       }
 
       if (USER_CCB_COORDINATES.valorLiquidoLiberado) {
-        const valor = condicoesData.valor || 0;
-        const iof = condicoesData.valorIof || 0;
-        const tac = condicoesData.valorTac || 0;
+        const valor = condicoesFinanceiras.valor || 0;
+        const iof = condicoesFinanceiras.valorIof || 0;
+        const tac = condicoesFinanceiras.valorTac || 0;
         const liquido = valor - iof - tac;
         firstPage.drawText(this.formatCurrency(liquido), {
           x: USER_CCB_COORDINATES.valorLiquidoLiberado.x,
@@ -593,9 +604,9 @@ export class CCBGenerationService {
       }
 
       if (USER_CCB_COORDINATES.valorLiquidoEmissor) {
-        const valor = condicoesData.valor || 0;
-        const iof = condicoesData.valorIof || 0;
-        const tac = condicoesData.valorTac || 0;
+        const valor = condicoesFinanceiras.valor || 0;
+        const iof = condicoesFinanceiras.valorIof || 0;
+        const tac = condicoesFinanceiras.valorTac || 0;
         const liquido = valor - iof - tac - 10; // menos TED
         firstPage.drawText(this.formatCurrency(liquido), {
           x: USER_CCB_COORDINATES.valorLiquidoEmissor.x,
@@ -611,8 +622,8 @@ export class CCBGenerationService {
       // ========================================
       if (secondPage) {
         // DADOS BANCÁRIOS PESSOA FÍSICA
-        if (USER_CCB_COORDINATES.bancoEmitente && dataPagamento.codigo_banco) {
-          secondPage.drawText(dataPagamento.codigo_banco, {
+        if (USER_CCB_COORDINATES.bancoEmitente && dadosPagamento.banco) {
+          secondPage.drawText(dadosPagamento.banco, {
             x: USER_CCB_COORDINATES.bancoEmitente.x,
             y: USER_CCB_COORDINATES.bancoEmitente.y,
             size: USER_CCB_COORDINATES.bancoEmitente.fontSize,
@@ -621,8 +632,8 @@ export class CCBGenerationService {
           });
         }
 
-        if (USER_CCB_COORDINATES.agenciaEmitente && dataPagamento.agencia) {
-          secondPage.drawText(dataPagamento.agencia, {
+        if (USER_CCB_COORDINATES.agenciaEmitente && dadosPagamento.agencia) {
+          secondPage.drawText(dadosPagamento.agencia, {
             x: USER_CCB_COORDINATES.agenciaEmitente.x,
             y: USER_CCB_COORDINATES.agenciaEmitente.y,
             size: USER_CCB_COORDINATES.agenciaEmitente.fontSize,
@@ -631,8 +642,8 @@ export class CCBGenerationService {
           });
         }
 
-        if (USER_CCB_COORDINATES.contaEmitente && dataPagamento.conta) {
-          secondPage.drawText(dataPagamento.conta, {
+        if (USER_CCB_COORDINATES.contaEmitente && dadosPagamento.conta) {
+          secondPage.drawText(dadosPagamento.conta, {
             x: USER_CCB_COORDINATES.contaEmitente.x,
             y: USER_CCB_COORDINATES.contaEmitente.y,
             size: USER_CCB_COORDINATES.contaEmitente.fontSize,
@@ -641,8 +652,8 @@ export class CCBGenerationService {
           });
         }
 
-        if (USER_CCB_COORDINATES.tipoContaEmitente && dataPagamento.tipo_conta) {
-          secondPage.drawText(dataPagamento.tipo_conta, {
+        if (USER_CCB_COORDINATES.tipoContaEmitente && dadosPagamento.tipoConta) {
+          secondPage.drawText(dadosPagamento.tipoConta, {
             x: USER_CCB_COORDINATES.tipoContaEmitente.x,
             y: USER_CCB_COORDINATES.tipoContaEmitente.y,
             size: USER_CCB_COORDINATES.tipoContaEmitente.fontSize,
@@ -652,9 +663,9 @@ export class CCBGenerationService {
         }
 
         // DADOS BANCÁRIOS PESSOA JURÍDICA (se aplicável)
-        if (clienteData.tipo === "PJ") {
-          if (USER_CCB_COORDINATES.razaoSocialEmitenteEmpresa && clienteData.razaoSocial) {
-            secondPage.drawText(clienteData.razaoSocial, {
+        if (dadosCliente.tipo === "PJ") {
+          if (USER_CCB_COORDINATES.razaoSocialEmitenteEmpresa && dadosCliente.razaoSocial && dadosCliente.razaoSocial !== "NÃO INFORMADO") {
+            secondPage.drawText(dadosCliente.razaoSocial, {
               x: USER_CCB_COORDINATES.razaoSocialEmitenteEmpresa.x,
               y: USER_CCB_COORDINATES.razaoSocialEmitenteEmpresa.y,
               size: USER_CCB_COORDINATES.razaoSocialEmitenteEmpresa.fontSize,
@@ -663,8 +674,8 @@ export class CCBGenerationService {
             });
           }
 
-          if (USER_CCB_COORDINATES.cnpjEmitenteEmpresa && clienteData.cnpj) {
-            secondPage.drawText(clienteData.cnpj, {
+          if (USER_CCB_COORDINATES.cnpjEmitenteEmpresa && dadosCliente.cnpj && dadosCliente.cnpj !== "NÃO INFORMADO") {
+            secondPage.drawText(dadosCliente.cnpj, {
               x: USER_CCB_COORDINATES.cnpjEmitenteEmpresa.x,
               y: USER_CCB_COORDINATES.cnpjEmitenteEmpresa.y,
               size: USER_CCB_COORDINATES.cnpjEmitenteEmpresa.fontSize,
@@ -675,8 +686,8 @@ export class CCBGenerationService {
         }
 
         // CHAVE PIX
-        if (USER_CCB_COORDINATES.chavePix && dataPagamento.chave_pix) {
-          secondPage.drawText(dataPagamento.chave_pix, {
+        if (USER_CCB_COORDINATES.chavePix && dadosPagamento.chavePix) {
+          secondPage.drawText(dadosPagamento.chavePix, {
             x: USER_CCB_COORDINATES.chavePix.x,
             y: USER_CCB_COORDINATES.chavePix.y,
             size: USER_CCB_COORDINATES.chavePix.fontSize,
