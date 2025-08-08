@@ -114,7 +114,7 @@ export class CCBGenerationService {
       // ========================================
       // USANDO COORDENADAS MANUAIS DO USUÁRIO
       // ========================================
-      
+
       // IDENTIFICAÇÃO DA CCB (Topo da página)
       const numeroCedulaCoord = USER_CCB_COORDINATES.numeroCedula;
       if (numeroCedulaCoord) {
@@ -126,7 +126,9 @@ export class CCBGenerationService {
           font: helveticaFont,
           color: rgb(0, 0, 0),
         });
-        console.log(`📄 [CCB] Número CCB: "${numeroCCB}" em x:${numeroCedulaCoord.x}, y:${numeroCedulaCoord.y}`);
+        console.log(
+          `📄 [CCB] Número CCB: "${numeroCCB}" em x:${numeroCedulaCoord.x}, y:${numeroCedulaCoord.y}`
+        );
       }
 
       // DATA DE EMISSÃO
@@ -140,7 +142,9 @@ export class CCBGenerationService {
           font: helveticaFont,
           color: rgb(0, 0, 0),
         });
-        console.log(`📄 [CCB] Data Emissão: "${dataAtual}" em x:${dataEmissaoCoord.x}, y:${dataEmissaoCoord.y}`);
+        console.log(
+          `📄 [CCB] Data Emissão: "${dataAtual}" em x:${dataEmissaoCoord.x}, y:${dataEmissaoCoord.y}`
+        );
       }
 
       // FINALIDADE DA OPERAÇÃO
@@ -153,7 +157,9 @@ export class CCBGenerationService {
           font: helveticaFont,
           color: rgb(0, 0, 0),
         });
-        console.log(`📄 [CCB] Finalidade: "Empréstimo pessoal" em x:${finalidadeCoord.x}, y:${finalidadeCoord.y}`);
+        console.log(
+          `📄 [CCB] Finalidade: "Empréstimo pessoal" em x:${finalidadeCoord.x}, y:${finalidadeCoord.y}`
+        );
       }
 
       // NOME DO CLIENTE (Sua coordenada: X:55, Y:645)
@@ -166,7 +172,9 @@ export class CCBGenerationService {
           font: helveticaFont,
           color: rgb(0, 0, 0),
         });
-        console.log(`📄 [CCB] Nome: "${proposalData.cliente_nome}" em x:${nomeCoord.x}, y:${nomeCoord.y}`);
+        console.log(
+          `📄 [CCB] Nome: "${proposalData.cliente_nome}" em x:${nomeCoord.x}, y:${nomeCoord.y}`
+        );
       }
 
       // CPF DO CLIENTE (Sua coordenada: X:405, Y:645)
@@ -179,7 +187,9 @@ export class CCBGenerationService {
           font: helveticaFont,
           color: rgb(0, 0, 0),
         });
-        console.log(`📄 [CCB] CPF: "${this.formatCPF(proposalData.cliente_cpf)}" em x:${cpfCoord.x}, y:${cpfCoord.y}`);
+        console.log(
+          `📄 [CCB] CPF: "${this.formatCPF(proposalData.cliente_cpf)}" em x:${cpfCoord.x}, y:${cpfCoord.y}`
+        );
       }
 
       // ENDEREÇO DO CLIENTE (Sua coordenada: X:100, Y:670)
@@ -192,7 +202,9 @@ export class CCBGenerationService {
           font: helveticaFont,
           color: rgb(0, 0, 0),
         });
-        console.log(`📄 [CCB] Endereço: "${proposalData.cliente_endereco}" em x:${enderecoCoord.x}, y:${enderecoCoord.y}`);
+        console.log(
+          `📄 [CCB] Endereço: "${proposalData.cliente_endereco}" em x:${enderecoCoord.x}, y:${enderecoCoord.y}`
+        );
       }
 
       // CEP DO CLIENTE (Sua coordenada: X:270, Y:670)
@@ -205,7 +217,9 @@ export class CCBGenerationService {
           font: helveticaFont,
           color: rgb(0, 0, 0),
         });
-        console.log(`📄 [CCB] CEP: "${this.formatCEP(proposalData.cliente_cep)}" em x:${cepCoord.x}, y:${cepCoord.y}`);
+        console.log(
+          `📄 [CCB] CEP: "${this.formatCEP(proposalData.cliente_cep)}" em x:${cepCoord.x}, y:${cepCoord.y}`
+        );
       }
 
       // CIDADE DO CLIENTE (Sua coordenada: X:380, Y:670)
@@ -218,7 +232,9 @@ export class CCBGenerationService {
           font: helveticaFont,
           color: rgb(0, 0, 0),
         });
-        console.log(`📄 [CCB] Cidade: "${proposalData.cliente_cidade}" em x:${cidadeCoord.x}, y:${cidadeCoord.y}`);
+        console.log(
+          `📄 [CCB] Cidade: "${proposalData.cliente_cidade}" em x:${cidadeCoord.x}, y:${cidadeCoord.y}`
+        );
       }
 
       // UF DO CLIENTE (Sua coordenada: X:533, Y:670)
@@ -231,7 +247,9 @@ export class CCBGenerationService {
           font: helveticaFont,
           color: rgb(0, 0, 0),
         });
-        console.log(`📄 [CCB] UF: "${proposalData.cliente_estado}" em x:${ufCoord.x}, y:${ufCoord.y}`);
+        console.log(
+          `📄 [CCB] UF: "${proposalData.cliente_estado}" em x:${ufCoord.x}, y:${ufCoord.y}`
+        );
       }
 
       // DADOS DO CREDOR
@@ -244,7 +262,9 @@ export class CCBGenerationService {
           font: helveticaFont,
           color: rgb(0, 0, 0),
         });
-        console.log(`📄 [CCB] Razão Social Credor: "SIMPIX LTDA" em x:${razaoCredorCoord.x}, y:${razaoCredorCoord.y}`);
+        console.log(
+          `📄 [CCB] Razão Social Credor: "SIMPIX LTDA" em x:${razaoCredorCoord.x}, y:${razaoCredorCoord.y}`
+        );
       }
 
       const cnpjCredorCoord = USER_CCB_COORDINATES.cnpjCredor;
@@ -256,7 +276,9 @@ export class CCBGenerationService {
           font: helveticaFont,
           color: rgb(0, 0, 0),
         });
-        console.log(`📄 [CCB] CNPJ Credor: "12.345.678/0001-90" em x:${cnpjCredorCoord.x}, y:${cnpjCredorCoord.y}`);
+        console.log(
+          `📄 [CCB] CNPJ Credor: "12.345.678/0001-90" em x:${cnpjCredorCoord.x}, y:${cnpjCredorCoord.y}`
+        );
       }
 
       // VALOR PRINCIPAL (Sua coordenada: X:50, Y:350)
@@ -269,7 +291,9 @@ export class CCBGenerationService {
           font: helveticaFont,
           color: rgb(0, 0, 0),
         });
-        console.log(`📄 [CCB] Valor Principal: "${this.formatCurrency(proposalData.valor_emprestimo)}" em x:${valorCoord.x}, y:${valorCoord.y}`);
+        console.log(
+          `📄 [CCB] Valor Principal: "${this.formatCurrency(proposalData.valor_emprestimo)}" em x:${valorCoord.x}, y:${valorCoord.y}`
+        );
       }
 
       // PRAZO DE AMORTIZAÇÃO (Sua coordenada: X:50, Y:300)
@@ -282,7 +306,9 @@ export class CCBGenerationService {
           font: helveticaFont,
           color: rgb(0, 0, 0),
         });
-        console.log(`📄 [CCB] Prazo: "${proposalData.prazo_meses} meses" em x:${prazoCoord.x}, y:${prazoCoord.y}`);
+        console.log(
+          `📄 [CCB] Prazo: "${proposalData.prazo_meses} meses" em x:${prazoCoord.x}, y:${prazoCoord.y}`
+        );
       }
 
       // TAXA DE JUROS MENSAL (Sua coordenada: X:95, Y:245)
@@ -295,7 +321,9 @@ export class CCBGenerationService {
           font: helveticaFont,
           color: rgb(0, 0, 0),
         });
-        console.log(`📄 [CCB] Taxa Mensal: "${proposalData.taxa_juros}%" em x:${taxaCoord.x}, y:${taxaCoord.y}`);
+        console.log(
+          `📄 [CCB] Taxa Mensal: "${proposalData.taxa_juros}%" em x:${taxaCoord.x}, y:${taxaCoord.y}`
+        );
       }
 
       console.log(`📄 [CCB] ✅ COORDENADAS MANUAIS DO USUÁRIO APLICADAS COM SUCESSO!`);

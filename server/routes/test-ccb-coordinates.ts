@@ -54,7 +54,7 @@ router.get("/validate", async (req, res) => {
 router.post("/generate-test", async (req, res) => {
   try {
     const { proposalId } = req.body;
-    
+
     if (!proposalId) {
       return res.status(400).json({ error: "proposalId é obrigatório" });
     }
@@ -63,10 +63,10 @@ router.post("/generate-test", async (req, res) => {
     console.log("🧪 [TEST] Proposta:", proposalId);
     console.log("🧪 [TEST] Sistema usando:", "USER_CCB_COORDINATES");
     console.log("🧪 [TEST] Total de campos mapeados:", Object.keys(USER_CCB_COORDINATES).length);
-    
+
     const ccbService = new CCBGenerationService();
     const result = await ccbService.generateCCB(proposalId);
-    
+
     if (result.success) {
       res.json({
         success: true,
