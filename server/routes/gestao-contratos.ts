@@ -10,6 +10,7 @@ import { Router, Request, Response } from 'express';
 import { jwtAuthMiddleware, type AuthenticatedRequest } from '../lib/jwt-auth-middleware';
 import { requireRoles } from '../lib/role-guards';
 import { storage } from '../storage';
+import { db } from '../lib/supabase';
 import { propostas, parceiros, lojas, produtos, propostaLogs } from '@shared/schema';
 import { gte, lte } from 'drizzle-orm';
 import { eq, and, isNotNull, isNull, desc } from 'drizzle-orm';
@@ -39,7 +40,7 @@ router.get('/contratos',
     try {
       // Log de auditoria - acesso a contratos
       securityLogger.logEvent({
-        type: SecurityEventType.ACCESS_ATTEMPT,
+        type: SecurityEventType.SENSITIVE_DATA_ACCESS,
         severity: 'LOW',
         userId: req.user?.id,
         userEmail: req.user?.email,
@@ -69,7 +70,7 @@ router.get('/contratos',
       });
 
       // Construir query base - apenas propostas com CCB assinado
-      let query = storage.db
+      let query = db
         .select({
           // Dados da proposta
           id: propostas.id,
@@ -307,7 +308,7 @@ router.get('/contratos/:id',
       console.log('[CONTRATOS] Buscando detalhes do contrato:', id);
 
       // Buscar contrato com todos os relacionamentos
-      const contrato = await storage.db
+      const contrato = await db
         .select()
         .from(propostas)
         .leftJoin(lojas, eq(propostas.lojaId, lojas.id))
@@ -331,7 +332,7 @@ router.get('/contratos/:id',
       }
 
       // Buscar histórico de logs da proposta
-      const historico = await storage.db
+      const historico = await db
         .select()
         .from(propostaLogs)
         .where(eq(propostaLogs.propostaId, id))
@@ -343,7 +344,7 @@ router.get('/contratos/:id',
       
       let urlCcbAssinado = null;
       let urlCcbOriginal = null;
-      let documentosAdicionais = [];
+      let documentosAdicionais: Array<{path: string, url: string | null, nome: string}> = [];
 
       if (contratoData.caminhoCcbAssinado) {
         const { data: ccbUrl } = supabaseAdmin
@@ -372,8 +373,8 @@ router.get('/contratos/:id',
             
             return {
               path: docPath,
-              url: docUrl?.publicUrl,
-              nome: docPath.split('/').pop()
+              url: docUrl?.publicUrl || null,
+              nome: docPath.split('/').pop() || 'documento'
             };
           })
         );
