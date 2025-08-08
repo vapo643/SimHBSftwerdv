@@ -1,0 +1,32 @@
+**IMPLEMENTAR:** Auditoria e correção completa do preenchimento de dados na Cédula de Crédito Bancário (CCB), garantindo que TODOS os campos mapeados da proposta sejam corretamente preenchidos no PDF final.
+
+**CONTEXT:** A re-arquitetura para usar a biblioteca `pdf-lib` foi bem-sucedida em usar o template, mas a implementação do preenchimento de dados está severamente incompleta. A maioria dos campos está em branco no PDF final, e o endereço do cliente está a ser renderizado de forma incorreta.
+
+**CURRENT STATE:** O serviço `pdfGeneratorService.ts` gera uma CCB a partir do template, mas apenas 8 dos 95 campos estão a ser preenchidos. Campos críticos como detalhes financeiros, endereço completo, dados bancários e, mais importante, as parcelas, estão ausentes.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um PDF de CCB 100% preenchido. Todos os campos definidos no mapeamento de coordenadas devem conter os dados corretos, puxados da proposta. O endereço do cliente deve estar formatado corretamente, com cada parte (rua, cidade, CEP) em seu devido lugar.
+
+**FONTE DA VERDADE PARA COORDENADAS:**
+A sua única fonte da verdade para as coordenadas X e Y de cada campo é o documento `MAPEAMENTO_COMPLETO_CCB_COORDENADAS.md`. Você deve seguir este mapeamento com precisão cirúrgica.
+
+**CONSTRAINTS (Roadmap de Correção Detalhado):**
+
+**1. Auditoria do Fluxo de Dados:**
+    - **Ação:** Sua primeira tarefa é auditar a função que chama o `pdfGeneratorService.ts`. Adicione um `console.log` para imprimir o objeto `propostaData` completo que está a ser passado para a função de geração.
+    - **Validação:** Confirme que este objeto contém TODAS as informações necessárias, incluindo os objetos JSON aninhados (`cliente_data`, `condicoes_data`, `dados_pagamento`) e, crucialmente, o array `parcelas`. Se os dados não estiverem a chegar completos, corrija a busca de dados primeiro.
+
+**2. Implementação do Preenchimento dos Campos Faltantes:**
+    - **Ação:** Modifique a função `generateCcbFromTemplate` em `pdfGeneratorService.ts`. Usando as coordenadas da sua "fonte da verdade", adicione as chamadas `page.drawText()` para **TODOS OS CAMPOS FALTANTES**.
+    - **Foco Crítico:**
+        - **Dados do Cliente (Página 1):** Implemente o preenchimento para RG, Endereço completo, CEP, Cidade, etc.
+        - **Condições Financeiras (Página 1):** Taxa de Juros (Mensal/Anual), IOF, TAC, CET.
+        - **Dados Bancários (Página 2):** Banco, Agência, Conta, Chave PIX.
+        - **TODAS as 24 Parcelas (Páginas 2 e 3):** Você **DEVE** implementar um loop (`for` ou `forEach`) que itere sobre o array `parcelas` contido nos dados da proposta. Para cada item da parcela no array, você deve usar `page.drawText()` três vezes (para Número, Vencimento e Valor), usando as coordenadas X correspondentes e a coordenada Y específica daquela parcela.
+
+**3. Correção da Formatação do Endereço:**
+    - **Ação:** Ao preencher o endereço do cliente, **NÃO CONCATENE TUDO EM UMA ÚNICA STRING**.
+    - **Implementação:** Você deve puxar os campos separados do objeto `cliente_data` (rua, numero, complemento, bairro, cidade, cep) e usar chamadas `page.drawText()` distintas para cada um, posicionando-os nas suas respectivas coordenadas no PDF.
+
+**TESTE:**
+- O critério de sucesso é um só: gerar um PDF de uma proposta completa e validar visualmente que **TODOS** os campos do mapeamento estão preenchidos com os dados corretos e nos locais exatos. O endereço deve estar perfeitamente formatado em suas partes distintas.
