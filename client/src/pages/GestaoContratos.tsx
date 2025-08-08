@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
+import DashboardLayout from "@/components/DashboardLayout";
 import {
   Table,
   TableBody,
@@ -113,69 +114,75 @@ export default function GestaoContratos() {
   // Redirecionar se não tem permissão
   if (!hasPermission) {
     return (
-      <div className="container mx-auto py-8">
-        <Card className="mx-auto max-w-md">
-          <CardHeader>
-            <CardTitle className="text-red-600">Acesso Negado</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>
-                Você não tem permissão para acessar esta página. Apenas usuários com perfil
-                ADMINISTRADOR ou DIRETOR podem visualizar contratos.
-              </AlertDescription>
-            </Alert>
-            <div className="mt-4">
-              <Button onClick={() => (window.location.href = "/dashboard")}>
-                Voltar ao Dashboard
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <DashboardLayout title="Acesso Negado">
+        <div className="container mx-auto py-8">
+          <Card className="mx-auto max-w-md">
+            <CardHeader>
+              <CardTitle className="text-red-600">Acesso Negado</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  Você não tem permissão para acessar esta página. Apenas usuários com perfil
+                  ADMINISTRADOR ou DIRETOR podem visualizar contratos.
+                </AlertDescription>
+              </Alert>
+              <div className="mt-4">
+                <Button onClick={() => (window.location.href = "/dashboard")}>
+                  Voltar ao Dashboard
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </DashboardLayout>
     );
   }
 
   // Estado de carregamento
   if (isLoading) {
     return (
-      <div className="container mx-auto py-8">
-        <Card>
-          <CardHeader>
-            <Skeleton className="h-8 w-64" />
-            <Skeleton className="mt-2 h-4 w-96" />
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {[...Array(5)].map((_, i) => (
-                <Skeleton key={i} className="h-12 w-full" />
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <DashboardLayout title="Gestão de Contratos">
+        <div className="container mx-auto py-8">
+          <Card>
+            <CardHeader>
+              <Skeleton className="h-8 w-64" />
+              <Skeleton className="mt-2 h-4 w-96" />
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {[...Array(5)].map((_, i) => (
+                  <Skeleton key={i} className="h-12 w-full" />
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </DashboardLayout>
     );
   }
 
   // Estado de erro
   if (error) {
     return (
-      <div className="container mx-auto py-8">
-        <Card>
-          <CardHeader>
-            <CardTitle>Erro ao carregar contratos</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>
-                Ocorreu um erro ao carregar os contratos. Por favor, tente novamente.
-              </AlertDescription>
-            </Alert>
-          </CardContent>
-        </Card>
-      </div>
+      <DashboardLayout title="Gestão de Contratos">
+        <div className="container mx-auto py-8">
+          <Card>
+            <CardHeader>
+              <CardTitle>Erro ao carregar contratos</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  Ocorreu um erro ao carregar os contratos. Por favor, tente novamente.
+                </AlertDescription>
+              </Alert>
+            </CardContent>
+          </Card>
+        </div>
+      </DashboardLayout>
     );
   }
 
@@ -191,29 +198,32 @@ export default function GestaoContratos() {
   // Estado vazio
   if (contratos.length === 0) {
     return (
-      <div className="container mx-auto py-8">
-        <Card>
-          <CardHeader>
-            <CardTitle>Gestão de Contratos</CardTitle>
-            <CardDescription>Visualize e gerencie todos os contratos assinados</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="py-12 text-center">
-              <FileText className="mx-auto h-12 w-12 text-gray-400" />
-              <h3 className="mt-2 text-lg font-semibold">Nenhum contrato assinado encontrado</h3>
-              <p className="mt-1 text-sm text-gray-500">
-                Quando houver contratos assinados, eles aparecerão aqui.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <DashboardLayout title="Gestão de Contratos">
+        <div className="container mx-auto py-8">
+          <Card>
+            <CardHeader>
+              <CardTitle>Gestão de Contratos</CardTitle>
+              <CardDescription>Visualize e gerencie todos os contratos assinados</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="py-12 text-center">
+                <FileText className="mx-auto h-12 w-12 text-gray-400" />
+                <h3 className="mt-2 text-lg font-semibold">Nenhum contrato assinado encontrado</h3>
+                <p className="mt-1 text-sm text-gray-500">
+                  Quando houver contratos assinados, eles aparecerão aqui.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </DashboardLayout>
     );
   }
 
   return (
-    <div className="container mx-auto py-8">
-      <Card>
+    <DashboardLayout title="Gestão de Contratos">
+      <div className="container mx-auto py-8">
+        <Card>
         <CardHeader>
           <CardTitle>Gestão de Contratos</CardTitle>
           <CardDescription>Visualize e gerencie todos os contratos assinados</CardDescription>
@@ -353,6 +363,7 @@ export default function GestaoContratos() {
         </CardContent>
       </Card>
     </div>
+    </DashboardLayout>
   );
 }
 

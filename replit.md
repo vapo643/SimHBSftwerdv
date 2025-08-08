@@ -10,6 +10,13 @@ Language: Portuguese, studying software architecture.
 Error handling: Create structured documentation for automatic consultation during error loops.
 
 ## Recent Changes (2025-08-08)
+- ✅ **ARCHITECTURAL FIX:** Layout bug definitively resolved with preventive solution:
+  - **Problem Solved:** Tela de Gestão de Contratos now displays sidebar menu correctly
+  - **Root Cause Fixed:** Pages were rendering outside DashboardLayout, losing navigation
+  - **Template System:** Created `_template.tsx` as mandatory base for all new pages
+  - **Documentation:** Added `PADROES_DE_CODIGO.md` with mandatory development rules
+  - **Developer Rule:** Never create pages from scratch - always copy and rename template
+  - **Future Prevention:** This architectural pattern prevents layout regression in all new pages
 - ✅ **QUALITY GATE IMPLEMENTATION:** Professional-grade automated code quality control:
   - Installed Husky + lint-staged (industry standard)
   - Pre-commit hooks automatically run ESLint --fix and Prettier
