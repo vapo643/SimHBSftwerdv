@@ -1,0 +1,36 @@
+[DEBUG] Gerando URL assinada para: proposta-93b5919d-4223-40ee-a776-aaf184f16049/1754682301772-96d9d0ba-cece-41e8-9cdb-0fe1555ed2a7-00-3u929fjpxz1vm.spock.replit.dev_financeiro_pagamentos%20-%20Google%20Chrome%2018_07_2025%2014_50_45.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV80OTVlMjJjYS1lMDMxLTQ0Y2YtOTM3Zi03N2M3ZWNiMTk2YzkiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJkb2N1bWVudHMvcHJvcG9zdGEtOTNiNTkxOWQtNDIyMy00MGVlLWE3NzYtYWFmMTg0ZjE2MDQ5LzE3NTQ2ODIzMDE3NzItOTZkOWQwYmEtY2VjZS00MWU4LTljZGItMGZlMTU1NWVkMmE3LTAwLTN1OTI5ZmpweHoxdm0uc3BvY2sucmVwbGl0LmRldl9maW5hbmNlaXJvX3BhZ2FtZW50b3MgLSBHb29nbGUgQ2hyb21lIDE4XzA3XzIwMjUgMTRfNTBfNDUucG5nIiwiaWF0IjoxNzU0NjgyMzA0LCJleHAiOjE3NTQ2ODU5MDR9.P6FAUwcZchohJfGsvZbOtQkR49xBmMq7iYirGDkOHzk
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /93b5919d-4223-40ee-a776-aaf184f16049/regenerate-ccb
+[JWT DEBUG] Método: POST
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/formalizacao/acompanhamento/93b5919d-4223-40ee-a776-aaf184f16049
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: '60672873-b0f8-4753-a403-2741f7ddf5d2',
+  timestamp: '2025-08-08T20:24:57.991Z'
+}
+📄 [CCB] Iniciando geração CORRETA para proposta 93b5919d-4223-40ee-a776-aaf184f16049
+📄 [CCB] Template path: /home/runner/workspace/server/templates/template_ccb.pdf
+❌ [CCB] Erro ao buscar dados da proposta: PostgresError: column p.dados_pagamento does not exist
+    at ErrorResponse (file:///home/runner/workspace/node_modules/postgres/src/connection.js:794:26)
+    at handle (file:///home/runner/workspace/node_modules/postgres/src/connection.js:480:6)
+    at TLSSocket.data (file:///home/runner/workspace/node_modules/postgres/src/connection.js:315:9)
+    at TLSSocket.emit (node:events:524:28)
+    at addChunk (node:internal/streams/readable:561:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+    at Readable.push (node:internal/streams/readable:392:5)
+    at TLSWrap.onStreamRead (node:internal/stream_base_commons:191:23) {
+  severity_local: 'ERROR',
+  severity: 'ERROR',
+  code: '42703',
+  hint: 'Perhaps you meant to reference the column "p.data_pagamento".',
+  position: '98',
+  file: 'parse_relation.c',
+  line: '3723',
+  routine: 'errorMissingColumn'
+}

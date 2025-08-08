@@ -92,7 +92,7 @@ export class CCBGenerationService {
       // Extrair dados detalhados
       const clienteData = proposalData.cliente_data || {};
       const condicoesData = proposalData.condicoes_data || {};
-      const dadosPagamento = proposalData.dados_pagamento || {};
+      const dataPagamento = proposalData.data_pagamento || {};
       const parcelas = proposalData.parcelas || [];
 
       // ========================================
@@ -538,8 +538,8 @@ export class CCBGenerationService {
       // ========================================
       if (secondPage) {
         // DADOS BANCÁRIOS PESSOA FÍSICA
-        if (USER_CCB_COORDINATES.bancoEmitente && dadosPagamento.codigo_banco) {
-          secondPage.drawText(dadosPagamento.codigo_banco, {
+        if (USER_CCB_COORDINATES.bancoEmitente && dataPagamento.codigo_banco) {
+          secondPage.drawText(dataPagamento.codigo_banco, {
             x: USER_CCB_COORDINATES.bancoEmitente.x,
             y: USER_CCB_COORDINATES.bancoEmitente.y,
             size: USER_CCB_COORDINATES.bancoEmitente.fontSize,
@@ -548,8 +548,8 @@ export class CCBGenerationService {
           });
         }
 
-        if (USER_CCB_COORDINATES.agenciaEmitente && dadosPagamento.agencia) {
-          secondPage.drawText(dadosPagamento.agencia, {
+        if (USER_CCB_COORDINATES.agenciaEmitente && dataPagamento.agencia) {
+          secondPage.drawText(dataPagamento.agencia, {
             x: USER_CCB_COORDINATES.agenciaEmitente.x,
             y: USER_CCB_COORDINATES.agenciaEmitente.y,
             size: USER_CCB_COORDINATES.agenciaEmitente.fontSize,
@@ -558,8 +558,8 @@ export class CCBGenerationService {
           });
         }
 
-        if (USER_CCB_COORDINATES.contaEmitente && dadosPagamento.conta) {
-          secondPage.drawText(dadosPagamento.conta, {
+        if (USER_CCB_COORDINATES.contaEmitente && dataPagamento.conta) {
+          secondPage.drawText(dataPagamento.conta, {
             x: USER_CCB_COORDINATES.contaEmitente.x,
             y: USER_CCB_COORDINATES.contaEmitente.y,
             size: USER_CCB_COORDINATES.contaEmitente.fontSize,
@@ -568,8 +568,8 @@ export class CCBGenerationService {
           });
         }
 
-        if (USER_CCB_COORDINATES.tipoContaEmitente && dadosPagamento.tipo_conta) {
-          secondPage.drawText(dadosPagamento.tipo_conta, {
+        if (USER_CCB_COORDINATES.tipoContaEmitente && dataPagamento.tipo_conta) {
+          secondPage.drawText(dataPagamento.tipo_conta, {
             x: USER_CCB_COORDINATES.tipoContaEmitente.x,
             y: USER_CCB_COORDINATES.tipoContaEmitente.y,
             size: USER_CCB_COORDINATES.tipoContaEmitente.fontSize,
@@ -602,8 +602,8 @@ export class CCBGenerationService {
         }
 
         // CHAVE PIX
-        if (USER_CCB_COORDINATES.chavePix && dadosPagamento.chave_pix) {
-          secondPage.drawText(dadosPagamento.chave_pix, {
+        if (USER_CCB_COORDINATES.chavePix && dataPagamento.chave_pix) {
+          secondPage.drawText(dataPagamento.chave_pix, {
             x: USER_CCB_COORDINATES.chavePix.x,
             y: USER_CCB_COORDINATES.chavePix.y,
             size: USER_CCB_COORDINATES.chavePix.fontSize,
@@ -729,7 +729,7 @@ export class CCBGenerationService {
           p.id,
           p.cliente_data,
           p.condicoes_data,
-          p.dados_pagamento,
+          p.data_pagamento,
           p.parcelas,
           p.valor_aprovado,
           p.created_at,
@@ -760,7 +760,7 @@ export class CCBGenerationService {
       console.log("📊 [CCB] ID da Proposta:", proposta.id);
       console.log("📊 [CCB] Cliente Data presente:", !!proposta.cliente_data);
       console.log("📊 [CCB] Condicoes Data presente:", !!proposta.condicoes_data);
-      console.log("📊 [CCB] Dados Pagamento presente:", !!proposta.dados_pagamento);
+      console.log("📊 [CCB] Data Pagamento presente:", !!proposta.data_pagamento);
       console.log("📊 [CCB] Parcelas presente:", !!proposta.parcelas);
       console.log("📊 [CCB] Parcelas quantidade:", proposta.parcelas?.length || 0);
       
@@ -771,8 +771,8 @@ export class CCBGenerationService {
       if (proposta.condicoes_data) {
         console.log("📊 [CCB] Condicoes Data campos:", Object.keys(proposta.condicoes_data));
       }
-      if (proposta.dados_pagamento) {
-        console.log("📊 [CCB] Dados Pagamento campos:", Object.keys(proposta.dados_pagamento));
+      if (proposta.data_pagamento) {
+        console.log("📊 [CCB] Data Pagamento campos:", Object.keys(proposta.data_pagamento));
       }
       
       console.log("📊 [CCB] ========== FIM DA AUDITORIA ==========");
