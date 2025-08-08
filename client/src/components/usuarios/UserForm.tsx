@@ -24,7 +24,15 @@ const userSchema = z
     email: z.string().email("Formato de e-mail inválido."),
     senha: z.string().min(8, "Senha deve ter pelo menos 8 caracteres."),
     confirmarSenha: z.string().min(1, "Confirmação de senha é obrigatória."),
-    perfil: z.enum(["ADMINISTRADOR", "DIRETOR", "GERENTE", "ATENDENTE", "ANALISTA", "FINANCEIRO", "COBRANÇA"]),
+    perfil: z.enum([
+      "ADMINISTRADOR",
+      "DIRETOR",
+      "GERENTE",
+      "ATENDENTE",
+      "ANALISTA",
+      "FINANCEIRO",
+      "COBRANÇA",
+    ]),
     parceiroId: z.string().optional(),
     lojaId: z.string().optional(), // For ATENDENTE
     lojaIds: z.array(z.string()).optional(), // For GERENTE (multiple stores)
@@ -44,13 +52,10 @@ const userSchema = z
       path: ["lojaId", "lojaIds"],
     }
   )
-  .refine(
-    data => data.senha === data.confirmarSenha,
-    {
-      message: "As senhas não coincidem.",
-      path: ["confirmarSenha"],
-    }
-  );
+  .refine(data => data.senha === data.confirmarSenha, {
+    message: "As senhas não coincidem.",
+    path: ["confirmarSenha"],
+  });
 
 type UserFormData = z.infer<typeof userSchema>;
 
@@ -61,7 +66,12 @@ interface UserFormProps {
   isLoading?: boolean;
 }
 
-const UserForm: React.FC<UserFormProps> = ({ initialData, onSubmit, onCancel, isLoading = false }) => {
+const UserForm: React.FC<UserFormProps> = ({
+  initialData,
+  onSubmit,
+  onCancel,
+  isLoading = false,
+}) => {
   const {
     register,
     handleSubmit,
@@ -104,7 +114,7 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, onSubmit, onCancel, is
   // Get available stores based on filtering strategy
   const getAvailableStores = () => {
     if (!selectedParceiroId) return [];
-    
+
     if (canFilterClientSide) {
       // Client-side filtering: use pre-loaded data
       return getStoresByPartner(parseInt(selectedParceiroId));
@@ -162,12 +172,14 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, onSubmit, onCancel, is
   // Handle errors and loading states
   if (formDataError) {
     return (
-      <div className="p-4 border border-red-200 bg-red-50 rounded-lg">
+      <div className="rounded-lg border border-red-200 bg-red-50 p-4">
         <div className="flex items-center gap-2">
           <AlertTriangle className="h-5 w-5 text-red-600" />
           <div>
             <h4 className="font-medium text-red-800">Erro ao carregar dados</h4>
-            <p className="text-sm text-red-700">Não foi possível carregar os dados necessários para o formulário.</p>
+            <p className="text-sm text-red-700">
+              Não foi possível carregar os dados necessários para o formulário.
+            </p>
           </div>
         </div>
       </div>
@@ -199,7 +211,9 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, onSubmit, onCancel, is
           <div>
             <Label htmlFor="confirmarSenha">Confirmar Senha</Label>
             <Input id="confirmarSenha" type="password" {...register("confirmarSenha")} />
-            {errors.confirmarSenha && <p className="mt-1 text-sm text-red-500">{errors.confirmarSenha.message}</p>}
+            {errors.confirmarSenha && (
+              <p className="mt-1 text-sm text-red-500">{errors.confirmarSenha.message}</p>
+            )}
           </div>
         </div>
       )}
@@ -207,20 +221,30 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, onSubmit, onCancel, is
       <div>
         <Label>Perfil de Acesso</Label>
         <Controller
-            name="perfil"
-            control={control}
-            render={({ field }) => (
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <SelectTrigger><SelectValue placeholder="Selecione um perfil..." /></SelectTrigger>
-                    <SelectContent>
-                        {["ADMINISTRADOR", "DIRETOR", "GERENTE", "ATENDENTE", "ANALISTA", "FINANCEIRO", "COBRANÇA"].map((perfil) => (
-                          <SelectItem key={perfil} value={perfil}>
-                            {perfil}
-                          </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-            )}
+          name="perfil"
+          control={control}
+          render={({ field }) => (
+            <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione um perfil..." />
+              </SelectTrigger>
+              <SelectContent>
+                {[
+                  "ADMINISTRADOR",
+                  "DIRETOR",
+                  "GERENTE",
+                  "ATENDENTE",
+                  "ANALISTA",
+                  "FINANCEIRO",
+                  "COBRANÇA",
+                ].map(perfil => (
+                  <SelectItem key={perfil} value={perfil}>
+                    {perfil}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
         />
         {errors.perfil && <p className="mt-1 text-sm text-red-500">{errors.perfil.message}</p>}
       </div>
@@ -233,9 +257,17 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, onSubmit, onCancel, is
               name="parceiroId"
               control={control}
               render={({ field }) => (
-                <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isFormDataLoading}>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                  disabled={isFormDataLoading}
+                >
                   <SelectTrigger>
-                    <SelectValue placeholder={isFormDataLoading ? "Carregando parceiros..." : "Selecione um parceiro..."} />
+                    <SelectValue
+                      placeholder={
+                        isFormDataLoading ? "Carregando parceiros..." : "Selecione um parceiro..."
+                      }
+                    />
                   </SelectTrigger>
                   <SelectContent>
                     {partners.map(parceiro => (
@@ -247,7 +279,9 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, onSubmit, onCancel, is
                 </Select>
               )}
             />
-            {errors.parceiroId && <p className="mt-1 text-sm text-red-500">{errors.parceiroId.message}</p>}
+            {errors.parceiroId && (
+              <p className="mt-1 text-sm text-red-500">{errors.parceiroId.message}</p>
+            )}
           </div>
 
           {/* Single Store Selection for ATENDENTE */}
@@ -256,13 +290,13 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, onSubmit, onCancel, is
               <div className="flex items-center gap-2">
                 <Label>Loja Associada</Label>
                 {serverStoresError && (
-                  <span className="text-xs text-red-500 flex items-center gap-1">
+                  <span className="flex items-center gap-1 text-xs text-red-500">
                     <Info className="h-3 w-3" />
                     Erro ao carregar lojas
                   </span>
                 )}
-                {filteringStrategy === 'server-side' && (
-                  <span className="text-xs text-blue-500 flex items-center gap-1">
+                {filteringStrategy === "server-side" && (
+                  <span className="flex items-center gap-1 text-xs text-blue-500">
                     <Info className="h-3 w-3" />
                     Modo otimizado ativo
                   </span>
@@ -272,19 +306,31 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, onSubmit, onCancel, is
                 name="lojaId"
                 control={control}
                 render={({ field }) => (
-                  <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!selectedParceiroId || isStoresLoading}>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                    disabled={!selectedParceiroId || isStoresLoading}
+                  >
                     <SelectTrigger>
-                      <SelectValue placeholder={isStoresLoading ? "Carregando lojas..." : "Selecione uma loja..."} />
+                      <SelectValue
+                        placeholder={
+                          isStoresLoading ? "Carregando lojas..." : "Selecione uma loja..."
+                        }
+                      />
                     </SelectTrigger>
                     <SelectContent>
                       {availableStores.map(l => (
-                        <SelectItem key={l.id} value={l.id.toString()}>{l.nomeLoja}</SelectItem>
+                        <SelectItem key={l.id} value={l.id.toString()}>
+                          {l.nomeLoja}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 )}
               />
-              {errors.lojaId && <p className="mt-1 text-sm text-red-500">{errors.lojaId.message}</p>}
+              {errors.lojaId && (
+                <p className="mt-1 text-sm text-red-500">{errors.lojaId.message}</p>
+              )}
             </div>
           )}
 
@@ -294,38 +340,51 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, onSubmit, onCancel, is
               <div className="flex items-center gap-2">
                 <Label>Lojas Associadas (Múltipla Seleção)</Label>
                 {serverStoresError && (
-                  <span className="text-xs text-red-500 flex items-center gap-1">
+                  <span className="flex items-center gap-1 text-xs text-red-500">
                     <Info className="h-3 w-3" />
                     Erro ao carregar lojas
                   </span>
                 )}
-                {filteringStrategy === 'server-side' && (
-                  <span className="text-xs text-blue-500 flex items-center gap-1">
+                {filteringStrategy === "server-side" && (
+                  <span className="flex items-center gap-1 text-xs text-blue-500">
                     <Info className="h-3 w-3" />
                     Modo otimizado ativo
                   </span>
                 )}
               </div>
               <div className="space-y-2">
-                <Select onValueChange={handleAddLoja} disabled={!selectedParceiroId || isStoresLoading}>
+                <Select
+                  onValueChange={handleAddLoja}
+                  disabled={!selectedParceiroId || isStoresLoading}
+                >
                   <SelectTrigger>
-                    <SelectValue placeholder={isStoresLoading ? "Carregando lojas..." : "Selecione lojas para adicionar..."} />
+                    <SelectValue
+                      placeholder={
+                        isStoresLoading
+                          ? "Carregando lojas..."
+                          : "Selecione lojas para adicionar..."
+                      }
+                    />
                   </SelectTrigger>
                   <SelectContent>
-                    {availableStores.filter(l => !selectedLojas.includes(l.id.toString())).map(l => (
-                      <SelectItem key={l.id} value={l.id.toString()}>{l.nomeLoja}</SelectItem>
-                    ))}
+                    {availableStores
+                      .filter(l => !selectedLojas.includes(l.id.toString()))
+                      .map(l => (
+                        <SelectItem key={l.id} value={l.id.toString()}>
+                          {l.nomeLoja}
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
-                
+
                 {/* Display selected stores */}
                 {selectedLojas.length > 0 && (
-                  <div className="flex flex-wrap gap-2 p-2 border rounded-md bg-muted/50">
+                  <div className="bg-muted/50 flex flex-wrap gap-2 rounded-md border p-2">
                     {selectedLojas.map(lojaId => (
                       <Badge key={lojaId} variant="secondary" className="flex items-center gap-1">
                         {getLojaName(lojaId)}
-                        <X 
-                          className="h-3 w-3 cursor-pointer" 
+                        <X
+                          className="h-3 w-3 cursor-pointer"
                           onClick={() => handleRemoveLoja(lojaId)}
                         />
                       </Badge>
@@ -333,7 +392,9 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, onSubmit, onCancel, is
                   </div>
                 )}
               </div>
-              {errors.lojaIds && <p className="mt-1 text-sm text-red-500">{errors.lojaIds.message}</p>}
+              {errors.lojaIds && (
+                <p className="mt-1 text-sm text-red-500">{errors.lojaIds.message}</p>
+              )}
             </div>
           )}
         </div>

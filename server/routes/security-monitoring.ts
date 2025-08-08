@@ -1,9 +1,9 @@
-import { Router } from 'express';
-import { jwtAuthMiddleware, AuthenticatedRequest } from '../lib/jwt-auth-middleware.js';
-import { db } from '../lib/supabase.js';
-import { users, propostas } from '../../shared/schema.js';
-import { eq, gte, and, count, desc, sql } from 'drizzle-orm';
-import { getBrasiliaTimestamp } from '../lib/timezone.js';
+import { Router } from "express";
+import { jwtAuthMiddleware, AuthenticatedRequest } from "../lib/jwt-auth-middleware.js";
+import { db } from "../lib/supabase.js";
+import { users, propostas } from "../../shared/schema.js";
+import { eq, gte, and, count, desc, sql } from "drizzle-orm";
+import { getBrasiliaTimestamp } from "../lib/timezone.js";
 
 const router = Router();
 
@@ -11,7 +11,7 @@ const router = Router();
 router.use(jwtAuthMiddleware);
 
 // GET /api/security-monitoring/real-time - Métricas de segurança em tempo real
-router.get('/real-time', async (req: AuthenticatedRequest, res) => {
+router.get("/real-time", async (req: AuthenticatedRequest, res) => {
   try {
     const now = new Date();
     const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
@@ -19,9 +19,7 @@ router.get('/real-time', async (req: AuthenticatedRequest, res) => {
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
     // Métricas de autenticação reais
-    const totalUsers = await db
-      .select({ count: count() })
-      .from(users);
+    const totalUsers = await db.select({ count: count() }).from(users);
 
     const newUsersToday = await db
       .select({ count: count() })
@@ -43,7 +41,7 @@ router.get('/real-time', async (req: AuthenticatedRequest, res) => {
     const proposalStats = await db
       .select({
         status: propostas.status,
-        count: count()
+        count: count(),
       })
       .from(propostas)
       .groupBy(propostas.status);
@@ -52,7 +50,7 @@ router.get('/real-time', async (req: AuthenticatedRequest, res) => {
     const usersByRole = await db
       .select({
         role: users.role,
-        count: count()
+        count: count(),
       })
       .from(users)
       .groupBy(users.role);
@@ -65,42 +63,48 @@ router.get('/real-time', async (req: AuthenticatedRequest, res) => {
         totalUsers: totalUsers[0]?.count || 0,
         newUsersToday: newUsersToday[0]?.count || 0,
         sessionsActive: Math.min(5, totalUsers[0]?.count || 0), // Simula sessões ativas
-        lastLoginActivity: getBrasiliaTimestamp()
+        lastLoginActivity: getBrasiliaTimestamp(),
       },
       systemActivity: {
         proposalsToday: proposalsToday[0]?.count || 0,
         proposalsMonth: proposalsMonth[0]?.count || 0,
-        proposalsByStatus: proposalStats.reduce((acc, stat) => {
-          acc[stat.status] = stat.count;
-          return acc;
-        }, {} as Record<string, number>)
+        proposalsByStatus: proposalStats.reduce(
+          (acc, stat) => {
+            acc[stat.status] = stat.count;
+            return acc;
+          },
+          {} as Record<string, number>
+        ),
       },
       accessControl: {
-        usersByRole: usersByRole.reduce((acc, role) => {
-          acc[role.role] = role.count;
-          return acc;
-        }, {} as Record<string, number>),
-        adminCount: usersByRole.find(r => r.role === 'ADMINISTRADOR')?.count || 0,
-        managerCount: usersByRole.find(r => r.role === 'GERENTE')?.count || 0,
-        attendantCount: usersByRole.find(r => r.role === 'ATENDENTE')?.count || 0
+        usersByRole: usersByRole.reduce(
+          (acc, role) => {
+            acc[role.role] = role.count;
+            return acc;
+          },
+          {} as Record<string, number>
+        ),
+        adminCount: usersByRole.find(r => r.role === "ADMINISTRADOR")?.count || 0,
+        managerCount: usersByRole.find(r => r.role === "GERENTE")?.count || 0,
+        attendantCount: usersByRole.find(r => r.role === "ATENDENTE")?.count || 0,
       },
       security: {
         // Dados reais de segurança
-        encryptionStatus: 'AES-256 Active',
-        tlsVersion: 'TLS 1.3',
+        encryptionStatus: "AES-256 Active",
+        tlsVersion: "TLS 1.3",
         certificateValid: true,
         certificateDaysRemaining: 365,
-        firewallStatus: 'Active',
+        firewallStatus: "Active",
         ddosProtection: true,
-        backupStatus: 'Daily backups enabled',
-        lastBackup: getBrasiliaTimestamp()
+        backupStatus: "Daily backups enabled",
+        lastBackup: getBrasiliaTimestamp(),
       },
       compliance: {
         owaspASVSLevel1: 100, // Alcançamos 100% conforme auditoria
-        owaspSAMMScore: 51,   // Conforme assessment
+        owaspSAMMScore: 51, // Conforme assessment
         owaspTop10Coverage: 100,
         lgpdCompliant: true,
-        pciDssCompliant: false // Ainda não implementado
+        pciDssCompliant: false, // Ainda não implementado
       },
       threats: {
         // Por enquanto zero, pois ainda não temos tabela de logs de segurança
@@ -108,33 +112,32 @@ router.get('/real-time', async (req: AuthenticatedRequest, res) => {
         xssAttemptsBlocked: 0,
         bruteForceAttempts: 0,
         rateLimitViolations: 0,
-        suspiciousActivities: 0
-      }
+        suspiciousActivities: 0,
+      },
     };
 
     res.json({
       success: true,
-      data: metrics
+      data: metrics,
     });
-
   } catch (error) {
-    console.error('[SECURITY MONITORING] Error:', error);
+    console.error("[SECURITY MONITORING] Error:", error);
     res.status(500).json({
       success: false,
-      error: 'Erro ao obter métricas de segurança'
+      error: "Erro ao obter métricas de segurança",
     });
   }
 });
 
 // GET /api/security-monitoring/alerts - Alertas de segurança
-router.get('/alerts', async (req: AuthenticatedRequest, res) => {
+router.get("/alerts", async (req: AuthenticatedRequest, res) => {
   try {
     // Por enquanto, retornar alertas simulados baseados em atividade real
     const recentActivity = await db
       .select({
         user_id: propostas.atendenteId,
         created_at: propostas.createdAt,
-        status: propostas.status
+        status: propostas.status,
       })
       .from(propostas)
       .orderBy(desc(propostas.createdAt))
@@ -142,29 +145,28 @@ router.get('/alerts', async (req: AuthenticatedRequest, res) => {
 
     const alerts = recentActivity.map((activity, index) => ({
       id: `alert-${index}`,
-      type: 'info',
-      severity: 'LOW',
+      type: "info",
+      severity: "LOW",
       message: `Nova proposta criada com status: ${activity.status}`,
       timestamp: activity.created_at,
-      resolved: true
+      resolved: true,
     }));
 
     res.json({
       success: true,
-      data: alerts
+      data: alerts,
     });
-
   } catch (error) {
-    console.error('[SECURITY MONITORING] Alerts error:', error);
+    console.error("[SECURITY MONITORING] Alerts error:", error);
     res.status(500).json({
       success: false,
-      error: 'Erro ao obter alertas'
+      error: "Erro ao obter alertas",
     });
   }
 });
 
 // GET /api/security-monitoring/performance - Métricas de performance
-router.get('/performance', async (req: AuthenticatedRequest, res) => {
+router.get("/performance", async (req: AuthenticatedRequest, res) => {
   try {
     // Métricas de performance baseadas em dados reais
     const databaseStats = await db.execute(sql`
@@ -174,7 +176,7 @@ router.get('/performance', async (req: AuthenticatedRequest, res) => {
         (SELECT count(*) FROM information_schema.tables WHERE table_schema = 'public') as table_count
     `);
 
-    const stats = databaseStats && databaseStats[0] ? databaseStats[0] as any : {};
+    const stats = databaseStats && databaseStats[0] ? (databaseStats[0] as any) : {};
 
     res.json({
       success: true,
@@ -183,27 +185,26 @@ router.get('/performance', async (req: AuthenticatedRequest, res) => {
           sizeBytes: stats.database_size || 0,
           sizeMB: Math.round((stats.database_size || 0) / 1024 / 1024),
           activeConnections: stats.active_connections || 0,
-          tableCount: stats.table_count || 0
+          tableCount: stats.table_count || 0,
         },
         api: {
           averageResponseTime: 85, // ms
           requestsPerMinute: 120,
           errorRate: 0.1, // %
-          uptime: 99.9 // %
+          uptime: 99.9, // %
         },
         resources: {
           cpuUsage: 15, // %
           memoryUsage: 45, // %
-          diskUsage: 30 // %
-        }
-      }
+          diskUsage: 30, // %
+        },
+      },
     });
-
   } catch (error) {
-    console.error('[SECURITY MONITORING] Performance error:', error);
+    console.error("[SECURITY MONITORING] Performance error:", error);
     res.status(500).json({
       success: false,
-      error: 'Erro ao obter métricas de performance'
+      error: "Erro ao obter métricas de performance",
     });
   }
 });

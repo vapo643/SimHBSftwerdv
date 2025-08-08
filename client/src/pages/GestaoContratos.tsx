@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { useAuth } from '@/contexts/AuthContext';
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Table,
   TableBody,
@@ -8,11 +8,11 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Skeleton } from '@/components/ui/skeleton';
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Pagination,
   PaginationContent,
@@ -20,19 +20,19 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from '@/components/ui/pagination';
-import { ExternalLink, FileText, AlertCircle } from 'lucide-react';
-import { formatCurrency } from '@/lib/utils';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
-import { apiRequest } from '@/lib/queryClient';
+} from "@/components/ui/pagination";
+import { ExternalLink, FileText, AlertCircle } from "lucide-react";
+import { formatCurrency } from "@/lib/utils";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { apiRequest } from "@/lib/queryClient";
 
 interface Contrato {
   id: string;
   clienteNome: string;
   clienteCpf?: string;
   clienteCnpj?: string;
-  tipoPessoa: 'PF' | 'PJ';
+  tipoPessoa: "PF" | "PJ";
   valor: string;
   prazo: number;
   valorTotalFinanciado: string;
@@ -70,11 +70,11 @@ export default function GestaoContratos() {
   const [loadingCcb, setLoadingCcb] = useState<string | null>(null);
 
   // Verificar permissão de acesso
-  const hasPermission = user?.role === 'ADMINISTRADOR' || user?.role === 'DIRETOR';
+  const hasPermission = user?.role === "ADMINISTRADOR" || user?.role === "DIRETOR";
 
   // Buscar contratos
   const { data, isLoading, error } = useQuery<ContratosResponse>({
-    queryKey: ['/api/contratos'],
+    queryKey: ["/api/contratos"],
     enabled: hasPermission,
     staleTime: 30000, // 30 segundos
     refetchInterval: 60000, // Atualizar a cada minuto
@@ -84,27 +84,27 @@ export default function GestaoContratos() {
   const handleVisualizarCcb = async (contrato: Contrato) => {
     try {
       setLoadingCcb(contrato.id);
-      
+
       // Se já temos a URL, abrir diretamente
       if (contrato.urlCcbAssinado) {
-        window.open(contrato.urlCcbAssinado, '_blank');
+        window.open(contrato.urlCcbAssinado, "_blank");
         return;
       }
 
       // Caso contrário, buscar URL segura do backend
       if (contrato.caminhoCcbAssinado) {
         const response = await apiRequest(`/api/formalizacao/${contrato.id}/ccb-url`, {
-          method: 'POST',
+          method: "POST",
         });
-        
+
         if (response.url) {
-          window.open(response.url, '_blank');
+          window.open(response.url, "_blank");
         } else {
-          console.error('URL do CCB não disponível');
+          console.error("URL do CCB não disponível");
         }
       }
     } catch (error) {
-      console.error('Erro ao abrir CCB:', error);
+      console.error("Erro ao abrir CCB:", error);
     } finally {
       setLoadingCcb(null);
     }
@@ -114,7 +114,7 @@ export default function GestaoContratos() {
   if (!hasPermission) {
     return (
       <div className="container mx-auto py-8">
-        <Card className="max-w-md mx-auto">
+        <Card className="mx-auto max-w-md">
           <CardHeader>
             <CardTitle className="text-red-600">Acesso Negado</CardTitle>
           </CardHeader>
@@ -122,12 +122,12 @@ export default function GestaoContratos() {
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                Você não tem permissão para acessar esta página.
-                Apenas usuários com perfil ADMINISTRADOR ou DIRETOR podem visualizar contratos.
+                Você não tem permissão para acessar esta página. Apenas usuários com perfil
+                ADMINISTRADOR ou DIRETOR podem visualizar contratos.
               </AlertDescription>
             </Alert>
             <div className="mt-4">
-              <Button onClick={() => window.location.href = '/dashboard'}>
+              <Button onClick={() => (window.location.href = "/dashboard")}>
                 Voltar ao Dashboard
               </Button>
             </div>
@@ -144,7 +144,7 @@ export default function GestaoContratos() {
         <Card>
           <CardHeader>
             <Skeleton className="h-8 w-64" />
-            <Skeleton className="h-4 w-96 mt-2" />
+            <Skeleton className="mt-2 h-4 w-96" />
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -195,12 +195,10 @@ export default function GestaoContratos() {
         <Card>
           <CardHeader>
             <CardTitle>Gestão de Contratos</CardTitle>
-            <CardDescription>
-              Visualize e gerencie todos os contratos assinados
-            </CardDescription>
+            <CardDescription>Visualize e gerencie todos os contratos assinados</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-center py-12">
+            <div className="py-12 text-center">
               <FileText className="mx-auto h-12 w-12 text-gray-400" />
               <h3 className="mt-2 text-lg font-semibold">Nenhum contrato assinado encontrado</h3>
               <p className="mt-1 text-sm text-gray-500">
@@ -218,31 +216,31 @@ export default function GestaoContratos() {
       <Card>
         <CardHeader>
           <CardTitle>Gestão de Contratos</CardTitle>
-          <CardDescription>
-            Visualize e gerencie todos os contratos assinados
-          </CardDescription>
-          
+          <CardDescription>Visualize e gerencie todos os contratos assinados</CardDescription>
+
           {estatisticas && (
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mt-4">
-              <div className="bg-blue-50 p-3 rounded-lg">
+            <div className="mt-4 grid grid-cols-2 gap-4 md:grid-cols-5">
+              <div className="rounded-lg bg-blue-50 p-3">
                 <p className="text-xs text-blue-600">Total de Contratos</p>
                 <p className="text-xl font-bold text-blue-900">{estatisticas.totalContratos}</p>
               </div>
-              <div className="bg-yellow-50 p-3 rounded-lg">
+              <div className="rounded-lg bg-yellow-50 p-3">
                 <p className="text-xs text-yellow-600">Aguardando Pagamento</p>
-                <p className="text-xl font-bold text-yellow-900">{estatisticas.aguardandoPagamento}</p>
+                <p className="text-xl font-bold text-yellow-900">
+                  {estatisticas.aguardandoPagamento}
+                </p>
               </div>
-              <div className="bg-green-50 p-3 rounded-lg">
+              <div className="rounded-lg bg-green-50 p-3">
                 <p className="text-xs text-green-600">Pagos</p>
                 <p className="text-xl font-bold text-green-900">{estatisticas.pagos}</p>
               </div>
-              <div className="bg-purple-50 p-3 rounded-lg">
+              <div className="rounded-lg bg-purple-50 p-3">
                 <p className="text-xs text-purple-600">Valor Total Contratado</p>
                 <p className="text-lg font-bold text-purple-900">
                   {formatCurrency(estatisticas.valorTotalContratado)}
                 </p>
               </div>
-              <div className="bg-indigo-50 p-3 rounded-lg">
+              <div className="rounded-lg bg-indigo-50 p-3">
                 <p className="text-xs text-indigo-600">Valor Total Liberado</p>
                 <p className="text-lg font-bold text-indigo-900">
                   {formatCurrency(estatisticas.valorTotalLiberado)}
@@ -251,7 +249,7 @@ export default function GestaoContratos() {
             </div>
           )}
         </CardHeader>
-        
+
         <CardContent>
           <div className="rounded-md border">
             <Table>
@@ -267,26 +265,24 @@ export default function GestaoContratos() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {currentContratos.map((contrato) => (
+                {currentContratos.map(contrato => (
                   <TableRow key={contrato.id}>
                     <TableCell className="font-mono text-xs">
                       {contrato.id.slice(0, 8)}...
                     </TableCell>
-                    <TableCell className="font-medium">
-                      {contrato.clienteNome}
-                    </TableCell>
+                    <TableCell className="font-medium">{contrato.clienteNome}</TableCell>
                     <TableCell>
-                      {contrato.tipoPessoa === 'PF' 
-                        ? formatCpf(contrato.clienteCpf || '')
-                        : formatCnpj(contrato.clienteCnpj || '')}
+                      {contrato.tipoPessoa === "PF"
+                        ? formatCpf(contrato.clienteCpf || "")
+                        : formatCnpj(contrato.clienteCnpj || "")}
                     </TableCell>
+                    <TableCell>{formatCurrency(parseFloat(contrato.valor || "0"))}</TableCell>
                     <TableCell>
-                      {formatCurrency(parseFloat(contrato.valor || '0'))}
-                    </TableCell>
-                    <TableCell>
-                      {contrato.dataAssinatura 
-                        ? format(new Date(contrato.dataAssinatura), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })
-                        : '-'}
+                      {contrato.dataAssinatura
+                        ? format(new Date(contrato.dataAssinatura), "dd/MM/yyyy 'às' HH:mm", {
+                            locale: ptBR,
+                          })
+                        : "-"}
                     </TableCell>
                     <TableCell>
                       <StatusBadge status={contrato.statusFormalizacao} />
@@ -303,7 +299,7 @@ export default function GestaoContratos() {
                           <>Carregando...</>
                         ) : (
                           <>
-                            <ExternalLink className="h-4 w-4 mr-1" />
+                            <ExternalLink className="mr-1 h-4 w-4" />
                             Visualizar CCB Assinado
                           </>
                         )}
@@ -320,12 +316,14 @@ export default function GestaoContratos() {
               <Pagination>
                 <PaginationContent>
                   <PaginationItem>
-                    <PaginationPrevious 
+                    <PaginationPrevious
                       onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                      className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                      className={
+                        currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"
+                      }
                     />
                   </PaginationItem>
-                  
+
                   {[...Array(totalPages)].map((_, i) => (
                     <PaginationItem key={i}>
                       <PaginationLink
@@ -337,11 +335,15 @@ export default function GestaoContratos() {
                       </PaginationLink>
                     </PaginationItem>
                   ))}
-                  
+
                   <PaginationItem>
                     <PaginationNext
                       onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                      className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                      className={
+                        currentPage === totalPages
+                          ? "pointer-events-none opacity-50"
+                          : "cursor-pointer"
+                      }
                     />
                   </PaginationItem>
                 </PaginationContent>
@@ -357,18 +359,28 @@ export default function GestaoContratos() {
 // Componente para badge de status
 function StatusBadge({ status }: { status?: string }) {
   const statusConfig = {
-    'PENDENTE_GERACAO': { label: 'Pendente', className: 'bg-gray-100 text-gray-800' },
-    'AGUARDANDO_ASSINATURA': { label: 'Aguardando Assinatura', className: 'bg-yellow-100 text-yellow-800' },
-    'AGUARDANDO_PAGAMENTO': { label: 'Aguardando Pagamento', className: 'bg-orange-100 text-orange-800' },
-    'CONCLUIDO': { label: 'Concluído', className: 'bg-green-100 text-green-800' },
-    'EM_PROCESSAMENTO': { label: 'Em Processamento', className: 'bg-blue-100 text-blue-800' },
+    PENDENTE_GERACAO: { label: "Pendente", className: "bg-gray-100 text-gray-800" },
+    AGUARDANDO_ASSINATURA: {
+      label: "Aguardando Assinatura",
+      className: "bg-yellow-100 text-yellow-800",
+    },
+    AGUARDANDO_PAGAMENTO: {
+      label: "Aguardando Pagamento",
+      className: "bg-orange-100 text-orange-800",
+    },
+    CONCLUIDO: { label: "Concluído", className: "bg-green-100 text-green-800" },
+    EM_PROCESSAMENTO: { label: "Em Processamento", className: "bg-blue-100 text-blue-800" },
   };
 
-  const config = statusConfig[status as keyof typeof statusConfig] || 
-    { label: status || 'Desconhecido', className: 'bg-gray-100 text-gray-800' };
+  const config = statusConfig[status as keyof typeof statusConfig] || {
+    label: status || "Desconhecido",
+    className: "bg-gray-100 text-gray-800",
+  };
 
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.className}`}>
+    <span
+      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${config.className}`}
+    >
       {config.label}
     </span>
   );
@@ -376,15 +388,15 @@ function StatusBadge({ status }: { status?: string }) {
 
 // Funções auxiliares de formatação
 function formatCpf(cpf: string): string {
-  if (!cpf) return '-';
-  const cleaned = cpf.replace(/\D/g, '');
+  if (!cpf) return "-";
+  const cleaned = cpf.replace(/\D/g, "");
   if (cleaned.length !== 11) return cpf;
-  return cleaned.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+  return cleaned.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
 }
 
 function formatCnpj(cnpj: string): string {
-  if (!cnpj) return '-';
-  const cleaned = cnpj.replace(/\D/g, '');
+  if (!cnpj) return "-";
+  const cleaned = cnpj.replace(/\D/g, "");
   if (cleaned.length !== 14) return cnpj;
-  return cleaned.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+  return cleaned.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5");
 }

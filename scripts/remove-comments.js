@@ -2,71 +2,66 @@
 
 /**
  * Remove Sensitive Comments Script - OWASP ASVS V14.3.2
- * 
+ *
  * Removes TODO, FIXME, HACK, XXX, and other revealing comments
  * from production builds to prevent information disclosure.
  */
 
-const fs = require('fs');
-const path = require('path');
-const glob = require('glob');
+const fs = require("fs");
+const path = require("path");
+const glob = require("glob");
 
 // Patterns to remove
 const COMMENT_PATTERNS = [
   // Single line comments with sensitive keywords
-  /\/\/\s*(TODO|FIXME|HACK|XXX|BUG|DEPRECATED|NOTA|IMPORTANTE|SECURITY|DEBUG|TEMP|REMOVE|DELETE).*$/gmi,
+  /\/\/\s*(TODO|FIXME|HACK|XXX|BUG|DEPRECATED|NOTA|IMPORTANTE|SECURITY|DEBUG|TEMP|REMOVE|DELETE).*$/gim,
   // Multi-line comments with sensitive keywords
-  /\/\*[\s\S]*?(TODO|FIXME|HACK|XXX|BUG|DEPRECATED|NOTA|IMPORTANTE|SECURITY|DEBUG|TEMP|REMOVE|DELETE)[\s\S]*?\*\//gmi,
+  /\/\*[\s\S]*?(TODO|FIXME|HACK|XXX|BUG|DEPRECATED|NOTA|IMPORTANTE|SECURITY|DEBUG|TEMP|REMOVE|DELETE)[\s\S]*?\*\//gim,
   // Console logs (should be removed in production)
-  /console\.(log|debug|info|warn|error|trace)\(.*?\);?$/gmi,
+  /console\.(log|debug|info|warn|error|trace)\(.*?\);?$/gim,
   // Debugger statements
-  /debugger;?$/gmi,
+  /debugger;?$/gim,
   // Alert statements
-  /alert\(.*?\);?$/gmi
+  /alert\(.*?\);?$/gim,
 ];
 
 // Files to process
 const FILE_PATTERNS = [
-  'dist/**/*.js',
-  'dist/**/*.jsx',
-  'dist/**/*.ts',
-  'dist/**/*.tsx',
-  'build/**/*.js',
-  'build/**/*.jsx'
+  "dist/**/*.js",
+  "dist/**/*.jsx",
+  "dist/**/*.ts",
+  "dist/**/*.tsx",
+  "build/**/*.js",
+  "build/**/*.jsx",
 ];
 
 // Files to exclude
-const EXCLUDE_PATTERNS = [
-  '**/node_modules/**',
-  '**/vendor/**',
-  '**/*.min.js',
-  '**/*.map'
-];
+const EXCLUDE_PATTERNS = ["**/node_modules/**", "**/vendor/**", "**/*.min.js", "**/*.map"];
 
 /**
  * Remove comments from a file
  */
 function processFile(filePath) {
   try {
-    let content = fs.readFileSync(filePath, 'utf8');
+    let content = fs.readFileSync(filePath, "utf8");
     let modified = false;
-    
+
     // Apply each pattern
     COMMENT_PATTERNS.forEach(pattern => {
-      const newContent = content.replace(pattern, '');
+      const newContent = content.replace(pattern, "");
       if (newContent !== content) {
         modified = true;
         content = newContent;
       }
     });
-    
+
     // Write back if modified
     if (modified) {
-      fs.writeFileSync(filePath, content, 'utf8');
+      fs.writeFileSync(filePath, content, "utf8");
       console.log(`✓ Cleaned: ${filePath}`);
       return true;
     }
-    
+
     return false;
   } catch (error) {
     console.error(`✗ Error processing ${filePath}:`, error.message);
@@ -78,18 +73,18 @@ function processFile(filePath) {
  * Main function
  */
 function main() {
-  console.log('🔍 Removing sensitive comments from production build...\n');
-  
+  console.log("🔍 Removing sensitive comments from production build...\n");
+
   let totalFiles = 0;
   let modifiedFiles = 0;
-  
+
   // Process each file pattern
   FILE_PATTERNS.forEach(pattern => {
-    const files = glob.sync(pattern, { 
+    const files = glob.sync(pattern, {
       ignore: EXCLUDE_PATTERNS,
-      nodir: true 
+      nodir: true,
     });
-    
+
     files.forEach(file => {
       totalFiles++;
       if (processFile(file)) {
@@ -97,18 +92,18 @@ function main() {
       }
     });
   });
-  
+
   // Summary
-  console.log('\n📊 Summary:');
+  console.log("\n📊 Summary:");
   console.log(`Total files scanned: ${totalFiles}`);
   console.log(`Files modified: ${modifiedFiles}`);
   console.log(`Files unchanged: ${totalFiles - modifiedFiles}`);
-  
+
   if (modifiedFiles > 0) {
-    console.log('\n⚠️  Warning: Sensitive comments were found and removed.');
-    console.log('Please ensure no sensitive information remains in the build.');
+    console.log("\n⚠️  Warning: Sensitive comments were found and removed.");
+    console.log("Please ensure no sensitive information remains in the build.");
   } else {
-    console.log('\n✅ No sensitive comments found. Build is clean!');
+    console.log("\n✅ No sensitive comments found. Build is clean!");
   }
 }
 

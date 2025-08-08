@@ -10,30 +10,32 @@ import { SupabaseServerAuthProvider } from "./providers/supabase-server-auth-pro
  * Configuração padrão para o servidor
  */
 const defaultConfig: ServerAuthConfig = {
-  provider: (process.env.AUTH_PROVIDER as ServerAuthConfig['provider']) || 'supabase',
+  provider: (process.env.AUTH_PROVIDER as ServerAuthConfig["provider"]) || "supabase",
   options: {
     supabaseUrl: process.env.SUPABASE_URL,
     supabaseServiceKey: process.env.SUPABASE_SERVICE_KEY,
-  }
+  },
 };
 
 /**
  * Factory para criar instância do provedor de autenticação no servidor
  */
-export function createServerAuthProvider(config: ServerAuthConfig = defaultConfig): ServerAuthProvider {
+export function createServerAuthProvider(
+  config: ServerAuthConfig = defaultConfig
+): ServerAuthProvider {
   switch (config.provider) {
-    case 'supabase':
+    case "supabase":
       return new SupabaseServerAuthProvider();
-    
-    case 'firebase':
+
+    case "firebase":
       throw new Error("Firebase server provider não implementado ainda");
-    
-    case 'auth0':
+
+    case "auth0":
       throw new Error("Auth0 server provider não implementado ainda");
-    
-    case 'custom':
+
+    case "custom":
       throw new Error("Custom server provider não implementado ainda");
-    
+
     default:
       throw new Error(`Provedor de autenticação de servidor desconhecido: ${config.provider}`);
   }

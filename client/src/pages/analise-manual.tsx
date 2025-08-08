@@ -81,7 +81,12 @@ export default function AnaliseManual() {
   const [analysisStarted, setAnalysisStarted] = useState(false);
   const [analysisProgress, setAnalysisProgress] = useState(0);
 
-  const { data: proposta, isLoading, error, isError } = useQuery<Proposta>({
+  const {
+    data: proposta,
+    isLoading,
+    error,
+    isError,
+  } = useQuery<Proposta>({
     queryKey: ["/api/propostas", propostaId],
     enabled: !!propostaId,
     retry: (failureCount, error) => {
@@ -263,16 +268,18 @@ export default function AnaliseManual() {
   if (isError) {
     return (
       <DashboardLayout title="Análise Manual">
-        <div className="py-12 text-center space-y-4">
-          <AlertCircle className="h-12 w-12 text-red-500 mx-auto" />
+        <div className="space-y-4 py-12 text-center">
+          <AlertCircle className="mx-auto h-12 w-12 text-red-500" />
           <div>
             <h3 className="text-lg font-semibold text-gray-900">Erro ao carregar proposta</h3>
-            <p className="text-gray-500 mt-2">
-              {error instanceof Error ? error.message : "Não foi possível carregar os dados da proposta"}
+            <p className="mt-2 text-gray-500">
+              {error instanceof Error
+                ? error.message
+                : "Não foi possível carregar os dados da proposta"}
             </p>
           </div>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={() => setLocation("/credito/fila")}
             className="flex items-center gap-2"
           >
@@ -287,14 +294,16 @@ export default function AnaliseManual() {
   if (!proposta) {
     return (
       <DashboardLayout title="Análise Manual">
-        <div className="py-12 text-center space-y-4">
-          <AlertTriangle className="h-12 w-12 text-yellow-500 mx-auto" />
+        <div className="space-y-4 py-12 text-center">
+          <AlertTriangle className="mx-auto h-12 w-12 text-yellow-500" />
           <div>
             <h3 className="text-lg font-semibold text-gray-900">Proposta não encontrada</h3>
-            <p className="text-gray-500 mt-2">A proposta solicitada não existe ou não está mais disponível</p>
+            <p className="mt-2 text-gray-500">
+              A proposta solicitada não existe ou não está mais disponível
+            </p>
           </div>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={() => setLocation("/credito/fila")}
             className="flex items-center gap-2"
           >
@@ -307,15 +316,9 @@ export default function AnaliseManual() {
   }
 
   return (
-    <DashboardLayout 
+    <DashboardLayout
       title={`Análise Manual - Proposta #${proposta.id}`}
-      actions={
-        <RefreshButton 
-          onRefresh={handleRefresh}
-          isLoading={isLoading}
-          variant="ghost"
-        />
-      }
+      actions={<RefreshButton onRefresh={handleRefresh} isLoading={isLoading} variant="ghost" />}
     >
       <div className="space-y-6">
         {/* Header Actions */}

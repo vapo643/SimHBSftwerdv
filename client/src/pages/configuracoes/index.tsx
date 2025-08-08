@@ -1,67 +1,59 @@
-import { Link } from 'wouter';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import DashboardLayout from '@/components/DashboardLayout';
-import { Button } from '@/components/ui/button';
-import { useAuth } from '@/contexts/AuthContext';
-import { 
-  User, 
-  Mail, 
-  Shield, 
-  Settings, 
-  Lock,
-  Monitor,
-  ArrowRight
-} from 'lucide-react';
+import { Link } from "wouter";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import DashboardLayout from "@/components/DashboardLayout";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
+import { User, Mail, Shield, Settings, Lock, Monitor, ArrowRight } from "lucide-react";
 
 export default function Configuracoes() {
   const { user } = useAuth();
-  const isAdmin = user?.role === 'ADMINISTRADOR';
+  const isAdmin = user?.role === "ADMINISTRADOR";
 
   const settingsOptions = [
     {
-      title: 'Alterar Email',
-      description: 'Altere o email associado à sua conta',
+      title: "Alterar Email",
+      description: "Altere o email associado à sua conta",
       icon: Mail,
-      href: '/configuracoes/alterar-email',
-      available: true
+      href: "/configuracoes/alterar-email",
+      available: true,
     },
     {
-      title: 'Sessões Ativas',
-      description: 'Gerencie suas sessões de login ativas',
+      title: "Sessões Ativas",
+      description: "Gerencie suas sessões de login ativas",
       icon: Monitor,
-      href: '/configuracoes/sessoes',
-      available: true
+      href: "/configuracoes/sessoes",
+      available: true,
     },
     {
-      title: 'Alterar Senha',
-      description: 'Atualize sua senha de acesso',
+      title: "Alterar Senha",
+      description: "Atualize sua senha de acesso",
       icon: Lock,
-      href: '/configuracoes/alterar-senha',
-      available: false // To be implemented
+      href: "/configuracoes/alterar-senha",
+      available: false, // To be implemented
     },
     {
-      title: 'Produtos de Crédito',
-      description: 'Gerencie produtos de crédito disponíveis',
+      title: "Produtos de Crédito",
+      description: "Gerencie produtos de crédito disponíveis",
       icon: Settings,
-      href: '/configuracoes/produtos',
-      available: isAdmin
+      href: "/configuracoes/produtos",
+      available: isAdmin,
     },
     {
-      title: 'Tabelas Comerciais',
-      description: 'Configure tabelas comerciais e taxas',
+      title: "Tabelas Comerciais",
+      description: "Configure tabelas comerciais e taxas",
       icon: Settings,
-      href: '/configuracoes/tabelas',
-      available: isAdmin
-    }
+      href: "/configuracoes/tabelas",
+      available: isAdmin,
+    },
   ];
 
   return (
     <DashboardLayout title="Configurações">
       <div className="min-h-screen bg-background">
-        <div className="container mx-auto p-4 max-w-6xl">
+        <div className="container mx-auto max-w-6xl p-4">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-3xl font-bold mb-2">Configurações</h1>
+            <h1 className="mb-2 text-3xl font-bold">Configurações</h1>
             <p className="text-muted-foreground">
               Gerencie suas preferências e configurações da conta
             </p>
@@ -79,7 +71,7 @@ export default function Configuracoes() {
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
                   <div className="text-sm text-muted-foreground">Nome</div>
-                  <div className="font-medium">{user?.full_name || 'Não informado'}</div>
+                  <div className="font-medium">{user?.full_name || "Não informado"}</div>
                 </div>
                 <div>
                   <div className="text-sm text-muted-foreground">Email</div>
@@ -101,10 +93,10 @@ export default function Configuracoes() {
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {settingsOptions
               .filter(option => option.available)
-              .map((option) => (
-                <Card 
-                  key={option.href} 
-                  className="hover:shadow-lg transition-shadow cursor-pointer"
+              .map(option => (
+                <Card
+                  key={option.href}
+                  className="cursor-pointer transition-shadow hover:shadow-lg"
                 >
                   <Link href={option.href}>
                     <CardHeader>
@@ -115,9 +107,7 @@ export default function Configuracoes() {
                         </div>
                         <ArrowRight className="h-4 w-4 text-muted-foreground" />
                       </CardTitle>
-                      <CardDescription>
-                        {option.description}
-                      </CardDescription>
+                      <CardDescription>{option.description}</CardDescription>
                     </CardHeader>
                   </Link>
                 </Card>
@@ -125,7 +115,7 @@ export default function Configuracoes() {
           </div>
 
           {/* Security Notice */}
-          <Card className="mt-8 border-amber-200 bg-amber-50 dark:bg-amber-950 dark:border-amber-800">
+          <Card className="mt-8 border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-amber-800 dark:text-amber-200">
                 <Shield className="h-5 w-5" />
@@ -134,8 +124,8 @@ export default function Configuracoes() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-amber-700 dark:text-amber-300">
-                Mantenha suas informações de acesso seguras. Nunca compartilhe sua senha
-                e sempre faça logout ao usar computadores compartilhados.
+                Mantenha suas informações de acesso seguras. Nunca compartilhe sua senha e sempre
+                faça logout ao usar computadores compartilhados.
               </p>
             </CardContent>
           </Card>

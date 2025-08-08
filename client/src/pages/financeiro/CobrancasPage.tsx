@@ -6,17 +6,42 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Progress } from "@/components/ui/progress";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   Calendar,
   Search,
   Phone,
@@ -50,7 +75,7 @@ import {
   CalendarPlus,
   Percent,
   CheckSquare,
-  Loader2
+  Loader2,
 } from "lucide-react";
 import { format, parseISO, differenceInDays, isToday, isFuture, addDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -148,7 +173,7 @@ export default function CobrancasPage() {
   const [tipoContato, setTipoContato] = useState("");
   const [statusPromessa, setStatusPromessa] = useState("");
   const [dataPromessaPagamento, setDataPromessaPagamento] = useState("");
-  
+
   // Estados para modais de modificação de boletos
   const [showProrrogarModal, setShowProrrogarModal] = useState(false);
   const [showDescontoModal, setShowDescontoModal] = useState(false);
@@ -156,46 +181,52 @@ export default function CobrancasPage() {
   const [novaDataVencimento, setNovaDataVencimento] = useState("");
   const [valorDesconto, setValorDesconto] = useState("");
   const [dataLimiteDesconto, setDataLimiteDesconto] = useState("");
-  
+
   // Estados para Desconto de Quitação (multi-etapas)
   const [etapaDesconto, setEtapaDesconto] = useState(1);
   const [debtInfo, setDebtInfo] = useState<any>(null);
   const [novoValorQuitacao, setNovoValorQuitacao] = useState(0);
   const [quantidadeParcelas, setQuantidadeParcelas] = useState(1);
-  const [novasParcelas, setNovasParcelas] = useState<Array<{valor: number, dataVencimento: string}>>([]);
-  
+  const [novasParcelas, setNovasParcelas] = useState<
+    Array<{ valor: number; dataVencimento: string }>
+  >([]);
+
   // Estados para Prorrogar Vencimento (seleção múltipla)
   const [boletosParaProrrogar, setBoletosParaProrrogar] = useState<string[]>([]);
   const [todosBoletosAtivos, setTodosBoletosAtivos] = useState<any[]>([]);
-  
+
   // Estados para Histórico de Observações
   const [observacoes, setObservacoes] = useState<Observacao[]>([]);
   const [loadingObservacoes, setLoadingObservacoes] = useState(false);
   const [salvandoObservacao, setSalvandoObservacao] = useState(false);
   const [statusObservacao, setStatusObservacao] = useState("Outros");
-  
+
   // Verificar se o usuário tem role de cobrança
-  const isCobrancaUser = user?.role === 'COBRANÇA';
-  const isAdmin = user?.role === 'ADMINISTRADOR';
+  const isCobrancaUser = user?.role === "COBRANÇA";
+  const isAdmin = user?.role === "ADMINISTRADOR";
 
   // Buscar informações de dívida para desconto de quitação
-  const { data: debtData, isLoading: loadingDebt, refetch: refetchDebt } = useQuery({
-    queryKey: ['/api/inter/collections/proposal', selectedPropostaId],
+  const {
+    data: debtData,
+    isLoading: loadingDebt,
+    refetch: refetchDebt,
+  } = useQuery({
+    queryKey: ["/api/inter/collections/proposal", selectedPropostaId],
     enabled: !!selectedPropostaId && showDescontoModal,
     queryFn: async () => {
       return apiRequest(`/api/inter/collections/proposal/${selectedPropostaId}`);
-    }
+    },
   });
 
   // Mutation para prorrogar vencimento em lote
   const prorrogarMutation = useMutation({
     mutationFn: async (data: { codigosSolicitacao: string[]; novaDataVencimento: string }) => {
-      return apiRequest('/api/inter/collections/batch-extend', {
-        method: 'PATCH',
-        body: JSON.stringify(data)
+      return apiRequest("/api/inter/collections/batch-extend", {
+        method: "PATCH",
+        body: JSON.stringify(data),
       });
     },
-    onSuccess: (result) => {
+    onSuccess: result => {
       toast({
         title: "Sucesso",
         description: result.message || "Vencimento(s) prorrogado(s) com sucesso",
@@ -210,18 +241,22 @@ export default function CobrancasPage() {
         description: error.message || "Falha ao prorrogar vencimento",
         variant: "destructive",
       });
-    }
+    },
   });
 
   // Mutation para aplicar desconto de quitação
   const descontoQuitacaoMutation = useMutation({
-    mutationFn: async (data: { propostaId: string; desconto: number; novasParcelas: Array<{valor: number, dataVencimento: string}> }) => {
-      return apiRequest('/api/inter/collections/settlement-discount', {
-        method: 'POST',
-        body: JSON.stringify(data)
+    mutationFn: async (data: {
+      propostaId: string;
+      desconto: number;
+      novasParcelas: Array<{ valor: number; dataVencimento: string }>;
+    }) => {
+      return apiRequest("/api/inter/collections/settlement-discount", {
+        method: "POST",
+        body: JSON.stringify(data),
       });
     },
-    onSuccess: (result) => {
+    onSuccess: result => {
       toast({
         title: "Sucesso",
         description: result.message || "Desconto de quitação aplicado com sucesso",
@@ -237,21 +272,25 @@ export default function CobrancasPage() {
         description: error.message || "Falha ao aplicar desconto de quitação",
         variant: "destructive",
       });
-    }
+    },
   });
 
   // Buscar propostas de cobrança
-  const { data: propostas, isLoading, refetch } = useQuery({
-    queryKey: ['/api/cobrancas', statusFilter, atrasoFilter],
+  const {
+    data: propostas,
+    isLoading,
+    refetch,
+  } = useQuery({
+    queryKey: ["/api/cobrancas", statusFilter, atrasoFilter],
     queryFn: async () => {
       const params = new URLSearchParams();
-      if (statusFilter !== 'todos') params.append('status', statusFilter);
-      if (atrasoFilter !== 'todos') params.append('atraso', atrasoFilter);
-      
+      if (statusFilter !== "todos") params.append("status", statusFilter);
+      if (atrasoFilter !== "todos") params.append("atraso", atrasoFilter);
+
       return apiRequest(`/api/cobrancas?${params.toString()}`);
-    }
+    },
   });
-  
+
   // Função para atualizar sem precisar recarregar a página
   const handleRefresh = () => {
     console.log("[COBRANÇAS] Atualizando dados da API do Banco Inter...");
@@ -260,47 +299,47 @@ export default function CobrancasPage() {
 
   // Buscar KPIs
   const { data: kpis } = useQuery({
-    queryKey: ['/api/cobrancas/kpis'],
-    queryFn: () => apiRequest('/api/cobrancas/kpis')
+    queryKey: ["/api/cobrancas/kpis"],
+    queryFn: () => apiRequest("/api/cobrancas/kpis"),
   });
 
   // Buscar ficha do cliente
   const { data: fichaCliente, isLoading: loadingFicha } = useQuery<FichaCliente>({
-    queryKey: ['/api/cobrancas/ficha', selectedPropostaId],
+    queryKey: ["/api/cobrancas/ficha", selectedPropostaId],
     queryFn: () => apiRequest(`/api/cobrancas/${selectedPropostaId}/ficha`),
-    enabled: !!selectedPropostaId && showFichaModal
+    enabled: !!selectedPropostaId && showFichaModal,
   });
-  
+
   // As observações agora vêm diretamente da ficha do cliente
-  
+
   // Função para salvar nova observação
   const handleSalvarObservacao = async () => {
     if (!selectedPropostaId || !novaObservacao.trim() || !statusObservacao) return;
-    
+
     setSalvandoObservacao(true);
     try {
       await apiRequest(`/api/propostas/${selectedPropostaId}/observacoes`, {
-        method: 'POST',
+        method: "POST",
         body: JSON.stringify({
           mensagem: novaObservacao,
-          tipo_acao: statusObservacao
-        })
+          tipo_acao: statusObservacao,
+        }),
       });
-      
+
       // Limpar formulário
-      setNovaObservacao('');
-      
+      setNovaObservacao("");
+
       // Recarregar ficha para atualizar observações
-      queryClient.invalidateQueries({ queryKey: ['/api/cobrancas/ficha', selectedPropostaId] });
-      
+      queryClient.invalidateQueries({ queryKey: ["/api/cobrancas/ficha", selectedPropostaId] });
+
       toast({
         title: "Sucesso",
         description: "Observação salva com sucesso",
       });
     } catch (error) {
-      console.error('Erro ao salvar observação:', error);
+      console.error("Erro ao salvar observação:", error);
       toast({
-        title: "Erro", 
+        title: "Erro",
         description: "Não foi possível salvar a observação",
         variant: "destructive",
       });
@@ -311,10 +350,10 @@ export default function CobrancasPage() {
 
   // Mutation para adicionar observação
   const adicionarObservacaoMutation = useMutation({
-    mutationFn: (data: any) => 
+    mutationFn: (data: any) =>
       apiRequest(`/api/cobrancas/${selectedPropostaId}/observacao`, {
-        method: 'POST',
-        body: JSON.stringify(data)
+        method: "POST",
+        body: JSON.stringify(data),
       }),
     onSuccess: () => {
       toast({
@@ -325,7 +364,7 @@ export default function CobrancasPage() {
       setTipoContato("");
       setStatusPromessa("");
       setDataPromessaPagamento("");
-      queryClient.invalidateQueries({ queryKey: ['/api/cobrancas/ficha'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/cobrancas/ficha"] });
     },
     onError: () => {
       toast({
@@ -333,7 +372,7 @@ export default function CobrancasPage() {
         description: "Não foi possível adicionar a observação.",
         variant: "destructive",
       });
-    }
+    },
   });
 
   // Função para copiar texto
@@ -347,11 +386,13 @@ export default function CobrancasPage() {
 
   // Função para mascarar CPF/CNPJ
   const maskDocument = (doc: string) => {
-    if (!doc) return '';
+    if (!doc) return "";
     if (!showCpf) {
-      if (doc.length === 11) { // CPF
+      if (doc.length === 11) {
+        // CPF
         return `${doc.substring(0, 3)}.***.***-${doc.substring(9)}`;
-      } else if (doc.length === 14) { // CNPJ
+      } else if (doc.length === 14) {
+        // CNPJ
         return `${doc.substring(0, 2)}.****.****/****-${doc.substring(12)}`;
       }
     }
@@ -361,24 +402,24 @@ export default function CobrancasPage() {
   // Função para exportar inadimplentes
   const exportarInadimplentes = async () => {
     try {
-      const data = await apiRequest('/api/cobrancas/exportar/inadimplentes');
-      
+      const data = await apiRequest("/api/cobrancas/exportar/inadimplentes");
+
       // Criar CSV manualmente
       const headers = Object.keys(data.inadimplentes[0] || {});
       const csv = [
-        headers.join(','),
-        ...data.inadimplentes.map((row: any) => 
-          headers.map(header => `"${row[header] || ''}"`).join(',')
-        )
-      ].join('\n');
-      
+        headers.join(","),
+        ...data.inadimplentes.map((row: any) =>
+          headers.map(header => `"${row[header] || ""}"`).join(",")
+        ),
+      ].join("\n");
+
       // Download do CSV
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement('a');
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
-      link.download = `inadimplentes_${format(new Date(), 'yyyy-MM-dd')}.csv`;
+      link.download = `inadimplentes_${format(new Date(), "yyyy-MM-dd")}.csv`;
       link.click();
-      
+
       toast({
         title: "Exportação concluída",
         description: `${data.total} registros exportados com sucesso.`,
@@ -395,7 +436,7 @@ export default function CobrancasPage() {
   // Filtrar propostas localmente pela busca
   const propostasFiltradas = propostas?.filter((proposta: any) => {
     if (!searchTerm) return true;
-    
+
     const search = searchTerm.toLowerCase();
     return (
       proposta.nomeCliente?.toLowerCase().includes(search) ||
@@ -407,86 +448,90 @@ export default function CobrancasPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'em_dia':
-        return 'bg-green-100 text-green-800';
-      case 'inadimplente':
-        return 'bg-red-100 text-red-800';
-      case 'quitado':
-        return 'bg-blue-100 text-blue-800';
+      case "em_dia":
+        return "bg-green-100 text-green-800";
+      case "inadimplente":
+        return "bg-red-100 text-red-800";
+      case "quitado":
+        return "bg-blue-100 text-blue-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getParcelaStatusColor = (status: string) => {
     switch (status) {
-      case 'pago':
-        return 'bg-green-100 text-green-800';
-      case 'vencido':
-        return 'bg-red-100 text-red-800';
-      case 'pendente':
-        return 'bg-yellow-100 text-yellow-800';
+      case "pago":
+        return "bg-green-100 text-green-800";
+      case "vencido":
+        return "bg-red-100 text-red-800";
+      case "pendente":
+        return "bg-yellow-100 text-yellow-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   // Função para mapear status do Inter Bank para cores
   const getInterBankStatusColor = (status: string) => {
     switch (status?.toUpperCase()) {
-      case 'RECEBIDO':
-      case 'MARCADO_RECEBIDO':
-        return 'bg-green-100 text-green-800';
-      case 'CANCELADO':
-      case 'EXPIRADO':
-      case 'FALHA_EMISSAO':
-        return 'bg-gray-100 text-gray-800';
-      case 'ATRASADO':
-      case 'PROTESTO':
-        return 'bg-red-100 text-red-800';
-      case 'A_RECEBER':
-      case 'EM_PROCESSAMENTO':
-      case 'EMITIDO':
-        return 'bg-blue-100 text-blue-800';
-      case 'pago':
-        return 'bg-green-100 text-green-800';
-      case 'vencido':
-        return 'bg-red-100 text-red-800';
-      case 'pendente':
-        return 'bg-yellow-100 text-yellow-800';
+      case "RECEBIDO":
+      case "MARCADO_RECEBIDO":
+        return "bg-green-100 text-green-800";
+      case "CANCELADO":
+      case "EXPIRADO":
+      case "FALHA_EMISSAO":
+        return "bg-gray-100 text-gray-800";
+      case "ATRASADO":
+      case "PROTESTO":
+        return "bg-red-100 text-red-800";
+      case "A_RECEBER":
+      case "EM_PROCESSAMENTO":
+      case "EMITIDO":
+        return "bg-blue-100 text-blue-800";
+      case "pago":
+        return "bg-green-100 text-green-800";
+      case "vencido":
+        return "bg-red-100 text-red-800";
+      case "pendente":
+        return "bg-yellow-100 text-yellow-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   // Função para mapear status do Inter Bank para texto de exibição
-  const getInterBankStatusLabel = (interSituacao?: string, localStatus?: string, vencida?: boolean) => {
+  const getInterBankStatusLabel = (
+    interSituacao?: string,
+    localStatus?: string,
+    vencida?: boolean
+  ) => {
     // Priorizar status do Inter Bank se disponível
     if (interSituacao) {
       switch (interSituacao.toUpperCase()) {
-        case 'RECEBIDO':
-        case 'MARCADO_RECEBIDO':
-          return 'Pago';
-        case 'CANCELADO':
-        case 'EXPIRADO':
-        case 'FALHA_EMISSAO':
-          return 'Cancelado';
-        case 'ATRASADO':
-        case 'PROTESTO':
-          return 'Vencido';
-        case 'A_RECEBER':
-        case 'EM_PROCESSAMENTO':
-        case 'EMITIDO':
-          return 'Pendente';
+        case "RECEBIDO":
+        case "MARCADO_RECEBIDO":
+          return "Pago";
+        case "CANCELADO":
+        case "EXPIRADO":
+        case "FALHA_EMISSAO":
+          return "Cancelado";
+        case "ATRASADO":
+        case "PROTESTO":
+          return "Vencido";
+        case "A_RECEBER":
+        case "EM_PROCESSAMENTO":
+        case "EMITIDO":
+          return "Pendente";
         default:
           return interSituacao;
       }
     }
-    
+
     // Fallback para status local
-    if (localStatus === 'pago') return 'Pago';
-    if (vencida) return 'Vencido';
-    return 'Pendente';
+    if (localStatus === "pago") return "Pago";
+    if (vencida) return "Vencido";
+    return "Pendente";
   };
 
   // Função para calcular o Status de Vencimento inteligente
@@ -494,49 +539,54 @@ export default function CobrancasPage() {
     // Se tem situação do Inter Bank, verificar status especiais
     if (proposta.interSituacao) {
       const situacao = proposta.interSituacao.toUpperCase();
-      if (situacao === 'RECEBIDO' || situacao === 'MARCADO_RECEBIDO') {
-        return { text: 'Pago', color: 'text-green-600' };
+      if (situacao === "RECEBIDO" || situacao === "MARCADO_RECEBIDO") {
+        return { text: "Pago", color: "text-green-600" };
       }
-      if (situacao === 'CANCELADO' || situacao === 'EXPIRADO' || situacao === 'FALHA_EMISSAO') {
-        return { text: 'Cancelado', color: 'text-gray-600' };
+      if (situacao === "CANCELADO" || situacao === "EXPIRADO" || situacao === "FALHA_EMISSAO") {
+        return { text: "Cancelado", color: "text-gray-600" };
       }
     }
 
     // Se o status local indica pago
-    if (proposta.status === 'quitado' || proposta.status === 'pago') {
-      return { text: 'Pago', color: 'text-green-600' };
+    if (proposta.status === "quitado" || proposta.status === "pago") {
+      return { text: "Pago", color: "text-green-600" };
     }
 
     // Calcular baseado na data de vencimento
     const hoje = new Date();
-    const dataVencimento = proposta.dataProximoVencimento ? parseISO(proposta.dataProximoVencimento) : null;
-    
+    const dataVencimento = proposta.dataProximoVencimento
+      ? parseISO(proposta.dataProximoVencimento)
+      : null;
+
     if (!dataVencimento) {
-      return { text: 'Sem vencimento', color: 'text-gray-500' };
+      return { text: "Sem vencimento", color: "text-gray-500" };
     }
 
     // Se já venceu
     if (proposta.diasAtraso > 0) {
-      return { text: `Vencido há ${proposta.diasAtraso} dias`, color: 'text-red-600 font-semibold' };
+      return {
+        text: `Vencido há ${proposta.diasAtraso} dias`,
+        color: "text-red-600 font-semibold",
+      };
     }
 
     // Se vence hoje
     if (isToday(dataVencimento)) {
-      return { text: 'Vence hoje', color: 'text-orange-600 font-semibold' };
+      return { text: "Vence hoje", color: "text-orange-600 font-semibold" };
     }
 
     // Se vence nos próximos 7 dias
     const diasParaVencer = differenceInDays(dataVencimento, hoje);
     if (diasParaVencer > 0 && diasParaVencer <= 7) {
-      return { text: `Vence em ${diasParaVencer} dias`, color: 'text-yellow-600' };
+      return { text: `Vence em ${diasParaVencer} dias`, color: "text-yellow-600" };
     }
 
     // Para todos os outros casos, mostrar a data de vencimento
     if (isFuture(dataVencimento)) {
-      return { text: format(dataVencimento, 'dd/MM/yyyy'), color: 'text-gray-600' };
+      return { text: format(dataVencimento, "dd/MM/yyyy"), color: "text-gray-600" };
     }
 
-    return { text: 'Em dia', color: 'text-green-600' };
+    return { text: "Em dia", color: "text-green-600" };
   };
 
   return (
@@ -551,7 +601,8 @@ export default function CobrancasPage() {
                 <div>
                   <h3 className="font-semibold text-orange-800">Modo Cobrança Ativo</h3>
                   <p className="text-sm text-orange-700">
-                    Você está visualizando apenas contratos: <strong>inadimplentes</strong>, <strong>em atraso</strong> ou que <strong>vencem nos próximos 3 dias</strong>.
+                    Você está visualizando apenas contratos: <strong>inadimplentes</strong>,{" "}
+                    <strong>em atraso</strong> ou que <strong>vencem nos próximos 3 dias</strong>.
                   </p>
                 </div>
               </div>
@@ -567,9 +618,9 @@ export default function CobrancasPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-red-600">
-                {new Intl.NumberFormat('pt-BR', { 
-                  style: 'currency', 
-                  currency: 'BRL' 
+                {new Intl.NumberFormat("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
                 }).format(kpis?.valorTotalEmAtraso || 0)}
               </div>
               <div className="text-xs text-muted-foreground">
@@ -596,9 +647,9 @@ export default function CobrancasPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {new Intl.NumberFormat('pt-BR', { 
-                  style: 'currency', 
-                  currency: 'BRL' 
+                {new Intl.NumberFormat("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
                 }).format(kpis?.valorTotalCarteira || 0)}
               </div>
               <div className="text-xs text-muted-foreground">
@@ -613,21 +664,21 @@ export default function CobrancasPage() {
               <Receipt className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent className="space-y-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
+              <Button
+                variant="outline"
+                size="sm"
                 className="w-full"
                 onClick={exportarInadimplentes}
               >
                 <Download className="mr-2 h-4 w-4" />
                 Exportar Inadimplentes
               </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
+              <Button
+                variant="outline"
+                size="sm"
                 className="w-full"
                 onClick={() => {
-                  console.log('[COBRANÇAS] Atualizando dados da API do Banco Inter...');
+                  console.log("[COBRANÇAS] Atualizando dados da API do Banco Inter...");
                   refetch();
                 }}
               >
@@ -650,12 +701,12 @@ export default function CobrancasPage() {
                 <Input
                   placeholder="Buscar por nome, CPF, contrato..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={e => setSearchTerm(e.target.value)}
                   className="pl-8"
                   data-testid="input-search-cobrancas"
                 />
               </div>
-              
+
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger data-testid="select-status-filter">
                   <SelectValue placeholder="Status" />
@@ -739,20 +790,18 @@ export default function CobrancasPage() {
                     </TableRow>
                   ) : (
                     propostasFiltradas?.map((proposta: any) => (
-                      <TableRow 
+                      <TableRow
                         key={proposta.id}
-                        className={proposta.diasAtraso > 30 ? 'bg-red-50' : ''}
+                        className={proposta.diasAtraso > 30 ? "bg-red-50" : ""}
                       >
-                        <TableCell className="font-medium">
-                          {proposta.numeroContrato}
-                        </TableCell>
+                        <TableCell className="font-medium">{proposta.numeroContrato}</TableCell>
                         <TableCell>{proposta.nomeCliente}</TableCell>
                         <TableCell>{maskDocument(proposta.cpfCliente)}</TableCell>
                         <TableCell>{proposta.telefoneCliente}</TableCell>
                         <TableCell>
-                          {new Intl.NumberFormat('pt-BR', { 
-                            style: 'currency', 
-                            currency: 'BRL' 
+                          {new Intl.NumberFormat("pt-BR", {
+                            style: "currency",
+                            currency: "BRL",
                           }).format(proposta.valorTotal)}
                         </TableCell>
                         <TableCell>
@@ -761,18 +810,16 @@ export default function CobrancasPage() {
                         <TableCell>
                           {(() => {
                             const statusInfo = getStatusVencimento(proposta);
-                            return (
-                              <span className={statusInfo.color}>
-                                {statusInfo.text}
-                              </span>
-                            );
+                            return <span className={statusInfo.color}>{statusInfo.text}</span>;
                           })()}
                         </TableCell>
                         <TableCell>
                           <Badge className={getStatusColor(proposta.status)}>
-                            {proposta.status === 'em_dia' ? 'Em Dia' : 
-                             proposta.status === 'inadimplente' ? 'Inadimplente' : 
-                             'Quitado'}
+                            {proposta.status === "em_dia"
+                              ? "Em Dia"
+                              : proposta.status === "inadimplente"
+                                ? "Inadimplente"
+                                : "Quitado"}
                           </Badge>
                         </TableCell>
                         <TableCell>
@@ -788,7 +835,7 @@ export default function CobrancasPage() {
                               <FileText className="mr-2 h-4 w-4" />
                               Ficha
                             </Button>
-                            
+
                             {/* Menu de Ações - Apenas para boletos com status modificável */}
                             {proposta.interCodigoSolicitacao && (
                               <DropdownMenu>
@@ -803,14 +850,17 @@ export default function CobrancasPage() {
                                       if (!isAdmin) {
                                         toast({
                                           title: "Acesso Negado",
-                                          description: "Apenas administradores podem prorrogar vencimentos",
+                                          description:
+                                            "Apenas administradores podem prorrogar vencimentos",
                                           variant: "destructive",
                                         });
                                         return;
                                       }
-                                      const canModify = ['A_RECEBER', 'ATRASADO', 'EM_PROCESSAMENTO'].includes(
-                                        proposta.interSituacao?.toUpperCase() || ''
-                                      );
+                                      const canModify = [
+                                        "A_RECEBER",
+                                        "ATRASADO",
+                                        "EM_PROCESSAMENTO",
+                                      ].includes(proposta.interSituacao?.toUpperCase() || "");
                                       if (!canModify) {
                                         toast({
                                           title: "Ação não permitida",
@@ -822,32 +872,40 @@ export default function CobrancasPage() {
                                       setSelectedBoleto(proposta);
                                       setSelectedPropostaId(proposta.id);
                                       // Buscar boletos ativos da proposta
-                                      apiRequest(`/api/inter/collections/proposal/${proposta.id}`).then((data) => {
+                                      apiRequest(
+                                        `/api/inter/collections/proposal/${proposta.id}`
+                                      ).then(data => {
                                         setTodosBoletosAtivos(data.boletosAtivos || []);
                                       });
                                       setShowProrrogarModal(true);
                                     }}
-                                    disabled={!isAdmin || ['PAGO', 'CANCELADO', 'RECEBIDO'].includes(
-                                      proposta.interSituacao?.toUpperCase() || ''
-                                    )}
+                                    disabled={
+                                      !isAdmin ||
+                                      ["PAGO", "CANCELADO", "RECEBIDO"].includes(
+                                        proposta.interSituacao?.toUpperCase() || ""
+                                      )
+                                    }
                                   >
                                     <CalendarPlus className="mr-2 h-4 w-4" />
                                     Prorrogar Vencimento
                                   </DropdownMenuItem>
-                                  
+
                                   <DropdownMenuItem
                                     onClick={() => {
                                       if (!isAdmin) {
                                         toast({
                                           title: "Acesso Negado",
-                                          description: "Apenas administradores podem aplicar descontos",
+                                          description:
+                                            "Apenas administradores podem aplicar descontos",
                                           variant: "destructive",
                                         });
                                         return;
                                       }
-                                      const canModify = ['A_RECEBER', 'ATRASADO', 'EM_PROCESSAMENTO'].includes(
-                                        proposta.interSituacao?.toUpperCase() || ''
-                                      );
+                                      const canModify = [
+                                        "A_RECEBER",
+                                        "ATRASADO",
+                                        "EM_PROCESSAMENTO",
+                                      ].includes(proposta.interSituacao?.toUpperCase() || "");
                                       if (!canModify) {
                                         toast({
                                           title: "Ação não permitida",
@@ -859,15 +917,20 @@ export default function CobrancasPage() {
                                       setSelectedBoleto(proposta);
                                       setSelectedPropostaId(proposta.id);
                                       // Buscar informações de dívida
-                                      apiRequest(`/api/inter/collections/proposal/${proposta.id}`).then((data) => {
+                                      apiRequest(
+                                        `/api/inter/collections/proposal/${proposta.id}`
+                                      ).then(data => {
                                         setDebtInfo(data);
                                         setNovoValorQuitacao(data.valorRestante * 0.5); // Sugerir 50% de desconto inicial
                                       });
                                       setShowDescontoModal(true);
                                     }}
-                                    disabled={!isAdmin || ['PAGO', 'CANCELADO', 'RECEBIDO'].includes(
-                                      proposta.interSituacao?.toUpperCase() || ''
-                                    )}
+                                    disabled={
+                                      !isAdmin ||
+                                      ["PAGO", "CANCELADO", "RECEBIDO"].includes(
+                                        proposta.interSituacao?.toUpperCase() || ""
+                                      )
+                                    }
                                   >
                                     <Percent className="mr-2 h-4 w-4" />
                                     Aplicar Desconto
@@ -887,13 +950,16 @@ export default function CobrancasPage() {
         </Card>
 
         {/* Modal - Prorrogar Vencimento (Seleção Múltipla) */}
-        <Dialog open={showProrrogarModal} onOpenChange={(open) => {
-          setShowProrrogarModal(open);
-          if (!open) {
-            setBoletosParaProrrogar([]);
-            setNovaDataVencimento("");
-          }
-        }}>
+        <Dialog
+          open={showProrrogarModal}
+          onOpenChange={open => {
+            setShowProrrogarModal(open);
+            if (!open) {
+              setBoletosParaProrrogar([]);
+              setNovaDataVencimento("");
+            }
+          }}
+        >
           <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>Prorrogar Vencimento de Boletos</DialogTitle>
@@ -901,51 +967,51 @@ export default function CobrancasPage() {
                 Selecione os boletos e escolha a nova data de vencimento
               </DialogDescription>
             </DialogHeader>
-            
+
             <div className="space-y-4 py-4">
               {/* Lista de boletos para seleção */}
               <div className="space-y-2">
                 <Label>Boletos Disponíveis</Label>
-                <div className="max-h-60 overflow-y-auto border rounded-lg p-2 space-y-2">
+                <div className="max-h-60 space-y-2 overflow-y-auto rounded-lg border p-2">
                   {todosBoletosAtivos.length > 0 ? (
-                    todosBoletosAtivos.map((boleto) => (
-                      <div 
+                    todosBoletosAtivos.map(boleto => (
+                      <div
                         key={boleto.codigoSolicitacao}
-                        className="flex items-center space-x-3 p-2 hover:bg-muted rounded-lg cursor-pointer"
+                        className="flex cursor-pointer items-center space-x-3 rounded-lg p-2 hover:bg-muted"
                         onClick={() => {
                           if (boletosParaProrrogar.includes(boleto.codigoSolicitacao)) {
-                            setBoletosParaProrrogar(prev => 
+                            setBoletosParaProrrogar(prev =>
                               prev.filter(c => c !== boleto.codigoSolicitacao)
                             );
                           } else {
-                            setBoletosParaProrrogar(prev => 
-                              [...prev, boleto.codigoSolicitacao]
-                            );
+                            setBoletosParaProrrogar(prev => [...prev, boleto.codigoSolicitacao]);
                           }
                         }}
                       >
-                        <div className="flex items-center justify-center w-5 h-5">
+                        <div className="flex h-5 w-5 items-center justify-center">
                           {boletosParaProrrogar.includes(boleto.codigoSolicitacao) ? (
                             <CheckSquare className="h-5 w-5 text-primary" />
                           ) : (
-                            <div className="w-5 h-5 border-2 border-gray-300 rounded" />
+                            <div className="h-5 w-5 rounded border-2 border-gray-300" />
                           )}
                         </div>
                         <div className="flex-1">
                           <p className="text-sm font-medium">
-                            Parcela {boleto.numeroParcela} - {new Intl.NumberFormat('pt-BR', { 
-                              style: 'currency', 
-                              currency: 'BRL' 
+                            Parcela {boleto.numeroParcela} -{" "}
+                            {new Intl.NumberFormat("pt-BR", {
+                              style: "currency",
+                              currency: "BRL",
                             }).format(boleto.valor)}
                           </p>
                           <p className="text-xs text-muted-foreground">
-                            Vencimento atual: {new Date(boleto.dataVencimento).toLocaleDateString('pt-BR')}
+                            Vencimento atual:{" "}
+                            {new Date(boleto.dataVencimento).toLocaleDateString("pt-BR")}
                           </p>
                         </div>
                       </div>
                     ))
                   ) : (
-                    <p className="text-sm text-muted-foreground p-4 text-center">
+                    <p className="p-4 text-center text-sm text-muted-foreground">
                       Carregando boletos ativos...
                     </p>
                   )}
@@ -959,21 +1025,21 @@ export default function CobrancasPage() {
                   id="nova-data"
                   type="date"
                   value={novaDataVencimento}
-                  onChange={(e) => setNovaDataVencimento(e.target.value)}
-                  min={new Date().toISOString().split('T')[0]}
+                  onChange={e => setNovaDataVencimento(e.target.value)}
+                  min={new Date().toISOString().split("T")[0]}
                 />
               </div>
-              
+
               {/* Resumo da seleção */}
               {boletosParaProrrogar.length > 0 && (
-                <div className="bg-muted p-3 rounded-lg">
+                <div className="rounded-lg bg-muted p-3">
                   <p className="text-sm font-medium">
                     {boletosParaProrrogar.length} boleto(s) selecionado(s)
                   </p>
                 </div>
               )}
             </div>
-            
+
             <DialogFooter>
               <Button
                 variant="outline"
@@ -1004,99 +1070,107 @@ export default function CobrancasPage() {
                   }
                   prorrogarMutation.mutate({
                     codigosSolicitacao: boletosParaProrrogar,
-                    novaDataVencimento
+                    novaDataVencimento,
                   });
                 }}
                 disabled={prorrogarMutation.isPending || boletosParaProrrogar.length === 0}
               >
-                {prorrogarMutation.isPending ? "Processando..." : `Prorrogar ${boletosParaProrrogar.length} Boleto(s)`}
+                {prorrogarMutation.isPending
+                  ? "Processando..."
+                  : `Prorrogar ${boletosParaProrrogar.length} Boleto(s)`}
               </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
 
         {/* Modal - Aplicar Desconto de Quitação (Multi-etapas) */}
-        <Dialog open={showDescontoModal} onOpenChange={(open) => {
-          setShowDescontoModal(open);
-          if (!open) {
-            setEtapaDesconto(1);
-            setDebtInfo(null);
-            setNovasParcelas([]);
-          }
-        }}>
-          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <Dialog
+          open={showDescontoModal}
+          onOpenChange={open => {
+            setShowDescontoModal(open);
+            if (!open) {
+              setEtapaDesconto(1);
+              setDebtInfo(null);
+              setNovasParcelas([]);
+            }
+          }}
+        >
+          <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>
-                Desconto para Quitação - Etapa {etapaDesconto} de 3
-              </DialogTitle>
+              <DialogTitle>Desconto para Quitação - Etapa {etapaDesconto} de 3</DialogTitle>
               <DialogDescription>
                 {etapaDesconto === 1 && "Análise da dívida atual"}
                 {etapaDesconto === 2 && "Configurar novo valor e parcelamento"}
                 {etapaDesconto === 3 && "Confirmar operação"}
               </DialogDescription>
             </DialogHeader>
-            
+
             <div className="space-y-4 py-4">
               {/* Etapa 1: Análise da Dívida */}
               {etapaDesconto === 1 && (
                 <div className="space-y-4">
                   {loadingDebt || !debtInfo ? (
                     <div className="flex items-center justify-center p-8">
-                      <RefreshCw className="animate-spin h-8 w-8 text-primary" />
+                      <RefreshCw className="h-8 w-8 animate-spin text-primary" />
                     </div>
                   ) : (
                     <>
-                      <div className="bg-muted p-4 rounded-lg space-y-2">
-                        <h3 className="font-semibold text-lg">Resumo da Dívida</h3>
+                      <div className="space-y-2 rounded-lg bg-muted p-4">
+                        <h3 className="text-lg font-semibold">Resumo da Dívida</h3>
                         <div className="grid grid-cols-2 gap-4">
                           <div>
                             <p className="text-sm text-muted-foreground">Valor Total Financiado</p>
                             <p className="text-lg font-bold">
-                              {new Intl.NumberFormat('pt-BR', { 
-                                style: 'currency', 
-                                currency: 'BRL' 
+                              {new Intl.NumberFormat("pt-BR", {
+                                style: "currency",
+                                currency: "BRL",
                               }).format(debtInfo.valorTotal)}
                             </p>
                           </div>
                           <div>
                             <p className="text-sm text-muted-foreground">Valor Já Pago</p>
                             <p className="text-lg font-bold text-green-600">
-                              {new Intl.NumberFormat('pt-BR', { 
-                                style: 'currency', 
-                                currency: 'BRL' 
+                              {new Intl.NumberFormat("pt-BR", {
+                                style: "currency",
+                                currency: "BRL",
                               }).format(debtInfo.valorPago)}
                             </p>
                           </div>
                           <div>
                             <p className="text-sm text-muted-foreground">Valor Restante</p>
                             <p className="text-lg font-bold text-orange-600">
-                              {new Intl.NumberFormat('pt-BR', { 
-                                style: 'currency', 
-                                currency: 'BRL' 
+                              {new Intl.NumberFormat("pt-BR", {
+                                style: "currency",
+                                currency: "BRL",
                               }).format(debtInfo.valorRestante)}
                             </p>
                           </div>
                           <div>
                             <p className="text-sm text-muted-foreground">Boletos Ativos</p>
-                            <p className="text-lg font-bold">
-                              {debtInfo.totalBoletosAtivos}
-                            </p>
+                            <p className="text-lg font-bold">{debtInfo.totalBoletosAtivos}</p>
                           </div>
                         </div>
                       </div>
 
                       {debtInfo.boletosAtivos?.length > 0 && (
-                        <div className="border rounded-lg p-4">
-                          <h4 className="font-medium mb-2">Boletos Ativos</h4>
-                          <div className="space-y-2 max-h-40 overflow-y-auto">
+                        <div className="rounded-lg border p-4">
+                          <h4 className="mb-2 font-medium">Boletos Ativos</h4>
+                          <div className="max-h-40 space-y-2 overflow-y-auto">
                             {debtInfo.boletosAtivos.map((b: any, idx: number) => (
-                              <div key={idx} className="flex justify-between text-sm p-2 bg-muted rounded">
+                              <div
+                                key={idx}
+                                className="flex justify-between rounded bg-muted p-2 text-sm"
+                              >
                                 <span>Parcela {b.numeroParcela}</span>
-                                <span>{new Intl.NumberFormat('pt-BR', { 
-                                  style: 'currency', 
-                                  currency: 'BRL' 
-                                }).format(b.valor)}</span>
-                                <span>Venc: {new Date(b.dataVencimento).toLocaleDateString('pt-BR')}</span>
+                                <span>
+                                  {new Intl.NumberFormat("pt-BR", {
+                                    style: "currency",
+                                    currency: "BRL",
+                                  }).format(b.valor)}
+                                </span>
+                                <span>
+                                  Venc: {new Date(b.dataVencimento).toLocaleDateString("pt-BR")}
+                                </span>
                               </div>
                             ))}
                           </div>
@@ -1117,7 +1191,7 @@ export default function CobrancasPage() {
                       type="number"
                       step="0.01"
                       value={novoValorQuitacao}
-                      onChange={(e) => {
+                      onChange={e => {
                         const valor = parseFloat(e.target.value);
                         setNovoValorQuitacao(valor);
                         // Recalcular parcelas
@@ -1129,7 +1203,7 @@ export default function CobrancasPage() {
                             dataVenc.setMonth(dataVenc.getMonth() + i + 1);
                             parcelas.push({
                               valor: valorParcela,
-                              dataVencimento: dataVenc.toISOString().split('T')[0]
+                              dataVencimento: dataVenc.toISOString().split("T")[0],
                             });
                           }
                           setNovasParcelas(parcelas);
@@ -1139,9 +1213,10 @@ export default function CobrancasPage() {
                       max={debtInfo.valorRestante}
                     />
                     <p className="text-xs text-muted-foreground">
-                      Máximo: {new Intl.NumberFormat('pt-BR', { 
-                        style: 'currency', 
-                        currency: 'BRL' 
+                      Máximo:{" "}
+                      {new Intl.NumberFormat("pt-BR", {
+                        style: "currency",
+                        currency: "BRL",
                       }).format(debtInfo.valorRestante)}
                     </p>
                   </div>
@@ -1150,7 +1225,7 @@ export default function CobrancasPage() {
                     <Label htmlFor="parcelas">Quantidade de Parcelas</Label>
                     <Select
                       value={quantidadeParcelas.toString()}
-                      onValueChange={(value) => {
+                      onValueChange={value => {
                         const qtd = parseInt(value);
                         setQuantidadeParcelas(qtd);
                         // Recalcular parcelas
@@ -1162,7 +1237,7 @@ export default function CobrancasPage() {
                             dataVenc.setMonth(dataVenc.getMonth() + i + 1);
                             parcelas.push({
                               valor: valorParcela,
-                              dataVencimento: dataVenc.toISOString().split('T')[0]
+                              dataVencimento: dataVenc.toISOString().split("T")[0],
                             });
                           }
                           setNovasParcelas(parcelas);
@@ -1175,7 +1250,7 @@ export default function CobrancasPage() {
                       <SelectContent>
                         {[1, 2, 3, 4, 5, 6, 12, 24].map(n => (
                           <SelectItem key={n} value={n.toString()}>
-                            {n} {n === 1 ? 'parcela' : 'parcelas'}
+                            {n} {n === 1 ? "parcela" : "parcelas"}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -1183,31 +1258,35 @@ export default function CobrancasPage() {
                   </div>
 
                   {novoValorQuitacao > 0 && (
-                    <div className="bg-green-50 p-3 rounded-lg">
+                    <div className="rounded-lg bg-green-50 p-3">
                       <p className="text-sm font-medium text-green-800">
-                        Desconto aplicado: {new Intl.NumberFormat('pt-BR', { 
-                          style: 'currency', 
-                          currency: 'BRL' 
+                        Desconto aplicado:{" "}
+                        {new Intl.NumberFormat("pt-BR", {
+                          style: "currency",
+                          currency: "BRL",
                         }).format(debtInfo.valorRestante - novoValorQuitacao)}
                       </p>
                       <p className="text-xs text-green-600">
-                        ({((1 - novoValorQuitacao / debtInfo.valorRestante) * 100).toFixed(1)}% de desconto)
+                        ({((1 - novoValorQuitacao / debtInfo.valorRestante) * 100).toFixed(1)}% de
+                        desconto)
                       </p>
                     </div>
                   )}
 
                   {novasParcelas.length > 0 && (
-                    <div className="border rounded-lg p-3">
-                      <h4 className="font-medium mb-2">Novas Parcelas</h4>
-                      <div className="space-y-1 max-h-40 overflow-y-auto">
+                    <div className="rounded-lg border p-3">
+                      <h4 className="mb-2 font-medium">Novas Parcelas</h4>
+                      <div className="max-h-40 space-y-1 overflow-y-auto">
                         {novasParcelas.map((p, idx) => (
                           <div key={idx} className="flex justify-between text-sm">
                             <span>Parcela {idx + 1}</span>
-                            <span>{new Intl.NumberFormat('pt-BR', { 
-                              style: 'currency', 
-                              currency: 'BRL' 
-                            }).format(p.valor)}</span>
-                            <span>{new Date(p.dataVencimento).toLocaleDateString('pt-BR')}</span>
+                            <span>
+                              {new Intl.NumberFormat("pt-BR", {
+                                style: "currency",
+                                currency: "BRL",
+                              }).format(p.valor)}
+                            </span>
+                            <span>{new Date(p.dataVencimento).toLocaleDateString("pt-BR")}</span>
                           </div>
                         ))}
                       </div>
@@ -1219,49 +1298,56 @@ export default function CobrancasPage() {
               {/* Etapa 3: Confirmação */}
               {etapaDesconto === 3 && debtInfo && (
                 <div className="space-y-4">
-                  <div className="bg-amber-50 border border-amber-200 p-4 rounded-lg">
+                  <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
                     <div className="flex items-start space-x-2">
-                      <AlertTriangle className="h-5 w-5 text-amber-600 mt-0.5" />
+                      <AlertTriangle className="mt-0.5 h-5 w-5 text-amber-600" />
                       <div className="flex-1">
                         <h4 className="font-medium text-amber-900">Atenção!</h4>
-                        <p className="text-sm text-amber-700 mt-1">
-                          Esta operação irá:
-                        </p>
-                        <ul className="text-sm text-amber-700 mt-2 space-y-1 list-disc list-inside">
+                        <p className="mt-1 text-sm text-amber-700">Esta operação irá:</p>
+                        <ul className="mt-2 list-inside list-disc space-y-1 text-sm text-amber-700">
                           <li>Cancelar {debtInfo.totalBoletosAtivos} boleto(s) ativo(s)</li>
                           <li>Criar {quantidadeParcelas} novo(s) boleto(s)</li>
-                          <li>Aplicar desconto de {new Intl.NumberFormat('pt-BR', { 
-                            style: 'currency', 
-                            currency: 'BRL' 
-                          }).format(debtInfo.valorRestante - novoValorQuitacao)}</li>
+                          <li>
+                            Aplicar desconto de{" "}
+                            {new Intl.NumberFormat("pt-BR", {
+                              style: "currency",
+                              currency: "BRL",
+                            }).format(debtInfo.valorRestante - novoValorQuitacao)}
+                          </li>
                         </ul>
                       </div>
                     </div>
                   </div>
 
-                  <div className="bg-muted p-4 rounded-lg space-y-3">
+                  <div className="space-y-3 rounded-lg bg-muted p-4">
                     <h4 className="font-semibold">Resumo Final</h4>
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
                         <p className="text-muted-foreground">Dívida Anterior</p>
-                        <p className="font-medium">{new Intl.NumberFormat('pt-BR', { 
-                          style: 'currency', 
-                          currency: 'BRL' 
-                        }).format(debtInfo.valorRestante)}</p>
+                        <p className="font-medium">
+                          {new Intl.NumberFormat("pt-BR", {
+                            style: "currency",
+                            currency: "BRL",
+                          }).format(debtInfo.valorRestante)}
+                        </p>
                       </div>
                       <div>
                         <p className="text-muted-foreground">Novo Valor</p>
-                        <p className="font-medium text-green-600">{new Intl.NumberFormat('pt-BR', { 
-                          style: 'currency', 
-                          currency: 'BRL' 
-                        }).format(novoValorQuitacao)}</p>
+                        <p className="font-medium text-green-600">
+                          {new Intl.NumberFormat("pt-BR", {
+                            style: "currency",
+                            currency: "BRL",
+                          }).format(novoValorQuitacao)}
+                        </p>
                       </div>
                       <div>
                         <p className="text-muted-foreground">Desconto Total</p>
-                        <p className="font-medium">{new Intl.NumberFormat('pt-BR', { 
-                          style: 'currency', 
-                          currency: 'BRL' 
-                        }).format(debtInfo.valorRestante - novoValorQuitacao)}</p>
+                        <p className="font-medium">
+                          {new Intl.NumberFormat("pt-BR", {
+                            style: "currency",
+                            currency: "BRL",
+                          }).format(debtInfo.valorRestante - novoValorQuitacao)}
+                        </p>
                       </div>
                       <div>
                         <p className="text-muted-foreground">Nova Quantidade de Parcelas</p>
@@ -1272,13 +1358,10 @@ export default function CobrancasPage() {
                 </div>
               )}
             </div>
-            
+
             <DialogFooter>
               {etapaDesconto > 1 && (
-                <Button
-                  variant="outline"
-                  onClick={() => setEtapaDesconto(etapaDesconto - 1)}
-                >
+                <Button variant="outline" onClick={() => setEtapaDesconto(etapaDesconto - 1)}>
                   Voltar
                 </Button>
               )}
@@ -1296,7 +1379,11 @@ export default function CobrancasPage() {
                   onClick={() => {
                     if (etapaDesconto === 1 && debtInfo) {
                       setEtapaDesconto(2);
-                    } else if (etapaDesconto === 2 && novoValorQuitacao > 0 && novasParcelas.length > 0) {
+                    } else if (
+                      etapaDesconto === 2 &&
+                      novoValorQuitacao > 0 &&
+                      novasParcelas.length > 0
+                    ) {
                       setEtapaDesconto(3);
                     } else {
                       toast({
@@ -1319,7 +1406,7 @@ export default function CobrancasPage() {
                     descontoQuitacaoMutation.mutate({
                       propostaId: selectedPropostaId,
                       desconto: debtInfo.valorRestante - novoValorQuitacao,
-                      novasParcelas
+                      novasParcelas,
                     });
                   }}
                   disabled={descontoQuitacaoMutation.isPending}
@@ -1334,14 +1421,14 @@ export default function CobrancasPage() {
 
         {/* Modal - Ficha do Cliente */}
         <Dialog open={showFichaModal} onOpenChange={setShowFichaModal}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
+          <DialogContent className="max-h-[90vh] max-w-4xl overflow-hidden">
             <DialogHeader>
               <DialogTitle>Ficha do Cliente - Dossiê de Cobrança</DialogTitle>
               <DialogDescription>
                 Informações completas do cliente e histórico de cobrança
               </DialogDescription>
             </DialogHeader>
-            
+
             {loadingFicha ? (
               <div className="p-8 text-center">Carregando ficha...</div>
             ) : fichaCliente ? (
@@ -1350,7 +1437,7 @@ export default function CobrancasPage() {
                   {/* Dados do Cliente */}
                   <Card>
                     <CardHeader>
-                      <CardTitle className="text-base flex items-center">
+                      <CardTitle className="flex items-center text-base">
                         <User className="mr-2 h-4 w-4" />
                         Dados do Cliente
                       </CardTitle>
@@ -1366,12 +1453,14 @@ export default function CobrancasPage() {
                       </div>
                       <div>
                         <Label className="text-muted-foreground">Telefone</Label>
-                        <p className="font-medium flex items-center gap-2">
+                        <p className="flex items-center gap-2 font-medium">
                           {fichaCliente.cliente.telefone}
                           <Button
                             size="sm"
                             variant="ghost"
-                            onClick={() => copyToClipboard(fichaCliente.cliente.telefone, 'Telefone')}
+                            onClick={() =>
+                              copyToClipboard(fichaCliente.cliente.telefone, "Telefone")
+                            }
                           >
                             <Copy className="h-3 w-3" />
                           </Button>
@@ -1392,7 +1481,7 @@ export default function CobrancasPage() {
                   {fichaCliente.referencias?.length > 0 && (
                     <Card>
                       <CardHeader>
-                        <CardTitle className="text-base flex items-center">
+                        <CardTitle className="flex items-center text-base">
                           <UserCheck className="mr-2 h-4 w-4" />
                           Referências Pessoais
                         </CardTitle>
@@ -1400,17 +1489,22 @@ export default function CobrancasPage() {
                       <CardContent>
                         <div className="space-y-2">
                           {fichaCliente.referencias.map((ref, index) => (
-                            <div key={ref.id} className="flex items-center justify-between p-2 rounded bg-muted/50">
+                            <div
+                              key={ref.id}
+                              className="bg-muted/50 flex items-center justify-between rounded p-2"
+                            >
                               <div>
                                 <p className="font-medium">{ref.nomeCompleto}</p>
-                                <p className="text-sm text-muted-foreground">{ref.grauParentesco}</p>
+                                <p className="text-sm text-muted-foreground">
+                                  {ref.grauParentesco}
+                                </p>
                               </div>
                               <div className="flex items-center gap-2">
                                 <span className="text-sm">{ref.telefone}</span>
                                 <Button
                                   size="sm"
                                   variant="ghost"
-                                  onClick={() => copyToClipboard(ref.telefone, 'Telefone')}
+                                  onClick={() => copyToClipboard(ref.telefone, "Telefone")}
                                 >
                                   <Copy className="h-3 w-3" />
                                 </Button>
@@ -1426,7 +1520,7 @@ export default function CobrancasPage() {
                   {fichaCliente.dadosBancarios?.banco && (
                     <Card>
                       <CardHeader>
-                        <CardTitle className="text-base flex items-center">
+                        <CardTitle className="flex items-center text-base">
                           <CreditCard className="mr-2 h-4 w-4" />
                           Dados Bancários
                         </CardTitle>
@@ -1451,12 +1545,14 @@ export default function CobrancasPage() {
                         {fichaCliente.dadosBancarios.pix && (
                           <div className="col-span-2">
                             <Label className="text-muted-foreground">Chave PIX</Label>
-                            <p className="font-medium flex items-center gap-2">
+                            <p className="flex items-center gap-2 font-medium">
                               {fichaCliente.dadosBancarios.pix}
                               <Button
                                 size="sm"
                                 variant="ghost"
-                                onClick={() => copyToClipboard(fichaCliente.dadosBancarios.pix, 'PIX')}
+                                onClick={() =>
+                                  copyToClipboard(fichaCliente.dadosBancarios.pix, "PIX")
+                                }
                               >
                                 <Copy className="h-3 w-3" />
                               </Button>
@@ -1470,7 +1566,7 @@ export default function CobrancasPage() {
                   {/* Resumo Financeiro */}
                   <Card>
                     <CardHeader>
-                      <CardTitle className="text-base flex items-center">
+                      <CardTitle className="flex items-center text-base">
                         <DollarSign className="mr-2 h-4 w-4" />
                         Resumo Financeiro
                       </CardTitle>
@@ -1479,44 +1575,50 @@ export default function CobrancasPage() {
                       <div className="grid grid-cols-3 gap-4">
                         <div className="text-center">
                           <p className="text-2xl font-bold text-green-600">
-                            {new Intl.NumberFormat('pt-BR', { 
-                              style: 'currency', 
-                              currency: 'BRL' 
+                            {new Intl.NumberFormat("pt-BR", {
+                              style: "currency",
+                              currency: "BRL",
                             }).format(fichaCliente.resumoFinanceiro.valorTotalPago)}
                           </p>
                           <p className="text-sm text-muted-foreground">Total Pago</p>
                         </div>
                         <div className="text-center">
                           <p className="text-2xl font-bold text-red-600">
-                            {new Intl.NumberFormat('pt-BR', { 
-                              style: 'currency', 
-                              currency: 'BRL' 
+                            {new Intl.NumberFormat("pt-BR", {
+                              style: "currency",
+                              currency: "BRL",
                             }).format(fichaCliente.resumoFinanceiro.valorTotalVencido)}
                           </p>
                           <p className="text-sm text-muted-foreground">Total Vencido</p>
                         </div>
                         <div className="text-center">
                           <p className="text-2xl font-bold text-yellow-600">
-                            {new Intl.NumberFormat('pt-BR', { 
-                              style: 'currency', 
-                              currency: 'BRL' 
+                            {new Intl.NumberFormat("pt-BR", {
+                              style: "currency",
+                              currency: "BRL",
                             }).format(fichaCliente.resumoFinanceiro.valorTotalPendente)}
                           </p>
                           <p className="text-sm text-muted-foreground">Total Pendente</p>
                         </div>
                       </div>
-                      
+
                       <div className="mt-4 grid grid-cols-3 gap-4">
-                        <div className="text-center p-2 bg-muted rounded">
-                          <p className="text-lg font-semibold">{fichaCliente.resumoFinanceiro.parcelasPagas}</p>
+                        <div className="rounded bg-muted p-2 text-center">
+                          <p className="text-lg font-semibold">
+                            {fichaCliente.resumoFinanceiro.parcelasPagas}
+                          </p>
                           <p className="text-xs text-muted-foreground">Parcelas Pagas</p>
                         </div>
-                        <div className="text-center p-2 bg-muted rounded">
-                          <p className="text-lg font-semibold">{fichaCliente.resumoFinanceiro.parcelasVencidas}</p>
+                        <div className="rounded bg-muted p-2 text-center">
+                          <p className="text-lg font-semibold">
+                            {fichaCliente.resumoFinanceiro.parcelasVencidas}
+                          </p>
                           <p className="text-xs text-muted-foreground">Parcelas Vencidas</p>
                         </div>
-                        <div className="text-center p-2 bg-muted rounded">
-                          <p className="text-lg font-semibold">{fichaCliente.resumoFinanceiro.parcelasPendentes}</p>
+                        <div className="rounded bg-muted p-2 text-center">
+                          <p className="text-lg font-semibold">
+                            {fichaCliente.resumoFinanceiro.parcelasPendentes}
+                          </p>
                           <p className="text-xs text-muted-foreground">Parcelas Pendentes</p>
                         </div>
                       </div>
@@ -1526,7 +1628,7 @@ export default function CobrancasPage() {
                   {/* Histórico de Observações */}
                   <Card>
                     <CardHeader>
-                      <CardTitle className="text-base flex items-center">
+                      <CardTitle className="flex items-center text-base">
                         <MessageSquare className="mr-2 h-4 w-4" />
                         Histórico de Observações
                       </CardTitle>
@@ -1542,7 +1644,7 @@ export default function CobrancasPage() {
                                 id="observacao-text"
                                 placeholder="Digite sua observação sobre este cliente ou proposta..."
                                 value={novaObservacao}
-                                onChange={(e) => setNovaObservacao(e.target.value)}
+                                onChange={e => setNovaObservacao(e.target.value)}
                                 className="min-h-[80px]"
                               />
                             </div>
@@ -1552,8 +1654,12 @@ export default function CobrancasPage() {
                                   <SelectValue placeholder="Selecione o status" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value="Contato Realizado">Contato Realizado</SelectItem>
-                                  <SelectItem value="Negociação em Andamento">Negociação em Andamento</SelectItem>
+                                  <SelectItem value="Contato Realizado">
+                                    Contato Realizado
+                                  </SelectItem>
+                                  <SelectItem value="Negociação em Andamento">
+                                    Negociação em Andamento
+                                  </SelectItem>
                                   <SelectItem value="Acordo Fechado">Acordo Fechado</SelectItem>
                                   <SelectItem value="Monitoramento">Monitoramento</SelectItem>
                                   <SelectItem value="Outros">Outros</SelectItem>
@@ -1561,7 +1667,9 @@ export default function CobrancasPage() {
                               </Select>
                               <Button
                                 onClick={handleSalvarObservacao}
-                                disabled={!novaObservacao.trim() || !statusObservacao || salvandoObservacao}
+                                disabled={
+                                  !novaObservacao.trim() || !statusObservacao || salvandoObservacao
+                                }
                               >
                                 {salvandoObservacao ? (
                                   <>
@@ -1569,7 +1677,7 @@ export default function CobrancasPage() {
                                     Salvando...
                                   </>
                                 ) : (
-                                  'Salvar Observação'
+                                  "Salvar Observação"
                                 )}
                               </Button>
                             </div>
@@ -1578,28 +1686,35 @@ export default function CobrancasPage() {
 
                         {/* Lista de observações existentes */}
                         {loadingFicha ? (
-                          <div className="text-center py-4">
-                            <Loader2 className="h-6 w-6 animate-spin mx-auto" />
-                            <p className="text-sm text-muted-foreground mt-2">Carregando histórico...</p>
+                          <div className="py-4 text-center">
+                            <Loader2 className="mx-auto h-6 w-6 animate-spin" />
+                            <p className="mt-2 text-sm text-muted-foreground">
+                              Carregando histórico...
+                            </p>
                           </div>
-                        ) : (!fichaCliente.observacoes || fichaCliente.observacoes.length === 0) ? (
-                          <div className="text-center py-4 text-muted-foreground">
+                        ) : !fichaCliente.observacoes || fichaCliente.observacoes.length === 0 ? (
+                          <div className="py-4 text-center text-muted-foreground">
                             Nenhuma observação registrada ainda.
                           </div>
                         ) : (
                           <ScrollArea className="h-[300px]">
                             <div className="space-y-3 pr-4">
-                              {fichaCliente.observacoes.map((obs) => (
-                                <div key={obs.id} className="border rounded-lg p-3 space-y-2">
+                              {fichaCliente.observacoes.map(obs => (
+                                <div key={obs.id} className="space-y-2 rounded-lg border p-3">
                                   <div className="flex items-start justify-between">
                                     <div className="flex-1">
                                       <div className="flex items-center gap-2">
-                                        <Badge variant={
-                                          obs.tipoContato === 'Acordo Fechado' ? 'default' :
-                                          obs.tipoContato === 'Contato Realizado' ? 'secondary' :
-                                          obs.tipoContato === 'Negociação em Andamento' ? 'outline' :
-                                          'secondary'
-                                        }>
+                                        <Badge
+                                          variant={
+                                            obs.tipoContato === "Acordo Fechado"
+                                              ? "default"
+                                              : obs.tipoContato === "Contato Realizado"
+                                                ? "secondary"
+                                                : obs.tipoContato === "Negociação em Andamento"
+                                                  ? "outline"
+                                                  : "secondary"
+                                          }
+                                        >
                                           {obs.tipoContato}
                                         </Badge>
                                         <span className="text-xs text-muted-foreground">
@@ -1607,7 +1722,7 @@ export default function CobrancasPage() {
                                         </span>
                                       </div>
                                       <p className="mt-2 text-sm">{obs.observacao}</p>
-                                      <p className="text-xs text-muted-foreground mt-1">
+                                      <p className="mt-1 text-xs text-muted-foreground">
                                         Por: {obs.userName}
                                       </p>
                                     </div>
@@ -1624,35 +1739,38 @@ export default function CobrancasPage() {
                   {/* Parcelas com Boletos */}
                   <Card>
                     <CardHeader>
-                      <CardTitle className="text-base flex items-center">
+                      <CardTitle className="flex items-center text-base">
                         <Receipt className="mr-2 h-4 w-4" />
                         Detalhamento de Parcelas
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-2">
-                        {fichaCliente.parcelas?.map((parcela) => (
-                          <div 
-                            key={parcela.id} 
-                            className={`p-3 rounded border ${
-                              parcela.vencida ? 'border-red-300 bg-red-50' : 
-                              parcela.status === 'pago' ? 'border-green-300 bg-green-50' : 
-                              'border-gray-200'
+                        {fichaCliente.parcelas?.map(parcela => (
+                          <div
+                            key={parcela.id}
+                            className={`rounded border p-3 ${
+                              parcela.vencida
+                                ? "border-red-300 bg-red-50"
+                                : parcela.status === "pago"
+                                  ? "border-green-300 bg-green-50"
+                                  : "border-gray-200"
                             }`}
                           >
                             <div className="flex items-center justify-between">
                               <div>
                                 <p className="font-medium">
-                                  Parcela {parcela.numeroParcela} - {' '}
-                                  {new Intl.NumberFormat('pt-BR', { 
-                                    style: 'currency', 
-                                    currency: 'BRL' 
+                                  Parcela {parcela.numeroParcela} -{" "}
+                                  {new Intl.NumberFormat("pt-BR", {
+                                    style: "currency",
+                                    currency: "BRL",
                                   }).format(Number(parcela.valorParcela))}
                                 </p>
                                 <p className="text-sm text-muted-foreground">
-                                  Vencimento: {format(parseISO(parcela.dataVencimento), 'dd/MM/yyyy')}
+                                  Vencimento:{" "}
+                                  {format(parseISO(parcela.dataVencimento), "dd/MM/yyyy")}
                                   {parcela.diasAtraso > 0 && (
-                                    <span className="text-red-600 font-semibold ml-2">
+                                    <span className="ml-2 font-semibold text-red-600">
                                       ({parcela.diasAtraso} dias de atraso)
                                     </span>
                                   )}
@@ -1663,7 +1781,9 @@ export default function CobrancasPage() {
                                   <Button
                                     size="sm"
                                     variant="outline"
-                                    onClick={() => copyToClipboard(parcela.interPixCopiaECola!, 'PIX')}
+                                    onClick={() =>
+                                      copyToClipboard(parcela.interPixCopiaECola!, "PIX")
+                                    }
                                   >
                                     <QrCode className="mr-2 h-3 w-3" />
                                     PIX
@@ -1673,14 +1793,27 @@ export default function CobrancasPage() {
                                   <Button
                                     size="sm"
                                     variant="outline"
-                                    onClick={() => copyToClipboard(parcela.interLinhaDigitavel!, 'Linha Digitável')}
+                                    onClick={() =>
+                                      copyToClipboard(
+                                        parcela.interLinhaDigitavel!,
+                                        "Linha Digitável"
+                                      )
+                                    }
                                   >
                                     <Barcode className="mr-2 h-3 w-3" />
                                     Boleto
                                   </Button>
                                 )}
-                                <Badge className={getInterBankStatusColor(parcela.interSituacao || parcela.status)}>
-                                  {getInterBankStatusLabel(parcela.interSituacao, parcela.status, parcela.vencida)}
+                                <Badge
+                                  className={getInterBankStatusColor(
+                                    parcela.interSituacao || parcela.status
+                                  )}
+                                >
+                                  {getInterBankStatusLabel(
+                                    parcela.interSituacao,
+                                    parcela.status,
+                                    parcela.vencida
+                                  )}
                                 </Badge>
                               </div>
                             </div>
@@ -1694,7 +1827,7 @@ export default function CobrancasPage() {
             ) : (
               <div className="p-8 text-center">Erro ao carregar ficha</div>
             )}
-            
+
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowFichaModal(false)}>
                 Fechar

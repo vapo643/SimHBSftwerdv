@@ -1,6 +1,6 @@
 /**
  * CONFIGURAÇÕES DE SEGURANÇA DA API
- * 
+ *
  * Este arquivo centraliza todas as configurações de segurança
  * para facilitar manutenção e auditoria das políticas de segurança.
  */
@@ -29,7 +29,7 @@ export const helmetConfig = {
   // Cross-Origin-Resource-Policy
   crossOriginResourcePolicy: { policy: "cross-origin" },
   // X-Frame-Options - Previne clickjacking
-  frameguard: { action: 'deny' },
+  frameguard: { action: "deny" },
   // X-Content-Type-Options - Previne MIME sniffing
   noSniff: true,
   // Referrer-Policy - Controla informações de referência
@@ -48,20 +48,20 @@ export const generalApiLimiter = rateLimit({
   max: 100, // Máximo 100 requisições por janela de tempo
   message: {
     error: "Muitas requisições da API. Tente novamente em 15 minutos.",
-    retryAfter: "15 minutos"
+    retryAfter: "15 minutos",
   },
   standardHeaders: true, // Retorna rate limit info nos headers `RateLimit-*`
   legacyHeaders: false, // Desabilita headers `X-RateLimit-*`
   // Identifica usuário por IP
-  keyGenerator: (req) => {
-    return req.ip || req.connection.remoteAddress || 'anonymous';
+  keyGenerator: req => {
+    return req.ip || req.connection.remoteAddress || "anonymous";
   },
   // Handler customizado para quando o limite é excedido
   handler: (req, res) => {
     log(`⚠️ Rate limit exceeded for IP: ${req.ip} on ${req.path}`);
     res.status(429).json({
       error: "Muitas requisições da API. Tente novamente em 15 minutos.",
-      retryAfter: "15 minutos"
+      retryAfter: "15 minutos",
     });
   },
 });
@@ -72,29 +72,33 @@ export const authApiLimiter = rateLimit({
   max: 5, // Máximo 5 tentativas de login por janela de tempo
   message: {
     error: "Muitas tentativas de login. Tente novamente em 15 minutos.",
-    retryAfter: "15 minutos"
+    retryAfter: "15 minutos",
   },
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => {
+  keyGenerator: req => {
     // Para rotas de auth, considere tanto IP quanto email (se disponível)
     const email = req.body?.email;
-    const ip = req.ip || req.connection.remoteAddress || 'anonymous';
+    const ip = req.ip || req.connection.remoteAddress || "anonymous";
     return email ? `${ip}-${email}` : ip;
   },
   handler: (req, res) => {
     const email = req.body?.email;
-    log(`🚨 Auth rate limit exceeded for IP: ${req.ip}${email ? `, email: ${email}` : ''}`);
+    log(`🚨 Auth rate limit exceeded for IP: ${req.ip}${email ? `, email: ${email}` : ""}`);
     res.status(429).json({
       error: "Muitas tentativas de login. Tente novamente em 15 minutos.",
-      retryAfter: "15 minutos"
+      retryAfter: "15 minutos",
     });
   },
   // Skip para rotas que não são de autenticação crítica
-  skip: (req) => {
+  skip: req => {
     const path = req.path;
-    return !(path.includes('/login') || path.includes('/register') || path.includes('/reset-password'));
-  }
+    return !(
+      path.includes("/login") ||
+      path.includes("/register") ||
+      path.includes("/reset-password")
+    );
+  },
 });
 
 // Rate Limit Extra-Restritivo para APIs críticas (opcional)
@@ -103,18 +107,18 @@ export const criticalApiLimiter = rateLimit({
   max: 10, // Máximo 10 requisições por janela de tempo
   message: {
     error: "Muitas requisições para operação crítica. Tente novamente em 15 minutos.",
-    retryAfter: "15 minutos"
+    retryAfter: "15 minutos",
   },
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => {
-    return req.ip || req.connection.remoteAddress || 'anonymous';
+  keyGenerator: req => {
+    return req.ip || req.connection.remoteAddress || "anonymous";
   },
   handler: (req, res) => {
     log(`🚨 Critical API rate limit exceeded for IP: ${req.ip} on ${req.path}`);
     res.status(429).json({
       error: "Muitas requisições para operação crítica. Tente novamente em 15 minutos.",
-      retryAfter: "15 minutos"
+      retryAfter: "15 minutos",
     });
   },
 });
@@ -123,8 +127,8 @@ export const criticalApiLimiter = rateLimit({
 // CONFIGURAÇÕES DE PAYLOAD
 // ====================================
 export const payloadLimits = {
-  json: '10mb', // Limite para JSON payload
-  urlencoded: '10mb', // Limite para URL encoded payload
+  json: "10mb", // Limite para JSON payload
+  urlencoded: "10mb", // Limite para URL encoded payload
 } as const;
 
 // ====================================
@@ -134,7 +138,7 @@ export function logSecurityEvent(event: string, details: any) {
   const timestamp = new Date().toISOString();
   const logMessage = `🛡️ [SECURITY] ${timestamp} - ${event}: ${JSON.stringify(details)}`;
   log(logMessage);
-  
+
   // Em produção, você pode enviar estes logs para um serviço de monitoramento
   // como DataDog, New Relic, ou Sentry
 }

@@ -39,7 +39,9 @@ export class SupabaseAuthProvider implements AuthProvider {
       user: this.mapSupabaseUser(supabaseSession.user),
       accessToken: supabaseSession.access_token,
       refreshToken: supabaseSession.refresh_token,
-      expiresAt: supabaseSession.expires_at ? new Date(supabaseSession.expires_at * 1000) : undefined,
+      expiresAt: supabaseSession.expires_at
+        ? new Date(supabaseSession.expires_at * 1000)
+        : undefined,
     };
   }
 
@@ -56,12 +58,12 @@ export class SupabaseAuthProvider implements AuthProvider {
 
     const user = this.mapSupabaseUser(data.user);
     const session = this.mapSupabaseSession(data.session);
-    
+
     // Log de diagnóstico para rastrear o token JWT
-    console.log('[PASSO 1 - LOGIN]', { 
+    console.log("[PASSO 1 - LOGIN]", {
       accessToken: data.session.access_token,
       tokenLength: data.session.access_token?.length,
-      expiresAt: data.session.expires_at
+      expiresAt: data.session.expires_at,
     });
 
     return { user, session };
@@ -77,7 +79,7 @@ export class SupabaseAuthProvider implements AuthProvider {
       data: { session },
       error,
     } = await this.supabase.auth.getSession();
-    
+
     if (error) throw error;
     if (!session) return null;
 

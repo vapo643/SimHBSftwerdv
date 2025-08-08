@@ -56,7 +56,7 @@ interface Produto {
 const ConfiguracaoComercialForm: React.FC = () => {
   const [match, params] = useRoute("/parceiros/detalhe/:id");
   const partnerId = params ? parseInt(params.id) : null;
-  
+
   const [isCustomModalOpen, setIsCustomModalOpen] = useState(false);
   const [novoPrazo, setNovoPrazo] = useState("");
   const [prazos, setPrazos] = useState<number[]>([]);
@@ -87,19 +87,23 @@ const ConfiguracaoComercialForm: React.FC = () => {
   const selectedTable = watch("tabelaComercial");
 
   // Fetch commercial tables from API
-  const { data: tabelasComerciais = [], isLoading: loadingTabelas, error: tabelasError } = useQuery<TabelaComercial[]>({
-    queryKey: ['tabelas-comerciais'],
+  const {
+    data: tabelasComerciais = [],
+    isLoading: loadingTabelas,
+    error: tabelasError,
+  } = useQuery<TabelaComercial[]>({
+    queryKey: ["tabelas-comerciais"],
     queryFn: async () => {
-      const response = await api.get<TabelaComercial[]>('/api/tabelas-comerciais');
+      const response = await api.get<TabelaComercial[]>("/api/tabelas-comerciais");
       return response.data;
     },
   });
 
   // Fetch products for dropdown
   const { data: produtos = [], isLoading: loadingProdutos } = useQuery<Produto[]>({
-    queryKey: ['produtos'],
+    queryKey: ["produtos"],
     queryFn: async () => {
-      const response = await api.get<Produto[]>('/api/produtos');
+      const response = await api.get<Produto[]>("/api/produtos");
       return response.data;
     },
   });
@@ -108,7 +112,7 @@ const ConfiguracaoComercialForm: React.FC = () => {
   const createTabelaMutation = useMutation({
     mutationFn: async (data: CustomTabelaFormData & { prazos: number[] }) => {
       if (!partnerId) throw new Error("Partner ID not found");
-      
+
       // Convert single produtoId to produtoIds array as expected by backend
       const payload = {
         nomeTabela: data.nomeTabela,
@@ -118,14 +122,14 @@ const ConfiguracaoComercialForm: React.FC = () => {
         produtoIds: [data.produtoId], // Convert single ID to array
         parceiroId: partnerId,
       };
-      
+
       console.log("Sending payload to backend:", payload);
-      
-      const response = await api.post('/api/admin/tabelas-comerciais', payload);
+
+      const response = await api.post("/api/admin/tabelas-comerciais", payload);
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tabelas-comerciais'] });
+      queryClient.invalidateQueries({ queryKey: ["tabelas-comerciais"] });
       setIsCustomModalOpen(false);
       resetCustom();
       setPrazos([]);
@@ -161,10 +165,10 @@ const ConfiguracaoComercialForm: React.FC = () => {
       });
       return;
     }
-    
+
     console.log("Form data:", data);
     console.log("Prazos:", prazos);
-    
+
     createTabelaMutation.mutate({
       ...data,
       prazos,
@@ -204,216 +208,222 @@ const ConfiguracaoComercialForm: React.FC = () => {
 
   return (
     <>
-    <Card>
-      <CardHeader>
-        <CardTitle>Configuração Comercial</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div>
-            <Label htmlFor="tabelaComercial">Tabela Comercial Aplicável</Label>
-            <Controller
-              name="tabelaComercial"
-              control={control}
-              render={({ field }) => (
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <SelectTrigger id="tabelaComercial">
-                    <SelectValue placeholder="Selecione uma tabela..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="custom">-- Criar Tabela Personalizada --</SelectItem>
-                    {loadingTabelas ? (
-                      <SelectItem value="loading" disabled>
-                        Carregando tabelas...
-                      </SelectItem>
-                    ) : tabelasError ? (
-                      <SelectItem value="error" disabled>
-                        Erro ao carregar tabelas
-                      </SelectItem>
-                    ) : tabelasComerciais.length === 0 ? (
-                      <SelectItem value="empty" disabled>
-                        Nenhuma tabela encontrada
-                      </SelectItem>
-                    ) : (
-                      tabelasComerciais.map((tabela) => (
-                        <SelectItem key={tabela.id} value={tabela.id.toString()}>
-                          {tabela.nomeTabela} - {tabela.taxaJuros}% a.m.
+      <Card>
+        <CardHeader>
+          <CardTitle>Configuração Comercial</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div>
+              <Label htmlFor="tabelaComercial">Tabela Comercial Aplicável</Label>
+              <Controller
+                name="tabelaComercial"
+                control={control}
+                render={({ field }) => (
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <SelectTrigger id="tabelaComercial">
+                      <SelectValue placeholder="Selecione uma tabela..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="custom">-- Criar Tabela Personalizada --</SelectItem>
+                      {loadingTabelas ? (
+                        <SelectItem value="loading" disabled>
+                          Carregando tabelas...
                         </SelectItem>
-                      ))
-                    )}
-                  </SelectContent>
-                </Select>
-              )}
-            />
-            {errors.tabelaComercial && (
-              <p className="mt-1 text-sm text-red-500">{errors.tabelaComercial.message}</p>
-            )}
-          </div>
-
-          <div>
-            <Label htmlFor="comissao">Comissão do Parceiro (%)</Label>
-            <Input id="comissao" type="number" {...register("comissao", { valueAsNumber: true })} />
-            {errors.comissao && (
-              <p className="mt-1 text-sm text-red-500">{errors.comissao.message}</p>
-            )}
-          </div>
-
-          <Button type="submit" className="w-full">
-            Salvar Configuração Comercial
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
-
-    {/* Modal for creating custom table */}
-    <Dialog 
-      open={isCustomModalOpen} 
-      onOpenChange={(open) => {
-        setIsCustomModalOpen(open);
-        if (!open) {
-          resetCustom();
-          setPrazos([]);
-          setValue("tabelaComercial", "");
-        }
-      }}
-    >
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>Criar Tabela Comercial Personalizada</DialogTitle>
-        </DialogHeader>
-        <form onSubmit={handleSubmitCustom(onSubmitCustom)} className="space-y-4">
-          <div>
-            <Label htmlFor="nomeTabela">Nome da Tabela</Label>
-            <Input
-              id="nomeTabela"
-              {...registerCustom("nomeTabela")}
-              placeholder="Ex: Tabela Especial - Parceiro X"
-            />
-            {customErrors.nomeTabela && (
-              <p className="mt-1 text-sm text-red-500">{customErrors.nomeTabela.message}</p>
-            )}
-          </div>
-
-          <div>
-            <Label htmlFor="produtoId">Produto Associado</Label>
-            <Controller
-              name="produtoId"
-              control={controlCustom}
-              render={({ field }) => (
-                <Select 
-                  onValueChange={(value) => field.onChange(parseInt(value))} 
-                  value={field.value?.toString()}
-                >
-                  <SelectTrigger id="produtoId">
-                    <SelectValue placeholder="Selecione um produto..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {loadingProdutos ? (
-                      <SelectItem value="loading" disabled>
-                        Carregando produtos...
-                      </SelectItem>
-                    ) : produtos.length === 0 ? (
-                      <SelectItem value="empty" disabled>
-                        Nenhum produto encontrado
-                      </SelectItem>
-                    ) : (
-                      produtos.filter(p => p.isActive).map((produto) => (
-                        <SelectItem key={produto.id} value={produto.id.toString()}>
-                          {produto.nomeProduto}
+                      ) : tabelasError ? (
+                        <SelectItem value="error" disabled>
+                          Erro ao carregar tabelas
                         </SelectItem>
-                      ))
-                    )}
-                  </SelectContent>
-                </Select>
-              )}
-            />
-            {customErrors.produtoId && (
-              <p className="mt-1 text-sm text-red-500">{customErrors.produtoId.message}</p>
-            )}
-          </div>
-
-          <div>
-            <Label htmlFor="taxaJuros">Taxa de Juros Mensal (%)</Label>
-            <Input
-              id="taxaJuros"
-              type="number"
-              step="0.01"
-              {...registerCustom("taxaJuros", { valueAsNumber: true })}
-              placeholder="Ex: 2.5"
-            />
-            {customErrors.taxaJuros && (
-              <p className="mt-1 text-sm text-red-500">{customErrors.taxaJuros.message}</p>
-            )}
-          </div>
-
-          <div>
-            <Label htmlFor="comissao">Comissão (%)</Label>
-            <Input
-              id="comissao"
-              type="number"
-              step="0.01"
-              min="0"
-              {...registerCustom("comissao", { valueAsNumber: true })}
-              placeholder="Ex: 15.50"
-            />
-            {customErrors.comissao && (
-              <p className="mt-1 text-sm text-red-500">{customErrors.comissao.message}</p>
-            )}
-          </div>
-
-          <div>
-            <Label>Prazos Permitidos (meses)</Label>
-            <div className="flex gap-2">
-              <Input
-                type="number"
-                value={novoPrazo}
-                onChange={(e) => setNovoPrazo(e.target.value)}
-                onKeyDown={handleKeyPress}
-                placeholder="Ex: 12"
+                      ) : tabelasComerciais.length === 0 ? (
+                        <SelectItem value="empty" disabled>
+                          Nenhuma tabela encontrada
+                        </SelectItem>
+                      ) : (
+                        tabelasComerciais.map(tabela => (
+                          <SelectItem key={tabela.id} value={tabela.id.toString()}>
+                            {tabela.nomeTabela} - {tabela.taxaJuros}% a.m.
+                          </SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
+                )}
               />
-              <Button type="button" onClick={adicionarPrazo} size="sm">
-                Adicionar
+              {errors.tabelaComercial && (
+                <p className="mt-1 text-sm text-red-500">{errors.tabelaComercial.message}</p>
+              )}
+            </div>
+
+            <div>
+              <Label htmlFor="comissao">Comissão do Parceiro (%)</Label>
+              <Input
+                id="comissao"
+                type="number"
+                {...register("comissao", { valueAsNumber: true })}
+              />
+              {errors.comissao && (
+                <p className="mt-1 text-sm text-red-500">{errors.comissao.message}</p>
+              )}
+            </div>
+
+            <Button type="submit" className="w-full">
+              Salvar Configuração Comercial
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+
+      {/* Modal for creating custom table */}
+      <Dialog
+        open={isCustomModalOpen}
+        onOpenChange={open => {
+          setIsCustomModalOpen(open);
+          if (!open) {
+            resetCustom();
+            setPrazos([]);
+            setValue("tabelaComercial", "");
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Criar Tabela Comercial Personalizada</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmitCustom(onSubmitCustom)} className="space-y-4">
+            <div>
+              <Label htmlFor="nomeTabela">Nome da Tabela</Label>
+              <Input
+                id="nomeTabela"
+                {...registerCustom("nomeTabela")}
+                placeholder="Ex: Tabela Especial - Parceiro X"
+              />
+              {customErrors.nomeTabela && (
+                <p className="mt-1 text-sm text-red-500">{customErrors.nomeTabela.message}</p>
+              )}
+            </div>
+
+            <div>
+              <Label htmlFor="produtoId">Produto Associado</Label>
+              <Controller
+                name="produtoId"
+                control={controlCustom}
+                render={({ field }) => (
+                  <Select
+                    onValueChange={value => field.onChange(parseInt(value))}
+                    value={field.value?.toString()}
+                  >
+                    <SelectTrigger id="produtoId">
+                      <SelectValue placeholder="Selecione um produto..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {loadingProdutos ? (
+                        <SelectItem value="loading" disabled>
+                          Carregando produtos...
+                        </SelectItem>
+                      ) : produtos.length === 0 ? (
+                        <SelectItem value="empty" disabled>
+                          Nenhum produto encontrado
+                        </SelectItem>
+                      ) : (
+                        produtos
+                          .filter(p => p.isActive)
+                          .map(produto => (
+                            <SelectItem key={produto.id} value={produto.id.toString()}>
+                              {produto.nomeProduto}
+                            </SelectItem>
+                          ))
+                      )}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              {customErrors.produtoId && (
+                <p className="mt-1 text-sm text-red-500">{customErrors.produtoId.message}</p>
+              )}
+            </div>
+
+            <div>
+              <Label htmlFor="taxaJuros">Taxa de Juros Mensal (%)</Label>
+              <Input
+                id="taxaJuros"
+                type="number"
+                step="0.01"
+                {...registerCustom("taxaJuros", { valueAsNumber: true })}
+                placeholder="Ex: 2.5"
+              />
+              {customErrors.taxaJuros && (
+                <p className="mt-1 text-sm text-red-500">{customErrors.taxaJuros.message}</p>
+              )}
+            </div>
+
+            <div>
+              <Label htmlFor="comissao">Comissão (%)</Label>
+              <Input
+                id="comissao"
+                type="number"
+                step="0.01"
+                min="0"
+                {...registerCustom("comissao", { valueAsNumber: true })}
+                placeholder="Ex: 15.50"
+              />
+              {customErrors.comissao && (
+                <p className="mt-1 text-sm text-red-500">{customErrors.comissao.message}</p>
+              )}
+            </div>
+
+            <div>
+              <Label>Prazos Permitidos (meses)</Label>
+              <div className="flex gap-2">
+                <Input
+                  type="number"
+                  value={novoPrazo}
+                  onChange={e => setNovoPrazo(e.target.value)}
+                  onKeyDown={handleKeyPress}
+                  placeholder="Ex: 12"
+                />
+                <Button type="button" onClick={adicionarPrazo} size="sm">
+                  Adicionar
+                </Button>
+              </div>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {prazos.map(prazo => (
+                  <Badge key={prazo} className="flex items-center gap-1">
+                    {prazo} meses
+                    <button
+                      type="button"
+                      onClick={() => removerPrazo(prazo)}
+                      className="ml-1 hover:text-red-500"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                ))}
+              </div>
+              {customErrors.prazos && (
+                <p className="mt-1 text-sm text-red-500">{customErrors.prazos.message}</p>
+              )}
+            </div>
+
+            <div className="flex justify-end space-x-2 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setIsCustomModalOpen(false);
+                  resetCustom();
+                  setPrazos([]);
+                  setValue("tabelaComercial", "");
+                }}
+              >
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={createTabelaMutation.isPending}>
+                {createTabelaMutation.isPending ? "Criando..." : "Criar Tabela"}
               </Button>
             </div>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {prazos.map((prazo) => (
-                <Badge key={prazo} className="flex items-center gap-1">
-                  {prazo} meses
-                  <button
-                    type="button"
-                    onClick={() => removerPrazo(prazo)}
-                    className="ml-1 hover:text-red-500"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </Badge>
-              ))}
-            </div>
-            {customErrors.prazos && (
-              <p className="mt-1 text-sm text-red-500">{customErrors.prazos.message}</p>
-            )}
-          </div>
-
-          <div className="flex justify-end space-x-2 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                setIsCustomModalOpen(false);
-                resetCustom();
-                setPrazos([]);
-                setValue("tabelaComercial", "");
-              }}
-            >
-              Cancelar
-            </Button>
-            <Button type="submit" disabled={createTabelaMutation.isPending}>
-              {createTabelaMutation.isPending ? "Criando..." : "Criar Tabela"}
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+          </form>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

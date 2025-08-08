@@ -1,11 +1,9 @@
-import { createServerSupabaseAdminClient } from '../lib/supabase';
-import { z } from 'zod';
+import { createServerSupabaseAdminClient } from "../lib/supabase";
+import { z } from "zod";
 
-import { UserDataSchema } from '../routes';
+import { UserDataSchema } from "../routes";
 
 export type UserData = z.infer<typeof UserDataSchema>;
-
-
 
 export async function createUser(userData: UserData) {
   const supabase = createServerSupabaseAdminClient();
@@ -22,7 +20,7 @@ export async function createUser(userData: UserData) {
     const existingUser = existingUsers.users.find(user => user.email === userData.email);
     if (existingUser) {
       const conflictError = new Error(`Usuário com email ${userData.email} já existe.`);
-      conflictError.name = 'ConflictError';
+      conflictError.name = "ConflictError";
       throw conflictError;
     }
 
@@ -40,28 +38,34 @@ export async function createUser(userData: UserData) {
       id: createdAuthUser.id,
       role: userData.role,
       full_name: userData.fullName,
-      loja_id: userData.role === 'ATENDENTE' ? userData.lojaId : null,
+      loja_id: userData.role === "ATENDENTE" ? userData.lojaId : null,
     };
 
-    const { data: profileResult, error: profileError } = await supabase.from('profiles').insert(profilePayload).select().single();
+    const { data: profileResult, error: profileError } = await supabase
+      .from("profiles")
+      .insert(profilePayload)
+      .select()
+      .single();
     if (profileError) throw new Error(`Erro ao criar perfil: ${profileError.message}`);
     createdProfile = profileResult;
 
-    if (userData.role === 'GERENTE' && userData.lojaIds && userData.lojaIds.length > 0) {
+    if (userData.role === "GERENTE" && userData.lojaIds && userData.lojaIds.length > 0) {
       const gerenteLojaInserts = userData.lojaIds.map(lojaId => ({
         gerente_id: createdAuthUser.id,
         loja_id: lojaId,
       }));
-      const { error: gerenteLojaError } = await supabase.from('gerente_lojas').insert(gerenteLojaInserts);
-      if (gerenteLojaError) throw new Error(`Erro ao associar gerente a lojas: ${gerenteLojaError.message}`);
+      const { error: gerenteLojaError } = await supabase
+        .from("gerente_lojas")
+        .insert(gerenteLojaInserts);
+      if (gerenteLojaError)
+        throw new Error(`Erro ao associar gerente a lojas: ${gerenteLojaError.message}`);
     }
 
     return {
       success: true,
-      message: 'Usuário criado com sucesso.',
+      message: "Usuário criado com sucesso.",
       user: createdProfile,
     };
-
   } catch (error) {
     if (createdAuthUser) {
       console.error("ERRO DETECTADO. Iniciando rollback completo...");

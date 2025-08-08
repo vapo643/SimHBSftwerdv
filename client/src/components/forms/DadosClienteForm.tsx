@@ -97,7 +97,12 @@ const DadosClienteForm: React.FC<{ register: any; control: any; errors: any }> =
         </div>
         <div>
           <Label htmlFor="dataNascimento">Data de Nascimento</Label>
-          <Input type="date" id="dataNascimento" className="input-simpix" {...register("dataNascimento")} />
+          <Input
+            type="date"
+            id="dataNascimento"
+            className="input-simpix"
+            {...register("dataNascimento")}
+          />
           {errors.dataNascimento && (
             <p className="mt-1 text-sm text-red-500">{errors.dataNascimento.message}</p>
           )}

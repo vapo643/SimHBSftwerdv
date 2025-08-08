@@ -5,37 +5,37 @@ const errorMessages: Record<string, string> = {
   // Erros de rede
   NETWORK_ERROR: "Erro de conexão. Verifique sua internet e tente novamente.",
   TIMEOUT_ERROR: "A requisição demorou muito. Tente novamente.",
-  
+
   // Erros de validação
   VALIDATION_ERROR: "Dados inválidos. Verifique os campos marcados.",
   REQUIRED_FIELD: "Preencha todos os campos obrigatórios.",
   INVALID_FORMAT: "Formato inválido. Verifique os dados inseridos.",
-  
+
   // Erros de autenticação e autorização
   UNAUTHORIZED: "Sessão expirada. Faça login novamente.",
   FORBIDDEN: "Você não tem permissão para esta ação.",
   PERMISSION_ERROR: "Acesso negado. Entre em contato com o administrador.",
-  
+
   // Erros de negócio
   DUPLICATE_ENTRY: "Este registro já existe no sistema.",
   NOT_FOUND: "Registro não encontrado.",
   BUSINESS_RULE: "Esta operação viola uma regra de negócio.",
   DEPENDENCY_ERROR: "Este item não pode ser excluído pois está em uso.",
-  
+
   // Erros de servidor
   SERVER_ERROR: "Erro interno. Tente novamente em alguns instantes.",
   DATABASE_ERROR: "Erro ao acessar o banco de dados.",
   SERVICE_UNAVAILABLE: "Serviço temporariamente indisponível.",
-  
+
   // Erros específicos do sistema
   PROPOSAL_LOCKED: "Esta proposta está sendo editada por outro usuário.",
   INVALID_STATUS_TRANSITION: "Mudança de status inválida para esta proposta.",
   INSUFFICIENT_DATA: "Dados insuficientes para completar a operação.",
   FILE_TOO_LARGE: "Arquivo muito grande. Tamanho máximo: 10MB.",
   INVALID_FILE_TYPE: "Tipo de arquivo não permitido.",
-  
+
   // Erros padrão
-  DEFAULT: "Ocorreu um erro. Tente novamente."
+  DEFAULT: "Ocorreu um erro. Tente novamente.",
 };
 
 // Mapear códigos HTTP para códigos de erro internos
@@ -51,7 +51,7 @@ const httpCodeToErrorCode: Record<number, string> = {
   500: "SERVER_ERROR",
   502: "SERVICE_UNAVAILABLE",
   503: "SERVICE_UNAVAILABLE",
-  504: "TIMEOUT_ERROR"
+  504: "TIMEOUT_ERROR",
 };
 
 interface ApiError {
@@ -80,20 +80,20 @@ export const handleApiError = (error: any) => {
   // Tentar extrair código de erro da resposta
   if (error.response) {
     const { status, data } = error.response;
-    
+
     // Usar código HTTP para determinar tipo de erro
     if (status && httpCodeToErrorCode[status]) {
       errorCode = httpCodeToErrorCode[status];
     }
-    
+
     // Sobrescrever com código específico se disponível
     if (data?.code) {
       errorCode = data.code;
     }
-    
+
     // Mensagem técnica
     technicalMessage = data?.message || error.message;
-    
+
     // Verificar se há mensagem customizada do backend
     if (data?.userMessage) {
       userMessage = data.userMessage;
@@ -122,7 +122,7 @@ export const handleApiError = (error: any) => {
     code: errorCode,
     userMessage: finalUserMessage,
     technicalMessage,
-    originalError: error
+    originalError: error,
   };
 };
 
@@ -149,7 +149,7 @@ export const showSuccessMessage = (action: string, entity?: string) => {
     approve: `${entity || "Proposta"} aprovada com sucesso!`,
     reject: `${entity || "Proposta"} rejeitada com sucesso!`,
     upload: "Arquivo enviado com sucesso!",
-    default: "Operação realizada com sucesso!"
+    default: "Operação realizada com sucesso!",
   };
 
   toast({

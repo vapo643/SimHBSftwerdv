@@ -21,7 +21,7 @@ export const createClientSupabaseClient = () => {
   }
 
   // Check if we're in a browser environment before accessing import.meta.env
-  if (typeof window !== 'undefined') {
+  if (typeof window !== "undefined") {
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "";
     const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || "";
 
@@ -37,5 +37,5 @@ export const createClientSupabaseClient = () => {
   throw new Error("Client supabase should not be used on server side");
 };
 
-// Lazy export the singleton client instance for React components  
+// Lazy export the singleton client instance for React components
 export const getSupabase = () => createClientSupabaseClient();

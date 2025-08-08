@@ -1,29 +1,25 @@
 /**
  * Dashboard de Segurança - Projeto Cérbero
- * 
+ *
  * Interface em tempo real para monitoramento de segurança
  * com visualização de vulnerabilidades, anomalias e métricas.
  */
 
-import { useState, useEffect } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useState, useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from '@/components/ui/alert';
-import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Shield,
   AlertTriangle,
@@ -38,10 +34,10 @@ import {
   Zap,
   Target,
   FileSearch,
-  Package
-} from 'lucide-react';
-import DashboardLayout from '@/components/DashboardLayout';
-import RefreshButton from '@/components/RefreshButton';
+  Package,
+} from "lucide-react";
+import DashboardLayout from "@/components/DashboardLayout";
+import RefreshButton from "@/components/RefreshButton";
 import {
   LineChart,
   Line,
@@ -57,8 +53,8 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-  ResponsiveContainer
-} from 'recharts';
+  ResponsiveContainer,
+} from "recharts";
 
 interface SecurityMetrics {
   totalRequests: number;
@@ -91,7 +87,7 @@ interface SecurityMetrics {
 interface VulnerabilityReport {
   id: string;
   type: string;
-  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
   endpoint?: string;
   description: string;
   detectedAt: Date;
@@ -107,322 +103,333 @@ interface AnomalyDetection {
 }
 
 const SEVERITY_COLORS = {
-  CRITICAL: '#dc2626',
-  HIGH: '#ea580c',
-  MEDIUM: '#f59e0b',
-  LOW: '#10b981',
+  CRITICAL: "#dc2626",
+  HIGH: "#ea580c",
+  MEDIUM: "#f59e0b",
+  LOW: "#10b981",
 };
 
 export default function SecurityDashboard() {
   const queryClient = useQueryClient();
-  const [selectedTimeRange, setSelectedTimeRange] = useState('1h');
+  const [selectedTimeRange, setSelectedTimeRange] = useState("1h");
   const [autoRefresh, setAutoRefresh] = useState(true);
-  
+
   // Dados em tempo real
   const { data: metrics, isLoading: metricsLoading } = useQuery<SecurityMetrics>({
-    queryKey: ['/api/security/metrics', selectedTimeRange],
+    queryKey: ["/api/security/metrics", selectedTimeRange],
     refetchInterval: autoRefresh ? 10000 : false, // 10 segundos
   });
-  
-  const { data: vulnerabilities, isLoading: vulnerabilitiesLoading } = useQuery<VulnerabilityReport[]>({
-    queryKey: ['/api/security/vulnerabilities'],
+
+  const { data: vulnerabilities, isLoading: vulnerabilitiesLoading } = useQuery<
+    VulnerabilityReport[]
+  >({
+    queryKey: ["/api/security/vulnerabilities"],
     refetchInterval: autoRefresh ? 30000 : false, // 30 segundos
   });
-  
+
   const { data: anomalies, isLoading: anomaliesLoading } = useQuery<AnomalyDetection[]>({
-    queryKey: ['/api/security/anomalies'],
+    queryKey: ["/api/security/anomalies"],
     refetchInterval: autoRefresh ? 10000 : false,
   });
-  
+
   const { data: dependencyScans, isLoading: dependencyLoading } = useQuery({
-    queryKey: ['/api/security/dependency-scan'],
+    queryKey: ["/api/security/dependency-scan"],
     refetchInterval: autoRefresh ? 300000 : false, // 5 minutos
   });
-  
+
   const { data: semgrepFindings, isLoading: semgrepLoading } = useQuery({
-    queryKey: ['/api/security/semgrep-findings'],
+    queryKey: ["/api/security/semgrep-findings"],
     refetchInterval: autoRefresh ? 60000 : false, // 1 minuto
   });
-  
+
   // WebSocket para eventos em tempo real
   useEffect(() => {
     try {
       // Get the correct port from window.location
-      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
       const host = window.location.hostname;
-      const port = window.location.port || (window.location.protocol === 'https:' ? '443' : '80');
+      const port = window.location.port || (window.location.protocol === "https:" ? "443" : "80");
       const wsUrl = `${protocol}//${host}:${port}/ws/security`;
-      
-      console.log('🔌 [SecurityDashboard] Connecting to WebSocket:', wsUrl);
-      
+
+      console.log("🔌 [SecurityDashboard] Connecting to WebSocket:", wsUrl);
+
       const ws = new WebSocket(wsUrl);
-      
+
       ws.onopen = () => {
-        console.log('🔌 [SecurityDashboard] WebSocket connected successfully');
+        console.log("🔌 [SecurityDashboard] WebSocket connected successfully");
       };
-      
-      ws.onmessage = (event) => {
+
+      ws.onmessage = event => {
         const data = JSON.parse(event.data);
-        
+
         switch (data.type) {
-          case 'anomaly':
-            queryClient.invalidateQueries({ queryKey: ['/api/security/anomalies'] });
+          case "anomaly":
+            queryClient.invalidateQueries({ queryKey: ["/api/security/anomalies"] });
             break;
-          case 'vulnerability':
-            queryClient.invalidateQueries({ queryKey: ['/api/security/vulnerabilities'] });
+          case "vulnerability":
+            queryClient.invalidateQueries({ queryKey: ["/api/security/vulnerabilities"] });
             break;
-          case 'critical-alert':
+          case "critical-alert":
             // Mostrar notificação
             showCriticalAlert(data);
             break;
         }
       };
-      
-      ws.onerror = (error) => {
-        console.error('🔌 [SecurityDashboard] WebSocket error:', error);
+
+      ws.onerror = error => {
+        console.error("🔌 [SecurityDashboard] WebSocket error:", error);
       };
-      
-      ws.onclose = (event) => {
-        console.log('🔌 [SecurityDashboard] WebSocket closed:', event.code, event.reason);
+
+      ws.onclose = event => {
+        console.log("🔌 [SecurityDashboard] WebSocket closed:", event.code, event.reason);
       };
-      
+
       return () => {
         ws.close();
       };
     } catch (error) {
-      console.error('🔌 [SecurityDashboard] Failed to create WebSocket connection:', error);
+      console.error("🔌 [SecurityDashboard] Failed to create WebSocket connection:", error);
     }
   }, [queryClient]);
-  
+
   // Calcular estatísticas
   const stats = {
     securityScore: calculateSecurityScore(metrics, vulnerabilities),
     totalVulnerabilities: Array.isArray(vulnerabilities) ? vulnerabilities.length : 0,
-    criticalVulnerabilities: Array.isArray(vulnerabilities) ? vulnerabilities.filter((v: VulnerabilityReport) => v.severity === 'CRITICAL').length : 0,
-    recentAnomalies: Array.isArray(anomalies) ? anomalies.filter((a: AnomalyDetection) => 
-      new Date(a.timestamp).getTime() > Date.now() - 3600000
-    ).length : 0,
+    criticalVulnerabilities: Array.isArray(vulnerabilities)
+      ? vulnerabilities.filter((v: VulnerabilityReport) => v.severity === "CRITICAL").length
+      : 0,
+    recentAnomalies: Array.isArray(anomalies)
+      ? anomalies.filter(
+          (a: AnomalyDetection) => new Date(a.timestamp).getTime() > Date.now() - 3600000
+        ).length
+      : 0,
   };
 
   const handleRefresh = () => {
-    queryClient.invalidateQueries({ queryKey: ['/api/security/metrics'] });
-    queryClient.invalidateQueries({ queryKey: ['/api/security/vulnerabilities'] });
-    queryClient.invalidateQueries({ queryKey: ['/api/security/anomalies'] });
-    queryClient.invalidateQueries({ queryKey: ['/api/security/dependency-scan'] });
-    queryClient.invalidateQueries({ queryKey: ['/api/security/semgrep-findings'] });
+    queryClient.invalidateQueries({ queryKey: ["/api/security/metrics"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/security/vulnerabilities"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/security/anomalies"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/security/dependency-scan"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/security/semgrep-findings"] });
   };
-  
+
   return (
-    <DashboardLayout 
+    <DashboardLayout
       title="Monitoramento Avançado de Segurança"
       actions={
-        <RefreshButton 
+        <RefreshButton
           onRefresh={handleRefresh}
           isLoading={metricsLoading || vulnerabilitiesLoading || anomaliesLoading}
           variant="ghost"
         />
       }
     >
-    <div className="container mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-muted-foreground">
-            Sistema autônomo de detecção e prevenção de vulnerabilidades
-          </p>
-        </div>
-        
-        <div className="flex items-center gap-4">
-          <Badge 
-            variant={autoRefresh ? "default" : "outline"}
-            className="cursor-pointer"
-            onClick={() => setAutoRefresh(!autoRefresh)}
-          >
-            <Activity className="h-4 w-4 mr-1" />
-            {autoRefresh ? 'Ao Vivo' : 'Pausado'}
-          </Badge>
-          
-          <Select value={selectedTimeRange} onValueChange={setSelectedTimeRange}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Selecionar período" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="1h">Última hora</SelectItem>
-              <SelectItem value="24h">Últimas 24h</SelectItem>
-              <SelectItem value="7d">Últimos 7 dias</SelectItem>
-              <SelectItem value="30d">Últimos 30 dias</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-      
-      {/* Score de Segurança */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Score de Segurança Global</CardTitle>
-          <CardDescription>
-            Avaliação geral da postura de segurança do sistema
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between">
-            <div className="text-6xl font-bold" style={{
-              color: getScoreColor(stats.securityScore)
-            }}>
-              {stats.securityScore}%
-            </div>
-            <div className="space-y-2 text-right">
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4 text-green-500" />
-                <span>Proteções Ativas: 20</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Shield className="h-4 w-4 text-blue-500" />
-                <span>Conformidade OWASP: 100%</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Zap className="h-4 w-4 text-yellow-500" />
-                <span>Detecção ML: Ativa</span>
-              </div>
-            </div>
+      <div className="container mx-auto space-y-6 p-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-muted-foreground">
+              Sistema autônomo de detecção e prevenção de vulnerabilidades
+            </p>
           </div>
-          <Progress value={stats.securityScore} className="mt-4" />
-        </CardContent>
-      </Card>
-      
-      {/* Estatísticas Rápidas */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {metricsLoading ? (
-          <>
-            <Skeleton className="h-32 w-full" />
-            <Skeleton className="h-32 w-full" />
-            <Skeleton className="h-32 w-full" />
-            <Skeleton className="h-32 w-full" />
-          </>
-        ) : (
-          <>
-            <StatsCard
-              title="Vulnerabilidades"
-              value={stats.totalVulnerabilities}
-              icon={<Bug className="h-8 w-8" />}
-              trend={-15}
-              critical={stats.criticalVulnerabilities}
-            />
-            <StatsCard
-              title="Anomalias/Hora"
-              value={stats.recentAnomalies}
-              icon={<AlertTriangle className="h-8 w-8" />}
-              trend={25}
-            />
-            <StatsCard
-              title="IPs Bloqueados"
-              value={metrics?.blockedIPs || 0}
-              icon={<Lock className="h-8 w-8" />}
-              trend={10}
-            />
-            <StatsCard
-              title="Taxa de Erro"
-              value={`${(metrics?.errorRate || 0).toFixed(2)}%`}
-              icon={<XCircle className="h-8 w-8" />}
-              trend={-5}
-            />
-          </>
-        )}
-      </div>
-      
-      {/* Alertas Críticos */}
-      {Array.isArray(vulnerabilities) && (vulnerabilities as VulnerabilityReport[]).filter((v: VulnerabilityReport) => v.severity === 'CRITICAL').length > 0 && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Atenção: Vulnerabilidades Críticas Detectadas</AlertTitle>
-          <AlertDescription>
-            {stats.criticalVulnerabilities} vulnerabilidades críticas requerem ação imediata.
-            <div className="mt-2 space-y-1">
-              {Array.isArray(vulnerabilities) && (vulnerabilities as VulnerabilityReport[])
-                .filter((v: VulnerabilityReport) => v.severity === 'CRITICAL')
-                .slice(0, 3)
-                .map((vuln: VulnerabilityReport) => (
-                  <div key={vuln.id} className="text-sm">
-                    • {vuln.type}: {vuln.description}
-                  </div>
-                ))}
+
+          <div className="flex items-center gap-4">
+            <Badge
+              variant={autoRefresh ? "default" : "outline"}
+              className="cursor-pointer"
+              onClick={() => setAutoRefresh(!autoRefresh)}
+            >
+              <Activity className="mr-1 h-4 w-4" />
+              {autoRefresh ? "Ao Vivo" : "Pausado"}
+            </Badge>
+
+            <Select value={selectedTimeRange} onValueChange={setSelectedTimeRange}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Selecionar período" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="1h">Última hora</SelectItem>
+                <SelectItem value="24h">Últimas 24h</SelectItem>
+                <SelectItem value="7d">Últimos 7 dias</SelectItem>
+                <SelectItem value="30d">Últimos 30 dias</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        {/* Score de Segurança */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Score de Segurança Global</CardTitle>
+            <CardDescription>Avaliação geral da postura de segurança do sistema</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div
+                className="text-6xl font-bold"
+                style={{
+                  color: getScoreColor(stats.securityScore),
+                }}
+              >
+                {stats.securityScore}%
+              </div>
+              <div className="space-y-2 text-right">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-500" />
+                  <span>Proteções Ativas: 20</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Shield className="h-4 w-4 text-blue-500" />
+                  <span>Conformidade OWASP: 100%</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Zap className="h-4 w-4 text-yellow-500" />
+                  <span>Detecção ML: Ativa</span>
+                </div>
+              </div>
             </div>
-          </AlertDescription>
-        </Alert>
-      )}
-      
-      {/* Tabs com Detalhes */}
-      <Tabs defaultValue="vulnerabilities" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="vulnerabilities">Vulnerabilidades</TabsTrigger>
-          <TabsTrigger value="anomalies">Anomalias</TabsTrigger>
-          <TabsTrigger value="attacks">Ataques</TabsTrigger>
-          <TabsTrigger value="dependencies">Dependências</TabsTrigger>
-          <TabsTrigger value="code">Análise de Código</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="vulnerabilities" className="space-y-4">
-          {vulnerabilitiesLoading ? (
-            <Skeleton className="h-64 w-full" />
-          ) : (
-            <VulnerabilitiesPanel vulnerabilities={vulnerabilities} />
-          )}
-        </TabsContent>
-        
-        <TabsContent value="anomalies" className="space-y-4">
-          {anomaliesLoading ? (
-            <Skeleton className="h-64 w-full" />
-          ) : (
-            <AnomaliesPanel anomalies={anomalies} />
-          )}
-        </TabsContent>
-        
-        <TabsContent value="attacks" className="space-y-4">
+            <Progress value={stats.securityScore} className="mt-4" />
+          </CardContent>
+        </Card>
+
+        {/* Estatísticas Rápidas */}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
           {metricsLoading ? (
-            <Skeleton className="h-64 w-full" />
+            <>
+              <Skeleton className="h-32 w-full" />
+              <Skeleton className="h-32 w-full" />
+              <Skeleton className="h-32 w-full" />
+              <Skeleton className="h-32 w-full" />
+            </>
           ) : (
-            <AttacksPanel metrics={metrics} />
+            <>
+              <StatsCard
+                title="Vulnerabilidades"
+                value={stats.totalVulnerabilities}
+                icon={<Bug className="h-8 w-8" />}
+                trend={-15}
+                critical={stats.criticalVulnerabilities}
+              />
+              <StatsCard
+                title="Anomalias/Hora"
+                value={stats.recentAnomalies}
+                icon={<AlertTriangle className="h-8 w-8" />}
+                trend={25}
+              />
+              <StatsCard
+                title="IPs Bloqueados"
+                value={metrics?.blockedIPs || 0}
+                icon={<Lock className="h-8 w-8" />}
+                trend={10}
+              />
+              <StatsCard
+                title="Taxa de Erro"
+                value={`${(metrics?.errorRate || 0).toFixed(2)}%`}
+                icon={<XCircle className="h-8 w-8" />}
+                trend={-5}
+              />
+            </>
           )}
-        </TabsContent>
-        
-        <TabsContent value="dependencies" className="space-y-4">
-          {dependencyLoading ? (
-            <Skeleton className="h-64 w-full" />
-          ) : (
-            <DependenciesPanel scans={dependencyScans} />
+        </div>
+
+        {/* Alertas Críticos */}
+        {Array.isArray(vulnerabilities) &&
+          (vulnerabilities as VulnerabilityReport[]).filter(
+            (v: VulnerabilityReport) => v.severity === "CRITICAL"
+          ).length > 0 && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Atenção: Vulnerabilidades Críticas Detectadas</AlertTitle>
+              <AlertDescription>
+                {stats.criticalVulnerabilities} vulnerabilidades críticas requerem ação imediata.
+                <div className="mt-2 space-y-1">
+                  {Array.isArray(vulnerabilities) &&
+                    (vulnerabilities as VulnerabilityReport[])
+                      .filter((v: VulnerabilityReport) => v.severity === "CRITICAL")
+                      .slice(0, 3)
+                      .map((vuln: VulnerabilityReport) => (
+                        <div key={vuln.id} className="text-sm">
+                          • {vuln.type}: {vuln.description}
+                        </div>
+                      ))}
+                </div>
+              </AlertDescription>
+            </Alert>
           )}
-        </TabsContent>
-        
-        <TabsContent value="code" className="space-y-4">
-          {semgrepLoading ? (
-            <Skeleton className="h-64 w-full" />
-          ) : (
-            <CodeAnalysisPanel findings={semgrepFindings} />
-          )}
-        </TabsContent>
-      </Tabs>
-      
-      {/* Gráficos de Tendências */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Tendência de Segurança</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <SecurityTrendChart data={metrics?.trend || []} />
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle>Distribuição de Vulnerabilidades</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <VulnerabilityDistribution vulnerabilities={vulnerabilities} />
-          </CardContent>
-        </Card>
+
+        {/* Tabs com Detalhes */}
+        <Tabs defaultValue="vulnerabilities" className="space-y-4">
+          <TabsList className="grid w-full grid-cols-5">
+            <TabsTrigger value="vulnerabilities">Vulnerabilidades</TabsTrigger>
+            <TabsTrigger value="anomalies">Anomalias</TabsTrigger>
+            <TabsTrigger value="attacks">Ataques</TabsTrigger>
+            <TabsTrigger value="dependencies">Dependências</TabsTrigger>
+            <TabsTrigger value="code">Análise de Código</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="vulnerabilities" className="space-y-4">
+            {vulnerabilitiesLoading ? (
+              <Skeleton className="h-64 w-full" />
+            ) : (
+              <VulnerabilitiesPanel vulnerabilities={vulnerabilities} />
+            )}
+          </TabsContent>
+
+          <TabsContent value="anomalies" className="space-y-4">
+            {anomaliesLoading ? (
+              <Skeleton className="h-64 w-full" />
+            ) : (
+              <AnomaliesPanel anomalies={anomalies} />
+            )}
+          </TabsContent>
+
+          <TabsContent value="attacks" className="space-y-4">
+            {metricsLoading ? (
+              <Skeleton className="h-64 w-full" />
+            ) : (
+              <AttacksPanel metrics={metrics} />
+            )}
+          </TabsContent>
+
+          <TabsContent value="dependencies" className="space-y-4">
+            {dependencyLoading ? (
+              <Skeleton className="h-64 w-full" />
+            ) : (
+              <DependenciesPanel scans={dependencyScans} />
+            )}
+          </TabsContent>
+
+          <TabsContent value="code" className="space-y-4">
+            {semgrepLoading ? (
+              <Skeleton className="h-64 w-full" />
+            ) : (
+              <CodeAnalysisPanel findings={semgrepFindings} />
+            )}
+          </TabsContent>
+        </Tabs>
+
+        {/* Gráficos de Tendências */}
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>Tendência de Segurança</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <SecurityTrendChart data={metrics?.trend || []} />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Distribuição de Vulnerabilidades</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <VulnerabilityDistribution vulnerabilities={vulnerabilities} />
+            </CardContent>
+          </Card>
+        </div>
       </div>
-    </div>
     </DashboardLayout>
   );
 }
@@ -437,19 +444,15 @@ function StatsCard({ title, value, icon, trend, critical }: any) {
             <p className="text-sm text-muted-foreground">{title}</p>
             <p className="text-2xl font-bold">{value}</p>
             {critical !== undefined && (
-              <p className="text-sm text-destructive">
-                {critical} críticas
-              </p>
+              <p className="text-sm text-destructive">{critical} críticas</p>
             )}
           </div>
           <div className="flex flex-col items-end">
             {icon}
             {trend !== undefined && (
-              <Badge 
-                variant={trend > 0 ? "destructive" : "default"}
-                className="mt-2"
-              >
-                {trend > 0 ? '+' : ''}{trend}%
+              <Badge variant={trend > 0 ? "destructive" : "default"} className="mt-2">
+                {trend > 0 ? "+" : ""}
+                {trend}%
               </Badge>
             )}
           </div>
@@ -464,14 +467,14 @@ function VulnerabilitiesPanel({ vulnerabilities }: any) {
     return (
       <Card>
         <CardContent className="p-12 text-center">
-          <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
+          <CheckCircle className="mx-auto mb-4 h-12 w-12 text-green-500" />
           <p className="text-lg font-semibold">Nenhuma vulnerabilidade detectada</p>
           <p className="text-muted-foreground">O sistema está seguro</p>
         </CardContent>
       </Card>
     );
   }
-  
+
   return (
     <div className="space-y-4">
       {vulnerabilities.map((vuln: VulnerabilityReport) => (
@@ -480,19 +483,17 @@ function VulnerabilitiesPanel({ vulnerabilities }: any) {
             <div className="flex items-start justify-between">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <Badge 
-                    style={{ 
+                  <Badge
+                    style={{
                       backgroundColor: SEVERITY_COLORS[vuln.severity],
-                      color: 'white'
+                      color: "white",
                     }}
                   >
                     {vuln.severity}
                   </Badge>
                   <span className="font-semibold">{vuln.type}</span>
                   {vuln.endpoint && (
-                    <code className="text-sm bg-muted px-2 py-1 rounded">
-                      {vuln.endpoint}
-                    </code>
+                    <code className="rounded bg-muted px-2 py-1 text-sm">{vuln.endpoint}</code>
                   )}
                 </div>
                 <p className="text-sm text-muted-foreground">{vuln.description}</p>
@@ -519,21 +520,17 @@ function AnomaliesPanel({ anomalies }: any) {
       <Card>
         <CardHeader>
           <CardTitle>Detecções em Tempo Real</CardTitle>
-          <CardDescription>
-            Anomalias detectadas por Machine Learning
-          </CardDescription>
+          <CardDescription>Anomalias detectadas por Machine Learning</CardDescription>
         </CardHeader>
         <CardContent>
           {anomalies?.map((anomaly: AnomalyDetection) => (
-            <div key={anomaly.id} className="border-l-4 border-warning pl-4 py-2 mb-4">
+            <div key={anomaly.id} className="border-warning mb-4 border-l-4 py-2 pl-4">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="font-medium">{anomaly.type}</p>
                   <p className="text-sm text-muted-foreground">{anomaly.description}</p>
                 </div>
-                <Badge variant="outline">
-                  {(anomaly.confidence * 100).toFixed(0)}% certeza
-                </Badge>
+                <Badge variant="outline">{(anomaly.confidence * 100).toFixed(0)}% certeza</Badge>
               </div>
             </div>
           ))}
@@ -551,22 +548,22 @@ function AttacksPanel({ metrics }: any) {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <AttackPattern 
+          <AttackPattern
             type="SQL Injection"
             count={metrics?.attacks?.sql || 0}
             blocked={metrics?.blocked?.sql || 0}
           />
-          <AttackPattern 
+          <AttackPattern
             type="XSS"
             count={metrics?.attacks?.xss || 0}
             blocked={metrics?.blocked?.xss || 0}
           />
-          <AttackPattern 
+          <AttackPattern
             type="Brute Force"
             count={metrics?.attacks?.bruteforce || 0}
             blocked={metrics?.blocked?.bruteforce || 0}
           />
-          <AttackPattern 
+          <AttackPattern
             type="Path Traversal"
             count={metrics?.attacks?.pathTraversal || 0}
             blocked={metrics?.blocked?.pathTraversal || 0}
@@ -578,10 +575,10 @@ function AttacksPanel({ metrics }: any) {
 }
 
 function AttackPattern({ type, count, blocked }: any) {
-  const blockRate = count > 0 ? (blocked / count * 100).toFixed(0) : 100;
-  
+  const blockRate = count > 0 ? ((blocked / count) * 100).toFixed(0) : 100;
+
   return (
-    <div className="flex items-center justify-between p-4 border rounded-lg">
+    <div className="flex items-center justify-between rounded-lg border p-4">
       <div>
         <p className="font-medium">{type}</p>
         <p className="text-sm text-muted-foreground">
@@ -607,17 +604,18 @@ function DependenciesPanel({ scans }: any) {
       </CardHeader>
       <CardContent>
         {scans?.vulnerabilities?.map((dep: any) => (
-          <div key={dep.cve} className="border-b last:border-0 py-4">
+          <div key={dep.cve} className="border-b py-4 last:border-0">
             <div className="flex items-start justify-between">
               <div>
                 <p className="font-medium">{dep.dependency}</p>
                 <p className="text-sm text-muted-foreground">{dep.description}</p>
-                <div className="flex items-center gap-2 mt-1">
+                <div className="mt-1 flex items-center gap-2">
                   <Badge variant="outline">{dep.cve}</Badge>
-                  <Badge 
-                    style={{ 
-                      backgroundColor: SEVERITY_COLORS[dep.severity as keyof typeof SEVERITY_COLORS] || '#10b981',
-                      color: 'white'
+                  <Badge
+                    style={{
+                      backgroundColor:
+                        SEVERITY_COLORS[dep.severity as keyof typeof SEVERITY_COLORS] || "#10b981",
+                      color: "white",
                     }}
                   >
                     CVSS: {dep.cvssScore}
@@ -644,24 +642,20 @@ function CodeAnalysisPanel({ findings }: any) {
       </CardHeader>
       <CardContent>
         {findings?.map((finding: any) => (
-          <div key={finding.id} className="border-b last:border-0 py-4">
+          <div key={finding.id} className="border-b py-4 last:border-0">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <p className="font-medium">{finding.rule}</p>
-                <Badge 
-                  variant={finding.severity === 'ERROR' ? 'destructive' : 'default'}
-                >
+                <Badge variant={finding.severity === "ERROR" ? "destructive" : "default"}>
                   {finding.severity}
                 </Badge>
               </div>
               <p className="text-sm text-muted-foreground">{finding.message}</p>
               <div className="flex items-center gap-2 text-xs">
-                <code className="bg-muted px-2 py-1 rounded">
+                <code className="rounded bg-muted px-2 py-1">
                   {finding.file}:{finding.line}:{finding.column}
                 </code>
-                {finding.category && (
-                  <Badge variant="outline">{finding.category}</Badge>
-                )}
+                {finding.category && <Badge variant="outline">{finding.category}</Badge>}
               </div>
               {finding.fixSuggestion && (
                 <Alert className="mt-2">
@@ -687,18 +681,18 @@ function SecurityTrendChart({ data }: any) {
         <YAxis />
         <Tooltip />
         <Legend />
-        <Area 
-          type="monotone" 
-          dataKey="securityScore" 
-          stroke="#10b981" 
-          fill="#10b981" 
+        <Area
+          type="monotone"
+          dataKey="securityScore"
+          stroke="#10b981"
+          fill="#10b981"
           fillOpacity={0.3}
           name="Score de Segurança"
         />
-        <Area 
-          type="monotone" 
-          dataKey="threats" 
-          stroke="#ef4444" 
+        <Area
+          type="monotone"
+          dataKey="threats"
+          stroke="#ef4444"
           fill="#ef4444"
           fillOpacity={0.3}
           name="Ameaças"
@@ -709,18 +703,19 @@ function SecurityTrendChart({ data }: any) {
 }
 
 function VulnerabilityDistribution({ vulnerabilities }: any) {
-  const data = vulnerabilities ? 
-    Object.entries(
-      vulnerabilities.reduce((acc: any, vuln: VulnerabilityReport) => {
-        acc[vuln.severity] = (acc[vuln.severity] || 0) + 1;
-        return acc;
-      }, {})
-    ).map(([severity, count]) => ({
-      name: severity,
-      value: count as number,
-      fill: SEVERITY_COLORS[severity as keyof typeof SEVERITY_COLORS]
-    })) : [];
-  
+  const data = vulnerabilities
+    ? Object.entries(
+        vulnerabilities.reduce((acc: any, vuln: VulnerabilityReport) => {
+          acc[vuln.severity] = (acc[vuln.severity] || 0) + 1;
+          return acc;
+        }, {})
+      ).map(([severity, count]) => ({
+        name: severity,
+        value: count as number,
+        fill: SEVERITY_COLORS[severity as keyof typeof SEVERITY_COLORS],
+      }))
+    : [];
+
   return (
     <ResponsiveContainer width="100%" height={300}>
       <PieChart>
@@ -747,37 +742,37 @@ function VulnerabilityDistribution({ vulnerabilities }: any) {
 // Funções auxiliares
 function calculateSecurityScore(metrics: any, vulnerabilities: any): number {
   if (!metrics || !vulnerabilities) return 100;
-  
+
   let score = 100;
-  
+
   // Penalizar por vulnerabilidades
   const vulnPenalty = {
     CRITICAL: 15,
     HIGH: 10,
     MEDIUM: 5,
-    LOW: 2
+    LOW: 2,
   };
-  
+
   vulnerabilities.forEach((vuln: VulnerabilityReport) => {
     score -= vulnPenalty[vuln.severity] || 0;
   });
-  
+
   // Penalizar por métricas ruins
   if (metrics.errorRate > 5) score -= 10;
   if (metrics.anomalyScore > 50) score -= 15;
   if (metrics.blockedRequests > metrics.totalRequests * 0.1) score -= 20;
-  
+
   return Math.max(0, Math.min(100, score));
 }
 
 function getScoreColor(score: number): string {
-  if (score >= 90) return '#10b981';
-  if (score >= 70) return '#f59e0b';
-  if (score >= 50) return '#ea580c';
-  return '#dc2626';
+  if (score >= 90) return "#10b981";
+  if (score >= 70) return "#f59e0b";
+  if (score >= 50) return "#ea580c";
+  return "#dc2626";
 }
 
 function showCriticalAlert(data: any) {
   // Implementar notificação do navegador ou toast
-  console.error('ALERTA CRÍTICO:', data);
+  console.error("ALERTA CRÍTICO:", data);
 }

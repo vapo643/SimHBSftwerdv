@@ -12,89 +12,87 @@ import { eq } from "drizzle-orm";
 export const togglePropostaStatus = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id: propostaId } = req.params;
-    
+
     if (!propostaId) {
       return res.status(400).json({ message: "ID da proposta é obrigatório" });
     }
 
     const supabase = createServerSupabaseAdminClient();
-    
+
     // 1. Buscar a proposta atual
     const { data: proposta, error: fetchError } = await supabase
-      .from('propostas')
-      .select('id, status, user_id')
-      .eq('id', propostaId)
+      .from("propostas")
+      .select("id, status, user_id")
+      .eq("id", propostaId)
       .single();
-    
+
     if (fetchError || !proposta) {
       return res.status(404).json({ message: "Proposta não encontrada" });
     }
 
     // 2. Verificar se o usuário é o atendente da proposta ou administrador
-    if (req.user?.role !== 'ADMINISTRADOR' && proposta.user_id !== req.user?.id) {
-      return res.status(403).json({ 
-        message: "Você não tem permissão para alterar o status desta proposta" 
+    if (req.user?.role !== "ADMINISTRADOR" && proposta.user_id !== req.user?.id) {
+      return res.status(403).json({
+        message: "Você não tem permissão para alterar o status desta proposta",
       });
     }
 
     // 3. Verificar se a proposta está em um status que pode ser suspensa
-    const statusSuspensiveis = ['rascunho', 'aguardando_analise', 'em_analise', 'pendente'];
-    if (!statusSuspensiveis.includes(proposta.status) && proposta.status !== 'suspensa') {
-      return res.status(400).json({ 
-        message: "Esta proposta não pode ser suspensa/reativada no status atual" 
+    const statusSuspensiveis = ["rascunho", "aguardando_analise", "em_analise", "pendente"];
+    if (!statusSuspensiveis.includes(proposta.status) && proposta.status !== "suspensa") {
+      return res.status(400).json({
+        message: "Esta proposta não pode ser suspensa/reativada no status atual",
       });
     }
 
     // 4. Determinar o novo status
     let novoStatus: string;
-    if (proposta.status === 'suspensa') {
+    if (proposta.status === "suspensa") {
       // Reativar: voltar para aguardando_analise
-      novoStatus = 'aguardando_analise';
+      novoStatus = "aguardando_analise";
     } else {
       // Suspender
-      novoStatus = 'suspensa';
+      novoStatus = "suspensa";
     }
 
     // 5. Atualizar o status
     const { error: updateError } = await supabase
-      .from('propostas')
-      .update({ 
-        status: novoStatus
+      .from("propostas")
+      .update({
+        status: novoStatus,
       })
-      .eq('id', propostaId);
-    
+      .eq("id", propostaId);
+
     if (updateError) {
-      console.error('Erro ao atualizar status:', updateError);
-      return res.status(500).json({ 
-        message: `Erro ao atualizar status: ${updateError.message}` 
+      console.error("Erro ao atualizar status:", updateError);
+      return res.status(500).json({
+        message: `Erro ao atualizar status: ${updateError.message}`,
       });
     }
 
     // 6. Criar log de comunicação
-    await supabase
-      .from('comunicacao_logs')
-      .insert({
-        proposta_id: propostaId,
-        usuario_id: req.user?.id,
-        tipo: 'status_change',
-        mensagem: `Status alterado de ${proposta.status} para ${novoStatus}`,
-        created_at: new Date().toISOString()
-      });
+    await supabase.from("comunicacao_logs").insert({
+      proposta_id: propostaId,
+      usuario_id: req.user?.id,
+      tipo: "status_change",
+      mensagem: `Status alterado de ${proposta.status} para ${novoStatus}`,
+      created_at: new Date().toISOString(),
+    });
 
     res.json({
       success: true,
       propostaId,
       statusAnterior: proposta.status,
       statusNovo: novoStatus,
-      message: novoStatus === 'suspensa' 
-        ? 'Proposta suspensa com sucesso' 
-        : 'Proposta reativada com sucesso'
+      message:
+        novoStatus === "suspensa"
+          ? "Proposta suspensa com sucesso"
+          : "Proposta reativada com sucesso",
     });
-
   } catch (error) {
-    console.error('Erro ao alterar status da proposta:', error);
-    res.status(500).json({ 
-      message: "Erro interno do servidor ao alterar status" 
+    console.error("Erro ao alterar status da proposta:", error);
+    res.status(500).json({
+      message: "Erro interno do servidor ao alterar status",
     });
   }
 };
@@ -106,7 +104,7 @@ export const togglePropostaStatus = async (req: AuthenticatedRequest, res: Respo
 export const getCcbAssinada = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id: propostaId } = req.params;
-    
+
     if (!propostaId) {
       return res.status(400).json({ message: "ID da proposta é obrigatório" });
     }
@@ -117,61 +115,61 @@ export const getCcbAssinada = async (req: AuthenticatedRequest, res: Response) =
       .from(propostas)
       .where(eq(propostas.id, propostaId))
       .limit(1);
-    
+
     if (!proposta) {
       return res.status(404).json({ message: "Proposta não encontrada" });
     }
 
     // Verificar se CCB foi gerada e assinada
     if (!proposta.ccbGerado || !proposta.assinaturaEletronicaConcluida) {
-      return res.status(404).json({ 
-        message: "CCB não foi gerada ou ainda não foi assinada" 
+      return res.status(404).json({
+        message: "CCB não foi gerada ou ainda não foi assinada",
       });
     }
 
     // Primeiro tentar buscar no Supabase Storage (onde salvo os PDFs assinados)
     const supabase = createServerSupabaseAdminClient();
-    
+
     try {
       // Tentar buscar CCB no storage primeiro
       const { data: urlData } = await supabase.storage
-        .from('documents')
+        .from("documents")
         .createSignedUrl(`proposta-${propostaId}/ccb-assinada.pdf`, 3600); // 1 hora
 
       if (urlData?.signedUrl) {
-        return res.json({ 
+        return res.json({
           url: urlData.signedUrl,
           nome: `CCB_${proposta.clienteNome}_${propostaId}.pdf`,
-          status: 'assinado',
+          status: "assinado",
           dataAssinatura: proposta.dataAprovacao,
-          fonte: 'storage'
+          fonte: "storage",
         });
       }
     } catch (storageError) {
-      console.error('Erro ao buscar no Storage:', storageError);
+      console.error("Erro ao buscar no Storage:", storageError);
     }
 
     // Se temos documento ID do ClickSign, retornar informações para visualização
     if (proposta.clicksignDocumentKey) {
-      return res.json({ 
+      return res.json({
         clicksignDocumentId: proposta.clicksignDocumentKey,
         nome: `CCB_${proposta.clienteNome}_${propostaId}.pdf`,
-        status: 'assinado',
+        status: "assinado",
         dataAssinatura: proposta.dataAprovacao,
-        fonte: 'clicksign',
-        message: 'Documento disponível no ClickSign. Acesse sua conta para visualizar.'
+        fonte: "clicksign",
+        message: "Documento disponível no ClickSign. Acesse sua conta para visualizar.",
       });
     }
 
     // Se chegou até aqui, CCB não foi encontrada
-    return res.status(404).json({ 
-      message: "CCB assinada não encontrada. Verifique se o documento foi assinado corretamente no ClickSign." 
+    return res.status(404).json({
+      message:
+        "CCB assinada não encontrada. Verifique se o documento foi assinado corretamente no ClickSign.",
     });
-
   } catch (error) {
-    console.error('Erro ao buscar CCB:', error);
-    res.status(500).json({ 
-      message: "Erro interno do servidor ao buscar CCB" 
+    console.error("Erro ao buscar CCB:", error);
+    res.status(500).json({
+      message: "Erro interno do servidor ao buscar CCB",
     });
   }
 };

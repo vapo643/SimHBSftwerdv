@@ -49,11 +49,20 @@ export interface IStorage {
   createProposta(proposta: InsertProposta): Promise<Proposta>;
   updateProposta(id: string | number, proposta: UpdateProposta): Promise<Proposta>;
   deleteProposta(id: string | number, deletedBy?: string): Promise<void>;
-  
+
   // ClickSign Integration Methods
-  getPropostaByClickSignKey(keyType: 'document' | 'list' | 'signer', key: string): Promise<Proposta | undefined>;
+  getPropostaByClickSignKey(
+    keyType: "document" | "list" | "signer",
+    key: string
+  ): Promise<Proposta | undefined>;
   getCcbUrl(propostaId: string): Promise<string | null>;
-  createPropostaLog(log: { propostaId: string; autorId: string; statusAnterior?: string; statusNovo: string; observacao?: string }): Promise<any>;
+  createPropostaLog(log: {
+    propostaId: string;
+    autorId: string;
+    statusAnterior?: string;
+    statusNovo: string;
+    observacao?: string;
+  }): Promise<any>;
 
   // Lojas
   getLojas(): Promise<Loja[]>;
@@ -61,7 +70,9 @@ export interface IStorage {
   createLoja(loja: InsertLoja): Promise<Loja>;
   updateLoja(id: number, loja: UpdateLoja): Promise<Loja>;
   deleteLoja(id: number, deletedBy?: string): Promise<void>;
-  checkLojaDependencies(id: number): Promise<{ hasUsers: boolean; hasPropostas: boolean; hasGerentes: boolean }>;
+  checkLojaDependencies(
+    id: number
+  ): Promise<{ hasUsers: boolean; hasPropostas: boolean; hasGerentes: boolean }>;
 
   // Gerente-Lojas Relationships
   getGerenteLojas(gerenteId: number): Promise<GerenteLojas[]>;
@@ -74,8 +85,13 @@ export interface IStorage {
   createInterCollection(collection: InsertInterCollection): Promise<InterCollection>;
   getInterCollectionByProposalId(propostaId: string): Promise<InterCollection | undefined>;
   getInterCollectionsByProposalId(propostaId: string): Promise<InterCollection[]>;
-  getInterCollectionByCodigoSolicitacao(codigoSolicitacao: string): Promise<InterCollection | undefined>;
-  updateInterCollection(codigoSolicitacao: string, updates: UpdateInterCollection): Promise<InterCollection>;
+  getInterCollectionByCodigoSolicitacao(
+    codigoSolicitacao: string
+  ): Promise<InterCollection | undefined>;
+  updateInterCollection(
+    codigoSolicitacao: string,
+    updates: UpdateInterCollection
+  ): Promise<InterCollection>;
   getInterCollections(): Promise<InterCollection[]>;
 
   // Inter Bank Webhooks
@@ -97,16 +113,18 @@ export interface IStorage {
     userAgent?: string;
     expiresAt: Date;
   }): Promise<void>;
-  getUserSessions(userId: string): Promise<Array<{
-    id: string;
-    userId: string;
-    ipAddress: string | null;
-    userAgent: string | null;
-    createdAt: Date;
-    expiresAt: Date;
-    lastActivityAt: Date;
-    isActive: boolean;
-  }>>;
+  getUserSessions(userId: string): Promise<
+    Array<{
+      id: string;
+      userId: string;
+      ipAddress: string | null;
+      userAgent: string | null;
+      createdAt: Date;
+      expiresAt: Date;
+      lastActivityAt: Date;
+      isActive: boolean;
+    }>
+  >;
   deleteSession(sessionId: string): Promise<void>;
   deleteAllUserSessions(userId: string, exceptSessionId?: string): Promise<void>;
   updateSessionActivity(sessionId: string): Promise<void>;
@@ -133,13 +151,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUsersWithDetails(): Promise<any[]> {
-    const { createServerSupabaseAdminClient } = await import('./lib/supabase');
+    const { createServerSupabaseAdminClient } = await import("./lib/supabase");
     const supabase = createServerSupabaseAdminClient();
-    
+
     try {
-      const { data: users, error } = await supabase
-        .from('profiles')
-        .select(`
+      const { data: users, error } = await supabase.from("profiles").select(`
           id,
           full_name,
           role,
@@ -150,25 +166,26 @@ export class DatabaseStorage implements IStorage {
         `);
 
       if (error) {
-        console.error('Database error in getUsersWithDetails:', error);
+        console.error("Database error in getUsersWithDetails:", error);
         throw new Error(`Erro ao buscar usuários: ${error.message}`);
       }
 
       return users || [];
     } catch (error) {
-      console.error('Critical error in getUsersWithDetails:', error);
+      console.error("Critical error in getUsersWithDetails:", error);
       throw error;
     }
   }
 
   async getPropostas(): Promise<any[]> {
     // Using raw SQL to handle the actual database schema with JSONB fields
-    const { createServerSupabaseAdminClient } = await import('./lib/supabase');
+    const { createServerSupabaseAdminClient } = await import("./lib/supabase");
     const supabase = createServerSupabaseAdminClient();
-    
+
     const { data, error } = await supabase
-      .from('propostas')
-      .select(`
+      .from("propostas")
+      .select(
+        `
         id,
         status,
         cliente_data,
@@ -183,33 +200,34 @@ export class DatabaseStorage implements IStorage {
             razao_social
           )
         )
-      `)
+      `
+      )
       // .is('deleted_at', null)  // Filter out soft-deleted records - coluna não existe ainda
-      .order('created_at', { ascending: false });
-    
+      .order("created_at", { ascending: false });
+
     if (error) {
-      console.error('Error fetching propostas:', error);
+      console.error("Error fetching propostas:", error);
       throw error;
     }
-    
+
     // Map the data to match the expected format, extracting from JSONB fields
     return (data || []).map((p: any) => {
       const clienteData = p.cliente_data || {};
       const condicoesData = p.condicoes_data || {};
-      
+
       // Debug: log raw data for first few proposals
       if (data && data.indexOf(p) < 3) {
         console.log(`[DEBUG] Proposta ${p.id}:`, {
           condicoesData,
           valorRaw: condicoesData.valor,
-          valorParsed: parseFloat(condicoesData.valor) || 0
+          valorParsed: parseFloat(condicoesData.valor) || 0,
         });
       }
-      
+
       return {
         id: p.id,
         status: p.status,
-        nomeCliente: clienteData.nome || 'Cliente não informado',
+        nomeCliente: clienteData.nome || "Cliente não informado",
         cpfCliente: clienteData.cpf,
         emailCliente: clienteData.email,
         telefoneCliente: clienteData.telefone,
@@ -218,26 +236,33 @@ export class DatabaseStorage implements IStorage {
         lojaId: p.loja_id,
         createdAt: p.created_at,
         updatedAt: p.created_at,
-        loja: p.lojas && p.lojas[0] ? {
-          id: p.lojas[0].id,
-          nomeLoja: p.lojas[0].nome_loja
-        } : null,
-        parceiro: p.lojas && p.lojas[0] && p.lojas[0].parceiros && p.lojas[0].parceiros[0] ? {
-          id: p.lojas[0].parceiros[0].id,
-          razaoSocial: p.lojas[0].parceiros[0].razao_social
-        } : null
+        loja:
+          p.lojas && p.lojas[0]
+            ? {
+                id: p.lojas[0].id,
+                nomeLoja: p.lojas[0].nome_loja,
+              }
+            : null,
+        parceiro:
+          p.lojas && p.lojas[0] && p.lojas[0].parceiros && p.lojas[0].parceiros[0]
+            ? {
+                id: p.lojas[0].parceiros[0].id,
+                razaoSocial: p.lojas[0].parceiros[0].razao_social,
+              }
+            : null,
       };
     });
   }
 
   async getPropostaById(id: string | number): Promise<any | undefined> {
     // Using Supabase to handle JSONB fields properly
-    const { createServerSupabaseAdminClient } = await import('./lib/supabase');
+    const { createServerSupabaseAdminClient } = await import("./lib/supabase");
     const supabase = createServerSupabaseAdminClient();
-    
+
     const { data, error } = await supabase
-      .from('propostas')
-      .select(`
+      .from("propostas")
+      .select(
+        `
         id,
         status,
         cliente_data,
@@ -272,23 +297,24 @@ export class DatabaseStorage implements IStorage {
           prazos,
           comissao
         )
-      `)
-      .eq('id', String(id))
+      `
+      )
+      .eq("id", String(id))
       // .is('deleted_at', null)  // Filter out soft-deleted records - coluna não existe ainda
       .single();
-    
+
     if (error || !data) {
-      console.error('Error fetching proposta by id:', error);
+      console.error("Error fetching proposta by id:", error);
       return undefined;
     }
-    
+
     // Buscar documentos associados à proposta
     const { data: documentos, error: docsError } = await supabase
-      .from('proposta_documentos')
-      .select('*')
-      .eq('proposta_id', String(id))
-      .order('created_at', { ascending: false });
-    
+      .from("proposta_documentos")
+      .select("*")
+      .eq("proposta_id", String(id))
+      .order("created_at", { ascending: false });
+
     // Formatear documentos para o frontend com URLs assinadas
     const documentosAnexados = [];
     if (documentos && documentos.length > 0) {
@@ -297,37 +323,37 @@ export class DatabaseStorage implements IStorage {
           // Construir o caminho do arquivo no storage: proposta-{id}/{timestamp}-{fileName}
           // A URL salva contém o caminho completo: https://xxx.supabase.co/storage/v1/object/public/documents/proposta-{id}/{fileName}
           // Extrair o caminho após '/documents/'
-          const documentsIndex = doc.url.indexOf('/documents/');
+          const documentsIndex = doc.url.indexOf("/documents/");
           let filePath;
-          
+
           if (documentsIndex !== -1) {
             // Extrair caminho após '/documents/'
-            filePath = doc.url.substring(documentsIndex + '/documents/'.length);
+            filePath = doc.url.substring(documentsIndex + "/documents/".length);
           } else {
             // Fallback: tentar extrair filename e reconstruir
-            const urlParts = doc.url.split('/');
+            const urlParts = doc.url.split("/");
             const fileName = urlParts[urlParts.length - 1];
             filePath = `proposta-${String(id)}/${fileName}`;
           }
-          
+
           console.log(`[DEBUG] Gerando URL assinada para: ${filePath}`);
-          
+
           // Gerar URL assinada temporária (válida por 1 hora)
           const { data: signedUrl, error: signError } = await supabase.storage
-            .from('documents')
+            .from("documents")
             .createSignedUrl(filePath, 3600); // 1 hora
-          
+
           if (signError) {
             console.error(`[ERROR] Erro ao gerar URL assinada para ${filePath}:`, signError);
           }
-          
+
           documentosAnexados.push({
             name: doc.nome_arquivo,
             url: signError ? doc.url : signedUrl.signedUrl, // Fallback para URL original se houver erro
-            type: doc.tipo || 'application/octet-stream',
+            type: doc.tipo || "application/octet-stream",
             size: doc.tamanho ? `${Math.round(doc.tamanho / 1024)} KB` : undefined,
             uploadDate: doc.created_at,
-            category: 'supporting'
+            category: "supporting",
           });
         } catch (error) {
           console.error(`Erro ao gerar URL assinada para documento ${doc.nome_arquivo}:`, error);
@@ -335,15 +361,15 @@ export class DatabaseStorage implements IStorage {
           documentosAnexados.push({
             name: doc.nome_arquivo,
             url: doc.url,
-            type: doc.tipo || 'application/octet-stream',
+            type: doc.tipo || "application/octet-stream",
             size: doc.tamanho ? `${Math.round(doc.tamanho / 1024)} KB` : undefined,
             uploadDate: doc.created_at,
-            category: 'supporting'
+            category: "supporting",
           });
         }
       }
     }
-    
+
     // Return complete structured data for editing
     return {
       id: data.id,
@@ -363,27 +389,36 @@ export class DatabaseStorage implements IStorage {
       analistaId: data.analista_id,
       dataAnalise: data.data_analise,
       // Related entities (handling Supabase responses)
-      loja: data.lojas ? {
-        id: (data.lojas as any).id,
-        nomeLoja: (data.lojas as any).nome_loja
-      } : null,
-      parceiro: data.lojas && (data.lojas as any).parceiros ? {
-        id: (data.lojas as any).parceiros.id,
-        razaoSocial: (data.lojas as any).parceiros.razao_social
-      } : null,
-      produto: data.produtos ? {
-        id: (data.produtos as any).id,
-        nomeProduto: (data.produtos as any).nome_produto,
-        tacValor: (data.produtos as any).tac_valor,
-        tacTipo: (data.produtos as any).tac_tipo
-      } : null,
-      tabelaComercial: data.tabelas_comerciais ? {
-        id: (data.tabelas_comerciais as any).id,
-        nomeTabela: (data.tabelas_comerciais as any).nome_tabela,
-        taxaJuros: (data.tabelas_comerciais as any).taxa_juros,
-        prazos: (data.tabelas_comerciais as any).prazos,
-        comissao: (data.tabelas_comerciais as any).comissao
-      } : null
+      loja: data.lojas
+        ? {
+            id: (data.lojas as any).id,
+            nomeLoja: (data.lojas as any).nome_loja,
+          }
+        : null,
+      parceiro:
+        data.lojas && (data.lojas as any).parceiros
+          ? {
+              id: (data.lojas as any).parceiros.id,
+              razaoSocial: (data.lojas as any).parceiros.razao_social,
+            }
+          : null,
+      produto: data.produtos
+        ? {
+            id: (data.produtos as any).id,
+            nomeProduto: (data.produtos as any).nome_produto,
+            tacValor: (data.produtos as any).tac_valor,
+            tacTipo: (data.produtos as any).tac_tipo,
+          }
+        : null,
+      tabelaComercial: data.tabelas_comerciais
+        ? {
+            id: (data.tabelas_comerciais as any).id,
+            nomeTabela: (data.tabelas_comerciais as any).nome_tabela,
+            taxaJuros: (data.tabelas_comerciais as any).taxa_juros,
+            prazos: (data.tabelas_comerciais as any).prazos,
+            comissao: (data.tabelas_comerciais as any).comissao,
+          }
+        : null,
     };
   }
 
@@ -391,49 +426,49 @@ export class DatabaseStorage implements IStorage {
     return await db
       .select()
       .from(propostas)
-      .where(and(
-        eq(propostas.status, status as any),
-        isNull(propostas.deletedAt)  // Filter out soft-deleted records
-      ))
+      .where(
+        and(
+          eq(propostas.status, status as any),
+          isNull(propostas.deletedAt) // Filter out soft-deleted records
+        )
+      )
       .orderBy(desc(propostas.createdAt));
   }
 
   async createProposta(proposta: any): Promise<any> {
     // Transform the normalized data to JSONB format for the real database schema
-    const { createServerSupabaseAdminClient } = await import('./lib/supabase');
+    const { createServerSupabaseAdminClient } = await import("./lib/supabase");
     const supabase = createServerSupabaseAdminClient();
-    
+
     // Use the JSONB objects directly from the incoming data
     const clienteData = proposta.clienteData || {};
     const condicoesData = proposta.condicoesData || {};
-    
 
-    
     // Insert with the real database schema
     const { data, error } = await supabase
-      .from('propostas')
+      .from("propostas")
       .insert({
         id: proposta.id,
-        status: proposta.status || 'rascunho',
+        status: proposta.status || "rascunho",
         loja_id: proposta.lojaId,
         user_id: proposta.userId,
         produto_id: proposta.produtoId,
         tabela_comercial_id: proposta.tabelaComercialId,
         cliente_data: clienteData,
-        condicoes_data: condicoesData
+        condicoes_data: condicoesData,
       })
       .select()
       .single();
-    
+
     if (error) {
-      console.error('Error creating proposta:', error);
+      console.error("Error creating proposta:", error);
       throw error;
     }
-    
+
     console.log(`[DEBUG] Proposta ${data.id} criada com sucesso`);
-    
+
     // Documents will be uploaded and associated separately via /api/propostas/:id/documentos endpoint
-    
+
     return data;
   }
 
@@ -448,28 +483,37 @@ export class DatabaseStorage implements IStorage {
 
   async deleteProposta(id: string | number, deletedBy?: string): Promise<void> {
     // Soft delete - set deleted_at timestamp
-    await db.update(propostas)
+    await db
+      .update(propostas)
       .set({ deletedAt: new Date() })
       .where(eq(propostas.id, String(id)));
   }
 
   // Lojas CRUD implementation
   async getLojas(): Promise<Loja[]> {
-    return await db.select().from(lojas)
-      .where(and(
-        eq(lojas.isActive, true),
-        isNull(lojas.deletedAt)  // Exclude soft-deleted records
-      ))
+    return await db
+      .select()
+      .from(lojas)
+      .where(
+        and(
+          eq(lojas.isActive, true),
+          isNull(lojas.deletedAt) // Exclude soft-deleted records
+        )
+      )
       .orderBy(lojas.nomeLoja);
   }
 
   async getLojaById(id: number): Promise<Loja | undefined> {
-    const result = await db.select().from(lojas)
-      .where(and(
-        eq(lojas.id, id), 
-        eq(lojas.isActive, true),
-        isNull(lojas.deletedAt)  // Exclude soft-deleted records
-      ))
+    const result = await db
+      .select()
+      .from(lojas)
+      .where(
+        and(
+          eq(lojas.id, id),
+          eq(lojas.isActive, true),
+          isNull(lojas.deletedAt) // Exclude soft-deleted records
+        )
+      )
       .limit(1);
     return result[0];
   }
@@ -480,45 +524,46 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateLoja(id: number, loja: UpdateLoja): Promise<Loja> {
-    const result = await db
-      .update(lojas)
-      .set(loja)
-      .where(eq(lojas.id, id))
-      .returning();
+    const result = await db.update(lojas).set(loja).where(eq(lojas.id, id)).returning();
     return result[0];
   }
 
   async deleteLoja(id: number, deletedBy?: string): Promise<void> {
     // Soft delete - set both isActive to false AND deleted_at timestamp
-    await db.update(lojas)
-      .set({ 
+    await db
+      .update(lojas)
+      .set({
         isActive: false,
-        deletedAt: new Date() 
+        deletedAt: new Date(),
       })
       .where(eq(lojas.id, id));
   }
 
-  async checkLojaDependencies(id: number): Promise<{ hasUsers: boolean; hasPropostas: boolean; hasGerentes: boolean }> {
+  async checkLojaDependencies(
+    id: number
+  ): Promise<{ hasUsers: boolean; hasPropostas: boolean; hasGerentes: boolean }> {
     try {
       // Check if there are proposals associated with this store (excluding soft-deleted)
-      const propostasCount = await db.select({ id: propostas.id })
+      const propostasCount = await db
+        .select({ id: propostas.id })
         .from(propostas)
-        .where(and(
-          eq(propostas.lojaId, id),
-          isNull(propostas.deletedAt)
-        ))
+        .where(and(eq(propostas.lojaId, id), isNull(propostas.deletedAt)))
         .limit(1);
-      
+
       // Check if there are manager-store relationships
-      const gerentesCount = await db.select({ id: gerenteLojas.gerenteId }).from(gerenteLojas).where(eq(gerenteLojas.lojaId, id)).limit(1);
-      
+      const gerentesCount = await db
+        .select({ id: gerenteLojas.gerenteId })
+        .from(gerenteLojas)
+        .where(eq(gerenteLojas.lojaId, id))
+        .limit(1);
+
       return {
         hasUsers: false, // Users don't have direct loja association in our current schema
         hasPropostas: propostasCount.length > 0,
         hasGerentes: gerentesCount.length > 0,
       };
     } catch (error) {
-      console.error('Error checking loja dependencies:', error);
+      console.error("Error checking loja dependencies:", error);
       return {
         hasUsers: false,
         hasPropostas: false,
@@ -529,10 +574,7 @@ export class DatabaseStorage implements IStorage {
 
   // Gerente-Lojas Relationships
   async getGerenteLojas(gerenteId: number): Promise<GerenteLojas[]> {
-    return await db
-      .select()
-      .from(gerenteLojas)
-      .where(eq(gerenteLojas.gerenteId, gerenteId));
+    return await db.select().from(gerenteLojas).where(eq(gerenteLojas.gerenteId, gerenteId));
   }
 
   async getLojasForGerente(gerenteId: number): Promise<number[]> {
@@ -559,24 +601,24 @@ export class DatabaseStorage implements IStorage {
   async removeGerenteFromLoja(gerenteId: number, lojaId: number): Promise<void> {
     await db
       .delete(gerenteLojas)
-      .where(and(
-        eq(gerenteLojas.gerenteId, gerenteId),
-        eq(gerenteLojas.lojaId, lojaId)
-      ));
+      .where(and(eq(gerenteLojas.gerenteId, gerenteId), eq(gerenteLojas.lojaId, lojaId)));
   }
 
   // ClickSign Integration Methods Implementation
-  async getPropostaByClickSignKey(keyType: 'document' | 'list' | 'signer', key: string): Promise<Proposta | undefined> {
+  async getPropostaByClickSignKey(
+    keyType: "document" | "list" | "signer",
+    key: string
+  ): Promise<Proposta | undefined> {
     let whereCondition;
-    
+
     switch (keyType) {
-      case 'document':
+      case "document":
         whereCondition = eq(propostas.clicksignDocumentKey, key);
         break;
-      case 'list':
+      case "list":
         whereCondition = eq(propostas.clicksignListKey, key);
         break;
-      case 'signer':
+      case "signer":
         whereCondition = eq(propostas.clicksignSignerKey, key);
         break;
       default:
@@ -589,7 +631,7 @@ export class DatabaseStorage implements IStorage {
 
   async getCcbUrl(propostaId: string): Promise<string | null> {
     try {
-      const { createServerSupabaseAdminClient } = await import('./lib/supabase');
+      const { createServerSupabaseAdminClient } = await import("./lib/supabase");
       const supabase = createServerSupabaseAdminClient();
 
       // Get proposal to find CCB file path
@@ -601,7 +643,7 @@ export class DatabaseStorage implements IStorage {
 
       // Generate signed URL for CCB document
       const { data: signedUrlData, error: signedUrlError } = await supabase.storage
-        .from('documents')
+        .from("documents")
         .createSignedUrl(proposta.caminhoCcbAssinado, 3600); // 1 hour expiry
 
       if (signedUrlError) {
@@ -616,12 +658,12 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async createPropostaLog(log: { 
-    propostaId: string; 
-    autorId: string; 
-    statusAnterior?: string; 
-    statusNovo: string; 
-    observacao?: string; 
+  async createPropostaLog(log: {
+    propostaId: string;
+    autorId: string;
+    statusAnterior?: string;
+    statusNovo: string;
+    observacao?: string;
   }): Promise<any> {
     const result = await db
       .insert(propostaLogs)
@@ -630,10 +672,10 @@ export class DatabaseStorage implements IStorage {
         autorId: log.autorId,
         statusAnterior: log.statusAnterior || null,
         statusNovo: log.statusNovo,
-        observacao: log.observacao || null
+        observacao: log.observacao || null,
       })
       .returning();
-    
+
     return result[0];
   }
 
@@ -646,27 +688,39 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getInterCollectionByProposalId(propostaId: string): Promise<InterCollection | undefined> {
-    const result = await db.select().from(interCollections)
+    const result = await db
+      .select()
+      .from(interCollections)
       .where(and(eq(interCollections.propostaId, propostaId), eq(interCollections.isActive, true)))
       .limit(1);
     return result[0];
   }
-  
+
   async getInterCollectionsByProposalId(propostaId: string): Promise<InterCollection[]> {
-    return await db.select().from(interCollections)
+    return await db
+      .select()
+      .from(interCollections)
       .where(and(eq(interCollections.propostaId, propostaId), eq(interCollections.isActive, true)))
       .orderBy(interCollections.dataVencimento);
   }
 
-  async getInterCollectionByCodigoSolicitacao(codigoSolicitacao: string): Promise<InterCollection | undefined> {
-    const result = await db.select().from(interCollections)
+  async getInterCollectionByCodigoSolicitacao(
+    codigoSolicitacao: string
+  ): Promise<InterCollection | undefined> {
+    const result = await db
+      .select()
+      .from(interCollections)
       .where(eq(interCollections.codigoSolicitacao, codigoSolicitacao))
       .limit(1);
     return result[0];
   }
 
-  async updateInterCollection(codigoSolicitacao: string, updates: UpdateInterCollection): Promise<InterCollection> {
-    const result = await db.update(interCollections)
+  async updateInterCollection(
+    codigoSolicitacao: string,
+    updates: UpdateInterCollection
+  ): Promise<InterCollection> {
+    const result = await db
+      .update(interCollections)
       .set({ ...updates, updatedAt: new Date() })
       .where(eq(interCollections.codigoSolicitacao, codigoSolicitacao))
       .returning();
@@ -674,7 +728,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getInterCollections(): Promise<InterCollection[]> {
-    return await db.select().from(interCollections)
+    return await db
+      .select()
+      .from(interCollections)
       .where(eq(interCollections.isActive, true))
       .orderBy(desc(interCollections.id));
   }
@@ -683,20 +739,26 @@ export class DatabaseStorage implements IStorage {
   async createInterWebhook(webhook: InsertInterWebhook): Promise<InterWebhook> {
     // Deactivate existing webhooks first
     await db.update(interWebhooks).set({ isActive: false });
-    
+
     const result = await db.insert(interWebhooks).values(webhook).returning();
     return result[0];
   }
 
   async getActiveInterWebhook(): Promise<InterWebhook | undefined> {
-    const result = await db.select().from(interWebhooks)
+    const result = await db
+      .select()
+      .from(interWebhooks)
       .where(eq(interWebhooks.isActive, true))
       .limit(1);
     return result[0];
   }
 
-  async updateInterWebhook(id: number, updates: Partial<InsertInterWebhook>): Promise<InterWebhook> {
-    const result = await db.update(interWebhooks)
+  async updateInterWebhook(
+    id: number,
+    updates: Partial<InsertInterWebhook>
+  ): Promise<InterWebhook> {
+    const result = await db
+      .update(interWebhooks)
       .set({ ...updates, updatedAt: new Date() })
       .where(eq(interWebhooks.id, id))
       .returning();
@@ -704,9 +766,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteInterWebhook(id: number): Promise<void> {
-    await db.update(interWebhooks)
-      .set({ isActive: false })
-      .where(eq(interWebhooks.id, id));
+    await db.update(interWebhooks).set({ isActive: false }).where(eq(interWebhooks.id, id));
   }
 
   // Inter Bank Callbacks
@@ -716,17 +776,20 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUnprocessedInterCallbacks(): Promise<InterCallback[]> {
-    return await db.select().from(interCallbacks)
+    return await db
+      .select()
+      .from(interCallbacks)
       .where(eq(interCallbacks.processado, false))
       .orderBy(desc(interCallbacks.id));
   }
 
   async markInterCallbackAsProcessed(id: number, erro?: string): Promise<void> {
-    await db.update(interCallbacks)
-      .set({ 
-        processado: true, 
+    await db
+      .update(interCallbacks)
+      .set({
+        processado: true,
         processedAt: new Date(),
-        erro: erro || null
+        erro: erro || null,
       })
       .where(eq(interCallbacks.id, id));
   }
@@ -754,37 +817,31 @@ export class DatabaseStorage implements IStorage {
     });
   }
 
-  async getUserSessions(userId: string): Promise<Array<{
-    id: string;
-    userId: string;
-    token: string;
-    ipAddress: string | null;
-    userAgent: string | null;
-    device: string | null;
-    createdAt: Date;
-    expiresAt: Date;
-    lastActivityAt: Date;
-    isActive: boolean;
-  }>> {
+  async getUserSessions(userId: string): Promise<
+    Array<{
+      id: string;
+      userId: string;
+      token: string;
+      ipAddress: string | null;
+      userAgent: string | null;
+      device: string | null;
+      createdAt: Date;
+      expiresAt: Date;
+      lastActivityAt: Date;
+      isActive: boolean;
+    }>
+  > {
     const sessions = await db
       .select()
       .from(userSessions)
-      .where(
-        and(
-          eq(userSessions.userId, userId),
-          eq(userSessions.isActive, true)
-        )
-      )
+      .where(and(eq(userSessions.userId, userId), eq(userSessions.isActive, true)))
       .orderBy(desc(userSessions.lastActivityAt));
-    
+
     return sessions;
   }
 
   async deleteSession(sessionId: string): Promise<void> {
-    await db
-      .update(userSessions)
-      .set({ isActive: false })
-      .where(eq(userSessions.id, sessionId));
+    await db.update(userSessions).set({ isActive: false }).where(eq(userSessions.id, sessionId));
   }
 
   async deleteAllUserSessions(userId: string, exceptSessionId?: string): Promise<void> {
@@ -805,12 +862,7 @@ export class DatabaseStorage implements IStorage {
       await db
         .update(userSessions)
         .set({ isActive: false })
-        .where(
-          and(
-            eq(userSessions.userId, userId),
-            eq(userSessions.isActive, true)
-          )
-        );
+        .where(and(eq(userSessions.userId, userId), eq(userSessions.isActive, true)));
     }
   }
 

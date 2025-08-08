@@ -1,19 +1,19 @@
 /**
  * ClickSign API v3 Service
  * Complete implementation using Envelope API
- * 
+ *
  * This is the definitive implementation following official documentation
  * API v3 uses Envelopes instead of Lists for better control
  */
 
-import { getBrasiliaTimestamp } from '../lib/timezone.js';
-import { clickSignSecurityService } from './clickSignSecurityService.js';
-import { cpf } from 'cpf-cnpj-validator';
+import { getBrasiliaTimestamp } from "../lib/timezone.js";
+import { clickSignSecurityService } from "./clickSignSecurityService.js";
+import { cpf } from "cpf-cnpj-validator";
 
 interface ClickSignV3Config {
   apiUrl: string;
   apiToken: string;
-  environment: 'sandbox' | 'production';
+  environment: "sandbox" | "production";
 }
 
 interface EnvelopeData {
@@ -29,7 +29,7 @@ interface EnvelopeData {
 }
 
 interface DocumentData {
-  content?: string; // base64 with Data URI format  
+  content?: string; // base64 with Data URI format
   content_base64?: string; // base64 with Data URI format (for atomic creation)
   filename?: string;
   template_id?: string; // for template type
@@ -47,14 +47,14 @@ interface SignerData {
 
 interface EnvelopeSignerData {
   signer_id: string;
-  sign_as: 'party' | 'witness' | 'approver';
+  sign_as: "party" | "witness" | "approver";
   refusable?: boolean;
   message?: string;
   group?: number;
 }
 
 interface RequirementData {
-  type: 'selfie' | 'pix' | 'document' | 'certificate';
+  type: "selfie" | "pix" | "document" | "certificate";
   signer_id: string;
 }
 
@@ -81,14 +81,16 @@ class ClickSignServiceV3 {
     // ALWAYS use production ClickSign API for valid legal signatures
     // ClickSign uses API v1 with query parameter authentication
     this.config = {
-      apiUrl: 'https://app.clicksign.com/api/v1',
-      apiToken: process.env.CLICKSIGN_API_TOKEN || '',
-      environment: 'production'
+      apiUrl: "https://app.clicksign.com/api/v1",
+      apiToken: process.env.CLICKSIGN_API_TOKEN || "",
+      environment: "production",
     };
 
     if (!this.config.apiToken) {
-      console.error('[CLICKSIGN V1] ❌ ERROR: API token not configured! Check CLICKSIGN_API_TOKEN environment variable');
-      throw new Error('ClickSign API token is required but not configured');
+      console.error(
+        "[CLICKSIGN V1] ❌ ERROR: API token not configured! Check CLICKSIGN_API_TOKEN environment variable"
+      );
+      throw new Error("ClickSign API token is required but not configured");
     }
 
     console.log(`[CLICKSIGN V1] 🚀 Initialized in PRODUCTION mode (legal signatures)`);
@@ -115,29 +117,29 @@ class ClickSignServiceV3 {
     const url = `${this.config.apiUrl}${endpoint}?access_token=${this.config.apiToken}`;
     // Use standard JSON format for v1 API
     const headers: HeadersInit = {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json'
+      "Content-Type": "application/json",
+      Accept: "application/json",
     };
 
     console.log(`[CLICKSIGN V1] 🌐 Full URL: ${url}`);
     console.log(`[CLICKSIGN V1] 📡 ${method} ${endpoint}`);
-    console.log(`[CLICKSIGN V1] Headers:`, { 
-      'Content-Type': headers['Content-Type'],
-      'Accept': headers['Accept'],
-      'Authorization': `${this.config.apiToken.substring(0, 10)}...`
+    console.log(`[CLICKSIGN V1] Headers:`, {
+      "Content-Type": headers["Content-Type"],
+      Accept: headers["Accept"],
+      Authorization: `${this.config.apiToken.substring(0, 10)}...`,
     });
 
     try {
       const response = await fetch(url, {
         method,
         headers,
-        body: body ? JSON.stringify(body) : undefined
+        body: body ? JSON.stringify(body) : undefined,
       });
 
       // Update rate limit info
-      const rateLimitHeader = response.headers.get('X-RateLimit-Remaining');
-      const rateLimitResetHeader = response.headers.get('X-RateLimit-Reset');
-      
+      const rateLimitHeader = response.headers.get("X-RateLimit-Remaining");
+      const rateLimitResetHeader = response.headers.get("X-RateLimit-Reset");
+
       if (rateLimitHeader) {
         this.rateLimitRemaining = parseInt(rateLimitHeader);
       }
@@ -146,21 +148,23 @@ class ClickSignServiceV3 {
       }
 
       // Check if response is JSON
-      const contentType = response.headers.get('content-type');
+      const contentType = response.headers.get("content-type");
       console.log(`[CLICKSIGN V1] Response content-type: ${contentType}`);
       console.log(`[CLICKSIGN V1] Response status: ${response.status}`);
-      
+
       // Handle 202 Accepted status (common for async operations like notifications)
       if (response.status === 202) {
         console.log(`[CLICKSIGN V1] ✅ Request accepted (202) - Processing asynchronously`);
-        return { data: { status: 'accepted', message: 'Request accepted for processing' } } as ClickSignV3Response<T>;
+        return {
+          data: { status: "accepted", message: "Request accepted for processing" },
+        } as ClickSignV3Response<T>;
       }
 
       // Always try to get text first to debug
       const responseText = await response.text();
-      
+
       let data;
-      if (responseText.trim() === '') {
+      if (responseText.trim() === "") {
         // Empty response (common for 204 No Content or some 202 responses)
         console.log(`[CLICKSIGN V1] Empty response body for status ${response.status}`);
         data = { status: response.status };
@@ -169,10 +173,14 @@ class ClickSignServiceV3 {
           data = JSON.parse(responseText);
         } catch (parseError) {
           console.error(`[CLICKSIGN V1] ❌ Failed to parse JSON response!`);
-          console.error(`[CLICKSIGN V1] Response text (first 1000 chars): ${responseText.substring(0, 1000)}`);
+          console.error(
+            `[CLICKSIGN V1] Response text (first 1000 chars): ${responseText.substring(0, 1000)}`
+          );
           console.error(`[CLICKSIGN V1] Full URL was: ${url}`);
           console.error(`[CLICKSIGN V1] Status: ${response.status}`);
-          throw new Error(`Failed to parse JSON. Status: ${response.status}. Response starts with: ${responseText.substring(0, 100)}`);
+          throw new Error(
+            `Failed to parse JSON. Status: ${response.status}. Response starts with: ${responseText.substring(0, 100)}`
+          );
         }
       }
 
@@ -182,9 +190,11 @@ class ClickSignServiceV3 {
           status: response.status,
           statusText: response.statusText,
           headers: Object.fromEntries(response.headers.entries()),
-          body: data
+          body: data,
         });
-        throw new Error(data.errors?.[0]?.detail || data.errors?.[0]?.message || `API error: ${response.status}`);
+        throw new Error(
+          data.errors?.[0]?.detail || data.errors?.[0]?.message || `API error: ${response.status}`
+        );
       }
 
       return { data };
@@ -198,20 +208,20 @@ class ClickSignServiceV3 {
    * Helper function to ensure correct Data URI format
    */
   private formatBase64ToDataURI(base64Content: string): string {
-    const prefix = 'data:application/pdf;base64,';
+    const prefix = "data:application/pdf;base64,";
 
     if (base64Content.startsWith(prefix)) {
       return base64Content; // Already correct
     }
 
     // If has another 'data:' prefix, remove it before adding the correct one
-    if (base64Content.startsWith('data:')) {
-      const parts = base64Content.split(',');
+    if (base64Content.startsWith("data:")) {
+      const parts = base64Content.split(",");
       if (parts.length === 2) {
         return `${prefix}${parts[1]}`;
       }
     }
-    
+
     // Add prefix if it's pure Base64
     return `${prefix}${base64Content}`;
   }
@@ -221,16 +231,16 @@ class ClickSignServiceV3 {
    */
   private sanitizeAndValidateCPF(rawCpf: string): string {
     // Sanitize: Remove all non-numeric characters
-    const cleanCpf = rawCpf.replace(/\D/g, '');
-    
+    const cleanCpf = rawCpf.replace(/\D/g, "");
+
     console.log(`[CLICKSIGN V1] 🧹 CPF sanitization: ${rawCpf} → ${cleanCpf}`);
-    
+
     // Validate using the library
     if (!cpf.isValid(cleanCpf)) {
       console.error(`[CLICKSIGN V1] ❌ Invalid CPF: ${cleanCpf}`);
-      throw new Error('CPF do cliente é inválido. Operação abortada em ambiente de Produção.');
+      throw new Error("CPF do cliente é inválido. Operação abortada em ambiente de Produção.");
     }
-    
+
     console.log(`[CLICKSIGN V1] ✅ CPF validation passed: ${cleanCpf}`);
     return cleanCpf;
   }
@@ -240,33 +250,36 @@ class ClickSignServiceV3 {
    */
   async createDocumentBatch(documentData: any) {
     console.log(`[CLICKSIGN V1] 🔨 Creating document batch`);
-    console.log(`[CLICKSIGN V1] Document data (content_base64 length):`, documentData.content_base64?.length || 0);
-    
+    console.log(
+      `[CLICKSIGN V1] Document data (content_base64 length):`,
+      documentData.content_base64?.length || 0
+    );
+
     // Use simple JSON format for v1 API
     // Add MIME type prefix to base64 content
     const contentWithMimeType = `data:application/pdf;base64,${documentData.content_base64}`;
-    
+
     const requestBody = {
       document: {
         path: `/propostas/${Date.now()}.pdf`,
         content_base64: contentWithMimeType,
         deadline_at: documentData.deadline_at,
         auto_close: true,
-        locale: 'pt-BR',
+        locale: "pt-BR",
         reminders: true,
-        block_after_refusal: true
-      }
+        block_after_refusal: true,
+      },
     };
-    
+
     console.log(`[CLICKSIGN V1] 🔨 Request body:`, JSON.stringify(requestBody, null, 2));
-    
-    const response = await this.makeRequest<any>('POST', '/documents', requestBody);
-    
+
+    const response = await this.makeRequest<any>("POST", "/documents", requestBody);
+
     console.log(`[CLICKSIGN V1] 📦 Document response:`, JSON.stringify(response, null, 2));
-    
+
     const document = (response as any).data?.document || (response as any).document || response;
     console.log(`[CLICKSIGN V1] ✅ Document created: ${document.key}`);
-    
+
     return document;
   }
 
@@ -276,28 +289,28 @@ class ClickSignServiceV3 {
   async addDocumentToEnvelope(envelopeId: string, documentData: DocumentData) {
     console.log(`[CLICKSIGN V1] 🔨 Adding document to envelope ${envelopeId}`);
     console.log(`[CLICKSIGN V1] Document data:`, documentData);
-    
+
     // Use JSON:API format
     const requestBody = {
       data: {
-        type: 'documents',
-        attributes: documentData
-      }
+        type: "documents",
+        attributes: documentData,
+      },
     };
-    
+
     console.log(`[CLICKSIGN V1] Request body being sent:`, JSON.stringify(requestBody, null, 2));
-    
+
     const response = await this.makeRequest<any>(
-      'POST',
+      "POST",
       `/envelopes/${envelopeId}/documents`,
       requestBody
     );
 
     console.log(`[CLICKSIGN V1] 📦 Document response:`, JSON.stringify(response, null, 2));
-    
+
     const document = response.data?.data || response.data;
     console.log(`[CLICKSIGN V1] ✅ Document added to envelope: ${document.id}`);
-    
+
     return document;
   }
 
@@ -310,14 +323,14 @@ class ClickSignServiceV3 {
       name: signerData.name,
       email: signerData.email,
       documentation: signerData.documentation,
-      useBiometricAuth: signerData.useBiometricAuth
+      useBiometricAuth: signerData.useBiometricAuth,
     });
-    
+
     // Determine authentication methods
     // For ClickSign v1: only 'email' is valid in the auths array
     // Biometric is controlled by boolean flags, not the auths array
-    const auths = ['email'];
-    
+    const auths = ["email"];
+
     // Use simple JSON format for v1
     const requestBody = {
       signer: {
@@ -327,7 +340,7 @@ class ClickSignServiceV3 {
         documentation: signerData.documentation,
         ...(signerData.birthday && { birthday: signerData.birthday }),
         auths: auths, // Always use 'email' for v1 API
-        delivery: 'email', // Always use email delivery (not WhatsApp)
+        delivery: "email", // Always use email delivery (not WhatsApp)
         // Enable biometric authentication flags when requested
         // Note: facial_biometrics_enabled cannot be used with selfie_enabled
         ...(signerData.useBiometricAuth && {
@@ -335,50 +348,53 @@ class ClickSignServiceV3 {
           // Don't enable these as they conflict with facial biometrics:
           // selfie_enabled: false,
           // liveness_enabled: false
-        })
-      }
+        }),
+      },
     };
 
     console.log(`[CLICKSIGN V1] 📡 POST /signers`);
     console.log(`[CLICKSIGN V1] Request body:`, JSON.stringify(requestBody, null, 2));
-    console.log(`[CLICKSIGN V1] 🔐 BIOMETRIC AUTH ENABLED:`, signerData.useBiometricAuth ? 'YES' : 'NO');
+    console.log(
+      `[CLICKSIGN V1] 🔐 BIOMETRIC AUTH ENABLED:`,
+      signerData.useBiometricAuth ? "YES" : "NO"
+    );
     console.log(`[CLICKSIGN V1] 🔐 Authentication methods requested:`, auths);
 
-    const response = await this.makeRequest<any>(
-      'POST',
-      '/signers',
-      requestBody
-    );
+    const response = await this.makeRequest<any>("POST", "/signers", requestBody);
 
     const signer = (response as any).data?.signer || (response as any).signer || response;
     console.log(`[CLICKSIGN V1] ✅ Signer created with key: ${signer.key}`);
     console.log(`[CLICKSIGN V1] Signer response:`, JSON.stringify(signer, null, 2));
     console.log(`[CLICKSIGN V1] 🔐 Signer authentication methods returned:`, signer.auths);
-    
+
     return signer;
   }
-
-
 
   /**
    * STEP 2: Add signer to envelope using the proper endpoint
    */
-  async addSignerToEnvelopeV3(envelopeId: string, signerId: string, signAs: 'party' | 'witness' | 'approver' = 'party') {
+  async addSignerToEnvelopeV3(
+    envelopeId: string,
+    signerId: string,
+    signAs: "party" | "witness" | "approver" = "party"
+  ) {
     console.log(`[CLICKSIGN V1] 🚀 STEP 2: Adding signer to envelope`);
-    console.log(`[CLICKSIGN V1] Envelope ID: ${envelopeId}, Signer ID: ${signerId}, Sign as: ${signAs}`);
-    
+    console.log(
+      `[CLICKSIGN V1] Envelope ID: ${envelopeId}, Signer ID: ${signerId}, Sign as: ${signAs}`
+    );
+
     const requestBody = {
       signer_id: signerId,
       sign_as: signAs,
       refusable: false,
-      message: 'Por favor, assine o Contrato de Crédito Bancário (CCB) do seu empréstimo.'
+      message: "Por favor, assine o Contrato de Crédito Bancário (CCB) do seu empréstimo.",
     };
 
     console.log(`[CLICKSIGN V1] 📡 POST /envelopes/${envelopeId}/signers`);
     console.log(`[CLICKSIGN V1] Request body:`, JSON.stringify(requestBody, null, 2));
 
     const response = await this.makeRequest<any>(
-      'POST',
+      "POST",
       `/envelopes/${envelopeId}/signers`,
       requestBody
     );
@@ -391,13 +407,21 @@ class ClickSignServiceV3 {
   /**
    * Legacy method - DO NOT USE (kept for backwards compatibility during migration)
    */
-  async addSignerToEnvelope(envelopeId: string, signerData: EnvelopeSignerData, fullSignerData?: SignerData) {
+  async addSignerToEnvelope(
+    envelopeId: string,
+    signerData: EnvelopeSignerData,
+    fullSignerData?: SignerData
+  ) {
     console.log(`[CLICKSIGN V1] ⚠️ WARNING: Using deprecated method addSignerToEnvelope`);
     console.log(`[CLICKSIGN V1] This method uses the unstable /envelopes/{id}/signers endpoint`);
-    console.log(`[CLICKSIGN V1] Please use createSignerGlobally + createRequirementForSigner instead`);
-    
+    console.log(
+      `[CLICKSIGN V1] Please use createSignerGlobally + createRequirementForSigner instead`
+    );
+
     // For now, throw an error to force migration
-    throw new Error('addSignerToEnvelope is deprecated. Use the 2-step flow: createSignerGlobally + createRequirementForSigner');
+    throw new Error(
+      "addSignerToEnvelope is deprecated. Use the 2-step flow: createSignerGlobally + createRequirementForSigner"
+    );
   }
 
   /**
@@ -405,17 +429,17 @@ class ClickSignServiceV3 {
    */
   async addRequirement(envelopeId: string, requirementData: RequirementData) {
     console.log(`[CLICKSIGN V1] 🔨 Adding requirement to envelope ${envelopeId}`);
-    
+
     // Use correct JSON API format
     const requestBody = {
       data: {
-        type: 'requirements',
-        attributes: requirementData
-      }
+        type: "requirements",
+        attributes: requirementData,
+      },
     };
 
     const response = await this.makeRequest<any>(
-      'POST',
+      "POST",
       `/envelopes/${envelopeId}/requirements`,
       requestBody
     );
@@ -428,11 +452,7 @@ class ClickSignServiceV3 {
    * Finish envelope (send for signature)
    */
   async finishEnvelope(envelopeId: string) {
-    const response = await this.makeRequest<any>(
-      'POST',
-      `/envelopes/${envelopeId}/finish`,
-      {}
-    );
+    const response = await this.makeRequest<any>("POST", `/envelopes/${envelopeId}/finish`, {});
 
     console.log(`[CLICKSIGN V1] ✅ Envelope finished and sent for signature`);
     return response.data?.data || response.data;
@@ -442,7 +462,7 @@ class ClickSignServiceV3 {
    * Get envelope status
    */
   async getEnvelopeStatus(envelopeId: string) {
-    const response = await this.makeRequest<any>('GET', `/envelopes/${envelopeId}`);
+    const response = await this.makeRequest<any>("GET", `/envelopes/${envelopeId}`);
     return response.data?.data || response.data;
   }
 
@@ -450,11 +470,7 @@ class ClickSignServiceV3 {
    * Cancel envelope
    */
   async cancelEnvelope(envelopeId: string) {
-    const response = await this.makeRequest<any>(
-      'POST',
-      `/envelopes/${envelopeId}/cancel`,
-      {}
-    );
+    const response = await this.makeRequest<any>("POST", `/envelopes/${envelopeId}/cancel`, {});
 
     console.log(`[CLICKSIGN V1] ✅ Envelope cancelled`);
     return response.data?.data || response.data;
@@ -465,7 +481,7 @@ class ClickSignServiceV3 {
    */
   async downloadDocument(envelopeId: string, documentId: string) {
     const response = await this.makeRequest<any>(
-      'GET',
+      "GET",
       `/envelopes/${envelopeId}/documents/${documentId}/download`
     );
     return response.data;
@@ -475,8 +491,8 @@ class ClickSignServiceV3 {
    * Configure webhook
    */
   async configureWebhook(webhookData: WebhookData) {
-    const response = await this.makeRequest<any>('POST', '/webhooks', {
-      webhook: webhookData
+    const response = await this.makeRequest<any>("POST", "/webhooks", {
+      webhook: webhookData,
     });
 
     console.log(`[CLICKSIGN V1] ✅ Webhook configured`);
@@ -493,7 +509,7 @@ class ClickSignServiceV3 {
     message?: string
   ) {
     const response = await this.makeRequest<any>(
-      'POST',
+      "POST",
       `/envelopes/${envelopeId}/signers/${signerId}/whatsapp`,
       { phone, message }
     );
@@ -510,16 +526,18 @@ class ClickSignServiceV3 {
       list: {
         document_key: documentKey,
         signer_key: signerKey,
-        sign_as: 'sign'
-      }
+        sign_as: "sign",
+      },
     };
 
     console.log(`[CLICKSIGN V1] 📡 POST /lists`);
     console.log(`[CLICKSIGN V1] Request body:`, JSON.stringify(requestBody, null, 2));
-    const response = await this.makeRequest<any>('POST', '/lists', requestBody);
+    const response = await this.makeRequest<any>("POST", "/lists", requestBody);
     console.log(`[CLICKSIGN V1] 📦 List response:`, JSON.stringify(response, null, 2));
     const list = (response as any).data?.list || (response as any).list || response;
-    console.log(`[CLICKSIGN V1] ✅ List created with request_signature_key: ${list.request_signature_key}`);
+    console.log(
+      `[CLICKSIGN V1] ✅ List created with request_signature_key: ${list.request_signature_key}`
+    );
     return list;
   }
 
@@ -528,11 +546,11 @@ class ClickSignServiceV3 {
    */
   async requestSignature(signerKey: string) {
     const requestBody = {
-      request_signature_key: signerKey
+      request_signature_key: signerKey,
     };
 
     console.log(`[CLICKSIGN V1] 📡 POST /notifications`);
-    const response = await this.makeRequest<any>('POST', '/notifications', requestBody);
+    const response = await this.makeRequest<any>("POST", "/notifications", requestBody);
     return response;
   }
 
@@ -554,18 +572,18 @@ class ClickSignServiceV3 {
     try {
       // Validate and sanitize client data
       const validatedClientData = clickSignSecurityService.validateClientData(clientData);
-      
+
       // Create audit log for signature request
-      const auditLog = clickSignSecurityService.createAuditLog(
-        'CLICKSIGN_V1_SEND_CCB',
-        { proposalId, clientEmail: validatedClientData.email }
-      );
-      console.log('[CLICKSIGN V1 AUDIT]', auditLog);
+      const auditLog = clickSignSecurityService.createAuditLog("CLICKSIGN_V1_SEND_CCB", {
+        proposalId,
+        clientEmail: validatedClientData.email,
+      });
+      console.log("[CLICKSIGN V1 AUDIT]", auditLog);
 
       console.log(`[CLICKSIGN V1] 🚀 Starting CCB signature flow for proposal: ${proposalId}`);
 
       // 1. Ensure correct base64 format (no data URI prefix)
-      const cleanBase64 = pdfBase64.replace(/^data:application\/pdf;base64,/, '');
+      const cleanBase64 = pdfBase64.replace(/^data:application\/pdf;base64,/, "");
 
       // 2. Validate and sanitize CPF before proceeding
       console.log(`[CLICKSIGN V1] Validating CPF for client: ${clientData.name}`);
@@ -575,7 +593,7 @@ class ClickSignServiceV3 {
       console.log(`[CLICKSIGN V1] 📄 Uploading document`);
       const document = await this.createDocumentBatch({
         content_base64: cleanBase64,
-        deadline_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // 30 days
+        deadline_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days
       });
       console.log(`[CLICKSIGN V1] ✅ Document uploaded with key: ${document.key}`);
 
@@ -587,7 +605,7 @@ class ClickSignServiceV3 {
         phone: clientData.phone,
         documentation: validatedCpf,
         birthday: clientData.birthday,
-        useBiometricAuth: clientData.useBiometricAuth
+        useBiometricAuth: clientData.useBiometricAuth,
       });
       console.log(`[CLICKSIGN V1] ✅ Signer created with key: ${signer.key}`);
 
@@ -605,14 +623,16 @@ class ClickSignServiceV3 {
             requirement: {
               document_key: document.key,
               signer_key: signer.key,
-              type: 'selfie'
-            }
+              type: "selfie",
+            },
           };
           console.log(`[CLICKSIGN V1] Requirement body:`, JSON.stringify(requirementBody, null, 2));
-          
+
           // Try to add requirement (may not be needed in v1, but won't hurt)
-          await this.makeRequest<any>('POST', '/requirements', requirementBody).catch(err => {
-            console.log(`[CLICKSIGN V1] ⚠️ Requirements endpoint not available in v1, continuing...`);
+          await this.makeRequest<any>("POST", "/requirements", requirementBody).catch(err => {
+            console.log(
+              `[CLICKSIGN V1] ⚠️ Requirements endpoint not available in v1, continuing...`
+            );
           });
         } catch (err) {
           console.log(`[CLICKSIGN V1] ⚠️ Could not add requirement, continuing with standard flow`);
@@ -625,7 +645,7 @@ class ClickSignServiceV3 {
       console.log(`[CLICKSIGN V1] ✅ Signature requested`);
 
       // 7. Build sign URL
-      const signUrl = list.request_signature_key 
+      const signUrl = list.request_signature_key
         ? `https://app.clicksign.com/sign/${list.request_signature_key}`
         : `https://app.clicksign.com/documento/${document.key}`;
 
@@ -636,10 +656,9 @@ class ClickSignServiceV3 {
         documentKey: document.key,
         signerId: signer.key,
         signUrl: signUrl,
-        requestSignatureKey: list.request_signature_key || '',
-        status: 'sent'
+        requestSignatureKey: list.request_signature_key || "",
+        status: "sent",
       };
-
     } catch (error) {
       console.error(`[CLICKSIGN V1] ❌ Failed to send CCB for signature:`, error);
       throw error;
@@ -651,7 +670,7 @@ class ClickSignServiceV3 {
    */
   async testConnection(): Promise<boolean> {
     try {
-      await this.makeRequest('GET', '/envelopes?limit=1');
+      await this.makeRequest("GET", "/envelopes?limit=1");
       console.log(`[CLICKSIGN V1] ✅ Connection test successful`);
       return true;
     } catch (error) {

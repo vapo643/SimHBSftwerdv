@@ -19,16 +19,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { 
-  CalendarDays, 
-  DollarSign, 
-  FileText, 
-  Upload, 
-  X, 
+import {
+  CalendarDays,
+  DollarSign,
+  FileText,
+  Upload,
+  X,
   AlertCircle,
   Loader2,
   CheckCircle2,
-  User
+  User,
 } from "lucide-react";
 import { ClientDataStep } from "@/components/propostas/ClientDataStep";
 import { LoanConditionsStep } from "@/components/propostas/LoanConditionsStep";
@@ -47,14 +47,18 @@ function ProposalForm() {
   useProposalEffects();
 
   // Load origination context on mount
-  const { isLoading: loadingContext, error: contextError, data: contextData } = useQuery({
-    queryKey: ['/api/origination/context'],
+  const {
+    isLoading: loadingContext,
+    error: contextError,
+    data: contextData,
+  } = useQuery({
+    queryKey: ["/api/origination/context"],
     queryFn: async () => {
-      const response = await apiRequest('/api/origination/context', {
-        method: 'GET'
+      const response = await apiRequest("/api/origination/context", {
+        method: "GET",
       });
       return response;
-    }
+    },
   });
 
   // Handle context data
@@ -68,11 +72,12 @@ function ProposalForm() {
   // Handle errors
   React.useEffect(() => {
     if (contextError) {
-      console.error('Erro ao carregar contexto:', contextError);
+      console.error("Erro ao carregar contexto:", contextError);
       toast({
-        title: 'Erro ao carregar dados',
-        description: 'Não foi possível carregar os dados necessários. Por favor, recarregue a página.',
-        variant: 'destructive',
+        title: "Erro ao carregar dados",
+        description:
+          "Não foi possível carregar os dados necessários. Por favor, recarregue a página.",
+        variant: "destructive",
       });
       setLoading(false);
     }
@@ -86,21 +91,21 @@ function ProposalForm() {
       const proposalData = {
         // ===== TIPO DE PESSOA E DADOS BÁSICOS =====
         tipoPessoa: state.clientData.tipoPessoa, // PF ou PJ
-        
+
         // Dados Pessoa Física
         clienteNome: state.clientData.nome,
         clienteCpf: state.clientData.cpf,
-        
+
         // Dados Pessoa Jurídica (quando aplicável)
         clienteRazaoSocial: state.clientData.razaoSocial || null,
         clienteCnpj: state.clientData.cnpj || null,
-        
+
         // ===== DOCUMENTAÇÃO COMPLETA (RG) =====
         clienteRg: state.clientData.rg,
         clienteOrgaoEmissor: state.clientData.orgaoEmissor,
         clienteRgUf: state.clientData.rgUf, // NOVO: UF de emissão do RG
         clienteRgDataEmissao: state.clientData.rgDataEmissao, // NOVO: Data de emissão do RG
-        
+
         // ===== DADOS PESSOAIS =====
         clienteEmail: state.clientData.email,
         clienteTelefone: state.clientData.telefone,
@@ -108,7 +113,7 @@ function ProposalForm() {
         clienteLocalNascimento: state.clientData.localNascimento, // NOVO: Local de nascimento
         clienteEstadoCivil: state.clientData.estadoCivil,
         clienteNacionalidade: state.clientData.nacionalidade,
-        
+
         // ===== ENDEREÇO DETALHADO =====
         clienteCep: state.clientData.cep,
         clienteLogradouro: state.clientData.logradouro, // NOVO: Rua/Avenida separado
@@ -117,145 +122,152 @@ function ProposalForm() {
         clienteBairro: state.clientData.bairro, // NOVO: Bairro
         clienteCidade: state.clientData.cidade, // NOVO: Cidade
         clienteUf: state.clientData.estado, // NOVO: Estado/UF
-        
+
         // Manter endereço concatenado para compatibilidade
-        clienteEndereco: `${state.clientData.logradouro || ''}, ${state.clientData.numero || ''}${state.clientData.complemento ? ', ' + state.clientData.complemento : ''}, ${state.clientData.bairro || ''}, ${state.clientData.cidade || ''}/${state.clientData.estado || ''} - CEP: ${state.clientData.cep || ''}`.trim(),
-        
+        clienteEndereco:
+          `${state.clientData.logradouro || ""}, ${state.clientData.numero || ""}${state.clientData.complemento ? ", " + state.clientData.complemento : ""}, ${state.clientData.bairro || ""}, ${state.clientData.cidade || ""}/${state.clientData.estado || ""} - CEP: ${state.clientData.cep || ""}`.trim(),
+
         // ===== DADOS PROFISSIONAIS =====
         clienteOcupacao: state.clientData.ocupacao,
         clienteRenda: state.clientData.rendaMensal,
         clienteTelefoneEmpresa: state.clientData.telefoneEmpresa,
-        
+
         // ===== MÉTODO DE PAGAMENTO =====
         metodoPagamento: state.clientData.metodoPagamento, // 'conta_bancaria' ou 'pix'
-        
+
         // Dados bancários (quando conta_bancaria)
         dadosPagamentoBanco: state.clientData.dadosPagamentoBanco || null,
         dadosPagamentoAgencia: state.clientData.dadosPagamentoAgencia || null,
         dadosPagamentoConta: state.clientData.dadosPagamentoConta || null,
         dadosPagamentoDigito: state.clientData.dadosPagamentoDigito || null,
-        
+
         // Dados PIX (quando pix)
         dadosPagamentoPix: state.clientData.dadosPagamentoPix || null, // Chave PIX
         dadosPagamentoTipoPix: state.clientData.dadosPagamentoTipoPix || null, // Tipo da chave
         dadosPagamentoPixBanco: state.clientData.dadosPagamentoPixBanco || null,
         dadosPagamentoPixNomeTitular: state.clientData.dadosPagamentoPixNomeTitular || null,
         dadosPagamentoPixCpfTitular: state.clientData.dadosPagamentoPixCpfTitular || null,
-        
+
         // ===== REFERÊNCIAS PESSOAIS =====
         referenciaPessoal: state.personalReferences,
-        
+
         // ===== DADOS DO EMPRÉSTIMO =====
         produtoId: state.loanData.produtoId,
         tabelaComercialId: state.loanData.tabelaComercialId,
-        valor: parseFloat(state.loanData.valorSolicitado.replace(/[^\d,]/g, '').replace(',', '.')),
+        valor: parseFloat(state.loanData.valorSolicitado.replace(/[^\d,]/g, "").replace(",", ".")),
         prazo: state.loanData.prazo,
-        
+
         // Valores calculados da simulação
         valorTac: state.simulation?.valorTAC ? parseFloat(state.simulation.valorTAC) : 0,
         valorIof: state.simulation?.valorIOF ? parseFloat(state.simulation.valorIOF) : 0,
-        valorTotalFinanciado: state.simulation?.valorTotalFinanciado ? parseFloat(state.simulation.valorTotalFinanciado) : 0,
-        
+        valorTotalFinanciado: state.simulation?.valorTotalFinanciado
+          ? parseFloat(state.simulation.valorTotalFinanciado)
+          : 0,
+
         // Data de carência (se houver)
         dataCarencia: state.loanData.dataCarencia || null,
         incluirTac: state.loanData.incluirTac,
-        
+
         // ===== DADOS ADMINISTRATIVOS =====
-        status: 'aguardando_analise',
+        status: "aguardando_analise",
         lojaId: state.context?.atendente?.loja?.id,
-        finalidade: 'Empréstimo pessoal',
-        garantia: 'Sem garantia',
-        
+        finalidade: "Empréstimo pessoal",
+        garantia: "Sem garantia",
+
         // ===== CAMPOS OPCIONAIS PARA CCB =====
         // Estes podem ser preenchidos posteriormente ou com valores padrão
-        formaLiberacao: 'deposito', // Como será liberado: deposito, ted, pix
-        formaPagamento: 'boleto', // Como cliente pagará: boleto, pix, debito
-        pracaPagamento: 'São Paulo', // Cidade de pagamento
+        formaLiberacao: "deposito", // Como será liberado: deposito, ted, pix
+        formaPagamento: "boleto", // Como cliente pagará: boleto, pix, debito
+        pracaPagamento: "São Paulo", // Cidade de pagamento
       };
 
       console.log(`[DEBUG] Criando proposta primeiro...`);
-      const propostaResponse = await apiRequest('/api/propostas', {
-        method: 'POST',
+      const propostaResponse = await apiRequest("/api/propostas", {
+        method: "POST",
         body: proposalData,
       });
-      
+
       const propostaId = propostaResponse.id;
       console.log(`[DEBUG] Proposta criada com ID: ${propostaId}`);
-      
+
       // 2. SEGUNDO: Upload dos documentos com ID real da proposta
       const uploadedDocuments: string[] = [];
-      
+
       if (state.documents.length > 0) {
-        console.log(`[DEBUG] Iniciando upload de ${state.documents.length} documentos para proposta ${propostaId}`);
-        
+        console.log(
+          `[DEBUG] Iniciando upload de ${state.documents.length} documentos para proposta ${propostaId}`
+        );
+
         for (const doc of state.documents) {
           try {
             const timestamp = Date.now();
             const fileName = `${timestamp}-${doc.name}`;
-            
+
             // Upload usando apiRequest com FormData
             const formData = new FormData();
-            formData.append('file', doc.file);
-            formData.append('filename', fileName);
-            formData.append('proposalId', propostaId); // Usar ID real da proposta
-            
-            const uploadResponse = await apiRequest('/api/upload', {
-              method: 'POST',
+            formData.append("file", doc.file);
+            formData.append("filename", fileName);
+            formData.append("proposalId", propostaId); // Usar ID real da proposta
+
+            const uploadResponse = await apiRequest("/api/upload", {
+              method: "POST",
               body: formData,
             });
-            
+
             console.log(`[DEBUG] Documento ${doc.name} enviado com sucesso:`, uploadResponse);
             uploadedDocuments.push(fileName);
-            
           } catch (uploadError) {
             console.error(`[ERROR] Falha ao enviar documento ${doc.name}:`, uploadError);
             throw new Error(`Falha ao enviar documento ${doc.name}. Tente novamente.`);
           }
         }
-        
+
         console.log(`[DEBUG] Todos os ${uploadedDocuments.length} documentos enviados com sucesso`);
-        
+
         // 3. TERCEIRO: Associar documentos na proposta via API específica
         if (uploadedDocuments.length > 0) {
           try {
             await apiRequest(`/api/propostas/${propostaId}/documentos`, {
-              method: 'POST',
-              body: { documentos: uploadedDocuments }
+              method: "POST",
+              body: { documentos: uploadedDocuments },
             });
-            console.log(`[DEBUG] ${uploadedDocuments.length} documentos associados à proposta ${propostaId}`);
+            console.log(
+              `[DEBUG] ${uploadedDocuments.length} documentos associados à proposta ${propostaId}`
+            );
           } catch (associationError) {
             console.error(`[ERROR] Falha ao associar documentos:`, associationError);
             // Não falhar a operação, documentos já estão no storage
           }
         }
       }
-      
+
       return propostaResponse;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       toast({
-        title: 'Proposta criada com sucesso!',
+        title: "Proposta criada com sucesso!",
         description: `Proposta ${data.id} foi encaminhada para análise com ${state.documents.length} documento(s) anexado(s).`,
       });
-      
+
       // Limpar documentos após sucesso
       if (state.context) {
         setContext(state.context);
       }
       setStep(0);
     },
-    onError: (error) => {
+    onError: error => {
       toast({
-        title: 'Erro ao criar proposta',
-        description: error instanceof Error ? error.message : 'Ocorreu um erro ao criar a proposta.',
-        variant: 'destructive',
+        title: "Erro ao criar proposta",
+        description:
+          error instanceof Error ? error.message : "Ocorreu um erro ao criar a proposta.",
+        variant: "destructive",
       });
     },
   });
 
   if (loadingContext || state.isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div className="flex min-h-[400px] items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
@@ -274,33 +286,38 @@ function ProposalForm() {
 
   const handleStepChange = (value: string) => {
     const stepMap: Record<string, number> = {
-      'dados-cliente': 0,
-      'referencias-pessoais': 1,
-      'condicoes-emprestimo': 2,
-      'anexo-documentos': 3,
+      "dados-cliente": 0,
+      "referencias-pessoais": 1,
+      "condicoes-emprestimo": 2,
+      "anexo-documentos": 3,
     };
     setStep(stepMap[value] || 0);
   };
 
-  const currentTabValue = ['dados-cliente', 'referencias-pessoais', 'condicoes-emprestimo', 'anexo-documentos'][state.currentStep];
+  const currentTabValue = [
+    "dados-cliente",
+    "referencias-pessoais",
+    "condicoes-emprestimo",
+    "anexo-documentos",
+  ][state.currentStep];
 
   return (
     <Tabs value={currentTabValue} onValueChange={handleStepChange} className="w-full">
       <TabsList className="grid w-full grid-cols-4">
         <TabsTrigger value="dados-cliente">
-          <User className="h-4 w-4 mr-2" />
+          <User className="mr-2 h-4 w-4" />
           Dados do Cliente
         </TabsTrigger>
         <TabsTrigger value="referencias-pessoais">
-          <User className="h-4 w-4 mr-2" />
+          <User className="mr-2 h-4 w-4" />
           Referências
         </TabsTrigger>
         <TabsTrigger value="condicoes-emprestimo">
-          <DollarSign className="h-4 w-4 mr-2" />
+          <DollarSign className="mr-2 h-4 w-4" />
           Empréstimo
         </TabsTrigger>
         <TabsTrigger value="anexo-documentos">
-          <FileText className="h-4 w-4 mr-2" />
+          <FileText className="mr-2 h-4 w-4" />
           Documentos
         </TabsTrigger>
       </TabsList>
@@ -334,10 +351,7 @@ function ProposalForm() {
         </Button>
 
         {state.currentStep < 3 ? (
-          <Button
-            type="button"
-            onClick={() => setStep(state.currentStep + 1)}
-          >
+          <Button type="button" onClick={() => setStep(state.currentStep + 1)}>
             Próximo
           </Button>
         ) : (
@@ -349,15 +363,17 @@ function ProposalForm() {
           >
             {submitProposal.isPending ? (
               <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                {state.documents.length > 0 ? `Enviando ${state.documents.length} documentos...` : 'Criando proposta...'}
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                {state.documents.length > 0
+                  ? `Enviando ${state.documents.length} documentos...`
+                  : "Criando proposta..."}
               </>
             ) : (
               <>
-                <CheckCircle2 className="h-4 w-4 mr-2" />
+                <CheckCircle2 className="mr-2 h-4 w-4" />
                 Enviar Proposta
                 {state.documents.length > 0 && (
-                  <span className="ml-2 text-xs bg-green-600 px-2 py-1 rounded-full">
+                  <span className="ml-2 rounded-full bg-green-600 px-2 py-1 text-xs">
                     {state.documents.length} doc(s)
                   </span>
                 )}

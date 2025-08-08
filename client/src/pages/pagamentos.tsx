@@ -107,7 +107,7 @@ export default function Pagamentos() {
     queryFn: async () => {
       const response = await apiRequest("/api/propostas/pagamento");
       return response;
-    }
+    },
   });
 
   const form = useForm<PaymentForm>({
@@ -339,19 +339,13 @@ export default function Pagamentos() {
   }
 
   const handleRefresh = () => {
-    queryClient.invalidateQueries({ queryKey: ['/api/propostas/pagamento'] });
+    queryClient.invalidateQueries({ queryKey: ["/api/propostas/pagamento"] });
   };
 
   return (
-    <DashboardLayout 
+    <DashboardLayout
       title="Fila de Pagamento"
-      actions={
-        <RefreshButton 
-          onRefresh={handleRefresh}
-          isLoading={isLoading}
-          variant="ghost"
-        />
-      }
+      actions={<RefreshButton onRefresh={handleRefresh} isLoading={isLoading} variant="ghost" />}
     >
       <div className="space-y-6">
         {/* Header */}
@@ -643,7 +637,9 @@ export default function Pagamentos() {
                               <p className="font-semibold text-gray-900">
                                 #{proposta.id} - {proposta.clienteData.nome}
                               </p>
-                              <p className="text-sm text-gray-600">CPF: {proposta.clienteData.cpf}</p>
+                              <p className="text-sm text-gray-600">
+                                CPF: {proposta.clienteData.cpf}
+                              </p>
                             </div>
                           </div>
                           <div className="text-right">
@@ -691,7 +687,9 @@ export default function Pagamentos() {
                     </div>
                     <div>
                       <span className="text-gray-600">Telefone:</span>
-                      <p className="font-medium">{selectedProposta.clienteData.telefone || "N/A"}</p>
+                      <p className="font-medium">
+                        {selectedProposta.clienteData.telefone || "N/A"}
+                      </p>
                     </div>
                   </div>
                 </div>

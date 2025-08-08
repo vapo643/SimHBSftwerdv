@@ -4,16 +4,21 @@
  * Preserva 100% do layout, logo e formatação original
  */
 
-import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
-import fs from 'fs/promises';
-import path from 'path';
-import { createServerSupabaseAdminClient } from '../lib/supabase';
-import { db } from '../lib/supabase';
-import { sql } from 'drizzle-orm';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
-import { SIMPIX_CCB_MAPPING, TEST_COORDINATES, yFromTop, formatTextWithLineBreaks } from './ccbFieldMapping';
-import { CoordinateAdjustment, applyCoordinateAdjustments } from './ccbCoordinateMapper';
+import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
+import fs from "fs/promises";
+import path from "path";
+import { createServerSupabaseAdminClient } from "../lib/supabase";
+import { db } from "../lib/supabase";
+import { sql } from "drizzle-orm";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import {
+  SIMPIX_CCB_MAPPING,
+  TEST_COORDINATES,
+  yFromTop,
+  formatTextWithLineBreaks,
+} from "./ccbFieldMapping";
+import { CoordinateAdjustment, applyCoordinateAdjustments } from "./ccbCoordinateMapper";
 
 interface PropostaData {
   id: string;
@@ -41,21 +46,26 @@ export class CCBGenerationService {
   private templatePath: string;
 
   constructor() {
-    this.templatePath = path.join(process.cwd(), 'server', 'templates', 'template_ccb.pdf');
+    this.templatePath = path.join(process.cwd(), "server", "templates", "template_ccb.pdf");
   }
 
   /**
    * Gera CCB preenchendo o template PDF com dados da proposta
    * MÉTODO CORRETO: Carrega template e desenha texto sobre ele, preservando layout
    */
-  async generateCCB(proposalId: string): Promise<{ success: boolean; pdfPath?: string; error?: string }> {
+  async generateCCB(
+    proposalId: string
+  ): Promise<{ success: boolean; pdfPath?: string; error?: string }> {
     return this.generateCCBWithAdjustments(proposalId, []);
   }
 
   /**
    * Gera CCB com ajustes de coordenadas personalizados
    */
-  async generateCCBWithAdjustments(proposalId: string, adjustments: CoordinateAdjustment[] = []): Promise<{ success: boolean; pdfPath?: string; error?: string }> {
+  async generateCCBWithAdjustments(
+    proposalId: string,
+    adjustments: CoordinateAdjustment[] = []
+  ): Promise<{ success: boolean; pdfPath?: string; error?: string }> {
     try {
       console.log(`📄 [CCB] Iniciando geração CORRETA para proposta ${proposalId}`);
       console.log(`📄 [CCB] Template path: ${this.templatePath}`);
@@ -63,60 +73,69 @@ export class CCBGenerationService {
       // 1. Buscar dados da proposta
       const proposalData = await this.getProposalData(proposalId);
       if (!proposalData) {
-        return { success: false, error: 'Proposta não encontrada ou dados incompletos' };
+        return { success: false, error: "Proposta não encontrada ou dados incompletos" };
       }
 
-      console.log('📄 [CCB] Dados da proposta carregados:', {
+      console.log("📄 [CCB] Dados da proposta carregados:", {
         nome: proposalData.cliente_nome,
         cpf: proposalData.cliente_cpf,
-        valor: proposalData.valor_emprestimo
+        valor: proposalData.valor_emprestimo,
       });
 
       // 2. CARREGAR TEMPLATE PDF EXISTENTE (NÃO criar novo!)
-      console.log('📄 [CCB] Carregando template PDF existente...');
+      console.log("📄 [CCB] Carregando template PDF existente...");
       const templateBytes = await fs.readFile(this.templatePath);
       console.log(`📄 [CCB] Template carregado: ${templateBytes.length} bytes`);
       const pdfDoc = await PDFDocument.load(templateBytes);
       console.log(`📄 [CCB] PDF carregado: ${pdfDoc.getPageCount()} páginas`);
-      
+
       // 3. Preparar fonte para desenhar texto
       const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
-      
+
       // 4. Obter a primeira página do template
       const pages = pdfDoc.getPages();
       const firstPage = pages[0];
       const { width, height } = firstPage.getSize();
-      
+
       console.log(`📄 [CCB] Dimensões da página: ${width}x${height}`);
-      
+
       // 5. DESENHAR TEXTO SOBRE O TEMPLATE usando mapeamento de coordenadas
-      
+
       // Aplicar ajustes de coordenadas se fornecidos (via parâmetro adjustments)
-      const mapping = adjustments && adjustments.length > 0 ? applyCoordinateAdjustments(adjustments) : SIMPIX_CCB_MAPPING;
-      
-      console.log(`📄 [CCB] Preenchimento com mapeamento SIMPIX (${adjustments?.length || 0} ajustes aplicados)...`);
-      
+      const mapping =
+        adjustments && adjustments.length > 0
+          ? applyCoordinateAdjustments(adjustments)
+          : SIMPIX_CCB_MAPPING;
+
+      console.log(
+        `📄 [CCB] Preenchimento com mapeamento SIMPIX (${adjustments?.length || 0} ajustes aplicados)...`
+      );
+
       // DADOS DO CLIENTE
       const nomeCoord = mapping.nomeCliente;
-      firstPage.drawText(proposalData.cliente_nome || '', {
+      firstPage.drawText(proposalData.cliente_nome || "", {
         x: nomeCoord.x,
         y: yFromTop(height, 120), // 120px do topo
         size: nomeCoord.size,
         font: helveticaFont,
         color: rgb(0, 0, 0),
       });
-      console.log(`📄 [CCB] Nome: "${proposalData.cliente_nome}" em x:${nomeCoord.x}, y:${yFromTop(height, 120)}`);
-      
+      console.log(
+        `📄 [CCB] Nome: "${proposalData.cliente_nome}" em x:${nomeCoord.x}, y:${yFromTop(height, 120)}`
+      );
+
       const cpfCoord = mapping.cpfCliente;
-      firstPage.drawText(this.formatCPF(proposalData.cliente_cpf) || '', {
+      firstPage.drawText(this.formatCPF(proposalData.cliente_cpf) || "", {
         x: cpfCoord.x,
         y: yFromTop(height, 145), // 145px do topo
         size: cpfCoord.size,
         font: helveticaFont,
         color: rgb(0, 0, 0),
       });
-      console.log(`📄 [CCB] CPF: "${this.formatCPF(proposalData.cliente_cpf)}" em x:${cpfCoord.x}, y:${yFromTop(height, 145)}`);
-      
+      console.log(
+        `📄 [CCB] CPF: "${this.formatCPF(proposalData.cliente_cpf)}" em x:${cpfCoord.x}, y:${yFromTop(height, 145)}`
+      );
+
       // DADOS DO EMPRÉSTIMO
       const valorCoord = mapping.valorEmprestimo;
       firstPage.drawText(this.formatCurrency(proposalData.valor_emprestimo), {
@@ -126,8 +145,10 @@ export class CCBGenerationService {
         font: helveticaFont,
         color: rgb(0, 0, 0),
       });
-      console.log(`📄 [CCB] Valor: "${this.formatCurrency(proposalData.valor_emprestimo)}" em x:${valorCoord.x}, y:${yFromTop(height, 240)}`);
-      
+      console.log(
+        `📄 [CCB] Valor: "${this.formatCurrency(proposalData.valor_emprestimo)}" em x:${valorCoord.x}, y:${yFromTop(height, 240)}`
+      );
+
       const parcelasCoord = mapping.numeroParcelas;
       firstPage.drawText(`${proposalData.prazo_meses}x`, {
         x: parcelasCoord.x,
@@ -136,8 +157,10 @@ export class CCBGenerationService {
         font: helveticaFont,
         color: rgb(0, 0, 0),
       });
-      console.log(`📄 [CCB] Parcelas: "${proposalData.prazo_meses}x" em x:${parcelasCoord.x}, y:${yFromTop(height, 270)}`);
-      
+      console.log(
+        `📄 [CCB] Parcelas: "${proposalData.prazo_meses}x" em x:${parcelasCoord.x}, y:${yFromTop(height, 270)}`
+      );
+
       const valorParcelaCoord = mapping.valorParcela;
       firstPage.drawText(this.formatCurrency(proposalData.valor_parcela), {
         x: valorParcelaCoord.x,
@@ -146,8 +169,10 @@ export class CCBGenerationService {
         font: helveticaFont,
         color: rgb(0, 0, 0),
       });
-      console.log(`📄 [CCB] Valor parcela: "${this.formatCurrency(proposalData.valor_parcela)}" em x:${valorParcelaCoord.x}, y:${yFromTop(height, 300)}`);
-      
+      console.log(
+        `📄 [CCB] Valor parcela: "${this.formatCurrency(proposalData.valor_parcela)}" em x:${valorParcelaCoord.x}, y:${yFromTop(height, 300)}`
+      );
+
       // DATA DE EMISSÃO
       const dataCoord = mapping.dataEmissao;
       const dataAtual = format(new Date(), "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
@@ -159,29 +184,29 @@ export class CCBGenerationService {
         color: rgb(0, 0, 0),
       });
       console.log(`📄 [CCB] Data: "${dataAtual}" em x:${dataCoord.x}, y:${yFromTop(height, 650)}`);
-      
+
       // TEXTO DE TESTE PARA VALIDAÇÃO VISUAL (removido temporariamente devido ao encoding)
       console.log(`📄 [CCB] Template Simpix aplicado com sucesso - dados posicionados`);
-      
+
       // 6. Salvar PDF com dados preenchidos
       const pdfBytes = await pdfDoc.save();
-      console.log('📄 [CCB] PDF preenchido gerado com sucesso');
-      
+      console.log("📄 [CCB] PDF preenchido gerado com sucesso");
+
       // 7. Upload para Supabase Storage
       const fileName = `ccb_${proposalId}_${Date.now()}.pdf`;
       const filePath = `ccb/${proposalId}/${fileName}`;
-      
+
       const supabaseAdmin = createServerSupabaseAdminClient();
       const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
-        .from('documents')
+        .from("documents")
         .upload(filePath, pdfBytes, {
-          contentType: 'application/pdf',
-          upsert: true
+          contentType: "application/pdf",
+          upsert: true,
         });
 
       if (uploadError) {
-        console.error('❌ [CCB] Erro no upload:', uploadError);
-        return { success: false, error: 'Erro ao fazer upload do PDF' };
+        console.error("❌ [CCB] Erro no upload:", uploadError);
+        return { success: false, error: "Erro ao fazer upload do PDF" };
       }
 
       // 8. Atualizar banco de dados
@@ -198,14 +223,13 @@ export class CCBGenerationService {
       console.log(`✅ [CCB] IMPORTANTE: Template preservado com logo e formatação`);
       console.log(`✅ [CCB] Dados preenchidos: Nome, CPF e Valor`);
       console.log(`✅ [CCB] Próximo passo: Ajustar coordenadas conforme feedback visual`);
-      
-      return { success: true, pdfPath: filePath };
 
+      return { success: true, pdfPath: filePath };
     } catch (error) {
-      console.error('❌ [CCB] Erro na geração:', error);
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Erro desconhecido' 
+      console.error("❌ [CCB] Erro na geração:", error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Erro desconhecido",
       };
     }
   }
@@ -231,40 +255,40 @@ export class CCBGenerationService {
       `);
 
       if (!result || result.length === 0) {
-        console.error('❌ [CCB] Proposta não encontrada');
+        console.error("❌ [CCB] Proposta não encontrada");
         return null;
       }
 
       const proposta = result[0] as any;
-      
+
       // Validar dados obrigatórios
       if (!proposta.cliente_data || !proposta.condicoes_data) {
-        console.error('❌ [CCB] Dados incompletos: cliente_data ou condicoes_data ausentes');
+        console.error("❌ [CCB] Dados incompletos: cliente_data ou condicoes_data ausentes");
         return null;
       }
 
       // Extrair dados das estruturas JSONB
       const clienteData = proposta.cliente_data as any;
       const condicoesData = proposta.condicoes_data as any;
-      
+
       // Calcular valores derivados
       const valorBase = condicoesData.valor || proposta.valor_aprovado || 0;
       const prazo = condicoesData.prazo || 12;
       const taxaJuros = condicoesData.taxa_juros || 0;
-      const valorTotal = condicoesData.valorTotalFinanciado || (valorBase * (1 + (taxaJuros / 100)));
+      const valorTotal = condicoesData.valorTotalFinanciado || valorBase * (1 + taxaJuros / 100);
       const valorParcela = valorTotal / prazo;
 
       // Retornar estrutura padronizada
       return {
         id: proposta.id,
-        cliente_nome: clienteData.nome || '',
-        cliente_cpf: clienteData.cpf || '',
-        cliente_endereco: clienteData.endereco || '',
-        cliente_cidade: clienteData.cidade || '',
-        cliente_estado: clienteData.estado || '',
-        cliente_cep: clienteData.cep || '',
-        cliente_email: clienteData.email || '',
-        cliente_telefone: clienteData.telefone || '',
+        cliente_nome: clienteData.nome || "",
+        cliente_cpf: clienteData.cpf || "",
+        cliente_endereco: clienteData.endereco || "",
+        cliente_cidade: clienteData.cidade || "",
+        cliente_estado: clienteData.estado || "",
+        cliente_cep: clienteData.cep || "",
+        cliente_email: clienteData.email || "",
+        cliente_telefone: clienteData.telefone || "",
         valor_emprestimo: valorBase,
         prazo_meses: prazo,
         taxa_juros: taxaJuros,
@@ -272,41 +296,39 @@ export class CCBGenerationService {
         valor_parcela: valorParcela,
         created_at: proposta.created_at || new Date(),
         loja_nome: proposta.loja_nome,
-        produto_nome: proposta.produto_nome
+        produto_nome: proposta.produto_nome,
       };
     } catch (error) {
-      console.error('❌ [CCB] Erro ao buscar dados da proposta:', error);
+      console.error("❌ [CCB] Erro ao buscar dados da proposta:", error);
       return null;
     }
   }
-
-
 
   /**
    * Formata CPF
    */
   private formatCPF(cpf?: string): string {
-    if (!cpf) return '';
-    const cleaned = cpf.replace(/\D/g, '');
-    return cleaned.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+    if (!cpf) return "";
+    const cleaned = cpf.replace(/\D/g, "");
+    return cleaned.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
   }
 
   /**
    * Formata CEP
    */
   private formatCEP(cep?: string): string {
-    if (!cep) return '';
-    const cleaned = cep.replace(/\D/g, '');
-    return cleaned.replace(/(\d{5})(\d{3})/, '$1-$2');
+    if (!cep) return "";
+    const cleaned = cep.replace(/\D/g, "");
+    return cleaned.replace(/(\d{5})(\d{3})/, "$1-$2");
   }
 
   /**
    * Formata valor em moeda
    */
   private formatCurrency(value: number): string {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
     }).format(value);
   }
 
@@ -316,13 +338,11 @@ export class CCBGenerationService {
   async getPublicUrl(filePath: string): Promise<string | null> {
     try {
       const supabaseAdmin = createServerSupabaseAdminClient();
-      const { data } = supabaseAdmin.storage
-        .from('documents')
-        .getPublicUrl(filePath);
-      
+      const { data } = supabaseAdmin.storage.from("documents").getPublicUrl(filePath);
+
       return data?.publicUrl || null;
     } catch (error) {
-      console.error('❌ [CCB] Erro ao obter URL pública:', error);
+      console.error("❌ [CCB] Erro ao obter URL pública:", error);
       return null;
     }
   }
@@ -341,7 +361,7 @@ export class CCBGenerationService {
       const proposal = result[0];
       return proposal?.ccb_gerado === true && !!proposal?.caminho_ccb;
     } catch (error) {
-      console.error('❌ [CCB] Erro ao verificar status:', error);
+      console.error("❌ [CCB] Erro ao verificar status:", error);
       return false;
     }
   }

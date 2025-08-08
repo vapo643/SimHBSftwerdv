@@ -1,22 +1,29 @@
-import { useState } from 'react';
-import { useLocation } from 'wouter';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { useToast } from '@/hooks/use-toast';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Mail, AlertCircle, CheckCircle2, ArrowLeft } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
-import { apiRequest } from '@/lib/queryClient';
+import { useState } from "react";
+import { useLocation } from "wouter";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { useToast } from "@/hooks/use-toast";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Mail, AlertCircle, CheckCircle2, ArrowLeft } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { apiRequest } from "@/lib/queryClient";
 
 const emailChangeSchema = z.object({
-  newEmail: z.string().email('Email inválido'),
-  password: z.string().min(1, 'Senha é obrigatória')
+  newEmail: z.string().email("Email inválido"),
+  password: z.string().min(1, "Senha é obrigatória"),
 });
 
 type EmailChangeFormData = z.infer<typeof emailChangeSchema>;
@@ -41,77 +48,77 @@ export default function AlterarEmail() {
   const form = useForm<EmailChangeFormData>({
     resolver: zodResolver(emailChangeSchema),
     defaultValues: {
-      newEmail: '',
-      password: ''
-    }
+      newEmail: "",
+      password: "",
+    },
   });
 
   // Check for pending email change
   const { data: statusData } = useQuery<EmailChangeStatusResponse>({
-    queryKey: ['/api/auth/email-change-status'],
-    refetchInterval: pendingEmail ? 5000 : false // Poll if there's a pending change
+    queryKey: ["/api/auth/email-change-status"],
+    refetchInterval: pendingEmail ? 5000 : false, // Poll if there's a pending change
   });
 
   // Request email change mutation
   const changeEmailMutation = useMutation({
     mutationFn: async (data: EmailChangeFormData) => {
-      const response = await apiRequest<EmailChangeResponse>('/api/auth/change-email', {
-        method: 'POST',
+      const response = await apiRequest<EmailChangeResponse>("/api/auth/change-email", {
+        method: "POST",
         body: JSON.stringify(data),
       });
       return response;
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       toast({
-        title: 'Email de verificação enviado',
-        description: 'Verifique seu novo email para confirmar a alteração.',
+        title: "Email de verificação enviado",
+        description: "Verifique seu novo email para confirmar a alteração.",
       });
-      
+
       // In development, show the token
       if (data.debugToken) {
         setVerificationToken(data.debugToken);
       }
-      
-      setPendingEmail(form.getValues('newEmail'));
+
+      setPendingEmail(form.getValues("newEmail"));
       form.reset();
     },
     onError: (error: any) => {
       toast({
-        title: 'Erro ao alterar email',
-        description: error.message || 'Ocorreu um erro ao processar sua solicitação',
-        variant: 'destructive'
+        title: "Erro ao alterar email",
+        description: error.message || "Ocorreu um erro ao processar sua solicitação",
+        variant: "destructive",
       });
-    }
+    },
   });
 
   // Verify email change mutation
   const verifyEmailMutation = useMutation({
     mutationFn: async (token: string) => {
-      const response = await apiRequest('/api/auth/verify-email-change', {
-        method: 'POST',
+      const response = await apiRequest("/api/auth/verify-email-change", {
+        method: "POST",
         body: JSON.stringify({ token }),
       });
       return response;
     },
     onSuccess: () => {
       toast({
-        title: 'Email alterado com sucesso',
-        description: 'Por favor, faça login novamente com seu novo email.',
+        title: "Email alterado com sucesso",
+        description: "Por favor, faça login novamente com seu novo email.",
       });
-      
+
       // Redirect to login after 2 seconds
       setTimeout(() => {
-        window.location.href = '/login';
+        window.location.href = "/login";
       }, 2000);
     },
     onError: (error: any) => {
       toast({
-        title: 'Erro ao verificar email',
-        description: error.message || 'Token inválido ou expirado',
-        variant: 'destructive'
+        title: "Erro ao verificar email",
+        description: error.message || "Token inválido ou expirado",
+        variant: "destructive",
       });
       setVerificationToken(null);
-    }
+    },
   });
 
   const onSubmit = (data: EmailChangeFormData) => {
@@ -126,12 +133,8 @@ export default function AlterarEmail() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto p-4 max-w-2xl">
-        <Button
-          variant="ghost"
-          className="mb-4"
-          onClick={() => setLocation('/configuracoes')}
-        >
+      <div className="container mx-auto max-w-2xl p-4">
+        <Button variant="ghost" className="mb-4" onClick={() => setLocation("/configuracoes")}>
           <ArrowLeft className="mr-2 h-4 w-4" />
           Voltar para Configurações
         </Button>
@@ -142,14 +145,12 @@ export default function AlterarEmail() {
               <Mail className="h-5 w-5" />
               Alterar Email
             </CardTitle>
-            <CardDescription>
-              Altere o email associado à sua conta
-            </CardDescription>
+            <CardDescription>Altere o email associado à sua conta</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Current Email Display */}
-            <div className="rounded-lg border p-4 bg-muted/50">
-              <div className="text-sm text-muted-foreground mb-1">Email atual</div>
+            <div className="bg-muted/50 rounded-lg border p-4">
+              <div className="mb-1 text-sm text-muted-foreground">Email atual</div>
               <div className="font-medium">{user?.email}</div>
             </div>
 
@@ -158,7 +159,8 @@ export default function AlterarEmail() {
               <Alert className="border-blue-200 bg-blue-50 dark:bg-blue-950">
                 <AlertCircle className="h-4 w-4 text-blue-600" />
                 <AlertDescription className="text-blue-800 dark:text-blue-200">
-                  Você tem uma alteração de email pendente para: <strong>{statusData.newEmail}</strong>
+                  Você tem uma alteração de email pendente para:{" "}
+                  <strong>{statusData.newEmail}</strong>
                   <br />
                   Verifique seu email para confirmar a alteração.
                 </AlertDescription>
@@ -173,7 +175,7 @@ export default function AlterarEmail() {
                   <div className="mb-2">
                     <strong>Modo Desenvolvimento - Token de Verificação:</strong>
                   </div>
-                  <code className="block p-2 bg-muted rounded text-xs break-all mb-3">
+                  <code className="mb-3 block break-all rounded bg-muted p-2 text-xs">
                     {verificationToken}
                   </code>
                   <Button
@@ -230,11 +232,8 @@ export default function AlterarEmail() {
                   />
 
                   <div className="flex justify-end pt-4">
-                    <Button
-                      type="submit"
-                      disabled={changeEmailMutation.isPending}
-                    >
-                      {changeEmailMutation.isPending ? 'Processando...' : 'Alterar Email'}
+                    <Button type="submit" disabled={changeEmailMutation.isPending}>
+                      {changeEmailMutation.isPending ? "Processando..." : "Alterar Email"}
                     </Button>
                   </div>
                 </form>
@@ -245,8 +244,8 @@ export default function AlterarEmail() {
             <Alert>
               <CheckCircle2 className="h-4 w-4" />
               <AlertDescription>
-                Por motivos de segurança, você precisará verificar o novo email antes que a alteração seja efetivada.
-                Um email de verificação será enviado para o novo endereço.
+                Por motivos de segurança, você precisará verificar o novo email antes que a
+                alteração seja efetivada. Um email de verificação será enviado para o novo endereço.
               </AlertDescription>
             </Alert>
           </CardContent>

@@ -1,13 +1,13 @@
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { RefreshCw } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import React from "react";
+import { Button } from "@/components/ui/button";
+import { RefreshCw } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface RefreshButtonProps {
   onRefresh: () => void;
   isLoading?: boolean;
-  variant?: 'default' | 'outline' | 'ghost' | 'secondary';
-  size?: 'default' | 'sm' | 'lg' | 'icon';
+  variant?: "default" | "outline" | "ghost" | "secondary";
+  size?: "default" | "sm" | "lg" | "icon";
   className?: string;
   showLabel?: boolean;
   label?: string;
@@ -16,19 +16,19 @@ interface RefreshButtonProps {
 export const RefreshButton: React.FC<RefreshButtonProps> = ({
   onRefresh,
   isLoading = false,
-  variant = 'ghost',
-  size = 'sm',
-  className = '',
+  variant = "ghost",
+  size = "sm",
+  className = "",
   showLabel = false,
-  label = 'Atualizar'
+  label = "Atualizar",
 }) => {
   const { toast } = useToast();
 
   const handleRefresh = () => {
     onRefresh();
     toast({
-      title: 'Dados atualizados',
-      description: 'As informações foram recarregadas com sucesso.',
+      title: "Dados atualizados",
+      description: "As informações foram recarregadas com sucesso.",
       duration: 2000,
     });
   };
@@ -42,8 +42,8 @@ export const RefreshButton: React.FC<RefreshButtonProps> = ({
       className={`transition-all duration-200 hover:scale-105 ${className}`}
       title={label}
     >
-      <RefreshCw 
-        className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''} ${showLabel ? 'mr-2' : ''}`} 
+      <RefreshCw
+        className={`h-4 w-4 ${isLoading ? "animate-spin" : ""} ${showLabel ? "mr-2" : ""}`}
       />
       {showLabel && label}
     </Button>

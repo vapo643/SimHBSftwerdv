@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback } from "react";
 
 interface UseIdleTimerOptions {
   timeout: number; // Timeout em milissegundos
@@ -8,20 +8,20 @@ interface UseIdleTimerOptions {
 }
 
 const DEFAULT_EVENTS = [
-  'mousedown',
-  'mousemove',
-  'keypress',
-  'scroll',
-  'touchstart',
-  'click',
-  'wheel'
+  "mousedown",
+  "mousemove",
+  "keypress",
+  "scroll",
+  "touchstart",
+  "click",
+  "wheel",
 ];
 
 export function useIdleTimer({
   timeout,
   onIdle,
   events = DEFAULT_EVENTS,
-  throttle = 500
+  throttle = 500,
 }: UseIdleTimerOptions) {
   const timeoutId = useRef<NodeJS.Timeout | null>(null);
   const lastEventTime = useRef<number>(Date.now());
@@ -30,12 +30,12 @@ export function useIdleTimer({
   // Função para resetar o timer
   const resetTimer = useCallback(() => {
     const now = Date.now();
-    
+
     // Throttle: só processa se passou o tempo mínimo desde o último evento
     if (now - lastEventTime.current < throttle) {
       return;
     }
-    
+
     lastEventTime.current = now;
     isIdle.current = false;
 
@@ -48,7 +48,7 @@ export function useIdleTimer({
     timeoutId.current = setTimeout(() => {
       if (!isIdle.current) {
         isIdle.current = true;
-        console.log('🕐 [IDLE TIMER] User became idle after 30 minutes of inactivity');
+        console.log("🕐 [IDLE TIMER] User became idle after 30 minutes of inactivity");
         onIdle();
       }
     }, timeout);
@@ -99,20 +99,20 @@ export function useIdleTimer({
   // Detecta mudanças de tab/foco
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
+      if (document.visibilityState === "visible") {
         // Usuário voltou para a tab, reseta o timer
         resetTimer();
       } else {
         // Usuário saiu da tab, para o timer (opcional)
         // Mantemos o timer rodando para que a inatividade seja contada
-        console.log('🔍 [IDLE TIMER] Tab became hidden, timer continues');
+        console.log("🔍 [IDLE TIMER] Tab became hidden, timer continues");
       }
     };
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
     return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [resetTimer]);
 
@@ -120,6 +120,6 @@ export function useIdleTimer({
     isIdle: isIdle.current,
     resetTimer,
     stopTimer,
-    startTimer
+    startTimer,
   };
 }

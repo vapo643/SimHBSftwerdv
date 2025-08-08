@@ -46,13 +46,9 @@ export async function multiTenantMiddleware(
     const userData = userRecord[0];
 
     // Set database session context for RLS
-    await db.execute(
-      `SET LOCAL app.current_user_loja_id = '${userData.lojaId}';`
-    );
+    await db.execute(`SET LOCAL app.current_user_loja_id = '${userData.lojaId}';`);
 
-    await db.execute(
-      `SET LOCAL app.current_user_email = '${req.user.email}';`
-    );
+    await db.execute(`SET LOCAL app.current_user_email = '${req.user.email}';`);
 
     // Enhance request with complete user context
     req.user = {
@@ -60,7 +56,9 @@ export async function multiTenantMiddleware(
       lojaId: userData.lojaId,
     };
 
-    console.log(`Multi-tenant context set: userId=${req.user.id}, lojaId=${userData.lojaId}, email=${req.user.email}`);
+    console.log(
+      `Multi-tenant context set: userId=${req.user.id}, lojaId=${userData.lojaId}, email=${req.user.email}`
+    );
 
     next();
   } catch (error) {
@@ -72,7 +70,11 @@ export async function multiTenantMiddleware(
 /**
  * Validation function to ensure resources belong to user's loja
  */
-export function validateResourceAccess(userLojaId: number, resourceLojaId: number, resourceType: string) {
+export function validateResourceAccess(
+  userLojaId: number,
+  resourceLojaId: number,
+  resourceType: string
+) {
   if (userLojaId !== resourceLojaId) {
     throw new Error(
       `Access denied: Cannot access ${resourceType} from loja_id ${resourceLojaId} (user belongs to loja_id ${userLojaId})`

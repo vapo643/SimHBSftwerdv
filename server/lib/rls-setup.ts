@@ -13,10 +13,8 @@ export async function setRLSContext(userId: string, lojaId: number) {
   try {
     // Set the current user's loja_id in the database session
     // This will be used by the get_current_user_loja_id() function
-    await db.execute(
-      `SET app.current_user_loja_id = '${lojaId}';`
-    );
-    
+    await db.execute(`SET app.current_user_loja_id = '${lojaId}';`);
+
     console.log(`RLS context set: userId=${userId}, lojaId=${lojaId}`);
   } catch (error) {
     console.error("Failed to set RLS context:", error);
@@ -51,7 +49,7 @@ export async function rlsAuthMiddleware(
 
     const token = authHeader.split(" ")[1];
     const supabaseClient = supabase;
-    
+
     // Get user from Supabase
     const {
       data: { user },

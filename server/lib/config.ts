@@ -1,4 +1,3 @@
-
 // Sistema de Configuração Resiliente - Pilar 10
 // Garante que a aplicação inicie mesmo com secrets ausentes
 
@@ -22,8 +21,8 @@ export interface AppConfig {
 }
 
 // Lista de secrets críticos vs opcionais
-const CRITICAL_SECRETS = ['DATABASE_URL'] as const;
-const OPTIONAL_SECRETS = ['SUPABASE_URL', 'SUPABASE_ANON_KEY'] as const;
+const CRITICAL_SECRETS = ["DATABASE_URL"] as const;
+const OPTIONAL_SECRETS = ["SUPABASE_URL", "SUPABASE_ANON_KEY"] as const;
 
 // Validação não-bloqueante de secrets
 function validateSecrets(): {
@@ -51,7 +50,7 @@ function validateSecrets(): {
   return {
     isValid: missing.length === 0,
     missing,
-    warnings
+    warnings,
   };
 }
 
@@ -62,12 +61,12 @@ export function loadConfig(): AppConfig {
 
     // Log de status de secrets (sem expor valores)
     if (validation.missing.length > 0) {
-      log(`⚠️  Missing critical secrets: ${validation.missing.join(', ')}`);
+      log(`⚠️  Missing critical secrets: ${validation.missing.join(", ")}`);
       log(`ℹ️  App will run in degraded mode`);
     }
 
     if (validation.warnings.length > 0) {
-      log(`⚠️  Missing optional secrets: ${validation.warnings.join(', ')}`);
+      log(`⚠️  Missing optional secrets: ${validation.warnings.join(", ")}`);
     }
 
     if (validation.isValid && validation.warnings.length === 0) {
@@ -116,7 +115,9 @@ export function logConfigStatus(): void {
   log(`🔧 App Config Status:`);
   log(`  - Port: ${config.port}`);
   log(`  - Environment: ${config.nodeEnv}`);
-  log(`  - Database: ${config.database.url ? '✅ Connected' : '❌ Not configured'}`);
-  log(`  - Supabase: ${config.supabase.url ? '✅ Connected' : '❌ Not configured'}`);
-  log(`  - Security: Rate Limit ${config.security.enableRateLimit ? '✅' : '❌'}, Helmet ${config.security.enableHelmet ? '✅' : '❌'}`);
+  log(`  - Database: ${config.database.url ? "✅ Connected" : "❌ Not configured"}`);
+  log(`  - Supabase: ${config.supabase.url ? "✅ Connected" : "❌ Not configured"}`);
+  log(
+    `  - Security: Rate Limit ${config.security.enableRateLimit ? "✅" : "❌"}, Helmet ${config.security.enableHelmet ? "✅" : "❌"}`
+  );
 }

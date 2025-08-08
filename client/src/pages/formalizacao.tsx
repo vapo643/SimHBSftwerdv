@@ -139,11 +139,11 @@ function FormalizacaoList() {
   // Função para parsing defensivo de dados JSONB
   const parseJsonbField = (field: any, fieldName: string, propostaId: string) => {
     // Se é null, undefined ou vazio, retornar objeto vazio
-    if (!field || field === 'null' || field === 'undefined') {
+    if (!field || field === "null" || field === "undefined") {
       return {};
     }
-    
-    if (typeof field === 'string' && field.trim() !== '') {
+
+    if (typeof field === "string" && field.trim() !== "") {
       try {
         return JSON.parse(field);
       } catch (e) {
@@ -151,32 +151,36 @@ function FormalizacaoList() {
         return {};
       }
     }
-    
+
     // Se já é um objeto, retornar como está
-    if (typeof field === 'object') {
+    if (typeof field === "object") {
       return field || {};
     }
-    
+
     return {};
   };
 
-  const { data: propostas, isLoading, error } = useQuery<Proposta[]>({
+  const {
+    data: propostas,
+    isLoading,
+    error,
+  } = useQuery<Proposta[]>({
     queryKey: ["/api/propostas/formalizacao"],
     queryFn: async () => {
       console.log("Fazendo requisição para /api/propostas/formalizacao");
       const response = await apiRequest("/api/propostas/formalizacao");
       console.log("Resposta do endpoint formalizacao:", response);
-      
+
       // PARSING DEFENSIVO: Garantir que dados JSONB sejam objetos
       const propostsWithParsedData = response.map((proposta: any) => ({
         ...proposta,
-        cliente_data: parseJsonbField(proposta.cliente_data, 'cliente_data', proposta.id),
-        condicoes_data: parseJsonbField(proposta.condicoes_data, 'condicoes_data', proposta.id)
+        cliente_data: parseJsonbField(proposta.cliente_data, "cliente_data", proposta.id),
+        condicoes_data: parseJsonbField(proposta.condicoes_data, "condicoes_data", proposta.id),
       }));
-      
+
       console.log("Propostas com dados parseados:", propostsWithParsedData);
       return propostsWithParsedData;
-    }
+    },
   });
 
   // Debug: log error if any
@@ -229,7 +233,10 @@ function FormalizacaoList() {
       <DashboardLayout title="Formalização">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {[...Array(6)].map((_, index) => (
-            <Card key={index} className="animate-pulse bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+            <Card
+              key={index}
+              className="animate-pulse border-gray-200 bg-gray-100 dark:border-gray-700 dark:bg-gray-800"
+            >
               <CardContent className="p-6">
                 <div className="mb-4 h-6 rounded bg-gray-300 dark:bg-gray-700"></div>
                 <div className="mb-2 h-4 rounded bg-gray-300 dark:bg-gray-700"></div>
@@ -243,7 +250,7 @@ function FormalizacaoList() {
   }
 
   const handleRefresh = () => {
-    queryClient.invalidateQueries({ queryKey: ['/api/propostas/formalizacao'] });
+    queryClient.invalidateQueries({ queryKey: ["/api/propostas/formalizacao"] });
   };
 
   const getTitle = () => {
@@ -255,25 +262,16 @@ function FormalizacaoList() {
   };
 
   return (
-    <DashboardLayout 
+    <DashboardLayout
       title={getTitle()}
-      actions={
-        <RefreshButton 
-          onRefresh={handleRefresh}
-          isLoading={isLoading}
-          variant="ghost"
-        />
-      }
+      actions={<RefreshButton onRefresh={handleRefresh} isLoading={isLoading} variant="ghost" />}
     >
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{getTitle()}</h1>
-            <p className="text-gray-600 dark:text-gray-400">
-              {getDescription()}
-            </p>
-
+            <p className="text-gray-600 dark:text-gray-400">{getDescription()}</p>
           </div>
           <div className="flex items-center gap-4">
             <div className="text-right">
@@ -294,11 +292,16 @@ function FormalizacaoList() {
           ].map(item => {
             const count = formalizacaoPropostas.filter(p => p.status === item.status).length;
             return (
-              <Card key={item.status} className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+              <Card
+                key={item.status}
+                className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
+              >
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div className={`h-3 w-3 rounded-full ${item.color}`}></div>
-                    <span className="text-2xl font-bold text-gray-900 dark:text-white">{count}</span>
+                    <span className="text-2xl font-bold text-gray-900 dark:text-white">
+                      {count}
+                    </span>
                   </div>
                   <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">{item.label}</p>
                 </CardContent>
@@ -310,10 +313,15 @@ function FormalizacaoList() {
         {/* Propostas List */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {formalizacaoPropostas.map(proposta => (
-            <Card key={proposta.id} className="cursor-pointer transition-shadow hover:shadow-lg bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+            <Card
+              key={proposta.id}
+              className="cursor-pointer border-gray-200 bg-white transition-shadow hover:shadow-lg dark:border-gray-700 dark:bg-gray-800"
+            >
               <CardContent className="p-6">
                 <div className="mb-4 flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">#{proposta.id}</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    #{proposta.id}
+                  </h3>
                   <Badge className={`${getStatusColor(proposta.status)} text-white`}>
                     {getStatusText(proposta.status)}
                   </Badge>
@@ -323,14 +331,18 @@ function FormalizacaoList() {
                   <div>
                     <p className="text-sm text-gray-600 dark:text-gray-400">Cliente</p>
                     <p className="font-medium text-gray-900 dark:text-white">
-                      {parseJsonbField(proposta.cliente_data, 'cliente_data', proposta.id)?.nome || 'Nome não informado'}
+                      {parseJsonbField(proposta.cliente_data, "cliente_data", proposta.id)?.nome ||
+                        "Nome não informado"}
                     </p>
                   </div>
 
                   <div>
                     <p className="text-sm text-gray-600 dark:text-gray-400">Valor Aprovado</p>
                     <p className="font-bold text-green-400">
-                      {formatCurrency(parseJsonbField(proposta.condicoes_data, 'condicoes_data', proposta.id)?.valor || 0)}
+                      {formatCurrency(
+                        parseJsonbField(proposta.condicoes_data, "condicoes_data", proposta.id)
+                          ?.valor || 0
+                      )}
                     </p>
                   </div>
 
@@ -346,13 +358,17 @@ function FormalizacaoList() {
                   <Button
                     onClick={() => setLocation(`/formalizacao/acompanhamento/${proposta.id}`)}
                     className="w-full"
-                    variant={user?.role === 'ATENDENTE' && 
-                            (proposta.status === 'aprovado' || proposta.status === 'documentos_enviados') 
-                            ? "default" : "outline"}
+                    variant={
+                      user?.role === "ATENDENTE" &&
+                      (proposta.status === "aprovado" || proposta.status === "documentos_enviados")
+                        ? "default"
+                        : "outline"
+                    }
                   >
-                    {user?.role === 'ATENDENTE' && 
-                     (proposta.status === 'aprovado' || proposta.status === 'documentos_enviados')
-                      ? "Ação Necessária" : "Acompanhar"}
+                    {user?.role === "ATENDENTE" &&
+                    (proposta.status === "aprovado" || proposta.status === "documentos_enviados")
+                      ? "Ação Necessária"
+                      : "Acompanhar"}
                   </Button>
                 </div>
               </CardContent>
@@ -388,7 +404,7 @@ export default function Formalizacao() {
   const [interBoletoData, setInterBoletoData] = useState<any>(null);
   const [loadingInter, setLoadingInter] = useState(false);
   const [boletosGerados, setBoletosGerados] = useState<any[]>([]);
-  
+
   const propostaId = params?.id;
 
   // Query para buscar boletos gerados
@@ -403,7 +419,11 @@ export default function Formalizacao() {
   });
 
   // TODOS os hooks devem estar aqui no topo
-  const { data: proposta, isLoading, refetch } = useQuery<Proposta>({
+  const {
+    data: proposta,
+    isLoading,
+    refetch,
+  } = useQuery<Proposta>({
     queryKey: ["/api/propostas", propostaId, "formalizacao"],
     queryFn: async () => {
       console.log(`🔍 [DEBUG] Buscando dados de formalização para proposta: ${propostaId}`);
@@ -486,11 +506,11 @@ export default function Formalizacao() {
         title: "Gerando CCB",
         description: "Aguarde, gerando CCB com todos os dados da proposta...",
       });
-      
+
       const response = await apiRequest(`/api/propostas/${propostaId}/gerar-ccb`, {
-        method: "POST"
+        method: "POST",
       });
-      
+
       if (response.success) {
         toast({
           title: "Sucesso",
@@ -500,7 +520,7 @@ export default function Formalizacao() {
         refetch();
       }
     } catch (error) {
-      console.error('Erro ao gerar CCB:', error);
+      console.error("Erro ao gerar CCB:", error);
       toast({
         title: "Erro",
         description: "Erro ao gerar CCB. Tente novamente.",
@@ -524,10 +544,10 @@ export default function Formalizacao() {
       }
       if (response.publicUrl) {
         // Abrir em nova aba
-        window.open(response.publicUrl, '_blank');
+        window.open(response.publicUrl, "_blank");
       }
     } catch (error) {
-      console.error('Erro ao visualizar CCB:', error);
+      console.error("Erro ao visualizar CCB:", error);
       toast({
         title: "Erro",
         description: "Erro ao visualizar CCB. Tente novamente.",
@@ -544,11 +564,11 @@ export default function Formalizacao() {
         title: "Enviando para ClickSign",
         description: "Preparando CCB para assinatura eletrônica...",
       });
-      
+
       const response = await apiRequest(`/api/clicksign/send-ccb/${propostaId}`, {
-        method: "POST"
+        method: "POST",
       });
-      
+
       if (response.success) {
         toast({
           title: "Sucesso",
@@ -559,7 +579,7 @@ export default function Formalizacao() {
         refetch();
       }
     } catch (error: any) {
-      console.error('Erro ao enviar para ClickSign:', error);
+      console.error("Erro ao enviar para ClickSign:", error);
       toast({
         title: "Erro",
         description: error.message || "Erro ao enviar CCB para ClickSign.",
@@ -570,14 +590,14 @@ export default function Formalizacao() {
     }
   };
 
-  // Função para consultar status ClickSign  
+  // Função para consultar status ClickSign
   const checkClickSignStatus = async (propostaId: string) => {
     try {
       const response = await apiRequest(`/api/clicksign/status/${propostaId}`);
       setClickSignData(response);
       return response;
     } catch (error) {
-      console.error('Erro ao consultar status ClickSign:', error);
+      console.error("Erro ao consultar status ClickSign:", error);
       return null;
     }
   };
@@ -595,8 +615,6 @@ export default function Formalizacao() {
       setClickSignData(initialClickSignData);
     }
   }, [initialClickSignData]);
-
-
 
   const getStatusProgress = (status: string) => {
     const statusMap = {
@@ -635,7 +653,7 @@ export default function Formalizacao() {
   };
 
   // AGORA toda a lógica condicional pode vir aqui, APÓS todos os hooks
-  
+
   // 🔧 CORREÇÃO CRÍTICA: Lógica condicional APÓS todos os hooks
   // Se não tem ID, mostrar lista de propostas
   if (!propostaId) {
@@ -661,40 +679,52 @@ export default function Formalizacao() {
       date: proposta.ccbGerado ? formatDate(proposta.createdAt) : "Pendente",
       completed: proposta.ccbGerado,
       interactive: true,
-      etapa: 'ccb_gerado' as const,
+      etapa: "ccb_gerado" as const,
     },
     {
       id: 3,
       title: "Assinatura Eletrônica",
       description: "Documento enviado para ClickSign para assinatura",
       icon: Signature,
-      status: proposta.assinaturaEletronicaConcluida ? "completed" : proposta.ccbGerado ? "current" : "pending",
+      status: proposta.assinaturaEletronicaConcluida
+        ? "completed"
+        : proposta.ccbGerado
+          ? "current"
+          : "pending",
       date: proposta.assinaturaEletronicaConcluida ? formatDate(proposta.createdAt) : "Pendente",
       completed: proposta.assinaturaEletronicaConcluida,
       interactive: proposta.ccbGerado,
-      etapa: 'assinatura_eletronica' as const,
+      etapa: "assinatura_eletronica" as const,
     },
     {
       id: 4,
       title: "Biometria Validada",
       description: "Validação biométrica concluída",
       icon: Shield,
-      status: proposta.biometriaConcluida ? "completed" : proposta.assinaturaEletronicaConcluida ? "current" : "pending",
+      status: proposta.biometriaConcluida
+        ? "completed"
+        : proposta.assinaturaEletronicaConcluida
+          ? "current"
+          : "pending",
       date: proposta.biometriaConcluida ? formatDate(proposta.createdAt) : "Pendente",
       completed: proposta.biometriaConcluida,
       interactive: proposta.assinaturaEletronicaConcluida,
-      etapa: 'biometria' as const,
+      etapa: "biometria" as const,
     },
     {
       id: 5,
       title: "Banco Inter - Boletos",
       description: "Boletos gerados automaticamente pelo Banco Inter para pagamento",
       icon: Building2,
-      status: proposta.interBoletoGerado ? "completed" : proposta.assinaturaEletronicaConcluida ? "current" : "pending",
+      status: proposta.interBoletoGerado
+        ? "completed"
+        : proposta.assinaturaEletronicaConcluida
+          ? "current"
+          : "pending",
       date: proposta.interBoletoGerado ? formatDate(proposta.createdAt) : "Pendente",
       completed: proposta.interBoletoGerado || false,
       interactive: proposta.assinaturaEletronicaConcluida,
-      etapa: 'banco_inter' as const,
+      etapa: "banco_inter" as const,
     },
     {
       id: 6,
@@ -721,7 +751,7 @@ export default function Formalizacao() {
       <DashboardLayout title="Acompanhamento da Formalização">
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           {[...Array(6)].map((_, index) => (
-            <Card key={index} className="animate-pulse bg-gray-800 border-gray-700">
+            <Card key={index} className="animate-pulse border-gray-700 bg-gray-800">
               <CardContent className="p-6">
                 <div className="mb-4 h-32 rounded bg-gray-700"></div>
                 <div className="mb-2 h-4 rounded bg-gray-700"></div>
@@ -777,7 +807,6 @@ export default function Formalizacao() {
               <ArrowLeft className="h-4 w-4" />
               Voltar para Formalização
             </Button>
-
           </div>
 
           <div className="flex items-center gap-2">
@@ -791,7 +820,7 @@ export default function Formalizacao() {
         </div>
 
         {/* Progress Overview */}
-        <Card className="bg-gray-800 border-gray-700">
+        <Card className="border-gray-700 bg-gray-800">
           <CardContent className="p-6">
             <div className="mb-4">
               <div className="mb-2 flex items-center justify-between">
@@ -809,7 +838,7 @@ export default function Formalizacao() {
         </Card>
 
         {/* Tabs Navigation */}
-        <Card className="bg-gray-800 border-gray-700">
+        <Card className="border-gray-700 bg-gray-800">
           <CardContent className="p-0">
             <div className="border-b border-gray-600">
               <div className="flex space-x-8 px-6 py-4">
@@ -822,7 +851,7 @@ export default function Formalizacao() {
                   }`}
                 >
                   <Activity className="h-4 w-4" />
-                  {user?.role === 'ATENDENTE' ? 'Progresso' : 'Timeline'}
+                  {user?.role === "ATENDENTE" ? "Progresso" : "Timeline"}
                 </button>
                 <button
                   onClick={() => setActiveTab("documents")}
@@ -836,7 +865,7 @@ export default function Formalizacao() {
                   Documentos
                 </button>
                 {/* ANALISTA vê todas as tabs, ATENDENTE pode ter acesso limitado */}
-                {user?.role !== 'ATENDENTE' && (
+                {user?.role !== "ATENDENTE" && (
                   <button
                     onClick={() => setActiveTab("contracts")}
                     className={`flex items-center gap-2 border-b-2 pb-2 text-sm font-medium ${
@@ -859,7 +888,7 @@ export default function Formalizacao() {
           <div className="space-y-6 lg:col-span-2">
             {/* Timeline Tab */}
             {activeTab === "timeline" && (
-              <Card className="bg-gray-800 border-gray-700">
+              <Card className="border-gray-700 bg-gray-800">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-white">
                     <Activity className="h-5 w-5 text-blue-400" />
@@ -876,19 +905,19 @@ export default function Formalizacao() {
                       // Se é uma etapa interativa, mostra o controle (independente do role)
                       if (step.interactive && step.etapa) {
                         // Para a etapa de CCB, mostrar o CCBViewer
-                        if (step.etapa === 'ccb_gerado') {
+                        if (step.etapa === "ccb_gerado") {
                           return (
                             <div key={step.id} className="mb-4">
-                              <CCBViewer 
-                                proposalId={proposta.id} 
-                                onCCBGenerated={() => refetch()} 
+                              <CCBViewer
+                                proposalId={proposta.id}
+                                onCCBGenerated={() => refetch()}
                               />
                             </div>
                           );
                         }
-                        
+
                         // Para a etapa de assinatura eletrônica, mostrar interface customizada
-                        if (step.etapa === 'assinatura_eletronica' && proposta.ccbGerado) {
+                        if (step.etapa === "assinatura_eletronica" && proposta.ccbGerado) {
                           return (
                             <div key={step.id} className="mb-4">
                               <div className="space-y-4">
@@ -902,34 +931,43 @@ export default function Formalizacao() {
                                   habilitada={step.interactive}
                                   onUpdate={() => refetch()}
                                 />
-                                
+
                                 {/* Botão de enviar para ClickSign se ainda não foi enviado */}
                                 {!proposta.clicksignSignUrl && !clickSignData && (
-                                  <div className="mt-3 p-4 bg-blue-900/20 border border-blue-700 rounded-lg">
-                                    <div className="flex items-center justify-between mb-3">
-                                      <h5 className="font-medium text-blue-300">Enviar para Assinatura Eletrônica</h5>
+                                  <div className="mt-3 rounded-lg border border-blue-700 bg-blue-900/20 p-4">
+                                    <div className="mb-3 flex items-center justify-between">
+                                      <h5 className="font-medium text-blue-300">
+                                        Enviar para Assinatura Eletrônica
+                                      </h5>
                                       <Signature className="h-5 w-5 text-blue-400" />
                                     </div>
-                                    <p className="text-sm text-blue-200 mb-4">
-                                      Clique no botão abaixo para enviar o contrato CCB para o ClickSign e gerar o link de assinatura para o cliente.
+                                    <p className="mb-4 text-sm text-blue-200">
+                                      Clique no botão abaixo para enviar o contrato CCB para o
+                                      ClickSign e gerar o link de assinatura para o cliente.
                                     </p>
                                     <Button
                                       onClick={async () => {
                                         setLoadingClickSign(true);
                                         try {
-                                          const response = await apiRequest(`/api/propostas/${proposta.id}/clicksign/enviar`, {
-                                            method: 'POST'
-                                          });
+                                          const response = await apiRequest(
+                                            `/api/propostas/${proposta.id}/clicksign/enviar`,
+                                            {
+                                              method: "POST",
+                                            }
+                                          );
                                           setClickSignData(response);
                                           toast({
                                             title: "Sucesso",
-                                            description: "Contrato enviado para ClickSign com sucesso!",
+                                            description:
+                                              "Contrato enviado para ClickSign com sucesso!",
                                           });
                                           refetch(); // Recarregar dados da proposta
                                         } catch (error: any) {
                                           toast({
                                             title: "Erro",
-                                            description: error.response?.data?.message || "Erro ao enviar para ClickSign",
+                                            description:
+                                              error.response?.data?.message ||
+                                              "Erro ao enviar para ClickSign",
                                             variant: "destructive",
                                           });
                                         } finally {
@@ -941,44 +979,53 @@ export default function Formalizacao() {
                                     >
                                       {loadingClickSign ? (
                                         <div className="flex items-center">
-                                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                          <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-white"></div>
                                           Enviando para ClickSign...
                                         </div>
                                       ) : (
                                         <div className="flex items-center">
-                                          <Signature className="h-4 w-4 mr-2" />
+                                          <Signature className="mr-2 h-4 w-4" />
                                           Enviar Contrato para Assinatura (ClickSign)
                                         </div>
                                       )}
                                     </Button>
                                   </div>
                                 )}
-                                
+
                                 {/* Exibir link de assinatura se já existe */}
                                 {(clickSignData || proposta.clicksignSignUrl) && (
-                                  <div className="mt-3 p-4 bg-green-900/20 border border-green-700 rounded-lg">
-                                    <div className="flex items-center mb-3">
-                                      <CheckCircle className="h-5 w-5 text-green-400 mr-2" />
-                                      <h5 className="font-medium text-green-300">Link de Assinatura Disponível</h5>
+                                  <div className="mt-3 rounded-lg border border-green-700 bg-green-900/20 p-4">
+                                    <div className="mb-3 flex items-center">
+                                      <CheckCircle className="mr-2 h-5 w-5 text-green-400" />
+                                      <h5 className="font-medium text-green-300">
+                                        Link de Assinatura Disponível
+                                      </h5>
                                     </div>
-                                    <p className="text-sm text-green-200 mb-3">
-                                      Compartilhe o link abaixo com o cliente para assinatura digital:
+                                    <p className="mb-3 text-sm text-green-200">
+                                      Compartilhe o link abaixo com o cliente para assinatura
+                                      digital:
                                     </p>
-                                    <div className="flex items-center gap-2 p-3 bg-gray-800 rounded border">
+                                    <div className="flex items-center gap-2 rounded border bg-gray-800 p-3">
                                       <input
                                         type="text"
-                                        value={clickSignData?.signUrl || proposta.clicksignSignUrl || ''}
+                                        value={
+                                          clickSignData?.signUrl || proposta.clicksignSignUrl || ""
+                                        }
                                         readOnly
-                                        className="flex-1 bg-transparent text-white text-sm"
+                                        className="flex-1 bg-transparent text-sm text-white"
                                       />
                                       <Button
                                         size="sm"
                                         onClick={() => {
-                                          const linkUrl = clickSignData?.signUrl || proposta.clicksignSignUrl || '';
+                                          const linkUrl =
+                                            clickSignData?.signUrl ||
+                                            proposta.clicksignSignUrl ||
+                                            "";
                                           navigator.clipboard.writeText(linkUrl);
                                           toast({
                                             title: "Copiado!",
-                                            description: "Link de assinatura copiado para a área de transferência",
+                                            description:
+                                              "Link de assinatura copiado para a área de transferência",
                                           });
                                         }}
                                       >
@@ -986,32 +1033,38 @@ export default function Formalizacao() {
                                       </Button>
                                     </div>
                                     {clickSignData?.envelopeId && (
-                                      <p className="text-xs text-gray-400 mt-2">
+                                      <p className="mt-2 text-xs text-gray-400">
                                         Envelope ID: {clickSignData.envelopeId}
                                       </p>
                                     )}
-                                    
+
                                     {/* Botão para regenerar link */}
-                                    <div className="mt-3 pt-3 border-t border-gray-700">
+                                    <div className="mt-3 border-t border-gray-700 pt-3">
                                       <Button
                                         variant="outline"
                                         size="sm"
                                         onClick={async () => {
                                           setLoadingClickSign(true);
                                           try {
-                                            const response = await apiRequest(`/api/propostas/${proposta.id}/clicksign/regenerar`, {
-                                              method: 'POST'
-                                            });
+                                            const response = await apiRequest(
+                                              `/api/propostas/${proposta.id}/clicksign/regenerar`,
+                                              {
+                                                method: "POST",
+                                              }
+                                            );
                                             setClickSignData(response);
                                             toast({
                                               title: "Sucesso",
-                                              description: "Novo link de assinatura gerado com sucesso!",
+                                              description:
+                                                "Novo link de assinatura gerado com sucesso!",
                                             });
                                             refetch(); // Recarregar dados da proposta
                                           } catch (error: any) {
                                             toast({
                                               title: "Erro",
-                                              description: error.response?.data?.error || "Erro ao regenerar link",
+                                              description:
+                                                error.response?.data?.error ||
+                                                "Erro ao regenerar link",
                                               variant: "destructive",
                                             });
                                           } finally {
@@ -1023,17 +1076,17 @@ export default function Formalizacao() {
                                       >
                                         {loadingClickSign ? (
                                           <div className="flex items-center">
-                                            <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-yellow-400 mr-2"></div>
+                                            <div className="mr-2 h-3 w-3 animate-spin rounded-full border-b-2 border-yellow-400"></div>
                                             Regenerando...
                                           </div>
                                         ) : (
                                           <div className="flex items-center">
-                                            <Signature className="h-3 w-3 mr-2" />
+                                            <Signature className="mr-2 h-3 w-3" />
                                             Gerar Novo Link
                                           </div>
                                         )}
                                       </Button>
-                                      <p className="text-xs text-gray-500 mt-1">
+                                      <p className="mt-1 text-xs text-gray-500">
                                         Use caso o link anterior não esteja funcionando
                                       </p>
                                     </div>
@@ -1045,24 +1098,30 @@ export default function Formalizacao() {
                         }
 
                         // Para a etapa do Banco Inter, mostrar interface customizada
-                        if (step.etapa === 'banco_inter' && proposta.assinaturaEletronicaConcluida) {
+                        if (
+                          step.etapa === "banco_inter" &&
+                          proposta.assinaturaEletronicaConcluida
+                        ) {
                           return (
                             <div key={step.id} className="mb-4">
                               <div className="space-y-4">
                                 {/* Interface do Banco Inter */}
-                                <div className="mt-3 p-4 bg-orange-900/20 border border-orange-700 rounded-lg">
-                                  <div className="flex items-center justify-between mb-3">
-                                    <h5 className="font-medium text-orange-300 flex items-center gap-2">
+                                <div className="mt-3 rounded-lg border border-orange-700 bg-orange-900/20 p-4">
+                                  <div className="mb-3 flex items-center justify-between">
+                                    <h5 className="flex items-center gap-2 font-medium text-orange-300">
                                       <Building2 className="h-5 w-5" />
                                       Banco Inter - Boletos de Pagamento
                                     </h5>
                                   </div>
-                                  
-                                  <p className="text-sm text-orange-200 mb-4">
-                                    Após a assinatura do contrato, os boletos são gerados automaticamente pelo Banco Inter para processamento do pagamento ao cliente.
+
+                                  <p className="mb-4 text-sm text-orange-200">
+                                    Após a assinatura do contrato, os boletos são gerados
+                                    automaticamente pelo Banco Inter para processamento do pagamento
+                                    ao cliente.
                                   </p>
 
-                                  {(!collectionsData || collectionsData.length === 0) && !interBoletoData ? (
+                                  {(!collectionsData || collectionsData.length === 0) &&
+                                  !interBoletoData ? (
                                     // Botão para gerar boletos
                                     <Button
                                       onClick={async () => {
@@ -1071,71 +1130,103 @@ export default function Formalizacao() {
                                           // Preparar dados para a API do Inter
                                           const dataVencimento = new Date();
                                           dataVencimento.setDate(dataVencimento.getDate() + 5); // Vencimento em 5 dias
-                                          
+
                                           // Aviso se dados de endereço estão incompletos
-                                          const enderecoIncompleto = !proposta.cliente_data?.endereco || !proposta.cliente_data?.numero || 
-                                              !proposta.cliente_data?.bairro || !proposta.cliente_data?.cidade || 
-                                              !proposta.cliente_data?.uf || !proposta.cliente_data?.cep;
-                                          
+                                          const enderecoIncompleto =
+                                            !proposta.cliente_data?.endereco ||
+                                            !proposta.cliente_data?.numero ||
+                                            !proposta.cliente_data?.bairro ||
+                                            !proposta.cliente_data?.cidade ||
+                                            !proposta.cliente_data?.uf ||
+                                            !proposta.cliente_data?.cep;
+
                                           if (enderecoIncompleto) {
-                                            console.warn('[INTER] Dados de endereço incompletos, usando valores padrão temporários');
+                                            console.warn(
+                                              "[INTER] Dados de endereço incompletos, usando valores padrão temporários"
+                                            );
                                           }
-                                          
+
                                           const requestData = {
                                             proposalId: proposta.id,
                                             valorTotal: proposta.condicoes_data?.valor || 0,
-                                            dataVencimento: dataVencimento.toISOString().split('T')[0],
+                                            dataVencimento: dataVencimento
+                                              .toISOString()
+                                              .split("T")[0],
                                             clienteData: {
-                                              nome: proposta.cliente_data?.nome || '',
-                                              cpf: proposta.cliente_data?.cpf || '',
-                                              email: proposta.cliente_data?.email || '',
-                                              telefone: proposta.cliente_data?.telefone || '00000000000',
-                                              endereco: proposta.cliente_data?.endereco || 'Rua Principal',
-                                              numero: proposta.cliente_data?.numero || '100',
-                                              complemento: proposta.cliente_data?.complemento || '',
-                                              bairro: proposta.cliente_data?.bairro || 'Centro',
-                                              cidade: proposta.cliente_data?.cidade || 'São Paulo',
-                                              uf: proposta.cliente_data?.uf || 'SP',
-                                              cep: proposta.cliente_data?.cep?.replace(/\D/g, '') || '00000000'
-                                            }
+                                              nome: proposta.cliente_data?.nome || "",
+                                              cpf: proposta.cliente_data?.cpf || "",
+                                              email: proposta.cliente_data?.email || "",
+                                              telefone:
+                                                proposta.cliente_data?.telefone || "00000000000",
+                                              endereco:
+                                                proposta.cliente_data?.endereco || "Rua Principal",
+                                              numero: proposta.cliente_data?.numero || "100",
+                                              complemento: proposta.cliente_data?.complemento || "",
+                                              bairro: proposta.cliente_data?.bairro || "Centro",
+                                              cidade: proposta.cliente_data?.cidade || "São Paulo",
+                                              uf: proposta.cliente_data?.uf || "SP",
+                                              cep:
+                                                proposta.cliente_data?.cep?.replace(/\D/g, "") ||
+                                                "00000000",
+                                            },
                                           };
-                                          
-                                          console.log('[INTER] Enviando dados para gerar boleto:', requestData);
-                                          
-                                          const response = await apiRequest('/api/inter/collections', {
-                                            method: 'POST',
-                                            body: JSON.stringify(requestData)
-                                          });
-                                          
-                                          console.log('[INTER] Resposta da API:', response);
-                                          
+
+                                          console.log(
+                                            "[INTER] Enviando dados para gerar boleto:",
+                                            requestData
+                                          );
+
+                                          const response = await apiRequest(
+                                            "/api/inter/collections",
+                                            {
+                                              method: "POST",
+                                              body: JSON.stringify(requestData),
+                                            }
+                                          );
+
+                                          console.log("[INTER] Resposta da API:", response);
+
                                           toast({
                                             title: "Sucesso",
                                             description: `${response.totalCriados} boleto(s) gerado(s) com sucesso!`,
                                           });
-                                          
+
                                           // Atualizar estado local para mostrar os boletos
                                           setInterBoletoData(response);
                                           refetch(); // Recarregar dados da proposta
-                                          queryClient.invalidateQueries({ queryKey: ["/api/inter/collections", proposta.id] });
+                                          queryClient.invalidateQueries({
+                                            queryKey: ["/api/inter/collections", proposta.id],
+                                          });
                                         } catch (error: any) {
-                                          console.error('[INTER] Erro ao gerar boleto:', error);
-                                          
+                                          console.error("[INTER] Erro ao gerar boleto:", error);
+
                                           // Verificar se é erro de boleto duplicado
-                                          if (error.status === 409 || error.response?.status === 409) {
-                                            const existingCollections = error.response?.data?.existingCollections || [];
+                                          if (
+                                            error.status === 409 ||
+                                            error.response?.status === 409
+                                          ) {
+                                            const existingCollections =
+                                              error.response?.data?.existingCollections || [];
                                             toast({
                                               title: "Boletos já existentes",
-                                              description: error.response?.data?.message || "Já existem boletos ativos para esta proposta. Verifique na lista abaixo.",
+                                              description:
+                                                error.response?.data?.message ||
+                                                "Já existem boletos ativos para esta proposta. Verifique na lista abaixo.",
                                               variant: "default",
                                             });
-                                            
+
                                             // Recarregar para mostrar os boletos existentes
-                                            queryClient.invalidateQueries({ queryKey: ["/api/inter/collections", proposta.id] });
+                                            queryClient.invalidateQueries({
+                                              queryKey: ["/api/inter/collections", proposta.id],
+                                            });
                                           } else {
                                             toast({
                                               title: "Erro",
-                                              description: error.response?.data?.message || error.response?.data?.details || error.response?.data?.error || "Erro ao gerar boletos",
+                                              description:
+                                                error.response?.data?.message ||
+                                                error.response?.data?.details ||
+                                                error.response?.data?.error ||
+                                                "Erro ao gerar boletos",
                                               variant: "destructive",
                                             });
                                           }
@@ -1148,12 +1239,12 @@ export default function Formalizacao() {
                                     >
                                       {loadingInter ? (
                                         <div className="flex items-center">
-                                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                          <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-white"></div>
                                           Gerando boleto...
                                         </div>
                                       ) : (
                                         <div className="flex items-center">
-                                          <Building2 className="h-4 w-4 mr-2" />
+                                          <Building2 className="mr-2 h-4 w-4" />
                                           Gerar Boletos via Banco Inter
                                         </div>
                                       )}
@@ -1161,69 +1252,85 @@ export default function Formalizacao() {
                                   ) : (
                                     // Boletos já gerados - mostrar lista
                                     <div className="space-y-3">
-                                      <div className="flex items-center gap-2 p-3 bg-green-900/20 border border-green-700 rounded">
+                                      <div className="flex items-center gap-2 rounded border border-green-700 bg-green-900/20 p-3">
                                         <CheckCircle className="h-5 w-5 text-green-400" />
-                                        <span className="text-green-300 font-medium">
-                                          {collectionsData && collectionsData.length > 0 
-                                            ? `${collectionsData.length} boleto(s) gerado(s) com sucesso` 
+                                        <span className="font-medium text-green-300">
+                                          {collectionsData && collectionsData.length > 0
+                                            ? `${collectionsData.length} boleto(s) gerado(s) com sucesso`
                                             : "Boletos gerados com sucesso"}
                                         </span>
                                       </div>
-                                      
+
                                       {/* Listar todos os boletos gerados */}
                                       {collectionsData && collectionsData.length > 0 ? (
                                         <div className="space-y-3">
                                           {collectionsData.map((boleto: any, index: number) => (
-                                            <div key={boleto.id || index} className="p-4 bg-gray-800 rounded-lg border border-gray-700">
-                                              <div className="flex items-start justify-between mb-3">
+                                            <div
+                                              key={boleto.id || index}
+                                              className="rounded-lg border border-gray-700 bg-gray-800 p-4"
+                                            >
+                                              <div className="mb-3 flex items-start justify-between">
                                                 <div>
-                                                  <h6 className="font-medium text-orange-300 mb-1">
-                                                    {boleto.numeroParcela && boleto.totalParcelas 
+                                                  <h6 className="mb-1 font-medium text-orange-300">
+                                                    {boleto.numeroParcela && boleto.totalParcelas
                                                       ? `Parcela ${boleto.numeroParcela}/${boleto.totalParcelas}`
-                                                      : boleto.seuNumero || boleto.codigoSolicitacao}
+                                                      : boleto.seuNumero ||
+                                                        boleto.codigoSolicitacao}
                                                   </h6>
                                                   <div className="flex items-center gap-4 text-sm text-gray-400">
                                                     <span>Valor: R$ {boleto.valorNominal}</span>
-                                                    <span>Venc: {new Date(boleto.dataVencimento).toLocaleDateString('pt-BR')}</span>
+                                                    <span>
+                                                      Venc:{" "}
+                                                      {new Date(
+                                                        boleto.dataVencimento
+                                                      ).toLocaleDateString("pt-BR")}
+                                                    </span>
                                                   </div>
                                                 </div>
-                                                <Badge 
+                                                <Badge
                                                   variant={
-                                                    boleto.situacao === 'RECEBIDO' ? 'default' : 
-                                                    boleto.situacao === 'VENCIDO' ? 'destructive' : 
-                                                    'secondary'
+                                                    boleto.situacao === "RECEBIDO"
+                                                      ? "default"
+                                                      : boleto.situacao === "VENCIDO"
+                                                        ? "destructive"
+                                                        : "secondary"
                                                   }
                                                   className={
-                                                    boleto.situacao === 'RECEBIDO' ? 'bg-green-900 text-green-300 border-green-700' : ''
+                                                    boleto.situacao === "RECEBIDO"
+                                                      ? "border-green-700 bg-green-900 text-green-300"
+                                                      : ""
                                                   }
                                                 >
                                                   {boleto.situacao}
                                                 </Badge>
                                               </div>
-                                              
+
                                               {/* QR Code PIX e Linha Digitável */}
                                               <div className="space-y-3">
                                                 {/* PIX - prioridade alta */}
                                                 {boleto.pixCopiaECola && (
-                                                  <div className="p-4 bg-green-900/20 border border-green-700 rounded">
-                                                    <p className="text-sm font-medium text-green-300 mb-3">
+                                                  <div className="rounded border border-green-700 bg-green-900/20 p-4">
+                                                    <p className="mb-3 text-sm font-medium text-green-300">
                                                       <span className="inline-flex items-center gap-2">
                                                         <QrCode className="h-4 w-4" />
                                                         PIX Copia e Cola (Pagamento Instantâneo)
                                                       </span>
                                                     </p>
-                                                    <div className="flex items-center gap-2 p-3 bg-gray-900 rounded">
-                                                      <code className="flex-1 text-green-400 font-mono text-xs break-all">
+                                                    <div className="flex items-center gap-2 rounded bg-gray-900 p-3">
+                                                      <code className="flex-1 break-all font-mono text-xs text-green-400">
                                                         {boleto.pixCopiaECola}
                                                       </code>
                                                       <Button
                                                         size="sm"
                                                         variant="ghost"
                                                         onClick={() => {
-                                                          navigator.clipboard.writeText(boleto.pixCopiaECola);
+                                                          navigator.clipboard.writeText(
+                                                            boleto.pixCopiaECola
+                                                          );
                                                           toast({
                                                             title: "PIX copiado!",
-                                                            description: "Cole no app do seu banco para pagar",
+                                                            description:
+                                                              "Cole no app do seu banco para pagar",
                                                           });
                                                         }}
                                                       >
@@ -1232,29 +1339,33 @@ export default function Formalizacao() {
                                                     </div>
                                                   </div>
                                                 )}
-                                                
+
                                                 {/* Linha Digitável do Boleto */}
                                                 {(boleto.linhaDigitavel || boleto.codigoBarras) && (
-                                                  <div className="p-4 bg-gray-800 rounded border border-gray-700">
-                                                    <p className="text-sm font-medium text-gray-300 mb-3">
+                                                  <div className="rounded border border-gray-700 bg-gray-800 p-4">
+                                                    <p className="mb-3 text-sm font-medium text-gray-300">
                                                       <span className="inline-flex items-center gap-2">
                                                         <Barcode className="h-4 w-4" />
                                                         Linha Digitável do Boleto
                                                       </span>
                                                     </p>
-                                                    <div className="flex items-center gap-2 p-3 bg-gray-900 rounded">
-                                                      <code className="flex-1 text-orange-400 font-mono text-xs break-all">
-                                                        {boleto.linhaDigitavel || boleto.codigoBarras}
+                                                    <div className="flex items-center gap-2 rounded bg-gray-900 p-3">
+                                                      <code className="flex-1 break-all font-mono text-xs text-orange-400">
+                                                        {boleto.linhaDigitavel ||
+                                                          boleto.codigoBarras}
                                                       </code>
                                                       <Button
                                                         size="sm"
                                                         variant="ghost"
                                                         onClick={() => {
-                                                          const codigo = boleto.linhaDigitavel || boleto.codigoBarras;
+                                                          const codigo =
+                                                            boleto.linhaDigitavel ||
+                                                            boleto.codigoBarras;
                                                           navigator.clipboard.writeText(codigo);
                                                           toast({
                                                             title: "Linha digitável copiada!",
-                                                            description: "Use no internet banking para pagar",
+                                                            description:
+                                                              "Use no internet banking para pagar",
                                                           });
                                                         }}
                                                       >
@@ -1264,7 +1375,7 @@ export default function Formalizacao() {
                                                   </div>
                                                 )}
                                               </div>
-                                              
+
                                               {/* Ações do boleto */}
                                               <div className="flex gap-2">
                                                 {boleto.linkPdf && (
@@ -1275,30 +1386,35 @@ export default function Formalizacao() {
                                                       // Informar que o PDF não está disponível e copiar código de barras
                                                       if (boleto.codigoBarras) {
                                                         try {
-                                                          await navigator.clipboard.writeText(boleto.codigoBarras);
+                                                          await navigator.clipboard.writeText(
+                                                            boleto.codigoBarras
+                                                          );
                                                           toast({
                                                             title: "Código de barras copiado!",
-                                                            description: "O banco Inter não disponibiliza PDF para download. Use o código de barras copiado ou o QR Code exibido na tela.",
+                                                            description:
+                                                              "O banco Inter não disponibiliza PDF para download. Use o código de barras copiado ou o QR Code exibido na tela.",
                                                             variant: "default",
                                                           });
                                                         } catch (err) {
                                                           toast({
                                                             title: "Como pagar este boleto",
-                                                            description: "Use o código de barras ou QR Code PIX exibidos na tela. O banco Inter não disponibiliza PDF para download.",
+                                                            description:
+                                                              "Use o código de barras ou QR Code PIX exibidos na tela. O banco Inter não disponibiliza PDF para download.",
                                                             variant: "default",
                                                           });
                                                         }
                                                       } else {
                                                         toast({
                                                           title: "Como pagar este boleto",
-                                                          description: "Use o QR Code PIX exibido na tela. O banco Inter não disponibiliza PDF para download.",
+                                                          description:
+                                                            "Use o QR Code PIX exibido na tela. O banco Inter não disponibiliza PDF para download.",
                                                           variant: "default",
                                                         });
                                                       }
                                                     }}
                                                     className="border-orange-700 text-orange-300 hover:bg-orange-900/20"
                                                   >
-                                                    <Copy className="h-4 w-4 mr-2" />
+                                                    <Copy className="mr-2 h-4 w-4" />
                                                     Copiar Código
                                                   </Button>
                                                 )}
@@ -1306,31 +1422,41 @@ export default function Formalizacao() {
                                             </div>
                                           ))}
                                         </div>
-                                      ) : (interBoletoData?.codigoSolicitacao || proposta.interCodigoSolicitacao) && (
-                                        <div className="p-3 bg-gray-800 rounded border border-gray-700">
-                                          <p className="text-sm text-gray-400 mb-1">Código do Boleto:</p>
-                                          <div className="flex items-center gap-2">
-                                            <code className="flex-1 text-orange-400 font-mono">
-                                              {interBoletoData?.codigoSolicitacao || proposta.interCodigoSolicitacao}
-                                            </code>
-                                            <Button
-                                              size="sm"
-                                              variant="ghost"
-                                              onClick={() => {
-                                                const codigo = interBoletoData?.codigoSolicitacao || proposta.interCodigoSolicitacao || '';
-                                                navigator.clipboard.writeText(codigo);
-                                                toast({
-                                                  title: "Copiado!",
-                                                  description: "Código do boleto copiado para a área de transferência",
-                                                });
-                                              }}
-                                            >
-                                              <Copy className="h-3 w-3" />
-                                            </Button>
+                                      ) : (
+                                        (interBoletoData?.codigoSolicitacao ||
+                                          proposta.interCodigoSolicitacao) && (
+                                          <div className="rounded border border-gray-700 bg-gray-800 p-3">
+                                            <p className="mb-1 text-sm text-gray-400">
+                                              Código do Boleto:
+                                            </p>
+                                            <div className="flex items-center gap-2">
+                                              <code className="flex-1 font-mono text-orange-400">
+                                                {interBoletoData?.codigoSolicitacao ||
+                                                  proposta.interCodigoSolicitacao}
+                                              </code>
+                                              <Button
+                                                size="sm"
+                                                variant="ghost"
+                                                onClick={() => {
+                                                  const codigo =
+                                                    interBoletoData?.codigoSolicitacao ||
+                                                    proposta.interCodigoSolicitacao ||
+                                                    "";
+                                                  navigator.clipboard.writeText(codigo);
+                                                  toast({
+                                                    title: "Copiado!",
+                                                    description:
+                                                      "Código do boleto copiado para a área de transferência",
+                                                  });
+                                                }}
+                                              >
+                                                <Copy className="h-3 w-3" />
+                                              </Button>
+                                            </div>
                                           </div>
-                                        </div>
+                                        )
                                       )}
-                                      
+
                                       <div className="grid grid-cols-2 gap-3">
                                         <Button
                                           variant="outline"
@@ -1343,24 +1469,29 @@ export default function Formalizacao() {
                                                 const firstCollection = collections[0];
                                                 if (firstCollection.codigoSolicitacao) {
                                                   // Importar TokenManager para obter token válido
-                                                  const { TokenManager } = await import('@/lib/apiClient');
+                                                  const { TokenManager } = await import(
+                                                    "@/lib/apiClient"
+                                                  );
                                                   const tokenManager = TokenManager.getInstance();
                                                   const token = await tokenManager.getValidToken();
-                                                  
+
                                                   if (!token) {
-                                                    throw new Error('Não autenticado');
+                                                    throw new Error("Não autenticado");
                                                   }
-                                                  
-                                                  const response = await fetch(`/api/inter/collections/${proposta.id}/${firstCollection.codigoSolicitacao}/pdf`, {
-                                                    headers: {
-                                                      'Authorization': `Bearer ${token}`
+
+                                                  const response = await fetch(
+                                                    `/api/inter/collections/${proposta.id}/${firstCollection.codigoSolicitacao}/pdf`,
+                                                    {
+                                                      headers: {
+                                                        Authorization: `Bearer ${token}`,
+                                                      },
                                                     }
-                                                  });
-                                                  
+                                                  );
+
                                                   if (response.ok) {
                                                     const blob = await response.blob();
                                                     const url = window.URL.createObjectURL(blob);
-                                                    const a = document.createElement('a');
+                                                    const a = document.createElement("a");
                                                     a.href = url;
                                                     a.download = `boleto-${firstCollection.seuNumero || firstCollection.codigoSolicitacao}.pdf`;
                                                     document.body.appendChild(a);
@@ -1368,7 +1499,7 @@ export default function Formalizacao() {
                                                     window.URL.revokeObjectURL(url);
                                                     document.body.removeChild(a);
                                                   } else {
-                                                    throw new Error('Erro ao baixar PDF');
+                                                    throw new Error("Erro ao baixar PDF");
                                                   }
                                                 } else {
                                                   toast({
@@ -1380,7 +1511,8 @@ export default function Formalizacao() {
                                               } else {
                                                 toast({
                                                   title: "Sem boletos",
-                                                  description: "Nenhum boleto foi gerado ainda para esta proposta",
+                                                  description:
+                                                    "Nenhum boleto foi gerado ainda para esta proposta",
                                                   variant: "default",
                                                 });
                                               }
@@ -1394,10 +1526,10 @@ export default function Formalizacao() {
                                           }}
                                           className="border-orange-600 text-orange-400 hover:bg-orange-600/10"
                                         >
-                                          <Printer className="h-4 w-4 mr-2" />
+                                          <Printer className="mr-2 h-4 w-4" />
                                           Imprimir Boleto
                                         </Button>
-                                        
+
                                         <Button
                                           variant="outline"
                                           onClick={async () => {
@@ -1406,23 +1538,31 @@ export default function Formalizacao() {
                                               const collections = collectionsData || [];
                                               if (collections.length > 0) {
                                                 // Mostrar informações de todas as coleções
-                                                const statusInfo = collections.map((col: any) => 
-                                                  `Parcela ${col.numeroParcela}: ${col.situacao || 'Aguardando'}`
-                                                ).join('\n');
-                                                
+                                                const statusInfo = collections
+                                                  .map(
+                                                    (col: any) =>
+                                                      `Parcela ${col.numeroParcela}: ${col.situacao || "Aguardando"}`
+                                                  )
+                                                  .join("\n");
+
                                                 toast({
                                                   title: "Status dos Boletos",
-                                                  description: statusInfo || "Nenhum boleto encontrado",
+                                                  description:
+                                                    statusInfo || "Nenhum boleto encontrado",
                                                 });
                                               } else {
                                                 toast({
                                                   title: "Sem boletos",
-                                                  description: "Nenhum boleto foi gerado ainda para esta proposta",
+                                                  description:
+                                                    "Nenhum boleto foi gerado ainda para esta proposta",
                                                   variant: "default",
                                                 });
                                               }
                                             } catch (error) {
-                                              console.error('[INTER] Erro ao consultar boletos:', error);
+                                              console.error(
+                                                "[INTER] Erro ao consultar boletos:",
+                                                error
+                                              );
                                               toast({
                                                 title: "Erro",
                                                 description: "Erro ao consultar status dos boletos",
@@ -1432,17 +1572,26 @@ export default function Formalizacao() {
                                           }}
                                           className="border-orange-600 text-orange-400 hover:bg-orange-600/10"
                                         >
-                                          <FileText className="h-4 w-4 mr-2" />
+                                          <FileText className="mr-2 h-4 w-4" />
                                           Ver Detalhes
                                         </Button>
                                       </div>
-                                      
-                                      <div className="text-xs text-gray-400 mt-2">
-                                        <p><strong>Instruções para o Cliente:</strong></p>
+
+                                      <div className="mt-2 text-xs text-gray-400">
+                                        <p>
+                                          <strong>Instruções para o Cliente:</strong>
+                                        </p>
                                         <p>• Boleto gerado automaticamente pelo Banco Inter</p>
-                                        <p>• Pode pagar via PIX, débito ou transferência bancária</p>
+                                        <p>
+                                          • Pode pagar via PIX, débito ou transferência bancária
+                                        </p>
                                         <p>• Valor será creditado após compensação bancária</p>
-                                        <p>• Vencimento: {new Date(new Date().setDate(new Date().getDate() + 5)).toLocaleDateString('pt-BR')}</p>
+                                        <p>
+                                          • Vencimento:{" "}
+                                          {new Date(
+                                            new Date().setDate(new Date().getDate() + 5)
+                                          ).toLocaleDateString("pt-BR")}
+                                        </p>
                                       </div>
                                     </div>
                                   )}
@@ -1451,9 +1600,9 @@ export default function Formalizacao() {
                             </div>
                           );
                         }
-                        
+
                         // Para outras etapas, usar o controle padrão se o tipo de etapa for válido
-                        if (step.etapa && step.etapa !== 'banco_inter') {
+                        if (step.etapa && step.etapa !== "banco_inter") {
                           return (
                             <div key={step.id} className="mb-4">
                               <EtapaFormalizacaoControl
@@ -1521,7 +1670,7 @@ export default function Formalizacao() {
                               </p>
 
                               {isCurrent && !step.interactive && (
-                                <div className="mt-2 rounded-md bg-blue-900/30 border border-blue-700 p-3">
+                                <div className="mt-2 rounded-md border border-blue-700 bg-blue-900/30 p-3">
                                   <div className="flex items-center">
                                     <AlertCircle className="mr-2 h-4 w-4 text-blue-400" />
                                     <span className="text-sm font-medium text-blue-300">
@@ -1541,11 +1690,14 @@ export default function Formalizacao() {
                                     onClick={async () => {
                                       try {
                                         // ✅ CORREÇÃO: Usar endpoint de formalização correto
-                                        const response = await apiRequest(`/api/formalizacao/${proposta.id}/ccb`);
+                                        const response = await apiRequest(
+                                          `/api/formalizacao/${proposta.id}/ccb`
+                                        );
                                         if (response.ccb_gerado === false) {
                                           toast({
                                             title: "CCB não disponível",
-                                            description: "A CCB ainda não foi gerada para esta proposta",
+                                            description:
+                                              "A CCB ainda não foi gerada para esta proposta",
                                             variant: "destructive",
                                           });
                                           return;
@@ -1564,106 +1716,127 @@ export default function Formalizacao() {
                                     size="sm"
                                     className="mr-2"
                                   >
-                                    <FileText className="h-4 w-4 mr-2" />
+                                    <FileText className="mr-2 h-4 w-4" />
                                     Visualizar CCB
                                   </Button>
                                 </div>
                               )}
 
-                              {step.id === 3 && proposta.ccbGerado && !proposta.assinaturaEletronicaConcluida && (
-                                <div className="mt-3 p-4 bg-blue-900/20 border border-blue-700 rounded-lg">
-                                  <div className="flex items-center justify-between mb-3">
-                                    <h5 className="font-medium text-blue-300">Enviar para Assinatura Eletrônica</h5>
-                                    <Signature className="h-5 w-5 text-blue-400" />
+                              {step.id === 3 &&
+                                proposta.ccbGerado &&
+                                !proposta.assinaturaEletronicaConcluida && (
+                                  <div className="mt-3 rounded-lg border border-blue-700 bg-blue-900/20 p-4">
+                                    <div className="mb-3 flex items-center justify-between">
+                                      <h5 className="font-medium text-blue-300">
+                                        Enviar para Assinatura Eletrônica
+                                      </h5>
+                                      <Signature className="h-5 w-5 text-blue-400" />
+                                    </div>
+                                    <p className="mb-4 text-sm text-blue-200">
+                                      Clique no botão abaixo para enviar o contrato CCB para o
+                                      ClickSign e gerar o link de assinatura para o cliente.
+                                    </p>
+
+                                    {/* Opção de Biometria Facial */}
+                                    <div className="mb-4 flex items-center space-x-2 rounded-lg border border-purple-700 bg-purple-900/20 p-3">
+                                      <input
+                                        type="checkbox"
+                                        id="useBiometricAuth"
+                                        checked={useBiometricAuth}
+                                        onChange={e => setUseBiometricAuth(e.target.checked)}
+                                        className="h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                                      />
+                                      <label
+                                        htmlFor="useBiometricAuth"
+                                        className="cursor-pointer text-sm text-gray-300"
+                                      >
+                                        <span className="font-medium">Usar Biometria Facial</span>
+                                        <span className="mt-0.5 block text-xs text-gray-400">
+                                          Adiciona validação facial com comparação de documento para
+                                          maior segurança
+                                        </span>
+                                      </label>
+                                    </div>
+
+                                    <Button
+                                      onClick={async () => {
+                                        setLoadingClickSign(true);
+                                        try {
+                                          const response = await apiRequest(
+                                            `/api/propostas/${proposta.id}/clicksign/enviar`,
+                                            {
+                                              method: "POST",
+                                              body: JSON.stringify({
+                                                useBiometricAuth: useBiometricAuth,
+                                              }),
+                                            }
+                                          );
+                                          setClickSignData(response);
+                                          toast({
+                                            title: "Sucesso",
+                                            description:
+                                              "Contrato enviado para ClickSign com sucesso!",
+                                          });
+                                        } catch (error: any) {
+                                          toast({
+                                            title: "Erro",
+                                            description:
+                                              error.response?.data?.message ||
+                                              "Erro ao enviar para ClickSign",
+                                            variant: "destructive",
+                                          });
+                                        } finally {
+                                          setLoadingClickSign(false);
+                                        }
+                                      }}
+                                      disabled={loadingClickSign}
+                                      className="w-full bg-blue-600 hover:bg-blue-700"
+                                    >
+                                      {loadingClickSign ? (
+                                        <div className="flex items-center">
+                                          <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-white"></div>
+                                          Enviando para ClickSign...
+                                        </div>
+                                      ) : (
+                                        <div className="flex items-center">
+                                          <Signature className="mr-2 h-4 w-4" />
+                                          Enviar Contrato para Assinatura (ClickSign)
+                                        </div>
+                                      )}
+                                    </Button>
                                   </div>
-                                  <p className="text-sm text-blue-200 mb-4">
-                                    Clique no botão abaixo para enviar o contrato CCB para o ClickSign e gerar o link de assinatura para o cliente.
-                                  </p>
-                                  
-                                  {/* Opção de Biometria Facial */}
-                                  <div className="flex items-center space-x-2 p-3 mb-4 bg-purple-900/20 rounded-lg border border-purple-700">
-                                    <input
-                                      type="checkbox"
-                                      id="useBiometricAuth"
-                                      checked={useBiometricAuth}
-                                      onChange={(e) => setUseBiometricAuth(e.target.checked)}
-                                      className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
-                                    />
-                                    <label htmlFor="useBiometricAuth" className="text-sm text-gray-300 cursor-pointer">
-                                      <span className="font-medium">Usar Biometria Facial</span>
-                                      <span className="block text-xs text-gray-400 mt-0.5">
-                                        Adiciona validação facial com comparação de documento para maior segurança
-                                      </span>
-                                    </label>
-                                  </div>
-                                  
-                                  <Button
-                                    onClick={async () => {
-                                      setLoadingClickSign(true);
-                                      try {
-                                        const response = await apiRequest(`/api/propostas/${proposta.id}/clicksign/enviar`, {
-                                          method: 'POST',
-                                          body: JSON.stringify({
-                                            useBiometricAuth: useBiometricAuth
-                                          })
-                                        });
-                                        setClickSignData(response);
-                                        toast({
-                                          title: "Sucesso",
-                                          description: "Contrato enviado para ClickSign com sucesso!",
-                                        });
-                                      } catch (error: any) {
-                                        toast({
-                                          title: "Erro",
-                                          description: error.response?.data?.message || "Erro ao enviar para ClickSign",
-                                          variant: "destructive",
-                                        });
-                                      } finally {
-                                        setLoadingClickSign(false);
-                                      }
-                                    }}
-                                    disabled={loadingClickSign}
-                                    className="w-full bg-blue-600 hover:bg-blue-700"
-                                  >
-                                    {loadingClickSign ? (
-                                      <div className="flex items-center">
-                                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                                        Enviando para ClickSign...
-                                      </div>
-                                    ) : (
-                                      <div className="flex items-center">
-                                        <Signature className="h-4 w-4 mr-2" />
-                                        Enviar Contrato para Assinatura (ClickSign)
-                                      </div>
-                                    )}
-                                  </Button>
-                                </div>
-                              )}
+                                )}
 
                               {(clickSignData || proposta.clicksignSignUrl) && step.id === 3 && (
-                                <div className="mt-3 p-4 bg-green-900/20 border border-green-700 rounded-lg">
-                                  <div className="flex items-center mb-3">
-                                    <CheckCircle className="h-5 w-5 text-green-400 mr-2" />
-                                    <h5 className="font-medium text-green-300">Link de Assinatura Disponível</h5>
+                                <div className="mt-3 rounded-lg border border-green-700 bg-green-900/20 p-4">
+                                  <div className="mb-3 flex items-center">
+                                    <CheckCircle className="mr-2 h-5 w-5 text-green-400" />
+                                    <h5 className="font-medium text-green-300">
+                                      Link de Assinatura Disponível
+                                    </h5>
                                   </div>
-                                  <p className="text-sm text-green-200 mb-3">
+                                  <p className="mb-3 text-sm text-green-200">
                                     Compartilhe o link abaixo com o cliente para assinatura digital:
                                   </p>
-                                  <div className="flex items-center gap-2 p-3 bg-gray-800 rounded border">
+                                  <div className="flex items-center gap-2 rounded border bg-gray-800 p-3">
                                     <input
                                       type="text"
-                                      value={clickSignData?.signUrl || proposta.clicksignSignUrl || ''}
+                                      value={
+                                        clickSignData?.signUrl || proposta.clicksignSignUrl || ""
+                                      }
                                       readOnly
-                                      className="flex-1 bg-transparent text-white text-sm"
+                                      className="flex-1 bg-transparent text-sm text-white"
                                     />
                                     <Button
                                       size="sm"
                                       onClick={() => {
-                                        const linkUrl = clickSignData?.signUrl || proposta.clicksignSignUrl || '';
+                                        const linkUrl =
+                                          clickSignData?.signUrl || proposta.clicksignSignUrl || "";
                                         navigator.clipboard.writeText(linkUrl);
                                         toast({
                                           title: "Copiado!",
-                                          description: "Link de assinatura copiado para a área de transferência",
+                                          description:
+                                            "Link de assinatura copiado para a área de transferência",
                                         });
                                       }}
                                     >
@@ -1671,45 +1844,63 @@ export default function Formalizacao() {
                                     </Button>
                                   </div>
                                   {clickSignData?.envelopeId && (
-                                    <p className="text-xs text-gray-400 mt-2">
+                                    <p className="mt-2 text-xs text-gray-400">
                                       Envelope ID: {clickSignData.envelopeId}
                                     </p>
                                   )}
-                                  
+
                                   {/* Botão para regenerar link */}
-                                  <div className="mt-3 pt-3 border-t border-gray-700">
+                                  <div className="mt-3 border-t border-gray-700 pt-3">
                                     <Button
                                       variant="outline"
                                       size="sm"
                                       onClick={async () => {
                                         setLoadingClickSign(true);
                                         try {
-                                          const response = await apiRequest(`/api/propostas/${proposta.id}/clicksign/regenerar`, {
-                                            method: 'POST'
-                                          });
+                                          const response = await apiRequest(
+                                            `/api/propostas/${proposta.id}/clicksign/regenerar`,
+                                            {
+                                              method: "POST",
+                                            }
+                                          );
                                           setClickSignData(response);
                                           toast({
                                             title: "Sucesso",
-                                            description: "Novo link de assinatura gerado com sucesso!",
+                                            description:
+                                              "Novo link de assinatura gerado com sucesso!",
                                           });
                                         } catch (error: any) {
                                           // Tratamento específico para erro de token ClickSign
-                                          if (error.response?.status === 401 && error.response?.data?.action === 'UPDATE_CLICKSIGN_TOKEN') {
+                                          if (
+                                            error.response?.status === 401 &&
+                                            error.response?.data?.action ===
+                                              "UPDATE_CLICKSIGN_TOKEN"
+                                          ) {
                                             toast({
                                               title: "Token ClickSign Inválido",
-                                              description: error.response.data.details || "Token do ClickSign precisa ser atualizado. Entre em contato com o administrador.",
+                                              description:
+                                                error.response.data.details ||
+                                                "Token do ClickSign precisa ser atualizado. Entre em contato com o administrador.",
                                               variant: "destructive",
                                             });
-                                          } else if (error.response?.status === 400 && error.response?.data?.action === 'CHECK_CLICKSIGN_SERVICE') {
+                                          } else if (
+                                            error.response?.status === 400 &&
+                                            error.response?.data?.action ===
+                                              "CHECK_CLICKSIGN_SERVICE"
+                                          ) {
                                             toast({
                                               title: "Erro na API ClickSign",
-                                              description: error.response.data.details || "Problema com o serviço ClickSign. Tente novamente em alguns minutos.",
+                                              description:
+                                                error.response.data.details ||
+                                                "Problema com o serviço ClickSign. Tente novamente em alguns minutos.",
                                               variant: "destructive",
                                             });
                                           } else {
                                             toast({
                                               title: "Erro",
-                                              description: error.response?.data?.error || "Erro ao regenerar link",
+                                              description:
+                                                error.response?.data?.error ||
+                                                "Erro ao regenerar link",
                                               variant: "destructive",
                                             });
                                           }
@@ -1722,17 +1913,17 @@ export default function Formalizacao() {
                                     >
                                       {loadingClickSign ? (
                                         <div className="flex items-center">
-                                          <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-yellow-400 mr-2"></div>
+                                          <div className="mr-2 h-3 w-3 animate-spin rounded-full border-b-2 border-yellow-400"></div>
                                           Regenerando...
                                         </div>
                                       ) : (
                                         <div className="flex items-center">
-                                          <Signature className="h-3 w-3 mr-2" />
+                                          <Signature className="mr-2 h-3 w-3" />
                                           Gerar Novo Link
                                         </div>
                                       )}
                                     </Button>
-                                    <p className="text-xs text-gray-500 mt-1">
+                                    <p className="mt-1 text-xs text-gray-500">
                                       Use caso o link anterior não esteja funcionando
                                     </p>
                                   </div>
@@ -1759,10 +1950,12 @@ export default function Formalizacao() {
                 </CardHeader>
                 <CardContent>
                   {/* Usar DocumentViewer com popup modal como na análise */}
-                  <DocumentViewer 
-                    propostaId={proposta.id} 
-                    documents={[]} 
-                    ccbDocumentoUrl={proposta.ccbGerado ? `/api/propostas/${proposta.id}/ccb-url` : undefined}
+                  <DocumentViewer
+                    propostaId={proposta.id}
+                    documents={[]}
+                    ccbDocumentoUrl={
+                      proposta.ccbGerado ? `/api/propostas/${proposta.id}/ccb-url` : undefined
+                    }
                   />
                 </CardContent>
               </Card>
@@ -1861,7 +2054,7 @@ export default function Formalizacao() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Proposal Summary */}
-            <Card className="bg-gray-800 border-gray-700">
+            <Card className="border-gray-700 bg-gray-800">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-white">
                   <User className="h-5 w-5 text-blue-400" />
@@ -1872,7 +2065,9 @@ export default function Formalizacao() {
                 <div className="space-y-4">
                   <div>
                     <Label className="text-sm font-medium text-gray-400">Cliente</Label>
-                    <p className="font-medium text-white">{proposta.cliente_data?.nome || 'Nome não informado'}</p>
+                    <p className="font-medium text-white">
+                      {proposta.cliente_data?.nome || "Nome não informado"}
+                    </p>
                   </div>
                   <div>
                     <Label className="text-sm font-medium text-gray-400">Valor Aprovado</Label>
@@ -1884,18 +2079,22 @@ export default function Formalizacao() {
                     <Label className="text-sm font-medium text-gray-400">Taxa de Juros</Label>
                     <p className="flex items-center gap-1 font-medium text-white">
                       <Percent className="h-4 w-4" />
-                      {'N/A'}% a.m.
+                      {"N/A"}% a.m.
                     </p>
                   </div>
                   <div>
                     <Label className="text-sm font-medium text-gray-400">Prazo</Label>
-                    <p className="font-medium text-white">{proposta.condicoes_data?.prazo || 0} meses</p>
+                    <p className="font-medium text-white">
+                      {proposta.condicoes_data?.prazo || 0} meses
+                    </p>
                   </div>
                   <div>
                     <Label className="text-sm font-medium text-gray-400">Data da Aprovação</Label>
                     <p className="flex items-center gap-1 text-white">
                       <Calendar className="h-4 w-4" />
-                      {proposta.dataAprovacao ? formatDate(proposta.dataAprovacao) : formatDate(proposta.createdAt)}
+                      {proposta.dataAprovacao
+                        ? formatDate(proposta.dataAprovacao)
+                        : formatDate(proposta.createdAt)}
                     </p>
                   </div>
                 </div>
@@ -1903,7 +2102,7 @@ export default function Formalizacao() {
             </Card>
 
             {/* Status Management */}
-            <Card className="bg-gray-800 border-gray-700">
+            <Card className="border-gray-700 bg-gray-800">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-white">
                   <Edit className="h-5 w-5 text-blue-400" />
@@ -1913,9 +2112,11 @@ export default function Formalizacao() {
               <CardContent>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                   <div>
-                    <Label htmlFor="status" className="text-gray-400">Status Atual</Label>
+                    <Label htmlFor="status" className="text-gray-400">
+                      Status Atual
+                    </Label>
                     <select
-                      className="w-full rounded-md border border-gray-600 bg-gray-700 text-white p-2"
+                      className="w-full rounded-md border border-gray-600 bg-gray-700 p-2 text-white"
                       value={form.watch("status") || proposta.status}
                       onChange={e => form.setValue("status", e.target.value as any)}
                     >
@@ -1929,12 +2130,14 @@ export default function Formalizacao() {
                   </div>
 
                   <div>
-                    <Label htmlFor="observacoes" className="text-gray-400">Observações</Label>
+                    <Label htmlFor="observacoes" className="text-gray-400">
+                      Observações
+                    </Label>
                     <Textarea
                       id="observacoes"
                       rows={3}
                       placeholder="Adicione observações sobre o processo..."
-                      className="bg-gray-700 border-gray-600 text-white"
+                      className="border-gray-600 bg-gray-700 text-white"
                       {...form.register("observacoesFormalização")}
                     />
                   </div>
@@ -1947,7 +2150,7 @@ export default function Formalizacao() {
             </Card>
 
             {/* Next Steps */}
-            <Card className="bg-gray-800 border-gray-700">
+            <Card className="border-gray-700 bg-gray-800">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-white">
                   <AlertCircle className="h-5 w-5 text-blue-400" />
@@ -1957,7 +2160,7 @@ export default function Formalizacao() {
               <CardContent>
                 <div className="space-y-3">
                   {proposta.status === "aprovado" && (
-                    <div className="rounded-md bg-blue-900/30 border border-blue-700 p-3">
+                    <div className="rounded-md border border-blue-700 bg-blue-900/30 p-3">
                       <p className="text-sm font-medium text-blue-300">
                         Aguardando documentos adicionais
                       </p>
@@ -1967,7 +2170,7 @@ export default function Formalizacao() {
                     </div>
                   )}
                   {proposta.status === "documentos_enviados" && (
-                    <div className="rounded-md bg-purple-900/30 border border-purple-700 p-3">
+                    <div className="rounded-md border border-purple-700 bg-purple-900/30 p-3">
                       <p className="text-sm font-medium text-purple-300">Preparar contratos</p>
                       <p className="mt-1 text-sm text-purple-200">
                         Gerar e preparar contratos para assinatura.
@@ -1975,7 +2178,7 @@ export default function Formalizacao() {
                     </div>
                   )}
                   {proposta.status === "contratos_preparados" && (
-                    <div className="rounded-md bg-indigo-900/30 border border-indigo-700 p-3">
+                    <div className="rounded-md border border-indigo-700 bg-indigo-900/30 p-3">
                       <p className="text-sm font-medium text-indigo-300">Aguardando assinatura</p>
                       <p className="mt-1 text-sm text-indigo-200">
                         Contratos enviados para assinatura do cliente.
@@ -1983,7 +2186,7 @@ export default function Formalizacao() {
                     </div>
                   )}
                   {proposta.status === "contratos_assinados" && (
-                    <div className="rounded-md bg-orange-900/30 border border-orange-700 p-3">
+                    <div className="rounded-md border border-orange-700 bg-orange-900/30 p-3">
                       <p className="text-sm font-medium text-orange-300">Preparar pagamento</p>
                       <p className="mt-1 text-sm text-orange-200">
                         Processar liberação do valor aprovado.
@@ -1991,7 +2194,7 @@ export default function Formalizacao() {
                     </div>
                   )}
                   {proposta.status === "pronto_pagamento" && (
-                    <div className="rounded-md bg-green-900/30 border border-green-700 p-3">
+                    <div className="rounded-md border border-green-700 bg-green-900/30 p-3">
                       <p className="text-sm font-medium text-green-300">Liberar pagamento</p>
                       <p className="mt-1 text-sm text-green-200">
                         Valor pronto para ser liberado ao cliente.
@@ -1999,7 +2202,7 @@ export default function Formalizacao() {
                     </div>
                   )}
                   {proposta.status === "pago" && (
-                    <div className="rounded-md bg-green-900/30 border border-green-700 p-3">
+                    <div className="rounded-md border border-green-700 bg-green-900/30 p-3">
                       <p className="text-sm font-medium text-green-300">Processo concluído</p>
                       <p className="mt-1 text-sm text-green-200">
                         Valor liberado com sucesso ao cliente.

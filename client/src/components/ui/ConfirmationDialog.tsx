@@ -39,24 +39,18 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2">
-            {variant === "destructive" && (
-              <AlertTriangle className="h-5 w-5 text-red-500" />
-            )}
+            {variant === "destructive" && <AlertTriangle className="h-5 w-5 text-red-500" />}
             {title}
           </AlertDialogTitle>
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isLoading}>
-            {cancelText}
-          </AlertDialogCancel>
+          <AlertDialogCancel disabled={isLoading}>{cancelText}</AlertDialogCancel>
           <AlertDialogAction
             onClick={onConfirm}
             disabled={isLoading}
             className={
-              variant === "destructive"
-                ? "bg-red-600 hover:bg-red-700 focus:ring-red-600"
-                : ""
+              variant === "destructive" ? "bg-red-600 hover:bg-red-700 focus:ring-red-600" : ""
             }
           >
             {isLoading ? "Processando..." : confirmText}

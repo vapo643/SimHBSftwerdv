@@ -27,24 +27,24 @@ export function DocumentsStep() {
 
     // Clear the input
     if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+      fileInputRef.current.value = "";
     }
   };
 
   const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) return "0 Bytes";
     const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
   const requiredDocuments = state.context?.documentosObrigatorios || [
-    'Documento de Identidade (RG ou CNH)',
-    'CPF',
-    'Comprovante de Residência',
-    'Comprovante de Renda',
-    'Extrato Bancário (últimos 3 meses)',
+    "Documento de Identidade (RG ou CNH)",
+    "CPF",
+    "Comprovante de Residência",
+    "Comprovante de Renda",
+    "Extrato Bancário (últimos 3 meses)",
   ];
 
   return (
@@ -64,7 +64,7 @@ export function DocumentsStep() {
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
               <strong>Documentos necessários:</strong>
-              <ul className="mt-2 ml-4 list-disc">
+              <ul className="ml-4 mt-2 list-disc">
                 {requiredDocuments.map((doc, index) => (
                   <li key={index}>{doc}</li>
                 ))}
@@ -74,13 +74,13 @@ export function DocumentsStep() {
 
           <div className="space-y-4">
             <div
-              className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-border/70 transition-colors cursor-pointer bg-muted/30 hover:bg-muted/50"
+              className="hover:border-border/70 bg-muted/30 hover:bg-muted/50 cursor-pointer rounded-lg border-2 border-dashed border-border p-8 text-center transition-colors"
               onClick={() => fileInputRef.current?.click()}
             >
-              <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-              <p className="text-lg font-medium mb-2 text-foreground">Clique para fazer upload</p>
+              <Upload className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+              <p className="mb-2 text-lg font-medium text-foreground">Clique para fazer upload</p>
               <p className="text-sm text-muted-foreground">ou arraste e solte os arquivos aqui</p>
-              <p className="text-xs text-muted-foreground mt-2">
+              <p className="mt-2 text-xs text-muted-foreground">
                 Formatos aceitos: PDF, JPG, PNG (máx. 10MB por arquivo)
               </p>
             </div>
@@ -97,11 +97,11 @@ export function DocumentsStep() {
 
           {state.documents.length > 0 && (
             <div className="space-y-2">
-              <h4 className="font-medium text-sm text-foreground">Documentos anexados:</h4>
-              {state.documents.map((doc) => (
+              <h4 className="text-sm font-medium text-foreground">Documentos anexados:</h4>
+              {state.documents.map(doc => (
                 <div
                   key={doc.id}
-                  className="flex items-center justify-between p-3 rounded-lg bg-muted border border-border"
+                  className="flex items-center justify-between rounded-lg border border-border bg-muted p-3"
                 >
                   <div className="flex items-center gap-3">
                     <FileText className="h-5 w-5 text-muted-foreground" />

@@ -26,18 +26,18 @@ export function LoanConditionsStep() {
     return (
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
-        <AlertDescription>
-          Erro ao carregar dados. Por favor, recarregue a página.
-        </AlertDescription>
+        <AlertDescription>Erro ao carregar dados. Por favor, recarregue a página.</AlertDescription>
       </Alert>
     );
   }
 
   // Get selected product
   const selectedProduct = context.produtos.find(p => p.id === loanData.produtoId);
-  
+
   // Get available terms from selected table
-  const selectedTable = selectedProduct?.tabelasDisponiveis.find(t => t.id === loanData.tabelaComercialId);
+  const selectedTable = selectedProduct?.tabelasDisponiveis.find(
+    t => t.id === loanData.tabelaComercialId
+  );
   const availableTerms = selectedTable?.prazos || [];
 
   return (
@@ -48,60 +48,64 @@ export function LoanConditionsStep() {
             <Package className="h-5 w-5" />
             Produto e Tabela Comercial
           </CardTitle>
-          <CardDescription>
-            Selecione o produto de crédito e a tabela comercial
-          </CardDescription>
+          <CardDescription>Selecione o produto de crédito e a tabela comercial</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
             <Label htmlFor="produto">Produto de Crédito</Label>
             <Select
-              value={loanData.produtoId?.toString() || ''}
-              onValueChange={(value) => selectProduct(parseInt(value))}
+              value={loanData.produtoId?.toString() || ""}
+              onValueChange={value => selectProduct(parseInt(value))}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Selecione um produto..." />
               </SelectTrigger>
               <SelectContent>
-                {context.produtos.map((produto) => (
+                {context.produtos.map(produto => (
                   <SelectItem key={produto.id} value={produto.id.toString()}>
                     {produto.nome}
-                    {produto.tacTipo === 'fixo' 
-                      ? ` (TAC: R$ ${produto.tacValor})` 
+                    {produto.tacTipo === "fixo"
+                      ? ` (TAC: R$ ${produto.tacValor})`
                       : ` (TAC: ${produto.tacValor}%)`}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            {errors.produtoId && <p className="mt-1 text-sm text-destructive">{errors.produtoId}</p>}
+            {errors.produtoId && (
+              <p className="mt-1 text-sm text-destructive">{errors.produtoId}</p>
+            )}
           </div>
 
           <div>
             <Label htmlFor="tabela">Tabela Comercial</Label>
             <Select
-              value={loanData.tabelaComercialId?.toString() || ''}
-              onValueChange={(value) => selectTable(parseInt(value))}
+              value={loanData.tabelaComercialId?.toString() || ""}
+              onValueChange={value => selectTable(parseInt(value))}
               disabled={!selectedProduct}
             >
               <SelectTrigger>
-                <SelectValue placeholder={
-                  !selectedProduct 
-                    ? "Primeiro selecione um produto" 
-                    : "Selecione uma tabela comercial..."
-                } />
+                <SelectValue
+                  placeholder={
+                    !selectedProduct
+                      ? "Primeiro selecione um produto"
+                      : "Selecione uma tabela comercial..."
+                  }
+                />
               </SelectTrigger>
               <SelectContent>
-                {selectedProduct?.tabelasDisponiveis.map((tabela) => (
+                {selectedProduct?.tabelasDisponiveis.map(tabela => (
                   <SelectItem key={tabela.id} value={tabela.id.toString()}>
                     {tabela.nomeTabela}
-                    <span className="text-sm text-muted-foreground ml-2">
+                    <span className="ml-2 text-sm text-muted-foreground">
                       ({tabela.taxaJuros}% a.m. - {tabela.tipo})
                     </span>
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            {errors.tabelaComercialId && <p className="mt-1 text-sm text-destructive">{errors.tabelaComercialId}</p>}
+            {errors.tabelaComercialId && (
+              <p className="mt-1 text-sm text-destructive">{errors.tabelaComercialId}</p>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -112,9 +116,7 @@ export function LoanConditionsStep() {
             <DollarSign className="h-5 w-5" />
             Condições do Empréstimo
           </CardTitle>
-          <CardDescription>
-            Defina o valor, prazo e condições do empréstimo
-          </CardDescription>
+          <CardDescription>Defina o valor, prazo e condições do empréstimo</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
@@ -122,29 +124,33 @@ export function LoanConditionsStep() {
             <CurrencyInput
               id="valorSolicitado"
               value={loanData.valorSolicitado}
-              onChange={(e) => updateLoanConditions({ valorSolicitado: e.target.value })}
-              placeholder={`Mín: R$ ${context.limites.valorMinimo.toLocaleString('pt-BR')} - Máx: R$ ${context.limites.valorMaximo.toLocaleString('pt-BR')}`}
+              onChange={e => updateLoanConditions({ valorSolicitado: e.target.value })}
+              placeholder={`Mín: R$ ${context.limites.valorMinimo.toLocaleString("pt-BR")} - Máx: R$ ${context.limites.valorMaximo.toLocaleString("pt-BR")}`}
               className={errors.valorSolicitado ? "border-destructive" : ""}
             />
-            {errors.valorSolicitado && <p className="mt-1 text-sm text-destructive">{errors.valorSolicitado}</p>}
+            {errors.valorSolicitado && (
+              <p className="mt-1 text-sm text-destructive">{errors.valorSolicitado}</p>
+            )}
           </div>
 
           <div>
             <Label htmlFor="prazo">Prazo (meses)</Label>
             <Select
-              value={loanData.prazo?.toString() || ''}
-              onValueChange={(value) => updateLoanConditions({ prazo: parseInt(value) })}
+              value={loanData.prazo?.toString() || ""}
+              onValueChange={value => updateLoanConditions({ prazo: parseInt(value) })}
               disabled={!selectedTable}
             >
               <SelectTrigger>
-                <SelectValue placeholder={
-                  !selectedTable 
-                    ? "Primeiro selecione uma tabela comercial" 
-                    : "Selecione o prazo..."
-                } />
+                <SelectValue
+                  placeholder={
+                    !selectedTable
+                      ? "Primeiro selecione uma tabela comercial"
+                      : "Selecione o prazo..."
+                  }
+                />
               </SelectTrigger>
               <SelectContent>
-                {availableTerms.map((prazo) => (
+                {availableTerms.map(prazo => (
                   <SelectItem key={prazo} value={prazo.toString()}>
                     {prazo} meses
                   </SelectItem>
@@ -158,11 +164,11 @@ export function LoanConditionsStep() {
             <Checkbox
               id="incluirTac"
               checked={loanData.incluirTac}
-              onCheckedChange={(checked) => updateLoanConditions({ incluirTac: !!checked })}
+              onCheckedChange={checked => updateLoanConditions({ incluirTac: !!checked })}
             />
-            <Label 
-              htmlFor="incluirTac" 
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+            <Label
+              htmlFor="incluirTac"
+              className="cursor-pointer text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
             >
               Incluir Taxa de Abertura de Crédito (TAC)
             </Label>
@@ -173,14 +179,12 @@ export function LoanConditionsStep() {
             <Input
               id="dataCarencia"
               type="date"
-              value={loanData.dataCarencia || ''}
-              onChange={(e) => updateLoanConditions({ dataCarencia: e.target.value })}
-              min={format(new Date(), 'yyyy-MM-dd')}
-              max={format(new Date(Date.now() + 45 * 24 * 60 * 60 * 1000), 'yyyy-MM-dd')}
+              value={loanData.dataCarencia || ""}
+              onChange={e => updateLoanConditions({ dataCarencia: e.target.value })}
+              min={format(new Date(), "yyyy-MM-dd")}
+              max={format(new Date(Date.now() + 45 * 24 * 60 * 60 * 1000), "yyyy-MM-dd")}
             />
-            <p className="mt-1 text-sm text-muted-foreground">
-              Máximo de 45 dias a partir de hoje
-            </p>
+            <p className="mt-1 text-sm text-muted-foreground">Máximo de 45 dias a partir de hoje</p>
           </div>
         </CardContent>
       </Card>
@@ -192,54 +196,82 @@ export function LoanConditionsStep() {
               <Calculator className="h-5 w-5" />
               Simulação de Crédito
             </CardTitle>
-            <CardDescription>
-              Resumo das condições calculadas
-            </CardDescription>
+            <CardDescription>Resumo das condições calculadas</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-sm text-muted-foreground">Valor da Parcela</p>
                 <p className="text-2xl font-bold text-green-600 dark:text-green-400">
-                  R$ {parseFloat(simulation.valorParcela).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  R${" "}
+                  {parseFloat(simulation.valorParcela).toLocaleString("pt-BR", {
+                    minimumFractionDigits: 2,
+                  })}
                 </p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Taxa de Juros</p>
-                <p className="text-lg font-semibold">
-                  {simulation.taxaJuros}% ao mês
-                </p>
+                <p className="text-lg font-semibold">{simulation.taxaJuros}% ao mês</p>
               </div>
             </div>
 
-            <div className="border-t border-border pt-3 space-y-2">
+            <div className="space-y-2 border-t border-border pt-3">
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Valor Solicitado:</span>
-                <span className="text-foreground">R$ {parseFloat(loanData.valorSolicitado || '0').toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                <span className="text-foreground">
+                  R${" "}
+                  {parseFloat(loanData.valorSolicitado || "0").toLocaleString("pt-BR", {
+                    minimumFractionDigits: 2,
+                  })}
+                </span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">IOF:</span>
-                <span className="text-foreground">R$ {parseFloat(simulation.valorIOF).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                <span className="text-foreground">
+                  R${" "}
+                  {parseFloat(simulation.valorIOF).toLocaleString("pt-BR", {
+                    minimumFractionDigits: 2,
+                  })}
+                </span>
               </div>
               {loanData.incluirTac && (
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">TAC:</span>
-                  <span className="text-foreground">R$ {parseFloat(simulation.valorTAC).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                  <span className="text-foreground">
+                    R${" "}
+                    {parseFloat(simulation.valorTAC).toLocaleString("pt-BR", {
+                      minimumFractionDigits: 2,
+                    })}
+                  </span>
                 </div>
               )}
               {simulation.jurosCarencia && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Juros de Carência ({simulation.diasCarencia} dias):</span>
-                  <span className="text-foreground">R$ {parseFloat(simulation.jurosCarencia).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                  <span className="text-muted-foreground">
+                    Juros de Carência ({simulation.diasCarencia} dias):
+                  </span>
+                  <span className="text-foreground">
+                    R${" "}
+                    {parseFloat(simulation.jurosCarencia).toLocaleString("pt-BR", {
+                      minimumFractionDigits: 2,
+                    })}
+                  </span>
                 </div>
               )}
-              <div className="flex justify-between text-sm font-semibold border-t border-border pt-2">
+              <div className="flex justify-between border-t border-border pt-2 text-sm font-semibold">
                 <span className="text-foreground">Total Financiado:</span>
-                <span className="text-foreground">R$ {parseFloat(simulation.valorTotalFinanciado).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                <span className="text-foreground">
+                  R${" "}
+                  {parseFloat(simulation.valorTotalFinanciado).toLocaleString("pt-BR", {
+                    minimumFractionDigits: 2,
+                  })}
+                </span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">CET Anual:</span>
-                <span className="font-semibold text-foreground">{simulation.custoEfetivoTotal}%</span>
+                <span className="font-semibold text-foreground">
+                  {simulation.custoEfetivoTotal}%
+                </span>
               </div>
             </div>
           </CardContent>

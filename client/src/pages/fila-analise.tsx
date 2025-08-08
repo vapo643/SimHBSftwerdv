@@ -158,7 +158,7 @@ export default function FilaAnalise() {
     return (
       <DashboardLayout title="Fila de Análise de Crédito">
         <div className="space-y-6">
-          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+          <Card className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
             <CardContent className="p-6">
               <div className="animate-pulse space-y-4">
                 <div className="h-4 w-1/4 rounded bg-gray-200 dark:bg-gray-700"></div>
@@ -181,48 +181,56 @@ export default function FilaAnalise() {
         {/* Statistics Cards */}
         {stats && (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+            <Card className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-gray-600 dark:text-gray-400">Aguardando Análise</p>
-                    <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">{stats.aguardando}</p>
+                    <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">
+                      {stats.aguardando}
+                    </p>
                   </div>
                   <Clock className="h-8 w-8 text-orange-600 dark:text-orange-400" />
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+            <Card className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-gray-600 dark:text-gray-400">Em Análise</p>
-                    <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{stats.emAnalise}</p>
+                    <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                      {stats.emAnalise}
+                    </p>
                   </div>
                   <AlertCircle className="h-8 w-8 text-blue-600 dark:text-blue-400" />
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+            <Card className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-gray-600 dark:text-gray-400">Aprovadas</p>
-                    <p className="text-2xl font-bold text-green-600 dark:text-green-400">{stats.aprovadas}</p>
+                    <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                      {stats.aprovadas}
+                    </p>
                   </div>
                   <CheckCircle className="h-8 w-8 text-green-600 dark:text-green-400" />
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+            <Card className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-gray-600 dark:text-gray-400">Rejeitadas</p>
-                    <p className="text-2xl font-bold text-red-600 dark:text-red-400">{stats.rejeitadas}</p>
+                    <p className="text-2xl font-bold text-red-600 dark:text-red-400">
+                      {stats.rejeitadas}
+                    </p>
                   </div>
                   <XCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
                 </div>
@@ -232,7 +240,7 @@ export default function FilaAnalise() {
         )}
 
         {/* Filters */}
-        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+        <Card className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
               <Filter className="h-5 w-5" />
@@ -339,7 +347,7 @@ export default function FilaAnalise() {
         </Card>
 
         {/* Proposals Table */}
-        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+        <Card className="border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
           <CardHeader>
             <CardTitle className="flex items-center justify-between text-gray-900 dark:text-white">
               <span className="flex items-center gap-2">
@@ -385,7 +393,7 @@ export default function FilaAnalise() {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800">
+                <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
                   {filteredPropostas && filteredPropostas.length > 0 ? (
                     filteredPropostas.map(proposta => {
                       const statusInfo = getStatusBadge(proposta.status);
@@ -434,7 +442,10 @@ export default function FilaAnalise() {
                     })
                   ) : (
                     <tr>
-                      <td colSpan={8} className="px-6 py-12 text-center text-gray-600 dark:text-gray-400">
+                      <td
+                        colSpan={8}
+                        className="px-6 py-12 text-center text-gray-600 dark:text-gray-400"
+                      >
                         <div className="flex flex-col items-center">
                           <Search className="mb-2 h-8 w-8 text-gray-600 dark:text-gray-400" />
                           <p>Nenhuma proposta encontrada</p>

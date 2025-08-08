@@ -51,27 +51,27 @@ export interface AuthProvider {
    * Realiza login com email e senha
    */
   signIn(credentials: SignInCredentials): Promise<SignInResult>;
-  
+
   /**
    * Realiza logout
    */
   signOut(): Promise<void>;
-  
+
   /**
    * Obtém a sessão atual
    */
   getSession(): Promise<Session | null>;
-  
+
   /**
    * Obtém o usuário atual
    */
   getCurrentUser(): Promise<User | null>;
-  
+
   /**
    * Escuta mudanças no estado de autenticação
    */
   onAuthStateChange(callback: AuthStateChangeCallback): AuthSubscription;
-  
+
   /**
    * Obtém o token de acesso atual
    */
@@ -82,6 +82,6 @@ export interface AuthProvider {
  * Configuração do provedor de autenticação
  */
 export interface AuthConfig {
-  provider: 'supabase' | 'firebase' | 'auth0' | 'custom';
+  provider: "supabase" | "firebase" | "auth0" | "custom";
   options?: Record<string, any>;
 }

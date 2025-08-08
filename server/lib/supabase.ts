@@ -21,19 +21,15 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 // NOVA FUNÇÃO para operações Admin:
 export function createServerSupabaseAdminClient() {
   if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    throw new Error('SUPABASE_SERVICE_ROLE_KEY é obrigatória para operações administrativas');
+    throw new Error("SUPABASE_SERVICE_ROLE_KEY é obrigatória para operações administrativas");
   }
-  
-  return createClient(
-    process.env.SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false
-      }
-    }
-  );
+
+  return createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  });
 }
 
 // FUNÇÃO ANTI-FRÁGIL para operações com RLS (autenticadas):
@@ -41,8 +37,8 @@ export function createServerSupabaseClient(accessToken?: string) {
   const client = createClient(supabaseUrl, supabaseAnonKey, {
     auth: {
       autoRefreshToken: false,
-      persistSession: false
-    }
+      persistSession: false,
+    },
   });
 
   // Se token fornecido, configurar para respeitar RLS
@@ -50,7 +46,7 @@ export function createServerSupabaseClient(accessToken?: string) {
     // Configurar sessão manualmente para RLS
     client.auth.setSession({
       access_token: accessToken,
-      refresh_token: ''
+      refresh_token: "",
     });
   }
 
@@ -61,27 +57,27 @@ export function createServerSupabaseClient(accessToken?: string) {
 // Temporary: Use lazy connection to prevent server crash
 let dbClient;
 
-if (databaseUrl.includes('supabase.com')) {
-  console.log('✅ Database: Configuring Supabase connection...');
-  
+if (databaseUrl.includes("supabase.com")) {
+  console.log("✅ Database: Configuring Supabase connection...");
+
   // Use transaction pooler port and SSL
   let correctedUrl = databaseUrl;
-  if (!correctedUrl.includes('sslmode=')) {
-    correctedUrl += correctedUrl.includes('?') ? '&sslmode=require' : '?sslmode=require';
+  if (!correctedUrl.includes("sslmode=")) {
+    correctedUrl += correctedUrl.includes("?") ? "&sslmode=require" : "?sslmode=require";
   }
-  if (correctedUrl.includes(':5432')) {
-    correctedUrl = correctedUrl.replace(':5432', ':6543');
+  if (correctedUrl.includes(":5432")) {
+    correctedUrl = correctedUrl.replace(":5432", ":6543");
   }
-  
+
   // Create connection with lazy initialization
   dbClient = postgres(correctedUrl, {
-    ssl: 'require',
+    ssl: "require",
     max: 5,
     idle_timeout: 30,
     connect_timeout: 10,
-    lazy: true // Prevent immediate connection
+    lazy: true, // Prevent immediate connection
   });
-  console.log('✅ Database: Connection configured (lazy)');
+  console.log("✅ Database: Connection configured (lazy)");
 } else {
   dbClient = postgres(databaseUrl, { lazy: true });
 }
@@ -93,10 +89,10 @@ export const db = drizzle(client, { schema });
 setTimeout(async () => {
   try {
     await client`SELECT 1`;
-    console.log('✅ Database: Connection test successful');
+    console.log("✅ Database: Connection test successful");
   } catch (error) {
-    console.warn('⚠️  Database: Connection test failed -', error.message);
-    console.warn('⚠️  Database: Check DATABASE_URL credentials in Secrets');
-    console.warn('⚠️  Database: App will continue using Supabase REST API only');
+    console.warn("⚠️  Database: Connection test failed -", error.message);
+    console.warn("⚠️  Database: Check DATABASE_URL credentials in Secrets");
+    console.warn("⚠️  Database: App will continue using Supabase REST API only");
   }
 }, 2000);

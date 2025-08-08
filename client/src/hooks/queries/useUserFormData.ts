@@ -1,6 +1,6 @@
-import { useQuery } from '@tanstack/react-query';
-import { api } from '@/lib/apiClient';
-import { queryKeys } from './queryKeys';
+import { useQuery } from "@tanstack/react-query";
+import { api } from "@/lib/apiClient";
+import { queryKeys } from "./queryKeys";
 
 // Types for the data structures
 interface Partner {
@@ -23,7 +23,7 @@ const LARGE_DATASET_THRESHOLD = 500;
 
 /**
  * Hook for User Form Data Management with Hybrid Filtering Strategy
- * 
+ *
  * This hook implements a sophisticated data fetching strategy:
  * - For small datasets (≤500 stores): Client-side filtering with all data pre-loaded
  * - For large datasets (>500 stores): Server-side filtering with on-demand loading
@@ -37,7 +37,7 @@ export function useUserFormData() {
   } = useQuery({
     queryKey: queryKeys.system.metadata(),
     queryFn: async () => {
-      const response = await api.get<SystemMetadata>('/api/admin/system/metadata');
+      const response = await api.get<SystemMetadata>("/api/admin/system/metadata");
       return response.data;
     },
   });
@@ -50,7 +50,7 @@ export function useUserFormData() {
   } = useQuery({
     queryKey: queryKeys.partners.list(),
     queryFn: async () => {
-      const response = await api.get<Partner[]>('/api/parceiros');
+      const response = await api.get<Partner[]>("/api/parceiros");
       return response.data;
     },
   });
@@ -66,7 +66,7 @@ export function useUserFormData() {
   } = useQuery({
     queryKey: queryKeys.stores.list(),
     queryFn: async () => {
-      const response = await api.get<Store[]>('/api/admin/lojas');
+      const response = await api.get<Store[]>("/api/admin/lojas");
       return response.data;
     },
     enabled: shouldUseClientSideFiltering === true, // Only fetch if using client-side filtering
@@ -85,18 +85,17 @@ export function useUserFormData() {
   };
 
   // Step 6: Compute loading states
-  const isLoading = isMetadataLoading || isPartnersLoading || 
-    (shouldUseClientSideFiltering && isAllStoresLoading);
+  const isLoading =
+    isMetadataLoading || isPartnersLoading || (shouldUseClientSideFiltering && isAllStoresLoading);
 
   // Step 7: Compute error states
-  const error = metadataError || partnersError || 
-    (shouldUseClientSideFiltering && allStoresError);
+  const error = metadataError || partnersError || (shouldUseClientSideFiltering && allStoresError);
 
   // Step 8: Return comprehensive state and methods
   return {
     // Data
     partners: partners || [],
-    allStores: shouldUseClientSideFiltering ? (allStores || []) : [],
+    allStores: shouldUseClientSideFiltering ? allStores || [] : [],
     metadata,
 
     // Loading states (granular)
@@ -112,7 +111,7 @@ export function useUserFormData() {
     allStoresError: shouldUseClientSideFiltering ? allStoresError : null,
 
     // Filtering strategy info
-    filteringStrategy: shouldUseClientSideFiltering ? 'client-side' : 'server-side',
+    filteringStrategy: shouldUseClientSideFiltering ? "client-side" : "server-side",
     totalLojas: metadata?.totalLojas || 0,
 
     // Methods

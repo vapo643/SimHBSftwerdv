@@ -10,25 +10,25 @@ async function throwIfResNotOk(res: Response) {
 
 export async function apiRequest(
   url: string,
-  options: { method: string; body?: unknown } = { method: 'GET' }
+  options: { method: string; body?: unknown } = { method: "GET" }
 ): Promise<any> {
   const { method, body } = options;
-  
+
   // Use the new api client methods
-  if (method === 'GET') {
+  if (method === "GET") {
     const response = await api.get(url);
     return response.data;
-  } else if (method === 'POST') {
+  } else if (method === "POST") {
     const response = await api.post(url, body);
     return response.data;
-  } else if (method === 'PUT') {
+  } else if (method === "PUT") {
     const response = await api.put(url, body);
     return response.data;
-  } else if (method === 'DELETE') {
+  } else if (method === "DELETE") {
     const response = await api.delete(url);
     return response.data;
   }
-  
+
   throw new Error(`Unsupported method: ${method}`);
 }
 

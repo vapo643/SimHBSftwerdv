@@ -1,7 +1,7 @@
-import { db } from '../db';
-import { securityLogs, propostas, users, loginAttempts } from '../../shared/schema';
-import { eq, gte, and, count, desc, sql } from 'drizzle-orm';
-import { getBrasiliaTimestamp } from '../lib/date-utils';
+import { db } from "../db";
+import { securityLogs, propostas, users, loginAttempts } from "../../shared/schema";
+import { eq, gte, and, count, desc, sql } from "drizzle-orm";
+import { getBrasiliaTimestamp } from "../lib/date-utils";
 
 interface SecurityMetrics {
   threats: {
@@ -66,7 +66,7 @@ class SecurityMonitoringService {
   }
 
   async getSecurityMetrics(): Promise<SecurityMetrics> {
-    const cacheKey = 'security-metrics';
+    const cacheKey = "security-metrics";
     const cached = this.getCachedData(cacheKey);
     if (cached) return cached;
 
@@ -79,7 +79,7 @@ class SecurityMonitoringService {
       const threatLogs = await db
         .select({
           event_type: securityLogs.event_type,
-          count: count()
+          count: count(),
         })
         .from(securityLogs)
         .where(gte(securityLogs.created_at, oneDayAgo))
@@ -88,7 +88,7 @@ class SecurityMonitoringService {
       const recentThreatLogs = await db
         .select({
           event_type: securityLogs.event_type,
-          count: count()
+          count: count(),
         })
         .from(securityLogs)
         .where(gte(securityLogs.created_at, oneHourAgo))
@@ -99,7 +99,7 @@ class SecurityMonitoringService {
         .select({
           total: count(),
           failed: sql<number>`COUNT(CASE WHEN event_type IN ('LOGIN_FAILED', 'INVALID_TOKEN') THEN 1 END)`,
-          suspicious: sql<number>`COUNT(CASE WHEN severity = 'HIGH' AND event_type LIKE '%FAILED%' THEN 1 END)`
+          suspicious: sql<number>`COUNT(CASE WHEN severity = 'HIGH' AND event_type LIKE '%FAILED%' THEN 1 END)`,
         })
         .from(securityLogs)
         .where(
@@ -113,10 +113,7 @@ class SecurityMonitoringService {
         .select({ count: count() })
         .from(securityLogs)
         .where(
-          and(
-            gte(securityLogs.created_at, oneHourAgo),
-            eq(securityLogs.event_type, 'LOGIN_FAILED')
-          )
+          and(gte(securityLogs.created_at, oneHourAgo), eq(securityLogs.event_type, "LOGIN_FAILED"))
         );
 
       // Get active sessions count
@@ -129,7 +126,7 @@ class SecurityMonitoringService {
       const lastLogin = await db
         .select({ created_at: securityLogs.created_at })
         .from(securityLogs)
-        .where(eq(securityLogs.event_type, 'LOGIN_SUCCESS'))
+        .where(eq(securityLogs.event_type, "LOGIN_SUCCESS"))
         .orderBy(desc(securityLogs.created_at))
         .limit(1);
 
@@ -139,16 +136,16 @@ class SecurityMonitoringService {
 
       const metrics: SecurityMetrics = {
         threats: {
-          sqlInjectionAttempts: threatMap.get('SQL_INJECTION_ATTEMPT') || 0,
-          xssAttemptsBlocked: threatMap.get('XSS_ATTEMPT') || 0,
-          bruteForceAttempts: threatMap.get('BRUTE_FORCE_ATTEMPT') || 0,
-          rateLimitViolations: threatMap.get('RATE_LIMIT_EXCEEDED') || 0,
+          sqlInjectionAttempts: threatMap.get("SQL_INJECTION_ATTEMPT") || 0,
+          xssAttemptsBlocked: threatMap.get("XSS_ATTEMPT") || 0,
+          bruteForceAttempts: threatMap.get("BRUTE_FORCE_ATTEMPT") || 0,
+          rateLimitViolations: threatMap.get("RATE_LIMIT_EXCEEDED") || 0,
           lastHour: {
-            sqlInjection: recentThreatMap.get('SQL_INJECTION_ATTEMPT') || 0,
-            xss: recentThreatMap.get('XSS_ATTEMPT') || 0,
-            bruteForce: recentThreatMap.get('BRUTE_FORCE_ATTEMPT') || 0,
-            rateLimit: recentThreatMap.get('RATE_LIMIT_EXCEEDED') || 0
-          }
+            sqlInjection: recentThreatMap.get("SQL_INJECTION_ATTEMPT") || 0,
+            xss: recentThreatMap.get("XSS_ATTEMPT") || 0,
+            bruteForce: recentThreatMap.get("BRUTE_FORCE_ATTEMPT") || 0,
+            rateLimit: recentThreatMap.get("RATE_LIMIT_EXCEEDED") || 0,
+          },
         },
         authentication: {
           totalLogins: authLogs[0]?.total || 0,
@@ -156,13 +153,13 @@ class SecurityMonitoringService {
           activeSessionsCount: activeSessions[0]?.count || 0,
           lastLoginTime: lastLogin[0]?.created_at || null,
           recentFailures: recentFailures[0]?.count || 0,
-          suspiciousActivities: authLogs[0]?.suspicious || 0
+          suspiciousActivities: authLogs[0]?.suspicious || 0,
         },
         performance: {
           averageResponseTime: await this.getAverageResponseTime(),
           slowQueries: await this.getSlowQueriesCount(),
           apiErrors: await this.getApiErrorsCount(oneDayAgo),
-          uptime: 99.9 // Would come from monitoring service
+          uptime: 99.9, // Would come from monitoring service
         },
         compliance: {
           asvsLevel1: 100, // From our ASVS audit
@@ -172,23 +169,23 @@ class SecurityMonitoringService {
             critical: 0,
             high: 0,
             medium: 0,
-            low: 0
-          }
+            low: 0,
+          },
         },
         system: {
           lastSecurityScan: getBrasiliaTimestamp(),
-          encryptionStatus: 'AES-256 (Active)',
-          backupStatus: 'Daily backups enabled',
+          encryptionStatus: "AES-256 (Active)",
+          backupStatus: "Daily backups enabled",
           certificateExpiry: 365, // Would check actual cert
-          firewallStatus: 'Active',
-          ddosProtection: true
-        }
+          firewallStatus: "Active",
+          ddosProtection: true,
+        },
       };
 
       this.setCachedData(cacheKey, metrics);
       return metrics;
     } catch (error) {
-      console.error('[SECURITY MONITORING] Error getting metrics:', error);
+      console.error("[SECURITY MONITORING] Error getting metrics:", error);
       throw error;
     }
   }
@@ -198,16 +195,16 @@ class SecurityMonitoringService {
     user_id?: string;
     description: string;
     ip_address?: string;
-    severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+    severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
     metadata?: any;
   }) {
     try {
       await db.insert(securityLogs).values({
         ...event,
-        created_at: getBrasiliaTimestamp()
+        created_at: getBrasiliaTimestamp(),
       });
     } catch (error) {
-      console.error('[SECURITY MONITORING] Error recording event:', error);
+      console.error("[SECURITY MONITORING] Error recording event:", error);
     }
   }
 
@@ -222,7 +219,7 @@ class SecurityMonitoringService {
 
       return alerts;
     } catch (error) {
-      console.error('[SECURITY MONITORING] Error getting alerts:', error);
+      console.error("[SECURITY MONITORING] Error getting alerts:", error);
       return [];
     }
   }
@@ -247,7 +244,7 @@ class SecurityMonitoringService {
           sql`event_type LIKE '%ERROR%' OR severity = 'HIGH'`
         )
       );
-    
+
     return errors[0]?.count || 0;
   }
 
@@ -262,7 +259,7 @@ class SecurityMonitoringService {
   private setCachedData(key: string, data: any): void {
     this.metricsCache.set(key, {
       data,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
   }
 }

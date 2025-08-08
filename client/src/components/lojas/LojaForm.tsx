@@ -4,7 +4,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useQuery } from "@tanstack/react-query";
 import { Save, X, Loader2 } from "lucide-react";
 import { z } from "zod";
@@ -13,7 +19,9 @@ import { queryKeys } from "@/hooks/queries/queryKeys";
 
 // Simplified schema for the form
 const lojaFormSchema = z.object({
-  parceiroId: z.number({ required_error: "Parceiro é obrigatório" }).min(1, "Selecione um parceiro"),
+  parceiroId: z
+    .number({ required_error: "Parceiro é obrigatório" })
+    .min(1, "Selecione um parceiro"),
   nomeLoja: z.string().min(1, "Nome da loja é obrigatório"),
   endereco: z.string().min(1, "Endereço é obrigatório"),
 });
@@ -27,11 +35,11 @@ interface LojaFormProps {
   isLoading?: boolean;
 }
 
-const LojaForm: React.FC<LojaFormProps> = ({ 
-  initialData, 
-  onSubmit, 
-  onCancel, 
-  isLoading = false 
+const LojaForm: React.FC<LojaFormProps> = ({
+  initialData,
+  onSubmit,
+  onCancel,
+  isLoading = false,
 }) => {
   const {
     register,
@@ -40,23 +48,25 @@ const LojaForm: React.FC<LojaFormProps> = ({
     formState: { errors },
   } = useForm<LojaFormData>({
     resolver: zodResolver(lojaFormSchema),
-    defaultValues: initialData ? {
-      parceiroId: initialData.parceiroId,
-      nomeLoja: initialData.nomeLoja,
-      endereco: initialData.endereco,
-    } : {
-      parceiroId: undefined,
-      nomeLoja: "",
-      endereco: "",
-    },
+    defaultValues: initialData
+      ? {
+          parceiroId: initialData.parceiroId,
+          nomeLoja: initialData.nomeLoja,
+          endereco: initialData.endereco,
+        }
+      : {
+          parceiroId: undefined,
+          nomeLoja: "",
+          endereco: "",
+        },
   });
 
   // Fetch parceiros for the select dropdown using consistent queryKeys and apiClient
   const { data: parceiros = [] } = useQuery<Parceiro[]>({
     queryKey: queryKeys.partners.list(),
     queryFn: async () => {
-      const { api } = await import('@/lib/apiClient');
-      const response = await api.get<Parceiro[]>('/api/parceiros');
+      const { api } = await import("@/lib/apiClient");
+      const response = await api.get<Parceiro[]>("/api/parceiros");
       return response.data;
     },
   });
@@ -72,8 +82,8 @@ const LojaForm: React.FC<LojaFormProps> = ({
             name="parceiroId"
             control={control}
             render={({ field }) => (
-              <Select 
-                onValueChange={(value) => field.onChange(parseInt(value, 10))}
+              <Select
+                onValueChange={value => field.onChange(parseInt(value, 10))}
                 defaultValue={field.value ? String(field.value) : undefined}
                 disabled={isLoading}
               >
@@ -81,7 +91,7 @@ const LojaForm: React.FC<LojaFormProps> = ({
                   <SelectValue placeholder="Selecione um parceiro..." />
                 </SelectTrigger>
                 <SelectContent>
-                  {parceiros.map((parceiro) => (
+                  {parceiros.map(parceiro => (
                     <SelectItem key={parceiro.id} value={String(parceiro.id)}>
                       {parceiro.razaoSocial}
                     </SelectItem>
@@ -99,9 +109,9 @@ const LojaForm: React.FC<LojaFormProps> = ({
           <Label htmlFor="nomeLoja" className="text-sm font-medium">
             Nome da Loja *
           </Label>
-          <Input 
-            id="nomeLoja" 
-            {...register("nomeLoja")} 
+          <Input
+            id="nomeLoja"
+            {...register("nomeLoja")}
             placeholder="Nome da loja"
             disabled={isLoading}
             className="mt-1"
@@ -115,9 +125,9 @@ const LojaForm: React.FC<LojaFormProps> = ({
           <Label htmlFor="endereco" className="text-sm font-medium">
             Endereço *
           </Label>
-          <Input 
-            id="endereco" 
-            {...register("endereco")} 
+          <Input
+            id="endereco"
+            {...register("endereco")}
             placeholder="Endereço completo da loja"
             disabled={isLoading}
             className="mt-1"
@@ -128,10 +138,10 @@ const LojaForm: React.FC<LojaFormProps> = ({
         </div>
       </div>
 
-      <div className="flex justify-end gap-3 pt-6 border-t">
-        <Button 
-          type="button" 
-          variant="outline" 
+      <div className="flex justify-end gap-3 border-t pt-6">
+        <Button
+          type="button"
+          variant="outline"
           onClick={onCancel}
           disabled={isLoading}
           className="gap-2"
@@ -139,11 +149,7 @@ const LojaForm: React.FC<LojaFormProps> = ({
           <X className="h-4 w-4" />
           Cancelar
         </Button>
-        <Button 
-          type="submit" 
-          disabled={isLoading}
-          className="gap-2 btn-simpix-primary"
-        >
+        <Button type="submit" disabled={isLoading} className="btn-simpix-primary gap-2">
           {isLoading ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" />

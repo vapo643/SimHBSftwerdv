@@ -3,8 +3,8 @@
  * Queries para análise de performance e saúde do sistema
  */
 
-import { db } from '../lib/supabase';
-import { sql } from 'drizzle-orm';
+import { db } from "../lib/supabase";
+import { sql } from "drizzle-orm";
 
 /**
  * Retorna estatísticas gerais do banco
@@ -21,10 +21,10 @@ export async function getDatabaseStats() {
         (SELECT count(*) FROM information_schema.tables WHERE table_schema = 'public') as total_tables,
         current_timestamp as checked_at
     `);
-    
+
     return stats[0];
   } catch (error) {
-    console.error('Erro ao buscar estatísticas do banco:', error);
+    console.error("Erro ao buscar estatísticas do banco:", error);
     throw error;
   }
 }
@@ -49,11 +49,11 @@ export async function getSlowQueries(limit = 10) {
       ORDER BY mean_exec_time DESC
       LIMIT ${limit}
     `);
-    
+
     return queries;
   } catch (error) {
     // pg_stat_statements pode não estar habilitado
-    console.warn('pg_stat_statements não disponível');
+    console.warn("pg_stat_statements não disponível");
     return [];
   }
 }
@@ -79,10 +79,10 @@ export async function getTableStats() {
       WHERE schemaname = 'public'
       ORDER BY pg_total_relation_size(schemaname||'.'||tablename) DESC
     `);
-    
+
     return stats;
   } catch (error) {
-    console.error('Erro ao buscar estatísticas das tabelas:', error);
+    console.error("Erro ao buscar estatísticas das tabelas:", error);
     throw error;
   }
 }
@@ -105,10 +105,10 @@ export async function getIndexUsage() {
       WHERE schemaname = 'public'
       ORDER BY idx_scan DESC
     `);
-    
+
     return usage;
   } catch (error) {
-    console.error('Erro ao buscar uso de índices:', error);
+    console.error("Erro ao buscar uso de índices:", error);
     throw error;
   }
 }
@@ -140,10 +140,10 @@ export async function getActiveConnections() {
         AND pid != pg_backend_pid()
       ORDER BY query_start DESC
     `);
-    
+
     return connections;
   } catch (error) {
-    console.error('Erro ao buscar conexões ativas:', error);
+    console.error("Erro ao buscar conexões ativas:", error);
     throw error;
   }
 }
@@ -154,11 +154,11 @@ export async function getActiveConnections() {
 export async function checkDatabaseHealth() {
   try {
     const health = {
-      status: 'healthy',
+      status: "healthy",
       issues: [] as string[],
-      metrics: {} as any
+      metrics: {} as any,
     };
-    
+
     // Verificar conexões
     const connStats = await db.execute(sql`
       SELECT 
@@ -166,15 +166,15 @@ export async function checkDatabaseHealth() {
         (SELECT count(*) FROM pg_stat_activity WHERE state = 'active') as active,
         (SELECT setting::int FROM pg_settings WHERE name = 'max_connections') as max_allowed
     `);
-    
+
     const conn = connStats[0] as any;
     health.metrics.connections = conn;
-    
+
     if (conn.total > conn.max_allowed * 0.8) {
       health.issues.push(`Alto número de conexões: ${conn.total}/${conn.max_allowed}`);
-      health.status = 'warning';
+      health.status = "warning";
     }
-    
+
     // Verificar bloat das tabelas
     const bloat = await db.execute(sql`
       SELECT 
@@ -189,20 +189,20 @@ export async function checkDatabaseHealth() {
         AND n_live_tup > 0
       ORDER BY dead_ratio DESC
     `);
-    
+
     health.metrics.table_bloat = bloat;
-    
+
     for (const table of bloat as any[]) {
       if (table.dead_ratio > 20) {
         health.issues.push(`Tabela ${table.tablename} com ${table.dead_ratio}% de linhas mortas`);
         if (table.dead_ratio > 50) {
-          health.status = 'critical';
-        } else if (health.status !== 'critical') {
-          health.status = 'warning';
+          health.status = "critical";
+        } else if (health.status !== "critical") {
+          health.status = "warning";
         }
       }
     }
-    
+
     // Verificar queries longas
     const longQueries = await db.execute(sql`
       SELECT count(*) as count
@@ -210,20 +210,20 @@ export async function checkDatabaseHealth() {
       WHERE state = 'active'
         AND query_start < now() - interval '5 minutes'
     `);
-    
+
     const longCount = (longQueries[0] as any).count;
     if (longCount > 0) {
       health.issues.push(`${longCount} queries rodando há mais de 5 minutos`);
-      health.status = 'warning';
+      health.status = "warning";
     }
-    
+
     return health;
   } catch (error) {
-    console.error('Erro ao verificar saúde do banco:', error);
+    console.error("Erro ao verificar saúde do banco:", error);
     return {
-      status: 'error',
-      issues: ['Erro ao verificar saúde do banco'],
-      error: error instanceof Error ? error.message : String(error)
+      status: "error",
+      issues: ["Erro ao verificar saúde do banco"],
+      error: error instanceof Error ? error.message : String(error),
     };
   }
 }
@@ -233,30 +233,24 @@ export async function checkDatabaseHealth() {
  */
 export async function generateMonitoringReport() {
   try {
-    const [
-      dbStats,
-      tableStats,
-      indexUsage,
-      activeConnections,
-      health
-    ] = await Promise.all([
+    const [dbStats, tableStats, indexUsage, activeConnections, health] = await Promise.all([
       getDatabaseStats(),
       getTableStats(),
       getIndexUsage(),
       getActiveConnections(),
-      checkDatabaseHealth()
+      checkDatabaseHealth(),
     ]);
-    
+
     return {
       timestamp: new Date().toISOString(),
       database: dbStats,
       tables: tableStats,
       indexes: indexUsage,
       connections: activeConnections,
-      health: health
+      health: health,
     };
   } catch (error) {
-    console.error('Erro ao gerar relatório de monitoramento:', error);
+    console.error("Erro ao gerar relatório de monitoramento:", error);
     throw error;
   }
 }

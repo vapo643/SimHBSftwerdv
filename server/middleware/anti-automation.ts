@@ -1,32 +1,36 @@
 /**
  * Anti-Automation Middleware - OWASP ASVS V11.1.4
- * 
+ *
  * This middleware provides basic protection against automated attacks
  * by implementing a challenge-response mechanism for critical endpoints.
- * 
+ *
  * For production use, integrate with a CAPTCHA service like:
  * - Google reCAPTCHA
  * - hCaptcha
  * - Cloudflare Turnstile
  */
 
-import { Request, Response, NextFunction } from 'express';
-import { securityLogger, SecurityEventType, getClientIP } from '../lib/security-logger';
-import { createHash } from 'crypto';
+import { Request, Response, NextFunction } from "express";
+import { securityLogger, SecurityEventType, getClientIP } from "../lib/security-logger";
+import { createHash } from "crypto";
 
 // In-memory store for challenges (use Redis in production)
-const challengeStore = new Map<string, {
-  challenge: string;
-  answer: string;
-  attempts: number;
-  createdAt: Date;
-}>();
+const challengeStore = new Map<
+  string,
+  {
+    challenge: string;
+    answer: string;
+    attempts: number;
+    createdAt: Date;
+  }
+>();
 
 // Clean up old challenges every 5 minutes
 setInterval(() => {
   const now = Date.now();
   for (const [key, value] of challengeStore.entries()) {
-    if (now - value.createdAt.getTime() > 300000) { // 5 minutes
+    if (now - value.createdAt.getTime() > 300000) {
+      // 5 minutes
       challengeStore.delete(key);
     }
   }
@@ -38,18 +42,18 @@ setInterval(() => {
 function generateChallenge(): { challenge: string; answer: string } {
   const a = Math.floor(Math.random() * 10) + 1;
   const b = Math.floor(Math.random() * 10) + 1;
-  const operations = ['+', '-'];
+  const operations = ["+", "-"];
   const op = operations[Math.floor(Math.random() * operations.length)];
-  
+
   let answer: number;
   let challenge: string;
-  
+
   switch (op) {
-    case '+':
+    case "+":
       answer = a + b;
       challenge = `${a} + ${b}`;
       break;
-    case '-':
+    case "-":
       answer = Math.max(a, b) - Math.min(a, b);
       challenge = `${Math.max(a, b)} - ${Math.min(a, b)}`;
       break;
@@ -57,7 +61,7 @@ function generateChallenge(): { challenge: string; answer: string } {
       answer = a + b;
       challenge = `${a} + ${b}`;
   }
-  
+
   return { challenge, answer: answer.toString() };
 }
 
@@ -66,9 +70,9 @@ function generateChallenge(): { challenge: string; answer: string } {
  */
 function getClientFingerprint(req: Request): string {
   const ip = getClientIP(req);
-  const userAgent = req.headers['user-agent'] || 'unknown';
+  const userAgent = req.headers["user-agent"] || "unknown";
   const fingerprint = `${ip}:${userAgent}`;
-  return createHash('sha256').update(fingerprint).digest('hex');
+  return createHash("sha256").update(fingerprint).digest("hex");
 }
 
 /**
@@ -79,13 +83,13 @@ export function antiAutomationMiddleware(req: Request, res: Response, next: Next
   if (req.user?.id) {
     return next();
   }
-  
+
   const fingerprint = getClientFingerprint(req);
   const existingChallenge = challengeStore.get(fingerprint);
-  
+
   // Check if challenge answer is provided
-  const challengeAnswer = req.headers['x-challenge-answer'] || req.body?.challengeAnswer;
-  
+  const challengeAnswer = req.headers["x-challenge-answer"] || req.body?.challengeAnswer;
+
   if (existingChallenge && challengeAnswer) {
     // Verify answer
     if (existingChallenge.answer === challengeAnswer.toString()) {
@@ -95,53 +99,53 @@ export function antiAutomationMiddleware(req: Request, res: Response, next: Next
     } else {
       // Wrong answer
       existingChallenge.attempts++;
-      
+
       if (existingChallenge.attempts >= 3) {
         // Too many failed attempts
         challengeStore.delete(fingerprint);
-        
+
         securityLogger.logEvent({
           type: SecurityEventType.SUSPICIOUS_ACTIVITY,
-          severity: 'HIGH',
+          severity: "HIGH",
           ipAddress: getClientIP(req),
-          userAgent: req.headers['user-agent'],
+          userAgent: req.headers["user-agent"],
           endpoint: req.originalUrl,
           success: false,
-          details: { reason: 'Failed anti-automation challenge multiple times' }
+          details: { reason: "Failed anti-automation challenge multiple times" },
         });
-        
+
         return res.status(403).json({
-          error: 'Acesso negado. Muitas tentativas falhadas.'
+          error: "Acesso negado. Muitas tentativas falhadas.",
         });
       }
-      
+
       // Generate new challenge
       const { challenge, answer } = generateChallenge();
       existingChallenge.challenge = challenge;
       existingChallenge.answer = answer;
-      
+
       return res.status(428).json({
-        error: 'Resposta incorreta. Tente novamente.',
+        error: "Resposta incorreta. Tente novamente.",
         challenge: challenge,
-        remainingAttempts: 3 - existingChallenge.attempts
+        remainingAttempts: 3 - existingChallenge.attempts,
       });
     }
   }
-  
+
   // No challenge exists or no answer provided, create new challenge
   const { challenge, answer } = generateChallenge();
-  
+
   challengeStore.set(fingerprint, {
     challenge,
     answer,
     attempts: 0,
-    createdAt: new Date()
+    createdAt: new Date(),
   });
-  
+
   return res.status(428).json({
-    error: 'Verificação anti-automação necessária',
+    error: "Verificação anti-automação necessária",
     challenge: challenge,
-    message: 'Por favor, resolva este desafio matemático simples'
+    message: "Por favor, resolva este desafio matemático simples",
   });
 }
 
@@ -152,7 +156,7 @@ export function antiAutomationLight(req: Request, res: Response, next: NextFunct
   // Only activate after multiple rapid requests
   const fingerprint = getClientFingerprint(req);
   const requestKey = `requests:${fingerprint}`;
-  
+
   // Simple request counting (use Redis in production)
   // This is a placeholder - implement proper request counting
   return next();

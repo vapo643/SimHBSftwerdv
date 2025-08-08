@@ -5,16 +5,22 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { 
-  Loader2, 
-  FileText, 
-  Clock, 
-  Calendar, 
-  TrendingUp, 
-  AlertCircle, 
+import {
+  Loader2,
+  FileText,
+  Clock,
+  Calendar,
+  TrendingUp,
+  AlertCircle,
   Edit,
   Search,
   Filter,
@@ -27,7 +33,7 @@ import {
   RefreshCw,
   CheckCircle2,
   XCircle,
-  Banknote
+  Banknote,
 } from "lucide-react";
 import RefreshButton from "@/components/RefreshButton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -69,7 +75,7 @@ const getStatusText = (status: string) => {
     case "pronto_pagamento":
       return "Pronto para Pagamento";
     default:
-      return status.replace(/_/g, ' ').replace(/^\w/, (c: string) => c.toUpperCase());
+      return status.replace(/_/g, " ").replace(/^\w/, (c: string) => c.toUpperCase());
   }
 };
 
@@ -92,9 +98,9 @@ const getStatusIcon = (status: string) => {
 };
 
 const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL'
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
   }).format(value);
 };
 
@@ -106,10 +112,15 @@ const Dashboard: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<string>("todos");
   const [parceiroFilter, setParceiroFilter] = useState<string>("todos");
   const [viewMode, setViewMode] = useState<"cards" | "table">("cards");
-  
+
   // Fetch real proposals data
-  const { data: propostas, isLoading, error, refetch } = useQuery<any[]>({
-    queryKey: ['/api/propostas'],
+  const {
+    data: propostas,
+    isLoading,
+    error,
+    refetch,
+  } = useQuery<any[]>({
+    queryKey: ["/api/propostas"],
   });
 
   // Fetch user metrics if user is ATENDENTE
@@ -118,14 +129,14 @@ const Dashboard: React.FC = () => {
     semana: number;
     mes: number;
   }>({
-    queryKey: ['/api/propostas/metricas'],
-    enabled: user?.role === 'ATENDENTE',
+    queryKey: ["/api/propostas/metricas"],
+    enabled: user?.role === "ATENDENTE",
   });
 
   // Redirect ANALISTA to analysis queue
   useEffect(() => {
-    if (user?.role === 'ANALISTA') {
-      setLocation('/credito/fila');
+    if (user?.role === "ANALISTA") {
+      setLocation("/credito/fila");
     }
   }, [user?.role, setLocation]);
 
@@ -135,15 +146,16 @@ const Dashboard: React.FC = () => {
   // Filtrar propostas - HOOK SEMPRE EXECUTADO
   const propostasFiltradas = useMemo(() => {
     return propostasData.filter(proposta => {
-      const matchesSearch = proposta.nomeCliente?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           proposta.id.includes(searchTerm) ||
-                           proposta.cpfCliente?.includes(searchTerm);
-      
-      const matchesStatus = statusFilter === 'todos' || proposta.status === statusFilter;
-      
-      const matchesParceiro = parceiroFilter === 'todos' || 
-                             proposta.parceiro?.razaoSocial === parceiroFilter;
-      
+      const matchesSearch =
+        proposta.nomeCliente?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        proposta.id.includes(searchTerm) ||
+        proposta.cpfCliente?.includes(searchTerm);
+
+      const matchesStatus = statusFilter === "todos" || proposta.status === statusFilter;
+
+      const matchesParceiro =
+        parceiroFilter === "todos" || proposta.parceiro?.razaoSocial === parceiroFilter;
+
       return matchesSearch && matchesStatus && matchesParceiro;
     });
   }, [propostasData, searchTerm, statusFilter, parceiroFilter]);
@@ -151,34 +163,45 @@ const Dashboard: React.FC = () => {
   // Estatísticas computadas - HOOK SEMPRE EXECUTADO
   const estatisticas = useMemo(() => {
     const total = propostasData.length;
-    const aprovadas = propostasData.filter(p => p.status === 'aprovado').length;
-    const pendentes = propostasData.filter(p => p.status === 'aguardando_analise' || p.status === 'em_analise').length;
-    const rejeitadas = propostasData.filter(p => p.status === 'rejeitado').length;
-    const pendenciadas = propostasData.filter(p => p.status === 'pendenciado').length;
+    const aprovadas = propostasData.filter(p => p.status === "aprovado").length;
+    const pendentes = propostasData.filter(
+      p => p.status === "aguardando_analise" || p.status === "em_analise"
+    ).length;
+    const rejeitadas = propostasData.filter(p => p.status === "rejeitado").length;
+    const pendenciadas = propostasData.filter(p => p.status === "pendenciado").length;
     // Debug: log first few values to understand the data structure
-    console.log('DEBUG - First 3 proposals values:', propostasData.slice(0, 3).map(p => ({
-      id: p.id,
-      valorSolicitado: p.valorSolicitado,
-      type: typeof p.valorSolicitado
-    })));
-    
+    console.log(
+      "DEBUG - First 3 proposals values:",
+      propostasData.slice(0, 3).map(p => ({
+        id: p.id,
+        valorSolicitado: p.valorSolicitado,
+        type: typeof p.valorSolicitado,
+      }))
+    );
+
     // Convert to numbers safely and filter out invalid values
     const valorTotal = propostasData.reduce((acc, p) => {
-      const valor = typeof p.valorSolicitado === 'string' 
-        ? parseFloat(p.valorSolicitado.replace(/[^\d,.-]/g, '').replace(',', '.'))
-        : Number(p.valorSolicitado) || 0;
+      const valor =
+        typeof p.valorSolicitado === "string"
+          ? parseFloat(p.valorSolicitado.replace(/[^\d,.-]/g, "").replace(",", "."))
+          : Number(p.valorSolicitado) || 0;
       return acc + valor;
     }, 0);
     const valorMedio = total > 0 ? valorTotal / total : 0;
 
     // Status distribution
-    const statusCounts = propostasData.reduce((acc, p) => {
-      acc[p.status] = (acc[p.status] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const statusCounts = propostasData.reduce(
+      (acc, p) => {
+        acc[p.status] = (acc[p.status] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
 
     // Unique partners
-    const parceiros = Array.from(new Set(propostasData.map(p => p.parceiro?.razaoSocial).filter(Boolean)));
+    const parceiros = Array.from(
+      new Set(propostasData.map(p => p.parceiro?.razaoSocial).filter(Boolean))
+    );
 
     return {
       total,
@@ -190,14 +213,14 @@ const Dashboard: React.FC = () => {
       valorMedio,
       statusCounts,
       parceiros,
-      taxaAprovacao: total > 0 ? ((aprovadas / total) * 100).toFixed(1) : '0'
+      taxaAprovacao: total > 0 ? ((aprovadas / total) * 100).toFixed(1) : "0",
     };
   }, [propostasData]);
 
   const handleRefresh = () => {
-    queryClient.invalidateQueries({ queryKey: ['/api/propostas'] });
-    if (user?.role === 'ATENDENTE') {
-      queryClient.invalidateQueries({ queryKey: ['/api/propostas/metricas'] });
+    queryClient.invalidateQueries({ queryKey: ["/api/propostas"] });
+    if (user?.role === "ATENDENTE") {
+      queryClient.invalidateQueries({ queryKey: ["/api/propostas/metricas"] });
     }
   };
 
@@ -205,7 +228,7 @@ const Dashboard: React.FC = () => {
   if (isLoading) {
     return (
       <DashboardLayout title="Dashboard de Propostas">
-        <div className="flex items-center justify-center h-64">
+        <div className="flex h-64 items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
         </div>
       </DashboardLayout>
@@ -225,15 +248,9 @@ const Dashboard: React.FC = () => {
   }
 
   return (
-    <DashboardLayout 
+    <DashboardLayout
       title="Dashboard de Propostas"
-      actions={
-        <RefreshButton
-          onRefresh={handleRefresh}
-          isLoading={isLoading}
-          variant="ghost"
-        />
-      }
+      actions={<RefreshButton onRefresh={handleRefresh} isLoading={isLoading} variant="ghost" />}
     >
       <div className="space-y-6">
         {/* Estatísticas Gerais */}
@@ -247,9 +264,7 @@ const Dashboard: React.FC = () => {
               <div className="text-2xl font-bold">{estatisticas.total}</div>
               <div className="text-xs text-muted-foreground">
                 {estatisticas.pendenciadas > 0 && (
-                  <span className="text-orange-600">
-                    {estatisticas.pendenciadas} pendências
-                  </span>
+                  <span className="text-orange-600">{estatisticas.pendenciadas} pendências</span>
                 )}
               </div>
             </CardContent>
@@ -274,9 +289,7 @@ const Dashboard: React.FC = () => {
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
-                {formatCurrency(estatisticas.valorTotal)}
-              </div>
+              <div className="text-2xl font-bold">{formatCurrency(estatisticas.valorTotal)}</div>
               <div className="text-xs text-muted-foreground">
                 Média: {formatCurrency(estatisticas.valorMedio)}
               </div>
@@ -290,15 +303,13 @@ const Dashboard: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-blue-600">{estatisticas.pendentes}</div>
-              <div className="text-xs text-muted-foreground">
-                Aguardando processamento
-              </div>
+              <div className="text-xs text-muted-foreground">Aguardando processamento</div>
             </CardContent>
           </Card>
         </div>
 
         {/* Métricas de Performance para Atendentes */}
-        {user?.role === 'ATENDENTE' && metricas && (
+        {user?.role === "ATENDENTE" && metricas && (
           <Card>
             <CardHeader>
               <CardTitle>Suas Métricas</CardTitle>
@@ -306,21 +317,21 @@ const Dashboard: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="grid gap-4 md:grid-cols-3">
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+                <div className="bg-muted/50 flex items-center gap-3 rounded-lg p-3">
                   <Calendar className="h-8 w-8 text-blue-500" />
                   <div>
                     <p className="text-2xl font-bold">{metricas.hoje || 0}</p>
                     <p className="text-sm text-muted-foreground">Hoje</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+                <div className="bg-muted/50 flex items-center gap-3 rounded-lg p-3">
                   <Clock className="h-8 w-8 text-green-500" />
                   <div>
                     <p className="text-2xl font-bold">{metricas.semana || 0}</p>
                     <p className="text-sm text-muted-foreground">Esta Semana</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+                <div className="bg-muted/50 flex items-center gap-3 rounded-lg p-3">
                   <TrendingUp className="h-8 w-8 text-purple-500" />
                   <div>
                     <p className="text-2xl font-bold">{metricas.mes || 0}</p>
@@ -338,7 +349,7 @@ const Dashboard: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle>
-                  {user?.role === 'ATENDENTE' ? 'Minhas Propostas' : 'Propostas'}
+                  {user?.role === "ATENDENTE" ? "Minhas Propostas" : "Propostas"}
                 </CardTitle>
                 <CardDescription>
                   Gerencie e acompanhe todas as propostas de crédito
@@ -347,14 +358,14 @@ const Dashboard: React.FC = () => {
               <div className="flex gap-2">
                 <Link to="/propostas/nova">
                   <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
-                    <PlusCircle className="h-4 w-4 mr-2" />
+                    <PlusCircle className="mr-2 h-4 w-4" />
                     Nova Proposta
                   </Button>
                 </Link>
-                {user?.role === 'ATENDENTE' && (
+                {user?.role === "ATENDENTE" && (
                   <Link to="/aceite-atendente">
                     <Button variant="outline">
-                      <CheckCircle2 className="h-4 w-4 mr-2" />
+                      <CheckCircle2 className="mr-2 h-4 w-4" />
                       Aceitar Propostas
                     </Button>
                   </Link>
@@ -363,14 +374,14 @@ const Dashboard: React.FC = () => {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="flex gap-4 mb-4">
+            <div className="mb-4 flex gap-4">
               <div className="flex-1">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
                     placeholder="Buscar por nome, CPF ou ID..."
                     value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onChange={e => setSearchTerm(e.target.value)}
                     className="pl-10"
                   />
                 </div>
@@ -397,7 +408,7 @@ const Dashboard: React.FC = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="todos">Todos os Parceiros</SelectItem>
-                    {estatisticas.parceiros.map((parceiro) => (
+                    {estatisticas.parceiros.map(parceiro => (
                       <SelectItem key={parceiro} value={parceiro}>
                         {parceiro}
                       </SelectItem>
@@ -424,47 +435,55 @@ const Dashboard: React.FC = () => {
             <Card>
               <CardContent className="p-6">
                 <div className="text-center text-muted-foreground">
-                  <FileText className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-                  <h3 className="text-lg font-medium mb-2">Nenhuma proposta encontrada</h3>
+                  <FileText className="mx-auto mb-4 h-16 w-16 text-muted-foreground" />
+                  <h3 className="mb-2 text-lg font-medium">Nenhuma proposta encontrada</h3>
                   <p>Nenhuma proposta corresponde aos filtros aplicados</p>
                 </div>
               </CardContent>
             </Card>
           ) : (
             propostasFiltradas.map((proposta: any) => (
-              <Card key={proposta.id} className="overflow-hidden hover:shadow-md transition-shadow">
+              <Card key={proposta.id} className="overflow-hidden transition-shadow hover:shadow-md">
                 <CardContent className="p-0">
                   <div className="flex items-center justify-between p-6">
                     <div className="flex items-center gap-4">
-                      <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-muted">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-muted">
                         {getStatusIcon(proposta.status)}
                       </div>
                       <div className="space-y-1">
                         <div className="flex items-center gap-4">
-                          <h3 className="font-semibold text-lg">
-                            {proposta.nomeCliente || 'Cliente não informado'}
+                          <h3 className="text-lg font-semibold">
+                            {proposta.nomeCliente || "Cliente não informado"}
                           </h3>
                           <Badge className={`${getStatusColor(proposta.status)} border`}>
                             {getStatusText(proposta.status)}
                           </Badge>
-                          {proposta.status === 'pendenciado' && (
-                            <Badge variant="outline" className="gap-1 border-orange-200 text-orange-700">
+                          {proposta.status === "pendenciado" && (
+                            <Badge
+                              variant="outline"
+                              className="gap-1 border-orange-200 text-orange-700"
+                            >
                               <AlertCircle className="h-3 w-3" />
                               Ação Necessária
                             </Badge>
                           )}
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          ID: #{proposta.id} | CPF: {proposta.cpfCliente || 'Não informado'}
+                          ID: #{proposta.id} | CPF: {proposta.cpfCliente || "Não informado"}
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          Criado em: {format(new Date(proposta.createdAt), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
+                          Criado em:{" "}
+                          {format(new Date(proposta.createdAt), "dd/MM/yyyy HH:mm", {
+                            locale: ptBR,
+                          })}
                           {proposta.parceiro?.razaoSocial && (
-                            <span className="ml-2">| Parceiro: {proposta.parceiro.razaoSocial}</span>
+                            <span className="ml-2">
+                              | Parceiro: {proposta.parceiro.razaoSocial}
+                            </span>
                           )}
                         </div>
-                        {proposta.status === 'pendenciado' && proposta.motivo_pendencia && (
-                          <div className="flex items-center gap-2 mt-2 p-2 bg-orange-50 rounded-md border border-orange-200">
+                        {proposta.status === "pendenciado" && proposta.motivo_pendencia && (
+                          <div className="mt-2 flex items-center gap-2 rounded-md border border-orange-200 bg-orange-50 p-2">
                             <AlertCircle className="h-4 w-4 text-orange-600" />
                             <span className="text-sm text-orange-700">
                               Pendência: {proposta.motivo_pendencia}
@@ -473,13 +492,13 @@ const Dashboard: React.FC = () => {
                         )}
                       </div>
                     </div>
-                    
-                    <div className="text-right space-y-1">
+
+                    <div className="space-y-1 text-right">
                       <div className="text-2xl font-bold text-green-600">
                         {formatCurrency(proposta.valorSolicitado || 0)}
                       </div>
-                      <div className="flex gap-2 justify-end">
-                        {proposta.status === 'pendenciado' ? (
+                      <div className="flex justify-end gap-2">
+                        {proposta.status === "pendenciado" ? (
                           <Link to={`/propostas/editar/${proposta.id}`}>
                             <Button size="sm" variant="outline" className="flex items-center gap-1">
                               <Edit className="h-4 w-4" />
@@ -489,7 +508,7 @@ const Dashboard: React.FC = () => {
                         ) : (
                           <Link to={`/credito/analise/${proposta.id}`}>
                             <Button size="sm" variant="outline">
-                              <Eye className="h-4 w-4 mr-1" />
+                              <Eye className="mr-1 h-4 w-4" />
                               Visualizar
                             </Button>
                           </Link>

@@ -1,13 +1,13 @@
-import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Progress } from '@/components/ui/progress';
-import { 
-  Shield, 
-  AlertTriangle, 
-  CheckCircle, 
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Progress } from "@/components/ui/progress";
+import {
+  Shield,
+  AlertTriangle,
+  CheckCircle,
   Clock,
   FileSearch,
   Bug,
@@ -20,10 +20,10 @@ import {
   Database,
   Globe,
   Terminal,
-  Cpu
-} from 'lucide-react';
-import { apiRequest } from '@/lib/queryClient';
-import { toast } from '@/hooks/use-toast';
+  Cpu,
+} from "lucide-react";
+import { apiRequest } from "@/lib/queryClient";
+import { toast } from "@/hooks/use-toast";
 
 interface WstgCategory {
   id: string;
@@ -46,18 +46,18 @@ interface WstgStatus {
 
 const getCategoryIcon = (categoryId: string) => {
   const icons: Record<string, any> = {
-    'WSTG-INFO': FileSearch,
-    'WSTG-CONF': Cpu,
-    'WSTG-IDNT': Users,
-    'WSTG-ATHN': Key,
-    'WSTG-ATHZ': Lock,
-    'WSTG-SESS': Cookie,
-    'WSTG-INPV': Code,
-    'WSTG-ERRH': AlertCircle,
-    'WSTG-CRYP': Shield,
-    'WSTG-BUSLOGIC': Database,
-    'WSTG-CLIENT': Globe,
-    'WSTG-API': Terminal
+    "WSTG-INFO": FileSearch,
+    "WSTG-CONF": Cpu,
+    "WSTG-IDNT": Users,
+    "WSTG-ATHN": Key,
+    "WSTG-ATHZ": Lock,
+    "WSTG-SESS": Cookie,
+    "WSTG-INPV": Code,
+    "WSTG-ERRH": AlertCircle,
+    "WSTG-CRYP": Shield,
+    "WSTG-BUSLOGIC": Database,
+    "WSTG-CLIENT": Globe,
+    "WSTG-API": Terminal,
   };
   return icons[categoryId] || Shield;
 };
@@ -67,15 +67,15 @@ export function WstgPage() {
   const queryClient = useQueryClient();
 
   const { data: status, isLoading } = useQuery<WstgStatus>({
-    queryKey: ['/api/owasp/wstg/status'],
-    queryFn: () => apiRequest('/api/owasp/wstg/status')
+    queryKey: ["/api/owasp/wstg/status"],
+    queryFn: () => apiRequest("/api/owasp/wstg/status"),
   });
 
   const processMutation = useMutation({
     mutationFn: async () => {
-      const response = await apiRequest('/api/owasp/wstg/process', {
-        method: 'POST',
-        body: {}
+      const response = await apiRequest("/api/owasp/wstg/process", {
+        method: "POST",
+        body: {},
       });
       return response;
     },
@@ -84,28 +84,28 @@ export function WstgPage() {
     },
     onSuccess: () => {
       toast({
-        title: 'WSTG Processing Started',
-        description: 'Processing 210 WSTG test cases. This may take several minutes.'
+        title: "WSTG Processing Started",
+        description: "Processing 210 WSTG test cases. This may take several minutes.",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/owasp/wstg/status'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/owasp/wstg/status"] });
     },
     onError: (error: any) => {
       toast({
-        title: 'Processing Error',
-        description: error.message || 'Failed to process WSTG URLs',
-        variant: 'destructive'
+        title: "Processing Error",
+        description: error.message || "Failed to process WSTG URLs",
+        variant: "destructive",
       });
     },
     onSettled: () => {
       setIsProcessing(false);
-    }
+    },
   });
 
   const getStatusColor = (percentage: number) => {
-    if (percentage >= 90) return 'text-green-600 dark:text-green-400';
-    if (percentage >= 70) return 'text-yellow-600 dark:text-yellow-400';
-    if (percentage >= 50) return 'text-orange-600 dark:text-orange-400';
-    return 'text-red-600 dark:text-red-400';
+    if (percentage >= 90) return "text-green-600 dark:text-green-400";
+    if (percentage >= 70) return "text-yellow-600 dark:text-yellow-400";
+    if (percentage >= 50) return "text-orange-600 dark:text-orange-400";
+    return "text-red-600 dark:text-red-400";
   };
 
   const getCategoryProgress = (category: WstgCategory) => {
@@ -115,9 +115,9 @@ export function WstgPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
-          <Shield className="w-12 h-12 mx-auto mb-4 text-muted-foreground animate-pulse" />
+          <Shield className="mx-auto mb-4 h-12 w-12 animate-pulse text-muted-foreground" />
           <p className="text-muted-foreground">Loading WSTG status...</p>
         </div>
       </div>
@@ -129,7 +129,7 @@ export function WstgPage() {
       <div className="p-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">OWASP WSTG Implementation</h1>
+          <h1 className="mb-2 text-4xl font-bold">OWASP WSTG Implementation</h1>
           <p className="text-muted-foreground">
             Web Security Testing Guide v4.2 - 210 Security Tests
           </p>
@@ -137,48 +137,51 @@ export function WstgPage() {
 
         {/* Overall Progress */}
         <Card className="mb-8 p-6">
-          <div className="flex items-center justify-between mb-4">
+          <div className="mb-4 flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-semibold">Overall Compliance</h2>
               <p className="text-muted-foreground">
                 {status?.completedTests || 0} of {status?.totalTests || 210} tests completed
               </p>
             </div>
-            <div className={`text-5xl font-bold ${getStatusColor(status?.compliancePercentage || 0)}`}>
+            <div
+              className={`text-5xl font-bold ${getStatusColor(status?.compliancePercentage || 0)}`}
+            >
               {status?.compliancePercentage || 0}%
             </div>
           </div>
-          
-          <Progress 
-            value={status?.compliancePercentage || 0} 
-            className="h-4 mb-4"
-          />
 
-          <div className="grid grid-cols-4 gap-4 mt-6">
+          <Progress value={status?.compliancePercentage || 0} className="mb-4 h-4" />
+
+          <div className="mt-6 grid grid-cols-4 gap-4">
             <div className="text-center">
-              <div className="flex items-center justify-center mb-2">
-                <Clock className="w-5 h-5 mr-2 text-muted-foreground" />
+              <div className="mb-2 flex items-center justify-center">
+                <Clock className="mr-2 h-5 w-5 text-muted-foreground" />
                 <span className="text-2xl font-bold">{status?.totalTests || 210}</span>
               </div>
               <p className="text-sm text-muted-foreground">Total Tests</p>
             </div>
             <div className="text-center">
-              <div className="flex items-center justify-center mb-2">
-                <CheckCircle className="w-5 h-5 mr-2 text-green-600" />
-                <span className="text-2xl font-bold text-green-600">{status?.secureTests || 0}</span>
+              <div className="mb-2 flex items-center justify-center">
+                <CheckCircle className="mr-2 h-5 w-5 text-green-600" />
+                <span className="text-2xl font-bold text-green-600">
+                  {status?.secureTests || 0}
+                </span>
               </div>
               <p className="text-sm text-muted-foreground">Secure</p>
             </div>
             <div className="text-center">
-              <div className="flex items-center justify-center mb-2">
-                <Bug className="w-5 h-5 mr-2 text-red-600" />
-                <span className="text-2xl font-bold text-red-600">{status?.vulnerableTests || 0}</span>
+              <div className="mb-2 flex items-center justify-center">
+                <Bug className="mr-2 h-5 w-5 text-red-600" />
+                <span className="text-2xl font-bold text-red-600">
+                  {status?.vulnerableTests || 0}
+                </span>
               </div>
               <p className="text-sm text-muted-foreground">Vulnerable</p>
             </div>
             <div className="text-center">
-              <div className="flex items-center justify-center mb-2">
-                <Clock className="w-5 h-5 mr-2 text-yellow-600" />
+              <div className="mb-2 flex items-center justify-center">
+                <Clock className="mr-2 h-5 w-5 text-yellow-600" />
                 <span className="text-2xl font-bold text-yellow-600">
                   {(status?.totalTests || 210) - (status?.completedTests || 0)}
                 </span>
@@ -190,7 +193,7 @@ export function WstgPage() {
 
         {/* Action Button */}
         <div className="mb-8 flex justify-center">
-          <Button 
+          <Button
             size="lg"
             onClick={() => processMutation.mutate()}
             disabled={isProcessing || processMutation.isPending}
@@ -198,12 +201,12 @@ export function WstgPage() {
           >
             {isProcessing ? (
               <>
-                <Clock className="w-5 h-5 mr-2 animate-spin" />
+                <Clock className="mr-2 h-5 w-5 animate-spin" />
                 Processing 210 URLs...
               </>
             ) : (
               <>
-                <Shield className="w-5 h-5 mr-2" />
+                <Shield className="mr-2 h-5 w-5" />
                 Start WSTG Analysis
               </>
             )}
@@ -211,16 +214,16 @@ export function WstgPage() {
         </div>
 
         {/* Categories Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {status?.categories.map((category) => {
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {status?.categories.map(category => {
             const Icon = getCategoryIcon(category.id);
             const progress = getCategoryProgress(category);
-            
+
             return (
-              <Card key={category.id} className="p-6 hover:shadow-lg transition-shadow">
-                <div className="flex items-start justify-between mb-4">
+              <Card key={category.id} className="p-6 transition-shadow hover:shadow-lg">
+                <div className="mb-4 flex items-start justify-between">
                   <div className="flex items-center">
-                    <Icon className="w-8 h-8 mr-3 text-primary" />
+                    <Icon className="mr-3 h-8 w-8 text-primary" />
                     <div>
                       <h3 className="font-semibold">{category.name}</h3>
                       <p className="text-sm text-muted-foreground">{category.id}</p>
@@ -230,13 +233,11 @@ export function WstgPage() {
                     {progress}%
                   </span>
                 </div>
-                
-                <p className="text-sm text-muted-foreground mb-4">
-                  {category.description}
-                </p>
-                
-                <Progress value={progress} className="h-2 mb-4" />
-                
+
+                <p className="mb-4 text-sm text-muted-foreground">{category.description}</p>
+
+                <Progress value={progress} className="mb-4 h-2" />
+
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">
                     {category.completedTests}/{category.totalTests} tests

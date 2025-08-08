@@ -3,26 +3,26 @@
  * Gerencia geração de CCB, assinatura eletrônica e boletos
  */
 
-import express from 'express';
-import { jwtAuthMiddleware } from '../lib/jwt-auth-middleware';
-import { ccbGenerationService } from '../services/ccbGenerationService';
-import { supabase } from '../lib/supabase';
-import { db } from '../lib/supabase';
-import { sql } from 'drizzle-orm';
-import { z } from 'zod';
+import express from "express";
+import { jwtAuthMiddleware } from "../lib/jwt-auth-middleware";
+import { ccbGenerationService } from "../services/ccbGenerationService";
+import { supabase } from "../lib/supabase";
+import { db } from "../lib/supabase";
+import { sql } from "drizzle-orm";
+import { z } from "zod";
 
 const router = express.Router();
 
 // Schema de validação
 const generateCCBSchema = z.object({
-  proposalId: z.string().uuid()
+  proposalId: z.string().uuid(),
 });
 
 /**
  * GET /api/formalizacao/:proposalId/status
  * Retorna status completo da formalização
  */
-router.get('/:proposalId/status', jwtAuthMiddleware, async (req, res) => {
+router.get("/:proposalId/status", jwtAuthMiddleware, async (req, res) => {
   try {
     const { proposalId } = req.params;
 
@@ -45,8 +45,8 @@ router.get('/:proposalId/status', jwtAuthMiddleware, async (req, res) => {
     `);
 
     if (!result || result.length === 0) {
-      return res.status(404).json({ 
-        error: 'Proposta não encontrada' 
+      return res.status(404).json({
+        error: "Proposta não encontrada",
       });
     }
 
@@ -69,13 +69,12 @@ router.get('/:proposalId/status', jwtAuthMiddleware, async (req, res) => {
     res.json({
       success: true,
       proposal,
-      timeline: logsResult || []
+      timeline: logsResult || [],
     });
-
   } catch (error) {
-    console.error('❌ [FORMALIZACAO] Erro ao buscar status:', error);
-    res.status(500).json({ 
-      error: 'Erro ao buscar status da formalização' 
+    console.error("❌ [FORMALIZACAO] Erro ao buscar status:", error);
+    res.status(500).json({
+      error: "Erro ao buscar status da formalização",
     });
   }
 });
@@ -84,14 +83,14 @@ router.get('/:proposalId/status', jwtAuthMiddleware, async (req, res) => {
  * POST /api/formalizacao/generate-ccb
  * Gera CCB usando template PDF
  */
-router.post('/generate-ccb', jwtAuthMiddleware, async (req, res) => {
+router.post("/generate-ccb", jwtAuthMiddleware, async (req, res) => {
   try {
     const validation = generateCCBSchema.safeParse(req.body);
-    
+
     if (!validation.success) {
-      return res.status(400).json({ 
-        error: 'Dados inválidos',
-        details: validation.error.errors 
+      return res.status(400).json({
+        error: "Dados inválidos",
+        details: validation.error.errors,
       });
     }
 
@@ -100,8 +99,8 @@ router.post('/generate-ccb', jwtAuthMiddleware, async (req, res) => {
     // Verificar se CCB já foi gerado
     const alreadyGenerated = await ccbGenerationService.isCCBGenerated(proposalId);
     if (alreadyGenerated) {
-      return res.status(400).json({ 
-        error: 'CCB já foi gerado para esta proposta' 
+      return res.status(400).json({
+        error: "CCB já foi gerado para esta proposta",
       });
     }
 
@@ -109,8 +108,8 @@ router.post('/generate-ccb', jwtAuthMiddleware, async (req, res) => {
     const result = await ccbGenerationService.generateCCB(proposalId);
 
     if (!result.success) {
-      return res.status(500).json({ 
-        error: result.error || 'Erro ao gerar CCB' 
+      return res.status(500).json({
+        error: result.error || "Erro ao gerar CCB",
       });
     }
 
@@ -119,15 +118,14 @@ router.post('/generate-ccb', jwtAuthMiddleware, async (req, res) => {
 
     res.json({
       success: true,
-      message: 'CCB gerado com sucesso',
+      message: "CCB gerado com sucesso",
       pdfPath: result.pdfPath,
-      publicUrl
+      publicUrl,
     });
-
   } catch (error) {
-    console.error('❌ [FORMALIZACAO] Erro ao gerar CCB:', error);
-    res.status(500).json({ 
-      error: 'Erro interno ao gerar CCB' 
+    console.error("❌ [FORMALIZACAO] Erro ao gerar CCB:", error);
+    res.status(500).json({
+      error: "Erro interno ao gerar CCB",
     });
   }
 });
@@ -136,7 +134,7 @@ router.post('/generate-ccb', jwtAuthMiddleware, async (req, res) => {
  * GET /api/formalizacao/:proposalId/ccb
  * Retorna URL do CCB para visualização
  */
-router.get('/:proposalId/ccb', jwtAuthMiddleware, async (req, res) => {
+router.get("/:proposalId/ccb", jwtAuthMiddleware, async (req, res) => {
   try {
     const { proposalId } = req.params;
 
@@ -150,35 +148,35 @@ router.get('/:proposalId/ccb', jwtAuthMiddleware, async (req, res) => {
     `);
 
     if (!result || result.length === 0) {
-      return res.status(404).json({ 
-        error: 'Proposta não encontrada' 
+      return res.status(404).json({
+        error: "Proposta não encontrada",
       });
     }
 
     const proposal = result[0];
 
     if (!proposal.ccb_gerado || !proposal.caminho_ccb) {
-      return res.status(200).json({ 
+      return res.status(200).json({
         ccb_gerado: false,
-        message: 'CCB ainda não foi gerado para esta proposta',
-        status: 'pendente'
+        message: "CCB ainda não foi gerado para esta proposta",
+        status: "pendente",
       });
     }
 
     // ✅ CORREÇÃO: Usar admin client para gerar URLs assinadas (conforme error_docs/storage_errors.md)
-    const { createServerSupabaseAdminClient } = await import('../lib/supabase');
+    const { createServerSupabaseAdminClient } = await import("../lib/supabase");
     const adminSupabase = createServerSupabaseAdminClient();
-    
+
     const { data: signedUrl, error } = await adminSupabase.storage
-      .from('documents')
+      .from("documents")
       .createSignedUrl(proposal.caminho_ccb as string, 3600);
 
     if (error) {
-      console.error('❌ [FORMALIZACAO] Erro ao gerar URL assinada:', error);
-      
+      console.error("❌ [FORMALIZACAO] Erro ao gerar URL assinada:", error);
+
       // 🔄 FALLBACK: Se arquivo não existe, tentar regenerar CCB automaticamente
-      if ((error as any)?.status === 400 || error.message?.includes('Object not found')) {
-        console.log('🔄 [FORMALIZACAO] Arquivo não encontrado, tentando regenerar CCB...');
+      if ((error as any)?.status === 400 || error.message?.includes("Object not found")) {
+        console.log("🔄 [FORMALIZACAO] Arquivo não encontrado, tentando regenerar CCB...");
         try {
           const newCcb = await ccbGenerationService.generateCCB(proposalId);
           if (newCcb.success) {
@@ -187,17 +185,17 @@ router.get('/:proposalId/ccb', jwtAuthMiddleware, async (req, res) => {
               ccbPath: newCcb.pdfPath,
               signedUrl: await ccbGenerationService.getPublicUrl(newCcb.pdfPath!),
               generatedAt: new Date().toISOString(),
-              regenerated: true
+              regenerated: true,
             });
           }
         } catch (regenError) {
-          console.error('❌ [FORMALIZACAO] Erro na regeneração:', regenError);
+          console.error("❌ [FORMALIZACAO] Erro na regeneração:", regenError);
         }
       }
-      
-      return res.status(500).json({ 
-        error: 'Erro ao gerar URL de acesso',
-        details: error.message
+
+      return res.status(500).json({
+        error: "Erro ao gerar URL de acesso",
+        details: error.message,
       });
     }
 
@@ -205,13 +203,12 @@ router.get('/:proposalId/ccb', jwtAuthMiddleware, async (req, res) => {
       success: true,
       ccbPath: proposal.caminho_ccb,
       signedUrl: signedUrl?.signedUrl,
-      generatedAt: proposal.ccb_gerado_em
+      generatedAt: proposal.ccb_gerado_em,
     });
-
   } catch (error) {
-    console.error('❌ [FORMALIZACAO] Erro ao buscar CCB:', error);
-    res.status(500).json({ 
-      error: 'Erro ao buscar CCB' 
+    console.error("❌ [FORMALIZACAO] Erro ao buscar CCB:", error);
+    res.status(500).json({
+      error: "Erro ao buscar CCB",
     });
   }
 });
@@ -220,7 +217,7 @@ router.get('/:proposalId/ccb', jwtAuthMiddleware, async (req, res) => {
  * POST /api/formalizacao/:proposalId/regenerate-ccb
  * Regenera CCB (substitui o anterior)
  */
-router.post('/:proposalId/regenerate-ccb', jwtAuthMiddleware, async (req, res) => {
+router.post("/:proposalId/regenerate-ccb", jwtAuthMiddleware, async (req, res) => {
   try {
     const { proposalId } = req.params;
 
@@ -238,8 +235,8 @@ router.post('/:proposalId/regenerate-ccb', jwtAuthMiddleware, async (req, res) =
     const result = await ccbGenerationService.generateCCB(proposalId);
 
     if (!result.success) {
-      return res.status(500).json({ 
-        error: result.error || 'Erro ao regenerar CCB' 
+      return res.status(500).json({
+        error: result.error || "Erro ao regenerar CCB",
       });
     }
 
@@ -248,15 +245,14 @@ router.post('/:proposalId/regenerate-ccb', jwtAuthMiddleware, async (req, res) =
 
     res.json({
       success: true,
-      message: 'CCB regenerado com sucesso',
+      message: "CCB regenerado com sucesso",
       pdfPath: result.pdfPath,
-      publicUrl
+      publicUrl,
     });
-
   } catch (error) {
-    console.error('❌ [FORMALIZACAO] Erro ao regenerar CCB:', error);
-    res.status(500).json({ 
-      error: 'Erro ao regenerar CCB' 
+    console.error("❌ [FORMALIZACAO] Erro ao regenerar CCB:", error);
+    res.status(500).json({
+      error: "Erro ao regenerar CCB",
     });
   }
 });
@@ -265,7 +261,7 @@ router.post('/:proposalId/regenerate-ccb', jwtAuthMiddleware, async (req, res) =
  * GET /api/formalizacao/:proposalId/timeline
  * Retorna timeline de eventos da formalização
  */
-router.get('/:proposalId/timeline', jwtAuthMiddleware, async (req, res) => {
+router.get("/:proposalId/timeline", jwtAuthMiddleware, async (req, res) => {
   try {
     const { proposalId } = req.params;
 
@@ -284,13 +280,12 @@ router.get('/:proposalId/timeline', jwtAuthMiddleware, async (req, res) => {
 
     res.json({
       success: true,
-      timeline: result || []
+      timeline: result || [],
     });
-
   } catch (error) {
-    console.error('❌ [FORMALIZACAO] Erro ao buscar timeline:', error);
-    res.status(500).json({ 
-      error: 'Erro ao buscar timeline' 
+    console.error("❌ [FORMALIZACAO] Erro ao buscar timeline:", error);
+    res.status(500).json({
+      error: "Erro ao buscar timeline",
     });
   }
 });

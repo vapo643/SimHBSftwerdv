@@ -2,15 +2,14 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { 
-  FileText, 
-  Download, 
-  Eye, 
-  Image, 
-  FileIcon,
-  ExternalLink 
-} from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { FileText, Download, Eye, Image, FileIcon, ExternalLink } from "lucide-react";
 
 interface Document {
   name: string;
@@ -37,10 +36,10 @@ export function DocumentViewer({ propostaId, documents, ccbDocumentoUrl }: Docum
       if (propostaId) {
         setCcbLoading(true);
         try {
-          const { api } = await import('@/lib/apiClient');
+          const { api } = await import("@/lib/apiClient");
           // ✅ CORREÇÃO: Sempre usar endpoint padrão para buscar CCB
           const response = await api.get(`/api/formalizacao/${propostaId}/ccb`);
-          
+
           if (response.ccb_gerado === false) {
             // CCB ainda não foi gerada - não mostrar na lista
             setCcbRealUrl(null);
@@ -50,7 +49,7 @@ export function DocumentViewer({ propostaId, documents, ccbDocumentoUrl }: Docum
             setCcbRealUrl(null);
           }
         } catch (error) {
-          console.error('Erro ao buscar status da CCB:', error);
+          console.error("Erro ao buscar status da CCB:", error);
           setCcbRealUrl(null);
         } finally {
           setCcbLoading(false);
@@ -65,31 +64,46 @@ export function DocumentViewer({ propostaId, documents, ccbDocumentoUrl }: Docum
   const allDocuments: Document[] = [
     ...documents,
     // Mostrar CCB apenas se foi carregada com sucesso
-    ...(ccbRealUrl ? [{
-      name: "CCB - Cédula de Crédito Bancário",
-      url: ccbRealUrl,
-      type: "application/pdf",
-      uploadDate: "Sistema"
-    }] : [])
+    ...(ccbRealUrl
+      ? [
+          {
+            name: "CCB - Cédula de Crédito Bancário",
+            url: ccbRealUrl,
+            type: "application/pdf",
+            uploadDate: "Sistema",
+          },
+        ]
+      : []),
   ];
 
   const getFileIcon = (type?: string, name?: string) => {
-    const nameExt = name?.toLowerCase() || '';
-    const fileType = type?.toLowerCase() || '';
-    if (fileType.includes('pdf') || nameExt.endsWith('.pdf')) return <FileText className="h-4 w-4" />;
-    if (fileType.includes('image') || nameExt.endsWith('.jpg') || nameExt.endsWith('.jpeg') || nameExt.endsWith('.png')) 
+    const nameExt = name?.toLowerCase() || "";
+    const fileType = type?.toLowerCase() || "";
+    if (fileType.includes("pdf") || nameExt.endsWith(".pdf"))
+      return <FileText className="h-4 w-4" />;
+    if (
+      fileType.includes("image") ||
+      nameExt.endsWith(".jpg") ||
+      nameExt.endsWith(".jpeg") ||
+      nameExt.endsWith(".png")
+    )
       return <Image className="h-4 w-4" />;
     return <FileIcon className="h-4 w-4" />;
   };
 
   const getFileTypeLabel = (type?: string, name?: string) => {
-    const nameExt = name?.toLowerCase() || '';
-    const fileType = type?.toLowerCase() || '';
-    if (fileType.includes('pdf') || nameExt.endsWith('.pdf')) return 'PDF';
-    if (fileType.includes('image') || nameExt.endsWith('.jpg') || nameExt.endsWith('.jpeg') || nameExt.endsWith('.png')) 
-      return 'Imagem';
-    if (fileType.includes('doc')) return 'DOC';
-    return 'Arquivo';
+    const nameExt = name?.toLowerCase() || "";
+    const fileType = type?.toLowerCase() || "";
+    if (fileType.includes("pdf") || nameExt.endsWith(".pdf")) return "PDF";
+    if (
+      fileType.includes("image") ||
+      nameExt.endsWith(".jpg") ||
+      nameExt.endsWith(".jpeg") ||
+      nameExt.endsWith(".png")
+    )
+      return "Imagem";
+    if (fileType.includes("doc")) return "DOC";
+    return "Arquivo";
   };
 
   const handleDownload = async (url: string, filename: string) => {
@@ -97,7 +111,7 @@ export function DocumentViewer({ propostaId, documents, ccbDocumentoUrl }: Docum
       const response = await fetch(url);
       const blob = await response.blob();
       const downloadUrl = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = downloadUrl;
       link.download = filename;
       document.body.appendChild(link);
@@ -105,50 +119,43 @@ export function DocumentViewer({ propostaId, documents, ccbDocumentoUrl }: Docum
       link.remove();
       window.URL.revokeObjectURL(downloadUrl);
     } catch (error) {
-      console.error('Erro ao baixar documento:', error);
+      console.error("Erro ao baixar documento:", error);
     }
   };
 
   const DocumentPreview = ({ document }: { document: Document }) => {
     const { url, type, name } = document;
-    const nameExt = name?.toLowerCase() || '';
-    const fileType = type?.toLowerCase() || '';
+    const nameExt = name?.toLowerCase() || "";
+    const fileType = type?.toLowerCase() || "";
 
     // Check both type and file extension
-    const isPDF = fileType.includes('pdf') || nameExt.endsWith('.pdf');
-    const isImage = fileType.includes('image') || 
-                   nameExt.endsWith('.jpg') || 
-                   nameExt.endsWith('.jpeg') || 
-                   nameExt.endsWith('.png');
+    const isPDF = fileType.includes("pdf") || nameExt.endsWith(".pdf");
+    const isImage =
+      fileType.includes("image") ||
+      nameExt.endsWith(".jpg") ||
+      nameExt.endsWith(".jpeg") ||
+      nameExt.endsWith(".png");
 
     if (isPDF) {
       return (
-        <div className="w-full h-[600px] border rounded bg-gray-900">
-          <iframe
-            src={url}
-            className="w-full h-full"
-            title={name}
-          />
+        <div className="h-[600px] w-full rounded border bg-gray-900">
+          <iframe src={url} className="h-full w-full" title={name} />
         </div>
       );
     }
 
     if (isImage) {
       return (
-        <div className="w-full max-h-[600px] flex justify-center bg-gray-900 p-4 rounded">
-          <img
-            src={url}
-            alt={name}
-            className="max-w-full max-h-[550px] object-contain"
-          />
+        <div className="flex max-h-[600px] w-full justify-center rounded bg-gray-900 p-4">
+          <img src={url} alt={name} className="max-h-[550px] max-w-full object-contain" />
         </div>
       );
     }
 
     return (
-      <div className="w-full h-48 border rounded flex items-center justify-center bg-gray-50">
+      <div className="flex h-48 w-full items-center justify-center rounded border bg-gray-50">
         <div className="text-center">
-          <FileIcon className="h-12 w-12 mx-auto mb-2 text-gray-400" />
+          <FileIcon className="mx-auto mb-2 h-12 w-12 text-gray-400" />
           <p className="text-sm text-gray-600">Visualização não disponível</p>
           <p className="text-xs text-gray-500">Use o botão de download para acessar o arquivo</p>
         </div>
@@ -163,8 +170,8 @@ export function DocumentViewer({ propostaId, documents, ccbDocumentoUrl }: Docum
           <CardTitle>Documentos da Proposta</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-8 text-gray-500">
-            <FileText className="h-12 w-12 mx-auto mb-2" />
+          <div className="py-8 text-center text-gray-500">
+            <FileText className="mx-auto mb-2 h-12 w-12" />
             <p>Nenhum documento anexado</p>
           </div>
         </CardContent>
@@ -179,71 +186,69 @@ export function DocumentViewer({ propostaId, documents, ccbDocumentoUrl }: Docum
       </CardHeader>
       <CardContent className="space-y-3">
         {allDocuments.map((doc, index) => (
-          <div 
+          <div
             key={index}
-            className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50"
+            className="flex items-center justify-between rounded-lg border p-3 hover:bg-gray-50"
           >
             <div className="flex items-center space-x-3">
               {getFileIcon(doc.type, doc.name)}
               <div>
-                <p className="font-medium text-sm">{doc.name}</p>
+                <p className="text-sm font-medium">{doc.name}</p>
                 <div className="flex items-center space-x-2">
                   <Badge variant="secondary" className="text-xs">
                     {getFileTypeLabel(doc.type, doc.name)}
                   </Badge>
-                  {doc.size && (
-                    <span className="text-xs text-gray-500">{doc.size}</span>
-                  )}
+                  {doc.size && <span className="text-xs text-gray-500">{doc.size}</span>}
                   {doc.uploadDate && (
                     <span className="text-xs text-gray-500">{doc.uploadDate}</span>
                   )}
                 </div>
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-2">
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     size="sm"
                     onClick={() => setSelectedDocument(doc)}
                     disabled={doc.url === "#loading" || doc.url === "#error"}
                   >
-                    <Eye className="h-4 w-4 mr-1" />
+                    <Eye className="mr-1 h-4 w-4" />
                     {doc.url === "#loading" ? "Carregando..." : "Visualizar"}
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-4xl max-h-[90vh]">
+                <DialogContent className="max-h-[90vh] max-w-4xl">
                   <DialogHeader>
                     <DialogTitle>{doc.name}</DialogTitle>
                   </DialogHeader>
                   <div className="mt-4">
                     <DocumentPreview document={doc} />
                   </div>
-                  <div className="flex justify-end space-x-2 mt-4">
-                    <Button 
+                  <div className="mt-4 flex justify-end space-x-2">
+                    <Button
                       variant="outline"
                       onClick={() => handleDownload(doc.url, doc.name)}
                       disabled={doc.url === "#loading" || doc.url === "#error"}
                     >
-                      <Download className="h-4 w-4 mr-1" />
+                      <Download className="mr-1 h-4 w-4" />
                       Baixar
                     </Button>
-                    <Button 
+                    <Button
                       variant="outline"
-                      onClick={() => window.open(doc.url, '_blank')}
+                      onClick={() => window.open(doc.url, "_blank")}
                       disabled={doc.url === "#loading" || doc.url === "#error"}
                     >
-                      <ExternalLink className="h-4 w-4 mr-1" />
+                      <ExternalLink className="mr-1 h-4 w-4" />
                       Abrir em Nova Aba
                     </Button>
                   </div>
                 </DialogContent>
               </Dialog>
-              
-              <Button 
-                variant="ghost" 
+
+              <Button
+                variant="ghost"
                 size="sm"
                 onClick={() => handleDownload(doc.url, doc.name)}
                 disabled={doc.url === "#loading" || doc.url === "#error"}

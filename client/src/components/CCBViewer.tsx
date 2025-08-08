@@ -2,17 +2,17 @@
  * Componente para visualização e gerenciamento de CCB
  */
 
-import { useState } from 'react';
-import { FileText, Download, RefreshCw, Eye, CheckCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Skeleton } from '@/components/ui/skeleton';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiRequest } from '@/lib/queryClient';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
-import { toast } from '@/hooks/use-toast';
+import { useState } from "react";
+import { FileText, Download, RefreshCw, Eye, CheckCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { toast } from "@/hooks/use-toast";
 
 interface CCBViewerProps {
   proposalId: string;
@@ -30,36 +30,40 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
   const queryClient = useQueryClient();
 
   // Query para buscar status do CCB
-  const { data: ccbStatus, isLoading, error } = useQuery<CCBStatus>({
+  const {
+    data: ccbStatus,
+    isLoading,
+    error,
+  } = useQuery<CCBStatus>({
     queryKey: [`/api/formalizacao/${proposalId}/ccb`],
-    refetchInterval: isGenerating ? 2000 : false // Poll enquanto gera
+    refetchInterval: isGenerating ? 2000 : false, // Poll enquanto gera
   });
 
   // Mutation para gerar CCB
   const generateCCBMutation = useMutation({
     mutationFn: async () => {
       setIsGenerating(true);
-      return apiRequest('/api/formalizacao/generate-ccb', {
-        method: 'POST',
-        body: JSON.stringify({ proposalId })
+      return apiRequest("/api/formalizacao/generate-ccb", {
+        method: "POST",
+        body: JSON.stringify({ proposalId }),
       });
     },
     onSuccess: () => {
       toast({
-        title: 'CCB Gerado!',
-        description: 'O documento foi gerado com sucesso.',
-        variant: 'default'
+        title: "CCB Gerado!",
+        description: "O documento foi gerado com sucesso.",
+        variant: "default",
       });
-      
+
       // Invalidar queries relacionadas - usar chaves corretas
       queryClient.invalidateQueries({ queryKey: [`/api/formalizacao/${proposalId}/ccb`] });
       queryClient.invalidateQueries({ queryKey: [`/api/propostas/${proposalId}/ccb-url`] });
-      queryClient.invalidateQueries({ queryKey: ['proposta', proposalId] });
-      queryClient.invalidateQueries({ queryKey: ['formalizacao-status', proposalId] });
-      
+      queryClient.invalidateQueries({ queryKey: ["proposta", proposalId] });
+      queryClient.invalidateQueries({ queryKey: ["formalizacao-status", proposalId] });
+
       setIsGenerating(false);
       onCCBGenerated?.();
-      
+
       // Forçar refetch após 500ms
       setTimeout(() => {
         queryClient.refetchQueries({ queryKey: [`/api/formalizacao/${proposalId}/ccb`] });
@@ -68,11 +72,11 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
     onError: (error: any) => {
       setIsGenerating(false);
       toast({
-        title: 'Erro ao gerar CCB',
-        description: error.message || 'Ocorreu um erro ao gerar o documento.',
-        variant: 'destructive'
+        title: "Erro ao gerar CCB",
+        description: error.message || "Ocorreu um erro ao gerar o documento.",
+        variant: "destructive",
       });
-    }
+    },
   });
 
   // Mutation para regenerar CCB
@@ -80,24 +84,24 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
     mutationFn: async () => {
       setIsGenerating(true);
       return apiRequest(`/api/formalizacao/${proposalId}/regenerate-ccb`, {
-        method: 'POST'
+        method: "POST",
       });
     },
     onSuccess: () => {
       toast({
-        title: 'CCB Regenerado!',
-        description: 'O documento foi regenerado com sucesso com o novo template.',
-        variant: 'default'
+        title: "CCB Regenerado!",
+        description: "O documento foi regenerado com sucesso com o novo template.",
+        variant: "default",
       });
-      
+
       // Invalidar queries - usar a chave correta
       queryClient.invalidateQueries({ queryKey: [`/api/formalizacao/${proposalId}/ccb`] });
       queryClient.invalidateQueries({ queryKey: [`/api/propostas/${proposalId}/ccb-url`] });
-      queryClient.invalidateQueries({ queryKey: ['proposta', proposalId] });
-      queryClient.invalidateQueries({ queryKey: ['formalizacao-status', proposalId] });
-      
+      queryClient.invalidateQueries({ queryKey: ["proposta", proposalId] });
+      queryClient.invalidateQueries({ queryKey: ["formalizacao-status", proposalId] });
+
       setIsGenerating(false);
-      
+
       // Forçar refetch após 500ms para garantir atualização
       setTimeout(() => {
         queryClient.refetchQueries({ queryKey: [`/api/formalizacao/${proposalId}/ccb`] });
@@ -106,29 +110,29 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
     onError: (error: any) => {
       setIsGenerating(false);
       toast({
-        title: 'Erro ao regenerar CCB',
-        description: error.message || 'Ocorreu um erro ao regenerar o documento.',
-        variant: 'destructive'
+        title: "Erro ao regenerar CCB",
+        description: error.message || "Ocorreu um erro ao regenerar o documento.",
+        variant: "destructive",
       });
-    }
+    },
   });
 
   const handleDownload = () => {
     if (ccbStatus?.signedUrl) {
       // Adicionar timestamp para forçar download da versão mais recente
       const urlWithTimestamp = `${ccbStatus.signedUrl}&t=${Date.now()}`;
-      window.open(urlWithTimestamp, '_blank');
+      window.open(urlWithTimestamp, "_blank");
     }
   };
 
   const handleView = () => {
     // Forçar refetch da URL mais recente antes de visualizar
     queryClient.refetchQueries({ queryKey: [`/api/formalizacao/${proposalId}/ccb`] });
-    
+
     if (ccbStatus?.signedUrl) {
       // Adicionar timestamp para garantir versão mais recente
       const urlWithTimestamp = `${ccbStatus.signedUrl}&t=${Date.now()}`;
-      window.open(urlWithTimestamp, '_blank');
+      window.open(urlWithTimestamp, "_blank");
     }
   };
 
@@ -178,10 +182,9 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
           Cédula de Crédito Bancário (CCB)
         </CardTitle>
         <CardDescription>
-          {hasCCB 
+          {hasCCB
             ? `Gerado em ${format(new Date(ccbStatus.generatedAt!), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}`
-            : 'Documento ainda não gerado'
-          }
+            : "Documento ainda não gerado"}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -196,13 +199,13 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
             </Alert>
 
             {/* Preview do PDF (opcional - pode usar iframe) */}
-            <div className="border rounded-lg p-4 bg-gray-50">
-              <p className="text-sm text-gray-600 mb-3">
+            <div className="rounded-lg border bg-gray-50 p-4">
+              <p className="mb-3 text-sm text-gray-600">
                 Documento disponível para visualização e download
               </p>
-              
+
               {/* Ações do documento */}
-              <div className="flex gap-2 flex-wrap">
+              <div className="flex flex-wrap gap-2">
                 <Button
                   variant="outline"
                   size="sm"
@@ -213,7 +216,7 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
                   <Eye className="h-4 w-4" />
                   Visualizar
                 </Button>
-                
+
                 <Button
                   variant="outline"
                   size="sm"
@@ -224,7 +227,7 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
                   <Download className="h-4 w-4" />
                   Baixar PDF
                 </Button>
-                
+
                 <Button
                   variant="outline"
                   size="sm"
@@ -233,21 +236,26 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
                   className="flex items-center gap-2 border-blue-500 text-blue-600 hover:bg-blue-50"
                   data-testid="button-regenerate-ccb"
                 >
-                  <RefreshCw className={`h-4 w-4 ${isGenerating ? 'animate-spin' : ''}`} />
-                  {isGenerating ? 'Gerando...' : 'Gerar CCB Novamente'}
+                  <RefreshCw className={`h-4 w-4 ${isGenerating ? "animate-spin" : ""}`} />
+                  {isGenerating ? "Gerando..." : "Gerar CCB Novamente"}
                 </Button>
               </div>
             </div>
 
             {/* Informações do documento */}
-            <div className="text-xs text-gray-500 space-y-1">
+            <div className="space-y-1 text-xs text-gray-500">
               <p>• Documento preenchido com os dados da proposta</p>
               <p>• Pronto para envio à assinatura eletrônica</p>
               <p>• Formato PDF com campos permanentes</p>
-              <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded text-blue-700">
-                <p className="font-medium text-sm">✅ Nova Arquitetura CCB:</p>
-                <p className="text-xs">Agora usando pdf-lib para preservar 100% do template original com logo e formatação.</p>
-                <p className="text-xs mt-1">Clique em "Gerar CCB Novamente" para criar nova versão com dados atualizados.</p>
+              <div className="mt-3 rounded border border-blue-200 bg-blue-50 p-3 text-blue-700">
+                <p className="text-sm font-medium">✅ Nova Arquitetura CCB:</p>
+                <p className="text-xs">
+                  Agora usando pdf-lib para preservar 100% do template original com logo e
+                  formatação.
+                </p>
+                <p className="mt-1 text-xs">
+                  Clique em "Gerar CCB Novamente" para criar nova versão com dados atualizados.
+                </p>
               </div>
             </div>
           </div>
@@ -256,8 +264,8 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
             {/* Informação sobre geração */}
             <Alert>
               <AlertDescription>
-                A CCB será gerada usando o template padrão com os dados da proposta.
-                Este é o primeiro passo do processo de formalização.
+                A CCB será gerada usando o template padrão com os dados da proposta. Este é o
+                primeiro passo do processo de formalização.
               </AlertDescription>
             </Alert>
 
@@ -282,13 +290,17 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
             </Button>
 
             {/* Instruções */}
-            <div className="text-xs text-gray-500 space-y-1">
+            <div className="space-y-1 text-xs text-gray-500">
               <p>• O documento será gerado automaticamente</p>
               <p>• Todos os campos serão preenchidos com os dados atuais</p>
               <p>• Após geração, você poderá visualizar e baixar o PDF</p>
-              <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded text-yellow-700">
-                <p className="font-medium text-sm">📄 Template Original:</p>
-                <p className="text-xs">O sistema usará o template PDF personalizado da Simpix (server/templates/template_ccb.pdf) e preencherá os campos em cima do documento original.</p>
+              <div className="mt-3 rounded border border-yellow-200 bg-yellow-50 p-3 text-yellow-700">
+                <p className="text-sm font-medium">📄 Template Original:</p>
+                <p className="text-xs">
+                  O sistema usará o template PDF personalizado da Simpix
+                  (server/templates/template_ccb.pdf) e preencherá os campos em cima do documento
+                  original.
+                </p>
               </div>
             </div>
           </div>

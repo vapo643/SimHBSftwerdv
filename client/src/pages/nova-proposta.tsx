@@ -180,11 +180,11 @@ export default function NovaProposta() {
           <CardContent className="p-6">
             {/* Pilar 12 - Progressive Enhancement: Offline status for critical forms */}
             <OfflineIndicator variant="compact" className="mb-4" />
-            
+
             {/* Progressive Enhancement: Form with fallback attributes */}
-            <form 
+            <form
               onSubmit={handleSubmit(onSubmit)}
-              action="/nova-proposta" 
+              action="/nova-proposta"
               method="POST"
               className="progressive-enhancement-form"
             >
@@ -288,7 +288,12 @@ export default function NovaProposta() {
                   <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <div>
                       <Label htmlFor="valor">Valor Solicitado</Label>
-                      <Input id="valor" name="valor" placeholder="R$ 50.000,00" {...register("valor")} />
+                      <Input
+                        id="valor"
+                        name="valor"
+                        placeholder="R$ 50.000,00"
+                        {...register("valor")}
+                      />
                       {errors.valor && (
                         <p className="text-sm text-red-600">{errors.valor.message}</p>
                       )}

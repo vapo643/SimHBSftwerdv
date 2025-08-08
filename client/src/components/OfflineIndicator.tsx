@@ -12,9 +12,9 @@ interface OfflineIndicatorProps {
   variant?: "banner" | "compact" | "icon-only";
 }
 
-export default function OfflineIndicator({ 
-  className = "", 
-  variant = "banner" 
+export default function OfflineIndicator({
+  className = "",
+  variant = "banner",
 }: OfflineIndicatorProps) {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [wasOffline, setWasOffline] = useState(false);
@@ -34,13 +34,13 @@ export default function OfflineIndicator({
     };
 
     // Adiciona listeners para mudanças no status da conexão
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
 
     // Cleanup
     return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
     };
   }, [wasOffline]);
 
@@ -65,11 +65,11 @@ export default function OfflineIndicator({
   // Variant: compact - indicador pequeno no canto
   if (variant === "compact") {
     return (
-      <div 
-        className={`fixed bottom-4 right-4 z-50 px-3 py-2 rounded-lg shadow-lg flex items-center gap-2 text-sm transition-all duration-300 ${
-          isOnline 
-            ? "bg-green-100 text-green-800 border border-green-200" 
-            : "bg-red-100 text-red-800 border border-red-200"
+      <div
+        className={`fixed bottom-4 right-4 z-50 flex items-center gap-2 rounded-lg px-3 py-2 text-sm shadow-lg transition-all duration-300 ${
+          isOnline
+            ? "border border-green-200 bg-green-100 text-green-800"
+            : "border border-red-200 bg-red-100 text-red-800"
         } ${className}`}
       >
         {isOnline ? (
@@ -90,11 +90,11 @@ export default function OfflineIndicator({
   // Variant: banner - banner completo no topo
   if (!isOnline) {
     return (
-      <div className={`bg-red-50 border-b border-red-200 ${className}`}>
+      <div className={`border-b border-red-200 bg-red-50 ${className}`}>
         <Alert className="border-0 bg-transparent">
           <AlertTriangle className="h-4 w-4 text-red-600" />
           <AlertDescription className="text-red-800">
-            <strong>Você está offline.</strong> Algumas funcionalidades podem não estar disponíveis. 
+            <strong>Você está offline.</strong> Algumas funcionalidades podem não estar disponíveis.
             Dados inseridos em formulários serão preservados até que a conexão seja restaurada.
           </AlertDescription>
         </Alert>
@@ -105,7 +105,7 @@ export default function OfflineIndicator({
   // Mostrar mensagem de reconexão temporariamente
   if (isOnline && wasOffline) {
     return (
-      <div className={`bg-green-50 border-b border-green-200 ${className}`}>
+      <div className={`border-b border-green-200 bg-green-50 ${className}`}>
         <Alert className="border-0 bg-transparent">
           <Wifi className="h-4 w-4 text-green-600" />
           <AlertDescription className="text-green-800">
@@ -129,12 +129,12 @@ export function useOnlineStatus() {
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
 
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
 
     return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
     };
   }, []);
 

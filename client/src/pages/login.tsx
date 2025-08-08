@@ -1,8 +1,8 @@
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { useForm } from 'react-hook-form';
+import React from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -48,21 +48,19 @@ const LoginPage: React.FC = () => {
 
   return (
     <div className="w-full lg:grid lg:min-h-screen lg:grid-cols-2">
-      <div className="hidden bg-muted lg:flex items-center justify-center relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary to-primary/80 opacity-40 dark:opacity-60"></div>
-        <img 
-          src="https://dvglgxrvhmtsixaabxha.supabase.co/storage/v1/object/public/logosimpixblack//Logotipo_Achadinhos_de_Beleza_Colorido_Moderno_Rosa_e_Preto-removebg-preview.png" 
+      <div className="relative hidden items-center justify-center overflow-hidden bg-muted lg:flex">
+        <div className="to-primary/80 absolute inset-0 bg-gradient-to-br from-primary opacity-40 dark:opacity-60"></div>
+        <img
+          src="https://dvglgxrvhmtsixaabxha.supabase.co/storage/v1/object/public/logosimpixblack//Logotipo_Achadinhos_de_Beleza_Colorido_Moderno_Rosa_e_Preto-removebg-preview.png"
           alt="Simpix Logo"
           className="relative z-10 w-1/2 opacity-75"
         />
       </div>
-      <div className="flex items-center justify-center py-12 bg-background min-h-screen lg:min-h-auto">
+      <div className="lg:min-h-auto flex min-h-screen items-center justify-center bg-background py-12">
         <div className="mx-auto grid w-[350px] gap-6">
           <div className="grid gap-2 text-center">
             <h1 className="text-3xl font-bold text-foreground">Login</h1>
-            <p className="text-balance text-muted-foreground">
-              Acesse sua conta para continuar
-            </p>
+            <p className="text-balance text-muted-foreground">Acesse sua conta para continuar</p>
           </div>
           <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
             <div className="grid gap-2">
@@ -74,20 +72,13 @@ const LoginPage: React.FC = () => {
                 required
                 {...register("email")}
               />
-              {errors.email && (
-                <p className="text-sm text-destructive">{errors.email.message}</p>
-              )}
+              {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
             </div>
             <div className="grid gap-2">
               <div className="flex items-center">
                 <Label htmlFor="password">Senha</Label>
               </div>
-              <Input 
-                id="password" 
-                type="password" 
-                required 
-                {...register("password")}
-              />
+              <Input id="password" type="password" required {...register("password")} />
               {errors.password && (
                 <p className="text-sm text-destructive">{errors.password.message}</p>
               )}

@@ -52,6 +52,10 @@ export async function authMiddleware(req: AuthRequest, res: Response, next: Next
  * Middleware alternativo que permite bypass em desenvolvimento
  * @deprecated Use authMiddleware() padrão que já inclui bypass de desenvolvimento
  */
-export async function authMiddlewareWithBypass(req: AuthRequest, res: Response, next: NextFunction) {
+export async function authMiddlewareWithBypass(
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) {
   return authMiddleware(req, res, next);
 }

@@ -60,23 +60,25 @@ const updatePropostaStatus = async ({
   }
 };
 
-const decisionSchema = z.object({
-  status: z.enum(["aprovado", "rejeitado", "pendenciado"]),
-  observacao: z.string().optional(),
-}).refine(
-  (data) => {
-    // Observação é obrigatória APENAS quando o status é "pendenciado"
-    if (data.status === "pendenciado") {
-      return data.observacao && data.observacao.trim().length > 0;
+const decisionSchema = z
+  .object({
+    status: z.enum(["aprovado", "rejeitado", "pendenciado"]),
+    observacao: z.string().optional(),
+  })
+  .refine(
+    data => {
+      // Observação é obrigatória APENAS quando o status é "pendenciado"
+      if (data.status === "pendenciado") {
+        return data.observacao && data.observacao.trim().length > 0;
+      }
+      // Para "aprovado" e "rejeitado", observação é opcional
+      return true;
+    },
+    {
+      message: "Observação é obrigatória quando a proposta é pendenciada",
+      path: ["observacao"], // Aplica o erro no campo observacao
     }
-    // Para "aprovado" e "rejeitado", observação é opcional
-    return true;
-  },
-  {
-    message: "Observação é obrigatória quando a proposta é pendenciada",
-    path: ["observacao"], // Aplica o erro no campo observacao
-  }
-);
+  );
 
 type DecisionFormData = z.infer<typeof decisionSchema>;
 
@@ -90,7 +92,7 @@ const AnaliseManualPage: React.FC = () => {
   const {
     data: proposta,
     isLoading,
-    isError,  
+    isError,
   } = useQuery({
     queryKey: ["proposta", propostaId],
     queryFn: () => fetchProposta(propostaId),
@@ -100,7 +102,7 @@ const AnaliseManualPage: React.FC = () => {
     staleTime: 5 * 60 * 1000, // 5 minutos - dados ficam válidos por mais tempo
   });
 
-// Removido - documentos agora vêm incluídos na proposta
+  // Removido - documentos agora vêm incluídos na proposta
 
   const { register, handleSubmit, control } = useForm<DecisionFormData>({
     resolver: zodResolver(decisionSchema),
@@ -115,7 +117,7 @@ const AnaliseManualPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ["proposta_logs", propostaId] });
       queryClient.invalidateQueries({ queryKey: [`/api/propostas/${propostaId}`] });
       queryClient.invalidateQueries({ queryKey: [`/api/propostas/${propostaId}/observacoes`] });
-      queryClient.invalidateQueries({ queryKey: ['/api/propostas'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/propostas"] });
     },
     onError: (error: Error) => {
       toast({ title: "Erro!", description: error.message, variant: "destructive" });
@@ -124,15 +126,15 @@ const AnaliseManualPage: React.FC = () => {
 
   const onSubmit = (data: DecisionFormData) => {
     if (!propostaId) return;
-    
+
     // For pendenciado status, send observacao as motivoPendencia
     const payload = {
       id: propostaId,
       status: data.status,
       observacao: data.observacao,
-      ...(data.status === 'pendenciado' && { motivoPendencia: data.observacao })
+      ...(data.status === "pendenciado" && { motivoPendencia: data.observacao }),
     };
-    
+
     mutation.mutate(payload);
   };
 
@@ -162,15 +164,9 @@ const AnaliseManualPage: React.FC = () => {
   };
 
   return (
-    <DashboardLayout 
+    <DashboardLayout
       title={`Análise Manual - Proposta #${proposta.id}`}
-      actions={
-        <RefreshButton 
-          onRefresh={handleRefresh}
-          isLoading={isLoading}
-          variant="ghost"
-        />
-      }
+      actions={<RefreshButton onRefresh={handleRefresh} isLoading={isLoading} variant="ghost" />}
     >
       <div className="grid gap-6 md:grid-cols-3">
         <div className="space-y-6 md:col-span-2">
@@ -180,19 +176,46 @@ const AnaliseManualPage: React.FC = () => {
               <CardTitle>Dados do Cliente</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              <p><strong>Nome:</strong> {proposta.clienteData?.nome || "N/A"}</p>
-              <p><strong>CPF:</strong> {proposta.clienteData?.cpf || "N/A"}</p>
-              <p><strong>Email:</strong> {proposta.clienteData?.email || "N/A"}</p>
-              <p><strong>Telefone:</strong> {proposta.clienteData?.telefone || "N/A"}</p>
-              <p><strong>Data de Nascimento:</strong> {proposta.clienteData?.dataNascimento || "N/A"}</p>
-              <p><strong>Renda Mensal:</strong> {proposta.clienteData?.renda ? `R$ ${proposta.clienteData.renda}` : "N/A"}</p>
-              <p><strong>RG:</strong> {proposta.clienteData?.rg || "N/A"}</p>
-              <p><strong>Órgão Emissor:</strong> {proposta.clienteData?.orgaoEmissor || "N/A"}</p>
-              <p><strong>Estado Civil:</strong> {proposta.clienteData?.estadoCivil || "N/A"}</p>
-              <p><strong>Nacionalidade:</strong> {proposta.clienteData?.nacionalidade || "N/A"}</p>
-              <p><strong>CEP:</strong> {proposta.clienteData?.cep || "N/A"}</p>
-              <p><strong>Endereço:</strong> {proposta.clienteData?.endereco || "N/A"}</p>
-              <p><strong>Ocupação:</strong> {proposta.clienteData?.ocupacao || "N/A"}</p>
+              <p>
+                <strong>Nome:</strong> {proposta.clienteData?.nome || "N/A"}
+              </p>
+              <p>
+                <strong>CPF:</strong> {proposta.clienteData?.cpf || "N/A"}
+              </p>
+              <p>
+                <strong>Email:</strong> {proposta.clienteData?.email || "N/A"}
+              </p>
+              <p>
+                <strong>Telefone:</strong> {proposta.clienteData?.telefone || "N/A"}
+              </p>
+              <p>
+                <strong>Data de Nascimento:</strong> {proposta.clienteData?.dataNascimento || "N/A"}
+              </p>
+              <p>
+                <strong>Renda Mensal:</strong>{" "}
+                {proposta.clienteData?.renda ? `R$ ${proposta.clienteData.renda}` : "N/A"}
+              </p>
+              <p>
+                <strong>RG:</strong> {proposta.clienteData?.rg || "N/A"}
+              </p>
+              <p>
+                <strong>Órgão Emissor:</strong> {proposta.clienteData?.orgaoEmissor || "N/A"}
+              </p>
+              <p>
+                <strong>Estado Civil:</strong> {proposta.clienteData?.estadoCivil || "N/A"}
+              </p>
+              <p>
+                <strong>Nacionalidade:</strong> {proposta.clienteData?.nacionalidade || "N/A"}
+              </p>
+              <p>
+                <strong>CEP:</strong> {proposta.clienteData?.cep || "N/A"}
+              </p>
+              <p>
+                <strong>Endereço:</strong> {proposta.clienteData?.endereco || "N/A"}
+              </p>
+              <p>
+                <strong>Ocupação:</strong> {proposta.clienteData?.ocupacao || "N/A"}
+              </p>
             </CardContent>
           </Card>
 
@@ -202,13 +225,34 @@ const AnaliseManualPage: React.FC = () => {
               <CardTitle>Condições do Empréstimo</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              <p><strong>Valor Solicitado:</strong> {proposta.condicoesData?.valor ? `R$ ${proposta.condicoesData.valor}` : "N/A"}</p>
-              <p><strong>Prazo:</strong> {proposta.condicoesData?.prazo ? `${proposta.condicoesData.prazo} meses` : "N/A"}</p>
-              <p><strong>Finalidade:</strong> {proposta.condicoesData?.finalidade || "N/A"}</p>
-              <p><strong>Garantia:</strong> {proposta.condicoesData?.garantia || "N/A"}</p>
-              <p><strong>TAC:</strong> {proposta.condicoesData?.valorTac ? `R$ ${proposta.condicoesData.valorTac}` : "N/A"}</p>
-              <p><strong>IOF:</strong> {proposta.condicoesData?.valorIof ? `R$ ${proposta.condicoesData.valorIof}` : "N/A"}</p>
-              <p><strong>Valor Total Financiado:</strong> {proposta.condicoesData?.valorTotalFinanciado ? `R$ ${proposta.condicoesData.valorTotalFinanciado}` : "N/A"}</p>
+              <p>
+                <strong>Valor Solicitado:</strong>{" "}
+                {proposta.condicoesData?.valor ? `R$ ${proposta.condicoesData.valor}` : "N/A"}
+              </p>
+              <p>
+                <strong>Prazo:</strong>{" "}
+                {proposta.condicoesData?.prazo ? `${proposta.condicoesData.prazo} meses` : "N/A"}
+              </p>
+              <p>
+                <strong>Finalidade:</strong> {proposta.condicoesData?.finalidade || "N/A"}
+              </p>
+              <p>
+                <strong>Garantia:</strong> {proposta.condicoesData?.garantia || "N/A"}
+              </p>
+              <p>
+                <strong>TAC:</strong>{" "}
+                {proposta.condicoesData?.valorTac ? `R$ ${proposta.condicoesData.valorTac}` : "N/A"}
+              </p>
+              <p>
+                <strong>IOF:</strong>{" "}
+                {proposta.condicoesData?.valorIof ? `R$ ${proposta.condicoesData.valorIof}` : "N/A"}
+              </p>
+              <p>
+                <strong>Valor Total Financiado:</strong>{" "}
+                {proposta.condicoesData?.valorTotalFinanciado
+                  ? `R$ ${proposta.condicoesData.valorTotalFinanciado}`
+                  : "N/A"}
+              </p>
             </CardContent>
           </Card>
 
@@ -218,16 +262,27 @@ const AnaliseManualPage: React.FC = () => {
               <CardTitle>Informações da Proposta</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              <p><strong>Status Atual:</strong> {proposta.status || "N/A"}</p>
-              <p><strong>Parceiro:</strong> {proposta.parceiro?.razaoSocial || "N/A"}</p>
-              <p><strong>Loja:</strong> {proposta.loja?.nomeLoja || "N/A"}</p>
-              <p><strong>Data de Criação:</strong> {proposta.createdAt ? new Date(proposta.createdAt).toLocaleDateString('pt-BR') : "N/A"}</p>
+              <p>
+                <strong>Status Atual:</strong> {proposta.status || "N/A"}
+              </p>
+              <p>
+                <strong>Parceiro:</strong> {proposta.parceiro?.razaoSocial || "N/A"}
+              </p>
+              <p>
+                <strong>Loja:</strong> {proposta.loja?.nomeLoja || "N/A"}
+              </p>
+              <p>
+                <strong>Data de Criação:</strong>{" "}
+                {proposta.createdAt
+                  ? new Date(proposta.createdAt).toLocaleDateString("pt-BR")
+                  : "N/A"}
+              </p>
               {proposta.ccbDocumentoUrl && (
                 <p>
-                  <strong>Documento CCB:</strong> 
-                  <a 
-                    href={proposta.ccbDocumentoUrl} 
-                    target="_blank" 
+                  <strong>Documento CCB:</strong>
+                  <a
+                    href={proposta.ccbDocumentoUrl}
+                    target="_blank"
                     rel="noopener noreferrer"
                     className="ml-2 text-blue-500 hover:underline"
                   >
@@ -237,16 +292,16 @@ const AnaliseManualPage: React.FC = () => {
               )}
             </CardContent>
           </Card>
-          
+
           {/* Visualizador de Documentos */}
-          <DocumentViewer 
+          <DocumentViewer
             propostaId={propostaId!}
             documents={proposta.documentos || []}
             ccbDocumentoUrl={proposta.ccbDocumentoUrl}
           />
-          
+
           {/* Renderização condicional - Painel de Decisão apenas para ANALISTA e ADMINISTRADOR */}
-          {user && (user.role === 'ANALISTA' || user.role === 'ADMINISTRADOR') ? (
+          {user && (user.role === "ANALISTA" || user.role === "ADMINISTRADOR") ? (
             <Card>
               <CardHeader>
                 <CardTitle>Painel de Decisão</CardTitle>
@@ -289,8 +344,8 @@ const AnaliseManualPage: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">
-                  Você está visualizando esta proposta em modo de leitura. 
-                  Apenas analistas podem aprovar ou negar propostas.
+                  Você está visualizando esta proposta em modo de leitura. Apenas analistas podem
+                  aprovar ou negar propostas.
                 </p>
               </CardContent>
             </Card>

@@ -16,18 +16,18 @@ export async function createApp() {
   const app = express();
 
   // Disable X-Powered-By header - OWASP ASVS V14.4.1
-  app.disable('x-powered-by');
+  app.disable("x-powered-by");
 
   // Configure trust proxy for rate limiting
-  app.set('trust proxy', process.env.NODE_ENV === 'production' ? 1 : ['127.0.0.1', '::1']);
+  app.set("trust proxy", process.env.NODE_ENV === "production" ? 1 : ["127.0.0.1", "::1"]);
 
   // Configure CORS - OWASP ASVS V13.2.1
   const corsOptions = setupCORS();
   app.use(cors(corsOptions));
   log("🔒 [SECURITY] CORS protection configured - ASVS V13.2.1");
-  
+
   // Tratamento explícito para requisições OPTIONS (preflight)
-  app.options('*', cors(corsOptions));
+  app.options("*", cors(corsOptions));
   log("🔒 [SECURITY] OPTIONS preflight handling configured");
 
   // Form-encoded middleware
@@ -38,14 +38,14 @@ export async function createApp() {
     app.use(setupSecurityHeaders());
     app.use(additionalSecurityHeaders);
     // Temporarily disable CSP in development to fix blank screen issue
-    if (process.env.NODE_ENV !== 'development') {
+    if (process.env.NODE_ENV !== "development") {
       app.use(strictCSP);
       log("🔒 [SECURITY] Enhanced security headers and strict CSP activated");
     } else {
       log("🔧 [DEV] CSP disabled in development mode for debugging");
     }
   }
-  
+
   // Input Sanitization Middleware - OWASP A03: Injection Prevention
   app.use(inputSanitizerMiddleware);
   log("🔒 [SECURITY] Input sanitization middleware activated");
@@ -59,18 +59,18 @@ export async function createApp() {
   log("🔒 [SECURITY] CSRF protection middleware activated - OWASP Cheat Sheet");
 
   // Rate Limiting - Configuração por ambiente
-  if (process.env.NODE_ENV !== 'test') {
+  if (process.env.NODE_ENV !== "test") {
     // Configurações diferentes por ambiente
-    const isDevelopment = process.env.NODE_ENV === 'development';
-    
+    const isDevelopment = process.env.NODE_ENV === "development";
+
     const generalApiLimiter = rateLimit({
       windowMs: isDevelopment ? 1 * 60 * 1000 : 15 * 60 * 1000, // 1min dev, 15min prod
       max: isDevelopment ? 10000 : 1000, // 10k dev, 1k prod (muito mais permissivo)
       message: {
-        error: isDevelopment 
-          ? "Rate limit atingido (modo desenvolvimento - limites altos)" 
+        error: isDevelopment
+          ? "Rate limit atingido (modo desenvolvimento - limites altos)"
           : "Muitas requisições da API. Tente novamente em 15 minutos.",
-        retryAfter: isDevelopment ? "1 minuto" : "15 minutos"
+        retryAfter: isDevelopment ? "1 minuto" : "15 minutos",
       },
       standardHeaders: true,
       legacyHeaders: false,
@@ -79,22 +79,22 @@ export async function createApp() {
           type: SecurityEventType.RATE_LIMIT_EXCEEDED,
           severity: isDevelopment ? "LOW" : "MEDIUM",
           ipAddress: getClientIP(req),
-          userAgent: req.headers['user-agent'],
+          userAgent: req.headers["user-agent"],
           endpoint: req.originalUrl,
           success: false,
-          details: { 
-            type: 'general_api',
+          details: {
+            type: "general_api",
             environment: process.env.NODE_ENV,
-            limit: isDevelopment ? 10000 : 1000
-          }
+            limit: isDevelopment ? 10000 : 1000,
+          },
         });
         res.status(429).json({
-          error: isDevelopment 
-            ? "Rate limit atingido (modo desenvolvimento - limites altos)" 
+          error: isDevelopment
+            ? "Rate limit atingido (modo desenvolvimento - limites altos)"
             : "Muitas requisições da API. Tente novamente em 15 minutos.",
-          retryAfter: isDevelopment ? "1 minuto" : "15 minutos"
+          retryAfter: isDevelopment ? "1 minuto" : "15 minutos",
         });
-      }
+      },
     });
 
     const authLimiter = rateLimit({
@@ -105,7 +105,7 @@ export async function createApp() {
         error: isDevelopment
           ? "Rate limit auth atingido (modo desenvolvimento)"
           : "Muitas tentativas de autenticação. Tente novamente em 15 minutos.",
-        retryAfter: isDevelopment ? "1 minuto" : "15 minutos"
+        retryAfter: isDevelopment ? "1 minuto" : "15 minutos",
       },
       standardHeaders: true,
       legacyHeaders: false,
@@ -114,27 +114,27 @@ export async function createApp() {
           type: SecurityEventType.BRUTE_FORCE_DETECTED,
           severity: isDevelopment ? "LOW" : "HIGH",
           ipAddress: getClientIP(req),
-          userAgent: req.headers['user-agent'],
+          userAgent: req.headers["user-agent"],
           endpoint: req.originalUrl,
           success: false,
-          details: { 
-            type: 'authentication_brute_force',
+          details: {
+            type: "authentication_brute_force",
             environment: process.env.NODE_ENV,
-            limit: isDevelopment ? 1000 : 20
-          }
+            limit: isDevelopment ? 1000 : 20,
+          },
         });
         res.status(429).json({
           error: isDevelopment
             ? "Rate limit auth atingido (modo desenvolvimento)"
             : "Muitas tentativas de autenticação. Tente novamente em 15 minutos.",
-          retryAfter: isDevelopment ? "1 minuto" : "15 minutos"
+          retryAfter: isDevelopment ? "1 minuto" : "15 minutos",
         });
-      }
+      },
     });
 
     app.use("/api/", generalApiLimiter);
     app.use("/api/auth/", authLimiter);
-    
+
     if (isDevelopment) {
       log("🔧 [DEV] Rate limiting configurado para desenvolvimento - limites altos");
     } else {

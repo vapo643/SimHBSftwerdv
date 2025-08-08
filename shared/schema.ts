@@ -10,7 +10,7 @@ import {
   primaryKey,
   varchar,
   uuid,
-  jsonb
+  jsonb,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -28,7 +28,9 @@ export const parceiros = pgTable("parceiros", {
 
 export const lojas = pgTable("lojas", {
   id: serial("id").primaryKey(),
-  parceiroId: integer("parceiro_id").references(() => parceiros.id).notNull(),
+  parceiroId: integer("parceiro_id")
+    .references(() => parceiros.id)
+    .notNull(),
   nomeLoja: text("nome_loja").notNull(),
   endereco: text("endereco").notNull(),
   isActive: boolean("is_active").default(true).notNull(),
@@ -60,7 +62,9 @@ export const users = pgTable("users", {
 // Tabela para rastrear sessões ativas dos usuários
 export const userSessions = pgTable("user_sessions", {
   id: varchar("id", { length: 255 }).primaryKey(), // Session ID (token)
-  userId: uuid("user_id").notNull().references(() => profiles.id, { onDelete: 'cascade' }),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => profiles.id, { onDelete: "cascade" }),
   token: varchar("token", { length: 2048 }).notNull(),
   ipAddress: varchar("ip_address", { length: 45 }),
   userAgent: text("user_agent"),
@@ -72,13 +76,21 @@ export const userSessions = pgTable("user_sessions", {
 });
 
 // Tabela de junção para relacionamento muitos-para-muitos Gerentes x Lojas
-export const gerenteLojas = pgTable("gerente_lojas", {
-  gerenteId: integer("gerente_id").references(() => users.id).notNull(),
-  lojaId: integer("loja_id").references(() => lojas.id).notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
-}, (table) => ({
-  pk: primaryKey({ columns: [table.gerenteId, table.lojaId] }),
-}));
+export const gerenteLojas = pgTable(
+  "gerente_lojas",
+  {
+    gerenteId: integer("gerente_id")
+      .references(() => users.id)
+      .notNull(),
+    lojaId: integer("loja_id")
+      .references(() => lojas.id)
+      .notNull(),
+    createdAt: timestamp("created_at").defaultNow(),
+  },
+  table => ({
+    pk: primaryKey({ columns: [table.gerenteId, table.lojaId] }),
+  })
+);
 
 export const statusEnum = pgEnum("status", [
   "rascunho",
@@ -102,11 +114,11 @@ export const statusEnum = pgEnum("status", [
 export const propostas = pgTable("propostas", {
   id: text("id").primaryKey(),
   lojaId: integer("loja_id").notNull(), // Multi-tenant key
-  
+
   // Relacionamentos de negócio
   produtoId: integer("produto_id").references(() => produtos.id),
   tabelaComercialId: integer("tabela_comercial_id").references(() => tabelasComerciais.id),
-  
+
   // Cliente dados básicos (mantendo campos existentes para compatibilidade)
   clienteNome: text("cliente_nome"),
   clienteCpf: text("cliente_cpf"),
@@ -114,7 +126,7 @@ export const propostas = pgTable("propostas", {
   clienteTelefone: text("cliente_telefone"),
   clienteDataNascimento: text("cliente_data_nascimento"),
   clienteRenda: text("cliente_renda"),
-  
+
   // Cliente dados adicionais (novos campos normalizados)
   clienteRg: text("cliente_rg"),
   clienteOrgaoEmissor: text("cliente_orgao_emissor"),
@@ -123,7 +135,7 @@ export const propostas = pgTable("propostas", {
   clienteEstadoCivil: text("cliente_estado_civil"),
   clienteNacionalidade: text("cliente_nacionalidade").default("Brasileira"),
   clienteLocalNascimento: text("cliente_local_nascimento"),
-  
+
   // Endereço detalhado
   clienteCep: text("cliente_cep"),
   clienteEndereco: text("cliente_endereco"), // Campo legado - mantido para compatibilidade
@@ -134,7 +146,7 @@ export const propostas = pgTable("propostas", {
   clienteCidade: text("cliente_cidade"),
   clienteUf: text("cliente_uf"),
   clienteOcupacao: text("cliente_ocupacao"),
-  
+
   // Dados para Pessoa Jurídica
   tipoPessoa: text("tipo_pessoa").default("PF"), // PF ou PJ
   clienteRazaoSocial: text("cliente_razao_social"),
@@ -151,7 +163,7 @@ export const propostas = pgTable("propostas", {
   valorIof: decimal("valor_iof", { precision: 10, scale: 2 }),
   valorTotalFinanciado: decimal("valor_total_financiado", { precision: 15, scale: 2 }),
   valorLiquidoLiberado: decimal("valor_liquido_liberado", { precision: 15, scale: 2 }),
-  
+
   // Dados financeiros detalhados
   jurosModalidade: text("juros_modalidade").default("pre_fixado"), // pre_fixado ou pos_fixado
   periodicidadeCapitalizacao: text("periodicidade_capitalizacao").default("mensal"),
@@ -177,7 +189,7 @@ export const propostas = pgTable("propostas", {
   // Documentos (mantendo campos legados)
   documentos: text("documentos").array(),
   ccbDocumentoUrl: text("ccb_documento_url"),
-  
+
   // Formalização - Enhanced fields
   dataAprovacao: timestamp("data_aprovacao"),
   documentosAdicionais: text("documentos_adicionais").array(),
@@ -186,12 +198,14 @@ export const propostas = pgTable("propostas", {
   dataAssinatura: timestamp("data_assinatura"),
   dataPagamento: timestamp("data_pagamento"),
   observacoesFormalização: text("observacoes_formalizacao"),
-  
+
   // New formalization tracking fields (January 29, 2025)
   ccbGerado: boolean("ccb_gerado").notNull().default(false),
   caminhoCcb: text("caminho_ccb"), // Caminho do CCB gerado
   ccbGeradoEm: timestamp("ccb_gerado_em"), // Data de geração do CCB
-  assinaturaEletronicaConcluida: boolean("assinatura_eletronica_concluida").notNull().default(false),
+  assinaturaEletronicaConcluida: boolean("assinatura_eletronica_concluida")
+    .notNull()
+    .default(false),
   biometriaConcluida: boolean("biometria_concluida").notNull().default(false),
   caminhoCcbAssinado: text("caminho_ccb_assinado"),
 
@@ -214,14 +228,14 @@ export const propostas = pgTable("propostas", {
   dadosPagamentoTipo: text("dados_pagamento_tipo"), // 'conta_corrente', 'conta_poupanca'
   dadosPagamentoNomeTitular: text("dados_pagamento_nome_titular"),
   dadosPagamentoCpfTitular: text("dados_pagamento_cpf_titular"),
-  
+
   // Opção 2: PIX (relacionado à conta bancária)
   dadosPagamentoPix: text("dados_pagamento_pix"), // Chave PIX
   dadosPagamentoTipoPix: text("dados_pagamento_tipo_pix"), // CPF, CNPJ, Email, Telefone, Aleatória
   dadosPagamentoPixBanco: text("dados_pagamento_pix_banco"), // Banco do PIX
   dadosPagamentoPixNomeTitular: text("dados_pagamento_pix_nome_titular"), // Nome do titular do PIX
   dadosPagamentoPixCpfTitular: text("dados_pagamento_pix_cpf_titular"), // CPF do titular do PIX
-  
+
   // Método escolhido
   metodoPagamento: text("metodo_pagamento").default("conta_bancaria"), // conta_bancaria ou pix
 
@@ -256,8 +270,12 @@ export const tabelasComerciais = pgTable("tabelas_comerciais", {
 // Tabela de Junção N:N - Produtos <-> Tabelas Comerciais
 export const produtoTabelaComercial = pgTable("produto_tabela_comercial", {
   id: serial("id").primaryKey(),
-  produtoId: integer("produto_id").references(() => produtos.id).notNull(),
-  tabelaComercialId: integer("tabela_comercial_id").references(() => tabelasComerciais.id).notNull(),
+  produtoId: integer("produto_id")
+    .references(() => produtos.id)
+    .notNull(),
+  tabelaComercialId: integer("tabela_comercial_id")
+    .references(() => tabelasComerciais.id)
+    .notNull(),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -268,33 +286,39 @@ export const produtos = pgTable("produtos", {
   isActive: boolean("is_active").notNull().default(true),
   tacValor: decimal("tac_valor", { precision: 10, scale: 2 }).default("0"),
   tacTipo: text("tac_tipo").notNull().default("fixo"),
-  
+
   // Novos campos para CCB
   modalidadeJuros: text("modalidade_juros").default("pre_fixado"), // pre_fixado ou pos_fixado
   periodicidadeCapitalizacao: text("periodicidade_capitalizacao").default("mensal"),
   anoBase: integer("ano_base").default(365),
   tarifaTedPadrao: decimal("tarifa_ted_padrao", { precision: 10, scale: 2 }).default("10.00"),
   taxaCreditoPadrao: decimal("taxa_credito_padrao", { precision: 10, scale: 2 }).default("50.00"),
-  
+
   createdAt: timestamp("created_at").defaultNow(),
   deletedAt: timestamp("deleted_at"), // Soft delete column
 });
 
-// Logs de Comunicação - Multi-tenant  
+// Logs de Comunicação - Multi-tenant
 export const comunicacaoLogs = pgTable("comunicacao_logs", {
   id: serial("id").primaryKey(),
-  propostaId: text("proposta_id").references(() => propostas.id).notNull(), // Changed from integer to text to match propostas.id
-  lojaId: integer("loja_id").references(() => lojas.id).notNull(), // Multi-tenant key
+  propostaId: text("proposta_id")
+    .references(() => propostas.id)
+    .notNull(), // Changed from integer to text to match propostas.id
+  lojaId: integer("loja_id")
+    .references(() => lojas.id)
+    .notNull(), // Multi-tenant key
   tipo: text("tipo").notNull(), // email, telefone, whatsapp, sistema
   conteudo: text("conteudo").notNull(),
   userId: integer("user_id").references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// Logs de Auditoria para Propostas  
+// Logs de Auditoria para Propostas
 export const propostaLogs = pgTable("proposta_logs", {
   id: serial("id").primaryKey(),
-  propostaId: text("proposta_id").references(() => propostas.id).notNull(),
+  propostaId: text("proposta_id")
+    .references(() => propostas.id)
+    .notNull(),
   autorId: text("autor_id").notNull(), // UUID do usuário que fez a ação
   statusAnterior: text("status_anterior"),
   statusNovo: text("status_novo").notNull(),
@@ -305,7 +329,9 @@ export const propostaLogs = pgTable("proposta_logs", {
 // Tabela de Junção - Propostas <-> Documentos
 export const propostaDocumentos = pgTable("proposta_documentos", {
   id: serial("id").primaryKey(),
-  propostaId: text("proposta_id").references(() => propostas.id).notNull(),
+  propostaId: text("proposta_id")
+    .references(() => propostas.id)
+    .notNull(),
   nomeArquivo: text("nome_arquivo").notNull(),
   url: text("url").notNull(),
   tamanho: integer("tamanho"), // tamanho em bytes
@@ -318,7 +344,9 @@ export const auditDeleteLog = pgTable("audit_delete_log", {
   id: uuid("id").primaryKey().defaultRandom(),
   tableName: text("table_name").notNull(),
   recordId: text("record_id").notNull(),
-  deletedBy: uuid("deleted_by").notNull().references(() => profiles.id),
+  deletedBy: uuid("deleted_by")
+    .notNull()
+    .references(() => profiles.id),
   deletedAt: timestamp("deleted_at").notNull().defaultNow(),
   deletionReason: text("deletion_reason"),
   recordData: text("record_data").notNull(), // JSONB stored as text
@@ -331,7 +359,9 @@ export const auditDeleteLog = pgTable("audit_delete_log", {
 // Referências Pessoais - Nova tabela para armazenar referências dos clientes
 export const referenciaPessoal = pgTable("referencia_pessoal", {
   id: serial("id").primaryKey(),
-  propostaId: text("proposta_id").references(() => propostas.id, { onDelete: 'cascade' }).notNull(),
+  propostaId: text("proposta_id")
+    .references(() => propostas.id, { onDelete: "cascade" })
+    .notNull(),
   nomeCompleto: text("nome_completo").notNull(),
   grauParentesco: text("grau_parentesco").notNull(), // Mãe, Pai, Irmão, Amigo, etc.
   telefone: text("telefone").notNull(),
@@ -341,7 +371,7 @@ export const referenciaPessoal = pgTable("referencia_pessoal", {
 // Configuração da Empresa (Credor)
 export const configuracaoEmpresa = pgTable("configuracao_empresa", {
   id: serial("id").primaryKey(),
-  
+
   // Dados da Simpix (Credor)
   razaoSocial: text("razao_social").notNull().default("SIMPIX LTDA"),
   cnpj: text("cnpj").notNull().default("00.000.000/0001-00"),
@@ -353,18 +383,20 @@ export const configuracaoEmpresa = pgTable("configuracao_empresa", {
   uf: text("uf").notNull().default("SP"),
   telefone: text("telefone").default("(11) 3000-0000"),
   email: text("email").default("contato@simpix.com.br"),
-  
+
   // Configurações de CCB
   pracaPagamentoPadrao: text("praca_pagamento_padrao").default("São Paulo"),
   anoBasePadrao: integer("ano_base_padrao").default(365),
-  
-  createdAt: timestamp("created_at").defaultNow()
+
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 // Banco Inter Integration Tables
 export const interCollections = pgTable("inter_collections", {
   id: serial("id").primaryKey(),
-  propostaId: text("proposta_id").references(() => propostas.id).notNull(),
+  propostaId: text("proposta_id")
+    .references(() => propostas.id)
+    .notNull(),
   codigoSolicitacao: text("codigo_solicitacao").notNull().unique(), // Inter's unique ID
   seuNumero: text("seu_numero").notNull(), // Our reference number
   valorNominal: decimal("valor_nominal", { precision: 12, scale: 2 }).notNull(),
@@ -381,12 +413,12 @@ export const interCollections = pgTable("inter_collections", {
   dataEmissao: text("data_emissao"),
   numeroParcela: integer("numero_parcela"), // Número da parcela (1, 2, 3...)
   totalParcelas: integer("total_parcelas"), // Total de parcelas
-  
+
   // Novos campos para CCB
   vencimentoPrimeiraParcela: text("vencimento_primeira_parcela"),
   vencimentoUltimaParcela: text("vencimento_ultima_parcela"),
   formaPagamento: text("forma_pagamento"), // boleto, pix, debito
-  
+
   isActive: boolean("is_active").default(true).notNull(),
   motivoCancelamento: text("motivo_cancelamento"), // Razão do cancelamento
   createdAt: timestamp("created_at").defaultNow(),
@@ -396,7 +428,9 @@ export const interCollections = pgTable("inter_collections", {
 // Tabela de histórico e observações de cobrança
 export const historicoObservacoesCobranca = pgTable("historico_observacoes_cobranca", {
   id: uuid("id").defaultRandom().primaryKey(),
-  propostaId: text("proposta_id").references(() => propostas.id).notNull(),
+  propostaId: text("proposta_id")
+    .references(() => propostas.id)
+    .notNull(),
   mensagem: text("mensagem").notNull(),
   criadoPor: text("criado_por").notNull(), // Email do usuário
   tipoAcao: text("tipo_acao"), // DESCONTO_QUITACAO, PRORROGACAO, OBSERVACAO, etc
@@ -427,7 +461,9 @@ export const interCallbacks = pgTable("inter_callbacks", {
 // Tabela de Parcelas - Controle de pagamentos parcelados
 export const parcelas = pgTable("parcelas", {
   id: serial("id").primaryKey(),
-  propostaId: text("proposta_id").references(() => propostas.id, { onDelete: 'cascade' }).notNull(),
+  propostaId: text("proposta_id")
+    .references(() => propostas.id, { onDelete: "cascade" })
+    .notNull(),
   numeroParcela: integer("numero_parcela").notNull(),
   valorParcela: decimal("valor_parcela", { precision: 12, scale: 2 }).notNull(),
   dataVencimento: text("data_vencimento").notNull(), // YYYY-MM-DD
@@ -446,8 +482,12 @@ export const parcelas = pgTable("parcelas", {
 // Observações de Cobrança - Sistema de histórico de contatos
 export const observacoesCobranca = pgTable("observacoes_cobranca", {
   id: serial("id").primaryKey(),
-  propostaId: text("proposta_id").references(() => propostas.id, { onDelete: 'cascade' }).notNull(),
-  userId: uuid("user_id").references(() => profiles.id).notNull(),
+  propostaId: text("proposta_id")
+    .references(() => propostas.id, { onDelete: "cascade" })
+    .notNull(),
+  userId: uuid("user_id")
+    .references(() => profiles.id)
+    .notNull(),
   userName: text("user_name").notNull(), // Nome do usuário que fez a observação
   observacao: text("observacao").notNull(),
   tipoContato: text("tipo_contato"), // telefone, whatsapp, sms, email, presencial

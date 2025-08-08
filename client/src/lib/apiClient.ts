@@ -1,25 +1,25 @@
 /**
  * API Client - Centralized HTTP Client for Simpix
- * 
+ *
  * This is the foundational API client that encapsulates HTTP requests
  * with consistent headers, authentication, and response handling.
- * 
+ *
  * @version 2.0.0
  * @created 2025-01-23
  * @updated 2025-01-23 - Added TokenManager, ApiConfig, RequestManager
  */
 
-import { getSession } from './auth';
-import { getSupabase } from './supabase';
+import { getSession } from "./auth";
+import { getSupabase } from "./supabase";
 
 export interface ApiClientOptions {
-  method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+  method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   body?: any;
   headers?: Record<string, string>;
   requireAuth?: boolean;
   timeout?: number;
   retries?: number;
-  responseType?: 'json' | 'blob' | 'text';
+  responseType?: "json" | "blob" | "text";
 }
 
 export interface ApiResponse<T = any> {
@@ -31,16 +31,16 @@ export interface ApiResponse<T = any> {
 
 // Error codes enum for standardized error handling
 export enum ApiErrorCode {
-  VALIDATION_ERROR = 'VALIDATION_ERROR',
-  TOKEN_EXPIRED = 'TOKEN_EXPIRED',
-  NETWORK_ERROR = 'NETWORK_ERROR',
-  TIMEOUT_ERROR = 'TIMEOUT_ERROR',
-  SERVER_ERROR = 'SERVER_ERROR',
-  UNKNOWN_ERROR = 'UNKNOWN_ERROR',
-  UNAUTHORIZED = 'UNAUTHORIZED',
-  FORBIDDEN = 'FORBIDDEN',
-  NOT_FOUND = 'NOT_FOUND',
-  CONFLICT = 'CONFLICT'
+  VALIDATION_ERROR = "VALIDATION_ERROR",
+  TOKEN_EXPIRED = "TOKEN_EXPIRED",
+  NETWORK_ERROR = "NETWORK_ERROR",
+  TIMEOUT_ERROR = "TIMEOUT_ERROR",
+  SERVER_ERROR = "SERVER_ERROR",
+  UNKNOWN_ERROR = "UNKNOWN_ERROR",
+  UNAUTHORIZED = "UNAUTHORIZED",
+  FORBIDDEN = "FORBIDDEN",
+  NOT_FOUND = "NOT_FOUND",
+  CONFLICT = "CONFLICT",
 }
 
 export class ApiError extends Error {
@@ -57,7 +57,7 @@ export class ApiError extends Error {
     data?: any // Add data parameter
   ) {
     super(message);
-    this.name = 'ApiError';
+    this.name = "ApiError";
     this.code = code || this.inferCodeFromStatus(status);
     this.isRetryable = this.determineRetryability();
     this.data = data; // Store the full response data
@@ -81,16 +81,20 @@ export class ApiError extends Error {
       case 504:
         return ApiErrorCode.SERVER_ERROR;
       case 0:
-        return this.message.includes('timeout') ? ApiErrorCode.TIMEOUT_ERROR : ApiErrorCode.NETWORK_ERROR;
+        return this.message.includes("timeout")
+          ? ApiErrorCode.TIMEOUT_ERROR
+          : ApiErrorCode.NETWORK_ERROR;
       default:
         return ApiErrorCode.UNKNOWN_ERROR;
     }
   }
 
   private determineRetryability(): boolean {
-    return [503, 504, 0].includes(this.status) || 
-           this.code === ApiErrorCode.TIMEOUT_ERROR ||
-           this.code === ApiErrorCode.NETWORK_ERROR;
+    return (
+      [503, 504, 0].includes(this.status) ||
+      this.code === ApiErrorCode.TIMEOUT_ERROR ||
+      this.code === ApiErrorCode.NETWORK_ERROR
+    );
   }
 }
 
@@ -130,7 +134,7 @@ class TokenManager {
     this.refreshPromise = this.refreshToken();
     const token = await this.refreshPromise;
     this.refreshPromise = null;
-    
+
     return token;
   }
 
@@ -138,15 +142,17 @@ class TokenManager {
     try {
       // Get fresh session directly from Supabase - bypasses auth.ts abstraction
       const supabase = getSupabase();
-      const { data: { session } } = await supabase.auth.getSession();
-      
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
       if (!session?.access_token) {
         this.clearCache();
         return null;
       }
 
       // Decode JWT to get expiry (simple base64 decode of payload)
-      const tokenParts = session.access_token.split('.');
+      const tokenParts = session.access_token.split(".");
       if (tokenParts.length === 3) {
         try {
           const payload = JSON.parse(atob(tokenParts[1]));
@@ -161,7 +167,7 @@ class TokenManager {
       console.log(`🔐 [TOKEN MANAGER] Fresh token obtained, length: ${this.cachedToken.length}`);
       return this.cachedToken;
     } catch (error) {
-      console.error('🔐 [TOKEN MANAGER] Error refreshing token:', error);
+      console.error("🔐 [TOKEN MANAGER] Error refreshing token:", error);
       this.clearCache();
       return null;
     }
@@ -203,27 +209,27 @@ class ApiConfig {
     }
 
     // Priority 2: Auto-detect environment
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       const hostname = window.location.hostname;
-      
+
       // Replit environment
-      if (hostname.includes('replit.') || hostname.includes('.repl.co')) {
+      if (hostname.includes("replit.") || hostname.includes(".repl.co")) {
         return window.location.origin;
       }
-      
+
       // Local development
-      if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      if (hostname === "localhost" || hostname === "127.0.0.1") {
         return `${window.location.protocol}//${hostname}:5000`;
       }
     }
 
     // Priority 3: Fallback
-    return 'http://localhost:5000';
+    return "http://localhost:5000";
   }
 
   buildUrl(endpoint: string): string {
     // Remove leading slash if present to avoid double slashes
-    const cleanEndpoint = endpoint.startsWith('/') ? endpoint.slice(1) : endpoint;
+    const cleanEndpoint = endpoint.startsWith("/") ? endpoint.slice(1) : endpoint;
     return `${this.baseUrl}/${cleanEndpoint}`;
   }
 
@@ -252,19 +258,19 @@ class RequestManager {
 
         const requestOptions = {
           ...options,
-          signal: controller.signal
+          signal: controller.signal,
         };
 
         const response = await fetch(url, requestOptions);
         clearTimeout(timeoutId);
-        
+
         return response;
       } catch (error) {
         lastError = error as Error;
-        
+
         // Clear any pending timeout
-        if (error instanceof Error && error.name === 'AbortError') {
-          lastError = new Error('Request timeout');
+        if (error instanceof Error && error.name === "AbortError") {
+          lastError = new Error("Request timeout");
         }
 
         // Don't retry on the last attempt
@@ -273,9 +279,9 @@ class RequestManager {
         }
 
         // Only retry on network errors or timeouts
-        const isRetryableError = error instanceof TypeError || 
-                                error instanceof Error && error.name === 'AbortError';
-        
+        const isRetryableError =
+          error instanceof TypeError || (error instanceof Error && error.name === "AbortError");
+
         if (!isRetryableError) {
           break;
         }
@@ -292,7 +298,7 @@ class RequestManager {
 
 /**
  * PASSO 5: Central API client function - Orquestra todas as classes especializadas
- * 
+ *
  * @param url - The API endpoint URL
  * @param options - Request configuration options
  * @returns Promise<ApiResponse<T>> - Standardized response wrapper
@@ -302,13 +308,13 @@ export async function apiClient<T = any>(
   options: ApiClientOptions = {}
 ): Promise<T | ApiResponse<T>> {
   const {
-    method = 'GET',
+    method = "GET",
     body,
     headers: customHeaders = {},
     requireAuth = true,
     timeout = 15000,
     retries = 2,
-    responseType = 'json'
+    responseType = "json",
   } = options;
 
   // PASSO 5.1: Use ApiConfig to build complete URL
@@ -317,13 +323,13 @@ export async function apiClient<T = any>(
 
   // Build headers - Don't set Content-Type for FormData
   const headers: Record<string, string> = {
-    ...customHeaders
+    ...customHeaders,
   };
 
   // Only set Content-Type if it's not FormData
   // FormData needs the browser to set the boundary automatically
   if (!(body instanceof FormData)) {
-    headers['Content-Type'] = 'application/json';
+    headers["Content-Type"] = "application/json";
   }
 
   // PASSO 5.2: Use TokenManager to get valid authentication token
@@ -331,15 +337,15 @@ export async function apiClient<T = any>(
     const tokenManager = TokenManager.getInstance();
     const token = await tokenManager.getValidToken();
     if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
+      headers["Authorization"] = `Bearer ${token}`;
     }
-    
+
     // Log de diagnóstico para rastrear o header de Authorization
-    console.log('[PASSO 3 - ENVIO]', { 
+    console.log("[PASSO 3 - ENVIO]", {
       url: fullUrl,
-      authorizationHeader: headers['Authorization'],
+      authorizationHeader: headers["Authorization"],
       hasToken: !!token,
-      isFormData: body instanceof FormData
+      isFormData: body instanceof FormData,
     });
   }
 
@@ -350,11 +356,11 @@ export async function apiClient<T = any>(
   };
 
   // Add body for non-GET requests
-  if (body && method !== 'GET') {
+  if (body && method !== "GET") {
     if (body instanceof FormData) {
       // FormData should be passed directly
       requestConfig.body = body;
-    } else if (typeof body === 'string') {
+    } else if (typeof body === "string") {
       requestConfig.body = body;
     } else {
       requestConfig.body = JSON.stringify(body);
@@ -363,20 +369,25 @@ export async function apiClient<T = any>(
 
   try {
     // PASSO 5.3: Use RequestManager for network call with timeout and retry
-    const response = await RequestManager.fetchWithTimeout(fullUrl, requestConfig, timeout, retries);
+    const response = await RequestManager.fetchWithTimeout(
+      fullUrl,
+      requestConfig,
+      timeout,
+      retries
+    );
 
     // Handle different response types based on responseType option
     let data: T;
-    const contentType = response.headers.get('content-type');
-    
+    const contentType = response.headers.get("content-type");
+
     // For blob responses, directly return the blob
-    if (responseType === 'blob') {
-      data = await response.blob() as T;
-    } else if (responseType === 'text') {
-      data = await response.text() as T;
+    if (responseType === "blob") {
+      data = (await response.blob()) as T;
+    } else if (responseType === "text") {
+      data = (await response.text()) as T;
     } else {
       // Default JSON handling
-      if (contentType && contentType.includes('application/json')) {
+      if (contentType && contentType.includes("application/json")) {
         data = await response.json();
       } else if (response.status === 204 || response.status === 205) {
         // No content responses
@@ -394,27 +405,32 @@ export async function apiClient<T = any>(
       if (response.status === 401 && requireAuth) {
         const tokenManager = TokenManager.getInstance();
         tokenManager.invalidateToken();
-        
+
         // Try once more with fresh token
         const newToken = await tokenManager.getValidToken();
         if (newToken) {
-          headers['Authorization'] = `Bearer ${newToken}`;
+          headers["Authorization"] = `Bearer ${newToken}`;
           const retryConfig = { ...requestConfig, headers };
-          
+
           try {
-            const retryResponse = await RequestManager.fetchWithTimeout(fullUrl, retryConfig, timeout, 0);
-            
+            const retryResponse = await RequestManager.fetchWithTimeout(
+              fullUrl,
+              retryConfig,
+              timeout,
+              0
+            );
+
             let retryData: T;
-            const retryContentType = retryResponse.headers.get('content-type');
-            
+            const retryContentType = retryResponse.headers.get("content-type");
+
             // Handle different response types based on responseType option
-            if (responseType === 'blob') {
-              retryData = await retryResponse.blob() as T;
-            } else if (responseType === 'text') {
-              retryData = await retryResponse.text() as T;
+            if (responseType === "blob") {
+              retryData = (await retryResponse.blob()) as T;
+            } else if (responseType === "text") {
+              retryData = (await retryResponse.text()) as T;
             } else {
               // Default JSON handling
-              if (retryContentType && retryContentType.includes('application/json')) {
+              if (retryContentType && retryContentType.includes("application/json")) {
                 retryData = await retryResponse.json();
               } else if (retryResponse.status === 204 || retryResponse.status === 205) {
                 retryData = null as T;
@@ -426,15 +442,15 @@ export async function apiClient<T = any>(
 
             if (retryResponse.ok) {
               // Return blob directly for blob responses (for PDFDownloader compatibility)
-              if (responseType === 'blob') {
+              if (responseType === "blob") {
                 return retryData as T;
               }
-              
+
               return {
                 data: retryData,
                 status: retryResponse.status,
                 statusText: retryResponse.statusText,
-                headers: retryResponse.headers
+                headers: retryResponse.headers,
               } as ApiResponse<T>;
             }
           } catch (retryError) {
@@ -455,7 +471,7 @@ export async function apiClient<T = any>(
     }
 
     // Return blob directly for blob responses (for PDFDownloader compatibility)
-    if (responseType === 'blob' && response.ok) {
+    if (responseType === "blob" && response.ok) {
       return data as T;
     }
 
@@ -463,9 +479,8 @@ export async function apiClient<T = any>(
       data,
       status: response.status,
       statusText: response.statusText,
-      headers: response.headers
+      headers: response.headers,
     } as ApiResponse<T>;
-
   } catch (error) {
     // Re-throw ApiError instances
     if (error instanceof ApiError) {
@@ -473,22 +488,22 @@ export async function apiClient<T = any>(
     }
 
     // Handle timeout errors
-    if (error instanceof Error && error.message.includes('timeout')) {
+    if (error instanceof Error && error.message.includes("timeout")) {
       throw new ApiError(
-        'Request timeout: The server took too long to respond',
+        "Request timeout: The server took too long to respond",
         0,
-        'Timeout Error',
+        "Timeout Error",
         undefined,
         ApiErrorCode.TIMEOUT_ERROR
       );
     }
 
     // Handle network errors and other fetch failures
-    if (error instanceof TypeError || (error instanceof Error && error.message.includes('fetch'))) {
+    if (error instanceof TypeError || (error instanceof Error && error.message.includes("fetch"))) {
       throw new ApiError(
-        'Network error: Unable to connect to the server',
+        "Network error: Unable to connect to the server",
         0,
-        'Network Error',
+        "Network Error",
         undefined,
         ApiErrorCode.NETWORK_ERROR
       );
@@ -496,9 +511,9 @@ export async function apiClient<T = any>(
 
     // Handle other errors
     throw new ApiError(
-      error instanceof Error ? error.message : 'Unknown error occurred',
+      error instanceof Error ? error.message : "Unknown error occurred",
       0,
-      'Unknown Error',
+      "Unknown Error",
       undefined,
       ApiErrorCode.UNKNOWN_ERROR
     );
@@ -509,20 +524,29 @@ export async function apiClient<T = any>(
  * Convenience methods for common HTTP operations
  */
 export const api = {
-  get: <T = any>(url: string, options: Omit<ApiClientOptions, 'method'> = {}) =>
-    apiClient<T>(url, { ...options, method: 'GET' }),
+  get: <T = any>(url: string, options: Omit<ApiClientOptions, "method"> = {}) =>
+    apiClient<T>(url, { ...options, method: "GET" }),
 
-  post: <T = any>(url: string, body?: any, options: Omit<ApiClientOptions, 'method' | 'body'> = {}) =>
-    apiClient<T>(url, { ...options, method: 'POST', body }),
+  post: <T = any>(
+    url: string,
+    body?: any,
+    options: Omit<ApiClientOptions, "method" | "body"> = {}
+  ) => apiClient<T>(url, { ...options, method: "POST", body }),
 
-  put: <T = any>(url: string, body?: any, options: Omit<ApiClientOptions, 'method' | 'body'> = {}) =>
-    apiClient<T>(url, { ...options, method: 'PUT', body }),
+  put: <T = any>(
+    url: string,
+    body?: any,
+    options: Omit<ApiClientOptions, "method" | "body"> = {}
+  ) => apiClient<T>(url, { ...options, method: "PUT", body }),
 
-  patch: <T = any>(url: string, body?: any, options: Omit<ApiClientOptions, 'method' | 'body'> = {}) =>
-    apiClient<T>(url, { ...options, method: 'PATCH', body }),
+  patch: <T = any>(
+    url: string,
+    body?: any,
+    options: Omit<ApiClientOptions, "method" | "body"> = {}
+  ) => apiClient<T>(url, { ...options, method: "PATCH", body }),
 
-  delete: <T = any>(url: string, options: Omit<ApiClientOptions, 'method'> = {}) =>
-    apiClient<T>(url, { ...options, method: 'DELETE' }),
+  delete: <T = any>(url: string, options: Omit<ApiClientOptions, "method"> = {}) =>
+    apiClient<T>(url, { ...options, method: "DELETE" }),
 };
 
 export default apiClient;

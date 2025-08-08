@@ -2,7 +2,16 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Monitor, Smartphone, Tablet, Trash2, Shield } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -71,7 +80,11 @@ export default function SessoesAtivas() {
   });
 
   const getDeviceIcon = (device: string) => {
-    if (device.toLowerCase().includes("mobile") || device.toLowerCase().includes("android") || device.toLowerCase().includes("iphone")) {
+    if (
+      device.toLowerCase().includes("mobile") ||
+      device.toLowerCase().includes("android") ||
+      device.toLowerCase().includes("iphone")
+    ) {
       return <Smartphone className="h-5 w-5" />;
     }
     if (device.toLowerCase().includes("ipad") || device.toLowerCase().includes("tablet")) {
@@ -81,7 +94,7 @@ export default function SessoesAtivas() {
   };
 
   return (
-    <div className="container mx-auto py-8 max-w-4xl">
+    <div className="container mx-auto max-w-4xl py-8">
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
@@ -94,23 +107,19 @@ export default function SessoesAtivas() {
         </CardHeader>
         <CardContent className="space-y-4">
           {isLoading ? (
-            <div className="text-center text-muted-foreground py-8">
-              Carregando sessões...
-            </div>
+            <div className="py-8 text-center text-muted-foreground">Carregando sessões...</div>
           ) : sessions?.length === 0 ? (
-            <div className="text-center text-muted-foreground py-8">
+            <div className="py-8 text-center text-muted-foreground">
               Nenhuma sessão ativa encontrada.
             </div>
           ) : (
-            sessions?.map((session) => (
+            sessions?.map(session => (
               <div
                 key={session.id}
-                className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors"
+                className="hover:bg-accent/50 flex items-center justify-between rounded-lg border p-4 transition-colors"
               >
                 <div className="flex items-start gap-4">
-                  <div className="p-2 bg-accent rounded-lg">
-                    {getDeviceIcon(session.device)}
-                  </div>
+                  <div className="rounded-lg bg-accent p-2">{getDeviceIcon(session.device)}</div>
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
                       <span className="font-medium">{session.device}</span>
@@ -120,14 +129,18 @@ export default function SessoesAtivas() {
                         </Badge>
                       )}
                     </div>
+                    <div className="text-sm text-muted-foreground">IP: {session.ipAddress}</div>
                     <div className="text-sm text-muted-foreground">
-                      IP: {session.ipAddress}
+                      Criada em:{" "}
+                      {format(new Date(session.createdAt), "dd 'de' MMMM 'às' HH:mm", {
+                        locale: ptBR,
+                      })}
                     </div>
                     <div className="text-sm text-muted-foreground">
-                      Criada em: {format(new Date(session.createdAt), "dd 'de' MMMM 'às' HH:mm", { locale: ptBR })}
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      Última atividade: {format(new Date(session.lastActivityAt), "dd 'de' MMMM 'às' HH:mm", { locale: ptBR })}
+                      Última atividade:{" "}
+                      {format(new Date(session.lastActivityAt), "dd 'de' MMMM 'às' HH:mm", {
+                        locale: ptBR,
+                      })}
                     </div>
                   </div>
                 </div>
@@ -136,7 +149,7 @@ export default function SessoesAtivas() {
                     variant="ghost"
                     size="icon"
                     onClick={() => setSessionToDelete(session)}
-                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                    className="hover:bg-destructive/10 text-destructive hover:text-destructive"
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -153,10 +166,13 @@ export default function SessoesAtivas() {
           <AlertDialogHeader>
             <AlertDialogTitle>Encerrar sessão?</AlertDialogTitle>
             <AlertDialogDescription>
-              Tem certeza que deseja encerrar esta sessão? O usuário será desconectado deste dispositivo.
-              <div className="mt-4 p-3 bg-accent rounded-md">
+              Tem certeza que deseja encerrar esta sessão? O usuário será desconectado deste
+              dispositivo.
+              <div className="mt-4 rounded-md bg-accent p-3">
                 <div className="font-medium">{sessionToDelete?.device}</div>
-                <div className="text-sm text-muted-foreground">IP: {sessionToDelete?.ipAddress}</div>
+                <div className="text-sm text-muted-foreground">
+                  IP: {sessionToDelete?.ipAddress}
+                </div>
               </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -164,7 +180,7 @@ export default function SessoesAtivas() {
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => sessionToDelete && deleteSessionMutation.mutate(sessionToDelete.id)}
-              className="bg-destructive hover:bg-destructive/90"
+              className="hover:bg-destructive/90 bg-destructive"
             >
               Encerrar Sessão
             </AlertDialogAction>

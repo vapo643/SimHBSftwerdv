@@ -1,5 +1,11 @@
 import React, { useState } from "react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { X, Plus } from "lucide-react";
@@ -22,7 +28,7 @@ export function MultiProductSelector({
 
   // Filter out already selected products
   const availableForSelection = availableProducts.filter(
-    (produto) => !selectedProducts.includes(produto.id)
+    produto => !selectedProducts.includes(produto.id)
   );
 
   const handleAddProduct = (produtoId: string) => {
@@ -33,11 +39,11 @@ export function MultiProductSelector({
   };
 
   const handleRemoveProduct = (produtoId: number) => {
-    onProductsChange(selectedProducts.filter((id) => id !== produtoId));
+    onProductsChange(selectedProducts.filter(id => id !== produtoId));
   };
 
   const getProductName = (produtoId: number) => {
-    const produto = availableProducts.find((p) => p.id === produtoId);
+    const produto = availableProducts.find(p => p.id === produtoId);
     return produto?.nomeProduto || `Produto ${produtoId}`;
   };
 
@@ -45,8 +51,8 @@ export function MultiProductSelector({
     <div className="space-y-3">
       {/* Product Selector Dropdown */}
       <div className="flex gap-2">
-        <Select 
-          value={selectedValue} 
+        <Select
+          value={selectedValue}
           onValueChange={setSelectedValue}
           disabled={disabled || availableForSelection.length === 0}
         >
@@ -54,7 +60,7 @@ export function MultiProductSelector({
             <SelectValue placeholder="Selecione produtos para associar..." />
           </SelectTrigger>
           <SelectContent>
-            {availableForSelection.map((produto) => (
+            {availableForSelection.map(produto => (
               <SelectItem key={produto.id} value={produto.id.toString()}>
                 {produto.nomeProduto}
               </SelectItem>
@@ -79,7 +85,7 @@ export function MultiProductSelector({
             Produtos Selecionados ({selectedProducts.length}):
           </label>
           <div className="flex flex-wrap gap-2">
-            {selectedProducts.map((produtoId) => (
+            {selectedProducts.map(produtoId => (
               <Badge
                 key={produtoId}
                 variant="secondary"
@@ -90,7 +96,7 @@ export function MultiProductSelector({
                   type="button"
                   onClick={() => handleRemoveProduct(produtoId)}
                   disabled={disabled}
-                  className="ml-1 hover:bg-gray-600 rounded-full p-0.5"
+                  className="ml-1 rounded-full p-0.5 hover:bg-gray-600"
                 >
                   <X className="h-3 w-3" />
                 </button>
@@ -102,15 +108,13 @@ export function MultiProductSelector({
 
       {/* Validation Message */}
       {selectedProducts.length === 0 && (
-        <p className="text-sm text-amber-400">
-          ⚠️ Pelo menos um produto deve ser selecionado
-        </p>
+        <p className="text-sm text-amber-400">⚠️ Pelo menos um produto deve ser selecionado</p>
       )}
 
       {/* Information Text */}
       <p className="text-xs text-gray-400">
-        Esta tabela comercial será aplicada aos produtos selecionados. 
-        Você pode adicionar múltiplos produtos para uma mesma configuração de taxas.
+        Esta tabela comercial será aplicada aos produtos selecionados. Você pode adicionar múltiplos
+        produtos para uma mesma configuração de taxas.
       </p>
     </div>
   );

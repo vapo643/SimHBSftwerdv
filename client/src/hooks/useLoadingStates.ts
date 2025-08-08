@@ -13,5 +13,5 @@ export const useLoadingStates = () => ({
   generating: "Gerando...",
   analyzing: "Analisando...",
   approving: "Aprovando...",
-  rejecting: "Rejeitando..."
+  rejecting: "Rejeitando...",
 });

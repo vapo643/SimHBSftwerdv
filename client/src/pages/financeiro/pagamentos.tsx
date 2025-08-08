@@ -7,9 +7,29 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
@@ -20,7 +40,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { api } from "@/lib/apiClient";
 import { format, isToday, isThisWeek, isThisMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { 
+import {
   Search,
   DollarSign,
   Eye,
@@ -46,7 +66,7 @@ import {
   Wallet,
   ArrowUpRight,
   ArrowDownRight,
-  ShieldCheck
+  ShieldCheck,
 } from "lucide-react";
 import PaymentReviewModal from "./pagamentos-review";
 import MarcarPagoModal from "./marcar-pago-modal";
@@ -68,7 +88,13 @@ interface Pagamento {
     tipoConta: string;
     titular: string;
   };
-  status: 'aguardando_aprovacao' | 'aprovado' | 'em_processamento' | 'pago' | 'rejeitado' | 'cancelado';
+  status:
+    | "aguardando_aprovacao"
+    | "aprovado"
+    | "em_processamento"
+    | "pago"
+    | "rejeitado"
+    | "cancelado";
   dataRequisicao: string;
   dataAprovacao?: string;
   dataPagamento?: string;
@@ -85,7 +111,7 @@ interface Pagamento {
   motivoRejeicao?: string;
   observacoes?: string;
   comprovante?: string;
-  formaPagamento: 'ted' | 'pix' | 'doc';
+  formaPagamento: "ted" | "pix" | "doc";
   loja: string;
   produto: string;
 }
@@ -111,23 +137,28 @@ export default function Pagamentos() {
   const [paymentObservation, setPaymentObservation] = useState("");
 
   // Buscar pagamentos
-  const { data: pagamentos = [], isLoading, error, refetch } = useQuery({
-    queryKey: ['/api/pagamentos', { status: statusFilter, periodo: periodoFilter }],
+  const {
+    data: pagamentos = [],
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ["/api/pagamentos", { status: statusFilter, periodo: periodoFilter }],
     queryFn: async () => {
       const params = new URLSearchParams();
-      if (statusFilter !== 'todos') params.append('status', statusFilter);
-      if (periodoFilter !== 'todos') params.append('periodo', periodoFilter);
-      
-      console.log('[PAGAMENTOS] Buscando pagamentos com filtros:', { statusFilter, periodoFilter });
-      
+      if (statusFilter !== "todos") params.append("status", statusFilter);
+      if (periodoFilter !== "todos") params.append("periodo", periodoFilter);
+
+      console.log("[PAGAMENTOS] Buscando pagamentos com filtros:", { statusFilter, periodoFilter });
+
       try {
         const response = await apiRequest(`/api/pagamentos?${params.toString()}`, {
-          method: 'GET',
+          method: "GET",
         });
-        console.log('[PAGAMENTOS] Resposta recebida:', response);
+        console.log("[PAGAMENTOS] Resposta recebida:", response);
         return response as Pagamento[];
       } catch (err) {
-        console.error('[PAGAMENTOS] Erro ao buscar:', err);
+        console.error("[PAGAMENTOS] Erro ao buscar:", err);
         throw err;
       }
     },
@@ -139,11 +170,11 @@ export default function Pagamentos() {
 
   // Buscar dados de verificação quando modal abrir
   const { data: verificacoes, isLoading: isLoadingVerificacao } = useQuery({
-    queryKey: ['/api/pagamentos', selectedPagamento?.id, 'verificar-documentos'],
+    queryKey: ["/api/pagamentos", selectedPagamento?.id, "verificar-documentos"],
     queryFn: async () => {
       if (!selectedPagamento?.id) return null;
       return await apiRequest(`/api/pagamentos/${selectedPagamento.id}/verificar-documentos`, {
-        method: 'GET',
+        method: "GET",
       });
     },
     enabled: showSecurityVerificationModal && !!selectedPagamento?.id,
@@ -153,7 +184,7 @@ export default function Pagamentos() {
   const aprovarMutation = useMutation({
     mutationFn: async ({ id, observacao }: { id: string; observacao: string }) => {
       return await apiRequest(`/api/pagamentos/${id}/aprovar`, {
-        method: 'POST',
+        method: "POST",
         body: JSON.stringify({ observacao }),
       });
     },
@@ -164,7 +195,7 @@ export default function Pagamentos() {
       });
       setShowApprovalModal(false);
       setApprovalObservation("");
-      queryClient.invalidateQueries({ queryKey: ['/api/pagamentos'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/pagamentos"] });
     },
     onError: () => {
       toast({
@@ -177,9 +208,17 @@ export default function Pagamentos() {
 
   // Confirmar desembolso com segurança
   const confirmarDesembolsoMutation = useMutation({
-    mutationFn: async ({ id, senha, observacoes }: { id: string; senha: string; observacoes: string }) => {
+    mutationFn: async ({
+      id,
+      senha,
+      observacoes,
+    }: {
+      id: string;
+      senha: string;
+      observacoes: string;
+    }) => {
       return await apiRequest(`/api/pagamentos/${id}/confirmar-desembolso`, {
-        method: 'POST',
+        method: "POST",
         body: JSON.stringify({ senha, observacoes }),
       });
     },
@@ -192,7 +231,7 @@ export default function Pagamentos() {
       setShowSecurityVerificationModal(false);
       setPaymentPassword("");
       setPaymentObservation("");
-      queryClient.invalidateQueries({ queryKey: ['/api/pagamentos'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/pagamentos"] });
     },
     onError: (error: any) => {
       toast({
@@ -207,7 +246,7 @@ export default function Pagamentos() {
   const rejeitarMutation = useMutation({
     mutationFn: async ({ id, motivo }: { id: string; motivo: string }) => {
       return await apiRequest(`/api/pagamentos/${id}/rejeitar`, {
-        method: 'POST',
+        method: "POST",
         body: JSON.stringify({ motivo }),
       });
     },
@@ -218,7 +257,7 @@ export default function Pagamentos() {
       });
       setShowRejectionModal(false);
       setRejectionReason("");
-      queryClient.invalidateQueries({ queryKey: ['/api/pagamentos'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/pagamentos"] });
     },
     onError: () => {
       toast({
@@ -232,102 +271,103 @@ export default function Pagamentos() {
   // Filtrar pagamentos
   const pagamentosFiltrados = pagamentos?.filter(pagamento => {
     // Se não há termo de busca, retorna todos
-    if (!searchTerm || searchTerm.trim() === '') {
+    if (!searchTerm || searchTerm.trim() === "") {
       return true;
     }
-    
-    const matchesSearch = 
+
+    const matchesSearch =
       pagamento.nomeCliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
       pagamento.numeroContrato.includes(searchTerm) ||
       pagamento.cpfCliente.includes(searchTerm) ||
       pagamento.propostaId.includes(searchTerm);
-    
+
     return matchesSearch;
   });
 
   // Debug para ver o que está acontecendo
-  console.log('[PAGAMENTOS FRONTEND] Dados recebidos:', pagamentos?.length);
-  console.log('[PAGAMENTOS FRONTEND] Termo de busca:', searchTerm);
-  console.log('[PAGAMENTOS FRONTEND] Dados filtrados:', pagamentosFiltrados?.length);
+  console.log("[PAGAMENTOS FRONTEND] Dados recebidos:", pagamentos?.length);
+  console.log("[PAGAMENTOS FRONTEND] Termo de busca:", searchTerm);
+  console.log("[PAGAMENTOS FRONTEND] Dados filtrados:", pagamentosFiltrados?.length);
   if (pagamentos?.length > 0) {
-    console.log('[PAGAMENTOS FRONTEND] Primeiro pagamento:', pagamentos[0]);
+    console.log("[PAGAMENTOS FRONTEND] Primeiro pagamento:", pagamentos[0]);
   }
 
   // Estatísticas
   const stats = {
-    aguardandoAprovacao: pagamentos?.filter(p => p.status === 'aguardando_aprovacao').length || 0,
-    aprovados: pagamentos?.filter(p => p.status === 'aprovado').length || 0,
-    emProcessamento: pagamentos?.filter(p => p.status === 'em_processamento').length || 0,
-    pagos: pagamentos?.filter(p => p.status === 'pago').length || 0,
-    rejeitados: pagamentos?.filter(p => p.status === 'rejeitado').length || 0,
-    valorTotalAguardando: pagamentos
-      ?.filter(p => p.status === 'aguardando_aprovacao')
-      .reduce((acc, p) => acc + p.valorLiquido, 0) || 0,
-    valorTotalPago: pagamentos
-      ?.filter(p => p.status === 'pago')
-      .reduce((acc, p) => acc + p.valorLiquido, 0) || 0,
-    valorTotalProcessando: pagamentos
-      ?.filter(p => p.status === 'em_processamento' || p.status === 'aprovado')
-      .reduce((acc, p) => acc + p.valorLiquido, 0) || 0,
+    aguardandoAprovacao: pagamentos?.filter(p => p.status === "aguardando_aprovacao").length || 0,
+    aprovados: pagamentos?.filter(p => p.status === "aprovado").length || 0,
+    emProcessamento: pagamentos?.filter(p => p.status === "em_processamento").length || 0,
+    pagos: pagamentos?.filter(p => p.status === "pago").length || 0,
+    rejeitados: pagamentos?.filter(p => p.status === "rejeitado").length || 0,
+    valorTotalAguardando:
+      pagamentos
+        ?.filter(p => p.status === "aguardando_aprovacao")
+        .reduce((acc, p) => acc + p.valorLiquido, 0) || 0,
+    valorTotalPago:
+      pagamentos?.filter(p => p.status === "pago").reduce((acc, p) => acc + p.valorLiquido, 0) || 0,
+    valorTotalProcessando:
+      pagamentos
+        ?.filter(p => p.status === "em_processamento" || p.status === "aprovado")
+        .reduce((acc, p) => acc + p.valorLiquido, 0) || 0,
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'aguardando_aprovacao':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'aprovado':
-        return 'bg-blue-100 text-blue-800';
-      case 'em_processamento':
-        return 'bg-purple-100 text-purple-800';
-      case 'pronto_pagamento':
-        return 'bg-indigo-100 text-indigo-800';
-      case 'pagamento_autorizado':
-        return 'bg-emerald-100 text-emerald-800';
-      case 'pago':
-        return 'bg-green-100 text-green-800';
-      case 'rejeitado':
-        return 'bg-red-100 text-red-800';
-      case 'cancelado':
-        return 'bg-gray-100 text-gray-800';
+      case "aguardando_aprovacao":
+        return "bg-yellow-100 text-yellow-800";
+      case "aprovado":
+        return "bg-blue-100 text-blue-800";
+      case "em_processamento":
+        return "bg-purple-100 text-purple-800";
+      case "pronto_pagamento":
+        return "bg-indigo-100 text-indigo-800";
+      case "pagamento_autorizado":
+        return "bg-emerald-100 text-emerald-800";
+      case "pago":
+        return "bg-green-100 text-green-800";
+      case "rejeitado":
+        return "bg-red-100 text-red-800";
+      case "cancelado":
+        return "bg-gray-100 text-gray-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'aguardando_aprovacao':
-        return 'Aguardando Aprovação';
-      case 'aprovado':
-        return 'Aprovado';
-      case 'em_processamento':
-        return 'Em Processamento';
-      case 'pronto_pagamento':
-        return 'Pronto para Pagamento';
-      case 'pagamento_autorizado':
-        return 'Pagamento Autorizado';
-      case 'pago':
-        return 'Pago';
-      case 'rejeitado':
-        return 'Rejeitado';
-      case 'cancelado':
-        return 'Cancelado';
+      case "aguardando_aprovacao":
+        return "Aguardando Aprovação";
+      case "aprovado":
+        return "Aprovado";
+      case "em_processamento":
+        return "Em Processamento";
+      case "pronto_pagamento":
+        return "Pronto para Pagamento";
+      case "pagamento_autorizado":
+        return "Pagamento Autorizado";
+      case "pago":
+        return "Pago";
+      case "rejeitado":
+        return "Rejeitado";
+      case "cancelado":
+        return "Cancelado";
       default:
         return status;
     }
   };
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', { 
-      style: 'currency', 
-      currency: 'BRL' 
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
     }).format(value);
   };
 
   const formatCPF = (cpf: string) => {
-    if (!cpf) return '';
-    const cleaned = cpf.replace(/\D/g, '');
-    return cleaned.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+    if (!cpf) return "";
+    const cleaned = cpf.replace(/\D/g, "");
+    return cleaned.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
   };
 
   const formatBankAccount = (conta: any) => {
@@ -343,9 +383,9 @@ export default function Pagamentos() {
   if (isLoading) {
     return (
       <DashboardLayout title="Pagamentos">
-        <div className="flex items-center justify-center min-h-[400px]">
+        <div className="flex min-h-[400px] items-center justify-center">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2 border-primary"></div>
             <p className="text-muted-foreground">Carregando pagamentos...</p>
           </div>
         </div>
@@ -356,21 +396,21 @@ export default function Pagamentos() {
   if (error) {
     return (
       <DashboardLayout title="Pagamentos">
-        <div className="flex items-center justify-center min-h-[400px]">
+        <div className="flex min-h-[400px] items-center justify-center">
           <Card className="w-full max-w-md">
             <CardHeader>
               <CardTitle className="text-red-600">Erro ao carregar pagamentos</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground mb-4">
+              <p className="mb-4 text-muted-foreground">
                 Não foi possível carregar os dados de pagamentos. Por favor, tente novamente.
               </p>
               <div className="flex gap-2">
                 <Button onClick={() => refetch()}>
-                  <RefreshCw className="h-4 w-4 mr-2" />
+                  <RefreshCw className="mr-2 h-4 w-4" />
                   Tentar novamente
                 </Button>
-                <Button variant="outline" onClick={() => setLocation('/dashboard')}>
+                <Button variant="outline" onClick={() => setLocation("/dashboard")}>
                   Voltar ao Dashboard
                 </Button>
               </div>
@@ -435,9 +475,7 @@ export default function Pagamentos() {
               <ArrowUpRight className="h-4 w-4 text-purple-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
-                {stats.aprovados + stats.emProcessamento}
-              </div>
+              <div className="text-2xl font-bold">{stats.aprovados + stats.emProcessamento}</div>
               <div className="text-xs text-muted-foreground">
                 {formatCurrency(stats.valorTotalProcessando)}
               </div>
@@ -466,9 +504,7 @@ export default function Pagamentos() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stats.rejeitados}</div>
-              <div className="text-xs text-muted-foreground">
-                Requerem nova análise
-              </div>
+              <div className="text-xs text-muted-foreground">Requerem nova análise</div>
             </CardContent>
           </Card>
         </div>
@@ -486,7 +522,7 @@ export default function Pagamentos() {
                   <Input
                     placeholder="Buscar por nome, CPF, contrato ou proposta..."
                     value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onChange={e => setSearchTerm(e.target.value)}
                     className="pl-10"
                   />
                 </div>
@@ -549,22 +585,22 @@ export default function Pagamentos() {
                 <TableBody>
                   {isLoading ? (
                     <TableRow>
-                      <TableCell colSpan={8} className="text-center py-8">
+                      <TableCell colSpan={8} className="py-8 text-center">
                         Carregando...
                       </TableCell>
                     </TableRow>
                   ) : pagamentosFiltrados?.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={8} className="text-center py-12">
+                      <TableCell colSpan={8} className="py-12 text-center">
                         <div className="space-y-3">
-                          <div className="flex justify-center mb-4">
-                            <AlertCircle className="h-12 w-12 text-muted-foreground/50" />
+                          <div className="mb-4 flex justify-center">
+                            <AlertCircle className="text-muted-foreground/50 h-12 w-12" />
                           </div>
                           <h3 className="text-lg font-medium">Nenhum pagamento disponível</h3>
-                          <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                          <p className="mx-auto max-w-md text-sm text-muted-foreground">
                             Para que uma proposta apareça aqui, ela precisa ter:
                           </p>
-                          <ul className="text-sm text-muted-foreground text-left max-w-sm mx-auto space-y-1">
+                          <ul className="mx-auto max-w-sm space-y-1 text-left text-sm text-muted-foreground">
                             <li className="flex items-center gap-2">
                               <CheckCircle className="h-4 w-4 text-green-600" />
                               CCB assinada eletronicamente
@@ -584,21 +620,19 @@ export default function Pagamentos() {
                             onClick={() => refetch()}
                             className="mt-4"
                           >
-                            <RefreshCw className="h-4 w-4 mr-2" />
+                            <RefreshCw className="mr-2 h-4 w-4" />
                             Verificar novamente
                           </Button>
                         </div>
                       </TableCell>
                     </TableRow>
                   ) : (
-                    pagamentosFiltrados?.map((pagamento) => (
-                      <TableRow key={pagamento.id} className="cursor-pointer hover:bg-muted/50">
+                    pagamentosFiltrados?.map(pagamento => (
+                      <TableRow key={pagamento.id} className="hover:bg-muted/50 cursor-pointer">
                         <TableCell className="font-medium">
                           <div className="space-y-1">
                             <div>{pagamento.numeroContrato}</div>
-                            <div className="text-xs text-muted-foreground">
-                              {pagamento.produto}
-                            </div>
+                            <div className="text-xs text-muted-foreground">{pagamento.produto}</div>
                           </div>
                         </TableCell>
                         <TableCell>
@@ -611,7 +645,9 @@ export default function Pagamentos() {
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="space-y-1">
-                            <div className="font-semibold">{formatCurrency(pagamento.valorLiquido)}</div>
+                            <div className="font-semibold">
+                              {formatCurrency(pagamento.valorLiquido)}
+                            </div>
                             <div className="text-xs text-muted-foreground">
                               Financ.: {formatCurrency(pagamento.valorFinanciado)}
                             </div>
@@ -633,10 +669,10 @@ export default function Pagamentos() {
                         <TableCell className="text-center">
                           <div className="space-y-1">
                             <div className="text-sm">
-                              {format(new Date(pagamento.dataRequisicao), 'dd/MM/yyyy')}
+                              {format(new Date(pagamento.dataRequisicao), "dd/MM/yyyy")}
                             </div>
                             <div className="text-xs text-muted-foreground">
-                              {format(new Date(pagamento.dataRequisicao), 'HH:mm')}
+                              {format(new Date(pagamento.dataRequisicao), "HH:mm")}
                             </div>
                           </div>
                         </TableCell>
@@ -649,7 +685,7 @@ export default function Pagamentos() {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div className="flex gap-1 justify-end">
+                          <div className="flex justify-end gap-1">
                             <Button
                               size="sm"
                               variant="ghost"
@@ -658,36 +694,39 @@ export default function Pagamentos() {
                             >
                               <Eye className="h-4 w-4" />
                             </Button>
-                            {(pagamento.status === 'em_processamento' || pagamento.status === 'pronto_pagamento') && userHasApprovalPermission() && (
-                              <Button
-                                size="sm"
-                                variant="default"
-                                className="gap-2"
-                                onClick={() => {
-                                  setSelectedPropostaForReview(pagamento);
-                                  setShowReviewModal(true);
-                                }}
-                                title="Confirmar Veracidade"
-                              >
-                                <ShieldCheck className="h-4 w-4" />
-                                Confirmar Veracidade
-                              </Button>
-                            )}
-                            {pagamento.status === 'pagamento_autorizado' && userHasApprovalPermission() && (
-                              <Button
-                                size="sm"
-                                variant="default"
-                                className="gap-2 bg-green-600 hover:bg-green-700"
-                                onClick={() => {
-                                  setSelectedPropostaForPago(pagamento);
-                                  setShowMarcarPagoModal(true);
-                                }}
-                                title="Marcar como Pago"
-                              >
-                                <Banknote className="h-4 w-4" />
-                                Marcar como Pago
-                              </Button>
-                            )}
+                            {(pagamento.status === "em_processamento" ||
+                              pagamento.status === "pronto_pagamento") &&
+                              userHasApprovalPermission() && (
+                                <Button
+                                  size="sm"
+                                  variant="default"
+                                  className="gap-2"
+                                  onClick={() => {
+                                    setSelectedPropostaForReview(pagamento);
+                                    setShowReviewModal(true);
+                                  }}
+                                  title="Confirmar Veracidade"
+                                >
+                                  <ShieldCheck className="h-4 w-4" />
+                                  Confirmar Veracidade
+                                </Button>
+                              )}
+                            {pagamento.status === "pagamento_autorizado" &&
+                              userHasApprovalPermission() && (
+                                <Button
+                                  size="sm"
+                                  variant="default"
+                                  className="gap-2 bg-green-600 hover:bg-green-700"
+                                  onClick={() => {
+                                    setSelectedPropostaForPago(pagamento);
+                                    setShowMarcarPagoModal(true);
+                                  }}
+                                  title="Marcar como Pago"
+                                >
+                                  <Banknote className="h-4 w-4" />
+                                  Marcar como Pago
+                                </Button>
+                              )}
                           </div>
                         </TableCell>
                       </TableRow>
@@ -705,11 +744,7 @@ export default function Pagamentos() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>Detalhes do Pagamento</CardTitle>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setSelectedPagamento(null)}
-                >
+                <Button variant="ghost" size="sm" onClick={() => setSelectedPagamento(null)}>
                   Fechar
                 </Button>
               </div>
@@ -727,7 +762,9 @@ export default function Pagamentos() {
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <Label>Número do Contrato</Label>
-                        <p className="text-sm text-muted-foreground">{selectedPagamento.numeroContrato}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {selectedPagamento.numeroContrato}
+                        </p>
                       </div>
                       <div>
                         <Label>Status</Label>
@@ -736,11 +773,13 @@ export default function Pagamentos() {
                         </Badge>
                       </div>
                     </div>
-                    
+
                     <div>
                       <Label>Cliente</Label>
                       <p className="text-sm">{selectedPagamento.nomeCliente}</p>
-                      <p className="text-sm text-muted-foreground">{formatCPF(selectedPagamento.cpfCliente)}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {formatCPF(selectedPagamento.cpfCliente)}
+                      </p>
                     </div>
 
                     <div>
@@ -753,7 +792,11 @@ export default function Pagamentos() {
                       <Label>Solicitado por</Label>
                       <p className="text-sm">{selectedPagamento.requisitadoPor.nome}</p>
                       <p className="text-sm text-muted-foreground">
-                        {selectedPagamento.requisitadoPor.papel} - {format(new Date(selectedPagamento.dataRequisicao), "dd/MM/yyyy 'às' HH:mm")}
+                        {selectedPagamento.requisitadoPor.papel} -{" "}
+                        {format(
+                          new Date(selectedPagamento.dataRequisicao),
+                          "dd/MM/yyyy 'às' HH:mm"
+                        )}
                       </p>
                     </div>
 
@@ -762,7 +805,12 @@ export default function Pagamentos() {
                         <Label>Aprovado por</Label>
                         <p className="text-sm">{selectedPagamento.aprovadoPor.nome}</p>
                         <p className="text-sm text-muted-foreground">
-                          {selectedPagamento.aprovadoPor.papel} - {selectedPagamento.dataAprovacao && format(new Date(selectedPagamento.dataAprovacao), "dd/MM/yyyy 'às' HH:mm")}
+                          {selectedPagamento.aprovadoPor.papel} -{" "}
+                          {selectedPagamento.dataAprovacao &&
+                            format(
+                              new Date(selectedPagamento.dataAprovacao),
+                              "dd/MM/yyyy 'às' HH:mm"
+                            )}
                         </p>
                       </div>
                     )}
@@ -779,7 +827,9 @@ export default function Pagamentos() {
                     {selectedPagamento.observacoes && (
                       <div>
                         <Label>Observações</Label>
-                        <p className="text-sm text-muted-foreground">{selectedPagamento.observacoes}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {selectedPagamento.observacoes}
+                        </p>
                       </div>
                     )}
                   </div>
@@ -790,7 +840,9 @@ export default function Pagamentos() {
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <Label>Valor Financiado</Label>
-                        <p className="text-lg font-semibold">{formatCurrency(selectedPagamento.valorFinanciado)}</p>
+                        <p className="text-lg font-semibold">
+                          {formatCurrency(selectedPagamento.valorFinanciado)}
+                        </p>
                       </div>
                       <div>
                         <Label>Valor Líquido</Label>
@@ -813,7 +865,7 @@ export default function Pagamentos() {
 
                     <div className="border-t pt-4">
                       <Label>Dados Bancários para Pagamento</Label>
-                      <div className="mt-2 p-3 bg-muted rounded-lg space-y-2">
+                      <div className="mt-2 space-y-2 rounded-lg bg-muted p-3">
                         <p className="text-sm">
                           <strong>Titular:</strong> {selectedPagamento.contaBancaria.titular}
                         </p>
@@ -824,10 +876,12 @@ export default function Pagamentos() {
                           <strong>Agência:</strong> {selectedPagamento.contaBancaria.agencia}
                         </p>
                         <p className="text-sm">
-                          <strong>Conta:</strong> {selectedPagamento.contaBancaria.conta} ({selectedPagamento.contaBancaria.tipoConta})
+                          <strong>Conta:</strong> {selectedPagamento.contaBancaria.conta} (
+                          {selectedPagamento.contaBancaria.tipoConta})
                         </p>
                         <p className="text-sm">
-                          <strong>Forma de Pagamento:</strong> {selectedPagamento.formaPagamento.toUpperCase()}
+                          <strong>Forma de Pagamento:</strong>{" "}
+                          {selectedPagamento.formaPagamento.toUpperCase()}
                         </p>
                       </div>
                     </div>
@@ -837,10 +891,10 @@ export default function Pagamentos() {
                         <Label>Comprovante de Pagamento</Label>
                         <Button
                           variant="outline"
-                          className="w-full mt-2"
-                          onClick={() => window.open(selectedPagamento.comprovante, '_blank')}
+                          className="mt-2 w-full"
+                          onClick={() => window.open(selectedPagamento.comprovante, "_blank")}
                         >
-                          <Download className="h-4 w-4 mr-2" />
+                          <Download className="mr-2 h-4 w-4" />
                           Baixar Comprovante
                         </Button>
                       </div>
@@ -857,7 +911,11 @@ export default function Pagamentos() {
                       <div className="flex-1">
                         <p className="text-sm font-medium">Solicitação Criada</p>
                         <p className="text-sm text-muted-foreground">
-                          Por {selectedPagamento.requisitadoPor.nome} em {format(new Date(selectedPagamento.dataRequisicao), "dd/MM/yyyy 'às' HH:mm")}
+                          Por {selectedPagamento.requisitadoPor.nome} em{" "}
+                          {format(
+                            new Date(selectedPagamento.dataRequisicao),
+                            "dd/MM/yyyy 'às' HH:mm"
+                          )}
                         </p>
                       </div>
                     </div>
@@ -870,7 +928,11 @@ export default function Pagamentos() {
                         <div className="flex-1">
                           <p className="text-sm font-medium">Pagamento Aprovado</p>
                           <p className="text-sm text-muted-foreground">
-                            Por {selectedPagamento.aprovadoPor?.nome} em {format(new Date(selectedPagamento.dataAprovacao), "dd/MM/yyyy 'às' HH:mm")}
+                            Por {selectedPagamento.aprovadoPor?.nome} em{" "}
+                            {format(
+                              new Date(selectedPagamento.dataAprovacao),
+                              "dd/MM/yyyy 'às' HH:mm"
+                            )}
                           </p>
                         </div>
                       </div>
@@ -884,7 +946,11 @@ export default function Pagamentos() {
                         <div className="flex-1">
                           <p className="text-sm font-medium">Pagamento Realizado</p>
                           <p className="text-sm text-muted-foreground">
-                            Em {format(new Date(selectedPagamento.dataPagamento), "dd/MM/yyyy 'às' HH:mm")}
+                            Em{" "}
+                            {format(
+                              new Date(selectedPagamento.dataPagamento),
+                              "dd/MM/yyyy 'às' HH:mm"
+                            )}
                           </p>
                         </div>
                       </div>
@@ -905,12 +971,14 @@ export default function Pagamentos() {
                     )}
                   </div>
 
-                  <div className="mt-4 pt-4 border-t">
+                  <div className="mt-4 border-t pt-4">
                     <Button
                       className="w-full"
-                      onClick={() => setLocation(`/credito/analise/${selectedPagamento.propostaId}`)}
+                      onClick={() =>
+                        setLocation(`/credito/analise/${selectedPagamento.propostaId}`)
+                      }
                     >
-                      <FileText className="h-4 w-4 mr-2" />
+                      <FileText className="mr-2 h-4 w-4" />
                       Ver Proposta Completa
                     </Button>
                   </div>
@@ -926,7 +994,9 @@ export default function Pagamentos() {
             <DialogHeader>
               <DialogTitle>Aprovar Pagamento</DialogTitle>
               <DialogDescription>
-                Você está prestes a aprovar o pagamento de {selectedPagamento && formatCurrency(selectedPagamento.valorLiquido)} para {selectedPagamento?.nomeCliente}.
+                Você está prestes a aprovar o pagamento de{" "}
+                {selectedPagamento && formatCurrency(selectedPagamento.valorLiquido)} para{" "}
+                {selectedPagamento?.nomeCliente}.
               </DialogDescription>
             </DialogHeader>
 
@@ -934,7 +1004,8 @@ export default function Pagamentos() {
               <Alert>
                 <Shield className="h-4 w-4" />
                 <AlertDescription>
-                  Certifique-se de que todos os dados bancários foram verificados e estão corretos antes de aprovar.
+                  Certifique-se de que todos os dados bancários foram verificados e estão corretos
+                  antes de aprovar.
                 </AlertDescription>
               </Alert>
 
@@ -943,7 +1014,7 @@ export default function Pagamentos() {
                 <Textarea
                   placeholder="Adicione observações sobre a aprovação..."
                   value={approvalObservation}
-                  onChange={(e) => setApprovalObservation(e.target.value)}
+                  onChange={e => setApprovalObservation(e.target.value)}
                   className="mt-2"
                 />
               </div>
@@ -964,7 +1035,7 @@ export default function Pagamentos() {
                   if (selectedPagamento) {
                     aprovarMutation.mutate({
                       id: selectedPagamento.id,
-                      observacao: approvalObservation
+                      observacao: approvalObservation,
                     });
                   }
                 }}
@@ -992,7 +1063,7 @@ export default function Pagamentos() {
                 <Textarea
                   placeholder="Descreva o motivo da rejeição..."
                   value={rejectionReason}
-                  onChange={(e) => setRejectionReason(e.target.value)}
+                  onChange={e => setRejectionReason(e.target.value)}
                   className="mt-2"
                   required
                 />
@@ -1015,7 +1086,7 @@ export default function Pagamentos() {
                   if (selectedPagamento && rejectionReason.trim()) {
                     rejeitarMutation.mutate({
                       id: selectedPagamento.id,
-                      motivo: rejectionReason
+                      motivo: rejectionReason,
                     });
                   }
                 }}
@@ -1028,8 +1099,11 @@ export default function Pagamentos() {
         </Dialog>
 
         {/* Modal de Verificação de Segurança para Desembolso */}
-        <Dialog open={showSecurityVerificationModal} onOpenChange={setShowSecurityVerificationModal}>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <Dialog
+          open={showSecurityVerificationModal}
+          onOpenChange={setShowSecurityVerificationModal}
+        >
+          <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Shield className="h-5 w-5 text-blue-600 dark:text-blue-400" />
@@ -1052,11 +1126,13 @@ export default function Pagamentos() {
                     <CardTitle className="text-base">Informações do Pagamento</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                       <div>
                         <Label className="text-sm">Cliente</Label>
-                        <p className="font-semibold text-sm">{selectedPagamento.nomeCliente}</p>
-                        <p className="text-xs text-muted-foreground">{formatCPF(selectedPagamento.cpfCliente)}</p>
+                        <p className="text-sm font-semibold">{selectedPagamento.nomeCliente}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {formatCPF(selectedPagamento.cpfCliente)}
+                        </p>
                       </div>
                       <div>
                         <Label className="text-sm">Valor a Pagar</Label>
@@ -1084,7 +1160,9 @@ export default function Pagamentos() {
                         ) : (
                           <XCircle className="h-4 w-4 text-red-600" />
                         )}
-                        <span className={verificacoes.ccbAssinada ? "text-green-700" : "text-red-700"}>
+                        <span
+                          className={verificacoes.ccbAssinada ? "text-green-700" : "text-red-700"}
+                        >
                           CCB Assinada e Localizada
                         </span>
                       </div>
@@ -1094,7 +1172,11 @@ export default function Pagamentos() {
                         ) : (
                           <XCircle className="h-4 w-4 text-red-600" />
                         )}
-                        <span className={verificacoes.boletosGerados ? "text-green-700" : "text-red-700"}>
+                        <span
+                          className={
+                            verificacoes.boletosGerados ? "text-green-700" : "text-red-700"
+                          }
+                        >
                           Boletos Registrados no Inter
                         </span>
                       </div>
@@ -1104,7 +1186,11 @@ export default function Pagamentos() {
                         ) : (
                           <AlertCircle className="h-4 w-4 text-yellow-600" />
                         )}
-                        <span className={verificacoes.titularidadeConta ? "text-green-700" : "text-yellow-700"}>
+                        <span
+                          className={
+                            verificacoes.titularidadeConta ? "text-green-700" : "text-yellow-700"
+                          }
+                        >
                           Titularidade da Conta
                         </span>
                       </div>
@@ -1113,7 +1199,7 @@ export default function Pagamentos() {
                 </Card>
 
                 {/* Documentação e Conta em duas colunas */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   {/* Documentação */}
                   <Card>
                     <CardHeader className="pb-3">
@@ -1127,58 +1213,64 @@ export default function Pagamentos() {
                           className="w-full"
                           onClick={async () => {
                             try {
-                              console.log('[CCB] Buscando CCB assinada para proposta:', selectedPagamento.id);
-                              
+                              console.log(
+                                "[CCB] Buscando CCB assinada para proposta:",
+                                selectedPagamento.id
+                              );
+
                               // Fazer a requisição para baixar a CCB assinada usando api diretamente
-                              const response = await api.get(`/api/pagamentos/${selectedPagamento.id}/ccb-assinada`, {
-                                responseType: 'blob'
-                              });
-                              
-                              console.log('[CCB] Resposta recebida:', response);
-                              
+                              const response = await api.get(
+                                `/api/pagamentos/${selectedPagamento.id}/ccb-assinada`,
+                                {
+                                  responseType: "blob",
+                                }
+                              );
+
+                              console.log("[CCB] Resposta recebida:", response);
+
                               // Verificar se recebemos um blob
                               if (response.data instanceof Blob) {
                                 const blob = response.data;
                                 const url = window.URL.createObjectURL(blob);
-                                window.open(url, '_blank');
-                                
+                                window.open(url, "_blank");
+
                                 // Limpar a URL após um tempo
                                 setTimeout(() => window.URL.revokeObjectURL(url), 1000);
-                                
+
                                 toast({
                                   title: "CCB aberta",
                                   description: "O documento foi aberto em uma nova aba",
                                 });
                               } else {
                                 // Se não for um blob, pode ser um erro
-                                console.error('[CCB] Resposta não é um blob:', response);
+                                console.error("[CCB] Resposta não é um blob:", response);
                                 toast({
                                   title: "Erro ao abrir CCB",
                                   description: "Formato de resposta inesperado",
-                                  variant: "destructive"
+                                  variant: "destructive",
                                 });
                               }
                             } catch (error: any) {
-                              console.error('[CCB] Erro ao buscar CCB assinada:', error);
-                              
+                              console.error("[CCB] Erro ao buscar CCB assinada:", error);
+
                               // Tratar erros específicos
                               let errorMessage = "Erro ao carregar documento assinado";
-                              
+
                               if (error.response?.data?.error) {
                                 errorMessage = error.response.data.error;
                               } else if (error.message) {
                                 errorMessage = error.message;
                               }
-                              
+
                               toast({
                                 title: "Erro ao buscar CCB",
                                 description: errorMessage,
-                                variant: "destructive"
+                                variant: "destructive",
                               });
                             }
                           }}
                         >
-                          <FileText className="h-4 w-4 mr-2" />
+                          <FileText className="mr-2 h-4 w-4" />
                           Ver CCB Assinada
                         </Button>
                       ) : (
@@ -1198,17 +1290,28 @@ export default function Pagamentos() {
                       <CardTitle className="text-base">Conta de Destino</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded text-xs space-y-1">
-                        {selectedPagamento.contaBancaria.banco !== 'N/A' ? (
+                      <div className="space-y-1 rounded bg-gray-50 p-3 text-xs dark:bg-gray-800">
+                        {selectedPagamento.contaBancaria.banco !== "N/A" ? (
                           <>
-                            <p><strong>Banco:</strong> {selectedPagamento.contaBancaria.banco}</p>
-                            <p><strong>Ag:</strong> {selectedPagamento.contaBancaria.agencia} | <strong>Conta:</strong> {selectedPagamento.contaBancaria.conta}</p>
-                            <p><strong>Titular:</strong> {selectedPagamento.contaBancaria.titular}</p>
+                            <p>
+                              <strong>Banco:</strong> {selectedPagamento.contaBancaria.banco}
+                            </p>
+                            <p>
+                              <strong>Ag:</strong> {selectedPagamento.contaBancaria.agencia} |{" "}
+                              <strong>Conta:</strong> {selectedPagamento.contaBancaria.conta}
+                            </p>
+                            <p>
+                              <strong>Titular:</strong> {selectedPagamento.contaBancaria.titular}
+                            </p>
                           </>
                         ) : verificacoes.dadosPagamento?.destino?.pix ? (
                           <>
-                            <p><strong>Tipo:</strong> PIX</p>
-                            <p><strong>Chave:</strong> {verificacoes.dadosPagamento.destino.pix}</p>
+                            <p>
+                              <strong>Tipo:</strong> PIX
+                            </p>
+                            <p>
+                              <strong>Chave:</strong> {verificacoes.dadosPagamento.destino.pix}
+                            </p>
                           </>
                         ) : (
                           <Alert variant="destructive" className="text-xs">
@@ -1223,9 +1326,11 @@ export default function Pagamentos() {
                 </div>
 
                 {/* Confirmação Final */}
-                <Card className="border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950">
+                <Card className="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950">
                   <CardHeader className="pb-3">
-                    <CardTitle className="text-base text-red-800 dark:text-red-200">Confirmação de Segurança</CardTitle>
+                    <CardTitle className="text-base text-red-800 dark:text-red-200">
+                      Confirmação de Segurança
+                    </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
                     <div>
@@ -1234,11 +1339,12 @@ export default function Pagamentos() {
                         type="password"
                         placeholder="Digite sua senha de segurança para pagamentos"
                         value={paymentPassword}
-                        onChange={(e) => setPaymentPassword(e.target.value)}
+                        onChange={e => setPaymentPassword(e.target.value)}
                         className="mt-1"
                       />
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Esta é uma senha adicional de segurança para pagamentos, pode ser diferente da sua senha de login.
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Esta é uma senha adicional de segurança para pagamentos, pode ser diferente
+                        da sua senha de login.
                       </p>
                     </div>
                     <div>
@@ -1246,7 +1352,7 @@ export default function Pagamentos() {
                       <Textarea
                         placeholder="Observações sobre o desembolso"
                         value={paymentObservation}
-                        onChange={(e) => setPaymentObservation(e.target.value)}
+                        onChange={e => setPaymentObservation(e.target.value)}
                         className="mt-1 h-20"
                       />
                     </div>
@@ -1255,7 +1361,7 @@ export default function Pagamentos() {
               </div>
             ) : null}
 
-            <DialogFooter className="flex flex-col sm:flex-row gap-2 pt-4">
+            <DialogFooter className="flex flex-col gap-2 pt-4 sm:flex-row">
               <Button
                 variant="outline"
                 size="sm"
@@ -1276,7 +1382,7 @@ export default function Pagamentos() {
                   setShowRejectionModal(true);
                 }}
               >
-                <XCircle className="h-4 w-4 mr-2" />
+                <XCircle className="mr-2 h-4 w-4" />
                 Reprovar
               </Button>
               <Button
@@ -1288,25 +1394,25 @@ export default function Pagamentos() {
                     confirmarDesembolsoMutation.mutate({
                       id: selectedPagamento.id,
                       senha: paymentPassword,
-                      observacoes: paymentObservation
+                      observacoes: paymentObservation,
                     });
                   }
                 }}
                 disabled={
-                  !paymentPassword || 
-                  !verificacoes?.ccbAssinada || 
+                  !paymentPassword ||
+                  !verificacoes?.ccbAssinada ||
                   !verificacoes?.boletosGerados ||
                   confirmarDesembolsoMutation.isPending
                 }
               >
                 {confirmarDesembolsoMutation.isPending ? (
                   <>
-                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
                     Confirmando...
                   </>
                 ) : (
                   <>
-                    <CheckCircle className="h-4 w-4 mr-2" />
+                    <CheckCircle className="mr-2 h-4 w-4" />
                     Confirmar Desembolso
                   </>
                 )}

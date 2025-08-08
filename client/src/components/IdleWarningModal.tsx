@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -6,9 +6,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { AlertTriangle, Clock } from 'lucide-react';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { AlertTriangle, Clock } from "lucide-react";
 
 interface IdleWarningModalProps {
   isOpen: boolean;
@@ -21,16 +21,16 @@ export function IdleWarningModal({
   isOpen,
   onContinueSession,
   onLogout,
-  warningTimeoutSeconds = 120 // 2 minutos por padrão
+  warningTimeoutSeconds = 120, // 2 minutos por padrão
 }: IdleWarningModalProps) {
   const [timeLeft, setTimeLeft] = useState(warningTimeoutSeconds);
 
   useEffect(() => {
     if (isOpen) {
       setTimeLeft(warningTimeoutSeconds);
-      
+
       const interval = setInterval(() => {
-        setTimeLeft((prev) => {
+        setTimeLeft(prev => {
           if (prev <= 1) {
             // Tempo esgotado, fazer logout automático
             clearInterval(interval);
@@ -48,7 +48,7 @@ export function IdleWarningModal({
   const formatTime = (seconds: number): string => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
   };
 
   return (
@@ -60,9 +60,7 @@ export function IdleWarningModal({
               <AlertTriangle className="h-6 w-6 text-amber-600 dark:text-amber-400" />
             </div>
             <div>
-              <DialogTitle className="text-lg font-semibold">
-                Sessão Expirando
-              </DialogTitle>
+              <DialogTitle className="text-lg font-semibold">Sessão Expirando</DialogTitle>
               <DialogDescription className="text-sm text-muted-foreground">
                 Sua sessão será encerrada devido à inatividade
               </DialogDescription>
@@ -73,9 +71,7 @@ export function IdleWarningModal({
         <div className="py-4">
           <div className="flex items-center justify-center gap-2 rounded-lg bg-muted p-4">
             <Clock className="h-5 w-5 text-muted-foreground" />
-            <span className="text-lg font-mono font-semibold">
-              {formatTime(timeLeft)}
-            </span>
+            <span className="font-mono text-lg font-semibold">{formatTime(timeLeft)}</span>
           </div>
           <p className="mt-3 text-center text-sm text-muted-foreground">
             Você será deslogado automaticamente em {formatTime(timeLeft)} devido à inatividade.
@@ -84,17 +80,10 @@ export function IdleWarningModal({
         </div>
 
         <DialogFooter className="gap-2">
-          <Button 
-            variant="outline" 
-            onClick={onLogout}
-            className="flex-1"
-          >
+          <Button variant="outline" onClick={onLogout} className="flex-1">
             Sair Agora
           </Button>
-          <Button 
-            onClick={onContinueSession}
-            className="flex-1"
-          >
+          <Button onClick={onContinueSession} className="flex-1">
             Continuar Sessão
           </Button>
         </DialogFooter>

@@ -6,7 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { X } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -20,7 +26,9 @@ const tabelaSchema = z.object({
   taxaJuros: z.number().positive("Taxa de Juros deve ser um número positivo."),
   comissao: z.number().min(0, "Comissão deve ser maior ou igual a zero.").default(0),
   prazosPermitidos: z.array(z.number()).min(1, "Deve conter ao menos um prazo."),
-  produtoIds: z.array(z.number().int().positive()).min(1, "Pelo menos um produto deve ser selecionado"),
+  produtoIds: z
+    .array(z.number().int().positive())
+    .min(1, "Pelo menos um produto deve ser selecionado"),
 });
 
 type TabelaFormData = z.infer<typeof tabelaSchema>;
@@ -60,11 +68,11 @@ const TabelaComercialForm: React.FC<TabelaComercialFormProps> = ({
 
   // Fetch products for dropdown
   const { data: produtos = [], isLoading: loadingProdutos } = useQuery<Produto[]>({
-    queryKey: ['/api/produtos'],
+    queryKey: ["/api/produtos"],
     queryFn: async () => {
-      const response = await apiRequest('/api/produtos', { method: 'GET' });
+      const response = await apiRequest("/api/produtos", { method: "GET" });
       return response.filter((p: Produto) => p.isActive);
-    }
+    },
   });
 
   const adicionarPrazo = () => {

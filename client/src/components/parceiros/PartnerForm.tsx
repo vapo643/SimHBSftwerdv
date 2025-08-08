@@ -23,11 +23,11 @@ interface PartnerFormProps {
   isLoading?: boolean;
 }
 
-const PartnerForm: React.FC<PartnerFormProps> = ({ 
-  initialData, 
-  onSubmit, 
-  onCancel, 
-  isLoading = false 
+const PartnerForm: React.FC<PartnerFormProps> = ({
+  initialData,
+  onSubmit,
+  onCancel,
+  isLoading = false,
 }) => {
   const {
     register,
@@ -35,13 +35,15 @@ const PartnerForm: React.FC<PartnerFormProps> = ({
     formState: { errors },
   } = useForm<SimplifiedPartnerData>({
     resolver: zodResolver(simplifiedPartnerSchema),
-    defaultValues: initialData ? {
-      razaoSocial: initialData.razaoSocial,
-      cnpj: initialData.cnpj,
-    } : {
-      razaoSocial: "",
-      cnpj: "",
-    },
+    defaultValues: initialData
+      ? {
+          razaoSocial: initialData.razaoSocial,
+          cnpj: initialData.cnpj,
+        }
+      : {
+          razaoSocial: "",
+          cnpj: "",
+        },
   });
 
   return (
@@ -51,9 +53,9 @@ const PartnerForm: React.FC<PartnerFormProps> = ({
           <Label htmlFor="razaoSocial" className="text-sm font-medium">
             Razão Social *
           </Label>
-          <Input 
-            id="razaoSocial" 
-            {...register("razaoSocial")} 
+          <Input
+            id="razaoSocial"
+            {...register("razaoSocial")}
             placeholder="Nome oficial da empresa"
             disabled={isLoading}
             className="mt-1"
@@ -67,25 +69,21 @@ const PartnerForm: React.FC<PartnerFormProps> = ({
           <Label htmlFor="cnpj" className="text-sm font-medium">
             CNPJ *
           </Label>
-          <Input 
-            id="cnpj" 
-            {...register("cnpj")} 
+          <Input
+            id="cnpj"
+            {...register("cnpj")}
             placeholder="00.000.000/0001-00"
             disabled={isLoading}
             className="mt-1"
           />
-          {errors.cnpj && (
-            <p className="mt-1 text-sm text-red-500">{errors.cnpj.message}</p>
-          )}
+          {errors.cnpj && <p className="mt-1 text-sm text-red-500">{errors.cnpj.message}</p>}
         </div>
-
-
       </div>
 
-      <div className="flex justify-end gap-3 pt-6 border-t">
-        <Button 
-          type="button" 
-          variant="outline" 
+      <div className="flex justify-end gap-3 border-t pt-6">
+        <Button
+          type="button"
+          variant="outline"
           onClick={onCancel}
           disabled={isLoading}
           className="gap-2"
@@ -93,11 +91,7 @@ const PartnerForm: React.FC<PartnerFormProps> = ({
           <X className="h-4 w-4" />
           Cancelar
         </Button>
-        <Button 
-          type="submit" 
-          disabled={isLoading}
-          className="gap-2 btn-simpix-primary"
-        >
+        <Button type="submit" disabled={isLoading} className="btn-simpix-primary gap-2">
           {isLoading ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" />
