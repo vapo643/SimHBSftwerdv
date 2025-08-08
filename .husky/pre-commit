@@ -1,5 +1,6 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
+#!/bin/sh
 
-npm run lint:fix
-npm run format
+# Pre-commit hook gerado pelo Husky
+# Executa lint-staged para verificar e corrigir código antes do commit
+
+npx lint-staged
