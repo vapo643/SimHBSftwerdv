@@ -4406,6 +4406,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const ccbDiagnosticsRouter = (await import("./routes/ccb-diagnostics")).default;
   app.use("/api/ccb-diagnostics", ccbDiagnosticsRouter);
 
+  // CCB Coordinate Calibration routes (Professional calibration system)
+  const ccbCalibrationRouter = (await import("./routes/ccb-calibration")).default;
+  app.use("/api/ccb-calibration", ccbCalibrationRouter);
+
   // Register Semgrep MCP routes - Projeto Cérbero
   const securityMCPRoutes = (await import("./routes/security-mcp.js")).default;
   app.use("/api/security/mcp", securityMCPRoutes);
