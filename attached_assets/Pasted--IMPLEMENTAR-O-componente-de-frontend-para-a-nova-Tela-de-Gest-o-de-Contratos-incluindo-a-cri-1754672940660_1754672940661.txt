@@ -1,0 +1,29 @@
+**IMPLEMENTAR:** O componente de frontend para a nova "Tela de Gestão de Contratos", incluindo a criação da rota, a tabela de listagem e a interação com o backend.
+
+**CONTEXT:** O backend para esta tela já foi implementado (`GET /api/contratos`). Agora, precisamos construir a interface do usuário (UI) para que os administradores e diretores possam visualizar e interagir com os contratos assinados.
+
+**CURRENT STATE:** A rota de frontend para esta página ainda não foi criada. Temos um endpoint de API funcional, mas nenhuma interface para consumi-lo.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  Uma nova página/rota segura no nosso aplicativo React (ex: `/gestao/contratos`).
+2.  Nesta página, uma tabela que exibe todos os contratos retornados pelo endpoint `GET /api/contratos`.
+3.  A tabela deve ter as seguintes colunas: `ID da Proposta`, `Nome do Cliente`, `CPF do Cliente`, `Valor do Contrato`, `Data da Assinatura`.
+4.  Uma coluna final de `Ações` que contenha um botão "Visualizar CCB Assinada".
+5.  O botão "Visualizar CCB Assinada" deve chamar a funcionalidade já existente para buscar a URL segura no backend e abrir o PDF assinado em uma nova aba.
+
+**CONSTRAINTS (Diretrizes de UI/UX):**
+- **Carregamento de Dados:** A página deve exibir um estado de carregamento (loading spinner) enquanto os dados estão sendo buscados.
+- **Estado Vazio:** Se nenhum contrato for retornado pela API, a página deve exibir uma mensagem clara, como "Nenhum contrato assinado encontrado.".
+- **Paginação:** Implemente uma paginação simples na tabela para lidar com um grande volume de contratos (ex: 15 itens por página).
+- **Design:** Utilize os componentes de UI e o estilo (Tailwind CSS) já existentes no projeto para manter a consistência visual.
+
+**INTEGRAÇÃO:**
+- O componente desta tela deve usar o **TanStack Query** (que já está no projeto) para buscar e gerenciar os dados do endpoint `GET /api/contratos`. Isso garantirá um bom gerenciamento de cache, estado de carregamento e tratamento de erros.
+
+**ROLES (Diretriz Crítica):**
+- A rota para esta nova página (`/gestao/contratos`) deve ser protegida. Apenas usuários com as roles `ADMIN` ou `DIRETOR` podem acessá-la. Usuários com outras roles que tentarem acessar a URL diretamente devem ser redirecionados para a página inicial ou ver uma mensagem de "Acesso Negado".
+
+**TESTE:**
+- Após a implementação, acesse a nova página com um usuário `ADMIN` e valide que a tabela é populada corretamente com os dados dos contratos.
+- Confirme que o botão "Visualizar CCB Assinada" funciona.
+- Tente acessar a página com um usuário de outra role (ex: `ATENDENTE`) e valide que o acesso é devidamente bloqueado.

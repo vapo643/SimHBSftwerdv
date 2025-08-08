@@ -313,6 +313,7 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
                     {[
                       { name: "🏢 Parceiros", href: "/parceiros", icon: Building2, gradient: "from-amber-500 to-orange-600" },
                       { name: "🏪 Lojas & Filiais", href: "/admin/lojas", icon: Store, gradient: "from-pink-500 to-rose-600" },
+                      { name: "📑 Gestão de Contratos", href: "/gestao/contratos", icon: FileText, gradient: "from-teal-500 to-cyan-600" },
                     ].map(item => {
                       const Icon = item.icon;
                       const isActive = location === item.href;

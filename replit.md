@@ -9,6 +9,15 @@ Focus: CCB template generation over UI visualization.
 Language: Portuguese, studying software architecture.
 Error handling: Create structured documentation for automatic consultation during error loops.
 
+## Recent Changes (2025-08-08)
+- ✅ **NEW FEATURE:** Tela de Gestão de Contratos implementada com sucesso:
+  - Backend: API `/api/contratos` com restrição RBAC (ADMIN/DIRETOR)
+  - Frontend: Nova página em `/gestao/contratos` com tabela completa
+  - Integração com Supabase Storage para visualização de CCBs assinados
+  - Paginação, loading states e empty states implementados
+  - TanStack Query para gerenciamento de estado
+  - Item adicionado ao menu lateral para usuários autorizados
+
 ## Recent Changes (2025-08-07)
 - ✅ **CRITICAL FIX:** CCB template conflict resolved - all routes now use `ccbGenerationService.ts` with pdf-lib
 - ✅ Legacy services renamed: `ccbGenerator.ts.LEGADO_PDFKit`, `ccbTemplateGenerator.ts.LEGADO_v1`, etc.

@@ -28,6 +28,7 @@ import SessoesAtivas from "@/pages/configuracoes/sessoes";
 import AlterarEmail from "@/pages/configuracoes/alterar-email";
 import Configuracoes from "@/pages/configuracoes";
 import AceiteAtendente from "@/pages/aceite-atendente";
+import GestaoContratos from "@/pages/GestaoContratos";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -87,6 +88,11 @@ function Router() {
       <Route path="/aceite-atendente">
         <ProtectedRoute>
           <AceiteAtendente />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/gestao/contratos">
+        <ProtectedRoute>
+          <GestaoContratos />
         </ProtectedRoute>
       </Route>
       <Route path="/configuracoes/tabelas">
