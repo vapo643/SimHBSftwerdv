@@ -6,6 +6,7 @@ Esta pasta contém documentação estruturada de problemas encontrados e suas so
 
 ### 🏆 Problemas Críticos Resolvidos
 - **`CCB_TEMPLATE_BREAKTHROUGH_DOCUMENTATION.md`** - Resolução completa do problema de template CCB (BREAKTHROUGH)
+- **`ccb_coordinate_mapping_errors.md`** - 🎯 **DOCUMENTAÇÃO COMPLETA DOS LOOPS DE COORDENADAS** - Mapeia TODOS os 7 erros principais enfrentados no mapeamento CCB
 - **`CCB_QUICK_REFERENCE_GUIDE.md`** - Guia rápido para verificação e resolução de problemas CCB
 
 ### 📂 Estrutura de Classificação
