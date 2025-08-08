@@ -1,8 +1,6 @@
 import React from "react";
-import { useForm, Controller } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { Controller } from "react-hook-form";
 import { z } from "zod";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -13,7 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const clienteSchema = z.object({
+const _clienteSchema = z.object({
   nomeCompleto: z.string().min(3, "Nome completo é obrigatório."),
   cpfCnpj: z
     .string()
@@ -31,9 +29,15 @@ const clienteSchema = z.object({
   rendaMensal: z.coerce.number().positive("Renda ou Faturamento deve ser um número positivo."),
 });
 
-type ClienteFormData = z.infer<typeof clienteSchema>;
+type _ClienteFormData = z.infer<typeof _clienteSchema>;
 
-const DadosClienteForm: React.FC<{ register: any; control: any; errors: any }> = ({
+interface DadosClienteFormProps {
+  register: any;
+  control: any;
+  errors: any;
+}
+
+const DadosClienteForm: React.FC<DadosClienteFormProps> = ({
   register,
   control,
   errors,

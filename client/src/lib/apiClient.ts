@@ -9,7 +9,6 @@
  * @updated 2025-01-23 - Added TokenManager, ApiConfig, RequestManager
  */
 
-import { getSession } from "./auth";
 import { getSupabase } from "./supabase";
 
 export interface ApiClientOptions {

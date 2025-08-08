@@ -23,17 +23,6 @@ export function ThemeSelector() {
     }
   };
 
-  const getThemeLabel = () => {
-    switch (theme) {
-      case "light":
-        return "Claro";
-      case "dark":
-        return "Escuro";
-      case "system":
-        return "Sistema";
-    }
-  };
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

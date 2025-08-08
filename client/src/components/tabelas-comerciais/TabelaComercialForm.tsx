@@ -1,18 +1,12 @@
 import React, { useState } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
 import { X } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -53,8 +47,6 @@ const TabelaComercialForm: React.FC<TabelaComercialFormProps> = ({
     handleSubmit,
     formState: { errors },
     setValue,
-    watch,
-    control,
   } = useForm<TabelaFormData>({
     resolver: zodResolver(tabelaSchema),
     defaultValues: {

@@ -6,7 +6,6 @@
 
 import { getAuthProvider } from "./auth-config";
 import {
-  AuthState,
   User,
   Session,
   SignInCredentials,

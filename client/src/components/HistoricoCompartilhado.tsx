@@ -3,7 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
   AlertCircle,
-  User,
   MessageCircle,
   Clock,
   CheckCircle,
@@ -20,7 +19,6 @@ interface HistoricoCompartilhadoProps {
 
 const HistoricoCompartilhado: React.FC<HistoricoCompartilhadoProps> = ({
   propostaId,
-  context = "analise",
 }) => {
   // Query para buscar dados da proposta - APENAS reativa (sem polling)
   const { data: proposta, isLoading } = useQuery({

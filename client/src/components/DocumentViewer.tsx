@@ -25,10 +25,10 @@ interface DocumentViewerProps {
   ccbDocumentoUrl?: string;
 }
 
-export function DocumentViewer({ propostaId, documents, ccbDocumentoUrl }: DocumentViewerProps) {
+export function DocumentViewer({ propostaId, documents }: DocumentViewerProps) {
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
   const [ccbRealUrl, setCcbRealUrl] = useState<string | null>(null);
-  const [ccbLoading, setCcbLoading] = useState(false);
+  const [_ccbLoading, setCcbLoading] = useState(false);
 
   // Fetch real CCB URL - sempre usar endpoint padrão da API
   useEffect(() => {

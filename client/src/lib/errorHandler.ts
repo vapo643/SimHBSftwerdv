@@ -54,13 +54,7 @@ const httpCodeToErrorCode: Record<number, string> = {
   504: "TIMEOUT_ERROR",
 };
 
-interface ApiError {
-  code?: string;
-  message?: string;
-  status?: number;
-  field?: string;
-  details?: any;
-}
+
 
 /**
  * Handler centralizado para erros da API

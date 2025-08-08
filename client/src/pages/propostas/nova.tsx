@@ -4,27 +4,13 @@ import { ProposalProvider, useProposal, useProposalActions } from "@/contexts/Pr
 import { useProposalEffects } from "@/hooks/useProposalEffects";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import {
-  CalendarDays,
   DollarSign,
   FileText,
-  Upload,
-  X,
   AlertCircle,
   Loader2,
   CheckCircle2,
@@ -34,8 +20,7 @@ import { ClientDataStep } from "@/components/propostas/ClientDataStep";
 import { LoanConditionsStep } from "@/components/propostas/LoanConditionsStep";
 import { DocumentsStep } from "@/components/propostas/DocumentsStep";
 import { PersonalReferencesStep } from "@/components/propostas/PersonalReferencesStep";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
+
 
 // Component that uses the ProposalContext
 function ProposalForm() {

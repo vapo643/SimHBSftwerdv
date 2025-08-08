@@ -15,7 +15,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   User,
   Phone,
-  Mail,
   MapPin,
   Briefcase,
   Building2,
@@ -25,13 +24,10 @@ import {
   CheckCircle2,
   XCircle,
   Loader2,
-  Search,
-  AlertCircle,
   Save,
 } from "lucide-react";
 import CurrencyInput from "@/components/ui/CurrencyInput";
 import InputMask from "react-input-mask";
-import axios from "axios";
 import { cpf as cpfValidator, cnpj as cnpjValidator } from "cpf-cnpj-validator";
 import { commonBanks, brazilianBanks } from "@/utils/brazilianBanks";
 import { apiRequest } from "@/lib/queryClient";

@@ -113,8 +113,6 @@ const HistoricoCompartilhadoV2: React.FC<HistoricoCompartilhadoV2Props> = ({
             auditLogs.logs.map((log: any, index: number) => {
               // Determine user type from log data
               const isAtendente = log.profiles?.role === "ATENDENTE";
-              const isAnalyst =
-                log.profiles?.role === "ANALISTA" || log.profiles?.role === "ADMINISTRADOR";
 
               // Determine action type from status changes
               const isResubmit =

@@ -54,7 +54,7 @@ interface Produto {
 }
 
 const ConfiguracaoComercialForm: React.FC = () => {
-  const [match, params] = useRoute("/parceiros/detalhe/:id");
+  const [_match, params] = useRoute("/parceiros/detalhe/:id");
   const partnerId = params ? parseInt(params.id) : null;
 
   const [isCustomModalOpen, setIsCustomModalOpen] = useState(false);
@@ -77,7 +77,6 @@ const ConfiguracaoComercialForm: React.FC = () => {
     register: registerCustom,
     handleSubmit: handleSubmitCustom,
     formState: { errors: customErrors },
-    control: controlCustom,
     setValue: setValueCustom,
     reset: resetCustom,
   } = useForm<CustomTabelaFormData>({

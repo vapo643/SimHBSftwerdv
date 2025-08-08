@@ -15,7 +15,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { X, Info } from "lucide-react";
 import { useUserFormData, useStoresByPartner } from "@/hooks/queries/useUserFormData";
-import { Skeleton } from "@/components/ui/skeleton";
 import { AlertTriangle } from "lucide-react";
 
 const userSchema = z
@@ -91,18 +90,14 @@ const UserForm: React.FC<UserFormProps> = ({
   const {
     partners,
     isLoading: isFormDataLoading,
-    error: formDataError,
-    filteringStrategy,
     getStoresByPartner,
     canFilterClientSide,
-    isDataReady,
   } = useUserFormData();
 
   // Use server-side store fetching when needed
   const {
     data: serverStores = [],
     isLoading: isServerStoresLoading,
-    error: serverStoresError,
   } = useStoresByPartner(
     selectedParceiroId ? parseInt(selectedParceiroId) : null,
     !canFilterClientSide && !!selectedParceiroId

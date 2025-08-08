@@ -12,10 +12,9 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { DollarSign, Package, Calendar, Calculator, AlertCircle, Loader2 } from "lucide-react";
+import { DollarSign, Package, Calculator, AlertCircle } from "lucide-react";
 import CurrencyInput from "@/components/ui/CurrencyInput";
 import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
 
 export function LoanConditionsStep() {
   const { state } = useProposal();
