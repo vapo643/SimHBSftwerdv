@@ -89,29 +89,67 @@ export class CCBGenerationService {
       console.log(`📄 [CCB] ✅ IMPLEMENTANDO TODOS OS 95 CAMPOS MAPEADOS`);
       console.log(`📄 [CCB] Total de campos mapeados: ${Object.keys(USER_CCB_COORDINATES).length}`);
 
-      // Extrair dados detalhados
-      const clienteData = proposalData.cliente_data || {};
-      const condicoesData = proposalData.condicoes_data || {};
+      // MAPEAMENTO COMPLETO: CAMPOS CCB → ORIGEM DOS DADOS
+      console.log("📊 [CCB] ========== MAPEAMENTO DE DADOS PARA CCB ==========");
       
-      // Construir objeto de dados de pagamento dos campos individuais
-      const dataPagamento = {
-        codigo_banco: proposalData.dados_pagamento_codigo_banco,
-        banco: proposalData.dados_pagamento_banco,
-        agencia: proposalData.dados_pagamento_agencia,
-        conta: proposalData.dados_pagamento_conta,
-        digito: proposalData.dados_pagamento_digito,
-        tipo_conta: proposalData.dados_pagamento_tipo,
-        nome_titular: proposalData.dados_pagamento_nome_titular,
-        cpf_titular: proposalData.dados_pagamento_cpf_titular,
-        chave_pix: proposalData.dados_pagamento_pix,
-        tipo_pix: proposalData.dados_pagamento_tipo_pix,
-        pix_banco: proposalData.dados_pagamento_pix_banco,
-        pix_nome_titular: proposalData.dados_pagamento_pix_nome_titular,
-        pix_cpf_titular: proposalData.dados_pagamento_pix_cpf_titular,
+      // DADOS PRINCIPAIS (usar campos diretos da tabela propostas)
+      const dadosCliente = {
+        // Dados diretos da tabela propostas
+        nome: proposalData.cliente_nome || (proposalData.cliente_data?.nome) || "NÃO INFORMADO",
+        cpf: proposalData.cliente_cpf || (proposalData.cliente_data?.cpf) || "NÃO INFORMADO",
+        rg: proposalData.cliente_rg || (proposalData.cliente_data?.rg) || "NÃO INFORMADO",
+        orgaoEmissor: proposalData.cliente_orgao_emissor || (proposalData.cliente_data?.orgaoEmissor) || "SSP",
+        estadoCivil: proposalData.cliente_estado_civil || (proposalData.cliente_data?.estadoCivil) || "NÃO INFORMADO",
+        nacionalidade: proposalData.cliente_nacionalidade || (proposalData.cliente_data?.nacionalidade) || "BRASILEIRA",
+        endereco: proposalData.cliente_endereco || (proposalData.cliente_data?.endereco) || "NÃO INFORMADO",
+        cidade: proposalData.cliente_cidade || (proposalData.cliente_data?.cidade) || "NÃO INFORMADO",
+        uf: proposalData.cliente_uf || (proposalData.cliente_data?.uf) || "NÃO INFORMADO",
+        cep: proposalData.cliente_cep || (proposalData.cliente_data?.cep) || "NÃO INFORMADO",
+        rgUf: proposalData.cliente_rg_uf || (proposalData.cliente_data?.rgUf) || "NÃO INFORMADO",
+        rgDataEmissao: proposalData.cliente_rg_data_emissao || (proposalData.cliente_data?.rgDataEmissao) || "NÃO INFORMADO",
+        localNascimento: proposalData.cliente_local_nascimento || (proposalData.cliente_data?.localNascimento) || "NÃO INFORMADO"
       };
       
+      // CONDIÇÕES FINANCEIRAS
+      const condicoesFinanceiras = {
+        valor: proposalData.valor || proposalData.valor_aprovado || (proposalData.condicoes_data?.valor) || 0,
+        prazo: proposalData.prazo || (proposalData.condicoes_data?.prazo) || 0,
+        taxaJuros: proposalData.taxa_juros || (proposalData.condicoes_data?.taxa) || 0,
+        valorTac: proposalData.valor_tac || (proposalData.condicoes_data?.valorTac) || 0,
+        valorIof: proposalData.valor_iof || (proposalData.condicoes_data?.valorIof) || 0,
+        valorTotalFinanciado: proposalData.valor_total_financiado || 0,
+        valorLiquidoLiberado: proposalData.valor_liquido_liberado || 0
+      };
+      
+      // DADOS DE PAGAMENTO
+      const dadosPagamento = {
+        codigoBanco: proposalData.dados_pagamento_codigo_banco || "NÃO INFORMADO",
+        banco: proposalData.dados_pagamento_banco || "NÃO INFORMADO",
+        agencia: proposalData.dados_pagamento_agencia || "NÃO INFORMADO",
+        conta: proposalData.dados_pagamento_conta || "NÃO INFORMADO",
+        digito: proposalData.dados_pagamento_digito || "NÃO INFORMADO",
+        tipoConta: proposalData.dados_pagamento_tipo || "NÃO INFORMADO",
+        nomeTitular: proposalData.dados_pagamento_nome_titular || dadosCliente.nome,
+        cpfTitular: proposalData.dados_pagamento_cpf_titular || dadosCliente.cpf,
+        chavePix: proposalData.dados_pagamento_pix || "NÃO INFORMADO",
+        tipoPix: proposalData.dados_pagamento_tipo_pix || "NÃO INFORMADO"
+      };
+      
+      // DADOS DA LOJA/CREDOR
+      const dadosLoja = {
+        nome: proposalData.loja_nome || "SIMPIX LTDA",
+        endereco: proposalData.loja_endereco || "NÃO INFORMADO",
+        cnpj: "NÃO DISPONÍVEL", // Campo não existe na tabela lojas
+        cidade: "NÃO DISPONÍVEL", // Campo não existe na tabela lojas
+        uf: "NÃO DISPONÍVEL" // Campo não existe na tabela lojas
+      };
+      
+      console.log("📊 [CCB] Cliente mapeado:", dadosCliente.nome, "-", dadosCliente.cpf);
+      console.log("📊 [CCB] Condições:", `R$ ${condicoesFinanceiras.valor} em ${condicoesFinanceiras.prazo}x`);
+      console.log("📊 [CCB] Pagamento via:", dadosPagamento.banco || dadosPagamento.chavePix);
+      
       // Buscar parcelas da tabela parcelas
-      let parcelas = [];
+      let parcelas: any[] = [];
       try {
         const parcelasResult = await db.execute(sql`
           SELECT 
@@ -159,7 +197,7 @@ export class CCBGenerationService {
       }
 
       if (USER_CCB_COORDINATES.finalidadeOperacao) {
-        const finalidade = condicoesData.finalidade || "Empréstimo pessoal";
+        const finalidade = (proposalData.condicoes_data?.finalidade) || "Empréstimo pessoal";
         firstPage.drawText(finalidade, {
           x: USER_CCB_COORDINATES.finalidadeOperacao.x,
           y: USER_CCB_COORDINATES.finalidadeOperacao.y,
@@ -170,8 +208,8 @@ export class CCBGenerationService {
       }
 
       // DADOS DO CLIENTE
-      if (USER_CCB_COORDINATES.nomeCliente && clienteData.nome) {
-        firstPage.drawText(clienteData.nome, {
+      if (USER_CCB_COORDINATES.nomeCliente && dadosCliente.nome && dadosCliente.nome !== "NÃO INFORMADO") {
+        firstPage.drawText(dadosCliente.nome, {
           x: USER_CCB_COORDINATES.nomeCliente.x,
           y: USER_CCB_COORDINATES.nomeCliente.y,
           size: USER_CCB_COORDINATES.nomeCliente.fontSize,
@@ -180,8 +218,8 @@ export class CCBGenerationService {
         });
       }
 
-      if (USER_CCB_COORDINATES.cpfCliente && clienteData.cpf) {
-        firstPage.drawText(this.formatCPF(clienteData.cpf), {
+      if (USER_CCB_COORDINATES.cpfCliente && dadosCliente.cpf && dadosCliente.cpf !== "NÃO INFORMADO") {
+        firstPage.drawText(this.formatCPF(dadosCliente.cpf), {
           x: USER_CCB_COORDINATES.cpfCliente.x,
           y: USER_CCB_COORDINATES.cpfCliente.y,
           size: USER_CCB_COORDINATES.cpfCliente.fontSize,
@@ -191,8 +229,8 @@ export class CCBGenerationService {
       }
 
       // RG E DOCUMENTAÇÃO
-      if (USER_CCB_COORDINATES.rgCliente && clienteData.rg) {
-        firstPage.drawText(clienteData.rg, {
+      if (USER_CCB_COORDINATES.rgCliente && dadosCliente.rg && dadosCliente.rg !== "NÃO INFORMADO") {
+        firstPage.drawText(dadosCliente.rg, {
           x: USER_CCB_COORDINATES.rgCliente.x,
           y: USER_CCB_COORDINATES.rgCliente.y,
           size: USER_CCB_COORDINATES.rgCliente.fontSize,
@@ -201,8 +239,8 @@ export class CCBGenerationService {
         });
       }
 
-      if (USER_CCB_COORDINATES.rgExpedidor && clienteData.orgaoEmissor) {
-        firstPage.drawText(clienteData.orgaoEmissor, {
+      if (USER_CCB_COORDINATES.rgExpedidor && dadosCliente.orgaoEmissor && dadosCliente.orgaoEmissor !== "NÃO INFORMADO") {
+        firstPage.drawText(dadosCliente.orgaoEmissor, {
           x: USER_CCB_COORDINATES.rgExpedidor.x,
           y: USER_CCB_COORDINATES.rgExpedidor.y,
           size: USER_CCB_COORDINATES.rgExpedidor.fontSize,
@@ -211,8 +249,8 @@ export class CCBGenerationService {
         });
       }
 
-      if (USER_CCB_COORDINATES.rgUF && clienteData.rgUf) {
-        firstPage.drawText(clienteData.rgUf, {
+      if (USER_CCB_COORDINATES.rgUF && dadosCliente.rgUf && dadosCliente.rgUf !== "NÃO INFORMADO") {
+        firstPage.drawText(dadosCliente.rgUf, {
           x: USER_CCB_COORDINATES.rgUF.x,
           y: USER_CCB_COORDINATES.rgUF.y,
           size: USER_CCB_COORDINATES.rgUF.fontSize,
@@ -221,8 +259,8 @@ export class CCBGenerationService {
         });
       }
 
-      if (USER_CCB_COORDINATES.rgEmissao && clienteData.rgEmissao) {
-        const dataRg = format(new Date(clienteData.rgEmissao), "dd/MM/yyyy");
+      if (USER_CCB_COORDINATES.rgEmissao && dadosCliente.rgDataEmissao && dadosCliente.rgDataEmissao !== "NÃO INFORMADO") {
+        const dataRg = format(new Date(dadosCliente.rgDataEmissao), "dd/MM/yyyy");
         firstPage.drawText(dataRg, {
           x: USER_CCB_COORDINATES.rgEmissao.x,
           y: USER_CCB_COORDINATES.rgEmissao.y,
@@ -232,8 +270,8 @@ export class CCBGenerationService {
         });
       }
 
-      if (USER_CCB_COORDINATES.nacionalidade && clienteData.nacionalidade) {
-        firstPage.drawText(clienteData.nacionalidade || "Brasileira", {
+      if (USER_CCB_COORDINATES.nacionalidade && dadosCliente.nacionalidade && dadosCliente.nacionalidade !== "NÃO INFORMADO") {
+        firstPage.drawText(dadosCliente.nacionalidade || "Brasileira", {
           x: USER_CCB_COORDINATES.nacionalidade.x,
           y: USER_CCB_COORDINATES.nacionalidade.y,
           size: USER_CCB_COORDINATES.nacionalidade.fontSize,
@@ -242,8 +280,8 @@ export class CCBGenerationService {
         });
       }
 
-      if (USER_CCB_COORDINATES.localNascimento && clienteData.localNascimento) {
-        firstPage.drawText(clienteData.localNascimento, {
+      if (USER_CCB_COORDINATES.localNascimento && dadosCliente.localNascimento && dadosCliente.localNascimento !== "NÃO INFORMADO") {
+        firstPage.drawText(dadosCliente.localNascimento, {
           x: USER_CCB_COORDINATES.localNascimento.x,
           y: USER_CCB_COORDINATES.localNascimento.y,
           size: USER_CCB_COORDINATES.localNascimento.fontSize,
@@ -252,8 +290,8 @@ export class CCBGenerationService {
         });
       }
 
-      if (USER_CCB_COORDINATES.estadoCivil && clienteData.estadoCivil) {
-        firstPage.drawText(clienteData.estadoCivil, {
+      if (USER_CCB_COORDINATES.estadoCivil && dadosCliente.estadoCivil && dadosCliente.estadoCivil !== "NÃO INFORMADO") {
+        firstPage.drawText(dadosCliente.estadoCivil, {
           x: USER_CCB_COORDINATES.estadoCivil.x,
           y: USER_CCB_COORDINATES.estadoCivil.y,
           size: USER_CCB_COORDINATES.estadoCivil.fontSize,
@@ -377,7 +415,7 @@ export class CCBGenerationService {
 
       // CONDIÇÕES FINANCEIRAS
       if (USER_CCB_COORDINATES.valorPrincipal) {
-        const valor = condicoesData.valor || proposalData.valor_aprovado || 0;
+        const valor = condicoesFinanceiras.valor || 0;
         firstPage.drawText(this.formatCurrency(valor), {
           x: USER_CCB_COORDINATES.valorPrincipal.x,
           y: USER_CCB_COORDINATES.valorPrincipal.y,
@@ -421,7 +459,7 @@ export class CCBGenerationService {
       }
 
       if (USER_CCB_COORDINATES.prazoAmortizacao) {
-        const prazo = condicoesData.prazo || 12;
+        const prazo = condicoesFinanceiras.prazo || 12;
         firstPage.drawText(`${prazo} meses`, {
           x: USER_CCB_COORDINATES.prazoAmortizacao.x,
           y: USER_CCB_COORDINATES.prazoAmortizacao.y,
@@ -432,7 +470,7 @@ export class CCBGenerationService {
       }
 
       if (USER_CCB_COORDINATES.percentualIndice) {
-        const taxa = condicoesData.taxa_juros || 0;
+        const taxa = condicoesFinanceiras.taxaJuros || 0;
         firstPage.drawText(`${taxa}%`, {
           x: USER_CCB_COORDINATES.percentualIndice.x,
           y: USER_CCB_COORDINATES.percentualIndice.y,
@@ -780,13 +818,32 @@ export class CCBGenerationService {
           p.dados_pagamento_pix_banco,
           p.dados_pagamento_pix_nome_titular,
           p.dados_pagamento_pix_cpf_titular,
+          p.cliente_nome,
+          p.cliente_cpf,
+          p.cliente_rg,
+          p.cliente_orgao_emissor,
+          p.cliente_estado_civil,
+          p.cliente_nacionalidade,
+          p.cliente_endereco,
+          p.cliente_cidade,
+          p.cliente_uf,
+          p.cliente_cep,
+          p.cliente_rg_uf,
+          p.cliente_rg_data_emissao,
+          p.cliente_local_nascimento,
+          p.tipo_pessoa,
+          p.cliente_razao_social,
+          p.cliente_cnpj,
+          p.valor,
+          p.prazo,
+          p.taxa_juros,
+          p.valor_tac,
+          p.valor_iof,
+          p.valor_total_financiado,
+          p.valor_liquido_liberado,
           pr.nome_produto as produto_nome,
           l.nome_loja as loja_nome,
-          l.cnpj as loja_cnpj,
-          l.endereco as loja_endereco,
-          l.cidade as loja_cidade,
-          l.estado as loja_estado,
-          l.cep as loja_cep
+          l.endereco as loja_endereco
         FROM propostas p
         LEFT JOIN produtos pr ON p.produto_id = pr.id
         LEFT JOIN lojas l ON p.loja_id = l.id
@@ -803,19 +860,24 @@ export class CCBGenerationService {
       // AUDITORIA COMPLETA DOS DADOS
       console.log("📊 [CCB] ========== AUDITORIA COMPLETA DE DADOS ==========");
       console.log("📊 [CCB] ID da Proposta:", proposta.id);
-      console.log("📊 [CCB] Cliente Data presente:", !!proposta.cliente_data);
-      console.log("📊 [CCB] Condicoes Data presente:", !!proposta.condicoes_data);
+      console.log("📊 [CCB] Cliente Nome (direto):", proposta.cliente_nome);
+      console.log("📊 [CCB] Cliente CPF (direto):", proposta.cliente_cpf);
+      console.log("📊 [CCB] Cliente RG (direto):", proposta.cliente_rg);
+      console.log("📊 [CCB] Cliente Endereco (direto):", proposta.cliente_endereco);
+      console.log("📊 [CCB] Valor Aprovado:", proposta.valor_aprovado);
+      console.log("📊 [CCB] Taxa Juros:", proposta.taxa_juros);
+      console.log("📊 [CCB] Prazo:", proposta.prazo);
       console.log("📊 [CCB] Dados Pagamento Banco:", proposta.dados_pagamento_banco);
-      console.log("📊 [CCB] Dados Pagamento Agencia:", proposta.dados_pagamento_agencia);
-      console.log("📊 [CCB] Dados Pagamento Conta:", proposta.dados_pagamento_conta);
       console.log("📊 [CCB] PIX presente:", !!proposta.dados_pagamento_pix);
+      console.log("📊 [CCB] Loja Nome:", proposta.loja_nome);
+      console.log("📊 [CCB] Produto Nome:", proposta.produto_nome);
       
-      // Log detalhado dos dados
+      // Log detalhado dos dados JSONB (se existirem)
       if (proposta.cliente_data) {
-        console.log("📊 [CCB] Cliente Data campos:", Object.keys(proposta.cliente_data));
+        console.log("📊 [CCB] Cliente Data (JSONB) campos:", Object.keys(proposta.cliente_data));
       }
       if (proposta.condicoes_data) {
-        console.log("📊 [CCB] Condicoes Data campos:", Object.keys(proposta.condicoes_data));
+        console.log("📊 [CCB] Condicoes Data (JSONB) campos:", Object.keys(proposta.condicoes_data));
       }
       
       console.log("📊 [CCB] ========== FIM DA AUDITORIA ==========");
