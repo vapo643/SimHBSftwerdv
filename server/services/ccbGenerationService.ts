@@ -19,6 +19,8 @@ import {
   formatTextWithLineBreaks,
 } from "./ccbFieldMapping";
 import { CoordinateAdjustment, applyCoordinateAdjustments } from "./ccbCoordinateMapper";
+// USANDO NOVAS COORDENADAS DO USUÁRIO
+import { USER_CCB_COORDINATES, getCoordinateForSystemField } from "./ccbUserCoordinates";
 
 interface PropostaData {
   id: string;
@@ -99,91 +101,204 @@ export class CCBGenerationService {
 
       console.log(`📄 [CCB] Dimensões da página: ${width}x${height}`);
 
-      // 5. DESENHAR TEXTO SOBRE O TEMPLATE usando mapeamento de coordenadas
+      // 5. DESENHAR TEXTO SOBRE O TEMPLATE usando NOVAS COORDENADAS DO USUÁRIO
 
-      // Aplicar ajustes de coordenadas se fornecidos (via parâmetro adjustments)
-      const mapping =
-        adjustments && adjustments.length > 0
-          ? applyCoordinateAdjustments(adjustments)
-          : SIMPIX_CCB_MAPPING;
-
+      // MUDANÇA CRÍTICA: Usando coordenadas manuais do usuário ao invés das antigas
       console.log(
-        `📄 [CCB] Preenchimento com mapeamento SIMPIX (${adjustments?.length || 0} ajustes aplicados)...`
+        `📄 [CCB] ✅ USANDO NOVAS COORDENADAS MANUAIS DO USUÁRIO (ccbUserCoordinates.ts)`
+      );
+      console.log(
+        `📄 [CCB] Coordenadas antigas DESATIVADAS. Total de campos mapeados: ${Object.keys(USER_CCB_COORDINATES).length}`
       );
 
-      // DADOS DO CLIENTE
-      const nomeCoord = mapping.nomeCliente;
-      firstPage.drawText(proposalData.cliente_nome || "", {
-        x: nomeCoord.x,
-        y: yFromTop(height, 120), // 120px do topo
-        size: nomeCoord.size,
-        font: helveticaFont,
-        color: rgb(0, 0, 0),
-      });
-      console.log(
-        `📄 [CCB] Nome: "${proposalData.cliente_nome}" em x:${nomeCoord.x}, y:${yFromTop(height, 120)}`
-      );
-
-      const cpfCoord = mapping.cpfCliente;
-      firstPage.drawText(this.formatCPF(proposalData.cliente_cpf) || "", {
-        x: cpfCoord.x,
-        y: yFromTop(height, 145), // 145px do topo
-        size: cpfCoord.size,
-        font: helveticaFont,
-        color: rgb(0, 0, 0),
-      });
-      console.log(
-        `📄 [CCB] CPF: "${this.formatCPF(proposalData.cliente_cpf)}" em x:${cpfCoord.x}, y:${yFromTop(height, 145)}`
-      );
-
-      // DADOS DO EMPRÉSTIMO
-      const valorCoord = mapping.valorEmprestimo;
-      firstPage.drawText(this.formatCurrency(proposalData.valor_emprestimo), {
-        x: valorCoord.x,
-        y: yFromTop(height, 240), // 240px do topo
-        size: valorCoord.size,
-        font: helveticaFont,
-        color: rgb(0, 0, 0),
-      });
-      console.log(
-        `📄 [CCB] Valor: "${this.formatCurrency(proposalData.valor_emprestimo)}" em x:${valorCoord.x}, y:${yFromTop(height, 240)}`
-      );
-
-      const parcelasCoord = mapping.numeroParcelas;
-      firstPage.drawText(`${proposalData.prazo_meses}x`, {
-        x: parcelasCoord.x,
-        y: yFromTop(height, 270), // 270px do topo
-        size: parcelasCoord.size,
-        font: helveticaFont,
-        color: rgb(0, 0, 0),
-      });
-      console.log(
-        `📄 [CCB] Parcelas: "${proposalData.prazo_meses}x" em x:${parcelasCoord.x}, y:${yFromTop(height, 270)}`
-      );
-
-      const valorParcelaCoord = mapping.valorParcela;
-      firstPage.drawText(this.formatCurrency(proposalData.valor_parcela), {
-        x: valorParcelaCoord.x,
-        y: yFromTop(height, 300), // 300px do topo
-        size: valorParcelaCoord.size,
-        font: helveticaFont,
-        color: rgb(0, 0, 0),
-      });
-      console.log(
-        `📄 [CCB] Valor parcela: "${this.formatCurrency(proposalData.valor_parcela)}" em x:${valorParcelaCoord.x}, y:${yFromTop(height, 300)}`
-      );
+      // ========================================
+      // USANDO COORDENADAS MANUAIS DO USUÁRIO
+      // ========================================
+      
+      // IDENTIFICAÇÃO DA CCB (Topo da página)
+      const numeroCedulaCoord = USER_CCB_COORDINATES.numeroCedula;
+      if (numeroCedulaCoord) {
+        const numeroCCB = `CCB-${proposalData.id}`;
+        firstPage.drawText(numeroCCB, {
+          x: numeroCedulaCoord.x,
+          y: numeroCedulaCoord.y, // Usando Y direto (735)
+          size: numeroCedulaCoord.fontSize,
+          font: helveticaFont,
+          color: rgb(0, 0, 0),
+        });
+        console.log(`📄 [CCB] Número CCB: "${numeroCCB}" em x:${numeroCedulaCoord.x}, y:${numeroCedulaCoord.y}`);
+      }
 
       // DATA DE EMISSÃO
-      const dataCoord = mapping.dataEmissao;
-      const dataAtual = format(new Date(), "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
-      firstPage.drawText(dataAtual, {
-        x: dataCoord.x,
-        y: yFromTop(height, 650), // 650px do topo (parte inferior)
-        size: dataCoord.size,
-        font: helveticaFont,
-        color: rgb(0, 0, 0),
-      });
-      console.log(`📄 [CCB] Data: "${dataAtual}" em x:${dataCoord.x}, y:${yFromTop(height, 650)}`);
+      const dataEmissaoCoord = USER_CCB_COORDINATES.dataEmissao;
+      if (dataEmissaoCoord) {
+        const dataAtual = format(new Date(), "dd/MM/yyyy");
+        firstPage.drawText(dataAtual, {
+          x: dataEmissaoCoord.x,
+          y: dataEmissaoCoord.y, // Y:735
+          size: dataEmissaoCoord.fontSize,
+          font: helveticaFont,
+          color: rgb(0, 0, 0),
+        });
+        console.log(`📄 [CCB] Data Emissão: "${dataAtual}" em x:${dataEmissaoCoord.x}, y:${dataEmissaoCoord.y}`);
+      }
+
+      // FINALIDADE DA OPERAÇÃO
+      const finalidadeCoord = USER_CCB_COORDINATES.finalidadeOperacao;
+      if (finalidadeCoord && proposalData.loja_nome) {
+        firstPage.drawText("Empréstimo pessoal", {
+          x: finalidadeCoord.x,
+          y: finalidadeCoord.y, // Y:735
+          size: finalidadeCoord.fontSize,
+          font: helveticaFont,
+          color: rgb(0, 0, 0),
+        });
+        console.log(`📄 [CCB] Finalidade: "Empréstimo pessoal" em x:${finalidadeCoord.x}, y:${finalidadeCoord.y}`);
+      }
+
+      // NOME DO CLIENTE (Sua coordenada: X:55, Y:645)
+      const nomeCoord = USER_CCB_COORDINATES.nomeCliente;
+      if (nomeCoord && proposalData.cliente_nome) {
+        firstPage.drawText(proposalData.cliente_nome, {
+          x: nomeCoord.x,
+          y: nomeCoord.y, // Y:645
+          size: nomeCoord.fontSize,
+          font: helveticaFont,
+          color: rgb(0, 0, 0),
+        });
+        console.log(`📄 [CCB] Nome: "${proposalData.cliente_nome}" em x:${nomeCoord.x}, y:${nomeCoord.y}`);
+      }
+
+      // CPF DO CLIENTE (Sua coordenada: X:405, Y:645)
+      const cpfCoord = USER_CCB_COORDINATES.cpfCliente;
+      if (cpfCoord && proposalData.cliente_cpf) {
+        firstPage.drawText(this.formatCPF(proposalData.cliente_cpf), {
+          x: cpfCoord.x,
+          y: cpfCoord.y, // Y:645
+          size: cpfCoord.fontSize,
+          font: helveticaFont,
+          color: rgb(0, 0, 0),
+        });
+        console.log(`📄 [CCB] CPF: "${this.formatCPF(proposalData.cliente_cpf)}" em x:${cpfCoord.x}, y:${cpfCoord.y}`);
+      }
+
+      // ENDEREÇO DO CLIENTE (Sua coordenada: X:100, Y:670)
+      const enderecoCoord = USER_CCB_COORDINATES.enderecoCliente;
+      if (enderecoCoord && proposalData.cliente_endereco) {
+        firstPage.drawText(proposalData.cliente_endereco, {
+          x: enderecoCoord.x,
+          y: enderecoCoord.y, // Y:670
+          size: enderecoCoord.fontSize,
+          font: helveticaFont,
+          color: rgb(0, 0, 0),
+        });
+        console.log(`📄 [CCB] Endereço: "${proposalData.cliente_endereco}" em x:${enderecoCoord.x}, y:${enderecoCoord.y}`);
+      }
+
+      // CEP DO CLIENTE (Sua coordenada: X:270, Y:670)
+      const cepCoord = USER_CCB_COORDINATES.cepCliente;
+      if (cepCoord && proposalData.cliente_cep) {
+        firstPage.drawText(this.formatCEP(proposalData.cliente_cep), {
+          x: cepCoord.x,
+          y: cepCoord.y, // Y:670
+          size: cepCoord.fontSize,
+          font: helveticaFont,
+          color: rgb(0, 0, 0),
+        });
+        console.log(`📄 [CCB] CEP: "${this.formatCEP(proposalData.cliente_cep)}" em x:${cepCoord.x}, y:${cepCoord.y}`);
+      }
+
+      // CIDADE DO CLIENTE (Sua coordenada: X:380, Y:670)
+      const cidadeCoord = USER_CCB_COORDINATES.cidadeCliente;
+      if (cidadeCoord && proposalData.cliente_cidade) {
+        firstPage.drawText(proposalData.cliente_cidade, {
+          x: cidadeCoord.x,
+          y: cidadeCoord.y, // Y:670
+          size: cidadeCoord.fontSize,
+          font: helveticaFont,
+          color: rgb(0, 0, 0),
+        });
+        console.log(`📄 [CCB] Cidade: "${proposalData.cliente_cidade}" em x:${cidadeCoord.x}, y:${cidadeCoord.y}`);
+      }
+
+      // UF DO CLIENTE (Sua coordenada: X:533, Y:670)
+      const ufCoord = USER_CCB_COORDINATES.ufCliente;
+      if (ufCoord && proposalData.cliente_estado) {
+        firstPage.drawText(proposalData.cliente_estado, {
+          x: ufCoord.x,
+          y: ufCoord.y, // Y:670
+          size: ufCoord.fontSize,
+          font: helveticaFont,
+          color: rgb(0, 0, 0),
+        });
+        console.log(`📄 [CCB] UF: "${proposalData.cliente_estado}" em x:${ufCoord.x}, y:${ufCoord.y}`);
+      }
+
+      // DADOS DO CREDOR
+      const razaoCredorCoord = USER_CCB_COORDINATES.razaoSocialCredor;
+      if (razaoCredorCoord) {
+        firstPage.drawText("SIMPIX LTDA", {
+          x: razaoCredorCoord.x,
+          y: razaoCredorCoord.y, // Y:465
+          size: razaoCredorCoord.fontSize,
+          font: helveticaFont,
+          color: rgb(0, 0, 0),
+        });
+        console.log(`📄 [CCB] Razão Social Credor: "SIMPIX LTDA" em x:${razaoCredorCoord.x}, y:${razaoCredorCoord.y}`);
+      }
+
+      const cnpjCredorCoord = USER_CCB_COORDINATES.cnpjCredor;
+      if (cnpjCredorCoord) {
+        firstPage.drawText("12.345.678/0001-90", {
+          x: cnpjCredorCoord.x,
+          y: cnpjCredorCoord.y, // Y:465
+          size: cnpjCredorCoord.fontSize,
+          font: helveticaFont,
+          color: rgb(0, 0, 0),
+        });
+        console.log(`📄 [CCB] CNPJ Credor: "12.345.678/0001-90" em x:${cnpjCredorCoord.x}, y:${cnpjCredorCoord.y}`);
+      }
+
+      // VALOR PRINCIPAL (Sua coordenada: X:50, Y:350)
+      const valorCoord = USER_CCB_COORDINATES.valorPrincipal;
+      if (valorCoord && proposalData.valor_emprestimo) {
+        firstPage.drawText(this.formatCurrency(proposalData.valor_emprestimo), {
+          x: valorCoord.x,
+          y: valorCoord.y, // Y:350
+          size: valorCoord.fontSize,
+          font: helveticaFont,
+          color: rgb(0, 0, 0),
+        });
+        console.log(`📄 [CCB] Valor Principal: "${this.formatCurrency(proposalData.valor_emprestimo)}" em x:${valorCoord.x}, y:${valorCoord.y}`);
+      }
+
+      // PRAZO DE AMORTIZAÇÃO (Sua coordenada: X:50, Y:300)
+      const prazoCoord = USER_CCB_COORDINATES.prazoAmortizacao;
+      if (prazoCoord && proposalData.prazo_meses) {
+        firstPage.drawText(`${proposalData.prazo_meses} meses`, {
+          x: prazoCoord.x,
+          y: prazoCoord.y, // Y:300
+          size: prazoCoord.fontSize,
+          font: helveticaFont,
+          color: rgb(0, 0, 0),
+        });
+        console.log(`📄 [CCB] Prazo: "${proposalData.prazo_meses} meses" em x:${prazoCoord.x}, y:${prazoCoord.y}`);
+      }
+
+      // TAXA DE JUROS MENSAL (Sua coordenada: X:95, Y:245)
+      const taxaCoord = USER_CCB_COORDINATES.taxaJurosEfetivaMensal;
+      if (taxaCoord && proposalData.taxa_juros) {
+        firstPage.drawText(`${proposalData.taxa_juros}%`, {
+          x: taxaCoord.x,
+          y: taxaCoord.y, // Y:245
+          size: taxaCoord.fontSize,
+          font: helveticaFont,
+          color: rgb(0, 0, 0),
+        });
+        console.log(`📄 [CCB] Taxa Mensal: "${proposalData.taxa_juros}%" em x:${taxaCoord.x}, y:${taxaCoord.y}`);
+      }
+
+      console.log(`📄 [CCB] ✅ COORDENADAS MANUAIS DO USUÁRIO APLICADAS COM SUCESSO!`);
 
       // TEXTO DE TESTE PARA VALIDAÇÃO VISUAL (removido temporariamente devido ao encoding)
       console.log(`📄 [CCB] Template Simpix aplicado com sucesso - dados posicionados`);

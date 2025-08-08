@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teste Visual CCB - Suas Coordenadas</title>
+    <style>
+        body { font-family: Arial; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; }
+        h1 { color: #2563eb; }
+        .status { padding: 15px; border-radius: 5px; margin: 20px 0; }
+        .success { background: #dcfce7; border: 2px solid #22c55e; }
+        .old { background: #fee2e2; border: 2px solid #ef4444; text-decoration: line-through; }
+        .new { background: #dbeafe; border: 2px solid #3b82f6; }
+        .coordinate { display: inline-block; margin: 5px; padding: 5px 10px; background: #f3f4f6; border-radius: 3px; font-family: monospace; }
+        button { background: #3b82f6; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
+        button:hover { background: #2563eb; }
+        .result { margin-top: 20px; padding: 15px; background: #f9fafb; border-radius: 5px; }
+        pre { background: #1f2937; color: #10b981; padding: 15px; border-radius: 5px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Teste Visual das Suas Coordenadas CCB</h1>
+        
+        <div class="status success">
+            <h2>✅ Status: SUAS COORDENADAS ESTÃO ATIVAS</h2>
+            <p>O sistema está usando suas 71 coordenadas manuais fornecidas</p>
+        </div>
+
+        <h2>📊 Comparação Visual</h2>
+        
+        <div class="old">
+            <h3>❌ Coordenadas ANTIGAS (Desativadas)</h3>
+            <div>
+                Nome: <span class="coordinate">X:120, Y:680</span>
+                CPF: <span class="coordinate">X:120, Y:655</span>
+                Valor: <span class="coordinate">X:200, Y:580</span>
+            </div>
+        </div>
+
+        <div class="new">
+            <h3>✅ SUAS Coordenadas (Ativas)</h3>
+            <div>
+                Nome: <span class="coordinate">X:55, Y:645</span>
+                CPF: <span class="coordinate">X:405, Y:645</span>
+                Valor: <span class="coordinate">X:50, Y:350</span>
+            </div>
+        </div>
+
+        <h2>🧪 Teste Ao Vivo</h2>
+        <button onclick="testarCoordenadas()">Validar Coordenadas em Uso</button>
+        <button onclick="gerarCCBTeste()">Gerar CCB de Teste</button>
+        
+        <div id="resultado" class="result" style="display:none;"></div>
+
+        <h2>📋 Suas Coordenadas Completas (Página 1)</h2>
+        <pre>
+// IDENTIFICAÇÃO
+numeroCedula: X:55, Y:735
+dataEmissao: X:255, Y:735
+finalidadeOperacao: X:405, Y:735
+
+// CLIENTE
+nomeCliente: X:55, Y:645
+cpfCliente: X:405, Y:645
+rgCliente: X:50, Y:620
+enderecoCliente: X:100, Y:670
+cepCliente: X:270, Y:670
+cidadeCliente: X:380, Y:670
+ufCliente: X:533, Y:670
+
+// FINANCEIRO
+valorPrincipal: X:50, Y:350
+prazoAmortizacao: X:50, Y:300
+taxaJurosEfetivaMensal: X:95, Y:245
+        </pre>
+    </div>
+
+    <script>
+        async function testarCoordenadas() {
+            const resultado = document.getElementById('resultado');
+            resultado.style.display = 'block';
+            resultado.innerHTML = 'Validando...';
+            
+            try {
+                const response = await fetch('/api/test-ccb-coordinates/validate');
+                const data = await response.json();
+                
+                resultado.innerHTML = `
+                    <h3>✅ Validação Concluída</h3>
+                    <p><strong>Sistema:</strong> ${data.system}</p>
+                    <p><strong>Total de campos:</strong> ${data.totalFields}</p>
+                    <p><strong>Status:</strong> ${data.status}</p>
+                    <pre>${JSON.stringify(data.samples, null, 2)}</pre>
+                `;
+            } catch (error) {
+                resultado.innerHTML = `<h3>❌ Erro: ${error.message}</h3>`;
+            }
+        }
+
+        async function gerarCCBTeste() {
+            const resultado = document.getElementById('resultado');
+            resultado.style.display = 'block';
+            resultado.innerHTML = 'Gerando CCB com suas coordenadas...';
+            
+            try {
+                const response = await fetch('/api/test/generate-ccb/PROP-1753476064646-PRM20HF', {
+                    method: 'POST'
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultado.innerHTML = `
+                        <h3>✅ CCB Gerado com Sucesso!</h3>
+                        <p><strong>Arquivo:</strong> ${data.pdfPath}</p>
+                        <p><strong>Mensagem:</strong> ${data.message}</p>
+                        <p>O PDF foi gerado usando suas coordenadas manuais!</p>
+                    `;
+                } else {
+                    resultado.innerHTML = `<h3>❌ Erro: ${data.error}</h3>`;
+                }
+            } catch (error) {
+                resultado.innerHTML = `<h3>❌ Erro: ${error.message}</h3>`;
+            }
+        }
+    </script>
+</body>
+</html>

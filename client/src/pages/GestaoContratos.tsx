@@ -224,145 +224,145 @@ export default function GestaoContratos() {
     <DashboardLayout title="Gestão de Contratos">
       <div className="container mx-auto py-8">
         <Card>
-        <CardHeader>
-          <CardTitle>Gestão de Contratos</CardTitle>
-          <CardDescription>Visualize e gerencie todos os contratos assinados</CardDescription>
+          <CardHeader>
+            <CardTitle>Gestão de Contratos</CardTitle>
+            <CardDescription>Visualize e gerencie todos os contratos assinados</CardDescription>
 
-          {estatisticas && (
-            <div className="mt-4 grid grid-cols-2 gap-4 md:grid-cols-5">
-              <div className="rounded-lg bg-blue-50 p-3">
-                <p className="text-xs text-blue-600">Total de Contratos</p>
-                <p className="text-xl font-bold text-blue-900">{estatisticas.totalContratos}</p>
+            {estatisticas && (
+              <div className="mt-4 grid grid-cols-2 gap-4 md:grid-cols-5">
+                <div className="rounded-lg bg-blue-50 p-3">
+                  <p className="text-xs text-blue-600">Total de Contratos</p>
+                  <p className="text-xl font-bold text-blue-900">{estatisticas.totalContratos}</p>
+                </div>
+                <div className="rounded-lg bg-yellow-50 p-3">
+                  <p className="text-xs text-yellow-600">Aguardando Pagamento</p>
+                  <p className="text-xl font-bold text-yellow-900">
+                    {estatisticas.aguardandoPagamento}
+                  </p>
+                </div>
+                <div className="rounded-lg bg-green-50 p-3">
+                  <p className="text-xs text-green-600">Pagos</p>
+                  <p className="text-xl font-bold text-green-900">{estatisticas.pagos}</p>
+                </div>
+                <div className="rounded-lg bg-purple-50 p-3">
+                  <p className="text-xs text-purple-600">Valor Total Contratado</p>
+                  <p className="text-lg font-bold text-purple-900">
+                    {formatCurrency(estatisticas.valorTotalContratado)}
+                  </p>
+                </div>
+                <div className="rounded-lg bg-indigo-50 p-3">
+                  <p className="text-xs text-indigo-600">Valor Total Liberado</p>
+                  <p className="text-lg font-bold text-indigo-900">
+                    {formatCurrency(estatisticas.valorTotalLiberado)}
+                  </p>
+                </div>
               </div>
-              <div className="rounded-lg bg-yellow-50 p-3">
-                <p className="text-xs text-yellow-600">Aguardando Pagamento</p>
-                <p className="text-xl font-bold text-yellow-900">
-                  {estatisticas.aguardandoPagamento}
-                </p>
-              </div>
-              <div className="rounded-lg bg-green-50 p-3">
-                <p className="text-xs text-green-600">Pagos</p>
-                <p className="text-xl font-bold text-green-900">{estatisticas.pagos}</p>
-              </div>
-              <div className="rounded-lg bg-purple-50 p-3">
-                <p className="text-xs text-purple-600">Valor Total Contratado</p>
-                <p className="text-lg font-bold text-purple-900">
-                  {formatCurrency(estatisticas.valorTotalContratado)}
-                </p>
-              </div>
-              <div className="rounded-lg bg-indigo-50 p-3">
-                <p className="text-xs text-indigo-600">Valor Total Liberado</p>
-                <p className="text-lg font-bold text-indigo-900">
-                  {formatCurrency(estatisticas.valorTotalLiberado)}
-                </p>
-              </div>
-            </div>
-          )}
-        </CardHeader>
+            )}
+          </CardHeader>
 
-        <CardContent>
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>ID da Proposta</TableHead>
-                  <TableHead>Nome do Cliente</TableHead>
-                  <TableHead>CPF/CNPJ</TableHead>
-                  <TableHead>Valor do Contrato</TableHead>
-                  <TableHead>Data da Assinatura</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {currentContratos.map(contrato => (
-                  <TableRow key={contrato.id}>
-                    <TableCell className="font-mono text-xs">
-                      {contrato.id.slice(0, 8)}...
-                    </TableCell>
-                    <TableCell className="font-medium">{contrato.clienteNome}</TableCell>
-                    <TableCell>
-                      {contrato.tipoPessoa === "PF"
-                        ? formatCpf(contrato.clienteCpf || "")
-                        : formatCnpj(contrato.clienteCnpj || "")}
-                    </TableCell>
-                    <TableCell>{formatCurrency(parseFloat(contrato.valor || "0"))}</TableCell>
-                    <TableCell>
-                      {contrato.dataAssinatura
-                        ? format(new Date(contrato.dataAssinatura), "dd/MM/yyyy 'às' HH:mm", {
-                            locale: ptBR,
-                          })
-                        : "-"}
-                    </TableCell>
-                    <TableCell>
-                      <StatusBadge status={contrato.statusFormalizacao} />
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleVisualizarCcb(contrato)}
-                        disabled={!contrato.caminhoCcbAssinado || loadingCcb === contrato.id}
-                        data-testid={`button-view-ccb-${contrato.id}`}
-                      >
-                        {loadingCcb === contrato.id ? (
-                          <>Carregando...</>
-                        ) : (
-                          <>
-                            <ExternalLink className="mr-1 h-4 w-4" />
-                            Visualizar CCB Assinado
-                          </>
-                        )}
-                      </Button>
-                    </TableCell>
+          <CardContent>
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>ID da Proposta</TableHead>
+                    <TableHead>Nome do Cliente</TableHead>
+                    <TableHead>CPF/CNPJ</TableHead>
+                    <TableHead>Valor do Contrato</TableHead>
+                    <TableHead>Data da Assinatura</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-
-          {totalPages > 1 && (
-            <div className="mt-4">
-              <Pagination>
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious
-                      onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                      className={
-                        currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"
-                      }
-                    />
-                  </PaginationItem>
-
-                  {[...Array(totalPages)].map((_, i) => (
-                    <PaginationItem key={i}>
-                      <PaginationLink
-                        onClick={() => setCurrentPage(i + 1)}
-                        isActive={currentPage === i + 1}
-                        className="cursor-pointer"
-                      >
-                        {i + 1}
-                      </PaginationLink>
-                    </PaginationItem>
+                </TableHeader>
+                <TableBody>
+                  {currentContratos.map(contrato => (
+                    <TableRow key={contrato.id}>
+                      <TableCell className="font-mono text-xs">
+                        {contrato.id.slice(0, 8)}...
+                      </TableCell>
+                      <TableCell className="font-medium">{contrato.clienteNome}</TableCell>
+                      <TableCell>
+                        {contrato.tipoPessoa === "PF"
+                          ? formatCpf(contrato.clienteCpf || "")
+                          : formatCnpj(contrato.clienteCnpj || "")}
+                      </TableCell>
+                      <TableCell>{formatCurrency(parseFloat(contrato.valor || "0"))}</TableCell>
+                      <TableCell>
+                        {contrato.dataAssinatura
+                          ? format(new Date(contrato.dataAssinatura), "dd/MM/yyyy 'às' HH:mm", {
+                              locale: ptBR,
+                            })
+                          : "-"}
+                      </TableCell>
+                      <TableCell>
+                        <StatusBadge status={contrato.statusFormalizacao} />
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleVisualizarCcb(contrato)}
+                          disabled={!contrato.caminhoCcbAssinado || loadingCcb === contrato.id}
+                          data-testid={`button-view-ccb-${contrato.id}`}
+                        >
+                          {loadingCcb === contrato.id ? (
+                            <>Carregando...</>
+                          ) : (
+                            <>
+                              <ExternalLink className="mr-1 h-4 w-4" />
+                              Visualizar CCB Assinado
+                            </>
+                          )}
+                        </Button>
+                      </TableCell>
+                    </TableRow>
                   ))}
-
-                  <PaginationItem>
-                    <PaginationNext
-                      onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                      className={
-                        currentPage === totalPages
-                          ? "pointer-events-none opacity-50"
-                          : "cursor-pointer"
-                      }
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
+                </TableBody>
+              </Table>
             </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+
+            {totalPages > 1 && (
+              <div className="mt-4">
+                <Pagination>
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious
+                        onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                        className={
+                          currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"
+                        }
+                      />
+                    </PaginationItem>
+
+                    {[...Array(totalPages)].map((_, i) => (
+                      <PaginationItem key={i}>
+                        <PaginationLink
+                          onClick={() => setCurrentPage(i + 1)}
+                          isActive={currentPage === i + 1}
+                          className="cursor-pointer"
+                        >
+                          {i + 1}
+                        </PaginationLink>
+                      </PaginationItem>
+                    ))}
+
+                    <PaginationItem>
+                      <PaginationNext
+                        onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                        className={
+                          currentPage === totalPages
+                            ? "pointer-events-none opacity-50"
+                            : "cursor-pointer"
+                        }
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </DashboardLayout>
   );
 }

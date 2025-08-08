@@ -1,7 +1,7 @@
 /**
  * 🎯 ENDPOINTS PARA CALIBRAÇÃO DE COORDENADAS CCB
  * API completa para ajustes visuais e testes de posicionamento
- * 
+ *
  * ROADMAP FORMALIZAÇÃO - API DE CALIBRAÇÃO
  * Data: 2025-08-08
  */
@@ -23,15 +23,14 @@ router.use(jwtAuthMiddleware);
 router.get("/diagnose", async (req, res) => {
   try {
     console.log("🔍 [CCB-CALIBRATION] Executando diagnóstico do template...");
-    
+
     const diagnosis = await ccbCoordinateCalibrator.diagnoseTemplate();
-    
+
     res.json({
       success: true,
       diagnosis,
       timestamp: new Date().toISOString(),
     });
-    
   } catch (error) {
     console.error("❌ [CCB-CALIBRATION] Erro no diagnóstico:", error);
     res.status(500).json({
@@ -48,19 +47,15 @@ router.get("/diagnose", async (req, res) => {
 router.post("/generate-grid", async (req, res) => {
   try {
     console.log("📐 [CCB-CALIBRATION] Gerando grid de calibração...");
-    
-    const { 
-      gridSpacing = 50,
-      showCoordinates = true,
-      highlightFields = []
-    } = req.body;
-    
+
+    const { gridSpacing = 50, showCoordinates = true, highlightFields = [] } = req.body;
+
     const gridPath = await ccbCoordinateCalibrator.generateCalibrationGrid(
       gridSpacing,
       showCoordinates,
       highlightFields
     );
-    
+
     res.json({
       success: true,
       gridPath,
@@ -68,7 +63,6 @@ router.post("/generate-grid", async (req, res) => {
       highlightedFields: highlightFields,
       message: "Grid de calibração gerado com sucesso",
     });
-    
   } catch (error) {
     console.error("❌ [CCB-CALIBRATION] Erro ao gerar grid:", error);
     res.status(500).json({
@@ -85,25 +79,24 @@ router.post("/generate-grid", async (req, res) => {
 router.post("/test-positions", async (req, res) => {
   try {
     console.log("🧪 [CCB-CALIBRATION] Testando posições dos campos...");
-    
+
     const { testData } = req.body;
-    
-    if (!testData || typeof testData !== 'object') {
+
+    if (!testData || typeof testData !== "object") {
       return res.status(400).json({
         success: false,
         error: "Dados de teste são obrigatórios",
       });
     }
-    
+
     const testPath = await ccbCoordinateCalibrator.testFieldPositions(testData);
-    
+
     res.json({
       success: true,
       testPath,
       testedFields: Object.keys(testData),
       message: "Teste de posições concluído",
     });
-    
   } catch (error) {
     console.error("❌ [CCB-CALIBRATION] Erro no teste:", error);
     res.status(500).json({
@@ -120,24 +113,23 @@ router.post("/test-positions", async (req, res) => {
 router.post("/intelligent-calibration", async (req, res) => {
   try {
     console.log("⚡ [CCB-CALIBRATION] Executando calibração inteligente...");
-    
+
     const { sampleData } = req.body;
-    
+
     if (!sampleData) {
       return res.status(400).json({
         success: false,
         error: "Dados de amostra são obrigatórios",
       });
     }
-    
+
     const result = await ccbCoordinateCalibrator.intelligentCalibration(sampleData);
-    
+
     res.json({
       success: true,
       ...result,
       message: "Calibração inteligente concluída",
     });
-    
   } catch (error) {
     console.error("❌ [CCB-CALIBRATION] Erro na calibração inteligente:", error);
     res.status(500).json({
@@ -154,16 +146,15 @@ router.post("/intelligent-calibration", async (req, res) => {
 router.get("/report", async (req, res) => {
   try {
     console.log("📊 [CCB-CALIBRATION] Gerando relatório completo...");
-    
+
     const report = await ccbCoordinateCalibrator.generateCalibrationReport();
-    
+
     res.json({
       success: true,
       report,
       timestamp: new Date().toISOString(),
       message: "Relatório de calibração gerado",
     });
-    
   } catch (error) {
     console.error("❌ [CCB-CALIBRATION] Erro no relatório:", error);
     res.status(500).json({
@@ -180,25 +171,30 @@ router.get("/report", async (req, res) => {
 router.get("/field-mapping", async (req, res) => {
   try {
     console.log("📋 [CCB-CALIBRATION] Fornecendo mapeamento de campos...");
-    
+
     const fieldCount = Object.keys(CCB_COMPLETE_MAPPING).length;
     const fieldNames = Object.keys(CCB_COMPLETE_MAPPING);
-    
+
     res.json({
       success: true,
       mapping: CCB_COMPLETE_MAPPING,
       fieldCount,
       fieldNames,
       categories: {
-        devedor: fieldNames.filter(name => name.startsWith('devedor')).length,
-        credito: fieldNames.filter(name => name.includes('valor') || name.includes('juros') || name.includes('taxa')).length,
-        pagamento: fieldNames.filter(name => name.includes('pix') || name.includes('banco') || name.includes('conta')).length,
-        credor: fieldNames.filter(name => name.startsWith('credor')).length,
-        assinatura: fieldNames.filter(name => name.includes('assinatura') || name.includes('testemunha')).length,
+        devedor: fieldNames.filter(name => name.startsWith("devedor")).length,
+        credito: fieldNames.filter(
+          name => name.includes("valor") || name.includes("juros") || name.includes("taxa")
+        ).length,
+        pagamento: fieldNames.filter(
+          name => name.includes("pix") || name.includes("banco") || name.includes("conta")
+        ).length,
+        credor: fieldNames.filter(name => name.startsWith("credor")).length,
+        assinatura: fieldNames.filter(
+          name => name.includes("assinatura") || name.includes("testemunha")
+        ).length,
       },
       message: "Mapeamento de campos fornecido",
     });
-    
   } catch (error) {
     console.error("❌ [CCB-CALIBRATION] Erro no mapeamento:", error);
     res.status(500).json({
@@ -215,7 +211,7 @@ router.get("/field-mapping", async (req, res) => {
 router.post("/quick-test", async (req, res) => {
   try {
     console.log("🎯 [CCB-CALIBRATION] Executando teste rápido...");
-    
+
     // Dados de teste padrão
     const quickTestData = {
       devedorNome: "João Silva Santos",
@@ -230,9 +226,9 @@ router.post("/quick-test", async (req, res) => {
       dataEmissao: "08/08/2025",
       localAssinatura: "São Paulo, SP",
     };
-    
+
     const testPath = await ccbCoordinateCalibrator.testFieldPositions(quickTestData);
-    
+
     res.json({
       success: true,
       testPath,
@@ -245,7 +241,6 @@ router.post("/quick-test", async (req, res) => {
         "🔄 Execute novos testes após ajustes",
       ],
     });
-    
   } catch (error) {
     console.error("❌ [CCB-CALIBRATION] Erro no teste rápido:", error);
     res.status(500).json({

@@ -39,6 +39,7 @@ import ccbIntelligentTestRoutes from "./routes/ccb-intelligent-test";
 import ccbCorrectedRoutes from "./routes/ccb-test-corrected";
 import clienteRoutes from "./routes/cliente-routes";
 import gestaoContratosRoutes from "./routes/gestao-contratos";
+import testCcbCoordinatesRoutes from "./routes/test-ccb-coordinates";
 import {
   getBrasiliaDate,
   formatBrazilianDateTime,
@@ -4409,6 +4410,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // CCB Coordinate Calibration routes (Professional calibration system)
   const ccbCalibrationRouter = (await import("./routes/ccb-calibration")).default;
   app.use("/api/ccb-calibration", ccbCalibrationRouter);
+
+  // TEST CCB USER COORDINATES - Validação das coordenadas manuais do usuário
+  app.use("/api/test-ccb-coordinates", testCcbCoordinatesRoutes);
 
   // Register Semgrep MCP routes - Projeto Cérbero
   const securityMCPRoutes = (await import("./routes/security-mcp.js")).default;
