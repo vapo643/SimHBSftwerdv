@@ -8,6 +8,7 @@ Preferred communication style: Simple, everyday language.
 Focus: CCB template generation over UI visualization.
 Language: Portuguese, studying software architecture.
 Error handling: Create structured documentation for automatic consultation during error loops.
+**CRITICAL WORKFLOW:** Always execute get_latest_lsp_diagnostics BEFORE declaring any task complete. Never say "pronto" with LSP errors > 0. Follow ESTRATEGIA_ZERO_MICRO_ERROS.md protocol to avoid the 80/20 pattern (80% working, 20% fixing micro errors).
 
 ## Recent Changes (2025-08-08 - 20:38)
 - ✅ **CRITICAL LSP ERROR CLEANUP COMPLETE:** Revolutionary code quality improvement achieved:
