@@ -87,8 +87,8 @@ export const USER_CCB_COORDINATES: CCBUserMapping = {
   // 🏦 DADOS BANCÁRIOS PESSOA FÍSICA (Seção 22)
   bancoEmitente: { x: 170, y: 660, fontSize: 10, page: 2 }, // dados_pagamento_codigo_banco
   agenciaEmitente: { x: 290, y: 660, fontSize: 10, page: 2 }, // dados_pagamento_agencia
-  contaEmitente: { x: 460, y: 674, fontSize: 7, page: 2 }, // Conta Nº
-  tipoContaEmitente: { x: 482, y: 662, fontSize: 7, page: 2 }, // Tipo de Conta
+  contaEmitente: { x: 460, y: 675, fontSize: 7, page: 2 }, // Conta Nº
+  tipoContaEmitente: { x: 482, y: 664, fontSize: 7, page: 2 }, // Tipo de Conta
 
   // DADOS BANCÁRIOS PESSOA JURÍDICA (Seções 23-24)
   razaoSocialEmitenteEmpresa: { x: 65, y: 630, fontSize: 10, page: 2 }, // cliente_data.razaoSocial
@@ -96,8 +96,8 @@ export const USER_CCB_COORDINATES: CCBUserMapping = {
   bancoEmitenteEmpresa: { x: 170, y: 610, fontSize: 10, page: 2 }, // Banco PJ
   agenciaEmitenteEmpresa: { x: 290, y: 610, fontSize: 10, page: 2 }, // Agência PJ
   contaEmitenteEmpresa: { x: 460, y: 630, fontSize: 9, page: 2 }, // Conta PJ
-  tipoContaEmitenteEmpresa: { x: 482, y: 615, fontSize: 9, page: 2 }, // Tipo conta PJ
-  chavePix: { x: 110, y: 521, fontSize: 9, page: 2 }, // chave pix do pf ou pj
+  tipoContaEmitenteEmpresa: { x: 482, y: 617, fontSize: 9, page: 2 }, // Tipo conta PJ
+  chavePix: { x: 110, y: 584, fontSize: 9, page: 2 }, // chave pix do pf ou pj
 
   // 📅 FLUXO DE PAGAMENTO - PARCELAS (Página 2)
   // Parcela 1
