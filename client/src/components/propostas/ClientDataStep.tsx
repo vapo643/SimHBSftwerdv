@@ -617,13 +617,18 @@ export function ClientDataStep() {
 
           <div>
             <Label htmlFor="nacionalidade">Nacionalidade</Label>
-            <Input
-              id="nacionalidade"
-              type="text"
-              value={clientData.nacionalidade}
-              onChange={e => updateClient({ nacionalidade: e.target.value })}
-              data-testid="input-nacionalidade"
-            />
+            <Select
+              value={clientData.nacionalidade || ""}
+              onValueChange={value => updateClient({ nacionalidade: value })}
+            >
+              <SelectTrigger data-testid="select-nacionalidade">
+                <SelectValue placeholder="Selecione a nacionalidade" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="BRASILEIRO">BRASILEIRO</SelectItem>
+                <SelectItem value="BRASILEIRA">BRASILEIRA</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </CardContent>
       </Card>
