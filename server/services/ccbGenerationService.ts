@@ -723,8 +723,9 @@ export class CCBGenerationService {
       // ========================================
       if (secondPage) {
         // DADOS BANCÁRIOS PESSOA FÍSICA
-        if (USER_CCB_COORDINATES.bancoEmitente && dadosPagamento.banco) {
-          secondPage.drawText(dadosPagamento.banco, {
+        if (USER_CCB_COORDINATES.bancoEmitente) {
+          const banco = dadosPagamento.banco || "NÃO INFORMADO";
+          secondPage.drawText(banco, {
             x: USER_CCB_COORDINATES.bancoEmitente.x,
             y: USER_CCB_COORDINATES.bancoEmitente.y,
             size: USER_CCB_COORDINATES.bancoEmitente.fontSize,
@@ -733,8 +734,9 @@ export class CCBGenerationService {
           });
         }
 
-        if (USER_CCB_COORDINATES.agenciaEmitente && dadosPagamento.agencia) {
-          secondPage.drawText(dadosPagamento.agencia, {
+        if (USER_CCB_COORDINATES.agenciaEmitente) {
+          const agencia = dadosPagamento.agencia || "NÃO INFORMADO";
+          secondPage.drawText(agencia, {
             x: USER_CCB_COORDINATES.agenciaEmitente.x,
             y: USER_CCB_COORDINATES.agenciaEmitente.y,
             size: USER_CCB_COORDINATES.agenciaEmitente.fontSize,
@@ -743,8 +745,9 @@ export class CCBGenerationService {
           });
         }
 
-        if (USER_CCB_COORDINATES.contaEmitente && dadosPagamento.conta) {
-          secondPage.drawText(dadosPagamento.conta, {
+        if (USER_CCB_COORDINATES.contaEmitente) {
+          const conta = dadosPagamento.conta || "NÃO INFORMADO";
+          secondPage.drawText(conta, {
             x: USER_CCB_COORDINATES.contaEmitente.x,
             y: USER_CCB_COORDINATES.contaEmitente.y,
             size: USER_CCB_COORDINATES.contaEmitente.fontSize,
@@ -753,8 +756,9 @@ export class CCBGenerationService {
           });
         }
 
-        if (USER_CCB_COORDINATES.tipoContaEmitente && dadosPagamento.tipoConta) {
-          secondPage.drawText(dadosPagamento.tipoConta, {
+        if (USER_CCB_COORDINATES.tipoContaEmitente) {
+          const tipoConta = dadosPagamento.tipoConta || "NÃO INFORMADO";
+          secondPage.drawText(tipoConta, {
             x: USER_CCB_COORDINATES.tipoContaEmitente.x,
             y: USER_CCB_COORDINATES.tipoContaEmitente.y,
             size: USER_CCB_COORDINATES.tipoContaEmitente.fontSize,

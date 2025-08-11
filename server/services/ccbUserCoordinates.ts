@@ -97,7 +97,7 @@ export const USER_CCB_COORDINATES: CCBUserMapping = {
   agenciaEmitenteEmpresa: { x: 290, y: 610, fontSize: 10, page: 2 }, // Agência PJ
   contaEmitenteEmpresa: { x: 460, y: 630, fontSize: 9, page: 2 }, // Conta PJ
   tipoContaEmitenteEmpresa: { x: 482, y: 615, fontSize: 9, page: 2 }, // Tipo conta PJ
-  chavePix: { x: 465, y: 616, fontSize: 9, page: 2 }, // dados_pagamento_pix
+  chavePix: { x: 110, y: 521, fontSize: 9, page: 2 }, // chave pix do pf ou pj
 
   // 📅 FLUXO DE PAGAMENTO - PARCELAS (Página 2)
   // Parcela 1
