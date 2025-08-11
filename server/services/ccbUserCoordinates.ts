@@ -34,12 +34,12 @@ export const USER_CCB_COORDINATES: CCBUserMapping = {
   nomeCliente: { x: 55, y: 645, fontSize: 11, page: 1 }, // cliente_data.nome
   cpfCliente: { x: 405, y: 645, fontSize: 11, page: 1 }, // cliente_data.cpf
   rgCliente: { x: 50, y: 620, fontSize: 11, page: 1 }, // cliente_data.rg
-  rgExpedidor: { x: 315, y: 620, fontSize: 9, page: 1 }, // cliente_data.orgaoEmissor
+  rgExpedidor: { x: 108, y: 620, fontSize: 9, page: 1 }, // cliente_data.orgaoEmissor
   rgUF: { x: 164, y: 620, fontSize: 9, page: 1 }, // Estado do órgão emissor
   rgEmissao: { x: 210, y: 620, fontSize: 8, page: 1 }, // Data emissão RG (se disponível)
   nacionalidade: { x: 270, y: 620, fontSize: 9, page: 1 }, // cliente_data.nacionalidade
   localNascimento: { x: 405, y: 620, fontSize: 10, page: 1 }, // cliente_data.cidade (nascimento)
-  estadoCivil: { x: 100, y: 570, fontSize: 9, page: 1 }, // TROCADO: Estado Civil para Y:570
+  estadoCivil: { x: 94, y: 570, fontSize: 9, page: 1 }, // Estado Civil: X:94, Y:570
 
   // ENDEREÇO DO CLIENTE - TROCADO PARA Y:595
   enderecoCliente: { x: 55, y: 595, fontSize: 9, page: 1 }, // Endereço completo trocado para Y:595
@@ -64,7 +64,7 @@ export const USER_CCB_COORDINATES: CCBUserMapping = {
   percentualIndice: { x: 300, y: 300, fontSize: 10, page: 1 }, // Taxa ou índice
 
   // TAXAS E ENCARGOS
-  taxaJurosEfetivaMensal: { x: 95, y: 245, fontSize: 10, page: 1 }, // taxa_juros mensal
+  taxaJurosEfetivaMensal: { x: 90, y: 245, fontSize: 10, page: 1 }, // 9. Taxa Juros Efetiva Mensal
   taxaJurosEfetivaAnual: { x: 230, y: 245, fontSize: 11, page: 1 }, // taxa_juros anual
   iof: { x: 300, y: 245, fontSize: 11, page: 1 }, // condicoes_data.valorIof
   pracaPagamento: { x: 490, y: 245, fontSize: 10, page: 1 }, // cidade_emissao
@@ -77,8 +77,8 @@ export const USER_CCB_COORDINATES: CCBUserMapping = {
   dataLiberacaoRecurso: { x: 50, y: 150, fontSize: 10, page: 1 }, // Data liberação
 
   // VALORES LÍQUIDOS
-  valorLiquidoLiberado: { x: 410, y: 163, fontSize: 9, page: 1 }, // Valor - taxas
-  valorLiquidoEmissor: { x: 475, y: 150, fontSize: 9, page: 1 }, // Valor ao emissor
+  valorLiquidoLiberado: { x: 410, y: 166, fontSize: 9, page: 1 }, // 20. Valor líquido liberado
+  valorLiquidoEmissor: { x: 475, y: 152, fontSize: 9, page: 1 }, // 20.a Valor Líquido Liberado ao Emissor
 
   // ==========================================
   // PÁGINA 2 - DADOS BANCÁRIOS E PARCELAS
@@ -87,8 +87,8 @@ export const USER_CCB_COORDINATES: CCBUserMapping = {
   // 🏦 DADOS BANCÁRIOS PESSOA FÍSICA (Seção 22)
   bancoEmitente: { x: 170, y: 660, fontSize: 10, page: 2 }, // dados_pagamento_codigo_banco
   agenciaEmitente: { x: 290, y: 660, fontSize: 10, page: 2 }, // dados_pagamento_agencia
-  contaEmitente: { x: 460, y: 670, fontSize: 9, page: 2 }, // dados_pagamento_conta
-  tipoContaEmitente: { x: 482, y: 660, fontSize: 9, page: 2 }, // dados_pagamento_tipo
+  contaEmitente: { x: 460, y: 674, fontSize: 7, page: 2 }, // Conta Nº
+  tipoContaEmitente: { x: 482, y: 662, fontSize: 7, page: 2 }, // Tipo de Conta
 
   // DADOS BANCÁRIOS PESSOA JURÍDICA (Seções 23-24)
   razaoSocialEmitenteEmpresa: { x: 65, y: 630, fontSize: 10, page: 2 }, // cliente_data.razaoSocial
