@@ -39,7 +39,7 @@ export const USER_CCB_COORDINATES: CCBUserMapping = {
   rgEmissao: { x: 210, y: 620, fontSize: 8, page: 1 }, // Data emissão RG (se disponível)
   nacionalidade: { x: 270, y: 620, fontSize: 9, page: 1 }, // cliente_data.nacionalidade
   localNascimento: { x: 405, y: 620, fontSize: 10, page: 1 }, // cliente_data.cidade (nascimento)
-  estadoCivil: { x: 94, y: 570, fontSize: 9, page: 1 }, // Estado Civil: X:94, Y:570
+  estadoCivil: { x: 90, y: 570, fontSize: 11, page: 1 }, // Estado Civil: X:90, Y:570, size:11
 
   // ENDEREÇO DO CLIENTE - TROCADO PARA Y:595
   enderecoCliente: { x: 55, y: 595, fontSize: 9, page: 1 }, // Endereço completo trocado para Y:595
@@ -97,7 +97,7 @@ export const USER_CCB_COORDINATES: CCBUserMapping = {
   agenciaEmitenteEmpresa: { x: 290, y: 610, fontSize: 10, page: 2 }, // Agência PJ
   contaEmitenteEmpresa: { x: 460, y: 630, fontSize: 9, page: 2 }, // Conta PJ
   tipoContaEmitenteEmpresa: { x: 482, y: 617, fontSize: 9, page: 2 }, // Tipo conta PJ
-  chavePix: { x: 110, y: 584, fontSize: 9, page: 2 }, // chave pix do pf ou pj - COORDENADAS CORRETAS
+  chavePix: { x: 110, y: 587, fontSize: 9, page: 2 }, // chave pix do pf ou pj - COORDENADAS ATUALIZADAS
 
   // 📅 FLUXO DE PAGAMENTO - PARCELAS (Página 2)
   // Parcela 1
