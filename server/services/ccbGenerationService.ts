@@ -162,6 +162,21 @@ export class CCBGenerationService {
         parseado: enderecoParseado
       });
       
+      // ========================================
+      // DETECÇÃO INTELIGENTE DO TIPO DE CLIENTE
+      // ========================================
+      const isPJ = !!(proposalData.cliente_data?.razaoSocial || proposalData.cliente_data?.cnpj);
+      const isPF = !isPJ;
+      const tipoCliente = isPJ ? 'PJ' : 'PF';
+      
+      console.log(`🔍 [CCB] Tipo de Cliente Detectado: ${tipoCliente}`);
+      console.log(`🔍 [CCB] isPF: ${isPF}, isPJ: ${isPJ}`);
+      if (isPJ) {
+        console.log(`🏢 [CCB] Cliente PJ - Razão Social: ${dadosCliente.razaoSocial}, CNPJ: ${dadosCliente.cnpj}`);
+      } else {
+        console.log(`👤 [CCB] Cliente PF - Nome: ${dadosCliente.nome}, CPF: ${dadosCliente.cpf}`);
+      }
+      
       // CONDIÇÕES FINANCEIRAS
       const condicoesFinanceiras = {
         valor: proposalData.valor || proposalData.valor_aprovado || (proposalData.condicoes_data?.valor) || 0,
@@ -312,76 +327,112 @@ export class CCBGenerationService {
         });
       }
 
-      // RG E DOCUMENTAÇÃO
-      if (USER_CCB_COORDINATES.rgCliente && dadosCliente.rg && dadosCliente.rg !== "NÃO INFORMADO") {
-        firstPage.drawText(dadosCliente.rg, {
-          x: USER_CCB_COORDINATES.rgCliente.x,
-          y: USER_CCB_COORDINATES.rgCliente.y,
-          size: USER_CCB_COORDINATES.rgCliente.fontSize,
-          font: helveticaFont,
-          color: rgb(0, 0, 0),
-        });
-      }
+      // ========================================
+      // CAMPOS ESPECÍFICOS DE PESSOA FÍSICA (PF)
+      // Só renderizar se o cliente for PF
+      // ========================================
+      if (isPF) {
+        console.log("📝 [CCB] Renderizando campos específicos de PF...");
+        
+        // RG E DOCUMENTAÇÃO - APENAS PARA PF
+        if (USER_CCB_COORDINATES.rgCliente && dadosCliente.rg && dadosCliente.rg !== "NÃO INFORMADO") {
+          firstPage.drawText(dadosCliente.rg, {
+            x: USER_CCB_COORDINATES.rgCliente.x,
+            y: USER_CCB_COORDINATES.rgCliente.y,
+            size: USER_CCB_COORDINATES.rgCliente.fontSize,
+            font: helveticaFont,
+            color: rgb(0, 0, 0),
+          });
+        }
 
-      if (USER_CCB_COORDINATES.rgExpedidor && dadosCliente.orgaoEmissor && dadosCliente.orgaoEmissor !== "NÃO INFORMADO") {
-        firstPage.drawText(dadosCliente.orgaoEmissor, {
-          x: USER_CCB_COORDINATES.rgExpedidor.x,
-          y: USER_CCB_COORDINATES.rgExpedidor.y,
-          size: USER_CCB_COORDINATES.rgExpedidor.fontSize,
-          font: helveticaFont,
-          color: rgb(0, 0, 0),
-        });
-      }
+        if (USER_CCB_COORDINATES.rgExpedidor && dadosCliente.orgaoEmissor && dadosCliente.orgaoEmissor !== "NÃO INFORMADO") {
+          firstPage.drawText(dadosCliente.orgaoEmissor, {
+            x: USER_CCB_COORDINATES.rgExpedidor.x,
+            y: USER_CCB_COORDINATES.rgExpedidor.y,
+            size: USER_CCB_COORDINATES.rgExpedidor.fontSize,
+            font: helveticaFont,
+            color: rgb(0, 0, 0),
+          });
+        }
 
-      if (USER_CCB_COORDINATES.rgUF && dadosCliente.rgUf && dadosCliente.rgUf !== "NÃO INFORMADO") {
-        firstPage.drawText(dadosCliente.rgUf, {
-          x: USER_CCB_COORDINATES.rgUF.x,
-          y: USER_CCB_COORDINATES.rgUF.y,
-          size: USER_CCB_COORDINATES.rgUF.fontSize,
-          font: helveticaFont,
-          color: rgb(0, 0, 0),
-        });
-      }
+        if (USER_CCB_COORDINATES.rgUF && dadosCliente.rgUf && dadosCliente.rgUf !== "NÃO INFORMADO") {
+          firstPage.drawText(dadosCliente.rgUf, {
+            x: USER_CCB_COORDINATES.rgUF.x,
+            y: USER_CCB_COORDINATES.rgUF.y,
+            size: USER_CCB_COORDINATES.rgUF.fontSize,
+            font: helveticaFont,
+            color: rgb(0, 0, 0),
+          });
+        }
 
-      if (USER_CCB_COORDINATES.rgEmissao && dadosCliente.rgDataEmissao && dadosCliente.rgDataEmissao !== "NÃO INFORMADO") {
-        const dataRg = format(new Date(dadosCliente.rgDataEmissao), "dd/MM/yyyy");
-        firstPage.drawText(dataRg, {
-          x: USER_CCB_COORDINATES.rgEmissao.x,
-          y: USER_CCB_COORDINATES.rgEmissao.y,
-          size: USER_CCB_COORDINATES.rgEmissao.fontSize,
-          font: helveticaFont,
-          color: rgb(0, 0, 0),
-        });
-      }
+        if (USER_CCB_COORDINATES.rgEmissao && dadosCliente.rgDataEmissao && dadosCliente.rgDataEmissao !== "NÃO INFORMADO") {
+          const dataRg = format(new Date(dadosCliente.rgDataEmissao), "dd/MM/yyyy");
+          firstPage.drawText(dataRg, {
+            x: USER_CCB_COORDINATES.rgEmissao.x,
+            y: USER_CCB_COORDINATES.rgEmissao.y,
+            size: USER_CCB_COORDINATES.rgEmissao.fontSize,
+            font: helveticaFont,
+            color: rgb(0, 0, 0),
+          });
+        }
 
-      if (USER_CCB_COORDINATES.nacionalidade && dadosCliente.nacionalidade && dadosCliente.nacionalidade !== "NÃO INFORMADO") {
-        firstPage.drawText(dadosCliente.nacionalidade || "Brasileira", {
-          x: USER_CCB_COORDINATES.nacionalidade.x,
-          y: USER_CCB_COORDINATES.nacionalidade.y,
-          size: USER_CCB_COORDINATES.nacionalidade.fontSize,
-          font: helveticaFont,
-          color: rgb(0, 0, 0),
-        });
-      }
+        if (USER_CCB_COORDINATES.nacionalidade && dadosCliente.nacionalidade && dadosCliente.nacionalidade !== "NÃO INFORMADO") {
+          firstPage.drawText(dadosCliente.nacionalidade || "Brasileira", {
+            x: USER_CCB_COORDINATES.nacionalidade.x,
+            y: USER_CCB_COORDINATES.nacionalidade.y,
+            size: USER_CCB_COORDINATES.nacionalidade.fontSize,
+            font: helveticaFont,
+            color: rgb(0, 0, 0),
+          });
+        }
 
-      if (USER_CCB_COORDINATES.localNascimento && dadosCliente.localNascimento && dadosCliente.localNascimento !== "NÃO INFORMADO") {
-        firstPage.drawText(dadosCliente.localNascimento, {
-          x: USER_CCB_COORDINATES.localNascimento.x,
-          y: USER_CCB_COORDINATES.localNascimento.y,
-          size: USER_CCB_COORDINATES.localNascimento.fontSize,
-          font: helveticaFont,
-          color: rgb(0, 0, 0),
-        });
-      }
+        if (USER_CCB_COORDINATES.localNascimento && dadosCliente.localNascimento && dadosCliente.localNascimento !== "NÃO INFORMADO") {
+          firstPage.drawText(dadosCliente.localNascimento, {
+            x: USER_CCB_COORDINATES.localNascimento.x,
+            y: USER_CCB_COORDINATES.localNascimento.y,
+            size: USER_CCB_COORDINATES.localNascimento.fontSize,
+            font: helveticaFont,
+            color: rgb(0, 0, 0),
+          });
+        }
 
-      if (USER_CCB_COORDINATES.estadoCivil && dadosCliente.estadoCivil && dadosCliente.estadoCivil !== "NÃO INFORMADO") {
-        firstPage.drawText(dadosCliente.estadoCivil, {
-          x: USER_CCB_COORDINATES.estadoCivil.x,
-          y: USER_CCB_COORDINATES.estadoCivil.y,
-          size: USER_CCB_COORDINATES.estadoCivil.fontSize,
-          font: helveticaFont,
-          color: rgb(0, 0, 0),
-        });
+        if (USER_CCB_COORDINATES.estadoCivil && dadosCliente.estadoCivil && dadosCliente.estadoCivil !== "NÃO INFORMADO") {
+          firstPage.drawText(dadosCliente.estadoCivil, {
+            x: USER_CCB_COORDINATES.estadoCivil.x,
+            y: USER_CCB_COORDINATES.estadoCivil.y,
+            size: USER_CCB_COORDINATES.estadoCivil.fontSize,
+            font: helveticaFont,
+            color: rgb(0, 0, 0),
+          });
+        }
+      } else if (isPJ) {
+        // ========================================
+        // CAMPOS ESPECÍFICOS DE PESSOA JURÍDICA (PJ)
+        // Só renderizar se o cliente for PJ
+        // ========================================
+        console.log("🏢 [CCB] Renderizando campos específicos de PJ...");
+        
+        // RAZÃO SOCIAL - APENAS PARA PJ
+        if (USER_CCB_COORDINATES.nomeCliente && dadosCliente.razaoSocial && dadosCliente.razaoSocial !== "") {
+          firstPage.drawText(dadosCliente.razaoSocial, {
+            x: USER_CCB_COORDINATES.nomeCliente.x,
+            y: USER_CCB_COORDINATES.nomeCliente.y,
+            size: USER_CCB_COORDINATES.nomeCliente.fontSize,
+            font: helveticaFont,
+            color: rgb(0, 0, 0),
+          });
+        }
+        
+        // CNPJ - APENAS PARA PJ
+        if (USER_CCB_COORDINATES.cpfCliente && dadosCliente.cnpj && dadosCliente.cnpj !== "") {
+          firstPage.drawText(this.formatCNPJ(dadosCliente.cnpj), {
+            x: USER_CCB_COORDINATES.cpfCliente.x,
+            y: USER_CCB_COORDINATES.cpfCliente.y,
+            size: USER_CCB_COORDINATES.cpfCliente.fontSize,
+            font: helveticaFont,
+            color: rgb(0, 0, 0),
+          });
+        }
       }
 
       // ENDEREÇO CLIENTE - APENAS LOGRADOURO + NÚMERO + COMPLEMENTO
@@ -745,116 +796,125 @@ export class CCBGenerationService {
       // PÁGINA 2 - DADOS BANCÁRIOS E PARCELAS
       // ========================================
       if (secondPage) {
-        // DADOS BANCÁRIOS PESSOA FÍSICA
-        if (USER_CCB_COORDINATES.bancoEmitente) {
-          const banco = dadosPagamento.banco || "NÃO INFORMADO";
-          secondPage.drawText(banco, {
-            x: USER_CCB_COORDINATES.bancoEmitente.x,
-            y: USER_CCB_COORDINATES.bancoEmitente.y,
-            size: USER_CCB_COORDINATES.bancoEmitente.fontSize,
-            font: helveticaFont,
-            color: rgb(0, 0, 0),
-          });
-        }
+        // ========================================
+        // DADOS BANCÁRIOS CONDICIONAIS PF/PJ
+        // ========================================
+        if (isPF) {
+          // DADOS BANCÁRIOS PESSOA FÍSICA
+          console.log("💳 [CCB] Renderizando dados bancários de PF...");
+          
+          if (USER_CCB_COORDINATES.bancoEmitente) {
+            const banco = dadosPagamento.banco || "NÃO INFORMADO";
+            secondPage.drawText(banco, {
+              x: USER_CCB_COORDINATES.bancoEmitente.x,
+              y: USER_CCB_COORDINATES.bancoEmitente.y,
+              size: USER_CCB_COORDINATES.bancoEmitente.fontSize,
+              font: helveticaFont,
+              color: rgb(0, 0, 0),
+            });
+          }
 
-        if (USER_CCB_COORDINATES.agenciaEmitente) {
-          const agencia = dadosPagamento.agencia || "NÃO INFORMADO";
-          secondPage.drawText(agencia, {
-            x: USER_CCB_COORDINATES.agenciaEmitente.x,
-            y: USER_CCB_COORDINATES.agenciaEmitente.y,
-            size: USER_CCB_COORDINATES.agenciaEmitente.fontSize,
-            font: helveticaFont,
-            color: rgb(0, 0, 0),
-          });
-        }
+          if (USER_CCB_COORDINATES.agenciaEmitente) {
+            const agencia = dadosPagamento.agencia || "NÃO INFORMADO";
+            secondPage.drawText(agencia, {
+              x: USER_CCB_COORDINATES.agenciaEmitente.x,
+              y: USER_CCB_COORDINATES.agenciaEmitente.y,
+              size: USER_CCB_COORDINATES.agenciaEmitente.fontSize,
+              font: helveticaFont,
+              color: rgb(0, 0, 0),
+            });
+          }
 
-        if (USER_CCB_COORDINATES.contaEmitente) {
-          const conta = dadosPagamento.conta || "NÃO INFORMADO";
-          secondPage.drawText(conta, {
-            x: USER_CCB_COORDINATES.contaEmitente.x,
-            y: USER_CCB_COORDINATES.contaEmitente.y,
-            size: USER_CCB_COORDINATES.contaEmitente.fontSize,
-            font: helveticaFont,
-            color: rgb(0, 0, 0),
-          });
-        }
+          if (USER_CCB_COORDINATES.contaEmitente) {
+            const conta = dadosPagamento.conta || "NÃO INFORMADO";
+            secondPage.drawText(conta, {
+              x: USER_CCB_COORDINATES.contaEmitente.x,
+              y: USER_CCB_COORDINATES.contaEmitente.y,
+              size: USER_CCB_COORDINATES.contaEmitente.fontSize,
+              font: helveticaFont,
+              color: rgb(0, 0, 0),
+            });
+          }
 
-        if (USER_CCB_COORDINATES.tipoContaEmitente) {
-          const tipoConta = dadosPagamento.tipoConta || "NÃO INFORMADO";
-          secondPage.drawText(tipoConta, {
-            x: USER_CCB_COORDINATES.tipoContaEmitente.x,
-            y: USER_CCB_COORDINATES.tipoContaEmitente.y,
-            size: USER_CCB_COORDINATES.tipoContaEmitente.fontSize,
-            font: helveticaFont,
-            color: rgb(0, 0, 0),
-          });
-        }
+          if (USER_CCB_COORDINATES.tipoContaEmitente) {
+            const tipoConta = dadosPagamento.tipoConta || "NÃO INFORMADO";
+            secondPage.drawText(tipoConta, {
+              x: USER_CCB_COORDINATES.tipoContaEmitente.x,
+              y: USER_CCB_COORDINATES.tipoContaEmitente.y,
+              size: USER_CCB_COORDINATES.tipoContaEmitente.fontSize,
+              font: helveticaFont,
+              color: rgb(0, 0, 0),
+            });
+          }
+          
+        } else if (isPJ) {
+          // DADOS BANCÁRIOS PESSOA JURÍDICA
+          console.log("🏢 [CCB] Renderizando dados bancários de PJ...");
+          
+          if (USER_CCB_COORDINATES.razaoSocialEmitenteEmpresa && dadosCliente.razaoSocial && dadosCliente.razaoSocial !== "") {
+            secondPage.drawText(dadosCliente.razaoSocial, {
+              x: USER_CCB_COORDINATES.razaoSocialEmitenteEmpresa.x,
+              y: USER_CCB_COORDINATES.razaoSocialEmitenteEmpresa.y,
+              size: USER_CCB_COORDINATES.razaoSocialEmitenteEmpresa.fontSize,
+              font: helveticaFont,
+              color: rgb(0, 0, 0),
+            });
+          }
 
-        // DADOS BANCÁRIOS PESSOA JURÍDICA - MAPEAR TUDO PARA TESTE
-        if (USER_CCB_COORDINATES.razaoSocialEmitenteEmpresa) {
-          const razaoSocial = dadosCliente.razaoSocial || "NÃO INFORMADO";
-          secondPage.drawText(razaoSocial, {
-            x: USER_CCB_COORDINATES.razaoSocialEmitenteEmpresa.x,
-            y: USER_CCB_COORDINATES.razaoSocialEmitenteEmpresa.y,
-            size: USER_CCB_COORDINATES.razaoSocialEmitenteEmpresa.fontSize,
-            font: helveticaFont,
-            color: rgb(0, 0, 0),
-          });
-        }
+          if (USER_CCB_COORDINATES.cnpjEmitenteEmpresa && dadosCliente.cnpj && dadosCliente.cnpj !== "") {
+            secondPage.drawText(this.formatCNPJ(dadosCliente.cnpj), {
+              x: USER_CCB_COORDINATES.cnpjEmitenteEmpresa.x,
+              y: USER_CCB_COORDINATES.cnpjEmitenteEmpresa.y,
+              size: USER_CCB_COORDINATES.cnpjEmitenteEmpresa.fontSize,
+              font: helveticaFont,
+              color: rgb(0, 0, 0),
+            });
+          }
+          
+          // Dados bancários PJ usam os mesmos campos
+          if (USER_CCB_COORDINATES.bancoEmitenteEmpresa) {
+            const banco = dadosPagamento.banco || "NÃO INFORMADO";
+            secondPage.drawText(banco, {
+              x: USER_CCB_COORDINATES.bancoEmitenteEmpresa.x,
+              y: USER_CCB_COORDINATES.bancoEmitenteEmpresa.y,
+              size: USER_CCB_COORDINATES.bancoEmitenteEmpresa.fontSize,
+              font: helveticaFont,
+              color: rgb(0, 0, 0),
+            });
+          }
 
-        if (USER_CCB_COORDINATES.cnpjEmitenteEmpresa) {
-          const cnpj = dadosCliente.cnpj || "NÃO INFORMADO";
-          secondPage.drawText(cnpj, {
-            x: USER_CCB_COORDINATES.cnpjEmitenteEmpresa.x,
-            y: USER_CCB_COORDINATES.cnpjEmitenteEmpresa.y,
-            size: USER_CCB_COORDINATES.cnpjEmitenteEmpresa.fontSize,
-            font: helveticaFont,
-            color: rgb(0, 0, 0),
-          });
-        }
+          if (USER_CCB_COORDINATES.agenciaEmitenteEmpresa) {
+            const agencia = dadosPagamento.agencia || "NÃO INFORMADO";
+            secondPage.drawText(agencia, {
+              x: USER_CCB_COORDINATES.agenciaEmitenteEmpresa.x,
+              y: USER_CCB_COORDINATES.agenciaEmitenteEmpresa.y,
+              size: USER_CCB_COORDINATES.agenciaEmitenteEmpresa.fontSize,
+              font: helveticaFont,
+              color: rgb(0, 0, 0),
+            });
+          }
 
-        if (USER_CCB_COORDINATES.bancoEmitenteEmpresa) {
-          const banco = dadosPagamento.banco || "NÃO INFORMADO";
-          secondPage.drawText(banco, {
-            x: USER_CCB_COORDINATES.bancoEmitenteEmpresa.x,
-            y: USER_CCB_COORDINATES.bancoEmitenteEmpresa.y,
-            size: USER_CCB_COORDINATES.bancoEmitenteEmpresa.fontSize,
-            font: helveticaFont,
-            color: rgb(0, 0, 0),
-          });
-        }
+          if (USER_CCB_COORDINATES.contaEmitenteEmpresa) {
+            const conta = dadosPagamento.conta || "NÃO INFORMADO";
+            secondPage.drawText(conta, {
+              x: USER_CCB_COORDINATES.contaEmitenteEmpresa.x,
+              y: USER_CCB_COORDINATES.contaEmitenteEmpresa.y,
+              size: USER_CCB_COORDINATES.contaEmitenteEmpresa.fontSize,
+              font: helveticaFont,
+              color: rgb(0, 0, 0),
+            });
+          }
 
-        if (USER_CCB_COORDINATES.agenciaEmitenteEmpresa) {
-          const agencia = dadosPagamento.agencia || "NÃO INFORMADO";
-          secondPage.drawText(agencia, {
-            x: USER_CCB_COORDINATES.agenciaEmitenteEmpresa.x,
-            y: USER_CCB_COORDINATES.agenciaEmitenteEmpresa.y,
-            size: USER_CCB_COORDINATES.agenciaEmitenteEmpresa.fontSize,
-            font: helveticaFont,
-            color: rgb(0, 0, 0),
-          });
-        }
-
-        if (USER_CCB_COORDINATES.contaEmitenteEmpresa) {
-          const conta = dadosPagamento.conta || "NÃO INFORMADO";
-          secondPage.drawText(conta, {
-            x: USER_CCB_COORDINATES.contaEmitenteEmpresa.x,
-            y: USER_CCB_COORDINATES.contaEmitenteEmpresa.y,
-            size: USER_CCB_COORDINATES.contaEmitenteEmpresa.fontSize,
-            font: helveticaFont,
-            color: rgb(0, 0, 0),
-          });
-        }
-
-        if (USER_CCB_COORDINATES.tipoContaEmitenteEmpresa) {
-          const tipoConta = dadosPagamento.tipoConta || "NÃO INFORMADO";
-          secondPage.drawText(tipoConta, {
-            x: USER_CCB_COORDINATES.tipoContaEmitenteEmpresa.x,
-            y: USER_CCB_COORDINATES.tipoContaEmitenteEmpresa.y,
-            size: USER_CCB_COORDINATES.tipoContaEmitenteEmpresa.fontSize,
-            font: helveticaFont,
-            color: rgb(0, 0, 0),
-          });
+          if (USER_CCB_COORDINATES.tipoContaEmitenteEmpresa) {
+            const tipoConta = dadosPagamento.tipoConta || "NÃO INFORMADO";
+            secondPage.drawText(tipoConta, {
+              x: USER_CCB_COORDINATES.tipoContaEmitenteEmpresa.x,
+              y: USER_CCB_COORDINATES.tipoContaEmitenteEmpresa.y,
+              size: USER_CCB_COORDINATES.tipoContaEmitenteEmpresa.fontSize,
+              font: helveticaFont,
+              color: rgb(0, 0, 0),
+            });
+          }
         }
 
         // CHAVE PIX - MAPEAR SEMPRE PARA TESTE
@@ -1099,6 +1159,15 @@ export class CCBGenerationService {
     if (!cpf) return "";
     const cleaned = cpf.replace(/\D/g, "");
     return cleaned.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+  }
+
+  /**
+   * Formata CNPJ
+   */
+  private formatCNPJ(cnpj?: string): string {
+    if (!cnpj) return "";
+    const cleaned = cnpj.replace(/\D/g, "");
+    return cleaned.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5");
   }
 
   /**
