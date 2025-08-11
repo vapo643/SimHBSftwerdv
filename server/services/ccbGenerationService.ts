@@ -108,7 +108,7 @@ export class CCBGenerationService {
       const enderecoCompleto = proposalData.cliente_data?.endereco || "";
       if (enderecoCompleto && enderecoCompleto !== "NÃO INFORMADO") {
         // Exemplo: "Rua Miguel Angelo, 675, Casa, Parque Residencial Laranjeiras, Serra/ES - CEP: 29165-460"
-        const partes = enderecoCompleto.split(",").map(s => s.trim());
+        const partes = enderecoCompleto.split(",").map((s: string) => s.trim());
         
         if (partes.length >= 4) {
           enderecoParseado.logradouro = partes[0] || ""; // "Rua Miguel Angelo"
@@ -533,7 +533,7 @@ export class CCBGenerationService {
       }
 
       if (USER_CCB_COORDINATES.vencimentoParcela && parcelas.length > 0) {
-        const primeiroVenc = format(new Date(parcelas[0].vencimento), "dd/MM/yyyy");
+        const primeiroVenc = format(new Date(parcelas[0].data_vencimento || parcelas[0].vencimento), "dd/MM/yyyy");
         firstPage.drawText(primeiroVenc, {
           x: USER_CCB_COORDINATES.vencimentoParcela.x,
           y: USER_CCB_COORDINATES.vencimentoParcela.y,
@@ -544,7 +544,7 @@ export class CCBGenerationService {
       }
 
       if (USER_CCB_COORDINATES.vencimentoUltimaParcela && parcelas.length > 0) {
-        const ultimoVenc = format(new Date(parcelas[parcelas.length - 1].vencimento), "dd/MM/yyyy");
+        const ultimoVenc = format(new Date(parcelas[parcelas.length - 1].data_vencimento || parcelas[parcelas.length - 1].vencimento), "dd/MM/yyyy");
         firstPage.drawText(ultimoVenc, {
           x: USER_CCB_COORDINATES.vencimentoUltimaParcela.x,
           y: USER_CCB_COORDINATES.vencimentoUltimaParcela.y,
@@ -810,8 +810,8 @@ export class CCBGenerationService {
           }
           
           // Vencimento da parcela
-          if (USER_CCB_COORDINATES[vencimentoKey] && parcela.vencimento) {
-            const vencFormatado = format(new Date(parcela.vencimento), "dd/MM/yyyy");
+          if (USER_CCB_COORDINATES[vencimentoKey] && (parcela.data_vencimento || parcela.vencimento)) {
+            const vencFormatado = format(new Date(parcela.data_vencimento || parcela.vencimento), "dd/MM/yyyy");
             currentPage.drawText(vencFormatado, {
               x: USER_CCB_COORDINATES[vencimentoKey].x,
               y: USER_CCB_COORDINATES[vencimentoKey].y,
@@ -822,8 +822,8 @@ export class CCBGenerationService {
           }
           
           // Valor da parcela
-          if (USER_CCB_COORDINATES[valorKey] && parcela.valor) {
-            currentPage.drawText(this.formatCurrency(parcela.valor), {
+          if (USER_CCB_COORDINATES[valorKey] && (parcela.valor_parcela || parcela.valor)) {
+            currentPage.drawText(this.formatCurrency(parcela.valor_parcela || parcela.valor), {
               x: USER_CCB_COORDINATES[valorKey].x,
               y: USER_CCB_COORDINATES[valorKey].y,
               size: USER_CCB_COORDINATES[valorKey].fontSize,
@@ -832,7 +832,7 @@ export class CCBGenerationService {
             });
           }
           
-          console.log(`📄 [CCB] Parcela ${parcelaNum} preenchida: Venc: ${parcela.vencimento}, Valor: ${parcela.valor}`);
+          console.log(`📄 [CCB] Parcela ${parcelaNum} preenchida: Venc: ${parcela.data_vencimento || parcela.vencimento}, Valor: ${parcela.valor_parcela || parcela.valor}`);
         }
       }
 

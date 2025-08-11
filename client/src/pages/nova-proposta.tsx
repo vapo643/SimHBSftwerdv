@@ -30,6 +30,14 @@ const clienteSchema = z.object({
   clienteTelefone: z.string().min(10, "Telefone inválido"),
   clienteDataNascimento: z.string().min(1, "Data de nascimento é obrigatória"),
   clienteRenda: z.string().min(1, "Renda é obrigatória"),
+  // Campos de endereço separados
+  clienteCep: z.string().min(8, "CEP inválido").optional(),
+  clienteLogradouro: z.string().min(1, "Logradouro é obrigatório").optional(),
+  clienteNumero: z.string().min(1, "Número é obrigatório").optional(),
+  clienteComplemento: z.string().optional(),
+  clienteBairro: z.string().min(1, "Bairro é obrigatório").optional(),
+  clienteCidade: z.string().min(1, "Cidade é obrigatória").optional(),
+  clienteUf: z.string().length(2, "UF deve ter 2 caracteres").optional(),
 });
 
 const emprestimoSchema = z.object({
@@ -37,6 +45,13 @@ const emprestimoSchema = z.object({
   prazo: z.string().min(1, "Prazo é obrigatório"),
   finalidade: z.string().min(1, "Finalidade é obrigatória"),
   garantia: z.string().min(1, "Garantia é obrigatória"),
+  // Dados bancários para pagamento
+  dadosPagamentoTipo: z.enum(["pix", "conta_bancaria"]).optional(),
+  dadosPagamentoPix: z.string().optional(),
+  dadosPagamentoBanco: z.string().optional(),
+  dadosPagamentoAgencia: z.string().optional(),
+  dadosPagamentoConta: z.string().optional(),
+  dadosPagamentoDigito: z.string().optional(),
 });
 
 const documentosSchema = z.object({
@@ -275,6 +290,102 @@ export default function NovaProposta() {
                       )}
                     </div>
                   </div>
+
+                  {/* Campos de Endereço */}
+                  <h4 className="mt-6 mb-4 text-md font-semibold text-gray-800">Endereço</h4>
+                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                    <div>
+                      <Label htmlFor="clienteCep">CEP</Label>
+                      <Input
+                        id="clienteCep"
+                        name="clienteCep"
+                        placeholder="12345-678"
+                        {...register("clienteCep")}
+                      />
+                      {errors.clienteCep && (
+                        <p className="text-sm text-red-600">{errors.clienteCep.message}</p>
+                      )}
+                    </div>
+
+                    <div className="md:col-span-2">
+                      <Label htmlFor="clienteLogradouro">Logradouro</Label>
+                      <Input
+                        id="clienteLogradouro"
+                        name="clienteLogradouro"
+                        placeholder="Rua, Avenida, etc."
+                        {...register("clienteLogradouro")}
+                      />
+                      {errors.clienteLogradouro && (
+                        <p className="text-sm text-red-600">{errors.clienteLogradouro.message}</p>
+                      )}
+                    </div>
+
+                    <div>
+                      <Label htmlFor="clienteNumero">Número</Label>
+                      <Input
+                        id="clienteNumero"
+                        name="clienteNumero"
+                        placeholder="123"
+                        {...register("clienteNumero")}
+                      />
+                      {errors.clienteNumero && (
+                        <p className="text-sm text-red-600">{errors.clienteNumero.message}</p>
+                      )}
+                    </div>
+
+                    <div>
+                      <Label htmlFor="clienteComplemento">Complemento</Label>
+                      <Input
+                        id="clienteComplemento"
+                        name="clienteComplemento"
+                        placeholder="Apto, Casa, etc. (opcional)"
+                        {...register("clienteComplemento")}
+                      />
+                      {errors.clienteComplemento && (
+                        <p className="text-sm text-red-600">{errors.clienteComplemento.message}</p>
+                      )}
+                    </div>
+
+                    <div>
+                      <Label htmlFor="clienteBairro">Bairro</Label>
+                      <Input
+                        id="clienteBairro"
+                        name="clienteBairro"
+                        placeholder="Nome do bairro"
+                        {...register("clienteBairro")}
+                      />
+                      {errors.clienteBairro && (
+                        <p className="text-sm text-red-600">{errors.clienteBairro.message}</p>
+                      )}
+                    </div>
+
+                    <div>
+                      <Label htmlFor="clienteCidade">Cidade</Label>
+                      <Input
+                        id="clienteCidade"
+                        name="clienteCidade"
+                        placeholder="Nome da cidade"
+                        {...register("clienteCidade")}
+                      />
+                      {errors.clienteCidade && (
+                        <p className="text-sm text-red-600">{errors.clienteCidade.message}</p>
+                      )}
+                    </div>
+
+                    <div>
+                      <Label htmlFor="clienteUf">UF</Label>
+                      <Input
+                        id="clienteUf"
+                        name="clienteUf"
+                        placeholder="SP"
+                        maxLength={2}
+                        {...register("clienteUf")}
+                      />
+                      {errors.clienteUf && (
+                        <p className="text-sm text-red-600">{errors.clienteUf.message}</p>
+                      )}
+                    </div>
+                  </div>
                 </div>
               )}
 
@@ -361,6 +472,83 @@ export default function NovaProposta() {
                         <p className="text-sm text-red-600">{errors.garantia.message}</p>
                       )}
                     </div>
+                  </div>
+
+                  {/* Dados Bancários para Pagamento */}
+                  <h4 className="mt-6 mb-4 text-md font-semibold text-gray-800">Dados para Pagamento</h4>
+                  <div className="space-y-4">
+                    <div>
+                      <Label>Forma de Recebimento</Label>
+                      <div className="flex gap-4">
+                        <label className="flex items-center cursor-pointer">
+                          <input
+                            type="radio"
+                            value="pix"
+                            {...register("dadosPagamentoTipo")}
+                            className="mr-2"
+                          />
+                          PIX
+                        </label>
+                        <label className="flex items-center cursor-pointer">
+                          <input
+                            type="radio"
+                            value="conta_bancaria"
+                            {...register("dadosPagamentoTipo")}
+                            className="mr-2"
+                          />
+                          Conta Bancária
+                        </label>
+                      </div>
+                    </div>
+
+                    {watch("dadosPagamentoTipo") === "pix" && (
+                      <div>
+                        <Label htmlFor="dadosPagamentoPix">Chave PIX</Label>
+                        <Input
+                          id="dadosPagamentoPix"
+                          placeholder="CPF, E-mail, Telefone ou Chave Aleatória"
+                          {...register("dadosPagamentoPix")}
+                        />
+                      </div>
+                    )}
+
+                    {watch("dadosPagamentoTipo") === "conta_bancaria" && (
+                      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <div>
+                          <Label htmlFor="dadosPagamentoBanco">Banco</Label>
+                          <Input
+                            id="dadosPagamentoBanco"
+                            placeholder="Ex: Banco do Brasil"
+                            {...register("dadosPagamentoBanco")}
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="dadosPagamentoAgencia">Agência</Label>
+                          <Input
+                            id="dadosPagamentoAgencia"
+                            placeholder="0000"
+                            {...register("dadosPagamentoAgencia")}
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="dadosPagamentoConta">Conta</Label>
+                          <Input
+                            id="dadosPagamentoConta"
+                            placeholder="00000"
+                            {...register("dadosPagamentoConta")}
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="dadosPagamentoDigito">Dígito</Label>
+                          <Input
+                            id="dadosPagamentoDigito"
+                            placeholder="0"
+                            maxLength={2}
+                            {...register("dadosPagamentoDigito")}
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}

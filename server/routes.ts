@@ -586,6 +586,96 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // Test endpoint para verificar correções de bugs
+  app.get("/api/test-data-flow", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { createServerSupabaseAdminClient } = await import("./lib/supabase");
+      const supabase = createServerSupabaseAdminClient();
+
+      // Buscar última proposta criada
+      const { data: proposta, error } = await supabase
+        .from("propostas")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .single();
+
+      if (error || !proposta) {
+        return res.json({ 
+          status: "nenhuma_proposta",
+          message: "Nenhuma proposta encontrada no banco"
+        });
+      }
+
+      // Verificar campos de endereço
+      const enderecoFields = {
+        cep: proposta.cliente_data?.cep,
+        logradouro: proposta.cliente_data?.logradouro,
+        numero: proposta.cliente_data?.numero,
+        complemento: proposta.cliente_data?.complemento,
+        bairro: proposta.cliente_data?.bairro,
+        cidade: proposta.cliente_data?.cidade,
+        estado: proposta.cliente_data?.estado || proposta.cliente_data?.uf,
+        endereco_concatenado: proposta.cliente_data?.endereco
+      };
+
+      // Verificar dados bancários
+      const dadosBancarios = {
+        tipo: proposta.dados_pagamento_tipo,
+        pix: proposta.dados_pagamento_pix,
+        banco: proposta.dados_pagamento_banco,
+        agencia: proposta.dados_pagamento_agencia,
+        conta: proposta.dados_pagamento_conta,
+        digito: proposta.dados_pagamento_digito,
+        nome_titular: proposta.dados_pagamento_nome_titular,
+        cpf_titular: proposta.dados_pagamento_cpf_titular
+      };
+
+      // Verificar parcelas
+      const { data: parcelas } = await supabase
+        .from("parcelas")
+        .select("*")
+        .eq("proposta_id", proposta.id)
+        .order("numero_parcela", { ascending: true });
+
+      const resultado = {
+        proposta_id: proposta.id,
+        created_at: proposta.created_at,
+        status: "analise_completa",
+        bugs_corrigidos: {
+          bug1_endereco: {
+            status: enderecoFields.logradouro ? "✅ CORRIGIDO" : "❌ PENDENTE",
+            campos_separados: enderecoFields,
+            tem_campos_separados: !!(enderecoFields.logradouro && enderecoFields.numero && enderecoFields.bairro)
+          },
+          bug2_dados_bancarios: {
+            status: dadosBancarios.tipo ? "✅ CORRIGIDO" : "❌ PENDENTE",
+            dados_salvos: dadosBancarios,
+            tem_dados_completos: !!(dadosBancarios.tipo && (dadosBancarios.pix || dadosBancarios.banco))
+          },
+          bug3_parcelas: {
+            status: parcelas && parcelas.length > 0 ? "✅ CORRIGIDO" : "❌ PENDENTE",
+            quantidade_parcelas: parcelas?.length || 0,
+            primeira_parcela: parcelas?.[0] || null,
+            ultima_parcela: parcelas?.[parcelas.length - 1] || null
+          }
+        },
+        resumo: {
+          todos_bugs_corrigidos: !!(
+            enderecoFields.logradouro && 
+            dadosBancarios.tipo && 
+            parcelas && parcelas.length > 0
+          )
+        }
+      };
+
+      res.json(resultado);
+    } catch (error) {
+      console.error("Erro no teste de fluxo de dados:", error);
+      res.status(500).json({ error: "Erro ao testar fluxo de dados" });
+    }
+  });
+
   // Debug endpoint for RBAC validation
   app.get("/api/debug/me", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     try {
@@ -1883,8 +1973,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
           orgaoEmissor: dataWithId.clienteOrgaoEmissor,
           estadoCivil: dataWithId.clienteEstadoCivil,
           nacionalidade: dataWithId.clienteNacionalidade,
+          // Campos de endereço separados
           cep: dataWithId.clienteCep,
-          endereco: dataWithId.clienteEndereco,
+          logradouro: dataWithId.clienteLogradouro,
+          numero: dataWithId.clienteNumero,
+          complemento: dataWithId.clienteComplemento,
+          bairro: dataWithId.clienteBairro,
+          cidade: dataWithId.clienteCidade,
+          estado: dataWithId.clienteUf,
+          // Campo legado para compatibilidade
+          endereco: dataWithId.clienteEndereco || 
+            [dataWithId.clienteLogradouro, dataWithId.clienteNumero, dataWithId.clienteComplemento, dataWithId.clienteBairro].filter(Boolean).join(", "),
           ocupacao: dataWithId.clienteOcupacao,
           telefoneEmpresa: dataWithId.clienteTelefoneEmpresa,
         },
@@ -1900,6 +1999,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           valorTotalFinanciado: dataWithId.valorTotalFinanciado,
         },
 
+        // Dados de pagamento (separados para melhor controle)
+        dados_pagamento_tipo: dataWithId.dadosPagamentoTipo,
+        dados_pagamento_pix: dataWithId.dadosPagamentoPix,
+        dados_pagamento_banco: dataWithId.dadosPagamentoBanco,
+        dados_pagamento_agencia: dataWithId.dadosPagamentoAgencia,
+        dados_pagamento_conta: dataWithId.dadosPagamentoConta,
+        dados_pagamento_digito: dataWithId.dadosPagamentoDigito,
+        dados_pagamento_nome_titular: dataWithId.clienteNome, // Usa o nome do cliente como titular
+        dados_pagamento_cpf_titular: dataWithId.clienteCpf, // Usa o CPF do cliente como titular
+
         // Additional fields
         produtoId: dataWithId.produtoId,
         tabelaComercialId: dataWithId.tabelaComercialId,
@@ -1910,6 +2019,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Create the proposal
       const proposta = await storage.createProposta(dataForDatabase);
+
+      // Generate installments automatically after proposal creation
+      try {
+        const prazo = parseInt(dataForDatabase.condicoesData.prazo) || 12;
+        const valor = parseFloat(dataForDatabase.condicoesData.valor) || 0;
+        const valorParcela = valor / prazo;
+        
+        const { createServerSupabaseAdminClient } = await import("./lib/supabase");
+        const supabase = createServerSupabaseAdminClient();
+        
+        // Generate installments
+        const parcelas = [];
+        const hoje = new Date();
+        
+        for (let i = 0; i < prazo; i++) {
+          const vencimento = new Date(hoje);
+          vencimento.setMonth(vencimento.getMonth() + i + 1);
+          
+          parcelas.push({
+            proposta_id: proposalId,
+            numero_parcela: i + 1,
+            valor_parcela: valorParcela,
+            data_vencimento: vencimento.toISOString(),
+            status: 'pendente'
+          });
+        }
+        
+        if (parcelas.length > 0) {
+          const { error: parcelasError } = await supabase
+            .from('parcelas')
+            .insert(parcelas);
+            
+          if (parcelasError) {
+            console.error('Erro ao criar parcelas:', parcelasError);
+          } else {
+            console.log(`✅ ${parcelas.length} parcelas criadas para proposta ${proposalId}`);
+          }
+        }
+      } catch (parcelasError) {
+        console.error('Erro ao gerar parcelas automáticas:', parcelasError);
+        // Não falhar a criação da proposta por causa das parcelas
+      }
 
       res.status(201).json(proposta);
     } catch (error) {
