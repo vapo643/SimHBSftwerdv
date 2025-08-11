@@ -1,7 +1,7 @@
 # Simpix Credit Management System
 
 ## Overview
-Simpix is a full-stack TypeScript application for comprehensive credit management. It streamlines the credit proposal workflow from creation and analysis to payment processing and formalization tracking. The project aims to provide a robust, secure, and user-friendly platform for financial institutions, focusing on banking-grade security, compliance, and efficient data management to become a leading solution in the credit management market.
+Simpix is a full-stack TypeScript application for comprehensive credit management, streamlining the credit proposal workflow from creation and analysis to payment processing and formalization tracking. It aims to provide a robust, secure, and user-friendly platform for financial institutions, focusing on banking-grade security, compliance, and efficient data management to become a leading solution in the credit management market.
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
@@ -9,122 +9,6 @@ Focus: CCB template generation over UI visualization.
 Language: Portuguese, studying software architecture.
 Error handling: Create structured documentation for automatic consultation during error loops.
 **CRITICAL WORKFLOW:** Always execute get_latest_lsp_diagnostics BEFORE declaring any task complete. Never say "pronto" with LSP errors > 0. Follow ESTRATEGIA_ZERO_MICRO_ERROS.md protocol to avoid the 80/20 pattern (80% working, 20% fixing micro errors).
-
-## Recent Changes (2025-08-11 - 17:45)
-- ✅ **SEQUENTIAL NUMERIC IDS IMPLEMENTED:** Revolutionary ID system deployed:
-  - **Database Schema:** Changed propostas.id from text to serial starting at 300001
-  - **Automatic Sequence:** Created propostas_id_seq starting at 300001, incrementing by 1
-  - **Code Updates:** Routes updated to use auto-generated IDs instead of UUIDs
-  - **CCB Display:** CCB now shows only numeric ID (300001) without "PROP-" prefix
-  - **LSP Clean:** All 27 TypeScript errors resolved (100% code quality)
-- ✅ **CHAVE PIX COORDINATES VERIFIED:** Final precision positioning confirmed:
-  - **Exact Coordinates:** chavePix positioned at X:110, Y:584, fontSize:9 (user specification)
-  - **System Verification:** Coordinates marked as correct in ccbUserCoordinates.ts
-  - **Testing Confirmed:** CCB generation logs confirm proper coordinate application
-
-## Recent Changes (2025-08-11 - 16:16)
-- ✅ **CRITICAL CCB COORDINATE CONFLICTS RESOLVED:** Final resolution of duplicate coordinate definitions:
-  - **Root Cause Found:** Multiple conflicting coordinate systems (ccbFieldMapping, ccbUserCoordinates, ccbFieldMappingComplete)
-  - **Conflicts Eliminated:** Removed all imports from ccbFieldMapping.ts in ccbGenerationService.ts
-  - **Single Source of Truth:** Only USER_CCB_COORDINATES now active with exact user specifications
-  - **Coordinates Verified:** All address fields correctly positioned at Y:670: enderecoCliente(X:100), CEP(X:270), Cidade(X:380), UF(X:533)
-  - **Log Validation:** System logs confirm correct coordinate application (no more Y:650 errors)
-  - **Duplication Fixed:** No more duplicate field rendering from conflicting systems
-  - **Font Sizes Corrected:** Applied user-specified font sizes (enderecoCliente: 10, CEP: 9, Cidade: 10, UF: 9)
-
-## Recent Changes (2025-08-08 - 20:38)
-- ✅ **CRITICAL LSP ERROR CLEANUP COMPLETE:** Revolutionary code quality improvement achieved:
-  - **Problem Solved:** Fixed all database column references that were causing PostgresError exceptions  
-  - **Systematic Correction:** Updated variable naming: `clienteData` → `dadosCliente`, `condicoesData` → `condicoesFinanceiras`, `dataPagamento` → `dadosPagamento`
-  - **Database Schema Alignment:** Code now properly references existing database columns instead of non-existent ones
-  - **Quality Metrics:** LSP errors reduced from 64 to 0 (100% resolution)
-  - **Data Mapping Audit:** Complete audit of all 95 CCB field mappings with proper data source connections
-  - **Robustness Enhancement:** Added null checks and "NÃO INFORMADO" validation to prevent empty field errors
-  - **User Satisfaction:** Addressed critical user frustration with systematic zero-error approach
-
-## Recent Changes (2025-08-08 - 19:15)
-- ✅ **USER COORDINATES FULLY INTEGRATED:** Revolutionary coordinate system completely replaced:
-  - **ccbUserCoordinates.ts:** 71 manual user coordinates mapped to 47 system fields + 24 installments
-  - **ccbGenerationService.ts:** Now imports and uses USER_CCB_COORDINATES instead of old SIMPIX_CCB_MAPPING
-  - **Validation Routes:** Created `/api/test-ccb-coordinates/validate` to confirm correct coordinates in use
-  - **Test Results:** Confirmed all coordinates applying correctly (Nome: X:55,Y:645, CPF: X:405,Y:645, etc.)
-  - **Button Integration:** Both "Gerar CCB" and "Gerar CCB Novamente" buttons connected to new coordinates
-  - **Full Coverage:** 3-page template with precise field positioning for all 122 mapped locations
-
-## Recent Changes (2025-08-08)
-- ✅ **COMPLETE CCB COORDINATE SYSTEM IMPLEMENTED:** Revolutionary calibration infrastructure deployed:
-  - **ccbFieldMappingComplete.ts:** Comprehensive mapping of all 50+ CCB fields with professional positioning
-  - **ccbCoordinateCalibrator.ts:** Advanced calibration service with visual grid generation and intelligent testing
-  - **ccb-calibration.ts API:** Complete REST API for coordinate calibration with 6 specialized endpoints
-  - **Visual Calibration Tools:** Grid overlay system with coordinate markers and field highlighting
-  - **Intelligent Testing:** Automated coordinate testing with real data and adjustment recommendations
-  - **Professional Infrastructure:** Template diagnosis, AcroForm detection, and comprehensive reporting
-  - **Quality Assurance:** All LSP errors resolved, proper authentication, and production-ready endpoints
-- ✅ **ARCHITECTURAL FIX:** Layout bug definitively resolved with preventive solution:
-  - **Problem Solved:** Tela de Gestão de Contratos now displays sidebar menu correctly
-  - **Root Cause Fixed:** Pages were rendering outside DashboardLayout, losing navigation
-  - **Template System:** Created `_template.tsx` as mandatory base for all new pages
-  - **Documentation:** Added `PADROES_DE_CODIGO.md` with mandatory development rules
-  - **Developer Rule:** Never create pages from scratch - always copy and rename template
-  - **Future Prevention:** This architectural pattern prevents layout regression in all new pages
-- ✅ **QUALITY GATE IMPLEMENTATION:** Professional-grade automated code quality control:
-  - Installed Husky + lint-staged (industry standard)
-  - Pre-commit hooks automatically run ESLint --fix and Prettier
-  - Only modified files are checked (ultra-fast)
-  - No separate process needed - runs automatically on git commit
-  - Test with: `npx lint-staged` or `./scripts/test-quality-gate.sh`
-- ✅ **CODE QUALITY REVOLUTION:** ESLint problems reduced from 3000+ to 634 (79% reduction):
-  - Migrated from legacy .eslintrc.js to modern eslint.config.js (v9.x format)
-  - Configured separate environments for client (browser) and server (Node.js)
-  - Added missing globals (React, setTimeout, fetch, etc.)
-  - Removed obsolete configuration files
-  - Integrated Prettier for automatic formatting
-  - Documentation at `/error_docs/ESLINT_3000_ERRORS_RESOLUTION.md`
-
-## Recent Changes (2025-08-08 - Earlier)
-- ✅ **NEW FEATURE:** Tela de Gestão de Contratos implementada com sucesso:
-  - Backend: API `/api/contratos` com restrição RBAC (ADMIN/DIRETOR)
-  - Frontend: Nova página em `/gestao/contratos` com tabela completa
-  - Integração com Supabase Storage para visualização de CCBs assinados
-  - Paginação, loading states e empty states implementados
-  - TanStack Query para gerenciamento de estado
-  - Item adicionado ao menu lateral para usuários autorizados
-- ✅ **CRITICAL FIX:** Menu lateral responsivo implementado definitivamente:
-  - Estado sidebarOpen com useState para controle de visibilidade
-  - useEffect para fechar menu com tecla Escape
-  - Botão hamburger mobile (lg:hidden) no header
-  - Overlay com backdrop-blur-sm para UX adequada
-  - Sidebar com transform/transition para animação suave
-  - Links com onClick={handleNavClick} para fechar menu ao navegar
-  - Documentação em `/error_docs/SIDEBAR_MENU_RESPONSIVE_FIX.md` para evitar reincidência
-
-## Recent Changes (2025-08-07)
-- ✅ **CRITICAL FIX:** CCB template conflict resolved - all routes now use `ccbGenerationService.ts` with pdf-lib
-- ✅ Legacy services renamed: `ccbGenerator.ts.LEGADO_PDFKit`, `ccbTemplateGenerator.ts.LEGADO_v1`, etc.
-- ✅ `clicksign-integration.ts` corrected to use template-based CCB generation (preserves logo/formatting)
-- ✅ `/ccb-url` endpoint enhanced to always fetch latest version from storage
-- ✅ Error Documentation System implemented in `/error_docs/`
-- ✅ Storage error fixes: Admin client for Supabase Storage operations
-- ✅ **BREAKTHROUGH:** Template file issue resolved - replaced 16KB generic with 564KB real Simpix template
-- ✅ **COORDINATE MAPPING SYSTEM:** Implemented professional field positioning architecture:
-  - `ccbFieldMapping.ts` - Pre-defined coordinates for all CCB fields
-  - `ccbCoordinateMapper.ts` - Dynamic adjustment system with presets
-  - `ccb-coordinate-test.ts` - Testing endpoints for iterative refinement
-  - Template now displays with Simpix logo and properly positioned data fields
-- ✅ **URL ROUTING FIX:** Resolved "Erro ao carregar status do CCB" caused by malformed API URLs:
-  - Frontend now consistently uses `/api/formalizacao/{id}/ccb` endpoint
-  - Fixed DocumentViewer to handle `ccb_gerado: false` state gracefully
-  - Removed special character "✓" that caused pdf-lib encoding errors
-  - Eliminated "[OBJECT] [OBJECT]" errors from URL parsing issues
-- ✅ **COMPLETE FRONTEND IMPLEMENTATION:** All 30+ digitizable CCB fields now fully integrated:
-  - PF/PJ toggle with conditional fields (Razão Social, CNPJ for companies)
-  - Complete RG documentation (UF emission, emission date)
-  - Detailed address fields (logradouro, número, complemento, bairro, cidade, UF)
-  - PIX vs bank account payment tabs with full data capture
-  - Local de nascimento field for complete personal data
-  - ClientDataStep.tsx completely rewritten with validation
-  - nova.tsx updated to map ALL new fields to database
-  - Complete data flow established: Frontend Forms → Database → CCB PDF Generation
 
 ## System Architecture
 
@@ -143,21 +27,10 @@ Error handling: Create structured documentation for automatic consultation durin
 - **Authentication**: Supabase Auth integration with JWT middleware and custom RBAC
 - **File Storage**: Supabase Storage for document uploads
 - **Server-Side Time Management**: Centralized timezone utilities for Brasília timezone consistency
-- **Security**: Comprehensive security architecture including:
-    - Helmet for security headers
-    - Two-tier rate limiting
-    - Input sanitization
-    - Timing attack protection
-    - Magic number validation and comprehensive file security validation for uploads
-    - Cryptographically secure UUIDs for IDs
-    - Soft delete implementation for financial compliance
-    - Row Level Security (RLS) for multi-tenant data isolation and fine-grained access control
-    - Automated security testing pipeline (SAST/DAST)
-    - OWASP ASVS Level 1 compliance and SAMM v1.5 integration
-    - Anti-fragile RBAC implementation
+- **Security**: Comprehensive security architecture including Helmet, two-tier rate limiting, input sanitization, timing attack protection, magic number validation, cryptographically secure UUIDs for IDs, soft delete implementation, Row Level Security (RLS), automated security testing (SAST/DAST), OWASP ASVS Level 1 compliance, SAMM v1.5 integration, and anti-fragile RBAC implementation.
 - **Credit Simulation**: Real-time credit simulation API using Tabela Price, IOF, TAC, and CET calculations, integrated with commercial tables.
-- **Document Management**: Secure private bucket for document storage with signed URLs, organized folder structure, and multi-format support. Enhanced with admin client authentication and automatic fallback for missing files.
-- **PDF Generation**: Template-based CCB generation using authentic Simpix template (564KB) with `pdf-lib` for precise field filling. **BREAKTHROUGH RESOLUTION:** Discovered and fixed critical template file issue (was using 16KB generic instead of real Simpix template). Includes professional coordinate mapping system for accurate field positioning, dynamic adjustment capabilities, and comprehensive testing framework.
+- **Document Management**: Secure private bucket for document storage with signed URLs, organized folder structure, multi-format support, admin client authentication, and automatic fallback for missing files.
+- **PDF Generation**: Template-based CCB generation using authentic Simpix template (564KB) with `pdf-lib` for precise field filling, professional coordinate mapping, dynamic adjustment capabilities, and comprehensive testing framework.
 - **Payment Workflow**: Complete payment queue system with batch processing, multiple payment methods, and formalization tracking integration.
 - **Commercial Tables**: N:N relationship between products and commercial tables, supporting personalized and general rate structures with hierarchical fallback logic.
 
@@ -166,6 +39,7 @@ Error handling: Create structured documentation for automatic consultation durin
 - Key tables: `users`, `propostas`, `parceiros`, `lojas`, `produtos`, `tabelas_comerciais`, `produto_tabela_comercial`, `comunicacao_logs`, `proposta_logs`, `parcelas`, `audit_delete_log`, `inter_collections`, `inter_webhooks`, `inter_callbacks`.
 - `propostas` table includes detailed client data, loan conditions, formalization tracking, and status tracking.
 - Soft deletes implemented using `deleted_at` columns.
+- Sequential numeric IDs for `propostas.id` starting at 300001.
 
 ## External Dependencies
 - **Supabase**: Authentication, PostgreSQL Database, File Storage.
@@ -184,10 +58,10 @@ Error handling: Create structured documentation for automatic consultation durin
 - **express-rate-limit**: API rate limiting.
 - **zxcvbn**: Password strength validation.
 - **uuid**: Cryptographically secure UUIDs.
-- **PDFKit**: Dynamic PDF generation.
+- **pdf-lib**: Dynamic PDF generation.
 - **OWASP ZAP**: Dynamic Application Security Testing (DAST).
 - **Semgrep**: Static Application Security Testing (SAST).
 - **OWASP Dependency-Check**: Software Composition Analysis (SCA).
-- **ClickSign**: Electronic signature integration with HMAC validation, event deduplication, and automated workflow for CCB signature to boleto generation. Supports regenerating signature links.
+- **ClickSign**: Electronic signature integration with HMAC validation, event deduplication, and automated workflow for CCB signature to boleto generation.
 - **Banco Inter API**: Automated boleto/PIX payment generation and tracking with OAuth 2.0 authentication (mTLS), and webhook system for payment notifications.
-- **Error Documentation System**: Structured error documentation in `/error_docs/` with categorized .md files for automatic consultation during error loops. Includes tested solutions and prevention strategies.
+- **Error Documentation System**: Structured error documentation in `/error_docs/` for automatic consultation.
