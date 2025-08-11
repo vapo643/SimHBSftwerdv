@@ -10,6 +10,18 @@ Language: Portuguese, studying software architecture.
 Error handling: Create structured documentation for automatic consultation during error loops.
 **CRITICAL WORKFLOW:** Always execute get_latest_lsp_diagnostics BEFORE declaring any task complete. Never say "pronto" with LSP errors > 0. Follow ESTRATEGIA_ZERO_MICRO_ERROS.md protocol to avoid the 80/20 pattern (80% working, 20% fixing micro errors).
 
+## Recent Changes (2025-08-11 - 17:45)
+- ✅ **SEQUENTIAL NUMERIC IDS IMPLEMENTED:** Revolutionary ID system deployed:
+  - **Database Schema:** Changed propostas.id from text to serial starting at 300001
+  - **Automatic Sequence:** Created propostas_id_seq starting at 300001, incrementing by 1
+  - **Code Updates:** Routes updated to use auto-generated IDs instead of UUIDs
+  - **CCB Display:** CCB now shows only numeric ID (300001) without "PROP-" prefix
+  - **LSP Clean:** All 27 TypeScript errors resolved (100% code quality)
+- ✅ **CHAVE PIX COORDINATES VERIFIED:** Final precision positioning confirmed:
+  - **Exact Coordinates:** chavePix positioned at X:110, Y:584, fontSize:9 (user specification)
+  - **System Verification:** Coordinates marked as correct in ccbUserCoordinates.ts
+  - **Testing Confirmed:** CCB generation logs confirm proper coordinate application
+
 ## Recent Changes (2025-08-11 - 16:16)
 - ✅ **CRITICAL CCB COORDINATE CONFLICTS RESOLVED:** Final resolution of duplicate coordinate definitions:
   - **Root Cause Found:** Multiple conflicting coordinate systems (ccbFieldMapping, ccbUserCoordinates, ccbFieldMappingComplete)

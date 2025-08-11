@@ -2223,15 +2223,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/propostas", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     try {
-      const { v4: uuidv4 } = await import("uuid");
+      // ID será gerado automaticamente pela sequência do banco (300001, 300002, etc.)
+      // Não precisamos gerar ID aqui pois o serial fará isso automaticamente
 
-      // Generate cryptographically secure UUID for the proposal
-      const proposalId = uuidv4();
-
-      // Add the generated ID and userId to the request body
+      // Add userId to the request body (ID será gerado automaticamente pelo banco)
       const dataWithId = {
         ...req.body,
-        id: proposalId,
         userId: req.user?.id,
         lojaId: req.body.lojaId || req.user?.loja_id, // Fallback to user's loja_id if not provided
       };
@@ -2249,7 +2246,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // FIX: Transform flat structure to JSONB structure expected by database
       const dataForDatabase = {
-        id: dataWithId.id,
+        // id será gerado automaticamente pela sequência
         userId: dataWithId.userId,
         lojaId: dataWithId.lojaId,
         status: dataWithId.status || "aguardando_analise",
@@ -2343,7 +2340,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           vencimento.setMonth(vencimento.getMonth() + i + 1);
           
           parcelas.push({
-            proposta_id: proposalId,
+            proposta_id: proposta.id,
             numero_parcela: i + 1,
             valor_parcela: valorParcela,
             data_vencimento: vencimento.toISOString(),
@@ -2359,7 +2356,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           if (parcelasError) {
             console.error('Erro ao criar parcelas:', parcelasError);
           } else {
-            console.log(`✅ ${parcelas.length} parcelas criadas para proposta ${proposalId}`);
+            console.log(`✅ ${parcelas.length} parcelas criadas para proposta ${proposta.id}`);
           }
         }
       } catch (parcelasError) {

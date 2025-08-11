@@ -254,9 +254,9 @@ export class CCBGenerationService {
       // PÁGINA 1 - DADOS PRINCIPAIS
       // ========================================
 
-      // IDENTIFICAÇÃO DA CCB
+      // IDENTIFICAÇÃO DA CCB - SOMENTE O NÚMERO (SEM "PROP-")
       if (USER_CCB_COORDINATES.numeroCedula) {
-        const numeroCCB = `PROP-${proposalData.id}`;
+        const numeroCCB = String(proposalData.id); // Apenas o número: 300001, 300002, etc.
         firstPage.drawText(numeroCCB, {
           x: USER_CCB_COORDINATES.numeroCedula.x,
           y: USER_CCB_COORDINATES.numeroCedula.y,
