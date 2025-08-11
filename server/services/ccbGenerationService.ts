@@ -466,6 +466,8 @@ export class CCBGenerationService {
 
       // SEÇÃO II.CREDOR ORIGINÁRIO - SEMPRE DADOS FIXOS DA SIMPIX
       // REGRA DE NEGÓCIO: NUNCA usar dados do parceiro, SEMPRE Simpix
+      console.log("📊 [CCB] ✅ APLICANDO DADOS FIXOS DA SIMPIX - SEÇÃO II.CREDOR ORIGINÁRIO");
+      
       if (USER_CCB_COORDINATES.razaoSocialCredor) {
         firstPage.drawText(dadosCredorOriginario.razaoSocial, {
           x: USER_CCB_COORDINATES.razaoSocialCredor.x,

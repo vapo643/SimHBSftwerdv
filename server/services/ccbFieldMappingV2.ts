@@ -349,7 +349,7 @@ export class CoordinateAdjuster {
    */
   static validateFieldPlacement(page: PDFPage, coord: FieldCoordinate, value: string): boolean {
     // Validação simplificada - em produção usaríamos OCR
-    const hasValue = value && value.trim().length > 0;
+    const hasValue = Boolean(value && value.trim().length > 0);
     const inBounds =
       coord.x >= 0 &&
       coord.x <= 595 && // A4 width
@@ -549,13 +549,13 @@ export class FieldDetector {
       estadoCivil: data.clienteEstadoCivil || "",
       localNascimento: data.clienteLocalNascimento || "",
 
-      // Dados do credor (empresa)
-      razaoSocialCredor: configEmpresa.razaoSocial,
-      cnpjCredor: configEmpresa.cnpj,
-      enderecoCredor: enderecoCredorCompleto,
-      cidadeCredor: configEmpresa.cidade,
-      ufCredor: configEmpresa.uf,
-      cepCredor: configEmpresa.cep,
+      // Dados do credor (empresa) - SEMPRE SIMPIX (REGRA DE NEGÓCIO)
+      razaoSocialCredor: "SIMPIX SOLUCOES E INTERMEDIACOES LTDA",
+      cnpjCredor: "42.162.929/0001-67",
+      enderecoCredor: "AV PAULO PEREIRA GOMES, 1156",
+      cidadeCredor: "SERRA",
+      ufCredor: "ES",
+      cepCredor: "29.166-828",
 
       // Valores e taxas COMPLETOS
       valorPrincipal: this.formatCurrency(data.valor),
