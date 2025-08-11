@@ -306,33 +306,33 @@ export class CCBGenerationService {
         });
       }
 
-      // DADOS DO CLIENTE
-      if (USER_CCB_COORDINATES.nomeCliente && dadosCliente.nome && dadosCliente.nome !== "NÃO INFORMADO") {
-        firstPage.drawText(dadosCliente.nome, {
-          x: USER_CCB_COORDINATES.nomeCliente.x,
-          y: USER_CCB_COORDINATES.nomeCliente.y,
-          size: USER_CCB_COORDINATES.nomeCliente.fontSize,
-          font: helveticaFont,
-          color: rgb(0, 0, 0),
-        });
-      }
-
-      if (USER_CCB_COORDINATES.cpfCliente && dadosCliente.cpf && dadosCliente.cpf !== "NÃO INFORMADO") {
-        firstPage.drawText(this.formatCPF(dadosCliente.cpf), {
-          x: USER_CCB_COORDINATES.cpfCliente.x,
-          y: USER_CCB_COORDINATES.cpfCliente.y,
-          size: USER_CCB_COORDINATES.cpfCliente.fontSize,
-          font: helveticaFont,
-          color: rgb(0, 0, 0),
-        });
-      }
-
       // ========================================
       // CAMPOS ESPECÍFICOS DE PESSOA FÍSICA (PF)
       // Só renderizar se o cliente for PF
       // ========================================
       if (isPF) {
         console.log("📝 [CCB] Renderizando campos específicos de PF...");
+        
+        // NOME E CPF - APENAS PARA PF
+        if (USER_CCB_COORDINATES.nomeCliente && dadosCliente.nome && dadosCliente.nome !== "NÃO INFORMADO") {
+          firstPage.drawText(dadosCliente.nome, {
+            x: USER_CCB_COORDINATES.nomeCliente.x,
+            y: USER_CCB_COORDINATES.nomeCliente.y,
+            size: USER_CCB_COORDINATES.nomeCliente.fontSize,
+            font: helveticaFont,
+            color: rgb(0, 0, 0),
+          });
+        }
+
+        if (USER_CCB_COORDINATES.cpfCliente && dadosCliente.cpf && dadosCliente.cpf !== "NÃO INFORMADO") {
+          firstPage.drawText(this.formatCPF(dadosCliente.cpf), {
+            x: USER_CCB_COORDINATES.cpfCliente.x,
+            y: USER_CCB_COORDINATES.cpfCliente.y,
+            size: USER_CCB_COORDINATES.cpfCliente.fontSize,
+            font: helveticaFont,
+            color: rgb(0, 0, 0),
+          });
+        }
         
         // RG E DOCUMENTAÇÃO - APENAS PARA PF
         if (USER_CCB_COORDINATES.rgCliente && dadosCliente.rg && dadosCliente.rg !== "NÃO INFORMADO") {
@@ -412,7 +412,7 @@ export class CCBGenerationService {
         // ========================================
         console.log("🏢 [CCB] Renderizando campos específicos de PJ...");
         
-        // RAZÃO SOCIAL - APENAS PARA PJ
+        // RAZÃO SOCIAL E CNPJ - APENAS PARA PJ (usando as mesmas coordenadas de nome/CPF)
         if (USER_CCB_COORDINATES.nomeCliente && dadosCliente.razaoSocial && dadosCliente.razaoSocial !== "") {
           firstPage.drawText(dadosCliente.razaoSocial, {
             x: USER_CCB_COORDINATES.nomeCliente.x,
@@ -423,7 +423,6 @@ export class CCBGenerationService {
           });
         }
         
-        // CNPJ - APENAS PARA PJ
         if (USER_CCB_COORDINATES.cpfCliente && dadosCliente.cnpj && dadosCliente.cnpj !== "") {
           firstPage.drawText(this.formatCNPJ(dadosCliente.cnpj), {
             x: USER_CCB_COORDINATES.cpfCliente.x,
