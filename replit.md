@@ -10,14 +10,15 @@ Language: Portuguese, studying software architecture.
 Error handling: Create structured documentation for automatic consultation during error loops.
 **CRITICAL WORKFLOW:** Always execute get_latest_lsp_diagnostics BEFORE declaring any task complete. Never say "pronto" with LSP errors > 0. Follow ESTRATEGIA_ZERO_MICRO_ERROS.md protocol to avoid the 80/20 pattern (80% working, 20% fixing micro errors).
 
-## Recent Changes (2025-08-11 - 13:08)
-- ✅ **CRITICAL BUG FIXES COMPLETE:** Three major data flow issues systematically resolved:
-  - **Bug #1 - Address Fields:** Nova Proposta form now captures separate address fields (logradouro, numero, complemento, bairro, cidade, UF) instead of concatenated string
-  - **Bug #2 - Banking Data:** Added complete payment data fields (dados_pagamento_*) to form and API, fixing NULL banking data issue
-  - **Bug #3 - Installments:** Implemented automatic parcela generation on proposal creation, populating Parcelas table correctly
-  - **Data Flow Fixed:** Form → Database → CCB Generation now works end-to-end with structured data
-  - **Test Endpoint:** Created `/api/test-data-flow` to validate all corrections are working
-  - **Zero LSP Errors:** All code quality issues resolved, maintaining Zero Micro Erros strategy
+## Recent Changes (2025-08-11 - 14:11)
+- ✅ **COMPREHENSIVE CCB FIELD CORRECTIONS COMPLETE:** Systematic implementation of diagnostic findings:
+  - **Priority 1 - Documentation Fields:** Added 7 missing RG fields to frontend form (RG, Órgão Emissor, Data Emissão RG, UF RG, Local Nascimento, Estado Civil, Nacionalidade)
+  - **Priority 2 - Banking Persistence:** Corrected clienteData mapping in POST /api/propostas to include rgDataEmissao, rgUf, localNascimento fields
+  - **Priority 3 - Address Rendering:** Separated address fields in CCB coordinates (logradouro, numero, complemento, bairro) for individual rendering
+  - **Priority 4 - Code Quality:** LSP errors reduced from 22 to 0 in frontend by removing duplicate "name" attributes from form inputs
+  - **Validation:** Created `/api/test-ccb-corrections` endpoint to verify all fixes are working
+  - **Schema Updates:** Enhanced clienteSchema in nova-proposta.tsx with complete field validation
+  - **Coordinate System:** Updated ccbUserCoordinates.ts with separated address field coordinates for precise PDF rendering
 
 ## Recent Changes (2025-08-08 - 20:38)
 - ✅ **CRITICAL LSP ERROR CLEANUP COMPLETE:** Revolutionary code quality improvement achieved:

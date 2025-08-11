@@ -30,6 +30,14 @@ const clienteSchema = z.object({
   clienteTelefone: z.string().min(10, "Telefone inválido"),
   clienteDataNascimento: z.string().min(1, "Data de nascimento é obrigatória"),
   clienteRenda: z.string().min(1, "Renda é obrigatória"),
+  // Campos de documentação - ADICIONADOS PARA CORREÇÃO CCB
+  clienteRg: z.string().min(5, "RG é obrigatório"),
+  clienteOrgaoEmissor: z.string().min(2, "Órgão emissor é obrigatório"),
+  clienteRgDataEmissao: z.string().min(1, "Data de emissão do RG é obrigatória"),
+  clienteRgUf: z.string().length(2, "UF do RG deve ter 2 caracteres"),
+  clienteLocalNascimento: z.string().min(2, "Local de nascimento é obrigatório"),
+  clienteEstadoCivil: z.string().min(1, "Estado civil é obrigatório"),
+  clienteNacionalidade: z.string().min(1, "Nacionalidade é obrigatória"),
   // Campos de endereço separados
   clienteCep: z.string().min(8, "CEP inválido").optional(),
   clienteLogradouro: z.string().min(1, "Logradouro é obrigatório").optional(),
@@ -213,7 +221,6 @@ export default function NovaProposta() {
                       <Label htmlFor="clienteNome">Nome Completo</Label>
                       <Input
                         id="clienteNome"
-                        name="clienteNome"
                         placeholder="Digite o nome completo"
                         {...register("clienteNome")}
                       />
@@ -226,7 +233,6 @@ export default function NovaProposta() {
                       <Label htmlFor="clienteCpf">CPF</Label>
                       <Input
                         id="clienteCpf"
-                        name="clienteCpf"
                         placeholder="000.000.000-00"
                         {...register("clienteCpf")}
                       />
@@ -239,7 +245,6 @@ export default function NovaProposta() {
                       <Label htmlFor="clienteEmail">Email</Label>
                       <Input
                         id="clienteEmail"
-                        name="clienteEmail"
                         type="email"
                         placeholder="email@exemplo.com"
                         {...register("clienteEmail")}
@@ -253,7 +258,6 @@ export default function NovaProposta() {
                       <Label htmlFor="clienteTelefone">Telefone</Label>
                       <Input
                         id="clienteTelefone"
-                        name="clienteTelefone"
                         placeholder="(11) 99999-9999"
                         {...register("clienteTelefone")}
                       />
@@ -266,7 +270,6 @@ export default function NovaProposta() {
                       <Label htmlFor="clienteDataNascimento">Data de Nascimento</Label>
                       <Input
                         id="clienteDataNascimento"
-                        name="clienteDataNascimento"
                         type="date"
                         {...register("clienteDataNascimento")}
                       />
@@ -281,12 +284,113 @@ export default function NovaProposta() {
                       <Label htmlFor="clienteRenda">Renda Mensal</Label>
                       <Input
                         id="clienteRenda"
-                        name="clienteRenda"
                         placeholder="R$ 5.000,00"
                         {...register("clienteRenda")}
                       />
                       {errors.clienteRenda && (
                         <p className="text-sm text-red-600">{errors.clienteRenda.message}</p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Campos de Documentação - ADICIONADOS PARA CORREÇÃO CCB */}
+                  <h4 className="mt-6 mb-4 text-md font-semibold text-gray-800">Documentação</h4>
+                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                    <div>
+                      <Label htmlFor="clienteRg">RG</Label>
+                      <Input
+                        id="clienteRg"
+                        
+                        placeholder="00.000.000-0"
+                        {...register("clienteRg")}
+                      />
+                      {errors.clienteRg && (
+                        <p className="text-sm text-red-600">{errors.clienteRg.message}</p>
+                      )}
+                    </div>
+
+                    <div>
+                      <Label htmlFor="clienteOrgaoEmissor">Órgão Emissor</Label>
+                      <Input
+                        id="clienteOrgaoEmissor"
+                        
+                        placeholder="SSP"
+                        {...register("clienteOrgaoEmissor")}
+                      />
+                      {errors.clienteOrgaoEmissor && (
+                        <p className="text-sm text-red-600">{errors.clienteOrgaoEmissor.message}</p>
+                      )}
+                    </div>
+
+                    <div>
+                      <Label htmlFor="clienteRgDataEmissao">Data de Emissão do RG</Label>
+                      <Input
+                        id="clienteRgDataEmissao"
+                        
+                        type="date"
+                        {...register("clienteRgDataEmissao")}
+                      />
+                      {errors.clienteRgDataEmissao && (
+                        <p className="text-sm text-red-600">{errors.clienteRgDataEmissao.message}</p>
+                      )}
+                    </div>
+
+                    <div>
+                      <Label htmlFor="clienteRgUf">UF do RG</Label>
+                      <Input
+                        id="clienteRgUf"
+                        
+                        placeholder="SP"
+                        maxLength={2}
+                        {...register("clienteRgUf")}
+                      />
+                      {errors.clienteRgUf && (
+                        <p className="text-sm text-red-600">{errors.clienteRgUf.message}</p>
+                      )}
+                    </div>
+
+                    <div>
+                      <Label htmlFor="clienteLocalNascimento">Local de Nascimento</Label>
+                      <Input
+                        id="clienteLocalNascimento"
+                        
+                        placeholder="São Paulo - SP"
+                        {...register("clienteLocalNascimento")}
+                      />
+                      {errors.clienteLocalNascimento && (
+                        <p className="text-sm text-red-600">{errors.clienteLocalNascimento.message}</p>
+                      )}
+                    </div>
+
+                    <div>
+                      <Label htmlFor="clienteEstadoCivil">Estado Civil</Label>
+                      <Select onValueChange={value => setValue("clienteEstadoCivil", value)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o estado civil" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="solteiro">Solteiro(a)</SelectItem>
+                          <SelectItem value="casado">Casado(a)</SelectItem>
+                          <SelectItem value="divorciado">Divorciado(a)</SelectItem>
+                          <SelectItem value="viuvo">Viúvo(a)</SelectItem>
+                          <SelectItem value="uniao_estavel">União Estável</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      {errors.clienteEstadoCivil && (
+                        <p className="text-sm text-red-600">{errors.clienteEstadoCivil.message}</p>
+                      )}
+                    </div>
+
+                    <div>
+                      <Label htmlFor="clienteNacionalidade">Nacionalidade</Label>
+                      <Input
+                        id="clienteNacionalidade"
+                        
+                        placeholder="Brasileira"
+                        {...register("clienteNacionalidade")}
+                      />
+                      {errors.clienteNacionalidade && (
+                        <p className="text-sm text-red-600">{errors.clienteNacionalidade.message}</p>
                       )}
                     </div>
                   </div>
@@ -298,7 +402,7 @@ export default function NovaProposta() {
                       <Label htmlFor="clienteCep">CEP</Label>
                       <Input
                         id="clienteCep"
-                        name="clienteCep"
+                        
                         placeholder="12345-678"
                         {...register("clienteCep")}
                       />
@@ -311,7 +415,7 @@ export default function NovaProposta() {
                       <Label htmlFor="clienteLogradouro">Logradouro</Label>
                       <Input
                         id="clienteLogradouro"
-                        name="clienteLogradouro"
+                        
                         placeholder="Rua, Avenida, etc."
                         {...register("clienteLogradouro")}
                       />
@@ -324,7 +428,7 @@ export default function NovaProposta() {
                       <Label htmlFor="clienteNumero">Número</Label>
                       <Input
                         id="clienteNumero"
-                        name="clienteNumero"
+                        
                         placeholder="123"
                         {...register("clienteNumero")}
                       />
@@ -337,7 +441,7 @@ export default function NovaProposta() {
                       <Label htmlFor="clienteComplemento">Complemento</Label>
                       <Input
                         id="clienteComplemento"
-                        name="clienteComplemento"
+                        
                         placeholder="Apto, Casa, etc. (opcional)"
                         {...register("clienteComplemento")}
                       />
@@ -350,7 +454,7 @@ export default function NovaProposta() {
                       <Label htmlFor="clienteBairro">Bairro</Label>
                       <Input
                         id="clienteBairro"
-                        name="clienteBairro"
+                        
                         placeholder="Nome do bairro"
                         {...register("clienteBairro")}
                       />
@@ -363,7 +467,7 @@ export default function NovaProposta() {
                       <Label htmlFor="clienteCidade">Cidade</Label>
                       <Input
                         id="clienteCidade"
-                        name="clienteCidade"
+                        
                         placeholder="Nome da cidade"
                         {...register("clienteCidade")}
                       />
@@ -376,7 +480,7 @@ export default function NovaProposta() {
                       <Label htmlFor="clienteUf">UF</Label>
                       <Input
                         id="clienteUf"
-                        name="clienteUf"
+                        
                         placeholder="SP"
                         maxLength={2}
                         {...register("clienteUf")}
@@ -401,7 +505,7 @@ export default function NovaProposta() {
                       <Label htmlFor="valor">Valor Solicitado</Label>
                       <Input
                         id="valor"
-                        name="valor"
+                        
                         placeholder="R$ 50.000,00"
                         {...register("valor")}
                       />
@@ -413,7 +517,7 @@ export default function NovaProposta() {
                     <div>
                       <Label htmlFor="prazo">Prazo (meses)</Label>
                       {/* Hidden input for progressive enhancement */}
-                      <input type="hidden" name="prazo" value={watch("prazo") || ""} />
+                      <input type="hidden"  value={watch("prazo") || ""} />
                       <Select onValueChange={value => setValue("prazo", value)}>
                         <SelectTrigger>
                           <SelectValue placeholder="Selecione o prazo" />
@@ -434,7 +538,7 @@ export default function NovaProposta() {
                     <div>
                       <Label htmlFor="finalidade">Finalidade</Label>
                       {/* Hidden input for progressive enhancement */}
-                      <input type="hidden" name="finalidade" value={watch("finalidade") || ""} />
+                      <input type="hidden"  value={watch("finalidade") || ""} />
                       <Select onValueChange={value => setValue("finalidade", value)}>
                         <SelectTrigger>
                           <SelectValue placeholder="Selecione a finalidade" />
@@ -455,7 +559,7 @@ export default function NovaProposta() {
                     <div>
                       <Label htmlFor="garantia">Tipo de Garantia</Label>
                       {/* Hidden input for progressive enhancement */}
-                      <input type="hidden" name="garantia" value={watch("garantia") || ""} />
+                      <input type="hidden"  value={watch("garantia") || ""} />
                       <Select onValueChange={value => setValue("garantia", value)}>
                         <SelectTrigger>
                           <SelectValue placeholder="Selecione a garantia" />
