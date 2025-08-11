@@ -12,12 +12,7 @@ import { db } from "../lib/supabase";
 import { sql } from "drizzle-orm";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import {
-  SIMPIX_CCB_MAPPING,
-  TEST_COORDINATES,
-  yFromTop,
-  formatTextWithLineBreaks,
-} from "./ccbFieldMapping";
+// REMOVIDO: Imports conflitantes do ccbFieldMapping (coordenadas antigas)
 import { CoordinateAdjustment, applyCoordinateAdjustments } from "./ccbCoordinateMapper";
 // USANDO NOVAS COORDENADAS DO USUÁRIO
 import { USER_CCB_COORDINATES, getCoordinateForSystemField } from "./ccbUserCoordinates";

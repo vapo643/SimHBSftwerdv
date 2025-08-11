@@ -41,11 +41,11 @@ export const USER_CCB_COORDINATES: CCBUserMapping = {
   localNascimento: { x: 405, y: 620, fontSize: 10, page: 1 }, // cliente_data.cidade (nascimento)
   estadoCivil: { x: 55, y: 595, fontSize: 10, page: 1 }, // cliente_data.estadoCivil
 
-  // ENDEREÇO DO CLIENTE - COORDENADAS VERTICALMENTE ESPAÇADAS
-  enderecoCliente: { x: 100, y: 670, fontSize: 8, page: 1 }, // LINHA 1: Endereço completo (logradouro + numero)
-  cepCliente: { x: 100, y: 650, fontSize: 9, page: 1 }, // LINHA 2: CEP (20px abaixo do endereço)
-  cidadeCliente: { x: 250, y: 650, fontSize: 10, page: 1 }, // LINHA 2: Cidade (ao lado do CEP)  
-  ufCliente: { x: 450, y: 650, fontSize: 9, page: 1 }, // LINHA 2: UF (ao lado da cidade)
+  // ENDEREÇO DO CLIENTE - COORDENADAS EXATAS CONFORME MAPEAMENTO REVISADO
+  enderecoCliente: { x: 100, y: 670, fontSize: 10, page: 1 }, // Endereço completo
+  cepCliente: { x: 270, y: 670, fontSize: 9, page: 1 }, // CEP  
+  cidadeCliente: { x: 380, y: 670, fontSize: 10, page: 1 }, // Cidade
+  ufCliente: { x: 533, y: 670, fontSize: 9, page: 1 }, // UF
 
   // 🏢 DADOS DO CREDOR (EMPRESA)
   razaoSocialCredor: { x: 55, y: 465, fontSize: 10, page: 1 }, // loja_nome ou "SIMPIX LTDA"

@@ -10,15 +10,15 @@ Language: Portuguese, studying software architecture.
 Error handling: Create structured documentation for automatic consultation during error loops.
 **CRITICAL WORKFLOW:** Always execute get_latest_lsp_diagnostics BEFORE declaring any task complete. Never say "pronto" with LSP errors > 0. Follow ESTRATEGIA_ZERO_MICRO_ERROS.md protocol to avoid the 80/20 pattern (80% working, 20% fixing micro errors).
 
-## Recent Changes (2025-08-11 - 15:53)
-- ✅ **CRITICAL CCB COORDINATE AUDIT COMPLETE:** Systematic cross-validation and correction of all address field positioning:
-  - **Issue Identified:** CEP, Cidade, UF coordinates had critical Y-axis deviations (Y:650 vs Y:670 required)
-  - **Coordinates Corrected:** All address fields moved to source-of-truth positions: CEP(X:270,Y:670), Cidade(X:380,Y:670), UF(X:533,Y:670)
-  - **Structure Simplified:** Unified enderecoCliente field replacing separated logradouro/numero/bairro approach
-  - **Code Updated:** ccbGenerationService.ts corrected to use accurate coordinate references
-  - **Zero LSP Errors:** Complete resolution of all compilation issues
-  - **Real Data Validation:** Tested with actual proposal data (ID: 88a44696-9b63-42ee-aa81-15f9519d24cb)
-  - **PDF Positioning Fixed:** Address fields now render at precise positions per template specification
+## Recent Changes (2025-08-11 - 16:16)
+- ✅ **CRITICAL CCB COORDINATE CONFLICTS RESOLVED:** Final resolution of duplicate coordinate definitions:
+  - **Root Cause Found:** Multiple conflicting coordinate systems (ccbFieldMapping, ccbUserCoordinates, ccbFieldMappingComplete)
+  - **Conflicts Eliminated:** Removed all imports from ccbFieldMapping.ts in ccbGenerationService.ts
+  - **Single Source of Truth:** Only USER_CCB_COORDINATES now active with exact user specifications
+  - **Coordinates Verified:** All address fields correctly positioned at Y:670: enderecoCliente(X:100), CEP(X:270), Cidade(X:380), UF(X:533)
+  - **Log Validation:** System logs confirm correct coordinate application (no more Y:650 errors)
+  - **Duplication Fixed:** No more duplicate field rendering from conflicting systems
+  - **Font Sizes Corrected:** Applied user-specified font sizes (enderecoCliente: 10, CEP: 9, Cidade: 10, UF: 9)
 
 ## Recent Changes (2025-08-08 - 20:38)
 - ✅ **CRITICAL LSP ERROR CLEANUP COMPLETE:** Revolutionary code quality improvement achieved:
