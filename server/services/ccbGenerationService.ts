@@ -528,6 +528,26 @@ export class CCBGenerationService {
         });
       }
 
+      if (USER_CCB_COORDINATES.cidadeCredor) {
+        firstPage.drawText(dadosCredorOriginario.cidade, {
+          x: USER_CCB_COORDINATES.cidadeCredor.x,
+          y: USER_CCB_COORDINATES.cidadeCredor.y,
+          size: USER_CCB_COORDINATES.cidadeCredor.fontSize,
+          font: helveticaFont,
+          color: rgb(0, 0, 0),
+        });
+      }
+
+      if (USER_CCB_COORDINATES.ufCredor) {
+        firstPage.drawText(dadosCredorOriginario.uf, {
+          x: USER_CCB_COORDINATES.ufCredor.x,
+          y: USER_CCB_COORDINATES.ufCredor.y,
+          size: USER_CCB_COORDINATES.ufCredor.fontSize,
+          font: helveticaFont,
+          color: rgb(0, 0, 0),
+        });
+      }
+
       // CONDIÇÕES FINANCEIRAS
       if (USER_CCB_COORDINATES.valorPrincipal) {
         const valor = condicoesFinanceiras.valor || 0;

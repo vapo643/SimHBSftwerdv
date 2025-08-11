@@ -47,13 +47,13 @@ export const USER_CCB_COORDINATES: CCBUserMapping = {
   cidadeCliente: { x: 380, y: 570, fontSize: 9, page: 1 }, // Cidade
   ufCliente: { x: 533, y: 570, fontSize: 9, page: 1 }, // UF
 
-  // 🏢 DADOS DO CREDOR (EMPRESA)
-  razaoSocialCredor: { x: 55, y: 465, fontSize: 10, page: 1 }, // loja_nome ou "SIMPIX LTDA"
-  cnpjCredor: { x: 445, y: 465, fontSize: 9, page: 1 }, // CNPJ da loja
-  enderecoCredor: { x: 50, y: 435, fontSize: 10, page: 1 }, // Endereço da loja
-  cepCredor: { x: 175, y: 435, fontSize: 10, page: 1 }, // CEP da loja
-  cidadeCredor: { x: 310, y: 435, fontSize: 10, page: 1 }, // Cidade da loja
-  ufCredor: { x: 440, y: 435, fontSize: 10, page: 1 }, // UF da loja
+  // 🏢 DADOS DO CREDOR (EMPRESA) - COORDENADAS AJUSTADAS
+  razaoSocialCredor: { x: 55, y: 465, fontSize: 7, page: 1 }, // Razão Social SIMPIX
+  cnpjCredor: { x: 445, y: 465, fontSize: 9, page: 1 }, // CNPJ SIMPIX
+  enderecoCredor: { x: 40, y: 435, fontSize: 6, page: 1 }, // Endereço SIMPIX
+  cepCredor: { x: 175, y: 435, fontSize: 7, page: 1 }, // CEP SIMPIX
+  cidadeCredor: { x: 310, y: 435, fontSize: 7, page: 1 }, // Cidade SIMPIX
+  ufCredor: { x: 440, y: 435, fontSize: 7, page: 1 }, // UF SIMPIX
 
   // 💰 CONDIÇÕES FINANCEIRAS (SEÇÃO III)
   valorPrincipal: { x: 50, y: 350, fontSize: 11, page: 1 }, // condicoes_data.valor
