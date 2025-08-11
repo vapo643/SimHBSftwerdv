@@ -3,6 +3,8 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { createServerSupabaseClient } from "../client/src/lib/supabase";
 import { jwtAuthMiddleware, type AuthenticatedRequest } from "./lib/jwt-auth-middleware";
+import { db } from "./lib/supabase";
+import { eq } from "drizzle-orm";
 import {
   requireAdmin,
   requireManagerOrAdmin,
@@ -23,6 +25,10 @@ import {
   updateLojaSchema,
   propostaLogs,
   propostas,
+  parceiros,
+  produtos,
+  tabelasComerciais,
+  produtoTabelaComercial,
 } from "@shared/schema";
 import { z } from "zod";
 import multer from "multer";
@@ -3798,34 +3804,175 @@ export async function registerRoutes(app: Express): Promise<Server> {
     return parseFloat(pmt.toFixed(2));
   };
 
-  // Mock de tabelas comerciais para simulação
-  const tabelasComerciais: { [key: string]: number } = {
-    "tabela-a": 5.0, // Tabela A, 5% de taxa de juros
-    "tabela-b": 7.5, // Tabela B, 7.5% de taxa de juros
-  };
+  // Rota para simular crédito COM DADOS REAIS DO BANCO
+  app.post("/api/simular", async (req, res) => {
+    try {
+      const { valorEmprestimo, prazoMeses, parceiroId, produtoId } = req.body;
 
-  // Função para obter a taxa de juros (substituirá a lógica real do DB)
-  const obterTaxaJurosPorTabela = (tabelaId: string): number => {
-    return tabelasComerciais[tabelaId] || 5.0; // Retorna 5% como padrão
-  };
+      // Validação de entrada
+      if (
+        typeof valorEmprestimo !== "number" || valorEmprestimo <= 0 ||
+        typeof prazoMeses !== "number" || prazoMeses <= 0 ||
+        (!parceiroId && !produtoId)
+      ) {
+        return res.status(400).json({ 
+          error: "Parâmetros inválidos. Forneça valorEmprestimo, prazoMeses e parceiroId ou produtoId." 
+        });
+      }
 
-  // Rota para simular crédito ATUALIZADA
-  app.post("/api/simular", (req, res) => {
-    const { valorSolicitado, prazoEmMeses, tabelaComercialId } = req.body;
+      console.log('[SIMULAÇÃO] Iniciando simulação:', { valorEmprestimo, prazoMeses, parceiroId, produtoId });
 
-    if (
-      typeof valorSolicitado !== "number" ||
-      typeof prazoEmMeses !== "number" ||
-      typeof tabelaComercialId !== "string"
-    ) {
-      return res.status(400).json({ error: "Entrada inválida." });
+      // PASSO 1: Buscar parâmetros financeiros do banco de dados
+      let taxaJurosMensal = 5.0; // Default fallback
+      let tacValor = 0;
+      let tacTipo = 'fixo';
+      let comissao = 0;
+
+      // Hierarquia de busca de taxas
+      if (parceiroId) {
+        // 1.1 - Busca dados do parceiro
+        const parceiro = await db
+          .select()
+          .from(parceiros)
+          .where(eq(parceiros.id, parceiroId))
+          .limit(1);
+
+        if (parceiro.length > 0) {
+          const parceiroData = parceiro[0];
+          
+          // Verifica se parceiro tem tabela comercial padrão
+          if (parceiroData.tabelaComercialPadraoId) {
+            const tabelaPadrao = await db
+              .select()
+              .from(tabelasComerciais)
+              .where(eq(tabelasComerciais.id, parceiroData.tabelaComercialPadraoId))
+              .limit(1);
+
+            if (tabelaPadrao.length > 0) {
+              taxaJurosMensal = parseFloat(tabelaPadrao[0].taxaJuros);
+              console.log('[SIMULAÇÃO] Usando tabela padrão do parceiro:', {
+                tabelaId: parceiroData.tabelaComercialPadraoId,
+                taxaJuros: taxaJurosMensal
+              });
+            }
+          }
+          
+          // Verifica comissão padrão do parceiro
+          if (parceiroData.comissaoPadrao) {
+            comissao = parseFloat(parceiroData.comissaoPadrao);
+          }
+        }
+      }
+
+      // 1.2 - Se produtoId fornecido, busca configurações do produto
+      if (produtoId) {
+        const produto = await db
+          .select()
+          .from(produtos)
+          .where(eq(produtos.id, produtoId))
+          .limit(1);
+
+        if (produto.length > 0) {
+          const produtoData = produto[0];
+          tacValor = parseFloat(produtoData.tacValor || '0');
+          tacTipo = produtoData.tacTipo || 'fixo';
+
+          // Busca tabelas comerciais associadas ao produto
+          const tabelasProduto = await db
+            .select({
+              tabela: tabelasComerciais
+            })
+            .from(produtoTabelaComercial)
+            .innerJoin(
+              tabelasComerciais,
+              eq(produtoTabelaComercial.tabelaComercialId, tabelasComerciais.id)
+            )
+            .where(eq(produtoTabelaComercial.produtoId, produtoId));
+
+          if (tabelasProduto.length > 0) {
+            // Prioriza tabela específica do parceiro se existir
+            let tabelaSelecionada = tabelasProduto[0].tabela;
+            
+            if (parceiroId) {
+              const tabelaParceiro = tabelasProduto.find(
+                (t: any) => t.tabela.parceiroId === parceiroId
+              );
+              if (tabelaParceiro) {
+                tabelaSelecionada = tabelaParceiro.tabela;
+                console.log('[SIMULAÇÃO] Usando tabela específica parceiro-produto');
+              }
+            }
+
+            taxaJurosMensal = parseFloat(tabelaSelecionada.taxaJuros);
+            
+            // Sobrepõe comissão se não definida no parceiro
+            if (!comissao && tabelaSelecionada.comissao) {
+              comissao = parseFloat(tabelaSelecionada.comissao);
+            }
+          }
+        }
+      }
+
+      console.log('[SIMULAÇÃO] Parâmetros obtidos do banco:', {
+        taxaJurosMensal,
+        tacValor,
+        tacTipo,
+        comissao
+      });
+
+      // PASSO 2: Executar cálculos usando o serviço de finanças
+      const { executarSimulacaoCompleta } = await import('./services/financeService.js');
+      
+      const resultado = executarSimulacaoCompleta(
+        valorEmprestimo,
+        prazoMeses,
+        taxaJurosMensal,
+        tacValor,
+        tacTipo,
+        0 // dias de carência (pode ser parametrizado depois)
+      );
+
+      // PASSO 3: Adicionar comissão ao resultado
+      const valorComissao = (valorEmprestimo * comissao) / 100;
+
+      // PASSO 4: Retornar simulação completa
+      const respostaCompleta = {
+        ...resultado,
+        comissao: {
+          percentual: comissao,
+          valor: Math.round(valorComissao * 100) / 100
+        },
+        parametrosUtilizados: {
+          parceiroId,
+          produtoId,
+          taxaJurosMensal,
+          tacValor,
+          tacTipo
+        }
+      };
+
+      // Log para validação (PROTOCOLO 5-CHECK - Item 5)
+      if (valorEmprestimo === 10000 && prazoMeses === 12) {
+        console.log('==== DEMONSTRAÇÃO DE CÁLCULO PARA R$ 10.000 em 12 meses ====');
+        console.log('Valor Empréstimo: R$', valorEmprestimo);
+        console.log('Prazo: ', prazoMeses, 'meses');
+        console.log('Taxa Juros Mensal:', taxaJurosMensal, '%');
+        console.log('IOF Total: R$', resultado.iof.total);
+        console.log('TAC: R$', resultado.tac);
+        console.log('Valor Parcela: R$', resultado.valorParcela);
+        console.log('CET Anual:', resultado.cetAnual, '%');
+        console.log('=========================================================');
+      }
+
+      return res.json(respostaCompleta);
+
+    } catch (error) {
+      console.error('[SIMULAÇÃO] Erro ao processar simulação:', error);
+      return res.status(500).json({ 
+        error: 'Erro ao processar simulação',
+        details: error instanceof Error ? error.message : 'Erro desconhecido'
+      });
     }
-
-    const taxaDeJurosMensal = obterTaxaJurosPorTabela(tabelaComercialId);
-    const valorDaParcela = calcularParcela(valorSolicitado, prazoEmMeses, taxaDeJurosMensal);
-    const cetAnual = taxaDeJurosMensal * 12 * 1.1;
-
-    return res.json({ valorParcela: valorDaParcela, cet: parseFloat(cetAnual.toFixed(2)) });
   });
 
   // Funções de mock para a simulação
