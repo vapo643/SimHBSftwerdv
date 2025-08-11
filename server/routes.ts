@@ -4930,6 +4930,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // 🧪 DEBUG ENDPOINT: Verificar dados de endereço no CCB
+  app.get("/api/test/ccb-address/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      // Buscar proposta
+      const proposal = await storage.getPropostaById(id);
+      if (!proposal) {
+        return res.status(404).json({ error: "Proposta não encontrada" });
+      }
+      
+      // Extrair dados de endereço
+      const clienteData = proposal.cliente_data as any || {};
+      
+      const debugInfo = {
+        proposalId: id,
+        addressData: {
+          endereco: clienteData.endereco || "NÃO ENCONTRADO",
+          logradouro: clienteData.logradouro || "NÃO ENCONTRADO",
+          numero: clienteData.numero || "NÃO ENCONTRADO",
+          complemento: clienteData.complemento || "NÃO ENCONTRADO",
+          bairro: clienteData.bairro || "NÃO ENCONTRADO",
+          cep: clienteData.cep || "NÃO ENCONTRADO",
+          cidade: clienteData.cidade || "NÃO ENCONTRADO",
+          estado: clienteData.estado || "NÃO ENCONTRADO",
+          uf: clienteData.uf || "NÃO ENCONTRADO"
+        },
+        coordinates: {
+          enderecoCliente: { x: 100, y: 670, fontSize: 8 },
+          cepCliente: { x: 270, y: 670, fontSize: 9 },
+          cidadeCliente: { x: 380, y: 670, fontSize: 10 },
+          ufCliente: { x: 533, y: 670, fontSize: 9 }
+        },
+        expectedRendering: {
+          endereco: clienteData.endereco || `${clienteData.logradouro || ""}, ${clienteData.numero || ""}`,
+          cep: clienteData.cep || "CEP NÃO INFORMADO",
+          cidade: clienteData.cidade || "CIDADE NÃO INFORMADA",
+          uf: clienteData.estado || clienteData.uf || "UF"
+        }
+      };
+      
+      console.log("🧪 [CCB DEBUG] Address data for proposal:", id);
+      console.log("🧪 [CCB DEBUG] Endereco:", debugInfo.expectedRendering.endereco);
+      console.log("🧪 [CCB DEBUG] CEP:", debugInfo.expectedRendering.cep);
+      console.log("🧪 [CCB DEBUG] Cidade:", debugInfo.expectedRendering.cidade);
+      console.log("🧪 [CCB DEBUG] UF:", debugInfo.expectedRendering.uf);
+      
+      return res.json(debugInfo);
+    } catch (error) {
+      console.error("❌ Erro no teste de endereço:", error);
+      return res.status(500).json({ error: error.message });
+    }
+  });
+
   app.get("/api/test/timing-invalid", timingNormalizerMiddleware, async (req, res) => {
     // Immediate response for invalid ID
     res.status(404).json({ message: "Invalid test response", timestamp: new Date().toISOString() });

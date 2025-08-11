@@ -387,14 +387,28 @@ export class CCBGenerationService {
         });
       }
 
-      // ENDEREÇO CLIENTE - CONFORME FONTE DA VERDADE (CAMPO ÚNICO)
-      // Concatenar logradouro + número para formar endereço completo
-      if (USER_CCB_COORDINATES.enderecoCliente && dadosCliente.endereco && dadosCliente.endereco !== "NÃO INFORMADO") {
-        // Usar endereço completo se disponível, ou concatenar logradouro + numero
-        let enderecoCompleto = dadosCliente.endereco;
-        if ((!enderecoCompleto || enderecoCompleto === "NÃO INFORMADO") && dadosCliente.logradouro) {
-          enderecoCompleto = `${dadosCliente.logradouro}${dadosCliente.numero ? ', ' + dadosCliente.numero : ''}`;
+      // ENDEREÇO CLIENTE - RENDERIZAÇÃO FORÇADA
+      // SEMPRE renderizar campos de endereço, mesmo se parcialmente preenchidos
+      if (USER_CCB_COORDINATES.enderecoCliente) {
+        // Combinar logradouro e número se disponíveis
+        let enderecoCompleto = "";
+        if (dadosCliente.endereco && dadosCliente.endereco !== "NÃO INFORMADO") {
+          enderecoCompleto = dadosCliente.endereco;
+        } else if (dadosCliente.logradouro) {
+          enderecoCompleto = dadosCliente.logradouro;
+          if (dadosCliente.numero) {
+            enderecoCompleto += `, ${dadosCliente.numero}`;
+          }
+          if (dadosCliente.complemento) {
+            enderecoCompleto += `, ${dadosCliente.complemento}`;
+          }
+          if (dadosCliente.bairro) {
+            enderecoCompleto += `, ${dadosCliente.bairro}`;
+          }
         }
+        
+        // Renderizar mesmo se vazio, para debug
+        enderecoCompleto = enderecoCompleto || "ENDEREÇO NÃO INFORMADO";
         
         firstPage.drawText(enderecoCompleto, {
           x: USER_CCB_COORDINATES.enderecoCliente.x,
@@ -403,37 +417,50 @@ export class CCBGenerationService {
           font: helveticaFont,
           color: rgb(0, 0, 0),
         });
-        console.log("📊 [CCB] Endereço renderizado nas coordenadas CORRETAS:", enderecoCompleto);
+        console.log("📊 [CCB] Endereço renderizado:", enderecoCompleto, "em X:", USER_CCB_COORDINATES.enderecoCliente.x, "Y:", USER_CCB_COORDINATES.enderecoCliente.y);
       }
 
-      if (USER_CCB_COORDINATES.cepCliente && dadosCliente.cep && dadosCliente.cep !== "NÃO INFORMADO") {
-        firstPage.drawText(this.formatCEP(dadosCliente.cep), {
+      // CEP - SEMPRE RENDERIZAR
+      if (USER_CCB_COORDINATES.cepCliente) {
+        const cepValue = dadosCliente.cep || "CEP NÃO INFORMADO";
+        const cepFormatado = cepValue !== "CEP NÃO INFORMADO" && cepValue !== "NÃO INFORMADO" ? this.formatCEP(cepValue) : cepValue;
+        
+        firstPage.drawText(cepFormatado, {
           x: USER_CCB_COORDINATES.cepCliente.x,
           y: USER_CCB_COORDINATES.cepCliente.y,
           size: USER_CCB_COORDINATES.cepCliente.fontSize,
           font: helveticaFont,
           color: rgb(0, 0, 0),
         });
+        console.log("📊 [CCB] CEP renderizado:", cepFormatado, "em X:", USER_CCB_COORDINATES.cepCliente.x, "Y:", USER_CCB_COORDINATES.cepCliente.y);
       }
 
-      if (USER_CCB_COORDINATES.cidadeCliente && dadosCliente.cidade && dadosCliente.cidade !== "NÃO INFORMADO") {
-        firstPage.drawText(dadosCliente.cidade, {
+      // CIDADE - SEMPRE RENDERIZAR
+      if (USER_CCB_COORDINATES.cidadeCliente) {
+        const cidadeValue = dadosCliente.cidade || "CIDADE NÃO INFORMADA";
+        
+        firstPage.drawText(cidadeValue, {
           x: USER_CCB_COORDINATES.cidadeCliente.x,
           y: USER_CCB_COORDINATES.cidadeCliente.y,
           size: USER_CCB_COORDINATES.cidadeCliente.fontSize,
           font: helveticaFont,
           color: rgb(0, 0, 0),
         });
+        console.log("📊 [CCB] Cidade renderizada:", cidadeValue, "em X:", USER_CCB_COORDINATES.cidadeCliente.x, "Y:", USER_CCB_COORDINATES.cidadeCliente.y);
       }
 
-      if (USER_CCB_COORDINATES.ufCliente && dadosCliente.estado && dadosCliente.estado !== "NÃO INFORMADO") {
-        firstPage.drawText(dadosCliente.estado, {
+      // UF - SEMPRE RENDERIZAR
+      if (USER_CCB_COORDINATES.ufCliente) {
+        const ufValue = dadosCliente.estado || dadosCliente.uf || "UF";
+        
+        firstPage.drawText(ufValue, {
           x: USER_CCB_COORDINATES.ufCliente.x,
           y: USER_CCB_COORDINATES.ufCliente.y,
           size: USER_CCB_COORDINATES.ufCliente.fontSize,
           font: helveticaFont,
           color: rgb(0, 0, 0),
         });
+        console.log("📊 [CCB] UF renderizada:", ufValue, "em X:", USER_CCB_COORDINATES.ufCliente.x, "Y:", USER_CCB_COORDINATES.ufCliente.y);
       }
 
       // DADOS DO CREDOR/LOJA

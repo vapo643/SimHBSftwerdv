@@ -42,7 +42,7 @@ export const USER_CCB_COORDINATES: CCBUserMapping = {
   estadoCivil: { x: 55, y: 595, fontSize: 10, page: 1 }, // cliente_data.estadoCivil
 
   // ENDEREÇO DO CLIENTE - COORDENADAS CORRIGIDAS CONFORME FONTE DA VERDADE
-  enderecoCliente: { x: 100, y: 670, fontSize: 10, page: 1 }, // cliente_data.endereco (logradouro + numero)
+  enderecoCliente: { x: 100, y: 670, fontSize: 8, page: 1 }, // cliente_data.endereco (logradouro + numero) - FONTE 8
   cepCliente: { x: 270, y: 670, fontSize: 9, page: 1 }, // cliente_data.cep - COORDENADA CORRIGIDA
   cidadeCliente: { x: 380, y: 670, fontSize: 10, page: 1 }, // cliente_data.cidade - COORDENADA CORRIGIDA  
   ufCliente: { x: 533, y: 670, fontSize: 9, page: 1 }, // cliente_data.estado - COORDENADA CORRIGIDA
