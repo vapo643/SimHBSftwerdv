@@ -830,9 +830,10 @@ export class CCBGenerationService {
           });
         }
 
-        // CHAVE PIX
-        if (USER_CCB_COORDINATES.chavePix && dadosPagamento.chavePix) {
-          secondPage.drawText(dadosPagamento.chavePix, {
+        // CHAVE PIX - MAPEAR SEMPRE PARA TESTE
+        if (USER_CCB_COORDINATES.chavePix) {
+          const chavePix = dadosPagamento.chavePix || "NÃO INFORMADO";
+          secondPage.drawText(chavePix, {
             x: USER_CCB_COORDINATES.chavePix.x,
             y: USER_CCB_COORDINATES.chavePix.y,
             size: USER_CCB_COORDINATES.chavePix.fontSize,
