@@ -99,27 +99,52 @@ export default function NovaProposta() {
     if (savedData) {
       try {
         const parsed = JSON.parse(savedData);
-        // Só restaura se não foi enviada (sem flag de enviada)
-        if (!parsed.enviada) {
+        // IMPORTANTE: Limpa sempre se já foi enviada
+        if (parsed.enviada === true) {
+          localStorage.removeItem('proposta_temp');
+          // NÃO restaura dados se já foi enviada
+          return;
+        }
+        
+        // Só restaura se não foi enviada
+        if (!parsed.enviada && parsed.data) {
           reset(parsed.data);
           toast({
             title: "Dados recuperados",
             description: "Seus dados anteriores foram restaurados.",
           });
-        } else {
-          // Se foi enviada, limpa o localStorage
-          localStorage.removeItem('proposta_temp');
         }
       } catch (error) {
         console.error('Erro ao recuperar dados:', error);
+        // Em caso de erro, limpa o localStorage corrompido
+        localStorage.removeItem('proposta_temp');
       }
     }
   }, []);
 
   // Auto-save a cada mudança (com debounce)
   useEffect(() => {
+    // Verifica se já foi enviada antes de salvar
+    const checkIfSent = () => {
+      const saved = localStorage.getItem('proposta_temp');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          return parsed.enviada === true;
+        } catch {
+          return false;
+        }
+      }
+      return false;
+    };
+    
     const subscription = watch((data) => {
-      // Salva os dados temporariamente, mas não se já foi enviado
+      // NÃO salva se já foi enviada
+      if (checkIfSent()) {
+        return;
+      }
+      
+      // Salva os dados temporariamente
       const tempData = {
         data: data,
         timestamp: new Date().toISOString(),
@@ -139,7 +164,7 @@ export default function NovaProposta() {
     
     setIsSearchingCpf(true);
     try {
-      const response = await apiRequest(`/api/propostas/buscar-por-cpf/${cpfLimpo}`, {
+      const response: any = await apiRequest(`/api/propostas/buscar-por-cpf/${cpfLimpo}`, {
         method: "GET",
       });
       
@@ -195,15 +220,65 @@ export default function NovaProposta() {
       });
     },
     onSuccess: () => {
-      // LIMPAR AUTO-SAVE após enviar com sucesso
-      localStorage.removeItem('proposta_temp');
+      // MARCA COMO ENVIADA antes de limpar
+      const tempData = {
+        data: {},
+        timestamp: new Date().toISOString(),
+        enviada: true // Marca que foi enviada com sucesso
+      };
+      localStorage.setItem('proposta_temp', JSON.stringify(tempData));
+      
+      // LIMPA O FORMULÁRIO
+      reset({
+        clienteNome: "",
+        clienteCpf: "",
+        clienteEmail: "",
+        clienteTelefone: "",
+        clienteDataNascimento: "",
+        clienteRenda: "",
+        clienteRg: "",
+        clienteOrgaoEmissor: "",
+        clienteRgDataEmissao: "",
+        clienteRgUf: "",
+        clienteLocalNascimento: "",
+        clienteEstadoCivil: "",
+        clienteNacionalidade: "",
+        clienteCep: "",
+        clienteLogradouro: "",
+        clienteNumero: "",
+        clienteComplemento: "",
+        clienteBairro: "",
+        clienteCidade: "",
+        clienteUf: "",
+        valor: "",
+        prazo: "",
+        finalidade: "",
+        garantia: "",
+        dadosPagamentoTipo: undefined,
+        dadosPagamentoPix: "",
+        dadosPagamentoBanco: "",
+        dadosPagamentoAgencia: "",
+        dadosPagamentoConta: "",
+        dadosPagamentoDigito: "",
+        documentos: []
+      });
+      
+      // Reseta para o primeiro passo
+      setCurrentStep(1);
       
       toast({
         title: "Proposta criada com sucesso!",
         description: "A proposta foi enviada para análise.",
       });
+      
       queryClient.invalidateQueries({ queryKey: ["/api/propostas"] });
-      setLocation("/dashboard");
+      
+      // Aguarda um pouco antes de redirecionar para dar tempo de ver a mensagem
+      setTimeout(() => {
+        // Limpa definitivamente o localStorage
+        localStorage.removeItem('proposta_temp');
+        setLocation("/dashboard");
+      }, 1500);
     },
     onError: (error: any) => {
       toast({
