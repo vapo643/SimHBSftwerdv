@@ -30,8 +30,8 @@ Error handling: Create structured documentation for automatic consultation durin
 - **Security**: Comprehensive security architecture including Helmet, two-tier rate limiting, input sanitization, timing attack protection, magic number validation, cryptographically secure UUIDs for IDs, soft delete implementation, Row Level Security (RLS), automated security testing (SAST/DAST), OWASP ASVS Level 1 compliance, SAMM v1.5 integration, and anti-fragile RBAC implementation.
 - **Credit Simulation**: Real-time credit simulation API using Tabela Price, IOF, TAC, and CET calculations, integrated with commercial tables.
 - **Document Management**: Secure private bucket for document storage with signed URLs, organized folder structure, multi-format support, admin client authentication, and automatic fallback for missing files.
-- **PDF Generation**: Template-based CCB generation using authentic Simpix template (564KB) with `pdf-lib` for precise field filling, professional coordinate mapping, dynamic adjustment capabilities, and comprehensive testing framework.
-- **Payment Workflow**: Complete payment queue system with batch processing, multiple payment methods, and formalization tracking integration.
+- **PDF Generation**: Template-based CCB generation using authentic Simpix template (564KB) with `pdf-lib` for precise field filling, professional coordinate mapping, dynamic adjustment capabilities, comprehensive testing framework, and complete payment data integration.
+- **Payment Workflow**: Complete payment queue system with batch processing, multiple payment methods (bank account and PIX), formalization tracking integration, and dual-storage strategy for payment data (dedicated columns + JSON fallback).
 - **Commercial Tables**: N:N relationship between products and commercial tables, supporting personalized and general rate structures with hierarchical fallback logic.
 
 ### Database Schema

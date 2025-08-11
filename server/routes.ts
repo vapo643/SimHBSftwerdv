@@ -2243,6 +2243,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         clienteCidade: dataWithId.clienteCidade,
         clienteUf: dataWithId.clienteUf
       });
+      
+      // DEBUG: Log dados de pagamento recebidos
+      console.log("💳 [NOVA PROPOSTA] Dados de pagamento recebidos do frontend:", {
+        metodoPagamento: dataWithId.metodoPagamento,
+        dadosPagamentoBanco: dataWithId.dadosPagamentoBanco,
+        dadosPagamentoAgencia: dataWithId.dadosPagamentoAgencia,
+        dadosPagamentoConta: dataWithId.dadosPagamentoConta,
+        dadosPagamentoDigito: dataWithId.dadosPagamentoDigito,
+        dadosPagamentoPix: dataWithId.dadosPagamentoPix,
+        dadosPagamentoTipoPix: dataWithId.dadosPagamentoTipoPix,
+        dadosPagamentoPixBanco: dataWithId.dadosPagamentoPixBanco,
+        dadosPagamentoPixNomeTitular: dataWithId.dadosPagamentoPixNomeTitular,
+        dadosPagamentoPixCpfTitular: dataWithId.dadosPagamentoPixCpfTitular
+      });
 
       // FIX: Transform flat structure to JSONB structure expected by database
       const dataForDatabase = {
@@ -2281,6 +2295,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
             [dataWithId.clienteLogradouro, dataWithId.clienteNumero, dataWithId.clienteComplemento, dataWithId.clienteBairro].filter(Boolean).join(", "),
           ocupacao: dataWithId.clienteOcupacao,
           telefoneEmpresa: dataWithId.clienteTelefoneEmpresa,
+          // DADOS DE PAGAMENTO NO JSON PARA FALLBACK
+          metodoPagamento: dataWithId.metodoPagamento,
+          banco: dataWithId.dadosPagamentoBanco,
+          agencia: dataWithId.dadosPagamentoAgencia,
+          conta: dataWithId.dadosPagamentoConta,
+          digito: dataWithId.dadosPagamentoDigito,
+          chavePix: dataWithId.dadosPagamentoPix,
+          tipoPix: dataWithId.dadosPagamentoTipoPix,
+          pixBanco: dataWithId.dadosPagamentoPixBanco,
+          pixNomeTitular: dataWithId.dadosPagamentoPixNomeTitular,
+          pixCpfTitular: dataWithId.dadosPagamentoPixCpfTitular,
         },
 
         // Store loan conditions as JSONB (as object, not string)
@@ -2295,14 +2320,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
 
         // Dados de pagamento (separados para melhor controle)
-        dados_pagamento_tipo: dataWithId.dadosPagamentoTipo,
-        dados_pagamento_pix: dataWithId.dadosPagamentoPix,
+        metodo_pagamento: dataWithId.metodoPagamento, // 'conta_bancaria' ou 'pix'
+        
+        // Dados bancários (quando conta_bancaria)
         dados_pagamento_banco: dataWithId.dadosPagamentoBanco,
         dados_pagamento_agencia: dataWithId.dadosPagamentoAgencia,
         dados_pagamento_conta: dataWithId.dadosPagamentoConta,
         dados_pagamento_digito: dataWithId.dadosPagamentoDigito,
-        dados_pagamento_nome_titular: dataWithId.clienteNome, // Usa o nome do cliente como titular
-        dados_pagamento_cpf_titular: dataWithId.clienteCpf, // Usa o CPF do cliente como titular
+        dados_pagamento_codigo_banco: dataWithId.dadosPagamentoBanco, // Código do banco
+        dados_pagamento_tipo: "corrente", // Tipo da conta (corrente/poupança)
+        dados_pagamento_nome_titular: dataWithId.dadosPagamentoNomeTitular || dataWithId.clienteNome,
+        dados_pagamento_cpf_titular: dataWithId.dadosPagamentoCpfTitular || dataWithId.clienteCpf,
+        
+        // Dados PIX (quando pix)
+        dados_pagamento_pix: dataWithId.dadosPagamentoPix, // Chave PIX
+        dados_pagamento_tipo_pix: dataWithId.dadosPagamentoTipoPix, // Tipo da chave (cpf/cnpj/email/telefone/aleatoria)
+        dados_pagamento_pix_banco: dataWithId.dadosPagamentoPixBanco, // Banco do PIX
+        dados_pagamento_pix_nome_titular: dataWithId.dadosPagamentoPixNomeTitular,
+        dados_pagamento_pix_cpf_titular: dataWithId.dadosPagamentoPixCpfTitular,
 
         // Additional fields
         produtoId: dataWithId.produtoId,
@@ -2314,6 +2349,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // DEBUG: Log dados que serão persistidos
       console.log("🔍 [NOVA PROPOSTA] clienteData que será salvo no banco:", dataForDatabase.clienteData);
+      console.log("💳 [NOVA PROPOSTA] Dados de pagamento que serão salvos no banco:", {
+        metodo_pagamento: dataForDatabase.metodo_pagamento,
+        dados_pagamento_banco: dataForDatabase.dados_pagamento_banco,
+        dados_pagamento_agencia: dataForDatabase.dados_pagamento_agencia,
+        dados_pagamento_conta: dataForDatabase.dados_pagamento_conta,
+        dados_pagamento_pix: dataForDatabase.dados_pagamento_pix,
+        dados_pagamento_tipo_pix: dataForDatabase.dados_pagamento_tipo_pix
+      });
 
       // Create the proposal
       const proposta = await storage.createProposta(dataForDatabase);
