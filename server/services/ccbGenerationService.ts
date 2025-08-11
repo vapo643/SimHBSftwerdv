@@ -382,37 +382,41 @@ export class CCBGenerationService {
         });
       }
 
-      // ENDEREÇO CLIENTE - RENDERIZAÇÃO FORÇADA
-      // SEMPRE renderizar campos de endereço, mesmo se parcialmente preenchidos
+      // ENDEREÇO CLIENTE - APENAS LOGRADOURO + NÚMERO + COMPLEMENTO
       if (USER_CCB_COORDINATES.enderecoCliente) {
-        // Combinar logradouro e número se disponíveis
-        let enderecoCompleto = "";
-        if (dadosCliente.endereco && dadosCliente.endereco !== "NÃO INFORMADO") {
-          enderecoCompleto = dadosCliente.endereco;
+        let enderecoBasico = "";
+        
+        // USAR ENDEREÇO PARSEADO para extrair apenas a parte básica
+        if (enderecoParseado?.logradouro) {
+          enderecoBasico = enderecoParseado.logradouro;
+          if (enderecoParseado.numero) {
+            enderecoBasico += `, ${enderecoParseado.numero}`;
+          }
+          if (enderecoParseado.complemento && enderecoParseado.complemento !== "NÃO INFORMADO") {
+            enderecoBasico += `, ${enderecoParseado.complemento}`;
+          }
         } else if (dadosCliente.logradouro) {
-          enderecoCompleto = dadosCliente.logradouro;
+          // Fallback para dados diretos
+          enderecoBasico = dadosCliente.logradouro;
           if (dadosCliente.numero) {
-            enderecoCompleto += `, ${dadosCliente.numero}`;
+            enderecoBasico += `, ${dadosCliente.numero}`;
           }
-          if (dadosCliente.complemento) {
-            enderecoCompleto += `, ${dadosCliente.complemento}`;
-          }
-          if (dadosCliente.bairro) {
-            enderecoCompleto += `, ${dadosCliente.bairro}`;
+          if (dadosCliente.complemento && dadosCliente.complemento !== "NÃO INFORMADO") {
+            enderecoBasico += `, ${dadosCliente.complemento}`;
           }
         }
         
-        // Renderizar mesmo se vazio, para debug
-        enderecoCompleto = enderecoCompleto || "ENDEREÇO NÃO INFORMADO";
+        // Renderizar apenas a parte básica (sem bairro, cidade, UF)
+        enderecoBasico = enderecoBasico || "ENDEREÇO NÃO INFORMADO";
         
-        firstPage.drawText(enderecoCompleto, {
+        firstPage.drawText(enderecoBasico, {
           x: USER_CCB_COORDINATES.enderecoCliente.x,
           y: USER_CCB_COORDINATES.enderecoCliente.y,
           size: USER_CCB_COORDINATES.enderecoCliente.fontSize,
           font: helveticaFont,
           color: rgb(0, 0, 0),
         });
-        console.log("📊 [CCB] Endereço renderizado:", enderecoCompleto, "em X:", USER_CCB_COORDINATES.enderecoCliente.x, "Y:", USER_CCB_COORDINATES.enderecoCliente.y);
+        console.log("📊 [CCB] Endereço básico renderizado:", enderecoBasico, "em X:", USER_CCB_COORDINATES.enderecoCliente.x, "Y:", USER_CCB_COORDINATES.enderecoCliente.y);
       }
 
       // CEP - SEMPRE RENDERIZAR
