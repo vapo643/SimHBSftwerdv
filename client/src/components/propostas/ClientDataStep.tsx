@@ -101,7 +101,7 @@ export function ClientDataStep() {
   }>({ isValid: false, message: null });
   const [loadingCep, setLoadingCep] = useState(false);
   const [loadingCpfData, setLoadingCpfData] = useState(false);
-  const [autoSaved, setAutoSaved] = useState(false);
+
   const [progress, setProgress] = useState(0);
 
   // Função para buscar CEP usando nosso backend
@@ -322,33 +322,11 @@ export function ClientDataStep() {
     setProgress(progressValue);
   }, [clientData]);
 
-  // Auto-save no localStorage
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      localStorage.setItem("proposalDraft", JSON.stringify(clientData));
-      setAutoSaved(true);
-      setTimeout(() => setAutoSaved(false), 2000);
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, [clientData]);
-
-  // Carregar dados salvos do localStorage
-  useEffect(() => {
-    const savedData = localStorage.getItem("proposalDraft");
-    if (savedData && !clientData.nome) {
-      const parsed = JSON.parse(savedData);
-      updateClient(parsed);
-      toast({
-        title: "Dados recuperados",
-        description: "Seus dados foram restaurados da sessão anterior.",
-      });
-    }
-  }, [clientData.nome, toast, updateClient]);
+  // AUTOSAVE REMOVIDO - Estava causando bugs ao carregar propostas finalizadas indevidamente
 
   return (
     <div className="space-y-6">
-      {/* Indicador de Progresso e Auto-Save */}
+      {/* Indicador de Progresso */}
       <Card>
         <CardContent className="pt-6">
           <div className="space-y-2">
@@ -357,11 +335,7 @@ export function ClientDataStep() {
               <span className="text-sm text-muted-foreground">{progress}% completo</span>
             </div>
             <Progress value={progress} className="h-2" />
-            {autoSaved && (
-              <p className="flex items-center gap-1 text-xs text-green-600">
-                <Save className="h-3 w-3" /> Dados salvos automaticamente
-              </p>
-            )}
+
             {loadingCpfData && (
               <p className="flex items-center gap-1 text-xs text-blue-600">
                 <Loader2 className="h-3 w-3 animate-spin" /> Buscando dados do cliente...
