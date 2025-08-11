@@ -50,7 +50,7 @@ export const USER_CCB_COORDINATES: CCBUserMapping = {
   // 🏢 DADOS DO CREDOR (EMPRESA) - COORDENADAS AJUSTADAS
   razaoSocialCredor: { x: 55, y: 465, fontSize: 9, page: 1 }, // Razão Social SIMPIX
   cnpjCredor: { x: 445, y: 465, fontSize: 9, page: 1 }, // CNPJ SIMPIX
-  enderecoCredor: { x: 40, y: 435, fontSize: 8, page: 1 }, // Endereço SIMPIX
+  enderecoCredor: { x: 40, y: 435, fontSize: 7.4, page: 1 }, // Endereço SIMPIX
   cepCredor: { x: 175, y: 435, fontSize: 8, page: 1 }, // CEP SIMPIX
   cidadeCredor: { x: 310, y: 435, fontSize: 8, page: 1 }, // Cidade SIMPIX
   ufCredor: { x: 440, y: 435, fontSize: 8, page: 1 }, // UF SIMPIX
