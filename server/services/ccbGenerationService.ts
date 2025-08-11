@@ -195,13 +195,15 @@ export class CCBGenerationService {
         pix: dadosPagamento.chavePix
       });
       
-      // DADOS DA LOJA/CREDOR
-      const dadosLoja = {
-        nome: proposalData.loja_nome || "SIMPIX LTDA",
-        endereco: proposalData.loja_endereco || "NÃO INFORMADO",
-        cnpj: "NÃO DISPONÍVEL", // Campo não existe na tabela lojas
-        cidade: "NÃO DISPONÍVEL", // Campo não existe na tabela lojas
-        uf: "NÃO DISPONÍVEL" // Campo não existe na tabela lojas
+      // DADOS FIXOS DA SIMPIX PARA SEÇÃO II.CREDOR ORIGINÁRIO
+      // REGRA DE NEGÓCIO: SEMPRE usar dados da SIMPIX, NUNCA do parceiro
+      const dadosCredorOriginario = {
+        razaoSocial: "SIMPIX SOLUCOES E INTERMEDIACOES LTDA",
+        cnpj: "42.162.929/0001-67",
+        endereco: "AV PAULO PEREIRA GOMES, 1156",
+        cep: "29.166-828",
+        cidade: "SERRA",
+        uf: "ES"
       };
       
       console.log("📊 [CCB] Cliente mapeado:", dadosCliente.nome, "-", dadosCliente.cpf);
@@ -462,10 +464,10 @@ export class CCBGenerationService {
         console.log("📊 [CCB] UF renderizada:", ufValue, "em X:", USER_CCB_COORDINATES.ufCliente.x, "Y:", USER_CCB_COORDINATES.ufCliente.y);
       }
 
-      // DADOS DO CREDOR/LOJA
+      // SEÇÃO II.CREDOR ORIGINÁRIO - SEMPRE DADOS FIXOS DA SIMPIX
+      // REGRA DE NEGÓCIO: NUNCA usar dados do parceiro, SEMPRE Simpix
       if (USER_CCB_COORDINATES.razaoSocialCredor) {
-        const razaoSocial = proposalData.loja_nome || "SIMPIX LTDA";
-        firstPage.drawText(razaoSocial, {
+        firstPage.drawText(dadosCredorOriginario.razaoSocial, {
           x: USER_CCB_COORDINATES.razaoSocialCredor.x,
           y: USER_CCB_COORDINATES.razaoSocialCredor.y,
           size: USER_CCB_COORDINATES.razaoSocialCredor.fontSize,
@@ -475,8 +477,7 @@ export class CCBGenerationService {
       }
 
       if (USER_CCB_COORDINATES.cnpjCredor) {
-        const cnpj = proposalData.loja_cnpj || "12.345.678/0001-90";
-        firstPage.drawText(cnpj, {
+        firstPage.drawText(dadosCredorOriginario.cnpj, {
           x: USER_CCB_COORDINATES.cnpjCredor.x,
           y: USER_CCB_COORDINATES.cnpjCredor.y,
           size: USER_CCB_COORDINATES.cnpjCredor.fontSize,
@@ -485,8 +486,8 @@ export class CCBGenerationService {
         });
       }
 
-      if (USER_CCB_COORDINATES.enderecoCredor && proposalData.loja_endereco) {
-        firstPage.drawText(proposalData.loja_endereco, {
+      if (USER_CCB_COORDINATES.enderecoCredor) {
+        firstPage.drawText(dadosCredorOriginario.endereco, {
           x: USER_CCB_COORDINATES.enderecoCredor.x,
           y: USER_CCB_COORDINATES.enderecoCredor.y,
           size: USER_CCB_COORDINATES.enderecoCredor.fontSize,
@@ -495,8 +496,8 @@ export class CCBGenerationService {
         });
       }
 
-      if (USER_CCB_COORDINATES.cepCredor && proposalData.loja_cep) {
-        firstPage.drawText(this.formatCEP(proposalData.loja_cep), {
+      if (USER_CCB_COORDINATES.cepCredor) {
+        firstPage.drawText(this.formatCEP(dadosCredorOriginario.cep), {
           x: USER_CCB_COORDINATES.cepCredor.x,
           y: USER_CCB_COORDINATES.cepCredor.y,
           size: USER_CCB_COORDINATES.cepCredor.fontSize,
@@ -505,8 +506,8 @@ export class CCBGenerationService {
         });
       }
 
-      if (USER_CCB_COORDINATES.cidadeCredor && proposalData.loja_cidade) {
-        firstPage.drawText(proposalData.loja_cidade, {
+      if (USER_CCB_COORDINATES.cidadeCredor) {
+        firstPage.drawText(dadosCredorOriginario.cidade, {
           x: USER_CCB_COORDINATES.cidadeCredor.x,
           y: USER_CCB_COORDINATES.cidadeCredor.y,
           size: USER_CCB_COORDINATES.cidadeCredor.fontSize,
@@ -515,8 +516,8 @@ export class CCBGenerationService {
         });
       }
 
-      if (USER_CCB_COORDINATES.ufCredor && proposalData.loja_estado) {
-        firstPage.drawText(proposalData.loja_estado, {
+      if (USER_CCB_COORDINATES.ufCredor) {
+        firstPage.drawText(dadosCredorOriginario.uf, {
           x: USER_CCB_COORDINATES.ufCredor.x,
           y: USER_CCB_COORDINATES.ufCredor.y,
           size: USER_CCB_COORDINATES.ufCredor.fontSize,
