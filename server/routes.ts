@@ -924,6 +924,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // BUSCA POR CPF - Recupera dados de propostas anteriores do mesmo CPF
+  app.get("/api/propostas/buscar-por-cpf/:cpf", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { cpf } = req.params;
+      const cpfLimpo = cpf.replace(/\D/g, '');
+      
+      console.log(`🔍 [BUSCA CPF] Buscando propostas anteriores para CPF: ${cpfLimpo}`);
+      
+      if (cpfLimpo.length !== 11) {
+        return res.status(400).json({ error: "CPF inválido" });
+      }
+      
+      const { createServerSupabaseAdminClient } = await import("./lib/supabase");
+      const supabase = createServerSupabaseAdminClient();
+      
+      // Busca a proposta mais recente do CPF
+      const { data: propostas, error } = await supabase
+        .from("propostas")
+        .select("*")
+        .order("created_at", { ascending: false });
+      
+      // Filtrar manualmente pelo CPF no cliente_data
+      const propostaEncontrada = propostas?.find(p => {
+        const cpfProposta = p.cliente_data?.cpf?.replace(/\D/g, '');
+        return cpfProposta === cpfLimpo;
+      });
+      
+      if (!propostaEncontrada) {
+        console.log(`ℹ️ [BUSCA CPF] Nenhuma proposta anterior encontrada para CPF: ${cpfLimpo}`);
+        return res.json({ data: null });
+      }
+      
+      console.log(`✅ [BUSCA CPF] Proposta anterior encontrada: ${propostaEncontrada.id}`);
+      
+      // Retorna os dados encontrados
+      res.json({ 
+        data: {
+          cliente_data: propostaEncontrada.cliente_data,
+          // Pode incluir outros dados úteis se necessário
+        }
+      });
+      
+    } catch (error) {
+      console.error("❌ [BUSCA CPF] Erro ao buscar proposta por CPF:", error);
+      res.status(500).json({ error: "Erro ao buscar dados" });
+    }
+  });
+
   // Proposal routes - ENHANCED WITH MULTI-FILTER SUPPORT AND RBAC SECURITY
   app.get("/api/propostas", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     try {

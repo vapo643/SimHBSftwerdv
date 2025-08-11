@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -21,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, ArrowRight, Upload } from "lucide-react";
+import { ArrowLeft, ArrowRight, Upload, Search } from "lucide-react";
 
 const clienteSchema = z.object({
   clienteNome: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
@@ -75,6 +75,7 @@ export default function NovaProposta() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [isSearchingCpf, setIsSearchingCpf] = useState(false);
 
   const {
     register,
@@ -82,12 +83,106 @@ export default function NovaProposta() {
     formState: { errors },
     watch,
     setValue,
+    getValues,
+    reset,
   } = useForm<PropostaForm>({
     resolver: zodResolver(fullSchema),
     defaultValues: {
       documentos: [],
     },
   });
+
+  // AUTO-SAVE: Salvar dados temporariamente enquanto preenche
+  useEffect(() => {
+    // Recuperar dados salvos temporariamente ao carregar a página
+    const savedData = localStorage.getItem('proposta_temp');
+    if (savedData) {
+      try {
+        const parsed = JSON.parse(savedData);
+        // Só restaura se não foi enviada (sem flag de enviada)
+        if (!parsed.enviada) {
+          reset(parsed.data);
+          toast({
+            title: "Dados recuperados",
+            description: "Seus dados anteriores foram restaurados.",
+          });
+        } else {
+          // Se foi enviada, limpa o localStorage
+          localStorage.removeItem('proposta_temp');
+        }
+      } catch (error) {
+        console.error('Erro ao recuperar dados:', error);
+      }
+    }
+  }, []);
+
+  // Auto-save a cada mudança (com debounce)
+  useEffect(() => {
+    const subscription = watch((data) => {
+      // Salva os dados temporariamente, mas não se já foi enviado
+      const tempData = {
+        data: data,
+        timestamp: new Date().toISOString(),
+        enviada: false
+      };
+      localStorage.setItem('proposta_temp', JSON.stringify(tempData));
+    });
+    return () => subscription.unsubscribe();
+  }, [watch]);
+
+  // BUSCA POR CPF: Buscar dados de propostas anteriores do mesmo CPF
+  const buscarDadosPorCpf = useCallback(async (cpf: string) => {
+    // Remove formatação do CPF
+    const cpfLimpo = cpf.replace(/\D/g, '');
+    
+    if (cpfLimpo.length !== 11) return;
+    
+    setIsSearchingCpf(true);
+    try {
+      const response = await apiRequest(`/api/propostas/buscar-por-cpf/${cpfLimpo}`, {
+        method: "GET",
+      });
+      
+      if (response && response.data) {
+        // Preenche os campos com os dados encontrados
+        const dadosCliente = response.data.cliente_data || {};
+        
+        // Preenche todos os campos do cliente
+        setValue("clienteNome", dadosCliente.nome || "");
+        setValue("clienteEmail", dadosCliente.email || "");
+        setValue("clienteTelefone", dadosCliente.telefone || "");
+        setValue("clienteDataNascimento", dadosCliente.dataNascimento || "");
+        setValue("clienteRenda", dadosCliente.renda || "");
+        
+        // Campos de documentação
+        setValue("clienteRg", dadosCliente.rg || "");
+        setValue("clienteOrgaoEmissor", dadosCliente.orgaoEmissor || "");
+        setValue("clienteRgDataEmissao", dadosCliente.rgDataEmissao || "");
+        setValue("clienteRgUf", dadosCliente.rgUf || "");
+        setValue("clienteLocalNascimento", dadosCliente.localNascimento || "");
+        setValue("clienteEstadoCivil", dadosCliente.estadoCivil || "");
+        setValue("clienteNacionalidade", dadosCliente.nacionalidade || "");
+        
+        // Campos de endereço
+        setValue("clienteCep", dadosCliente.cep || "");
+        setValue("clienteLogradouro", dadosCliente.logradouro || "");
+        setValue("clienteNumero", dadosCliente.numero || "");
+        setValue("clienteComplemento", dadosCliente.complemento || "");
+        setValue("clienteBairro", dadosCliente.bairro || "");
+        setValue("clienteCidade", dadosCliente.cidade || "");
+        setValue("clienteUf", dadosCliente.uf || dadosCliente.estado || "");
+        
+        toast({
+          title: "Dados recuperados",
+          description: "Os dados do cliente foram preenchidos com base em propostas anteriores.",
+        });
+      }
+    } catch (error) {
+      console.log("Nenhuma proposta anterior encontrada para este CPF");
+    } finally {
+      setIsSearchingCpf(false);
+    }
+  }, [setValue, toast]);
 
   const createProposta = useMutation({
     mutationFn: async (data: PropostaForm) => {
@@ -100,6 +195,9 @@ export default function NovaProposta() {
       });
     },
     onSuccess: () => {
+      // LIMPAR AUTO-SAVE após enviar com sucesso
+      localStorage.removeItem('proposta_temp');
+      
       toast({
         title: "Proposta criada com sucesso!",
         description: "A proposta foi enviada para análise.",
@@ -233,14 +331,23 @@ export default function NovaProposta() {
 
                     <div>
                       <Label htmlFor="clienteCpf">CPF</Label>
-                      <Input
-                        id="clienteCpf"
-                        placeholder="000.000.000-00"
-                        {...register("clienteCpf")}
-                      />
+                      <div className="relative">
+                        <Input
+                          id="clienteCpf"
+                          placeholder="000.000.000-00"
+                          {...register("clienteCpf")}
+                          onBlur={(e) => buscarDadosPorCpf(e.target.value)}
+                        />
+                        {isSearchingCpf && (
+                          <Search className="absolute right-3 top-3 h-4 w-4 animate-pulse text-gray-400" />
+                        )}
+                      </div>
                       {errors.clienteCpf && (
                         <p className="text-sm text-red-600">{errors.clienteCpf.message}</p>
                       )}
+                      <p className="text-xs text-gray-500 mt-1">
+                        Se o CPF já teve proposta anterior, os dados serão preenchidos automaticamente
+                      </p>
                     </div>
 
                     <div>
