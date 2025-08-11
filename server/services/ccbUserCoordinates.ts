@@ -39,10 +39,10 @@ export const USER_CCB_COORDINATES: CCBUserMapping = {
   rgEmissao: { x: 210, y: 620, fontSize: 8, page: 1 }, // Data emissão RG (se disponível)
   nacionalidade: { x: 270, y: 620, fontSize: 9, page: 1 }, // cliente_data.nacionalidade
   localNascimento: { x: 405, y: 620, fontSize: 10, page: 1 }, // cliente_data.cidade (nascimento)
-  estadoCivil: { x: 55, y: 595, fontSize: 9, page: 1 }, // cliente_data.estadoCivil - CORRIGIDO: size 9
+  estadoCivil: { x: 100, y: 570, fontSize: 9, page: 1 }, // TROCADO: Estado Civil para Y:570
 
-  // ENDEREÇO DO CLIENTE - COORDENADAS FINAIS CORRETAS Y:570
-  enderecoCliente: { x: 100, y: 570, fontSize: 8, page: 1 }, // Endereço completo
+  // ENDEREÇO DO CLIENTE - TROCADO PARA Y:595
+  enderecoCliente: { x: 55, y: 595, fontSize: 9, page: 1 }, // Endereço completo trocado para Y:595
   cepCliente: { x: 270, y: 570, fontSize: 9, page: 1 }, // CEP  
   cidadeCliente: { x: 380, y: 570, fontSize: 9, page: 1 }, // Cidade
   ufCliente: { x: 533, y: 570, fontSize: 9, page: 1 }, // UF
