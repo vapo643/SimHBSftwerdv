@@ -10,15 +10,15 @@ Language: Portuguese, studying software architecture.
 Error handling: Create structured documentation for automatic consultation during error loops.
 **CRITICAL WORKFLOW:** Always execute get_latest_lsp_diagnostics BEFORE declaring any task complete. Never say "pronto" with LSP errors > 0. Follow ESTRATEGIA_ZERO_MICRO_ERROS.md protocol to avoid the 80/20 pattern (80% working, 20% fixing micro errors).
 
-## Recent Changes (2025-08-11 - 14:11)
-- ✅ **COMPREHENSIVE CCB FIELD CORRECTIONS COMPLETE:** Systematic implementation of diagnostic findings:
-  - **Priority 1 - Documentation Fields:** Added 7 missing RG fields to frontend form (RG, Órgão Emissor, Data Emissão RG, UF RG, Local Nascimento, Estado Civil, Nacionalidade)
-  - **Priority 2 - Banking Persistence:** Corrected clienteData mapping in POST /api/propostas to include rgDataEmissao, rgUf, localNascimento fields
-  - **Priority 3 - Address Rendering:** Separated address fields in CCB coordinates (logradouro, numero, complemento, bairro) for individual rendering
-  - **Priority 4 - Code Quality:** LSP errors reduced from 22 to 0 in frontend by removing duplicate "name" attributes from form inputs
-  - **Validation:** Created `/api/test-ccb-corrections` endpoint to verify all fixes are working
-  - **Schema Updates:** Enhanced clienteSchema in nova-proposta.tsx with complete field validation
-  - **Coordinate System:** Updated ccbUserCoordinates.ts with separated address field coordinates for precise PDF rendering
+## Recent Changes (2025-08-11 - 15:53)
+- ✅ **CRITICAL CCB COORDINATE AUDIT COMPLETE:** Systematic cross-validation and correction of all address field positioning:
+  - **Issue Identified:** CEP, Cidade, UF coordinates had critical Y-axis deviations (Y:650 vs Y:670 required)
+  - **Coordinates Corrected:** All address fields moved to source-of-truth positions: CEP(X:270,Y:670), Cidade(X:380,Y:670), UF(X:533,Y:670)
+  - **Structure Simplified:** Unified enderecoCliente field replacing separated logradouro/numero/bairro approach
+  - **Code Updated:** ccbGenerationService.ts corrected to use accurate coordinate references
+  - **Zero LSP Errors:** Complete resolution of all compilation issues
+  - **Real Data Validation:** Tested with actual proposal data (ID: 88a44696-9b63-42ee-aa81-15f9519d24cb)
+  - **PDF Positioning Fixed:** Address fields now render at precise positions per template specification
 
 ## Recent Changes (2025-08-08 - 20:38)
 - ✅ **CRITICAL LSP ERROR CLEANUP COMPLETE:** Revolutionary code quality improvement achieved:

@@ -41,14 +41,11 @@ export const USER_CCB_COORDINATES: CCBUserMapping = {
   localNascimento: { x: 405, y: 620, fontSize: 10, page: 1 }, // cliente_data.cidade (nascimento)
   estadoCivil: { x: 55, y: 595, fontSize: 10, page: 1 }, // cliente_data.estadoCivil
 
-  // ENDEREÇO DO CLIENTE - CAMPOS SEPARADOS PARA CORREÇÃO
-  logradouroCliente: { x: 100, y: 670, fontSize: 10, page: 1 }, // cliente_data.logradouro
-  numeroCliente: { x: 330, y: 670, fontSize: 9, page: 1 }, // cliente_data.numero
-  complementoCliente: { x: 380, y: 670, fontSize: 8, page: 1 }, // cliente_data.complemento
-  bairroCliente: { x: 450, y: 670, fontSize: 9, page: 1 }, // cliente_data.bairro
-  cepCliente: { x: 100, y: 650, fontSize: 9, page: 1 }, // cliente_data.cep
-  cidadeCliente: { x: 200, y: 650, fontSize: 10, page: 1 }, // cliente_data.cidade
-  ufCliente: { x: 380, y: 650, fontSize: 9, page: 1 }, // cliente_data.estado
+  // ENDEREÇO DO CLIENTE - COORDENADAS CORRIGIDAS CONFORME FONTE DA VERDADE
+  enderecoCliente: { x: 100, y: 670, fontSize: 10, page: 1 }, // cliente_data.endereco (logradouro + numero)
+  cepCliente: { x: 270, y: 670, fontSize: 9, page: 1 }, // cliente_data.cep - COORDENADA CORRIGIDA
+  cidadeCliente: { x: 380, y: 670, fontSize: 10, page: 1 }, // cliente_data.cidade - COORDENADA CORRIGIDA  
+  ufCliente: { x: 533, y: 670, fontSize: 9, page: 1 }, // cliente_data.estado - COORDENADA CORRIGIDA
 
   // 🏢 DADOS DO CREDOR (EMPRESA)
   razaoSocialCredor: { x: 55, y: 465, fontSize: 10, page: 1 }, // loja_nome ou "SIMPIX LTDA"

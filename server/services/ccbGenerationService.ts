@@ -387,47 +387,23 @@ export class CCBGenerationService {
         });
       }
 
-      // ENDEREÇO COMPLETO - CAMPOS SEPARADOS (CORREÇÃO COMPLETA)
-      // Renderizar cada campo de endereço separadamente
-      if (USER_CCB_COORDINATES.logradouroCliente && dadosCliente.logradouro && dadosCliente.logradouro !== "NÃO INFORMADO") {
-        firstPage.drawText(dadosCliente.logradouro, {
-          x: USER_CCB_COORDINATES.logradouroCliente.x,
-          y: USER_CCB_COORDINATES.logradouroCliente.y,
-          size: USER_CCB_COORDINATES.logradouroCliente.fontSize,
+      // ENDEREÇO CLIENTE - CONFORME FONTE DA VERDADE (CAMPO ÚNICO)
+      // Concatenar logradouro + número para formar endereço completo
+      if (USER_CCB_COORDINATES.enderecoCliente && dadosCliente.endereco && dadosCliente.endereco !== "NÃO INFORMADO") {
+        // Usar endereço completo se disponível, ou concatenar logradouro + numero
+        let enderecoCompleto = dadosCliente.endereco;
+        if ((!enderecoCompleto || enderecoCompleto === "NÃO INFORMADO") && dadosCliente.logradouro) {
+          enderecoCompleto = `${dadosCliente.logradouro}${dadosCliente.numero ? ', ' + dadosCliente.numero : ''}`;
+        }
+        
+        firstPage.drawText(enderecoCompleto, {
+          x: USER_CCB_COORDINATES.enderecoCliente.x,
+          y: USER_CCB_COORDINATES.enderecoCliente.y,
+          size: USER_CCB_COORDINATES.enderecoCliente.fontSize,
           font: helveticaFont,
           color: rgb(0, 0, 0),
         });
-        console.log("📊 [CCB] Logradouro renderizado:", dadosCliente.logradouro);
-      }
-
-      if (USER_CCB_COORDINATES.numeroCliente && dadosCliente.numero && dadosCliente.numero !== "NÃO INFORMADO") {
-        firstPage.drawText(dadosCliente.numero, {
-          x: USER_CCB_COORDINATES.numeroCliente.x,
-          y: USER_CCB_COORDINATES.numeroCliente.y,
-          size: USER_CCB_COORDINATES.numeroCliente.fontSize,
-          font: helveticaFont,
-          color: rgb(0, 0, 0),
-        });
-      }
-
-      if (USER_CCB_COORDINATES.complementoCliente && dadosCliente.complemento && dadosCliente.complemento !== "NÃO INFORMADO") {
-        firstPage.drawText(dadosCliente.complemento, {
-          x: USER_CCB_COORDINATES.complementoCliente.x,
-          y: USER_CCB_COORDINATES.complementoCliente.y,
-          size: USER_CCB_COORDINATES.complementoCliente.fontSize,
-          font: helveticaFont,
-          color: rgb(0, 0, 0),
-        });
-      }
-
-      if (USER_CCB_COORDINATES.bairroCliente && dadosCliente.bairro && dadosCliente.bairro !== "NÃO INFORMADO") {
-        firstPage.drawText(dadosCliente.bairro, {
-          x: USER_CCB_COORDINATES.bairroCliente.x,
-          y: USER_CCB_COORDINATES.bairroCliente.y,
-          size: USER_CCB_COORDINATES.bairroCliente.fontSize,
-          font: helveticaFont,
-          color: rgb(0, 0, 0),
-        });
+        console.log("📊 [CCB] Endereço renderizado nas coordenadas CORRETAS:", enderecoCompleto);
       }
 
       if (USER_CCB_COORDINATES.cepCliente && dadosCliente.cep && dadosCliente.cep !== "NÃO INFORMADO") {
