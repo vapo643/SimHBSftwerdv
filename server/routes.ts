@@ -1954,6 +1954,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         lojaId: req.body.lojaId || req.user?.loja_id, // Fallback to user's loja_id if not provided
       };
 
+      // DEBUG: Log dados recebidos do frontend
+      console.log("🔍 [NOVA PROPOSTA] Dados de endereço recebidos do frontend:", {
+        clienteLogradouro: dataWithId.clienteLogradouro,
+        clienteNumero: dataWithId.clienteNumero,
+        clienteComplemento: dataWithId.clienteComplemento,
+        clienteBairro: dataWithId.clienteBairro,
+        clienteCep: dataWithId.clienteCep,
+        clienteCidade: dataWithId.clienteCidade,
+        clienteUf: dataWithId.clienteUf
+      });
+
       // FIX: Transform flat structure to JSONB structure expected by database
       const dataForDatabase = {
         id: dataWithId.id,
@@ -1973,7 +1984,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           orgaoEmissor: dataWithId.clienteOrgaoEmissor,
           estadoCivil: dataWithId.clienteEstadoCivil,
           nacionalidade: dataWithId.clienteNacionalidade,
-          // Campos de endereço separados
+          // Campos de endereço separados - CORRIGIDO para garantir persistência
           cep: dataWithId.clienteCep,
           logradouro: dataWithId.clienteLogradouro,
           numero: dataWithId.clienteNumero,
@@ -1981,6 +1992,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           bairro: dataWithId.clienteBairro,
           cidade: dataWithId.clienteCidade,
           estado: dataWithId.clienteUf,
+          uf: dataWithId.clienteUf, // Alias para compatibilidade
           // Campo legado para compatibilidade
           endereco: dataWithId.clienteEndereco || 
             [dataWithId.clienteLogradouro, dataWithId.clienteNumero, dataWithId.clienteComplemento, dataWithId.clienteBairro].filter(Boolean).join(", "),
@@ -2017,8 +2029,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         referenciaPessoal: dataWithId.referenciaPessoal || [],
       };
 
+      // DEBUG: Log dados que serão persistidos
+      console.log("🔍 [NOVA PROPOSTA] clienteData que será salvo no banco:", dataForDatabase.clienteData);
+
       // Create the proposal
       const proposta = await storage.createProposta(dataForDatabase);
+      
+      // DEBUG: Log proposta criada
+      console.log("🔍 [NOVA PROPOSTA] Proposta criada com ID:", proposta.id);
+      console.log("🔍 [NOVA PROPOSTA] clienteData salvo:", proposta.clienteData);
 
       // Generate installments automatically after proposal creation
       try {
