@@ -1110,6 +1110,22 @@ export function ClientDataStep() {
                     data-testid="input-digito"
                   />
                 </div>
+                
+                <div>
+                  <Label htmlFor="tipoConta">Tipo de Conta *</Label>
+                  <Select
+                    value={clientData.dadosPagamentoTipo || ""}
+                    onValueChange={value => updateClient({ dadosPagamentoTipo: value })}
+                  >
+                    <SelectTrigger data-testid="select-tipo-conta">
+                      <SelectValue placeholder="Selecione o tipo..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="conta_corrente">Conta Corrente</SelectItem>
+                      <SelectItem value="conta_poupanca">Conta Poupança</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </TabsContent>
 

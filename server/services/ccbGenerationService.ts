@@ -196,7 +196,7 @@ export class CCBGenerationService {
         agencia: proposalData.dados_pagamento_agencia || proposalData.cliente_data?.agencia || "NÃO INFORMADO",
         conta: proposalData.dados_pagamento_conta || proposalData.cliente_data?.conta || "NÃO INFORMADO",
         digito: proposalData.dados_pagamento_digito || proposalData.cliente_data?.digito || "NÃO INFORMADO",
-        tipoConta: proposalData.dados_pagamento_tipo || proposalData.cliente_data?.tipoConta || "NÃO INFORMADO",
+        tipoConta: this.formatTipoConta(proposalData.dados_pagamento_tipo || proposalData.cliente_data?.dadosPagamentoTipo || proposalData.cliente_data?.tipoConta),
         nomeTitular: proposalData.dados_pagamento_nome_titular || proposalData.cliente_data?.nomeTitular || dadosCliente.nome,
         cpfTitular: proposalData.dados_pagamento_cpf_titular || proposalData.cliente_data?.cpfTitular || dadosCliente.cpf,
         chavePix: proposalData.dados_pagamento_pix || proposalData.cliente_data?.chavePix || proposalData.cliente_data?.pix || "NÃO INFORMADO",
@@ -1167,6 +1167,16 @@ export class CCBGenerationService {
     if (!cnpj) return "";
     const cleaned = cnpj.replace(/\D/g, "");
     return cleaned.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5");
+  }
+
+  /**
+   * Formata tipo de conta
+   */
+  private formatTipoConta(tipo?: string): string {
+    if (!tipo) return "Corrente";
+    if (tipo === "conta_corrente") return "Corrente";
+    if (tipo === "conta_poupanca") return "Poupança";
+    return tipo;
   }
 
   /**

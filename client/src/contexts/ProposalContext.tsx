@@ -93,6 +93,7 @@ interface ClientData {
   dadosPagamentoAgencia?: string;
   dadosPagamentoConta?: string;
   dadosPagamentoDigito?: string;
+  dadosPagamentoTipo?: string; // Tipo de conta: conta_corrente ou conta_poupanca
 
   // Dados PIX (quando pix)
   dadosPagamentoPix?: string; // Chave PIX
