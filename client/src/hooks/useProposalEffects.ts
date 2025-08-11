@@ -53,30 +53,61 @@ export function useProposalEffects() {
       try {
         clearErrors();
 
-        // Calculate first payment date - if no grace period, use 30 days from now
-        const dataVencimento =
-          state.loanData.dataCarencia ||
-          new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+        // Convert currency string to number
+        const valorEmprestimo = parseFloat(debouncedValorSolicitado.replace(/[^\d,]/g, "").replace(",", "."));
+        
+        // Calculate grace period days if specified
+        let diasCarencia = 0;
+        if (state.loanData.dataCarencia) {
+          const dataCarenciaObj = new Date(state.loanData.dataCarencia);
+          const hoje = new Date();
+          diasCarencia = Math.ceil((dataCarenciaObj.getTime() - hoje.getTime()) / (1000 * 3600 * 24));
+        }
 
-        const params = new URLSearchParams({
-          valor: debouncedValorSolicitado.replace(/[^\d,]/g, "").replace(",", "."),
-          prazo: debouncedPrazo.toString(),
-          produto_id: state.loanData.produtoId.toString(),
-          incluir_tac: state.loanData.incluirTac.toString(),
-          dataVencimento: dataVencimento,
+        // Prepare payload for new API
+        const payload = {
+          valorEmprestimo,
+          prazoMeses: debouncedPrazo,
+          produtoId: state.loanData.produtoId,
+          parceiroId: state.context?.atendente?.loja?.parceiro?.id || null,
+          diasCarencia // Pass grace period to API for proper calculation
+        };
+
+        console.log('[FRONTEND] Enviando simulação para nova API:', payload);
+
+        // Use new POST API endpoint
+        const response = await apiRequest('/api/simular', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
         });
 
-        const response = await apiRequest(`/api/simulacao?${params.toString()}`);
+        console.log('[FRONTEND] Resposta da nova API:', response);
 
+        // Map new API response to frontend state
         setSimulationResult({
           valorParcela: response.valorParcela,
-          taxaJuros: response.taxaJuros,
-          valorIOF: response.valorIOF,
-          valorTAC: response.valorTAC,
+          taxaJuros: response.taxaJurosMensal,
+          taxaJurosAnual: response.taxaJurosAnual,
+          valorIOF: response.iof.total,
+          iofDetalhado: {
+            diario: response.iof.diario,
+            adicional: response.iof.adicional,
+            total: response.iof.total
+          },
+          valorTAC: response.tac,
           valorTotalFinanciado: response.valorTotalFinanciado,
-          custoEfetivoTotal: response.custoEfetivoTotalAnual,
-          jurosCarencia: response.jurosCarencia,
-          diasCarencia: response.diasCarencia,
+          valorTotalAPagar: response.valorTotalAPagar,
+          custoTotalOperacao: response.custoTotalOperacao,
+          custoEfetivoTotal: response.cetAnual,
+          comissao: response.comissao?.valor || 0,
+          comissaoPercentual: response.comissao?.percentual || 0,
+          cronogramaPagamento: response.cronogramaPagamento,
+          jurosCarencia: diasCarencia > 0 ? (valorEmprestimo * (response.taxaJurosMensal / 100 / 30) * diasCarencia) : 0,
+          diasCarencia,
+          parametrosUtilizados: response.parametrosUtilizados
         });
       } catch (error) {
         console.error("Erro na simulação:", error);

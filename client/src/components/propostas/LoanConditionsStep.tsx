@@ -211,6 +211,11 @@ export function LoanConditionsStep() {
               <div>
                 <p className="text-sm text-muted-foreground">Taxa de Juros</p>
                 <p className="text-lg font-semibold">{simulation.taxaJuros}% ao mês</p>
+                {simulation.taxaJurosAnual && (
+                  <p className="text-xs text-muted-foreground">
+                    ({parseFloat(simulation.taxaJurosAnual).toFixed(2)}% ao ano)
+                  </p>
+                )}
               </div>
             </div>
 
@@ -224,16 +229,52 @@ export function LoanConditionsStep() {
                   })}
                 </span>
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">IOF:</span>
-                <span className="text-foreground">
-                  R${" "}
-                  {parseFloat(simulation.valorIOF).toLocaleString("pt-BR", {
-                    minimumFractionDigits: 2,
-                  })}
-                </span>
-              </div>
-              {loanData.incluirTac && (
+              
+              {/* IOF Detalhado */}
+              {simulation.iofDetalhado ? (
+                <>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">IOF Diário:</span>
+                    <span className="text-foreground">
+                      R${" "}
+                      {parseFloat(simulation.iofDetalhado.diario).toLocaleString("pt-BR", {
+                        minimumFractionDigits: 2,
+                      })}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">IOF Adicional:</span>
+                    <span className="text-foreground">
+                      R${" "}
+                      {parseFloat(simulation.iofDetalhado.adicional).toLocaleString("pt-BR", {
+                        minimumFractionDigits: 2,
+                      })}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm font-medium">
+                    <span className="text-muted-foreground">IOF Total:</span>
+                    <span className="text-foreground">
+                      R${" "}
+                      {parseFloat(simulation.iofDetalhado.total).toLocaleString("pt-BR", {
+                        minimumFractionDigits: 2,
+                      })}
+                    </span>
+                  </div>
+                </>
+              ) : (
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">IOF:</span>
+                  <span className="text-foreground">
+                    R${" "}
+                    {parseFloat(simulation.valorIOF).toLocaleString("pt-BR", {
+                      minimumFractionDigits: 2,
+                    })}
+                  </span>
+                </div>
+              )}
+
+              {/* TAC */}
+              {parseFloat(simulation.valorTAC) > 0 && (
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">TAC:</span>
                   <span className="text-foreground">
@@ -244,7 +285,24 @@ export function LoanConditionsStep() {
                   </span>
                 </div>
               )}
-              {simulation.jurosCarencia && (
+
+              {/* Comissão */}
+              {simulation.comissao && parseFloat(simulation.comissao) > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">
+                    Comissão ({simulation.comissaoPercentual}%):
+                  </span>
+                  <span className="text-foreground">
+                    R${" "}
+                    {parseFloat(simulation.comissao).toLocaleString("pt-BR", {
+                      minimumFractionDigits: 2,
+                    })}
+                  </span>
+                </div>
+              )}
+
+              {/* Juros de Carência */}
+              {simulation.jurosCarencia && parseFloat(simulation.jurosCarencia) > 0 && (
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">
                     Juros de Carência ({simulation.diasCarencia} dias):
@@ -257,6 +315,8 @@ export function LoanConditionsStep() {
                   </span>
                 </div>
               )}
+
+              {/* Total Financiado */}
               <div className="flex justify-between border-t border-border pt-2 text-sm font-semibold">
                 <span className="text-foreground">Total Financiado:</span>
                 <span className="text-foreground">
@@ -266,10 +326,38 @@ export function LoanConditionsStep() {
                   })}
                 </span>
               </div>
+
+              {/* Total a Pagar */}
+              {simulation.valorTotalAPagar && (
+                <div className="flex justify-between text-sm font-semibold text-blue-600 dark:text-blue-400">
+                  <span>Total que o Cliente Pagará:</span>
+                  <span>
+                    R${" "}
+                    {parseFloat(simulation.valorTotalAPagar).toLocaleString("pt-BR", {
+                      minimumFractionDigits: 2,
+                    })}
+                  </span>
+                </div>
+              )}
+
+              {/* Custo da Operação */}
+              {simulation.custoTotalOperacao && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Custo Total da Operação:</span>
+                  <span className="text-foreground">
+                    R${" "}
+                    {parseFloat(simulation.custoTotalOperacao).toLocaleString("pt-BR", {
+                      minimumFractionDigits: 2,
+                    })}
+                  </span>
+                </div>
+              )}
+
+              {/* CET Anual */}
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">CET Anual:</span>
                 <span className="font-semibold text-foreground">
-                  {simulation.custoEfetivoTotal}%
+                  {parseFloat(simulation.custoEfetivoTotal).toFixed(2)}%
                 </span>
               </div>
             </div>

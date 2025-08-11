@@ -117,12 +117,37 @@ interface LoanData {
 interface SimulationResult {
   valorParcela: string;
   taxaJuros: string;
+  taxaJurosAnual?: string;
   valorIOF: string;
+  iofDetalhado?: {
+    diario: string;
+    adicional: string;
+    total: string;
+  };
   valorTAC: string;
   valorTotalFinanciado: string;
+  valorTotalAPagar?: string;
+  custoTotalOperacao?: string;
   custoEfetivoTotal: string;
+  comissao?: string;
+  comissaoPercentual?: string;
+  cronogramaPagamento?: Array<{
+    parcela: number;
+    dataVencimento: string;
+    valorParcela: number;
+    valorJuros: number;
+    valorAmortizacao: number;
+    saldoDevedor: number;
+  }>;
   jurosCarencia?: string;
   diasCarencia?: number;
+  parametrosUtilizados?: {
+    parceiroId?: number;
+    produtoId?: number;
+    taxaJurosMensal?: number;
+    tacValor?: number;
+    tacTipo?: string;
+  };
 }
 
 // Document interface
