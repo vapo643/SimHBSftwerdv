@@ -91,11 +91,13 @@ export default function NovaProposta() {
 
   const createProposta = useMutation({
     mutationFn: async (data: PropostaForm) => {
-      const response = await apiRequest("POST", "/api/propostas", {
-        ...data,
-        status: "aguardando_analise",
+      return apiRequest("/api/propostas", {
+        method: "POST",
+        body: JSON.stringify({
+          ...data,
+          status: "aguardando_analise",
+        }),
       });
-      return response.json();
     },
     onSuccess: () => {
       toast({
