@@ -436,23 +436,6 @@ export default function Formalizacao() {
 
   const propostaId = params?.id;
 
-  // Query para buscar boletos gerados - OTIMIZADA
-  const { data: collectionsData } = useQuery<any[]>({
-    queryKey: ["/api/inter/collections", propostaId],
-    queryFn: async (): Promise<any[]> => {
-      if (!propostaId) return [];
-      console.log(`[INTER QUERY] Buscando boletos para proposta: ${propostaId}`);
-      const response = await apiRequest(`/api/inter/collections/${propostaId}`) as any[];
-      console.log(`[INTER QUERY] Boletos encontrados: ${Array.isArray(response) ? response.length : 0}`);
-      return Array.isArray(response) ? response : [];
-    },
-    enabled: !!propostaId && (proposta?.status === "contratos_assinados" || proposta?.interBoletoGerado),
-    staleTime: 2 * 60 * 1000, // Cache por 2 minutos para evitar chamadas excessivas
-    refetchOnWindowFocus: false, // Não refetch quando janela ganha foco
-    retry: 1, // Reduzir tentativas de retry
-  });
-
-  // TODOS os hooks devem estar aqui no topo
   const {
     data: proposta,
     isLoading,
@@ -466,6 +449,22 @@ export default function Formalizacao() {
     enabled: !!propostaId,
     staleTime: 1 * 60 * 1000, // Cache por 1 minuto
     refetchOnWindowFocus: false, // Não refetch quando janela ganha foco
+  });
+
+  // Query para buscar boletos gerados - OTIMIZADA (após proposta carregar)
+  const { data: collectionsData } = useQuery<any[]>({
+    queryKey: ["/api/inter/collections", propostaId],
+    queryFn: async (): Promise<any[]> => {
+      if (!propostaId) return [];
+      console.log(`[INTER QUERY] Buscando boletos para proposta: ${propostaId}`);
+      const response = await apiRequest(`/api/inter/collections/${propostaId}`) as any[];
+      console.log(`[INTER QUERY] Boletos encontrados: ${Array.isArray(response) ? response.length : 0}`);
+      return Array.isArray(response) ? response : [];
+    },
+    enabled: !!propostaId && !!proposta && (proposta?.status === "contratos_assinados" || proposta?.interBoletoGerado),
+    staleTime: 2 * 60 * 1000, // Cache por 2 minutos para evitar chamadas excessivas
+    refetchOnWindowFocus: false, // Não refetch quando janela ganha foco
+    retry: 1, // Reduzir tentativas de retry
   });
 
   const form = useForm<UpdateFormalizacaoForm>({
@@ -632,11 +631,11 @@ export default function Formalizacao() {
     }
   };
 
-  // Carregar status ClickSign na inicialização - OTIMIZADA
+  // Carregar status ClickSign na inicialização - OTIMIZADA (após proposta carregar)
   const { data: initialClickSignData } = useQuery({
     queryKey: ["/api/clicksign/status", propostaId],
     queryFn: () => checkClickSignStatus(propostaId!),
-    enabled: !!propostaId && !!proposta?.ccbGerado && proposta?.status !== "contratos_assinados",
+    enabled: !!propostaId && !!proposta && !!proposta?.ccbGerado && proposta?.status !== "contratos_assinados",
     staleTime: 2 * 60 * 1000, // Cache por 2 minutos
     refetchOnWindowFocus: false, // Não refetch quando janela ganha foco
     retry: 1, // Reduzir tentativas
