@@ -829,7 +829,23 @@ class InterBankService {
     console.log(`[INTER] 🔍 Using direct /pdf endpoint with Accept: application/pdf header`);
 
     try {
+      // INVESTIGAR PRIMEIRO SE O CÓDIGO SOLICITAÇÃO É VÁLIDO
+      console.log(`[INTER] 🔍 DEBUGGING codigoSolicitacao: "${codigoSolicitacao}"`);
+      console.log(`[INTER] 🔍 Length: ${codigoSolicitacao.length} chars`);
+      console.log(`[INTER] 🔍 Contains special chars: ${/[^a-zA-Z0-9\-_.]/.test(codigoSolicitacao)}`);
+      
+      try {
+        // PRIMEIRO: Tentar recuperar a cobrança para verificar se existe
+        console.log(`[INTER] 🔍 STEP 1: Verificando se cobrança existe...`);
+        await this.recuperarCobranca(codigoSolicitacao);
+        console.log(`[INTER] ✅ Cobrança existe, prosseguindo para PDF...`);
+      } catch (error: any) {
+        console.error(`[INTER] ❌ Cobrança não existe ou código inválido:`, error.message);
+        throw new Error(`Boleto com código "${codigoSolicitacao}" não encontrado na API Inter. Verifique se o boleto foi gerado corretamente.`);
+      }
+
       // FAZER REQUISIÇÃO DIRETA PARA O ENDPOINT /pdf COM HEADERS CORRETOS
+      console.log(`[INTER] 🔍 STEP 2: Tentando baixar PDF...`);
       const response = await this.makeRequest(
         `/cobranca/v3/cobrancas/${codigoSolicitacao}/pdf`,
         "GET",

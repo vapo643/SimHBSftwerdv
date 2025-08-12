@@ -1575,12 +1575,23 @@ export default function Formalizacao() {
                                                         return;
                                                       }
 
-                                                      // Fazer download com autenticação correta (usando apiRequest)
+                                                      // Fazer download com autenticação correta usando apiRequest
+                                                      console.log(`[PDF DOWNLOAD] Usando código: ${boleto.codigoSolicitacao}`);
+                                                      console.log(`[PDF DOWNLOAD] Nosso número: ${boleto.nossoNumero || 'não definido'}`);
+                                                      console.log(`[PDF DOWNLOAD] Seu número: ${boleto.seuNumero || 'não definido'}`);
+                                                      
+                                                      // Usar apiRequest para autenticação automática, mas ainda precisamos tratar como blob
+                                                      const token = localStorage.getItem('token');
+                                                      if (!token) {
+                                                        throw new Error('Token de acesso não encontrado');
+                                                      }
+                                                      
                                                       const response = await fetch(`/api/inter/collections/${boleto.codigoSolicitacao}/pdf`, {
                                                         method: 'GET',
                                                         headers: {
-                                                          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                                                          'Accept': 'application/pdf'
+                                                          'Authorization': `Bearer ${token}`,
+                                                          'Accept': 'application/pdf',
+                                                          'Content-Type': 'application/json'
                                                         }
                                                       });
 

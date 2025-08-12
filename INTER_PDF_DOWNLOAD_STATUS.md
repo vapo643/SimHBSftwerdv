@@ -78,4 +78,35 @@ A implementação está completa e funcionando. O sistema:
 4. Oferece alternativas inteligentes (código de barras, PIX)
 5. Salva PDF automaticamente quando disponível
 
-**Próxima ação:** Aguardar boletos mudarem para status "REGISTRADO" para testar download completo.
+## 🚨 PROBLEMA CRÍTICO IDENTIFICADO
+
+### codigoSolicitacao Inválido
+- ❌ **Atual**: "CORRETO-1755013508.325368-X" (REJEITADO pela API Inter)  
+- ✅ **Correto**: UUIDs como "44a467d1-e93f-4e91-b1f9-c79438ef5eea"
+
+### Causa Raiz
+Os boletos da proposta atual foram criados com códigos inválidos. A API Inter só aceita UUIDs válidos.
+
+### Solução Imediata
+1. Criar novos boletos com API Inter correta
+2. Ou encontrar boletos existentes com UUIDs válidos para testar
+
+**Status**: Sistema de PDF funcional, mas precisa de boletos com códigos válidos da API Inter.
+
+## 🛠️ SOLUÇÃO IMPLEMENTADA
+
+### Endpoint de Regeneração Criado
+- **Teste**: `POST /api/inter/test-fix-collections/:propostaId` (sem auth)
+- **Produção**: `POST /api/inter/fix-collections/:propostaId` (com auth)
+
+### Funcionalidade
+1. ✅ Identifica boletos com códigos inválidos (não-UUID)
+2. ✅ Desativa boletos antigos
+3. ✅ Cria novos boletos com API Inter usando UUIDs válidos
+4. ✅ Mantém todas as parcelas e valores originais
+
+### Teste Atual
+**Proposta**: `88a44696-9b63-42ee-aa81-15f9519d24cb`
+- **Total**: 24 boletos
+- **Inválidos**: 24 (formato "CORRETO-1755013508.325368-X")
+- **Válidos**: 0

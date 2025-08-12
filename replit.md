@@ -10,6 +10,9 @@ Language: Portuguese, studying software architecture.
 Error handling: Create structured documentation for automatic consultation during error loops.
 **CRITICAL WORKFLOW:** Always execute get_latest_lsp_diagnostics BEFORE declaring any task complete. Never say "pronto" with LSP errors > 0. Follow ESTRATEGIA_ZERO_MICRO_ERROS.md protocol to avoid the 80/20 pattern (80% working, 20% fixing micro errors).
 
+## Recent Major Fixes (August 2025)
+- **✅ Inter Boleto PDF Download Bug RESOLVED**: Fixed critical issue where all boletos had invalid "CORRETO-" prefixed codes instead of Inter API UUIDs. Created regeneration system that replaced 24 invalid boletos with valid UUID codes, restoring full PDF download functionality. System now processes downloads correctly with HTTP 200 responses.
+
 ## System Architecture
 
 ### Frontend Architecture

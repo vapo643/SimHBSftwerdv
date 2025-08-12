@@ -5018,6 +5018,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const interCollectionsRouter = (await import("./routes/inter-collections.js")).default;
   app.use("/api/inter/collections", interCollectionsRouter);
 
+  // Register Inter Fix Collections (emergency endpoint)
+  const interFixRouter = (await import("./routes/inter-fix-collections.js")).default;
+  app.use("/api/inter", interFixRouter);
+
+  // Register Inter Test Fix (no auth endpoint for testing)
+  const interTestFixRouter = (await import("./routes/inter-fix-test.js")).default;
+  app.use("/api/inter", interTestFixRouter);
+
+  // Register Inter Execute Fix (execute regeneration)
+  const interExecuteFixRouter = (await import("./routes/inter-execute-fix.js")).default;
+  app.use("/api/inter", interExecuteFixRouter);
+
   // Register Inter Bank routes AFTER (less specific route)
   app.use("/api/inter", interRoutes);
 
