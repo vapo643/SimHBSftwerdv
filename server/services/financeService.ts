@@ -124,8 +124,9 @@ export function calcularCET(
   outrosEncargos: number = 0
 ): number {
   // Passo 1: Calcular o valor líquido recebido pelo cliente
-  // (valor do empréstimo menos todos os encargos cobrados antecipadamente)
-  const valorLiquidoRecebido = valorEmprestimo - iofTotal - tacTotal - outrosEncargos;
+  // IOF NÃO é deduzido do valor recebido - é financiado junto com o empréstimo
+  // Apenas TAC e outros encargos antecipados são deduzidos
+  const valorLiquidoRecebido = valorEmprestimo - tacTotal - outrosEncargos;
   
   // Passo 2: Calcular o valor total pago pelo cliente
   const valorTotalPago = valorParcela * prazoMeses;
@@ -182,7 +183,7 @@ export function calcularCET(
       prazoMeses
     },
     '2_CALCULO_BASE': {
-      valorLiquidoRecebido,
+      valorLiquidoRecebido: valorLiquidoRecebido + ' (IOF NÃO deduzido - é financiado)',
       valorTotalPago,
       custoTotalOperacao
     },
