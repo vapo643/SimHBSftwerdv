@@ -16,19 +16,29 @@
 
 ## 🔧 CORREÇÕES IMPLEMENTADAS
 
-### 1. **TIPAGEM CORRIGIDA**
+### 1. **LÓGICA DE ESTADOS CORRIGIDA**
 ```typescript
-// ✅ ANTES (problemático):
-const [clickSignData, setClickSignData] = useState<{signUrl?: string; envelopeId?: string} | null>(null);
+// ❌ ANTES (problemático):
+{!proposta.clicksignSignUrl && !clickSignData && (
 
 // ✅ DEPOIS (corrigido):
+{proposta.ccbGerado && !proposta.clicksignSignUrl && !clickSignData?.signUrl && (
+```
+
+**Estado inicial:** Apenas quando CCB gerada mas sem link
+**Estado posterior:** Link existe (novo ou antigo) e CCB gerada
+
+### 2. **TIPAGEM CORRIGIDA**
+```typescript
+// ✅ Interfaces adicionadas:
 interface ClickSignData {
   signUrl?: string;
   envelopeId?: string;
   status?: string;
   success?: boolean;
 }
-const [clickSignData, setClickSignData] = useState<ClickSignData | null>(null);
+interface InterBoletoResponse { ... }
+interface CCBResponse { ... }
 ```
 
 ### 2. **LOGS DE DEBUG ADICIONADOS**
@@ -70,9 +80,12 @@ setClickSignData(response); // ✅ Sem erros de TypeScript
 
 ## 🧪 GUIA DE TESTE COMPLETO
 
-### **CENÁRIO 1: Estado Inicial**
-1. Acesse uma proposta que NUNCA foi enviada ao ClickSign
-2. **Resultado esperado:** Apenas o botão azul "Enviar Contrato para Assinatura (ClickSign)" deve estar visível
+### **CENÁRIO 1: Estado Inicial Corrigido**
+1. Acesse uma proposta com CCB gerada mas SEM link de ClickSign
+2. **Resultado esperado:** 
+   - ✅ CCB gerada → Botão azul "Enviar Contrato para Assinatura (ClickSign)" aparece
+   - ❌ Link de assinatura não deve estar visível
+   - ❌ Botão "Gerar Novo Link" não deve estar visível
 
 ### **CENÁRIO 2: Primeiro Envio**
 1. Clique no botão "Enviar Contrato para Assinatura (ClickSign)"

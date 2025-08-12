@@ -642,8 +642,12 @@ export default function Formalizacao() {
   // Atualizar clickSignData quando initialClickSignData mudar
   React.useEffect(() => {
     console.log("🔄 [CLICKSIGN] Dados iniciais recebidos:", initialClickSignData);
-    if (initialClickSignData) {
+    if (initialClickSignData?.signUrl) {
+      console.log("✅ [CLICKSIGN] Link encontrado, definindo estado posterior");
       setClickSignData(initialClickSignData as ClickSignData);
+    } else {
+      console.log("📭 [CLICKSIGN] Sem link, mantendo estado inicial");
+      setClickSignData(null); // Limpar estado para mostrar botão azul
     }
   }, [initialClickSignData]);
 
@@ -1026,8 +1030,8 @@ export default function Formalizacao() {
                                   onUpdate={() => refetch()}
                                 />
 
-                                {/* 🎯 ESTADO INICIAL: Botão de enviar para ClickSign se ainda não foi enviado */}
-                                {!proposta.clicksignSignUrl && !clickSignData && (
+                                {/* 🎯 ESTADO INICIAL: Botão azul quando CCB gerada mas sem link */}
+                                {proposta.ccbGerado && !proposta.clicksignSignUrl && !clickSignData?.signUrl && (
                                   <div className="mt-3 rounded-lg border border-blue-700 bg-blue-900/20 p-4">
                                     <div className="mb-3 flex items-center justify-between">
                                       <h5 className="font-medium text-blue-300">
@@ -1036,7 +1040,7 @@ export default function Formalizacao() {
                                       <Signature className="h-5 w-5 text-blue-400" />
                                     </div>
                                     <p className="mb-4 text-sm text-blue-200">
-                                      Clique no botão abaixo para enviar o contrato CCB para o
+                                      CCB foi gerada com sucesso! Clique no botão para enviar ao 
                                       ClickSign e gerar o link de assinatura para o cliente.
                                     </p>
                                     <Button
@@ -1091,8 +1095,8 @@ export default function Formalizacao() {
                                   </div>
                                 )}
 
-                                {/* 🎯 ESTADO POSTERIOR: Exibir link de assinatura se já existe */}
-                                {(clickSignData?.signUrl || proposta.clicksignSignUrl) && (
+                                {/* 🎯 ESTADO POSTERIOR: Link existe (novo ou antigo) - manter fixo até assinatura */}
+                                {(clickSignData?.signUrl || proposta.clicksignSignUrl) && proposta.ccbGerado && (
                                   <div className="mt-3 rounded-lg border border-green-700 bg-green-900/20 p-4">
                                     <div className="mb-3 flex items-center">
                                       <CheckCircle className="mr-2 h-5 w-5 text-green-400" />
