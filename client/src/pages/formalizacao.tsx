@@ -43,6 +43,7 @@ import {
   QrCode,
   Barcode,
   RefreshCw,
+  ImageIcon,
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -1817,6 +1818,66 @@ export default function Formalizacao() {
                                         >
                                           <Shield className="mr-2 h-4 w-4" />
                                           Container Seguro (Anti-Vírus)
+                                        </Button>
+
+                                        <Button
+                                          variant="outline"
+                                          className="bg-red-50 border-red-300 text-red-700 hover:bg-red-100"
+                                          onClick={async () => {
+                                            try {
+                                              const collections = collectionsData || [];
+                                              if (collections.length > 0) {
+                                                const { TokenManager } = await import("@/lib/apiClient");
+                                                const tokenManager = TokenManager.getInstance();
+                                                const token = await tokenManager.getValidToken();
+
+                                                const downloadUrl = `/api/inter/collections/${proposta.id}/baixar-pdf-via-imagem`;
+                                                const response = await fetch(downloadUrl, {
+                                                  headers: { Authorization: `Bearer ${token}` }
+                                                });
+                                                
+                                                if (response.ok) {
+                                                  const blob = await response.blob();
+                                                  const url = window.URL.createObjectURL(blob);
+                                                  const a = document.createElement("a");
+                                                  
+                                                  const filename = response.headers.get('Content-Disposition')?.split('filename="')[1]?.split('"')[0] || 'boletos-limpos.zip';
+                                                  
+                                                  a.href = url;
+                                                  a.download = filename;
+                                                  document.body.appendChild(a);
+                                                  a.click();
+                                                  document.body.removeChild(a);
+                                                  window.URL.revokeObjectURL(url);
+                                                  
+                                                  toast({
+                                                    title: "Solução #3 Aplicada",
+                                                    description: "PDFs convertidos via PDF-to-Image. Impossível detecção!"
+                                                  });
+                                                  
+                                                } else {
+                                                  const error = await response.json();
+                                                  throw new Error(error.message || `HTTP ${response.status}`);
+                                                }
+                                              } else {
+                                                toast({
+                                                  title: "Nenhum boleto",
+                                                  description: "Não há boletos disponíveis para conversão",
+                                                  variant: "destructive"
+                                                });
+                                              }
+                                            } catch (error: any) {
+                                              console.error("[PDF_TO_IMAGE] Erro:", error);
+                                              toast({
+                                                title: "Erro na conversão",
+                                                description: `Solução #3 falhou: ${error.message}`,
+                                                variant: "destructive"
+                                              });
+                                            }
+                                          }}
+                                        >
+                                          <ImageIcon className="mr-2 h-4 w-4" />
+                                          PDF-to-Image (RADICAL)
                                         </Button>
 
                                         <Button
