@@ -67,34 +67,25 @@ router.get(
                 error
               );
               
-              // Se for erro 404, desativar este boleto (código inválido)
-              if (error.message?.includes('404')) {
-                console.warn(`[INTER COLLECTIONS] 🗑️ Desativando boleto não encontrado: ${collection.codigoSolicitacao}`);
-                await db
-                  .update(interCollections)
-                  .set({
-                    isActive: false,
-                    situacao: 'CODIGO_INVALIDO',
-                    updatedAt: new Date(),
-                  })
-                  .where(eq(interCollections.id, collection.id));
-                return null; // Remove este item da resposta
-              }
+              // NÃO desativar automaticamente - apenas logar o erro
+              // Os códigos podem estar temporariamente indisponíveis
+              console.warn(`[INTER COLLECTIONS] ⚠️ Erro ao buscar boleto parcela ${collection.numeroParcela}, usando dados locais`);
               
-              // Para outros erros, retornar dados do banco local
+              // Sempre retornar dados do banco local em caso de erro
               return {
                 ...collection,
                 linkPdf: `/api/inter/collections/${collection.codigoSolicitacao}/pdf`,
+                // Manter número da parcela e total
+                numeroParcela: collection.numeroParcela,
+                totalParcelas: collection.totalParcelas,
               };
             }
           })
         );
 
-        // Filtrar boletos válidos (remover os null de códigos 404)
-        const validCollections = updatedCollections.filter(Boolean);
-        
-        console.log(`[INTER COLLECTIONS] Found ${validCollections.length} valid collections for proposal ${propostaId}`);
-        res.json(validCollections);
+        // NÃO filtrar - retornar todas as collections
+        console.log(`[INTER COLLECTIONS] Found ${updatedCollections.length} collections for proposal ${propostaId}`);
+        res.json(updatedCollections);
       } else {
         res.json([]);
       }
@@ -119,14 +110,14 @@ router.get(
 
       console.log(`[INTER COLLECTIONS] Downloading PDF for collection: ${codigoSolicitacao}`);
 
-      // Verificar se collection pertence à proposta
+      // Verificar se collection pertence à proposta (correção da query)
       const collection = await db
         .select()
         .from(interCollections)
-        .where(
-          eq(interCollections.propostaId, propostaId) &&
-            eq(interCollections.codigoSolicitacao, codigoSolicitacao)
-        )
+        .where(and(
+          eq(interCollections.propostaId, propostaId),
+          eq(interCollections.codigoSolicitacao, codigoSolicitacao)
+        ))
         .limit(1);
 
       if (collection.length === 0) {

@@ -1542,8 +1542,28 @@ export default function Formalizacao() {
                                                       console.log(`[PDF DOWNLOAD] Tentando baixar PDF para: ${boleto.codigoSolicitacao}`);
                                                       console.log(`[PDF DOWNLOAD] Status do boleto: ${boleto.situacao}`);
                                                       
-                                                      // Permitir download independente do status - a API do Inter vai validar
+                                                      // Verificar status do boleto
                                                       console.log(`[PDF DOWNLOAD] Tentativa de download para status: ${boleto.situacao}`);
+                                                      
+                                                      // Se o status ainda é EM_PROCESSAMENTO, avisar o usuário
+                                                      if (boleto.situacao === 'EM_PROCESSAMENTO' || boleto.situacao === 'CODIGO_INVALIDO') {
+                                                        toast({
+                                                          title: "PDF temporariamente indisponível",
+                                                          description: "O boleto está sendo processado. Use o código de barras abaixo para pagamento.",
+                                                          variant: "default",
+                                                        });
+                                                        
+                                                        // Copiar código de barras como fallback
+                                                        if (boleto.linhaDigitavel || boleto.codigoBarras) {
+                                                          const codigo = boleto.linhaDigitavel || boleto.codigoBarras;
+                                                          await navigator.clipboard.writeText(codigo);
+                                                          toast({
+                                                            title: "✅ Código copiado!",
+                                                            description: "Use no app do banco ou PIX Copia e Cola",
+                                                          });
+                                                        }
+                                                        return;
+                                                      }
 
                                                       // Fazer download com autenticação correta usando apiRequest
                                                       console.log(`[PDF DOWNLOAD] Usando código: ${boleto.codigoSolicitacao}`);

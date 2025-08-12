@@ -4,7 +4,7 @@ import { requireAnyRole } from "../lib/role-guards";
 import { interBankService } from "../services/interBankService";
 import { db } from "../lib/supabase";
 import { interCollections } from "@shared/schema";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 
 const router = Router();
 
@@ -26,8 +26,10 @@ router.post(
       const collections = await db
         .select()
         .from(interCollections)
-        .where(eq(interCollections.propostaId, propostaId))
-        .where(eq(interCollections.isActive, true));
+        .where(and(
+          eq(interCollections.propostaId, propostaId),
+          eq(interCollections.isActive, true)
+        ));
 
       if (collections.length === 0) {
         return res.json({ updated: 0, message: "Nenhum boleto encontrado" });
@@ -65,22 +67,17 @@ router.post(
           });
 
         } catch (error: any) {
-          if (error.message?.includes('404')) {
-            // Código não existe mais - desativar
-            await db
-              .update(interCollections)
-              .set({
-                isActive: false,
-                situacao: 'CODIGO_INVALIDO',
-                updatedAt: new Date(),
-              })
-              .where(eq(interCollections.id, collection.id));
-            
-            removed++;
-            console.warn(`[INTER REALTIME] 🗑️ Removido código inválido parcela ${collection.numeroParcela}: ${collection.codigoSolicitacao}`);
-          } else {
-            console.error(`[INTER REALTIME] ❌ Erro na parcela ${collection.numeroParcela}:`, error.message);
-          }
+          // NÃO desativar automaticamente - apenas logar o erro
+          console.error(`[INTER REALTIME] ⚠️ Erro na parcela ${collection.numeroParcela}:`, error.message);
+          
+          results.push({
+            parcela: collection.numeroParcela,
+            codigo: collection.codigoSolicitacao,
+            statusAnterior: collection.situacao,
+            statusAtual: collection.situacao, // Manter o status atual
+            mudou: false,
+            erro: error.message?.includes('404') ? 'Boleto não encontrado na API' : 'Erro ao buscar'
+          });
         }
       }
 

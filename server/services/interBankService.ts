@@ -906,7 +906,7 @@ class InterBankService {
       console.error("[INTER] ❌ DEEP RESEARCH: PDF download failed:", error);
       
       // Log adicional para debugging
-      if (error.message?.includes("Inter API error: 406")) {
+      if (error instanceof Error && error.message?.includes("Inter API error: 406")) {
         console.error("[INTER] ❌ ERROR 406 - POSSIBLE CAUSES:");
         console.error("- Boleto não está no status correto (precisa ser REGISTRADO?)");
         console.error("- codigoSolicitacao incorreto (tentar nossoNumero?)");
