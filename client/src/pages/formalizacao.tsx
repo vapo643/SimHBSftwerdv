@@ -180,7 +180,7 @@ function FormalizacaoList() {
       console.log("Resposta do endpoint formalizacao:", response);
 
       // PARSING DEFENSIVO: Garantir que dados JSONB sejam objetos
-      const propostsWithParsedData = response.map((proposta: any) => ({
+      const propostsWithParsedData = (response as any[]).map((proposta: any) => ({
         ...proposta,
         cliente_data: parseJsonbField(proposta.cliente_data, "cliente_data", proposta.id),
         condicoes_data: parseJsonbField(proposta.condicoes_data, "condicoes_data", proposta.id),
@@ -406,12 +406,23 @@ export default function Formalizacao() {
   const { user } = useAuth();
   const [ccbUrl, setCcbUrl] = useState<string | null>(null);
   const [showCcbViewer, setShowCcbViewer] = useState(false);
-  // 🎯 TIPAGEM CORRIGIDA: Interface para dados do ClickSign
+  // 🎯 TIPAGEM CORRIGIDA: Interfaces para dados das APIs
   interface ClickSignData {
     signUrl?: string;
     envelopeId?: string;
     status?: string;
     success?: boolean;
+  }
+
+  interface InterBoletoResponse {
+    totalCriados?: number;
+    codigoSolicitacao?: string;
+    boletos?: any[];
+  }
+
+  interface CCBResponse {
+    ccb_gerado?: boolean;
+    publicUrl?: string;
   }
   
   const [clickSignData, setClickSignData] = useState<ClickSignData | null>(null);
@@ -625,6 +636,7 @@ export default function Formalizacao() {
     queryKey: ["/api/clicksign/status", propostaId],
     queryFn: () => checkClickSignStatus(propostaId!),
     enabled: !!propostaId && !!proposta?.ccbGerado,
+    staleTime: 30000, // Cache por 30s para evitar refetch excessivo
   });
 
   // Atualizar clickSignData quando initialClickSignData mudar
@@ -673,12 +685,9 @@ export default function Formalizacao() {
               queryKey: ["/api/inter/collections", propostaId]
             });
             
-            // Mostrar notificação
-            toast({
-              title: "📡 Atualização em tempo real",
-              description: "A proposta foi atualizada automaticamente",
-              duration: 3000,
-            });
+            // 🔇 SILENCIAR TOAST de realtime para evitar confusão na UX do ClickSign
+            // Apenas loggar a atualização
+            console.log("🔄 [REALTIME] Proposta atualizada silenciosamente");
           }
         }
       )
@@ -1017,7 +1026,7 @@ export default function Formalizacao() {
                                   onUpdate={() => refetch()}
                                 />
 
-                                {/* Botão de enviar para ClickSign se ainda não foi enviado */}
+                                {/* 🎯 ESTADO INICIAL: Botão de enviar para ClickSign se ainda não foi enviado */}
                                 {!proposta.clicksignSignUrl && !clickSignData && (
                                   <div className="mt-3 rounded-lg border border-blue-700 bg-blue-900/20 p-4">
                                     <div className="mb-3 flex items-center justify-between">
@@ -1082,8 +1091,8 @@ export default function Formalizacao() {
                                   </div>
                                 )}
 
-                                {/* Exibir link de assinatura se já existe */}
-                                {(clickSignData || proposta.clicksignSignUrl) && (
+                                {/* 🎯 ESTADO POSTERIOR: Exibir link de assinatura se já existe */}
+                                {(clickSignData?.signUrl || proposta.clicksignSignUrl) && (
                                   <div className="mt-3 rounded-lg border border-green-700 bg-green-900/20 p-4">
                                     <div className="mb-3 flex items-center">
                                       <CheckCircle className="mr-2 h-5 w-5 text-green-400" />
@@ -1152,13 +1161,13 @@ export default function Formalizacao() {
                                             setClickSignData(response);
                                             
                                             toast({
-                                              title: "Sucesso",
-                                              description:
-                                                "Novo link de assinatura gerado com sucesso!",
+                                              title: "✅ Link Regenerado",
+                                              description: "Novo link de assinatura disponível para o cliente!",
+                                              duration: 4000,
                                             });
                                             
-                                            // Recarregar dados da proposta
-                                            refetch();
+                                            // 🔄 Atualizar cache sem refetch para evitar flickering
+                                            queryClient.setQueryData(["/api/clicksign/status", propostaId], response);
                                           } catch (error: any) {
                                             console.error("❌ [CLICKSIGN] Erro ao regenerar:", error);
                                             toast({
@@ -1283,17 +1292,17 @@ export default function Formalizacao() {
                                               method: "POST",
                                               body: JSON.stringify(requestData),
                                             }
-                                          );
+                                          ) as InterBoletoResponse;
 
                                           console.log("[INTER] Resposta da API:", response);
 
                                           toast({
                                             title: "Sucesso",
-                                            description: `${response.totalCriados} boleto(s) gerado(s) com sucesso!`,
+                                            description: `${response.totalCriados || 0} boleto(s) gerado(s) com sucesso!`,
                                           });
 
                                           // Atualizar estado local para mostrar os boletos
-                                          setInterBoletoData(response);
+                                          setInterBoletoData(response as {codigoSolicitacao?: string});
                                           refetch(); // Recarregar dados da proposta
                                           queryClient.invalidateQueries({
                                             queryKey: ["/api/inter/collections", proposta.id],
@@ -1809,7 +1818,7 @@ export default function Formalizacao() {
                                         // ✅ CORREÇÃO: Usar endpoint de formalização correto
                                         const response = await apiRequest(
                                           `/api/formalizacao/${proposta.id}/ccb`
-                                        );
+                                        ) as CCBResponse;
                                         if (response.ccb_gerado === false) {
                                           toast({
                                             title: "CCB não disponível",
@@ -1819,7 +1828,7 @@ export default function Formalizacao() {
                                           });
                                           return;
                                         }
-                                        setCcbUrl(response.publicUrl);
+                                        setCcbUrl(response.publicUrl || "");
                                         setShowCcbViewer(true);
                                       } catch (error) {
                                         toast({
@@ -2249,7 +2258,7 @@ export default function Formalizacao() {
                     <select
                       className="w-full rounded-md border border-gray-600 bg-gray-700 p-2 text-white"
                       value={form.watch("status") || proposta.status}
-                      onChange={e => form.setValue("status", e.target.value as unknown)}
+                      onChange={e => form.setValue("status", e.target.value as "documentos_enviados" | "contratos_preparados" | "contratos_assinados" | "pronto_pagamento" | "pago")}
                     >
                       <option value="aprovado">Aprovado</option>
                       <option value="documentos_enviados">Documentos Enviados</option>
