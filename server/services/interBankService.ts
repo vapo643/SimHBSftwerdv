@@ -822,11 +822,11 @@ class InterBankService {
 
   /**
    * Get collection PDF using direct API endpoint
-   * DEEP RESEARCH SOLUTION: Endpoint /pdf funciona com header Accept: application/pdf
+   * CORREÇÃO: API Inter exige Accept: application/json mas retorna PDF
    */
   async obterPdfCobranca(codigoSolicitacao: string): Promise<Buffer> {
-    console.log(`[INTER] 📄 DEEP RESEARCH: Downloading PDF for: ${codigoSolicitacao}`);
-    console.log(`[INTER] 🔍 Using direct /pdf endpoint with Accept: application/pdf header`);
+    console.log(`[INTER] 📄 Downloading PDF for: ${codigoSolicitacao}`);
+    console.log(`[INTER] 🔍 Using /pdf endpoint with Accept: application/json (API requirement)`);
 
     try {
       // INVESTIGAR PRIMEIRO SE O CÓDIGO SOLICITAÇÃO É VÁLIDO
@@ -846,13 +846,14 @@ class InterBankService {
 
       // FAZER REQUISIÇÃO DIRETA PARA O ENDPOINT /pdf COM HEADERS CORRETOS
       console.log(`[INTER] 🔍 STEP 2: Tentando baixar PDF...`);
+      console.log(`[INTER] 📋 Usando Accept: application/json conforme exigido pela API`);
       const response = await this.makeRequest(
         `/cobranca/v3/cobrancas/${codigoSolicitacao}/pdf`,
         "GET",
         null,
         {
-          "Accept": "application/pdf",           // ✅ CRÍTICO: Header descoberto na pesquisa
-          "Content-Type": "application/json"     // Header padrão
+          "Accept": "application/json",           // ✅ CORREÇÃO: API só aceita application/json
+          "Content-Type": "application/json"      // Header padrão
         }
       );
 
