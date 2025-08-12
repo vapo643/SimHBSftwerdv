@@ -745,20 +745,28 @@ router.post("/collections", jwtAuthMiddleware, async (req: AuthenticatedRequest,
       .from(interCollections)
       .where(eq(interCollections.propostaId, validatedData.proposalId));
 
-    // Filtrar apenas boletos com status "a receber" (não pagos)
+    // Filtrar apenas boletos ativos (não pagos, não cancelados)
     const activeCollections = existingCollections.filter(
-      col => col.situacao === "NORMAL" || col.situacao === "EM_ABERTO" || !col.situacao
+      col => col.isActive === true && 
+             (col.situacao === "NORMAL" || col.situacao === "EM_ABERTO" || !col.situacao)
     );
 
     if (activeCollections.length > 0) {
       console.log(
-        `[INTER] Found ${activeCollections.length} active collections for proposal ${validatedData.proposalId}`
+        `[INTER] 🚫 BLOQUEIO: Encontrados ${activeCollections.length} boletos ativos para proposta ${validatedData.proposalId}`
       );
+      console.log(`[INTER] 🚫 Boletos ativos existentes:`, activeCollections.map(col => ({
+        codigo: col.codigoSolicitacao,
+        valor: col.valorNominal,
+        situacao: col.situacao,
+        isActive: col.isActive,
+        numeroParcela: col.numeroParcela
+      })));
       return res.status(409).json({
         success: false,
         error: "Boleto ativo encontrado",
         message:
-          "Já existem boletos ativos (não pagos) para esta proposta. Aguarde o pagamento ou cancele os boletos anteriores.",
+          `Já existem ${activeCollections.length} boletos ativos (não pagos) para esta proposta. Aguarde o pagamento ou cancele os boletos anteriores.`,
         existingCollections: activeCollections.map(col => ({
           codigo: col.codigoSolicitacao,
           valor: col.valorNominal,
@@ -791,7 +799,8 @@ router.post("/collections", jwtAuthMiddleware, async (req: AuthenticatedRequest,
     const prazo = condicoesData?.prazo || 1;
     const valorParcela = validatedData.valorTotal / prazo;
 
-    console.log(`[INTER] Criando ${prazo} boletos de R$ ${valorParcela.toFixed(2)} cada`);
+    console.log(`[INTER] ✅ AUTORIZADO: Criando ${prazo} boletos de R$ ${valorParcela.toFixed(2)} cada para proposta ${validatedData.proposalId}`);
+    console.log(`[INTER] 📊 Detalhes: prazo=${prazo}, valorTotal=${validatedData.valorTotal}, valorParcela=${valorParcela.toFixed(2)}`);
 
     const createdCollections = [];
     const errors = [];

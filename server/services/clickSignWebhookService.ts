@@ -477,10 +477,47 @@ class ClickSignWebhookService {
     try {
       console.log(`[CLICKSIGN → INTER] Triggering boleto generation for proposal: ${proposta.id}`);
 
-      // Check if collection already exists
+      // ===== PROTEÇÃO CONTRA CONDIÇÃO DE CORRIDA =====
+      // Check if collection already exists (ENHANCED CHECK)
       const existingCollections = await storage.getInterCollectionsByProposalId(proposta.id);
+      
       if (existingCollections && existingCollections.length > 0) {
-        console.log(`[CLICKSIGN → INTER] Boletos already exist for proposal: ${proposta.id}`);
+        console.log(`[CLICKSIGN → INTER] 🚫 BLOQUEIO: ${existingCollections.length} boletos ativos já existem para proposta: ${proposta.id}`);
+        console.log(`[CLICKSIGN → INTER] 🚫 Boletos existentes:`, existingCollections.map(col => ({
+          codigo: col.codigoSolicitacao,
+          parcela: col.numeroParcela,
+          valor: col.valorNominal,
+          situacao: col.situacao,
+          isActive: col.isActive
+        })));
+        
+        await storage.createPropostaLog({
+          propostaId: proposta.id,
+          autorId: "clicksign-webhook",
+          statusAnterior: proposta.status,
+          statusNovo: proposta.status,
+          observacao: `🚫 WEBHOOK BLOQUEADO: ${existingCollections.length} boletos ativos já existem. Timestamp: ${new Date().toISOString()}`,
+        });
+        
+        return;
+      }
+
+      // ===== DUPLA VERIFICAÇÃO ANTES DA CRIAÇÃO =====
+      console.log(`[CLICKSIGN → INTER] ✅ Verificação inicial passou. Fazendo segunda verificação antes de criar boletos...`);
+      
+      // Wait 500ms and check again to prevent race conditions
+      await new Promise(resolve => setTimeout(resolve, 500));
+      const secondCheck = await storage.getInterCollectionsByProposalId(proposta.id);
+      
+      if (secondCheck && secondCheck.length > 0) {
+        console.log(`[CLICKSIGN → INTER] 🚫 BLOQUEIO NA SEGUNDA VERIFICAÇÃO: ${secondCheck.length} boletos criados por outro processo`);
+        await storage.createPropostaLog({
+          propostaId: proposta.id,
+          autorId: "clicksign-webhook",
+          statusAnterior: proposta.status,
+          statusNovo: proposta.status,
+          observacao: `🚫 CORRIDA DETECTADA: Boletos criados por outro processo durante os 500ms de espera`,
+        });
         return;
       }
 
@@ -500,8 +537,9 @@ class ClickSignWebhookService {
       const valorParcela = parseFloat(String(condicoesData.valorParcela || 0));
 
       console.log(
-        `[CLICKSIGN → INTER] Creating ${numeroParcelas} boletos of R$ ${valorParcela} each`
+        `[CLICKSIGN → INTER] ✅ AUTORIZADO: Criando ${numeroParcelas} boletos de R$ ${valorParcela} cada para proposta ${proposta.id}`
       );
+      console.log(`[CLICKSIGN → INTER] 📊 Detalhes: numeroParcelas=${numeroParcelas}, valorParcela=${valorParcela}`);
 
       const successfulBoletos = [];
       const failedBoletos = [];

@@ -473,20 +473,22 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateProposta(id: string | number, proposta: UpdateProposta): Promise<Proposta> {
+    const numericId = typeof id === 'string' ? parseInt(id) : id;
     const result = await db
       .update(propostas)
       .set(proposta)
-      .where(eq(propostas.id, String(id)))
+      .where(eq(propostas.id, numericId))
       .returning();
     return result[0];
   }
 
   async deleteProposta(id: string | number, deletedBy?: string): Promise<void> {
+    const numericId = typeof id === 'string' ? parseInt(id) : id;
     // Soft delete - set deleted_at timestamp
     await db
       .update(propostas)
       .set({ deletedAt: new Date() })
-      .where(eq(propostas.id, String(id)));
+      .where(eq(propostas.id, numericId));
   }
 
   // Lojas CRUD implementation
