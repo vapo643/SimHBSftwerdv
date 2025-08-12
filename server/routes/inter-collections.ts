@@ -8,6 +8,7 @@ import { eq, and } from "drizzle-orm";
 import { getBrasiliaTimestamp } from "../lib/timezone";
 import { createHash } from 'crypto';
 import * as path from 'path';
+import JSZip from 'jszip';
 
 const router = Router();
 
@@ -94,6 +95,128 @@ router.get(
     } catch (error) {
       console.error("[INTER COLLECTIONS] Error:", error);
       res.status(500).json({ error: "Erro ao buscar boletos" });
+    }
+  }
+);
+
+/**
+ * Baixar todos os boletos em ZIP para impressão
+ * GET /api/inter/collections/:propostaId/baixar-todos-boletos
+ */
+router.get(
+  "/:propostaId/baixar-todos-boletos", 
+  jwtAuthMiddleware,
+  requireAnyRole,
+  async (req: AuthenticatedRequest, res) => {
+    try {
+      const { propostaId } = req.params;
+
+      console.log(`[INTER COLLECTIONS] Baixando TODOS os boletos para proposta: ${propostaId}`);
+
+      // Buscar todas as cobranças da proposta
+      const collections = await db
+        .select()
+        .from(interCollections)
+        .where(eq(interCollections.propostaId, propostaId))
+        .orderBy(interCollections.numeroParcela);
+
+      if (collections.length === 0) {
+        return res.status(404).json({ error: "Nenhum boleto encontrado para esta proposta" });
+      }
+
+      console.log(`[INTER COLLECTIONS] Encontradas ${collections.length} parcelas para download`);
+
+      // Buscar dados da proposta para nomeação
+      const propostaData = await db
+        .select()
+        .from(propostas)
+        .where(eq(propostas.id, parseInt(propostaId)))
+        .limit(1);
+
+      const proposta = propostaData[0];
+      const nomeCliente = proposta?.clienteNome?.toUpperCase().replace(/\s+/g, '_').substring(0, 20) || 'CLIENTE';
+      const cpfPrimeiros3 = proposta?.clienteCpf?.substring(0, 3) || '000';
+
+      // Criar ZIP com todos os boletos
+      const zip = new JSZip();
+      const interService = interBankService;
+      let sucessos = 0;
+      let erros = 0;
+
+      // Processar cada boleto
+      for (const collection of collections) {
+        try {
+          console.log(`[INTER COLLECTIONS] Processando parcela ${collection.numeroParcela}: ${collection.codigoSolicitacao}`);
+          
+          const pdfBuffer = await interService.obterPdfCobranca(collection.codigoSolicitacao);
+          
+          if (pdfBuffer && pdfBuffer.length > 0) {
+            // Verificar se é PDF válido
+            const pdfMagic = pdfBuffer.slice(0, 5).toString("utf8");
+            if (pdfMagic.startsWith("%PDF")) {
+              // Nome do arquivo: BOLETO_01_CLIENTE_NOME123.pdf
+              const numeroFormatado = (collection.numeroParcela || 1).toString().padStart(2, '0');
+              const filename = `BOLETO_${numeroFormatado}_CLIENTE_${nomeCliente}${cpfPrimeiros3}.pdf`;
+              
+              zip.file(filename, pdfBuffer);
+              sucessos++;
+              console.log(`[INTER COLLECTIONS] ✅ Parcela ${collection.numeroParcela} adicionada ao ZIP`);
+            } else {
+              console.log(`[INTER COLLECTIONS] ❌ Parcela ${collection.numeroParcela} - PDF inválido`);
+              erros++;
+            }
+          } else {
+            console.log(`[INTER COLLECTIONS] ❌ Parcela ${collection.numeroParcela} - PDF vazio`);
+            erros++;
+          }
+          
+        } catch (error) {
+          console.error(`[INTER COLLECTIONS] Erro na parcela ${collection.numeroParcela}:`, error);
+          erros++;
+        }
+      }
+
+      if (sucessos === 0) {
+        return res.status(404).json({ 
+          error: "Nenhum boleto válido encontrado",
+          message: "Todos os PDFs falharam na validação ou download"
+        });
+      }
+
+      console.log(`[INTER COLLECTIONS] Gerando ZIP final: ${sucessos} sucessos, ${erros} erros`);
+
+      // Gerar ZIP final
+      const zipBuffer = await zip.generateAsync({ 
+        type: 'nodebuffer', 
+        compression: 'DEFLATE',
+        compressionOptions: { level: 6 }
+      });
+
+      // Nome do arquivo ZIP
+      const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+      const zipFilename = `BOLETOS_${nomeCliente}${cpfPrimeiros3}_${timestamp}.zip`;
+
+      console.log(`[INTER COLLECTIONS] ✅ ZIP gerado: ${zipFilename} (${zipBuffer.length} bytes)`);
+
+      // Headers para download ZIP
+      res.setHeader('Content-Type', 'application/zip');
+      res.setHeader('Content-Disposition', `attachment; filename="${zipFilename}"`);
+      res.setHeader('Content-Length', zipBuffer.length.toString());
+      
+      // Headers básicos
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+
+      // Enviar ZIP
+      res.send(zipBuffer);
+
+    } catch (error: any) {
+      console.error("[INTER COLLECTIONS] Erro ao gerar ZIP de boletos:", error);
+      res.status(500).json({
+        error: "Erro interno do servidor",
+        message: "Falha ao gerar arquivo ZIP com os boletos"
+      });
     }
   }
 );
@@ -188,7 +311,6 @@ router.get(
       console.log(`[INTER COLLECTIONS] McAfee rejeitou todas as técnicas - tentando ZIP wrapper`);
       
       // Comprimir PDF dentro de um ZIP
-      const JSZip = require('jszip');
       const zip = new JSZip();
       zip.file('documento_bancario.pdf', pdfBuffer);
       const zipBuffer = await zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' });

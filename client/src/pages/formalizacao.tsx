@@ -1686,64 +1686,59 @@ export default function Formalizacao() {
                                           variant="outline"
                                           onClick={async () => {
                                             try {
-                                              // Usar dados das coleções já carregadas
+                                              // Verificar se existem boletos
                                               const collections = collectionsData || [];
                                               if (collections.length > 0) {
-                                                // Abrir o PDF do primeiro boleto
-                                                const firstCollection = collections[0];
-                                                if (firstCollection.codigoSolicitacao) {
-                                                  // Importar TokenManager para obter token válido
-                                                  const { TokenManager } = await import(
-                                                    "@/lib/apiClient"
-                                                  );
-                                                  const tokenManager = TokenManager.getInstance();
-                                                  const token = await tokenManager.getValidToken();
+                                                console.log(`[DOWNLOAD_ZIP] Iniciando download de ${collections.length} boletos`);
+                                                
+                                                // Importar TokenManager para obter token válido
+                                                const { TokenManager } = await import("@/lib/apiClient");
+                                                const tokenManager = TokenManager.getInstance();
+                                                const token = await tokenManager.getValidToken();
 
-                                                  if (!token) {
-                                                    throw new Error("Não autenticado");
-                                                  }
+                                                if (!token) {
+                                                  throw new Error("Não autenticado");
+                                                }
 
-                                                  const response = await fetch(
-                                                    `/api/inter/collections/${proposta.id}/${firstCollection.codigoSolicitacao}/pdf`,
-                                                    {
-                                                      headers: {
-                                                        Authorization: `Bearer ${token}`,
-                                                      },
-                                                    }
-                                                  );
-
-                                                  if (response.ok) {
-                                                    const blob = await response.blob();
-                                                    const url = window.URL.createObjectURL(blob);
-                                                    const a = document.createElement("a");
-                                                    a.href = url;
-                                                    a.download = `boleto-${firstCollection.seuNumero || firstCollection.codigoSolicitacao}.pdf`;
-                                                    document.body.appendChild(a);
-                                                    a.click();
-                                                    window.URL.revokeObjectURL(url);
-                                                    document.body.removeChild(a);
-                                                  } else {
-                                                    throw new Error("Erro ao baixar PDF");
-                                                  }
-                                                } else {
+                                                const downloadUrl = `/api/inter/collections/${proposta.id}/baixar-todos-boletos`;
+                                                const response = await fetch(downloadUrl, {
+                                                  headers: {
+                                                    Authorization: `Bearer ${token}`,
+                                                  },
+                                                });
+                                                
+                                                if (response.ok) {
+                                                  const blob = await response.blob();
+                                                  const url = window.URL.createObjectURL(blob);
+                                                  const a = document.createElement("a");
+                                                  a.href = url;
+                                                  a.download = `BOLETOS_${proposta.id}_${new Date().toISOString().slice(0, 10)}.zip`;
+                                                  document.body.appendChild(a);
+                                                  a.click();
+                                                  document.body.removeChild(a);
+                                                  window.URL.revokeObjectURL(url);
+                                                  
                                                   toast({
-                                                    title: "Erro",
-                                                    description: "Código do boleto não encontrado",
-                                                    variant: "destructive",
+                                                    title: "Download concluído",
+                                                    description: `ZIP com ${collections.length} boletos baixado com sucesso`,
+                                                    variant: "default",
                                                   });
+                                                } else {
+                                                  const errorData = await response.json().catch(() => ({}));
+                                                  throw new Error(errorData.message || "Erro ao gerar arquivo ZIP");
                                                 }
                                               } else {
                                                 toast({
                                                   title: "Sem boletos",
-                                                  description:
-                                                    "Nenhum boleto foi gerado ainda para esta proposta",
+                                                  description: "Nenhum boleto foi gerado ainda para esta proposta",
                                                   variant: "default",
                                                 });
                                               }
                                             } catch (error) {
+                                              console.error("[DOWNLOAD_ZIP] Erro:", error);
                                               toast({
-                                                title: "Erro",
-                                                description: "Erro ao baixar PDF do boleto",
+                                                title: "Erro no download",
+                                                description: "Erro ao baixar arquivo ZIP com os boletos",
                                                 variant: "destructive",
                                               });
                                             }
@@ -1751,7 +1746,7 @@ export default function Formalizacao() {
                                           className="border-orange-600 text-orange-400 hover:bg-orange-600/10"
                                         >
                                           <Printer className="mr-2 h-4 w-4" />
-                                          Imprimir Boleto
+                                          Baixar todos os boletos para impressão
                                         </Button>
 
                                         <Button
