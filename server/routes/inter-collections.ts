@@ -56,27 +56,45 @@ router.get(
               return {
                 ...collection,
                 ...details,
-                // qrCode: details.qrCode || collection.qrCode, // Campo não existe no schema
                 codigoBarras: details.codigoBarras || collection.codigoBarras,
-                linkPdf: `/api/inter/collections/${propostaId}/${collection.codigoSolicitacao}/pdf`,
+                linkPdf: `/api/inter/collections/${collection.codigoSolicitacao}/pdf`,
                 numeroParcela: collection.numeroParcela,
                 totalParcelas: collection.totalParcelas,
               };
-            } catch (error) {
+            } catch (error: any) {
               console.error(
                 `[INTER COLLECTIONS] Error fetching details for ${collection.codigoSolicitacao}:`,
                 error
               );
-              // Retornar dados do banco local se falhar buscar na API
+              
+              // Se for erro 404, desativar este boleto (código inválido)
+              if (error.message?.includes('404')) {
+                console.warn(`[INTER COLLECTIONS] 🗑️ Desativando boleto não encontrado: ${collection.codigoSolicitacao}`);
+                await db
+                  .update(interCollections)
+                  .set({
+                    isActive: false,
+                    situacao: 'CODIGO_INVALIDO',
+                    updatedAt: new Date(),
+                  })
+                  .where(eq(interCollections.id, collection.id));
+                return null; // Remove este item da resposta
+              }
+              
+              // Para outros erros, retornar dados do banco local
               return {
                 ...collection,
-                linkPdf: `/api/inter/collections/${propostaId}/${collection.codigoSolicitacao}/pdf`,
+                linkPdf: `/api/inter/collections/${collection.codigoSolicitacao}/pdf`,
               };
             }
           })
         );
 
-        res.json(updatedCollections);
+        // Filtrar boletos válidos (remover os null de códigos 404)
+        const validCollections = updatedCollections.filter(Boolean);
+        
+        console.log(`[INTER COLLECTIONS] Found ${validCollections.length} valid collections for proposal ${propostaId}`);
+        res.json(validCollections);
       } else {
         res.json([]);
       }

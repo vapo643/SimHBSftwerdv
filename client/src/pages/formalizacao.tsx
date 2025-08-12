@@ -42,6 +42,7 @@ import {
   Copy,
   QrCode,
   Barcode,
+  RefreshCw,
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -1541,25 +1542,8 @@ export default function Formalizacao() {
                                                       console.log(`[PDF DOWNLOAD] Tentando baixar PDF para: ${boleto.codigoSolicitacao}`);
                                                       console.log(`[PDF DOWNLOAD] Status do boleto: ${boleto.situacao}`);
                                                       
-                                                      // Verificar se o status permite download
-                                                      if (boleto.situacao === 'EM_PROCESSAMENTO') {
-                                                        toast({
-                                                          title: "PDF não disponível",
-                                                          description: "O boleto ainda está sendo processado pelo banco. Aguarde alguns minutos.",
-                                                          variant: "default",
-                                                        });
-                                                        
-                                                        // Fallback: copiar código de barras
-                                                        if (boleto.codigoBarras || boleto.linhaDigitavel) {
-                                                          const codigo = boleto.linhaDigitavel || boleto.codigoBarras;
-                                                          await navigator.clipboard.writeText(codigo);
-                                                          toast({
-                                                            title: "Código copiado como alternativa",
-                                                            description: "Use no internet banking ou PIX para pagar.",
-                                                          });
-                                                        }
-                                                        return;
-                                                      }
+                                                      // Permitir download independente do status - a API do Inter vai validar
+                                                      console.log(`[PDF DOWNLOAD] Tentativa de download para status: ${boleto.situacao}`);
 
                                                       // Fazer download com autenticação correta usando apiRequest
                                                       console.log(`[PDF DOWNLOAD] Usando código: ${boleto.codigoSolicitacao}`);
@@ -1673,7 +1657,48 @@ export default function Formalizacao() {
                                         )
                                       )}
 
-                                      <div className="grid grid-cols-2 gap-3">
+                                      <div className="grid grid-cols-3 gap-3">
+                                        <Button
+                                          variant="outline"
+                                          onClick={async () => {
+                                            try {
+                                              // Atualizar status em tempo real
+                                              console.log(`[REALTIME UPDATE] Iniciando atualização para proposta: ${proposta.id}`);
+                                              
+                                              const { apiRequest } = await import("@/lib/queryClient");
+                                              const response = await apiRequest(`/api/inter/realtime-update/${proposta.id}`, {
+                                                method: "POST",
+                                              });
+
+                                              if (response.updated > 0 || response.removed > 0) {
+                                                // Recarregar dados após atualização
+                                                refetchCollections();
+                                                
+                                                toast({
+                                                  title: "Status atualizado!",
+                                                  description: `${response.updated} boletos atualizados, ${response.removed} códigos inválidos removidos`,
+                                                });
+                                              } else {
+                                                toast({
+                                                  title: "Sem atualizações",
+                                                  description: response.message || "Status já está atualizado",
+                                                });
+                                              }
+                                            } catch (error) {
+                                              console.error("[REALTIME UPDATE] Erro:", error);
+                                              toast({
+                                                title: "Erro",
+                                                description: "Erro ao atualizar status dos boletos",
+                                                variant: "destructive",
+                                              });
+                                            }
+                                          }}
+                                          className="border-green-600 text-green-400 hover:bg-green-600/10"
+                                        >
+                                          <RefreshCw className="mr-2 h-4 w-4" />
+                                          Atualizar Status
+                                        </Button>
+                                        
                                         <Button
                                           variant="outline"
                                           onClick={async () => {

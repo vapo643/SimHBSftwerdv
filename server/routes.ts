@@ -37,6 +37,7 @@ import { clickSignRouter } from "./routes/clicksign.js";
 import clicksignIntegrationRoutes from "./routes/clicksign-integration.js";
 import { interRoutes } from "./routes/inter.js";
 import interWebhookRouter from "./routes/webhooks/inter";
+import interRealtimeRouter from "./routes/inter-realtime";
 import { setupSecurityRoutes } from "./routes/security.js";
 import emailChangeRoutes from "./routes/email-change";
 import cobrancasRoutes from "./routes/cobrancas";
@@ -5032,6 +5033,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Register Inter Bank routes AFTER (less specific route)
   app.use("/api/inter", interRoutes);
+  
+  // Inter Real-time Status Update Route
+  app.use("/api/inter", interRealtimeRouter);
 
   // Register Cobranças routes
   const cobrancasRouter = (await import("./routes/cobrancas.js")).default;
