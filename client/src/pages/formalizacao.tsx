@@ -436,15 +436,20 @@ export default function Formalizacao() {
 
   const propostaId = params?.id;
 
-  // Query para buscar boletos gerados
+  // Query para buscar boletos gerados - OTIMIZADA
   const { data: collectionsData } = useQuery<any[]>({
     queryKey: ["/api/inter/collections", propostaId],
     queryFn: async (): Promise<any[]> => {
       if (!propostaId) return [];
+      console.log(`[INTER QUERY] Buscando boletos para proposta: ${propostaId}`);
       const response = await apiRequest(`/api/inter/collections/${propostaId}`) as any[];
+      console.log(`[INTER QUERY] Boletos encontrados: ${Array.isArray(response) ? response.length : 0}`);
       return Array.isArray(response) ? response : [];
     },
-    enabled: !!propostaId,
+    enabled: !!propostaId && (proposta?.status === "contratos_assinados" || proposta?.interBoletoGerado),
+    staleTime: 2 * 60 * 1000, // Cache por 2 minutos para evitar chamadas excessivas
+    refetchOnWindowFocus: false, // Não refetch quando janela ganha foco
+    retry: 1, // Reduzir tentativas de retry
   });
 
   // TODOS os hooks devem estar aqui no topo
@@ -455,18 +460,12 @@ export default function Formalizacao() {
   } = useQuery<Proposta>({
     queryKey: ["/api/propostas", propostaId, "formalizacao"],
     queryFn: async (): Promise<Proposta> => {
-      console.log(`🔍 [DEBUG] Buscando dados de formalização para proposta: ${propostaId}`);
       const response = await apiRequest(`/api/propostas/${propostaId}/formalizacao`) as Proposta;
-      console.log(`🔍 [DEBUG] Dados recebidos do backend:`, response);
-      console.log(`🔍 [DEBUG] Cliente Data:`, response.cliente_data);
-      console.log(`🔍 [DEBUG] Condicoes Data:`, response.condicoes_data);
-      console.log(`🔍 [DEBUG] Data Aprovação:`, response.dataAprovacao);
-      console.log(`🔍 [DEBUG] Documentos - Total:`, response.documentos_adicionais?.length || 0);
-      console.log(`🔍 [DEBUG] Documentos - Estrutura:`, response.documentos_adicionais);
-      console.log(`🔍 [DEBUG] Primeiro documento:`, response.documentos_adicionais?.[0]);
       return response;
     },
     enabled: !!propostaId,
+    staleTime: 1 * 60 * 1000, // Cache por 1 minuto
+    refetchOnWindowFocus: false, // Não refetch quando janela ganha foco
   });
 
   const form = useForm<UpdateFormalizacaoForm>({
@@ -633,12 +632,14 @@ export default function Formalizacao() {
     }
   };
 
-  // Carregar status ClickSign na inicialização
+  // Carregar status ClickSign na inicialização - OTIMIZADA
   const { data: initialClickSignData } = useQuery({
     queryKey: ["/api/clicksign/status", propostaId],
     queryFn: () => checkClickSignStatus(propostaId!),
-    enabled: !!propostaId && !!proposta?.ccbGerado,
-    staleTime: 30000, // Cache por 30s para evitar refetch excessivo
+    enabled: !!propostaId && !!proposta?.ccbGerado && proposta?.status !== "contratos_assinados",
+    staleTime: 2 * 60 * 1000, // Cache por 2 minutos
+    refetchOnWindowFocus: false, // Não refetch quando janela ganha foco
+    retry: 1, // Reduzir tentativas
   });
 
   // Atualizar clickSignData quando initialClickSignData mudar
@@ -690,10 +691,13 @@ export default function Formalizacao() {
               });
             }
             
-            // Atualizar boletos
-            queryClient.invalidateQueries({
-              queryKey: ["/api/inter/collections", propostaId]
-            });
+            // Atualizar boletos APENAS se status mudou para contratos_assinados ou Inter foi ativado
+            if (newData?.status === "contratos_assinados" || newData?.interBoletoGerado !== oldData?.interBoletoGerado) {
+              console.log("🔄 [REALTIME] Atualizando boletos Inter devido a mudança relevante");
+              queryClient.invalidateQueries({
+                queryKey: ["/api/inter/collections", propostaId]
+              });
+            }
             
             console.log("🔄 [REALTIME] Proposta atualizada silenciosamente");
           }
