@@ -443,7 +443,7 @@ router.post(
 
             // Save to database
             await tx.insert(interCollections).values({
-              proposta_id: propostaId,
+              propostaId: propostaId,
               codigoSolicitacao: novoBoleto.codigoSolicitacao,
               seuNumero: detalhes.cobranca.seuNumero,
               valorNominal: detalhes.cobranca.valorNominal.toString(),
@@ -780,7 +780,7 @@ router.post("/collections", jwtAuthMiddleware, async (req: AuthenticatedRequest,
     const [proposta] = await db
       .select()
       .from(propostas)
-      .where(eq(propostas.id, validatedData.proposalId))
+      .where(eq(propostas.id, parseInt(validatedData.proposalId)))
       .limit(1);
 
     if (!proposta) {
@@ -831,7 +831,7 @@ router.post("/collections", jwtAuthMiddleware, async (req: AuthenticatedRequest,
 
         // Store collection data in database
         await db.insert(interCollections).values({
-          proposta_id: validatedData.proposalId,
+          propostaId: validatedData.proposalId,
           codigoSolicitacao: collectionResponse.codigoSolicitacao,
           seuNumero: collectionDetails.cobranca.seuNumero,
           valorNominal: collectionDetails.cobranca.valorNominal.toString(),
@@ -1081,7 +1081,7 @@ router.get(
       const proposta = await db
         .select()
         .from(propostas)
-        .where(eq(propostas.id, propostaId))
+        .where(eq(propostas.id, parseInt(propostaId)))
         .limit(1);
 
       if (proposta.length === 0) {

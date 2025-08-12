@@ -1061,8 +1061,29 @@ class InterBankService {
 
       // REMOVED: dataEmissao is not valid in API v3
 
+      // 🔥 FIX: Garantir seuNumero único para cada parcela
+      // Se o ID contém "-" seguido de número no final (ex: "proposta-id-1"), preservar isso
+      let seuNumeroUnico = proposalData.id;
+      
+      // Se o ID é muito longo, precisamos ser inteligentes ao truncar
+      if (seuNumeroUnico.length > 15) {
+        // Verificar se tem sufixo de parcela (ex: "-1", "-2", etc)
+        const parcelaMatch = seuNumeroUnico.match(/-(\d+)$/);
+        if (parcelaMatch) {
+          // Tem sufixo de parcela, preservar ele
+          const sufixoParcela = parcelaMatch[0]; // ex: "-1"
+          const prefixo = seuNumeroUnico.substring(0, 15 - sufixoParcela.length);
+          seuNumeroUnico = prefixo + sufixoParcela;
+        } else {
+          // Não tem sufixo, apenas truncar
+          seuNumeroUnico = seuNumeroUnico.substring(0, 15);
+        }
+      }
+      
+      console.log(`[INTER] 🔑 seuNumero único gerado: ${seuNumeroUnico}`);
+
       const cobrancaData: CobrancaRequest = {
-        seuNumero: proposalData.id.substring(0, 15), // Max 15 chars
+        seuNumero: seuNumeroUnico, // Agora é único para cada parcela
         valorNominal: parseFloat(valorDecimal), // Garantir que é um número decimal
         // REMOVED dataEmissao - NOT VALID IN API v3 per Gemini analysis
         dataVencimento: proposalData.dataVencimento,

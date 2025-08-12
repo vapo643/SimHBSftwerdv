@@ -1,0 +1,34 @@
+**BUG:**
+A lógica de geração de boletos em lote para o Banco Inter está a falhar catastroficamente. O sistema tenta criar múltiplas parcelas (ex: 24), mas envia o mesmo identificador único (`seuNumero`) para todas elas. A API do Inter aceita a primeira requisição, mas rejeita todas as subsequentes como duplicatas, resultando em um relatório de falha total.
+
+**PROCESSO SISTEMÁTICO (Roadmap de Correção):**
+
+**1. Isolamento do Ponto de Falha:**
+    - **Ação:** Concentre-se na função ou no loop dentro do `interBankService.ts` (ou no serviço que o chama) que é responsável por iterar sobre as parcelas e enviar as requisições para a API do Inter.
+
+**2. Implementação da Correção:**
+    - **Ação:** A correção é garantir a unicidade do campo `seuNumero` para CADA parcela dentro do loop.
+    - **Lógica a ser implementada:** Modifique a lógica de geração do `seuNumero` para que ele seja único por parcela. A estratégia correta é concatenar o `ID da Proposta` com o `número da parcela` correspondente.
+
+    - **Exemplo de Lógica Correta (implemente algo similar):**
+      ```typescript
+      // Dentro do seu loop de parcelas...
+      for (const parcela of parcelas) {
+        // ...
+        const seuNumeroUnico = `${proposta.id}-${parcela.numero}`; // Ex: "88a44696-9b63-42ee-aa81-15f9519d24cb-1"
+        
+        const cobrancaData = {
+          ...
+          seuNumero: seuNumeroUnico, // Use o número único aqui
+          ...
+        };
+        // ... resto da chamada da API
+      }
+      ```
+
+**3. Validação Final (Protocolo 5-CHECK):**
+    - **Ação Obrigatória:** Após a correção, execute `get_latest_lsp_diagnostics` para garantir ZERO erros.
+    - **Teste Obrigatório:** Execute novamente o fluxo de geração de boletos para uma proposta de teste com múltiplas parcelas.
+    - **Relatório Final:** O critério de sucesso é um log do console que mostre:
+        a. Que o `seuNumero` enviado para a API do Inter é **diferente e único para cada uma das requisições**.
+        b. O relatório final da função indicando: **"✅ 24 boletos criados com sucesso, 0 erros"** (ou o número correspondente de parcelas).
