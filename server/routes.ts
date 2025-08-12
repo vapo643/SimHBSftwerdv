@@ -1516,6 +1516,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
             data_assinatura: proposta.data_assinatura,
             data_pagamento: proposta.data_pagamento,
             observacoes_formalizacao: proposta.observacoes_formalizacao,
+            // 🔥 NOVO: Campos de tracking do Banco Inter
+            interBoletoGerado: proposta.inter_boleto_gerado,
+            interBoletoGeradoEm: proposta.inter_boleto_gerado_em,
           };
         });
 

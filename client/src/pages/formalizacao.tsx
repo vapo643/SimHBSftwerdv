@@ -116,8 +116,9 @@ interface Proposta {
   clicksignStatus?: string;
   clicksignSentAt?: string;
   clicksignSignedAt?: string;
-  // Inter Bank fields
+  // Campos de tracking do Banco Inter
   interBoletoGerado?: boolean;
+  interBoletoGeradoEm?: string;
   interCodigoSolicitacao?: string;
 }
 
@@ -1266,7 +1267,7 @@ export default function Formalizacao() {
                                   </p>
 
                                   {(!collectionsData || collectionsData.length === 0) &&
-                                  !interBoletoData ? (
+                                  !interBoletoData && !proposta.interBoletoGerado ? (
                                     // Botão para gerar boletos
                                     <Button
                                       onClick={async () => {
