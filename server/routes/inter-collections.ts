@@ -53,7 +53,7 @@ router.get(
               return {
                 ...collection,
                 ...details,
-                qrCode: details.qrCode || collection.qrCode,
+                // qrCode: details.qrCode || collection.qrCode, // Campo não existe no schema
                 codigoBarras: details.codigoBarras || collection.codigoBarras,
                 linkPdf: `/api/inter/collections/${propostaId}/${collection.codigoSolicitacao}/pdf`,
                 numeroParcela: collection.numeroParcela,
@@ -239,7 +239,7 @@ router.get("/", jwtAuthMiddleware, requireAnyRole, async (req: AuthenticatedRequ
               ...collection,
               proposta: {
                 id: proposta[0].id,
-                numeroContrato: proposta[0].numeroContrato || proposta[0].id,
+                numeroContrato: proposta[0].id, // numeroContrato field não existe, usando id
                 nomeCliente: proposta[0].clienteNome || "",
                 cpfCliente: proposta[0].clienteCpf || "",
                 telefoneCliente: proposta[0].clienteTelefone || "",

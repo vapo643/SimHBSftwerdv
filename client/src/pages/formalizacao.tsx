@@ -1547,46 +1547,96 @@ export default function Formalizacao() {
 
                                               {/* Ações do boleto */}
                                               <div className="flex gap-2">
-                                                {boleto.linkPdf && (
-                                                  <Button
-                                                    size="sm"
-                                                    variant="outline"
-                                                    onClick={async () => {
-                                                      // Informar que o PDF não está disponível e copiar código de barras
-                                                      if (boleto.codigoBarras) {
-                                                        try {
-                                                          await navigator.clipboard.writeText(
-                                                            boleto.codigoBarras
-                                                          );
+                                                <Button
+                                                  size="sm"
+                                                  variant="outline"
+                                                  onClick={async () => {
+                                                    try {
+                                                      console.log(`[PDF DOWNLOAD] Tentando baixar PDF para: ${boleto.codigoSolicitacao}`);
+                                                      console.log(`[PDF DOWNLOAD] Status do boleto: ${boleto.situacao}`);
+                                                      
+                                                      // Verificar se o status permite download
+                                                      if (boleto.situacao === 'EM_PROCESSAMENTO') {
+                                                        toast({
+                                                          title: "PDF não disponível",
+                                                          description: "O boleto ainda está sendo processado pelo banco. Aguarde alguns minutos.",
+                                                          variant: "default",
+                                                        });
+                                                        
+                                                        // Fallback: copiar código de barras
+                                                        if (boleto.codigoBarras || boleto.linhaDigitavel) {
+                                                          const codigo = boleto.linhaDigitavel || boleto.codigoBarras;
+                                                          await navigator.clipboard.writeText(codigo);
                                                           toast({
-                                                            title: "Código de barras copiado!",
-                                                            description:
-                                                              "O banco Inter não disponibiliza PDF para download. Use o código de barras copiado ou o QR Code exibido na tela.",
+                                                            title: "Código copiado como alternativa",
+                                                            description: "Use no internet banking ou PIX para pagar.",
+                                                          });
+                                                        }
+                                                        return;
+                                                      }
+
+                                                      // Fazer download com autenticação correta (usando apiRequest)
+                                                      const response = await fetch(`/api/inter/collections/${boleto.codigoSolicitacao}/pdf`, {
+                                                        method: 'GET',
+                                                        headers: {
+                                                          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                                                          'Accept': 'application/pdf'
+                                                        }
+                                                      });
+
+                                                      if (response.ok) {
+                                                        const blob = await response.blob();
+                                                        const url = window.URL.createObjectURL(blob);
+                                                        const a = document.createElement('a');
+                                                        a.href = url;
+                                                        a.download = `boleto-${boleto.codigoSolicitacao}.pdf`;
+                                                        document.body.appendChild(a);
+                                                        a.click();
+                                                        window.URL.revokeObjectURL(url);
+                                                        document.body.removeChild(a);
+                                                        
+                                                        toast({
+                                                          title: "PDF baixado com sucesso!",
+                                                          description: "Arquivo salvo na pasta de Downloads",
+                                                        });
+                                                      } else {
+                                                        throw new Error(`Erro ${response.status}: ${response.statusText}`);
+                                                      }
+                                                      
+                                                    } catch (error: any) {
+                                                      console.error("[PDF DOWNLOAD] Erro:", error);
+                                                      
+                                                      // Se falhar, copiar código de barras como fallback
+                                                      if (boleto.codigoBarras || boleto.linhaDigitavel) {
+                                                        try {
+                                                          const codigo = boleto.linhaDigitavel || boleto.codigoBarras;
+                                                          await navigator.clipboard.writeText(codigo);
+                                                          toast({
+                                                            title: "PDF indisponível - Código copiado",
+                                                            description: "Use no internet banking ou PIX para pagar.",
                                                             variant: "default",
                                                           });
-                                                        } catch (err) {
+                                                        } catch {
                                                           toast({
-                                                            title: "Como pagar este boleto",
-                                                            description:
-                                                              "Use o código de barras ou QR Code PIX exibidos na tela. O banco Inter não disponibiliza PDF para download.",
-                                                            variant: "default",
+                                                            title: "PDF indisponível",
+                                                            description: "Use o QR Code PIX ou linha digitável acima para pagar.",
+                                                            variant: "destructive",
                                                           });
                                                         }
                                                       } else {
                                                         toast({
-                                                          title: "Como pagar este boleto",
-                                                          description:
-                                                            "Use o QR Code PIX exibido na tela. O banco Inter não disponibiliza PDF para download.",
-                                                          variant: "default",
+                                                          title: "PDF indisponível",
+                                                          description: "Use o QR Code PIX acima para pagar.",
+                                                          variant: "destructive",
                                                         });
                                                       }
-                                                    }}
-                                                    className="border-orange-700 text-orange-300 hover:bg-orange-900/20"
-                                                  >
-                                                    <Copy className="mr-2 h-4 w-4" />
-                                                    Copiar Código
-                                                  </Button>
-                                                )}
+                                                    }
+                                                  }}
+                                                  className="border-blue-600 text-blue-400 hover:bg-blue-600/10"
+                                                >
+                                                  <Download className="mr-2 h-4 w-4" />
+                                                  Baixar PDF
+                                                </Button>
                                               </div>
                                             </div>
                                           ))}
