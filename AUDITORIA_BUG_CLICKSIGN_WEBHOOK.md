@@ -137,4 +137,25 @@ if (payload.new.status !== payload.old.status) {
 - Só invalida query ClickSign se status realmente mudou
 - Preserva estado local quando possível
 
-**Status:** CORRIGIDO - Pronto para teste
+## 🎯 CORREÇÕES FINAIS APLICADAS
+
+### 4. **Timeline sincronizada** ✅  
+- Timeline agora reconhece `status === "contratos_assinados"`
+- Mostra mensagem de sucesso quando assinado
+- Remove botões de ClickSign após assinatura
+
+### 5. **Persistência após F5** ✅
+- Usa `initialClickSignData?.signUrl` para recuperar link
+- Condições corrigidas para evitar botão azul incorreto
+
+### 6. **Realtime seletivo ativado** ✅
+- Só invalida quando status muda para "contratos_assinados"
+- Timeline atualiza automaticamente via webhook
+
+**Status:** ✅ COMPLETAMENTE CORRIGIDO
+
+**Fluxo Final:**
+1. Clique botão → Link aparece imediatamente
+2. F5 → Link permanece (via initialClickSignData)
+3. Webhook assina → Timeline atualiza automaticamente 
+4. Mostra "Contrato Assinado com Sucesso"
