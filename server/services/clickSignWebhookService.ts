@@ -200,6 +200,7 @@ class ClickSignWebhookService {
       clicksignStatus: "finished",
       clicksignSignedAt: new Date(now),
       assinaturaEletronicaConcluida: true,
+      biometriaConcluida: true, // ClickSign biometria acontece no mesmo processo
       dataAssinatura: new Date(now),
       status: "contratos_assinados" as const,
     };
@@ -211,7 +212,7 @@ class ClickSignWebhookService {
       autorId: "clicksign-webhook",
       statusAnterior: proposta.status,
       statusNovo: "contratos_assinados",
-      observacao: "✅ CCB assinado com sucesso - Finalização automática",
+      observacao: "✅ CCB assinado com sucesso + Biometria validada - Finalização automática",
     });
 
     // CRITICAL: Trigger automatic boleto generation

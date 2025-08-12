@@ -154,8 +154,23 @@ if (payload.new.status !== payload.old.status) {
 
 **Status:** ✅ COMPLETAMENTE CORRIGIDO
 
-**Fluxo Final:**
-1. Clique botão → Link aparece imediatamente
-2. F5 → Link permanece (via initialClickSignData)
-3. Webhook assina → Timeline atualiza automaticamente 
-4. Mostra "Contrato Assinado com Sucesso"
+## 🎯 CORREÇÕES FINAIS BIOMETRIA + INTER
+
+### 7. **Biometria integrada com ClickSign** ✅
+- Webhook `auto_close` agora marca `biometriaConcluida: true`
+- Timeline reconhece status "contratos_assinados" para biometria
+- Uma assinatura = duas etapas completas
+
+### 8. **Banco Inter liberado automaticamente** ✅
+- Etapa Inter habilitada quando contrato assinado
+- Botão "Gerar Boletos" disponível imediatamente
+- Interface atualizada para fluxo automático
+
+**Fluxo Final Completo:**
+1. Clique botão → Link ClickSign aparece
+2. Cliente assina → Webhook dispara
+3. Timeline atualiza: ✅ Assinatura + ✅ Biometria
+4. Banco Inter liberado → Botão boletos habilitado  
+5. "Contrato Assinado + Biometria Validada"
+
+**Status:** ✅ SISTEMA COMPLETO - Integração ClickSign + Biometria + Inter

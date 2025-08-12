@@ -803,13 +803,15 @@ export default function Formalizacao() {
       title: "Biometria Validada",
       description: "Validação biométrica concluída",
       icon: Shield,
-      status: proposta.biometriaConcluida
+      status: (proposta.biometriaConcluida || proposta.status === "contratos_assinados")
         ? "completed"
         : proposta.assinaturaEletronicaConcluida
           ? "current"
           : "pending",
-      date: proposta.biometriaConcluida ? formatDate(proposta.createdAt) : "Pendente",
-      completed: proposta.biometriaConcluida,
+      date: (proposta.biometriaConcluida || proposta.status === "contratos_assinados") 
+        ? formatDate(proposta.dataAssinatura || proposta.createdAt) 
+        : "Pendente",
+      completed: proposta.biometriaConcluida || proposta.status === "contratos_assinados",
       interactive: proposta.assinaturaEletronicaConcluida,
       etapa: "biometria" as const,
     },
@@ -820,12 +822,12 @@ export default function Formalizacao() {
       icon: Building2,
       status: proposta.interBoletoGerado
         ? "completed"
-        : proposta.assinaturaEletronicaConcluida
+        : (proposta.assinaturaEletronicaConcluida || proposta.status === "contratos_assinados")
           ? "current"
           : "pending",
       date: proposta.interBoletoGerado ? formatDate(proposta.createdAt) : "Pendente",
       completed: proposta.interBoletoGerado || false,
-      interactive: proposta.assinaturaEletronicaConcluida,
+      interactive: proposta.assinaturaEletronicaConcluida || proposta.status === "contratos_assinados",
       etapa: "banco_inter" as const,
     },
     {
@@ -1108,12 +1110,12 @@ export default function Formalizacao() {
                                     <div className="mb-3 flex items-center">
                                       <CheckCircle className="mr-2 h-5 w-5 text-green-400" />
                                       <h5 className="font-medium text-green-300">
-                                        Contrato Assinado com Sucesso
+                                        Contrato Assinado + Biometria Validada
                                       </h5>
                                     </div>
                                     <p className="text-sm text-green-200">
-                                      O cliente assinou digitalmente o contrato via ClickSign. 
-                                      Próximo passo: geração automática dos boletos de pagamento.
+                                      O cliente assinou digitalmente o contrato via ClickSign com validação biométrica. 
+                                      Próximo passo: geração automática dos boletos de pagamento pelo Banco Inter.
                                     </p>
                                   </div>
                                 )}
@@ -1243,7 +1245,7 @@ export default function Formalizacao() {
                         // Para a etapa do Banco Inter, mostrar interface customizada
                         if (
                           step.etapa === "banco_inter" &&
-                          proposta.assinaturaEletronicaConcluida
+                          (proposta.assinaturaEletronicaConcluida || proposta.status === "contratos_assinados")
                         ) {
                           return (
                             <div key={step.id} className="mb-4">
