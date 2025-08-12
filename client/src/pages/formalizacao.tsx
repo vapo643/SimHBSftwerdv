@@ -639,20 +639,27 @@ export default function Formalizacao() {
     staleTime: 30000, // Cache por 30s para evitar refetch excessivo
   });
 
+  // DEBUG: Adicionar log sempre que clickSignData mudar
+  React.useEffect(() => {
+    console.log("🔍 [DEBUG] clickSignData mudou para:", clickSignData);
+  }, [clickSignData]);
+
   // Atualizar clickSignData quando initialClickSignData mudar
   React.useEffect(() => {
     console.log("🔄 [CLICKSIGN] Dados iniciais recebidos:", initialClickSignData);
+    console.log("🔄 [CLICKSIGN] Estado local atual:", clickSignData);
+    
     if (initialClickSignData?.signUrl) {
-      console.log("✅ [CLICKSIGN] Link encontrado, definindo estado posterior");
+      console.log("✅ [CLICKSIGN] Link encontrado na query, definindo estado posterior");
       setClickSignData(initialClickSignData as ClickSignData);
-    } else if (!clickSignData) {
-      // 🛡️ PROTEÇÃO: Só reseta se não tem dados locais (evita race condition com webhook)
-      console.log("📭 [CLICKSIGN] Sem link e sem estado local, mantendo estado inicial");
+    } else if (!clickSignData?.signUrl) {
+      // 🛡️ PROTEÇÃO: Só reseta se não tem link local
+      console.log("📭 [CLICKSIGN] Sem link na query E sem link local, mantendo estado inicial");
       setClickSignData(null);
     } else {
-      console.log("🔒 [CLICKSIGN] Mantendo dados locais existentes (não resetar)");
+      console.log("🔒 [CLICKSIGN] Query sem link mas estado local tem link - MANTENDO LOCAL");
     }
-  }, [initialClickSignData, clickSignData]);
+  }, [initialClickSignData]);
 
   // 🔄 REALTIME: Escutar mudanças na tabela propostas
   useEffect(() => {
@@ -682,10 +689,19 @@ export default function Formalizacao() {
               queryKey: ["/api/propostas", propostaId, "formalizacao"]
             });
             
-            // 🎯 CORREÇÃO: Só invalidar ClickSign se necessário para evitar race condition
+            // 🎯 CORREÇÃO: PAUSAR totalmente invalidação ClickSign para testar
             const oldData = payload.old;
             const newData = payload.new;
             
+            console.log("🔍 [DEBUG REALTIME] Comparando mudanças:");
+            console.log("🔍 [DEBUG REALTIME] Old status:", oldData?.status);
+            console.log("🔍 [DEBUG REALTIME] New status:", newData?.status);
+            console.log("🔍 [DEBUG REALTIME] Old clicksign_sign_url:", oldData?.clicksign_sign_url);
+            console.log("🔍 [DEBUG REALTIME] New clicksign_sign_url:", newData?.clicksign_sign_url);
+            
+            // 🚨 TEMPORARIAMENTE DESABILITADO para testar
+            console.log("🚨 [DEBUG] REALTIME ClickSign invalidation PAUSADA para teste");
+            /*
             if (oldData?.status !== newData?.status || 
                 oldData?.clicksign_sign_url !== newData?.clicksign_sign_url) {
               console.log("🔄 [REALTIME] Status ClickSign mudou, atualizando query");
@@ -695,6 +711,7 @@ export default function Formalizacao() {
             } else {
               console.log("🔒 [REALTIME] Status ClickSign inalterado, preservando estado local");
             }
+            */
             
             // Atualizar boletos
             queryClient.invalidateQueries({
@@ -1066,6 +1083,7 @@ export default function Formalizacao() {
                                           ) as ClickSignData;
                                           
                                           console.log("✅ [CLICKSIGN] Resposta recebida:", response);
+                                          console.log("🎯 [DEBUG] Definindo clickSignData IMEDIATAMENTE após clique");
                                           setClickSignData(response);
                                           
                                           toast({
@@ -1073,7 +1091,7 @@ export default function Formalizacao() {
                                             description:
                                               "Contrato enviado para ClickSign com sucesso!",
                                           });
-                                          // ❌ REMOVIDO: refetch() causava race condition com webhook
+                                          console.log("🔐 [DEBUG] Estado deve permanecer fixo até assinatura");
                                         } catch (error: any) {
                                           console.error("❌ [CLICKSIGN] Erro ao enviar:", error);
                                           toast({
