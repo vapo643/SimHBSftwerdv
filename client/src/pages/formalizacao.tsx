@@ -1338,10 +1338,17 @@ export default function Formalizacao() {
 
                                           // Atualizar estado local para mostrar os boletos
                                           setInterBoletoData(response as {codigoSolicitacao?: string});
-                                          refetch(); // Recarregar dados da proposta
-                                          queryClient.invalidateQueries({
-                                            queryKey: ["/api/inter/collections", proposta.id],
-                                          });
+                                          
+                                          // 🔥 IMPORTANTE: Recarregar dados da proposta e timeline
+                                          await Promise.all([
+                                            refetch(), // Recarregar dados da proposta para atualizar timeline
+                                            queryClient.invalidateQueries({
+                                              queryKey: ["/api/inter/collections", proposta.id],
+                                            }),
+                                            queryClient.invalidateQueries({
+                                              queryKey: [`/api/propostas/${proposta.id}/formalizacao`],
+                                            }),
+                                          ]);
                                         } catch (error: any) {
                                           console.error("[INTER] Erro ao gerar boleto:", error);
 

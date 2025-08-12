@@ -874,6 +874,29 @@ router.post("/collections", jwtAuthMiddleware, async (req: AuthenticatedRequest,
       `[INTER] ✅ ${createdCollections.length} boletos criados com sucesso, ${errors.length} erros`
     );
 
+    // 🔥 IMPORTANTE: Atualizar proposta marcando que boletos foram gerados
+    if (createdCollections.length > 0) {
+      console.log(`[INTER] 📌 Atualizando proposta ${validatedData.proposalId} - interBoletoGerado = true`);
+      
+      await db.update(propostas)
+        .set({ 
+          interBoletoGerado: true,
+          interBoletoGeradoEm: new Date(getBrasiliaTimestamp())
+        })
+        .where(eq(propostas.id, parseInt(validatedData.proposalId)));
+      
+      // Criar log da operação
+      await storage.createPropostaLog({
+        propostaId: validatedData.proposalId, // String, não número
+        autorId: req.user?.id || "sistema",
+        statusAnterior: proposta.status,
+        statusNovo: proposta.status, // Status não muda, apenas marca boleto gerado
+        observacao: `✅ ${createdCollections.length} boletos gerados com sucesso pelo Banco Inter`,
+      });
+      
+      console.log(`[INTER] ✅ Proposta atualizada - boletos fixados na timeline`);
+    }
+
     res.json({
       success: true,
       totalCriados: createdCollections.length,

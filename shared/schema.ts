@@ -241,6 +241,10 @@ export const propostas = pgTable("propostas", {
 
   // Comprovante de Pagamento - Added August 6, 2025
   urlComprovantePagamento: text("url_comprovante_pagamento"), // URL do comprovante no Supabase Storage
+  
+  // Tracking de boletos do Banco Inter - Added August 12, 2025
+  interBoletoGerado: boolean("inter_boleto_gerado").default(false),
+  interBoletoGeradoEm: timestamp("inter_boleto_gerado_em"),
 
   // Campos JSONB legados (mantidos para compatibilidade)
   clienteData: text("cliente_data"),
