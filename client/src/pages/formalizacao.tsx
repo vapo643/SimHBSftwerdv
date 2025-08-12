@@ -1458,21 +1458,7 @@ export default function Formalizacao() {
                                                 </Badge>
                                               </div>
 
-                                              {/* Botão de Download do PDF do Boleto */}
-                                              {boleto.codigoSolicitacao && (
-                                                <div className="mt-3 mb-3">
-                                                  <a
-                                                    href={`/api/inter/collections/${boleto.codigoSolicitacao}/pdf`}
-                                                    download
-                                                    className="inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                                                    data-testid={`button-download-boleto-formalizacao-${boleto.codigoSolicitacao}`}
-                                                    title="Baixar boleto em PDF"
-                                                  >
-                                                    <Download className="mr-2 h-4 w-4" />
-                                                    Baixar PDF do Boleto
-                                                  </a>
-                                                </div>
-                                              )}
+
 
                                               {/* QR Code PIX e Linha Digitável */}
                                               <div className="space-y-3">

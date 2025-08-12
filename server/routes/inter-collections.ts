@@ -4,7 +4,7 @@ import { requireAnyRole } from "../lib/role-guards";
 import { interBankService } from "../services/interBankService";
 import { db } from "../lib/supabase";
 import { interCollections, propostas } from "@shared/schema";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { getBrasiliaTimestamp } from "../lib/timezone";
 
 const router = Router();
@@ -23,11 +23,14 @@ router.get(
 
       console.log(`[INTER COLLECTIONS] Fetching collections for proposal: ${propostaId}`);
 
-      // Buscar collections da proposta no banco (apenas com número de parcela preenchido)
+      // Buscar collections ATIVAS da proposta no banco (apenas com número de parcela preenchido)
       const collections = await db
         .select()
         .from(interCollections)
-        .where(eq(interCollections.propostaId, propostaId))
+        .where(and(
+          eq(interCollections.propostaId, propostaId),
+          eq(interCollections.isActive, true)
+        ))
         .orderBy(interCollections.numeroParcela);
 
       // Se tiver collections, buscar detalhes atualizados na API do Inter
