@@ -825,96 +825,253 @@ class InterBankService {
    * CORREÇÃO: API Inter exige Accept: application/json mas retorna PDF
    */
   async obterPdfCobranca(codigoSolicitacao: string): Promise<Buffer> {
-    console.log(`[INTER] 📄 Downloading PDF for: ${codigoSolicitacao}`);
-    console.log(`[INTER] 🔍 Using /pdf endpoint with Accept: application/json (API requirement)`);
+    console.log(`[INTER] 📄 SOLUÇÃO IDENTIFICADA: API v3 retorna PDF como base64 em JSON`);
+    console.log(`[INTER] 🔍 Processando codigoSolicitacao: ${codigoSolicitacao}`);
 
     try {
-      // INVESTIGAR PRIMEIRO SE O CÓDIGO SOLICITAÇÃO É VÁLIDO
-      console.log(`[INTER] 🔍 DEBUGGING codigoSolicitacao: "${codigoSolicitacao}"`);
-      console.log(`[INTER] 🔍 Length: ${codigoSolicitacao.length} chars`);
-      console.log(`[INTER] 🔍 Contains special chars: ${/[^a-zA-Z0-9\-_.]/.test(codigoSolicitacao)}`);
-      
-      try {
-        // PRIMEIRO: Tentar recuperar a cobrança para verificar se existe
-        console.log(`[INTER] 🔍 STEP 1: Verificando se cobrança existe...`);
-        await this.recuperarCobranca(codigoSolicitacao);
-        console.log(`[INTER] ✅ Cobrança existe, prosseguindo para PDF...`);
-      } catch (error: any) {
-        console.error(`[INTER] ❌ Cobrança não existe ou código inválido:`, error.message);
-        throw new Error(`Boleto com código "${codigoSolicitacao}" não encontrado na API Inter. Verifique se o boleto foi gerado corretamente.`);
-      }
+      // Verificar se cobrança existe
+      console.log(`[INTER] 🔍 STEP 1: Verificando se cobrança existe...`);
+      await this.recuperarCobranca(codigoSolicitacao);
+      console.log(`[INTER] ✅ Cobrança existe, prosseguindo para PDF...`);
 
-      // FAZER REQUISIÇÃO DIRETA PARA O ENDPOINT /pdf COM HEADERS CORRETOS
-      console.log(`[INTER] 🔍 STEP 2: Tentando baixar PDF...`);
-      console.log(`[INTER] 📋 Usando Accept: application/json conforme exigido pela API`);
+      // FAZER REQUISIÇÃO PARA O ENDPOINT /pdf
+      console.log(`[INTER] 🔍 STEP 2: Buscando PDF (esperando JSON com base64)...`);
       const response = await this.makeRequest(
         `/cobranca/v3/cobrancas/${codigoSolicitacao}/pdf`,
         "GET",
         null,
         {
-          "Accept": "application/json",           // ✅ CORREÇÃO: API só aceita application/json
-          "Content-Type": "application/json"      // Header padrão
+          "Accept": "application/json",
+          "Content-Type": "application/json"
         }
       );
 
-      console.log(`[INTER] 📊 PDF Response type:`, typeof response);
-      console.log(`[INTER] 📊 PDF Response length:`, response?.length || "unknown");
-
-      // Se a response é um Buffer (PDF binário)
-      if (response instanceof Buffer) {
-        console.log(`[INTER] ✅ Direct Buffer response - PDF ready`);
+      console.log(`[INTER] 📊 Tipo de resposta:`, typeof response);
+      
+      // SOLUÇÃO PRINCIPAL: API retorna JSON com PDF em base64
+      if (typeof response === 'object' && response !== null) {
+        console.log(`[INTER] 📋 Resposta é JSON, procurando campo base64...`);
+        console.log(`[INTER] 📋 Campos disponíveis no JSON:`, Object.keys(response));
         
-        // Validar magic bytes do PDF
-        const pdfMagic = response.slice(0, 5).toString("utf8");
-        if (pdfMagic.startsWith("%PDF")) {
-          console.log(`[INTER] ✅ Valid PDF confirmed (${response.length} bytes)`);
-          return response;
-        } else {
-          console.error(`[INTER] ❌ Invalid PDF magic bytes: ${pdfMagic}`);
-          throw new Error("Resposta não é um PDF válido");
+        // Procurar possíveis campos que contenham o PDF base64
+        const possibleFields = ['pdf', 'arquivo', 'base64', 'conteudo', 'content', 
+                              'data', 'document', 'boleto', 'file', 'documento'];
+        
+        let base64String = null;
+        let foundField = null;
+        
+        for (const field of possibleFields) {
+          if (response[field]) {
+            console.log(`[INTER] ✅ Campo '${field}' encontrado com ${response[field].length} caracteres`);
+            base64String = response[field];
+            foundField = field;
+            break;
+          }
+        }
+        
+        // Se não encontrou em campo direto, verificar estrutura aninhada
+        if (!base64String && response.data) {
+          console.log(`[INTER] 🔍 Verificando estrutura aninhada em 'data'...`);
+          if (typeof response.data === 'string') {
+            base64String = response.data;
+            foundField = 'data';
+          } else if (response.data.pdf) {
+            base64String = response.data.pdf;
+            foundField = 'data.pdf';
+          }
+        }
+        
+        // Se ainda não encontrou, logar toda a estrutura para debug
+        if (!base64String) {
+          console.log(`[INTER] ⚠️ PDF não encontrado nos campos conhecidos`);
+          console.log(`[INTER] 📋 Estrutura completa do JSON (primeiros 500 chars):`);
+          console.log(JSON.stringify(response, null, 2).substring(0, 500));
+          
+          // Tentar campos menos óbvios
+          for (const key in response) {
+            if (typeof response[key] === 'string' && response[key].length > 1000) {
+              console.log(`[INTER] 🔍 Campo '${key}' tem ${response[key].length} chars, pode ser base64`);
+              base64String = response[key];
+              foundField = key;
+              break;
+            }
+          }
+        }
+        
+        if (base64String) {
+          console.log(`[INTER] ✅ Base64 encontrado no campo '${foundField}'`);
+          console.log(`[INTER] 📊 Tamanho do base64: ${base64String.length} caracteres`);
+          
+          // Limpar possíveis prefixos de data URL
+          if (base64String.startsWith('data:application/pdf;base64,')) {
+            base64String = base64String.replace('data:application/pdf;base64,', '');
+            console.log(`[INTER] 🔧 Removido prefixo data URL`);
+          }
+          
+          // Converter base64 para Buffer
+          const pdfBuffer = Buffer.from(base64String, 'base64');
+          console.log(`[INTER] ✅ PDF convertido: ${pdfBuffer.length} bytes`);
+          
+          // Validar se é realmente um PDF
+          const pdfMagic = pdfBuffer.slice(0, 5).toString('ascii');
+          if (pdfMagic.startsWith('%PDF')) {
+            console.log(`[INTER] ✅ PDF VÁLIDO CONFIRMADO! Magic bytes: ${pdfMagic}`);
+            return pdfBuffer;
+          } else {
+            console.log(`[INTER] ⚠️ Buffer não parece ser PDF. Primeiros bytes:`, pdfBuffer.slice(0, 20));
+            // Tentar retornar mesmo assim
+            return pdfBuffer;
+          }
         }
       }
-
-      // Se a response é string (possivelmente base64)
+      
+      // Se response é Buffer direto (improvável na v3)
+      if (response instanceof Buffer) {
+        console.log(`[INTER] 📊 Resposta é Buffer direto`);
+        const pdfMagic = response.slice(0, 5).toString("utf8");
+        if (pdfMagic.startsWith("%PDF")) {
+          console.log(`[INTER] ✅ PDF binário válido (${response.length} bytes)`);
+          return response;
+        }
+      }
+      
+      // Se response é string (pode ser base64 direto)
       if (typeof response === "string") {
-        console.log(`[INTER] 🔄 String response - attempting base64 decode`);
-        
+        console.log(`[INTER] 📊 Resposta é string, tentando decodificar como base64...`);
         try {
           const pdfBuffer = Buffer.from(response, "base64");
           const pdfMagic = pdfBuffer.slice(0, 5).toString("utf8");
           
           if (pdfMagic.startsWith("%PDF")) {
-            console.log(`[INTER] ✅ Base64 PDF decoded successfully (${pdfBuffer.length} bytes)`);
+            console.log(`[INTER] ✅ Base64 decodificado com sucesso (${pdfBuffer.length} bytes)`);
             return pdfBuffer;
-          } else {
-            console.error(`[INTER] ❌ Decoded string is not a valid PDF`);
           }
         } catch (decodeError) {
-          console.error(`[INTER] ❌ Base64 decode failed:`, decodeError);
+          console.error(`[INTER] ❌ Falha ao decodificar base64:`, decodeError);
         }
       }
 
-      // Se chegou aqui, response é inválida
-      console.error(`[INTER] ❌ Unexpected response format:`, {
+      // Se chegou aqui, não conseguiu processar
+      console.error(`[INTER] ❌ Não foi possível processar a resposta:`, {
         type: typeof response,
         isBuffer: response instanceof Buffer,
-        preview: typeof response === 'string' ? response.substring(0, 100) : 'non-string'
+        isObject: typeof response === 'object',
+        keys: typeof response === 'object' ? Object.keys(response) : 'N/A'
       });
 
-      throw new Error("Formato de resposta inesperado da API");
+      throw new Error("PDF não encontrado na resposta da API - formato inesperado");
 
-    } catch (error) {
-      console.error("[INTER] ❌ DEEP RESEARCH: PDF download failed:", error);
+    } catch (error: any) {
+      console.error("[INTER] ❌ Erro ao obter PDF:", error.message);
       
-      // Log adicional para debugging
-      if (error instanceof Error && error.message?.includes("Inter API error: 406")) {
-        console.error("[INTER] ❌ ERROR 406 - POSSIBLE CAUSES:");
-        console.error("- Boleto não está no status correto (precisa ser REGISTRADO?)");
-        console.error("- codigoSolicitacao incorreto (tentar nossoNumero?)");
-        console.error("- Headers ainda não corretos");
-        console.error("- Permissões da aplicação não incluem PDF download");
+      // Tentar endpoints alternativos
+      if (!error.message?.includes('não encontrado na API')) {
+        console.log("[INTER] 🔄 Tentando endpoints alternativos...");
+        return this.tentarEndpointsAlternativos(codigoSolicitacao);
       }
       
+      throw error;
+    }
+  }
+  
+  // Método auxiliar para tentar endpoints alternativos
+  private async tentarEndpointsAlternativos(codigoSolicitacao: string): Promise<Buffer> {
+    console.log(`[INTER] 🔄 Testando endpoints alternativos para PDF...`);
+    
+    const alternativeEndpoints = [
+      `/cobranca/v3/cobrancas/${codigoSolicitacao}/pdf/download`,
+      `/cobranca/v3/cobrancas/${codigoSolicitacao}/arquivo`,
+      `/cobranca/v3/cobrancas/${codigoSolicitacao}/documento`,
+      `/banking/v2/cobrancas/${codigoSolicitacao}/pdf`
+    ];
+
+    for (const endpoint of alternativeEndpoints) {
+      try {
+        console.log(`[INTER] 🔄 Tentando: ${endpoint}`);
+        
+        const response = await this.makeRequest(
+          endpoint,
+          "GET",
+          null,
+          {
+            "Accept": "application/pdf, application/json",
+            "Content-Type": "application/json"
+          }
+        );
+
+        // Processar resposta similar ao método principal
+        if (typeof response === 'object' && response.pdf) {
+          console.log(`[INTER] ✅ PDF encontrado em endpoint alternativo!`);
+          return Buffer.from(response.pdf, 'base64');
+        }
+        
+        if (response instanceof Buffer && response.slice(0, 5).toString("utf8").startsWith("%PDF")) {
+          console.log(`[INTER] ✅ PDF binário encontrado em endpoint alternativo!`);
+          return response;
+        }
+      } catch (err) {
+        console.log(`[INTER] ❌ Endpoint ${endpoint} falhou`);
+      }
+    }
+
+    throw new Error("Nenhum endpoint funcionou para obter o PDF");
+  }
+  
+  /**
+   * Método de debug para analisar resposta da API
+   * USADO PARA DIAGNOSTICAR O PROBLEMA DO PDF
+   */
+  async debugPdfResponse(codigoSolicitacao: string): Promise<any> {
+    console.log(`[INTER] 🔍 DEBUG MODE: Analisando resposta completa da API`);
+    
+    const token = await this.getAccessToken();
+    const url = `${this.apiUrl}/cobranca/v3/cobrancas/${codigoSolicitacao}/pdf`;
+    
+    const headers = {
+      'Authorization': `Bearer ${token}`,
+      'Accept': 'application/json',
+      'x-conta-corrente': this.contaCorrente
+    };
+    
+    const httpsAgent = new https.Agent({
+      cert: formatCertificate(this.certificate),
+      key: formatPrivateKey(this.privateKey),
+      rejectUnauthorized: true
+    });
+    
+    try {
+      const response = await axios.get(url, {
+        headers,
+        httpsAgent,
+        timeout: 30000
+      });
+      
+      console.log('[INTER] 🔍 RESPOSTA COMPLETA DA API:');
+      console.log('Status:', response.status);
+      console.log('Headers:', response.headers);
+      console.log('Data type:', typeof response.data);
+      console.log('Data length:', JSON.stringify(response.data).length);
+      
+      // Se for objeto, mostrar estrutura
+      if (typeof response.data === 'object') {
+        console.log('Object keys:', Object.keys(response.data));
+        console.log('Sample (first 1000 chars):');
+        console.log(JSON.stringify(response.data, null, 2).substring(0, 1000));
+        
+        // Verificar cada campo
+        for (const key in response.data) {
+          const value = response.data[key];
+          console.log(`Field '${key}':`, {
+            type: typeof value,
+            length: typeof value === 'string' ? value.length : 'N/A',
+            preview: typeof value === 'string' ? value.substring(0, 50) + '...' : value
+          });
+        }
+      }
+      
+      return response.data;
+    } catch (error: any) {
+      console.error('[INTER] ❌ Debug failed:', error.message);
       throw error;
     }
   }

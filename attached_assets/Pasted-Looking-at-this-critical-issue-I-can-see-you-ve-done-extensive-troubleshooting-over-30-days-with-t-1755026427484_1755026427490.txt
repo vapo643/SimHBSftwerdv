@@ -1,0 +1,55 @@
+Looking at this critical issue, I can see you've done extensive troubleshooting over 30+ days with the Banco Inter API PDF download functionality. Let me search for any recent changes or known issues with their API that might explain this behavior.Com base na sua documentação extremamente detalhada do problema e nas buscas que realizei, posso ver que você enfrentou um problema crítico e complexo com a API do Banco Inter. Vamos analisar sistematicamente este problema e explorar algumas soluções avançadas que você ainda não testou.Analisando seu problema detalhadamente, posso ver que você enfrentou uma situação extremamente frustrante que está bloqueando sua produção há mais de um mês. Vamos abordar isso de forma sistemática, como um detetive resolvendo um caso complexo.
+
+## Entendendo o Comportamento Anômalo da API
+
+O que você está observando é realmente **muito incomum** para uma API REST bem implementada. Quando uma API retorna HTTP 200 OK com `content-type: application/json` em um endpoint que deveria retornar PDF, isso geralmente indica uma de três situações:
+
+**Primeira possibilidade**: A API implementou um sistema de **duas etapas** onde o primeiro endpoint apenas inicia o processo de geração do PDF, retornando informações sobre onde buscá-lo depois.
+
+**Segunda possibilidade**: Existe uma **configuração específica da conta** ou um **header proprietário** não documentado que controla o formato da resposta.
+
+**Terceira possibilidade**: A API mudou recentemente seu comportamento, mas manteve compatibilidade retornando dados em JSON que podem ser processados de forma diferente.
+
+## A Chave para a Solução: Analisar o Conteúdo JSON
+
+O primeiro passo crucial, que você ainda não executou, é examinar **exatamente o que está dentro** desses 55KB de dados JSON que a API está retornando. Este JSON pode conter pistas valiosas sobre como obter o PDF.
+
+Vou explicar por que isso é tão importante: muitas APIs bancárias modernas, por questões de segurança e compliance, não retornam arquivos binários diretamente. Em vez disso, elas retornam estruturas JSON que contêm:
+
+- URLs temporárias para download do arquivo
+- Dados codificados em base64
+- Informações sobre o status do processamento
+- Instruções sobre como fazer a segunda requisição
+
+## Abordagem Sistemática para Resolução
+
+**Primeiro passo**: Execute o método de debug que incluí no artifact para capturar e examinar o JSON completo. Isso é fundamental porque pode revelar se a API está fornecendo o PDF de uma forma não óbvia.
+
+**Segundo passo**: Se o JSON não contiver o PDF de forma utilizável, teste os headers proprietários experimentais que listei. Muitas vezes, APIs bancárias têm headers não documentados que controlam o formato da resposta.
+
+**Terceiro passo**: Teste a abordagem de duas etapas. É possível que você precise primeiro "solicitar" a geração do PDF e depois fazer o download em um segundo endpoint.
+
+## Por Que Suas Tentativas Anteriores Não Funcionaram
+
+Você fez um trabalho exemplar de troubleshooting, mas há uma razão lógica pela qual suas tentativas não surtiram efeito:
+
+**Headers Accept**: Se a API implementou lógica condicional interna baseada em configurações de conta, o header Accept pode ser ignorado completamente.
+
+**Certificados e Autenticação**: Como você mesmo confirmou, estes estão funcionando perfeitamente - o problema não está na camada de segurança.
+
+**Response Types do Axios**: Estes controlam apenas como o cliente JavaScript processa a resposta, não afetam o que o servidor envia.
+
+**Endpoints alternativos**: Você testou variações lógicas, mas é possível que existam endpoints específicos não documentados para PDF.
+
+## Próximos Passos Imediatos
+
+Recomendo que você execute primeiro a função `debugPdfResponse` que incluí no artifact. Esta função vai capturar e exibir exatamente o que a API está retornando. Com essas informações, poderemos determinar se:
+
+1. O JSON contém uma URL para download do PDF
+2. O JSON contém dados base64 do PDF
+3. O JSON indica que é necessário fazer uma segunda requisição
+4. O JSON contém informações sobre como configurar adequadamente a conta
+
+Depois de analisar essa resposta, poderemos ajustar nossa estratégia com base no que descobrirmos. Lembre-se: este tipo de problema complexo com APIs bancárias quase sempre tem uma solução, mas ela pode não ser óbvia na documentação oficial.
+
+Você gostaria de começar executando a função de debug para examinarmos o conteúdo JSON retornado pela API?
