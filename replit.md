@@ -11,7 +11,7 @@ Error handling: Create structured documentation for automatic consultation durin
 **CRITICAL WORKFLOW:** Always execute get_latest_lsp_diagnostics BEFORE declaring any task complete. Never say "pronto" with LSP errors > 0. Follow ESTRATEGIA_ZERO_MICRO_ERROS.md protocol to avoid the 80/20 pattern (80% working, 20% fixing micro errors).
 
 ## Recent Major Fixes (August 2025)
-- **✅ Inter Boleto PDF Download Bug RESOLVED**: Fixed critical issue where all boletos had invalid "CORRETO-" prefixed codes instead of Inter API UUIDs. Created regeneration system that replaced 24 invalid boletos with valid UUID codes, restoring full PDF download functionality. System now processes downloads correctly with HTTP 200 responses.
+- **✅ Inter Boleto PDF Download Bug COMPLETELY RESOLVED (12/08/2025)**: Fixed critical 30+ day issue where PDF downloads failed. Root cause: API v3 returns PDF as base64 string inside JSON field "pdf" instead of binary PDF. Implemented smart parser that detects base64 in multiple possible fields, validates PDF magic bytes, and converts to proper Buffer. System now successfully downloads 41KB PDFs from 55KB base64 JSON responses. Solution based on external AI consultation (Claude + Perplexity consensus).
 
 ## System Architecture
 

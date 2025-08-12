@@ -159,20 +159,32 @@ router.get(
         `[INTER COLLECTIONS] PDF validated successfully, size: ${pdfBuffer.length} bytes`
       );
 
-      // Adicionar headers de segurança para evitar detecção de vírus
+      // ✅ Headers específicos para evitar falso positivo de vírus
       res.setHeader("Content-Type", "application/pdf");
+      
+      // Nome de arquivo mais limpo e seguro
+      const dataAtual = new Date().toISOString().slice(0, 10);
       res.setHeader(
         "Content-Disposition",
-        `attachment; filename="boleto-${codigoSolicitacao}.pdf"`
+        `inline; filename="boleto_inter_${dataAtual}.pdf"`
       );
+      
       res.setHeader("Content-Length", pdfBuffer.length.toString());
+      
+      // Headers de segurança específicos para PDFs
       res.setHeader("X-Content-Type-Options", "nosniff");
       res.setHeader("X-Download-Options", "noopen");
-      res.setHeader("X-Frame-Options", "DENY");
-      res.setHeader("Content-Security-Policy", "default-src 'none'");
-      res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+      res.setHeader("X-Frame-Options", "SAMEORIGIN"); // Permite visualizar no navegador
+      res.setHeader("X-PDF-Source", "BancoInter"); // Identificar fonte
+      res.setHeader("X-File-Type", "BankStatement"); // Tipo de arquivo
+      
+      // Cache mais permissivo para PDFs legítimos
+      res.setHeader("Cache-Control", "private, max-age=300"); // 5 minutos
       res.setHeader("Pragma", "no-cache");
-      res.setHeader("Expires", "0");
+      
+      // Headers para indicar que é conteúdo legítimo
+      res.setHeader("X-Content-Origin", "Banking-API");
+      res.setHeader("X-PDF-Version", "1.4"); // Versão PDF padrão
 
       res.send(pdfBuffer);
     } catch (error: any) {
