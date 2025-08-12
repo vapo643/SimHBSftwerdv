@@ -8,6 +8,7 @@ import crypto from "crypto";
 import { db } from "../lib/supabase";
 import { sql } from "drizzle-orm";
 import { documentProcessingService, ProcessingSource } from "../services/documentProcessingService";
+import { clickSignWebhookService } from "../services/clickSignWebhookService";
 import { z } from "zod";
 
 const router = express.Router();
@@ -113,12 +114,12 @@ router.post("/clicksign", express.raw({ type: "application/json" }), async (req,
       LIMIT 1
     `);
 
-    if (!proposalResult.rows || proposalResult.rows.length === 0) {
+    if (!proposalResult || proposalResult.length === 0) {
       console.warn(`⚠️ [WEBHOOK] No proposal found for document ${document.key}`);
       return res.status(404).json({ error: "Proposal not found" });
     }
 
-    const proposal = proposalResult.rows[0];
+    const proposal = proposalResult[0];
     console.log(`🎯 [WEBHOOK] Found proposal ${proposal.id} for document ${document.key}`);
 
     // 5. Processar documento de forma assíncrona
@@ -131,16 +132,30 @@ router.post("/clicksign", express.raw({ type: "application/json" }), async (req,
     // Processar em background
     setImmediate(async () => {
       try {
-        const result = await documentProcessingService.processSignedDocument(
-          proposal.id as string,
-          ProcessingSource.WEBHOOK,
-          document.key
-        );
+        // CORREÇÃO CRÍTICA: Usar clickSignWebhookService para atualizar status corretamente
+        const result = await clickSignWebhookService.processEvent({
+          event: event.name,
+          data: {
+            document: document,
+            signer: event.data?.signer,
+            list: event.data?.list
+          },
+          occurred_at: event.occurred_at
+        });
 
-        if (result.success) {
+        if (result.processed) {
           console.log(
-            `✅ [WEBHOOK] Successfully processed document for proposal ${proposal.id} via WEBHOOK`
+            `✅ [WEBHOOK] Successfully processed document for proposal ${result.proposalId || proposal.id} via WEBHOOK`
           );
+
+          // Também processar o download do documento assinado
+          if (document.status === "closed") {
+            await documentProcessingService.processSignedDocument(
+              proposal.id as string,
+              ProcessingSource.WEBHOOK,
+              document.key
+            );
+          }
 
           // Log webhook success
           await db.execute(sql`
@@ -162,7 +177,7 @@ router.post("/clicksign", express.raw({ type: "application/json" }), async (req,
           `);
         } else {
           console.error(
-            `❌ [WEBHOOK] Failed to process document for proposal ${proposal.id}: ${result.message}`
+            `❌ [WEBHOOK] Failed to process document for proposal ${proposal.id}: ${result.reason}`
           );
         }
       } catch (error) {

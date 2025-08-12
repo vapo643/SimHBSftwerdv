@@ -1,6 +1,6 @@
 import { useRoute, useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
+import { getSupabase } from "@/lib/supabase";
 import {
   CheckCircle,
   Clock,
@@ -622,6 +623,72 @@ export default function Formalizacao() {
       setClickSignData(initialClickSignData);
     }
   }, [initialClickSignData]);
+
+  // 🔄 REALTIME: Escutar mudanças na tabela propostas
+  useEffect(() => {
+    if (!propostaId) return;
+
+    console.log("🔄 [REALTIME] Configurando escuta para proposta:", propostaId);
+    
+    const supabase = getSupabase();
+    const channel = supabase
+      .channel(`propostas-changes-${propostaId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // Escutar todos os eventos (INSERT, UPDATE, DELETE)
+          schema: 'public',
+          table: 'propostas',
+          filter: `id=eq.${propostaId}` // Filtrar apenas esta proposta
+        },
+        (payload) => {
+          console.log("📡 [REALTIME] Evento recebido:", payload);
+          
+          if (payload.eventType === 'UPDATE') {
+            console.log("✅ [REALTIME] Proposta atualizada, recarregando dados...");
+            
+            // Atualizar dados da proposta
+            queryClient.invalidateQueries({
+              queryKey: ["/api/propostas", propostaId, "formalizacao"]
+            });
+            
+            // Atualizar status do ClickSign
+            queryClient.invalidateQueries({
+              queryKey: ["/api/clicksign/status", propostaId]
+            });
+            
+            // Atualizar boletos
+            queryClient.invalidateQueries({
+              queryKey: ["/api/inter/collections", propostaId]
+            });
+            
+            // Mostrar notificação
+            toast({
+              title: "📡 Atualização em tempo real",
+              description: "A proposta foi atualizada automaticamente",
+              duration: 3000,
+            });
+          }
+        }
+      )
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          console.log("✅ [REALTIME] Conectado ao canal de atualizações");
+        } else if (status === 'CHANNEL_ERROR') {
+          console.error("❌ [REALTIME] Erro ao conectar ao canal");
+        } else if (status === 'TIMED_OUT') {
+          console.error("⏱️ [REALTIME] Timeout ao conectar");
+        } else if (status === 'CLOSED') {
+          console.log("🔌 [REALTIME] Canal fechado");
+        }
+      });
+
+    // Cleanup ao desmontar o componente
+    return () => {
+      console.log("🧹 [REALTIME] Removendo canal de escuta");
+      supabase.removeChannel(channel);
+    };
+  }, [propostaId, queryClient, toast]);
 
   const getStatusProgress = (status: string) => {
     const statusMap = {

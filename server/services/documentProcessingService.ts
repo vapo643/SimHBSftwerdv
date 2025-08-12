@@ -46,7 +46,7 @@ export class DocumentProcessingService {
         WHERE id = ${proposalId}
       `);
 
-      if (!proposalResult.rows || proposalResult.rows.length === 0) {
+      if (!proposalResult || proposalResult.length === 0) {
         console.warn(`⚠️ [DOCUMENT PROCESSING] Proposal ${proposalId} not found`);
         return {
           success: false,
@@ -54,7 +54,7 @@ export class DocumentProcessingService {
         };
       }
 
-      const proposal = proposalResult.rows[0];
+      const proposal = proposalResult[0];
       const clickSignDocId =
         documentKey || proposal.clicksign_document_id || proposal.clicksign_envelope_id;
 
