@@ -210,104 +210,23 @@ router.get(
       // ✅ STREAMING APPROACH - evita 100% detecção de vírus
       console.log(`[INTER COLLECTIONS] Serving PDF via secure stream: ${pdfBuffer.length} bytes`);
       
-      console.log(`[INTER COLLECTIONS] Implementing BYPASS McAfee solution for: ${filename}`);
+      console.log(`[INTER COLLECTIONS] Preparing anti-McAfee headers for: ${filename}`);
       
-      // ✅ SOLUÇÃO RADICAL - BYPASS COMPLETO DO McAfee
-      // Retornar como HTML que força download via JavaScript
-      const base64PDF = pdfBuffer.toString('base64');
-      const downloadHTML = `
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>Download PDF Bancário</title>
-    <style>
-        body { font-family: Arial; text-align: center; padding: 50px; background: #f5f5f5; }
-        .download-container { background: white; border-radius: 8px; padding: 30px; max-width: 500px; margin: 0 auto; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .logo { color: #ff6600; font-size: 24px; font-weight: bold; margin-bottom: 20px; }
-        .download-btn { background: #ff6600; color: white; border: none; padding: 15px 30px; border-radius: 5px; font-size: 16px; cursor: pointer; margin: 20px 10px; }
-        .download-btn:hover { background: #e55a00; }
-        .info { color: #666; margin: 15px 0; }
-        .security { background: #e8f5e8; border: 1px solid #4caf50; border-radius: 4px; padding: 10px; margin: 20px 0; color: #2e7d32; }
-    </style>
-</head>
-<body>
-    <div class="download-container">
-        <div class="logo">🏦 BANCO INTER</div>
-        <h2>Boleto Bancário</h2>
-        <p class="info">Documento: ${filename}</p>
-        <p class="info">Tamanho: ${Math.round(pdfBuffer.length / 1024)} KB</p>
-        
-        <div class="security">
-            ✅ Documento verificado e seguro<br>
-            📊 SHA256: ${require('crypto').createHash('sha256').update(pdfBuffer).digest('hex').substring(0, 16)}...
-        </div>
-        
-        <button class="download-btn" onclick="downloadPDF()">📄 Download PDF</button>
-        <button class="download-btn" onclick="openPDF()">👁️ Visualizar PDF</button>
-        
-        <p class="info">
-            <small>Se o seu antivírus detectar como ameaça, isso é um falso positivo comum com PDFs bancários.<br>
-            Você pode prosseguir com segurança - este documento é legítimo.</small>
-        </p>
-    </div>
-
-    <script>
-        const pdfBase64 = "${base64PDF}";
-        const fileName = "${filename}";
-        
-        function downloadPDF() {
-            const byteCharacters = atob(pdfBase64);
-            const byteNumbers = new Array(byteCharacters.length);
-            for (let i = 0; i < byteCharacters.length; i++) {
-                byteNumbers[i] = byteCharacters.charCodeAt(i);
-            }
-            const byteArray = new Uint8Array(byteNumbers);
-            const blob = new Blob([byteArray], { type: 'application/pdf' });
-            
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = fileName;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(link.href);
-        }
-        
-        function openPDF() {
-            const byteCharacters = atob(pdfBase64);
-            const byteNumbers = new Array(byteCharacters.length);
-            for (let i = 0; i < byteCharacters.length; i++) {
-                byteNumbers[i] = byteCharacters.charCodeAt(i);
-            }
-            const byteArray = new Uint8Array(byteNumbers);
-            const blob = new Blob([byteArray], { type: 'application/pdf' });
-            
-            const url = URL.createObjectURL(blob);
-            window.open(url, '_blank');
-            setTimeout(() => URL.revokeObjectURL(url), 1000);
-        }
-        
-        // Download automático após 3 segundos se usuário não interagir
-        setTimeout(() => {
-            if (document.hasFocus()) {
-                console.log('Auto-download iniciado');
-                // downloadPDF(); // Comentado - usuário precisa clicar
-            }
-        }, 3000);
-    </script>
-</body>
-</html>`;
-
-      // Headers para HTML ao invés de PDF
-      res.writeHead(200, {
-        'Content-Type': 'text/html; charset=utf-8',
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0'
-      });
+      // Headers padrão para PDF
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Length", pdfBuffer.length.toString());
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="${filename}"`
+      );
       
-      res.end(downloadHTML);
+      // Headers básicos de segurança
+      res.setHeader("X-Content-Type-Options", "nosniff");
+      res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+      res.setHeader("Pragma", "no-cache");
+      res.setHeader("Expires", "0");
+
+      res.send(pdfBuffer);
     } catch (error: any) {
       console.error("[INTER COLLECTIONS] Error downloading PDF:", error);
 

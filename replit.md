@@ -12,6 +12,7 @@ Error handling: Create structured documentation for automatic consultation durin
 
 ## Recent Major Fixes (August 2025)
 - **✅ Inter Boleto PDF Download Bug COMPLETELY RESOLVED (12/08/2025)**: Fixed critical 30+ day issue where PDF downloads failed. Root cause: API v3 returns PDF as base64 string inside JSON field "pdf" instead of binary PDF. Implemented smart parser that detects base64 in multiple possible fields, validates PDF magic bytes, and converts to proper Buffer. System now successfully downloads 41KB PDFs from 55KB base64 JSON responses. Solution based on external AI consultation (Claude + Perplexity consensus).
+- **⚠️ McAfee False Positive Issue (12/08/2025)**: PDFs download correctly but McAfee antivirus detects as virus. Multiple header solutions attempted. Created comprehensive external AI consultation prompt for specialized solution.
 
 ## System Architecture
 
