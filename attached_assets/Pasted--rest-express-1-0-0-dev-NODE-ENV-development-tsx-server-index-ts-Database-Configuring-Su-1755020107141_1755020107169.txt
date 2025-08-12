@@ -1,0 +1,1839 @@
+
+> rest-express@1.0.0 dev
+> NODE_ENV=development tsx server/index.ts
+
+✅ Database: Configuring Supabase connection...
+✅ Database: Connection configured (lazy)
+[CLICKSIGN V1] 🚀 Initialized in PRODUCTION mode (legal signatures)
+[CLICKSIGN V1] API URL: https://app.clicksign.com/api/v1
+[CLICKSIGN V1] Token configured: b73b3b90-c87...
+[INTER] 🏦 Initialized in production mode
+[INTER] 🌐 API URL: https://cdpj.partners.bancointer.com.br
+[CLICKSIGN V1] 🚀 Initialized in PRODUCTION mode (legal signatures)
+[CLICKSIGN V1] API URL: https://app.clicksign.com/api/v1
+[CLICKSIGN V1] Token configured: b73b3b90-c...
+🚀 [TIMING MIDDLEWARE] Creating middleware instance...
+🚀 [TIMING MIDDLEWARE] Middleware instance created and exported
+5:32:30 PM [express] ✅ All secrets loaded successfully
+5:32:30 PM [express] 🔒 [SECURITY] CORS protection configured - ASVS V13.2.1
+5:32:30 PM [express] 🔒 [SECURITY] OPTIONS preflight handling configured
+5:32:30 PM [express] 🔧 [DEV] CSP disabled in development mode for debugging
+5:32:30 PM [express] 🔒 [SECURITY] Input sanitization middleware activated
+5:32:30 PM [express] 🔒 [SECURITY] URL token validation middleware activated - ASVS V7.1.1
+5:32:30 PM [express] 🔒 [SECURITY] CSRF protection middleware activated - OWASP Cheat Sheet
+5:32:30 PM [express] 🔧 [DEV] Rate limiting configurado para desenvolvimento - limites altos
+[SEMGREP MCP] Development mode - using in-memory cache
+🧠 [ML] Treinando modelo de detecção...
+5:32:30 PM [express] 🔐 Security WebSocket initialized
+[CCB SYNC] 🚀 Starting fallback polling (every 6 hours)
+[CCB SYNC] ℹ️ Primary processing via webhooks, polling is safety net only
+5:32:31 PM [express] 🔄 CCB Sync Service initialized - Webhook primary, polling fallback every 6 hours
+5:32:31 PM [express] ℹ️  Security monitoring disabled. Set ENABLE_SECURITY_MONITORING=true to enable
+5:32:31 PM [express] 🔧 App Config Status:
+5:32:31 PM [express]   - Port: 5000
+5:32:31 PM [express]   - Environment: development
+5:32:31 PM [express]   - Database: ✅ Connected
+5:32:31 PM [express]   - Supabase: ✅ Connected
+5:32:31 PM [express]   - Security: Rate Limit ✅, Helmet ✅
+5:32:31 PM [express] 🚀 Server running on port 5000
+5:32:31 PM [express] 🌍 Environment: development
+5:32:31 PM [express] 📦 Checking storage buckets...
+Browserslist: browsers data (caniuse-lite) is 10 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+5:32:33 PM [express] ✅ Storage bucket "documents" already exists as PRIVATE
+✅ [ML] Modelo treinado com 0 amostras
+✅ Database: Connection test successful
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/debug/me
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/formalizacao/acompanhamento/88a44696-9b63-42ee-aa81-15f9519d24cb
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-12T17:33:47.103Z'
+}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/debug/me
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/login
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-12T17:33:48.182Z'
+}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/debug/me
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/login
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /88a44696-9b63-42ee-aa81-15f9519d24cb
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/formalizacao/acompanhamento/88a44696-9b63-42ee-aa81-15f9519d24cb
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/propostas/88a44696-9b63-42ee-aa81-15f9519d24cb/formalizacao
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/formalizacao/acompanhamento/88a44696-9b63-42ee-aa81-15f9519d24cb
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-12T17:33:59.471Z'
+}
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-12T17:33:59.496Z'
+}
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-12T17:33:59.726Z'
+}
+[INTER COLLECTIONS] Fetching collections for proposal: 88a44696-9b63-42ee-aa81-15f9519d24cb
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/debug/me
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/formalizacao/acompanhamento/88a44696-9b63-42ee-aa81-15f9519d24cb
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[2025-08-12T14:34:00.000-03:00] 🔍 INICIO - Buscando dados de formalização para proposta: 88a44696-9b63-42ee-aa81-15f9519d24cb
+[2025-08-12T14:34:00.000-03:00] 🔍 STEP 1 - Fazendo query direta no Supabase...
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-12T17:34:00.312Z'
+}
+[2025-08-12T14:34:00.000-03:00] 🔍 STEP 2 - Proposta encontrada: true
+[2025-08-12T14:34:00.000-03:00] 🔍 STEP 2.1 - Dados da proposta: {
+  id: '88a44696-9b63-42ee-aa81-15f9519d24cb',
+  status: 'contratos_assinados',
+  tabela_comercial_id: 16,
+  produto_id: 5,
+  atendente_id: undefined
+}
+[2025-08-12T14:34:00.000-03:00] 🔍 STEP 3 - Buscando documentos...
+[2025-08-12T14:34:00.000-03:00] 🔍 STEP 4 - Documentos encontrados: 1
+[2025-08-12T14:34:00.000-03:00] 🔍 STEP 4.1 - Estrutura dos documentos: [
+  {
+    id: 34,
+    proposta_id: '88a44696-9b63-42ee-aa81-15f9519d24cb',
+    nome_arquivo: '(1776) Hans Zimmer - Interstellar (Space Sounds) - YouTube - Google Chrome 07_08_2025 13_48_06.png',
+    url: 'https://dvglgxrvhmtsixaabxha.supabase.co/storage/v1/object/sign/documents/proposta-88a44696-9b63-42ee-aa81-15f9519d24cb/1754923128364-(1776)%20Hans%20Zimmer%20-%20Interstellar%20(Space%20Sounds)%20-%20YouTube%20-%20Google%20Chrome%2007_08_2025%2013_48_06.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV80OTVlMjJjYS1lMDMxLTQ0Y2YtOTM3Zi03N2M3ZWNiMTk2YzkiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJkb2N1bWVudHMvcHJvcG9zdGEtODhhNDQ2OTYtOWI2My00MmVlLWFhODEtMTVmOTUxOWQyNGNiLzE3NTQ5MjMxMjgzNjQtKDE3NzYpIEhhbnMgWmltbWVyIC0gSW50ZXJzdGVsbGFyIChTcGFjZSBTb3VuZHMpIC0gWW91VHViZSAtIEdvb2dsZSBDaHJvbWUgMDdfMDhfMjAyNSAxM180OF8wNi5wbmciLCJpYXQiOjE3NTQ5MjMxMzMsImV4cCI6MTc1NDkyNjczM30.SSLBc2_xbNhF7MV_kMuYXeQIcP-d137-umbhy12meI4',
+    tamanho: 0,
+    tipo: 'image/png',
+    created_at: '2025-08-11T14:38:53.92227'
+  }
+]
+[2025-08-12T14:34:00.000-03:00] 🔍 STEP 4.2 - Gerando URLs assinadas para 1 documentos...
+🔍 [FORMALIZAÇÃO] Tentando gerar URL para documento: {
+  nome: '(1776) Hans Zimmer - Interstellar (Space Sounds) - YouTube - Google Chrome 07_08_2025 13_48_06.png',
+  url: 'https://dvglgxrvhmtsixaabxha.supabase.co/storage/v1/object/sign/documents/proposta-88a44696-9b63-42ee-aa81-15f9519d24cb/1754923128364-(1776)%20Hans%20Zimmer%20-%20Interstellar%20(Space%20Sounds)%20-%20YouTube%20-%20Google%20Chrome%2007_08_2025%2013_48_06.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV80OTVlMjJjYS1lMDMxLTQ0Y2YtOTM3Zi03N2M3ZWNiMTk2YzkiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJkb2N1bWVudHMvcHJvcG9zdGEtODhhNDQ2OTYtOWI2My00MmVlLWFhODEtMTVmOTUxOWQyNGNiLzE3NTQ5MjMxMjgzNjQtKDE3NzYpIEhhbnMgWmltbWVyIC0gSW50ZXJzdGVsbGFyIChTcGFjZSBTb3VuZHMpIC0gWW91VHViZSAtIEdvb2dsZSBDaHJvbWUgMDdfMDhfMjAyNSAxM180OF8wNi5wbmciLCJpYXQiOjE3NTQ5MjMxMzMsImV4cCI6MTc1NDkyNjczM30.SSLBc2_xbNhF7MV_kMuYXeQIcP-d137-umbhy12meI4',
+  tipo: 'image/png',
+  proposta_id: '88a44696-9b63-42ee-aa81-15f9519d24cb'
+}
+🔍 [FORMALIZAÇÃO] Caminho extraído para URL assinada: proposta-88a44696-9b63-42ee-aa81-15f9519d24cb/1754923128364-(1776)%20Hans%20Zimmer%20-%20Interstellar%20(Space%20Sounds)%20-%20YouTube%20-%20Google%20Chrome%2007_08_2025%2013_48_06.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV80OTVlMjJjYS1lMDMxLTQ0Y2YtOTM3Zi03N2M3ZWNiMTk2YzkiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJkb2N1bWVudHMvcHJvcG9zdGEtODhhNDQ2OTYtOWI2My00MmVlLWFhODEtMTVmOTUxOWQyNGNiLzE3NTQ5MjMxMjgzNjQtKDE3NzYpIEhhbnMgWmltbWVyIC0gSW50ZXJzdGVsbGFyIChTcGFjZSBTb3VuZHMpIC0gWW91VHViZSAtIEdvb2dsZSBDaHJvbWUgMDdfMDhfMjAyNSAxM180OF8wNi5wbmciLCJpYXQiOjE3NTQ5MjMxMzMsImV4cCI6MTc1NDkyNjczM30.SSLBc2_xbNhF7MV_kMuYXeQIcP-d137-umbhy12meI4
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/debug/me
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/formalizacao/acompanhamento/88a44696-9b63-42ee-aa81-15f9519d24cb
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-12T17:34:01.085Z'
+}
+[INTER] 📋 Retrieving collection: 73e76cfe-f8f8-4638-ac83-d8e809e06eef
+[INTER] 🔑 Requesting new access token...
+[INTER] 🌐 Token URL: cdpj.partners.bancointer.com.br/oauth/v2/token
+[INTER] 📄 Using form-based authentication per official docs
+[INTER] 🔓 Certificate configured: ✅ Present
+[INTER] 🔑 Private Key configured: ✅ Present
+[INTER] 📊 Client ID length: 36 chars
+[INTER] 📊 Client Secret length: 36 chars
+[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=boleto-cobranca.read boleto-cobranca.write webhook.read webhook.write
+[INTER] 📝 Form body string length: 203 chars
+[INTER] 📝 Form body preview: client_id=05fc3816-9a8f-4a2d-8b28-277cd3617cc2&client_secret=bbb82b01-2ca0-407f-a21c-0e1dff659d42&gr...
+[INTER] 🔒 Using mTLS certificate authentication
+[INTER] 🔄 Formatting certificates with proper line breaks...
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] ✅ Certificate formatted with line breaks
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] ✅ Private key formatted with line breaks
+[INTER] ✅ Certificates formatted and ready
+[INTER] 🔧 Creating Undici agent for mTLS...
+[INTER] 🚀 Making mTLS request with Undici agent...
+[INTER] 📋 Retrieving collection: 585bcc53-e077-49c7-a4cd-b000698a5bfe
+[INTER] 🔑 Requesting new access token...
+[INTER] 🌐 Token URL: cdpj.partners.bancointer.com.br/oauth/v2/token
+[INTER] 📄 Using form-based authentication per official docs
+[INTER] 🔓 Certificate configured: ✅ Present
+[INTER] 🔑 Private Key configured: ✅ Present
+[INTER] 📊 Client ID length: 36 chars
+[INTER] 📊 Client Secret length: 36 chars
+[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=boleto-cobranca.read boleto-cobranca.write webhook.read webhook.write
+[INTER] 📝 Form body string length: 203 chars
+[INTER] 📝 Form body preview: client_id=05fc3816-9a8f-4a2d-8b28-277cd3617cc2&client_secret=bbb82b01-2ca0-407f-a21c-0e1dff659d42&gr...
+[INTER] 🔒 Using mTLS certificate authentication
+[INTER] 🔄 Formatting certificates with proper line breaks...
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] ✅ Certificate formatted with line breaks
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] ✅ Private key formatted with line breaks
+[INTER] ✅ Certificates formatted and ready
+[INTER] 🔧 Creating Undici agent for mTLS...
+[INTER] 🚀 Making mTLS request with Undici agent...
+[INTER] 📋 Retrieving collection: 6f378471-4bde-4e1e-b335-ae4a28abb060
+[INTER] 🔑 Requesting new access token...
+[INTER] 🌐 Token URL: cdpj.partners.bancointer.com.br/oauth/v2/token
+[INTER] 📄 Using form-based authentication per official docs
+[INTER] 🔓 Certificate configured: ✅ Present
+[INTER] 🔑 Private Key configured: ✅ Present
+[INTER] 📊 Client ID length: 36 chars
+[INTER] 📊 Client Secret length: 36 chars
+[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=boleto-cobranca.read boleto-cobranca.write webhook.read webhook.write
+[INTER] 📝 Form body string length: 203 chars
+[INTER] 📝 Form body preview: client_id=05fc3816-9a8f-4a2d-8b28-277cd3617cc2&client_secret=bbb82b01-2ca0-407f-a21c-0e1dff659d42&gr...
+[INTER] 🔒 Using mTLS certificate authentication
+[INTER] 🔄 Formatting certificates with proper line breaks...
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] ✅ Certificate formatted with line breaks
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] ✅ Private key formatted with line breaks
+[INTER] ✅ Certificates formatted and ready
+[INTER] 🔧 Creating Undici agent for mTLS...
+[INTER] 🚀 Making mTLS request with Undici agent...
+[INTER] 📋 Retrieving collection: 96c8ac2f-f26d-4198-89a1-5751152d3d04
+[INTER] 🔑 Requesting new access token...
+[INTER] 🌐 Token URL: cdpj.partners.bancointer.com.br/oauth/v2/token
+[INTER] 📄 Using form-based authentication per official docs
+[INTER] 🔓 Certificate configured: ✅ Present
+[INTER] 🔑 Private Key configured: ✅ Present
+[INTER] 📊 Client ID length: 36 chars
+[INTER] 📊 Client Secret length: 36 chars
+[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=boleto-cobranca.read boleto-cobranca.write webhook.read webhook.write
+[INTER] 📝 Form body string length: 203 chars
+[INTER] 📝 Form body preview: client_id=05fc3816-9a8f-4a2d-8b28-277cd3617cc2&client_secret=bbb82b01-2ca0-407f-a21c-0e1dff659d42&gr...
+[INTER] 🔒 Using mTLS certificate authentication
+[INTER] 🔄 Formatting certificates with proper line breaks...
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] ✅ Certificate formatted with line breaks
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] ✅ Private key formatted with line breaks
+[INTER] ✅ Certificates formatted and ready
+[INTER] 🔧 Creating Undici agent for mTLS...
+[INTER] 🚀 Making mTLS request with Undici agent...
+[INTER] 📋 Retrieving collection: 957e99ca-083f-4652-8d06-bc537772ec1f
+[INTER] 🔑 Requesting new access token...
+[INTER] 🌐 Token URL: cdpj.partners.bancointer.com.br/oauth/v2/token
+[INTER] 📄 Using form-based authentication per official docs
+[INTER] 🔓 Certificate configured: ✅ Present
+[INTER] 🔑 Private Key configured: ✅ Present
+[INTER] 📊 Client ID length: 36 chars
+[INTER] 📊 Client Secret length: 36 chars
+[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=boleto-cobranca.read boleto-cobranca.write webhook.read webhook.write
+[INTER] 📝 Form body string length: 203 chars
+[INTER] 📝 Form body preview: client_id=05fc3816-9a8f-4a2d-8b28-277cd3617cc2&client_secret=bbb82b01-2ca0-407f-a21c-0e1dff659d42&gr...
+[INTER] 🔒 Using mTLS certificate authentication
+[INTER] 🔄 Formatting certificates with proper line breaks...
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] ✅ Certificate formatted with line breaks
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] ✅ Private key formatted with line breaks
+[INTER] ✅ Certificates formatted and ready
+[INTER] 🔧 Creating Undici agent for mTLS...
+[INTER] 🚀 Making mTLS request with Undici agent...
+[INTER] 📋 Retrieving collection: fc01f610-05e5-4879-b237-dd9d63f0e4b4
+[INTER] 🔑 Requesting new access token...
+[INTER] 🌐 Token URL: cdpj.partners.bancointer.com.br/oauth/v2/token
+[INTER] 📄 Using form-based authentication per official docs
+[INTER] 🔓 Certificate configured: ✅ Present
+[INTER] 🔑 Private Key configured: ✅ Present
+[INTER] 📊 Client ID length: 36 chars
+[INTER] 📊 Client Secret length: 36 chars
+[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=boleto-cobranca.read boleto-cobranca.write webhook.read webhook.write
+[INTER] 📝 Form body string length: 203 chars
+[INTER] 📝 Form body preview: client_id=05fc3816-9a8f-4a2d-8b28-277cd3617cc2&client_secret=bbb82b01-2ca0-407f-a21c-0e1dff659d42&gr...
+[INTER] 🔒 Using mTLS certificate authentication
+[INTER] 🔄 Formatting certificates with proper line breaks...
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] ✅ Certificate formatted with line breaks
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] ✅ Private key formatted with line breaks
+[INTER] ✅ Certificates formatted and ready
+[INTER] 🔧 Creating Undici agent for mTLS...
+[INTER] 🚀 Making mTLS request with Undici agent...
+[INTER] 📋 Retrieving collection: 126dffb8-a53f-40af-a7df-04b07fdbed3b
+[INTER] 🔑 Requesting new access token...
+[INTER] 🌐 Token URL: cdpj.partners.bancointer.com.br/oauth/v2/token
+[INTER] 📄 Using form-based authentication per official docs
+[INTER] 🔓 Certificate configured: ✅ Present
+[INTER] 🔑 Private Key configured: ✅ Present
+[INTER] 📊 Client ID length: 36 chars
+[INTER] 📊 Client Secret length: 36 chars
+[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=boleto-cobranca.read boleto-cobranca.write webhook.read webhook.write
+[INTER] 📝 Form body string length: 203 chars
+[INTER] 📝 Form body preview: client_id=05fc3816-9a8f-4a2d-8b28-277cd3617cc2&client_secret=bbb82b01-2ca0-407f-a21c-0e1dff659d42&gr...
+[INTER] 🔒 Using mTLS certificate authentication
+[INTER] 🔄 Formatting certificates with proper line breaks...
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] ✅ Certificate formatted with line breaks
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] ✅ Private key formatted with line breaks
+[INTER] ✅ Certificates formatted and ready
+[INTER] 🔧 Creating Undici agent for mTLS...
+[INTER] 🚀 Making mTLS request with Undici agent...
+[INTER] 📋 Retrieving collection: f5f7fe5a-44b8-4a43-9d7f-a864cfdc84c9
+[INTER] 🔑 Requesting new access token...
+[INTER] 🌐 Token URL: cdpj.partners.bancointer.com.br/oauth/v2/token
+[INTER] 📄 Using form-based authentication per official docs
+[INTER] 🔓 Certificate configured: ✅ Present
+[INTER] 🔑 Private Key configured: ✅ Present
+[INTER] 📊 Client ID length: 36 chars
+[INTER] 📊 Client Secret length: 36 chars
+[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=boleto-cobranca.read boleto-cobranca.write webhook.read webhook.write
+[INTER] 📝 Form body string length: 203 chars
+[INTER] 📝 Form body preview: client_id=05fc3816-9a8f-4a2d-8b28-277cd3617cc2&client_secret=bbb82b01-2ca0-407f-a21c-0e1dff659d42&gr...
+[INTER] 🔒 Using mTLS certificate authentication
+[INTER] 🔄 Formatting certificates with proper line breaks...
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] ✅ Certificate formatted with line breaks
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] ✅ Private key formatted with line breaks
+[INTER] ✅ Certificates formatted and ready
+[INTER] 🔧 Creating Undici agent for mTLS...
+[INTER] 🚀 Making mTLS request with Undici agent...
+[INTER] 📋 Retrieving collection: 928adfab-f412-49aa-bbc9-8a1a7803ddd3
+[INTER] 🔑 Requesting new access token...
+[INTER] 🌐 Token URL: cdpj.partners.bancointer.com.br/oauth/v2/token
+[INTER] 📄 Using form-based authentication per official docs
+[INTER] 🔓 Certificate configured: ✅ Present
+[INTER] 🔑 Private Key configured: ✅ Present
+[INTER] 📊 Client ID length: 36 chars
+[INTER] 📊 Client Secret length: 36 chars
+[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=boleto-cobranca.read boleto-cobranca.write webhook.read webhook.write
+[INTER] 📝 Form body string length: 203 chars
+[INTER] 📝 Form body preview: client_id=05fc3816-9a8f-4a2d-8b28-277cd3617cc2&client_secret=bbb82b01-2ca0-407f-a21c-0e1dff659d42&gr...
+[INTER] 🔒 Using mTLS certificate authentication
+[INTER] 🔄 Formatting certificates with proper line breaks...
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] ✅ Certificate formatted with line breaks
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] ✅ Private key formatted with line breaks
+[INTER] ✅ Certificates formatted and ready
+[INTER] 🔧 Creating Undici agent for mTLS...
+[INTER] 🚀 Making mTLS request with Undici agent...
+[INTER] 📋 Retrieving collection: 14d56dd6-000d-417f-92a4-dc785db66ef8
+[INTER] 🔑 Requesting new access token...
+[INTER] 🌐 Token URL: cdpj.partners.bancointer.com.br/oauth/v2/token
+[INTER] 📄 Using form-based authentication per official docs
+[INTER] 🔓 Certificate configured: ✅ Present
+[INTER] 🔑 Private Key configured: ✅ Present
+[INTER] 📊 Client ID length: 36 chars
+[INTER] 📊 Client Secret length: 36 chars
+[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=boleto-cobranca.read boleto-cobranca.write webhook.read webhook.write
+[INTER] 📝 Form body string length: 203 chars
+[INTER] 📝 Form body preview: client_id=05fc3816-9a8f-4a2d-8b28-277cd3617cc2&client_secret=bbb82b01-2ca0-407f-a21c-0e1dff659d42&gr...
+[INTER] 🔒 Using mTLS certificate authentication
+[INTER] 🔄 Formatting certificates with proper line breaks...
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] ✅ Certificate formatted with line breaks
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] ✅ Private key formatted with line breaks
+[INTER] ✅ Certificates formatted and ready
+[INTER] 🔧 Creating Undici agent for mTLS...
+[INTER] 🚀 Making mTLS request with Undici agent...
+[INTER] 📋 Retrieving collection: 4f3c1f03-222a-46e3-bafd-0c9d6c9cad02
+[INTER] 🔑 Requesting new access token...
+[INTER] 🌐 Token URL: cdpj.partners.bancointer.com.br/oauth/v2/token
+[INTER] 📄 Using form-based authentication per official docs
+[INTER] 🔓 Certificate configured: ✅ Present
+[INTER] 🔑 Private Key configured: ✅ Present
+[INTER] 📊 Client ID length: 36 chars
+[INTER] 📊 Client Secret length: 36 chars
+[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=boleto-cobranca.read boleto-cobranca.write webhook.read webhook.write
+[INTER] 📝 Form body string length: 203 chars
+[INTER] 📝 Form body preview: client_id=05fc3816-9a8f-4a2d-8b28-277cd3617cc2&client_secret=bbb82b01-2ca0-407f-a21c-0e1dff659d42&gr...
+[INTER] 🔒 Using mTLS certificate authentication
+[INTER] 🔄 Formatting certificates with proper line breaks...
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] ✅ Certificate formatted with line breaks
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] ✅ Private key formatted with line breaks
+[INTER] ✅ Certificates formatted and ready
+[INTER] 🔧 Creating Undici agent for mTLS...
+[INTER] 🚀 Making mTLS request with Undici agent...
+[INTER] 📋 Retrieving collection: c3599570-b534-4b13-9dc4-e53e7109a163
+[INTER] 🔑 Requesting new access token...
+[INTER] 🌐 Token URL: cdpj.partners.bancointer.com.br/oauth/v2/token
+[INTER] 📄 Using form-based authentication per official docs
+[INTER] 🔓 Certificate configured: ✅ Present
+[INTER] 🔑 Private Key configured: ✅ Present
+[INTER] 📊 Client ID length: 36 chars
+[INTER] 📊 Client Secret length: 36 chars
+[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=boleto-cobranca.read boleto-cobranca.write webhook.read webhook.write
+[INTER] 📝 Form body string length: 203 chars
+[INTER] 📝 Form body preview: client_id=05fc3816-9a8f-4a2d-8b28-277cd3617cc2&client_secret=bbb82b01-2ca0-407f-a21c-0e1dff659d42&gr...
+[INTER] 🔒 Using mTLS certificate authentication
+[INTER] 🔄 Formatting certificates with proper line breaks...
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] ✅ Certificate formatted with line breaks
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] ✅ Private key formatted with line breaks
+[INTER] ✅ Certificates formatted and ready
+[INTER] 🔧 Creating Undici agent for mTLS...
+[INTER] 🚀 Making mTLS request with Undici agent...
+[INTER] 📋 Retrieving collection: 170a1d54-d276-4ccc-a297-3ce65f98f5fc
+[INTER] 🔑 Requesting new access token...
+[INTER] 🌐 Token URL: cdpj.partners.bancointer.com.br/oauth/v2/token
+[INTER] 📄 Using form-based authentication per official docs
+[INTER] 🔓 Certificate configured: ✅ Present
+[INTER] 🔑 Private Key configured: ✅ Present
+[INTER] 📊 Client ID length: 36 chars
+[INTER] 📊 Client Secret length: 36 chars
+[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=boleto-cobranca.read boleto-cobranca.write webhook.read webhook.write
+[INTER] 📝 Form body string length: 203 chars
+[INTER] 📝 Form body preview: client_id=05fc3816-9a8f-4a2d-8b28-277cd3617cc2&client_secret=bbb82b01-2ca0-407f-a21c-0e1dff659d42&gr...
+[INTER] 🔒 Using mTLS certificate authentication
+[INTER] 🔄 Formatting certificates with proper line breaks...
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] ✅ Certificate formatted with line breaks
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] ✅ Private key formatted with line breaks
+[INTER] ✅ Certificates formatted and ready
+[INTER] 🔧 Creating Undici agent for mTLS...
+[INTER] 🚀 Making mTLS request with Undici agent...
+[INTER] 📋 Retrieving collection: 07caf7d0-f986-4f3f-a71b-9704c5cb6e17
+[INTER] 🔑 Requesting new access token...
+[INTER] 🌐 Token URL: cdpj.partners.bancointer.com.br/oauth/v2/token
+[INTER] 📄 Using form-based authentication per official docs
+[INTER] 🔓 Certificate configured: ✅ Present
+[INTER] 🔑 Private Key configured: ✅ Present
+[INTER] 📊 Client ID length: 36 chars
+[INTER] 📊 Client Secret length: 36 chars
+[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=boleto-cobranca.read boleto-cobranca.write webhook.read webhook.write
+[INTER] 📝 Form body string length: 203 chars
+[INTER] 📝 Form body preview: client_id=05fc3816-9a8f-4a2d-8b28-277cd3617cc2&client_secret=bbb82b01-2ca0-407f-a21c-0e1dff659d42&gr...
+[INTER] 🔒 Using mTLS certificate authentication
+[INTER] 🔄 Formatting certificates with proper line breaks...
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] ✅ Certificate formatted with line breaks
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] ✅ Private key formatted with line breaks
+[INTER] ✅ Certificates formatted and ready
+[INTER] 🔧 Creating Undici agent for mTLS...
+[INTER] 🚀 Making mTLS request with Undici agent...
+[INTER] 📋 Retrieving collection: 29d44830-802d-4491-9d7a-b60e9cfe1ab6
+[INTER] 🔑 Requesting new access token...
+[INTER] 🌐 Token URL: cdpj.partners.bancointer.com.br/oauth/v2/token
+[INTER] 📄 Using form-based authentication per official docs
+[INTER] 🔓 Certificate configured: ✅ Present
+[INTER] 🔑 Private Key configured: ✅ Present
+[INTER] 📊 Client ID length: 36 chars
+[INTER] 📊 Client Secret length: 36 chars
+[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=boleto-cobranca.read boleto-cobranca.write webhook.read webhook.write
+[INTER] 📝 Form body string length: 203 chars
+[INTER] 📝 Form body preview: client_id=05fc3816-9a8f-4a2d-8b28-277cd3617cc2&client_secret=bbb82b01-2ca0-407f-a21c-0e1dff659d42&gr...
+[INTER] 🔒 Using mTLS certificate authentication
+[INTER] 🔄 Formatting certificates with proper line breaks...
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] ✅ Certificate formatted with line breaks
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] ✅ Private key formatted with line breaks
+[INTER] ✅ Certificates formatted and ready
+[INTER] 🔧 Creating Undici agent for mTLS...
+[INTER] 🚀 Making mTLS request with Undici agent...
+[INTER] 📋 Retrieving collection: e5ea8ee4-8e41-4606-9ba3-a20b8be99234
+[INTER] 🔑 Requesting new access token...
+[INTER] 🌐 Token URL: cdpj.partners.bancointer.com.br/oauth/v2/token
+[INTER] 📄 Using form-based authentication per official docs
+[INTER] 🔓 Certificate configured: ✅ Present
+[INTER] 🔑 Private Key configured: ✅ Present
+[INTER] 📊 Client ID length: 36 chars
+[INTER] 📊 Client Secret length: 36 chars
+[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=boleto-cobranca.read boleto-cobranca.write webhook.read webhook.write
+[INTER] 📝 Form body string length: 203 chars
+[INTER] 📝 Form body preview: client_id=05fc3816-9a8f-4a2d-8b28-277cd3617cc2&client_secret=bbb82b01-2ca0-407f-a21c-0e1dff659d42&gr...
+[INTER] 🔒 Using mTLS certificate authentication
+[INTER] 🔄 Formatting certificates with proper line breaks...
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] ✅ Certificate formatted with line breaks
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] ✅ Private key formatted with line breaks
+[INTER] ✅ Certificates formatted and ready
+[INTER] 🔧 Creating Undici agent for mTLS...
+[INTER] 🚀 Making mTLS request with Undici agent...
+[INTER] 📋 Retrieving collection: 210074a3-e28a-41a5-807a-ee3981ff0d15
+[INTER] 🔑 Requesting new access token...
+[INTER] 🌐 Token URL: cdpj.partners.bancointer.com.br/oauth/v2/token
+[INTER] 📄 Using form-based authentication per official docs
+[INTER] 🔓 Certificate configured: ✅ Present
+[INTER] 🔑 Private Key configured: ✅ Present
+[INTER] 📊 Client ID length: 36 chars
+[INTER] 📊 Client Secret length: 36 chars
+[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=boleto-cobranca.read boleto-cobranca.write webhook.read webhook.write
+[INTER] 📝 Form body string length: 203 chars
+[INTER] 📝 Form body preview: client_id=05fc3816-9a8f-4a2d-8b28-277cd3617cc2&client_secret=bbb82b01-2ca0-407f-a21c-0e1dff659d42&gr...
+[INTER] 🔒 Using mTLS certificate authentication
+[INTER] 🔄 Formatting certificates with proper line breaks...
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] ✅ Certificate formatted with line breaks
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] ✅ Private key formatted with line breaks
+[INTER] ✅ Certificates formatted and ready
+[INTER] 🔧 Creating Undici agent for mTLS...
+[INTER] 🚀 Making mTLS request with Undici agent...
+[INTER] 📋 Retrieving collection: 7438d333-e4f2-49cd-a3fc-9b66a7baaa1b
+[INTER] 🔑 Requesting new access token...
+[INTER] 🌐 Token URL: cdpj.partners.bancointer.com.br/oauth/v2/token
+[INTER] 📄 Using form-based authentication per official docs
+[INTER] 🔓 Certificate configured: ✅ Present
+[INTER] 🔑 Private Key configured: ✅ Present
+[INTER] 📊 Client ID length: 36 chars
+[INTER] 📊 Client Secret length: 36 chars
+[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=boleto-cobranca.read boleto-cobranca.write webhook.read webhook.write
+[INTER] 📝 Form body string length: 203 chars
+[INTER] 📝 Form body preview: client_id=05fc3816-9a8f-4a2d-8b28-277cd3617cc2&client_secret=bbb82b01-2ca0-407f-a21c-0e1dff659d42&gr...
+[INTER] 🔒 Using mTLS certificate authentication
+[INTER] 🔄 Formatting certificates with proper line breaks...
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] ✅ Certificate formatted with line breaks
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] ✅ Private key formatted with line breaks
+[INTER] ✅ Certificates formatted and ready
+[INTER] 🔧 Creating Undici agent for mTLS...
+[INTER] 🚀 Making mTLS request with Undici agent...
+[INTER] 📋 Retrieving collection: d5422afd-a164-4331-b5ff-29fe9ce758ee
+[INTER] 🔑 Requesting new access token...
+[INTER] 🌐 Token URL: cdpj.partners.bancointer.com.br/oauth/v2/token
+[INTER] 📄 Using form-based authentication per official docs
+[INTER] 🔓 Certificate configured: ✅ Present
+[INTER] 🔑 Private Key configured: ✅ Present
+[INTER] 📊 Client ID length: 36 chars
+[INTER] 📊 Client Secret length: 36 chars
+[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=boleto-cobranca.read boleto-cobranca.write webhook.read webhook.write
+[INTER] 📝 Form body string length: 203 chars
+[INTER] 📝 Form body preview: client_id=05fc3816-9a8f-4a2d-8b28-277cd3617cc2&client_secret=bbb82b01-2ca0-407f-a21c-0e1dff659d42&gr...
+[INTER] 🔒 Using mTLS certificate authentication
+[INTER] 🔄 Formatting certificates with proper line breaks...
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] ✅ Certificate formatted with line breaks
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] ✅ Private key formatted with line breaks
+[INTER] ✅ Certificates formatted and ready
+[INTER] 🔧 Creating Undici agent for mTLS...
+[INTER] 🚀 Making mTLS request with Undici agent...
+[INTER] 📋 Retrieving collection: 214dc1d5-59c2-4497-a3ed-b421989ef167
+[INTER] 🔑 Requesting new access token...
+[INTER] 🌐 Token URL: cdpj.partners.bancointer.com.br/oauth/v2/token
+[INTER] 📄 Using form-based authentication per official docs
+[INTER] 🔓 Certificate configured: ✅ Present
+[INTER] 🔑 Private Key configured: ✅ Present
+[INTER] 📊 Client ID length: 36 chars
+[INTER] 📊 Client Secret length: 36 chars
+[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=boleto-cobranca.read boleto-cobranca.write webhook.read webhook.write
+[INTER] 📝 Form body string length: 203 chars
+[INTER] 📝 Form body preview: client_id=05fc3816-9a8f-4a2d-8b28-277cd3617cc2&client_secret=bbb82b01-2ca0-407f-a21c-0e1dff659d42&gr...
+[INTER] 🔒 Using mTLS certificate authentication
+[INTER] 🔄 Formatting certificates with proper line breaks...
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] ✅ Certificate formatted with line breaks
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] ✅ Private key formatted with line breaks
+[INTER] ✅ Certificates formatted and ready
+[INTER] 🔧 Creating Undici agent for mTLS...
+[INTER] 🚀 Making mTLS request with Undici agent...
+[INTER] 📋 Retrieving collection: 3721fc7d-3301-44bd-8836-072a2299d570
+[INTER] 🔑 Requesting new access token...
+[INTER] 🌐 Token URL: cdpj.partners.bancointer.com.br/oauth/v2/token
+[INTER] 📄 Using form-based authentication per official docs
+[INTER] 🔓 Certificate configured: ✅ Present
+[INTER] 🔑 Private Key configured: ✅ Present
+[INTER] 📊 Client ID length: 36 chars
+[INTER] 📊 Client Secret length: 36 chars
+[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=boleto-cobranca.read boleto-cobranca.write webhook.read webhook.write
+[INTER] 📝 Form body string length: 203 chars
+[INTER] 📝 Form body preview: client_id=05fc3816-9a8f-4a2d-8b28-277cd3617cc2&client_secret=bbb82b01-2ca0-407f-a21c-0e1dff659d42&gr...
+[INTER] 🔒 Using mTLS certificate authentication
+[INTER] 🔄 Formatting certificates with proper line breaks...
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] ✅ Certificate formatted with line breaks
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] ✅ Private key formatted with line breaks
+[INTER] ✅ Certificates formatted and ready
+[INTER] 🔧 Creating Undici agent for mTLS...
+[INTER] 🚀 Making mTLS request with Undici agent...
+[INTER] 📋 Retrieving collection: 24cf3f92-ec3d-49c9-a99f-8639a759115c
+[INTER] 🔑 Requesting new access token...
+[INTER] 🌐 Token URL: cdpj.partners.bancointer.com.br/oauth/v2/token
+[INTER] 📄 Using form-based authentication per official docs
+[INTER] 🔓 Certificate configured: ✅ Present
+[INTER] 🔑 Private Key configured: ✅ Present
+[INTER] 📊 Client ID length: 36 chars
+[INTER] 📊 Client Secret length: 36 chars
+[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=boleto-cobranca.read boleto-cobranca.write webhook.read webhook.write
+[INTER] 📝 Form body string length: 203 chars
+[INTER] 📝 Form body preview: client_id=05fc3816-9a8f-4a2d-8b28-277cd3617cc2&client_secret=bbb82b01-2ca0-407f-a21c-0e1dff659d42&gr...
+[INTER] 🔒 Using mTLS certificate authentication
+[INTER] 🔄 Formatting certificates with proper line breaks...
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] ✅ Certificate formatted with line breaks
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] ✅ Private key formatted with line breaks
+[INTER] ✅ Certificates formatted and ready
+[INTER] 🔧 Creating Undici agent for mTLS...
+[INTER] 🚀 Making mTLS request with Undici agent...
+[INTER] 📋 Retrieving collection: 66715aeb-5beb-4258-82b1-db684ec91c86
+[INTER] 🔑 Requesting new access token...
+[INTER] 🌐 Token URL: cdpj.partners.bancointer.com.br/oauth/v2/token
+[INTER] 📄 Using form-based authentication per official docs
+[INTER] 🔓 Certificate configured: ✅ Present
+[INTER] 🔑 Private Key configured: ✅ Present
+[INTER] 📊 Client ID length: 36 chars
+[INTER] 📊 Client Secret length: 36 chars
+[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=boleto-cobranca.read boleto-cobranca.write webhook.read webhook.write
+[INTER] 📝 Form body string length: 203 chars
+[INTER] 📝 Form body preview: client_id=05fc3816-9a8f-4a2d-8b28-277cd3617cc2&client_secret=bbb82b01-2ca0-407f-a21c-0e1dff659d42&gr...
+[INTER] 🔒 Using mTLS certificate authentication
+[INTER] 🔄 Formatting certificates with proper line breaks...
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] ✅ Certificate formatted with line breaks
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] ✅ Private key formatted with line breaks
+[INTER] ✅ Certificates formatted and ready
+[INTER] 🔧 Creating Undici agent for mTLS...
+[INTER] 🚀 Making mTLS request with Undici agent...
+[INTER] 📋 Retrieving collection: a8599139-cfc4-4ea3-abda-b08d9836441a
+[INTER] 🔑 Requesting new access token...
+[INTER] 🌐 Token URL: cdpj.partners.bancointer.com.br/oauth/v2/token
+[INTER] 📄 Using form-based authentication per official docs
+[INTER] 🔓 Certificate configured: ✅ Present
+[INTER] 🔑 Private Key configured: ✅ Present
+[INTER] 📊 Client ID length: 36 chars
+[INTER] 📊 Client Secret length: 36 chars
+[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=boleto-cobranca.read boleto-cobranca.write webhook.read webhook.write
+[INTER] 📝 Form body string length: 203 chars
+[INTER] 📝 Form body preview: client_id=05fc3816-9a8f-4a2d-8b28-277cd3617cc2&client_secret=bbb82b01-2ca0-407f-a21c-0e1dff659d42&gr...
+[INTER] 🔒 Using mTLS certificate authentication
+[INTER] 🔄 Formatting certificates with proper line breaks...
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] ✅ Certificate formatted with line breaks
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] ✅ Private key formatted with line breaks
+[INTER] ✅ Certificates formatted and ready
+[INTER] 🔧 Creating Undici agent for mTLS...
+[INTER] 🚀 Making mTLS request with Undici agent...
+[2025-08-12T14:34:01.000-03:00] ✅ URL gerada para documento: (1776) Hans Zimmer - Interstellar (Space Sounds) - YouTube - Google Chrome 07_08_2025 13_48_06.png
+[2025-08-12T14:34:01.000-03:00] 🔍 STEP 5 - Verificando tabela_comercial_id: 16
+[2025-08-12T14:34:01.000-03:00] 🔍 STEP 5.1 - Buscando tabela comercial ID: 16
+[INTER] ❌ Fetch error: fetch failed
+[INTER] 🔄 Falling back to raw HTTPS request...
+[INTER] ❌ Fetch error: fetch failed
+[INTER] 🔄 Falling back to raw HTTPS request...
+[INTER] ❌ Fetch error: fetch failed
+[INTER] 🔄 Falling back to raw HTTPS request...
+[INTER] ❌ Fetch error: fetch failed
+[INTER] 🔄 Falling back to raw HTTPS request...
+[INTER] ❌ Fetch error: fetch failed
+[INTER] 🔄 Falling back to raw HTTPS request...
+[INTER] ❌ Fetch error: fetch failed
+[INTER] 🔄 Falling back to raw HTTPS request...
+[INTER] ❌ Fetch error: fetch failed
+[INTER] 🔄 Falling back to raw HTTPS request...
+[INTER] ❌ Fetch error: fetch failed
+[INTER] 🔄 Falling back to raw HTTPS request...
+[INTER] ❌ Fetch error: fetch failed
+[INTER] 🔄 Falling back to raw HTTPS request...
+[INTER] ❌ Fetch error: fetch failed
+[INTER] 🔄 Falling back to raw HTTPS request...
+[INTER] ❌ Fetch error: fetch failed
+[INTER] 🔄 Falling back to raw HTTPS request...
+[INTER] ❌ Fetch error: fetch failed
+[INTER] 🔄 Falling back to raw HTTPS request...
+[INTER] ❌ Fetch error: fetch failed
+[INTER] 🔄 Falling back to raw HTTPS request...
+[INTER] ❌ Fetch error: fetch failed
+[INTER] 🔄 Falling back to raw HTTPS request...
+[INTER] ❌ Fetch error: fetch failed
+[INTER] 🔄 Falling back to raw HTTPS request...
+[INTER] ❌ Fetch error: fetch failed
+[INTER] 🔄 Falling back to raw HTTPS request...
+[INTER] ❌ Fetch error: fetch failed
+[INTER] 🔄 Falling back to raw HTTPS request...
+[INTER] ❌ Fetch error: fetch failed
+[INTER] 🔄 Falling back to raw HTTPS request...
+[INTER] ❌ Fetch error: fetch failed
+[INTER] 🔄 Falling back to raw HTTPS request...
+[INTER] ❌ Fetch error: fetch failed
+[INTER] 🔄 Falling back to raw HTTPS request...
+[INTER] ❌ Fetch error: fetch failed
+[INTER] 🔄 Falling back to raw HTTPS request...
+[INTER] ❌ Fetch error: fetch failed
+[INTER] 🔄 Falling back to raw HTTPS request...
+[INTER] ❌ Fetch error: fetch failed
+[INTER] 🔄 Falling back to raw HTTPS request...
+[INTER] ❌ Fetch error: fetch failed
+[INTER] 🔄 Falling back to raw HTTPS request...
+[2025-08-12T14:34:01.000-03:00] 🔍 STEP 5.2 - Resultado da consulta tabela comercial: {
+  data: { taxa_juros: 19.7, nome_tabela: 'Flex', parceiro_id: null },
+  error: undefined,
+  hasData: true
+}
+[2025-08-12T14:34:01.000-03:00] ✅ Taxa de juros encontrada: 19.7 % da tabela "Flex"
+[2025-08-12T14:34:01.000-03:00] 🔍 STEP 6 - Processando dados JSONB...
+[2025-08-12T14:34:01.000-03:00] ✅ SUCESSO - Dados de formalização retornados para proposta 88a44696-9b63-42ee-aa81-15f9519d24cb: {
+  id: '88a44696-9b63-42ee-aa81-15f9519d24cb',
+  status: 'contratos_assinados',
+  ccbGerado: true,
+  dataAprovacao: '2025-08-11T11:44:13',
+  temClienteData: true,
+  temCondicoesData: true,
+  totalDocumentos: 1,
+  clienteNome: 'Gabriel Santana Jesus ',
+  valorEmprestimo: 20000,
+  taxaJuros: 19.7
+}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /88a44696-9b63-42ee-aa81-15f9519d24cb/ccb
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/formalizacao/acompanhamento/88a44696-9b63-42ee-aa81-15f9519d24cb
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /status/88a44696-9b63-42ee-aa81-15f9519d24cb
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/formalizacao/acompanhamento/88a44696-9b63-42ee-aa81-15f9519d24cb
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[INTER] 📡 Response status: 429
+[INTER] ❌ Error response body: 
+[INTER] ❌ Error response is not JSON
+[INTER] ❌ Failed to get access token: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 6)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER] Request failed for /cobranca/v3/cobrancas/126dffb8-a53f-40af-a7df-04b07fdbed3b: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 6)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER] ❌ Failed to retrieve collection: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 6)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER COLLECTIONS] Error fetching details for 126dffb8-a53f-40af-a7df-04b07fdbed3b: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 6)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER COLLECTIONS] ⚠️ Erro ao buscar boleto parcela 7, usando dados locais
+[INTER] 📡 Response status: 429
+[INTER] ❌ Error response body: 
+[INTER] ❌ Error response is not JSON
+[INTER] ❌ Failed to get access token: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 5)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER] Request failed for /cobranca/v3/cobrancas/fc01f610-05e5-4879-b237-dd9d63f0e4b4: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 5)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER] ❌ Failed to retrieve collection: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 5)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER COLLECTIONS] Error fetching details for fc01f610-05e5-4879-b237-dd9d63f0e4b4: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 5)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER COLLECTIONS] ⚠️ Erro ao buscar boleto parcela 6, usando dados locais
+[INTER] 📡 Response status: 200
+[INTER] ✅ Access token obtained successfully (expires in 3600s)
+[INTER] ========== REQUEST DETAILS ==========
+[INTER] 🌐 FULL URL: https://cdpj.partners.bancointer.com.br/cobranca/v3/cobrancas/585bcc53-e077-49c7-a4cd-b000698a5bfe
+[INTER] 🔧 METHOD: GET
+[INTER] 🪙 TOKEN (first 20 chars):', 212ff48d-7532-4fa5-9...
+[INTER] ===================================
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] 🏦 CONTA CORRENTE HEADER ADDED: 346470536
+[INTER] 🔑 ALL HEADERS: {
+  "Authorization": "Bearer 212ff48d-7532-4fa5-9de7-48107e61f997",
+  "Accept": "application/json",
+  "User-Agent": "SIMPIX-Inter-Integration/1.0",
+  "x-conta-corrente": "346470536"
+}
+[INTER] 📡 Response status: 200
+[INTER] ✅ Access token obtained successfully (expires in 3600s)
+[INTER] ========== REQUEST DETAILS ==========
+[INTER] 🌐 FULL URL: https://cdpj.partners.bancointer.com.br/cobranca/v3/cobrancas/6f378471-4bde-4e1e-b335-ae4a28abb060
+[INTER] 🔧 METHOD: GET
+[INTER] 🪙 TOKEN (first 20 chars):', 01345cdf-1a95-43b6-8...
+[INTER] ===================================
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] 🏦 CONTA CORRENTE HEADER ADDED: 346470536
+[INTER] 🔑 ALL HEADERS: {
+  "Authorization": "Bearer 01345cdf-1a95-43b6-86d1-e7299e4f67bf",
+  "Accept": "application/json",
+  "User-Agent": "SIMPIX-Inter-Integration/1.0",
+  "x-conta-corrente": "346470536"
+}
+[INTER] 📡 Response status: 200
+[INTER] ✅ Access token obtained successfully (expires in 3600s)
+[INTER] ========== REQUEST DETAILS ==========
+[INTER] 🌐 FULL URL: https://cdpj.partners.bancointer.com.br/cobranca/v3/cobrancas/96c8ac2f-f26d-4198-89a1-5751152d3d04
+[INTER] 🔧 METHOD: GET
+[INTER] 🪙 TOKEN (first 20 chars):', 411b6234-6f98-4587-a...
+[INTER] ===================================
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] 🏦 CONTA CORRENTE HEADER ADDED: 346470536
+[INTER] 🔑 ALL HEADERS: {
+  "Authorization": "Bearer 411b6234-6f98-4587-a48f-38db7f14dc19",
+  "Accept": "application/json",
+  "User-Agent": "SIMPIX-Inter-Integration/1.0",
+  "x-conta-corrente": "346470536"
+}
+[INTER] 📡 Response status: 429
+[INTER] ❌ Error response body: 
+[INTER] ❌ Error response is not JSON
+[INTER] ❌ Failed to get access token: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 9)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER] Request failed for /cobranca/v3/cobrancas/14d56dd6-000d-417f-92a4-dc785db66ef8: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 9)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER] ❌ Failed to retrieve collection: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 9)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER COLLECTIONS] Error fetching details for 14d56dd6-000d-417f-92a4-dc785db66ef8: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 9)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER COLLECTIONS] ⚠️ Erro ao buscar boleto parcela 10, usando dados locais
+[INTER] 📡 Response status: 429
+[INTER] ❌ Error response body: 
+[INTER] ❌ Error response is not JSON
+[INTER] ❌ Failed to get access token: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 8)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER] Request failed for /cobranca/v3/cobrancas/928adfab-f412-49aa-bbc9-8a1a7803ddd3: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 8)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER] ❌ Failed to retrieve collection: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 8)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER COLLECTIONS] Error fetching details for 928adfab-f412-49aa-bbc9-8a1a7803ddd3: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 8)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER COLLECTIONS] ⚠️ Erro ao buscar boleto parcela 9, usando dados locais
+[INTER] 📡 Response status: 429
+[INTER] ❌ Error response body: 
+[INTER] ❌ Error response is not JSON
+[INTER] ❌ Failed to get access token: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 14)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER] Request failed for /cobranca/v3/cobrancas/29d44830-802d-4491-9d7a-b60e9cfe1ab6: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 14)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER] ❌ Failed to retrieve collection: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 14)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER COLLECTIONS] Error fetching details for 29d44830-802d-4491-9d7a-b60e9cfe1ab6: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 14)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER COLLECTIONS] ⚠️ Erro ao buscar boleto parcela 15, usando dados locais
+[INTER] 📡 Response status: 200
+[INTER] ✅ Access token obtained successfully (expires in 3600s)
+[INTER] ========== REQUEST DETAILS ==========
+[INTER] 🌐 FULL URL: https://cdpj.partners.bancointer.com.br/cobranca/v3/cobrancas/957e99ca-083f-4652-8d06-bc537772ec1f
+[INTER] 🔧 METHOD: GET
+[INTER] 🪙 TOKEN (first 20 chars):', a5a7557a-e432-4409-9...
+[INTER] ===================================
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] 🏦 CONTA CORRENTE HEADER ADDED: 346470536
+[INTER] 🔑 ALL HEADERS: {
+  "Authorization": "Bearer a5a7557a-e432-4409-9c1c-549a36d665fa",
+  "Accept": "application/json",
+  "User-Agent": "SIMPIX-Inter-Integration/1.0",
+  "x-conta-corrente": "346470536"
+}
+[INTER] 📡 Response status: 429
+[INTER] ❌ Error response body: 
+[INTER] ❌ Error response is not JSON
+[INTER] ❌ Failed to get access token: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 18)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER] Request failed for /cobranca/v3/cobrancas/d5422afd-a164-4331-b5ff-29fe9ce758ee: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 18)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER] ❌ Failed to retrieve collection: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 18)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER COLLECTIONS] Error fetching details for d5422afd-a164-4331-b5ff-29fe9ce758ee: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 18)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER COLLECTIONS] ⚠️ Erro ao buscar boleto parcela 19, usando dados locais
+[INTER] 📡 Response status: 429
+[INTER] ❌ Error response body: 
+[INTER] ❌ Error response is not JSON
+[INTER] ❌ Failed to get access token: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 12)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER] Request failed for /cobranca/v3/cobrancas/170a1d54-d276-4ccc-a297-3ce65f98f5fc: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 12)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER] ❌ Failed to retrieve collection: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 12)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER COLLECTIONS] Error fetching details for 170a1d54-d276-4ccc-a297-3ce65f98f5fc: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 12)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER COLLECTIONS] ⚠️ Erro ao buscar boleto parcela 13, usando dados locais
+[INTER] 📡 Response status: 429
+[INTER] ❌ Error response body: 
+[INTER] ❌ Error response is not JSON
+[INTER] ❌ Failed to get access token: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 11)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER] Request failed for /cobranca/v3/cobrancas/c3599570-b534-4b13-9dc4-e53e7109a163: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 11)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER] ❌ Failed to retrieve collection: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 11)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER COLLECTIONS] Error fetching details for c3599570-b534-4b13-9dc4-e53e7109a163: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 11)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER COLLECTIONS] ⚠️ Erro ao buscar boleto parcela 12, usando dados locais
+[INTER] 📡 Response status: 429
+[INTER] ❌ Error response body: 
+[INTER] ❌ Error response is not JSON
+[INTER] ❌ Failed to get access token: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 13)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER] Request failed for /cobranca/v3/cobrancas/07caf7d0-f986-4f3f-a71b-9704c5cb6e17: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 13)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER] ❌ Failed to retrieve collection: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 13)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER COLLECTIONS] Error fetching details for 07caf7d0-f986-4f3f-a71b-9704c5cb6e17: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 13)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER COLLECTIONS] ⚠️ Erro ao buscar boleto parcela 14, usando dados locais
+[INTER] 📡 Response status: 429
+[INTER] ❌ Error response body: 
+[INTER] ❌ Error response is not JSON
+[INTER] ❌ Failed to get access token: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 22)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER] Request failed for /cobranca/v3/cobrancas/66715aeb-5beb-4258-82b1-db684ec91c86: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 22)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER] ❌ Failed to retrieve collection: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 22)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER COLLECTIONS] Error fetching details for 66715aeb-5beb-4258-82b1-db684ec91c86: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 22)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER COLLECTIONS] ⚠️ Erro ao buscar boleto parcela 23, usando dados locais
+[INTER] 📡 Response status: 429
+[INTER] ❌ Error response body: 
+[INTER] ❌ Error response is not JSON
+[INTER] ❌ Failed to get access token: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 7)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER] Request failed for /cobranca/v3/cobrancas/f5f7fe5a-44b8-4a43-9d7f-a864cfdc84c9: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 7)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER] ❌ Failed to retrieve collection: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 7)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER COLLECTIONS] Error fetching details for f5f7fe5a-44b8-4a43-9d7f-a864cfdc84c9: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 7)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER COLLECTIONS] ⚠️ Erro ao buscar boleto parcela 8, usando dados locais
+[INTER] 📡 Response status: 200
+[INTER] ✅ Access token obtained successfully (expires in 3600s)
+[INTER] ========== REQUEST DETAILS ==========
+[INTER] 🌐 FULL URL: https://cdpj.partners.bancointer.com.br/cobranca/v3/cobrancas/73e76cfe-f8f8-4638-ac83-d8e809e06eef
+[INTER] 🔧 METHOD: GET
+[INTER] 🪙 TOKEN (first 20 chars):', e40227c1-4e96-408d-a...
+[INTER] ===================================
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] 🏦 CONTA CORRENTE HEADER ADDED: 346470536
+[INTER] 🔑 ALL HEADERS: {
+  "Authorization": "Bearer e40227c1-4e96-408d-a9fd-47c8abbe4066",
+  "Accept": "application/json",
+  "User-Agent": "SIMPIX-Inter-Integration/1.0",
+  "x-conta-corrente": "346470536"
+}
+[INTER] 📡 Response status: 429
+[INTER] ❌ Error response body: 
+[INTER] ❌ Error response is not JSON
+[INTER] ❌ Failed to get access token: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 20)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER] Request failed for /cobranca/v3/cobrancas/3721fc7d-3301-44bd-8836-072a2299d570: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 20)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER] ❌ Failed to retrieve collection: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 20)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER COLLECTIONS] Error fetching details for 3721fc7d-3301-44bd-8836-072a2299d570: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 20)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER COLLECTIONS] ⚠️ Erro ao buscar boleto parcela 21, usando dados locais
+[INTER] 📡 Response status: 429
+[INTER] ❌ Error response body: 
+[INTER] ❌ Error response is not JSON
+[INTER] ❌ Failed to get access token: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 15)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER] Request failed for /cobranca/v3/cobrancas/e5ea8ee4-8e41-4606-9ba3-a20b8be99234: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 15)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER] ❌ Failed to retrieve collection: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 15)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER COLLECTIONS] Error fetching details for e5ea8ee4-8e41-4606-9ba3-a20b8be99234: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 15)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER COLLECTIONS] ⚠️ Erro ao buscar boleto parcela 16, usando dados locais
+[INTER] 📡 Response status: 429
+[INTER] ❌ Error response body: 
+[INTER] ❌ Error response is not JSON
+[INTER] ❌ Failed to get access token: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 19)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER] Request failed for /cobranca/v3/cobrancas/214dc1d5-59c2-4497-a3ed-b421989ef167: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 19)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER] ❌ Failed to retrieve collection: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 19)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER COLLECTIONS] Error fetching details for 214dc1d5-59c2-4497-a3ed-b421989ef167: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 19)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER COLLECTIONS] ⚠️ Erro ao buscar boleto parcela 20, usando dados locais
+[INTER] 📡 Response status: 429
+[INTER] ❌ Error response body: 
+[INTER] ❌ Error response is not JSON
+[INTER] ❌ Failed to get access token: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 16)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER] Request failed for /cobranca/v3/cobrancas/210074a3-e28a-41a5-807a-ee3981ff0d15: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 16)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER] ❌ Failed to retrieve collection: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 16)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER COLLECTIONS] Error fetching details for 210074a3-e28a-41a5-807a-ee3981ff0d15: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 16)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER COLLECTIONS] ⚠️ Erro ao buscar boleto parcela 17, usando dados locais
+[INTER] 📡 Response status: 429
+[INTER] ❌ Error response body: 
+[INTER] ❌ Error response is not JSON
+[INTER] ❌ Failed to get access token: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 10)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER] Request failed for /cobranca/v3/cobrancas/4f3c1f03-222a-46e3-bafd-0c9d6c9cad02: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 10)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER] ❌ Failed to retrieve collection: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 10)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER COLLECTIONS] Error fetching details for 4f3c1f03-222a-46e3-bafd-0c9d6c9cad02: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 10)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER COLLECTIONS] ⚠️ Erro ao buscar boleto parcela 11, usando dados locais
+[INTER] 📡 Response status: 429
+[INTER] ❌ Error response body: 
+[INTER] ❌ Error response is not JSON
+[INTER] ❌ Failed to get access token: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 17)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER] Request failed for /cobranca/v3/cobrancas/7438d333-e4f2-49cd-a3fc-9b66a7baaa1b: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 17)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER] ❌ Failed to retrieve collection: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 17)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER COLLECTIONS] Error fetching details for 7438d333-e4f2-49cd-a3fc-9b66a7baaa1b: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 17)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER COLLECTIONS] ⚠️ Erro ao buscar boleto parcela 18, usando dados locais
+[INTER] 📡 Response status: 429
+[INTER] ❌ Error response body: 
+[INTER] ❌ Error response is not JSON
+[INTER] ❌ Failed to get access token: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 23)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER] Request failed for /cobranca/v3/cobrancas/a8599139-cfc4-4ea3-abda-b08d9836441a: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 23)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER] ❌ Failed to retrieve collection: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 23)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER COLLECTIONS] Error fetching details for a8599139-cfc4-4ea3-abda-b08d9836441a: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 23)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER COLLECTIONS] ⚠️ Erro ao buscar boleto parcela 24, usando dados locais
+[INTER] 📡 Response status: 429
+[INTER] ❌ Error response body: 
+[INTER] ❌ Error response is not JSON
+[INTER] ❌ Failed to get access token: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 21)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER] Request failed for /cobranca/v3/cobrancas/24cf3f92-ec3d-49c9-a99f-8639a759115c: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 21)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER] ❌ Failed to retrieve collection: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 21)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER COLLECTIONS] Error fetching details for 24cf3f92-ec3d-49c9-a99f-8639a759115c: Error: Token request failed: 429 - 
+    at InterBankService.getAccessToken (/home/runner/workspace/server/services/interBankService.ts:388:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:420:21)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:672:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:43:31)
+    at async Promise.all (index 21)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:40:36)
+[INTER COLLECTIONS] ⚠️ Erro ao buscar boleto parcela 22, usando dados locais
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-12T17:34:02.576Z'
+}
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-12T17:34:02.620Z'
+}
+[INTER] ========== RESPONSE DETAILS ==========
+[INTER] 📊 STATUS: 200 OK
+[INTER] 📋 RESPONSE HEADERS: {
+  'content-length': '974',
+  'content-type': 'application/json',
+  date: 'Tue, 12 Aug 2025 17:34:02 GMT',
+  server: 'istio-envoy',
+  'strict-transport-security': 'max-age=31536000; includeSubDomains',
+  traceparent: '00-c5963105a8e94d31d7318ed06c034d42-961acf8899054602-00',
+  'x-envoy-upstream-service-time': '61',
+  'x-rate-limit-remaining': '119',
+  'x-rate-limit-time': '1755020102810',
+  'x-upstream-time': '66'
+}
+[INTER] 🔍 Response Content-Type: application/json
+[INTER] 🔍 Is PDF Response: false
+[INTER] 📦 Response buffer size: 974 bytes
+[INTER] ✅ Response OK
+[INTER] =====================================
+[INTER] 📊 Collection data: {
+  "cobranca": {
+    "codigoSolicitacao": "6f378471-4bde-4e1e-b335-ae4a28abb060",
+    "seuNumero": "SX68087-3",
+    "dataEmissao": "2025-08-12",
+    "dataVencimento": "2025-11-10",
+    "valorNominal": 833.33,
+    "tipoCobranca": "SIMPLES",
+    "situacao": "A_RECEBER",
+    "dataSituacao": "2025-08-12",
+    "arquivada": false,
+    "descontos": [],
+    "pagador": {
+      "cpfCnpj": "20528464760",
+      "tipoPessoa": "FISICA",
+      "nome": "GABRIEL DE JESUS SANTANA SERRI",
+      "endereco": "RUA MIGUEL ANGELO",
+      "bairro": "CENTRO",
+      "cidade": "SERRA",
+      "uf": "ES",
+      "cep": "29165460",
+      "email": "",
+      "ddd": "",
+      "telefone": "",
+      "numero": "100",
+      "complemento": ""
+    }
+  },
+  "boleto": {
+    "nossoNumero": "90398347594",
+    "codigoBarras": "07793126100000833330001112134234790398347594",
+    "linhaDigitavel": "07790001161213423479303983475942312610000083333"
+  },
+  "pix": {
+    "txid": "3464705361755009068000WBbu2BZWiRHRs",
+    "pixCopiaECola": "00020101021226980014BR.GOV.BCB.PIX2576spi-qrcode.bancointer.com.br/spi/pj/v2/cobv/8bd7d0fe0c4a42cabe0f39145da173bd5204000053039865406833.335802BR5901*6007VITORIA61082901819062070503***63046427"
+  }
+}
+[INTER] ⚠️ QR Code generation not implemented yet
+[INTER] ✅ Collection retrieved and enriched successfully
+[INTER] 📊 Linha digitável: 07790001161213423479303983475942312610000083333
+[INTER] 📊 Código de barras: 07793126100000833330001112134234790398347594
+[INTER] 📊 PIX disponível: Sim
+[INTER] ========== RESPONSE DETAILS ==========
+[INTER] 📊 STATUS: 200 OK
+[INTER] 📋 RESPONSE HEADERS: {
+  'content-length': '974',
+  'content-type': 'application/json',
+  date: 'Tue, 12 Aug 2025 17:34:02 GMT',
+  server: 'istio-envoy',
+  'strict-transport-security': 'max-age=31536000; includeSubDomains',
+  traceparent: '00-eb9974d5f3931450a3a3485a3172a75c-233bc15ebd5476e0-00',
+  'x-envoy-upstream-service-time': '59',
+  'x-rate-limit-remaining': '119',
+  'x-rate-limit-time': '1755020102813',
+  'x-upstream-time': '62'
+}
+[INTER] 🔍 Response Content-Type: application/json
+[INTER] 🔍 Is PDF Response: false
+[INTER] 📦 Response buffer size: 974 bytes
+[INTER] ✅ Response OK
+[INTER] =====================================
+[INTER] 📊 Collection data: {
+  "cobranca": {
+    "codigoSolicitacao": "585bcc53-e077-49c7-a4cd-b000698a5bfe",
+    "seuNumero": "SX67165-2",
+    "dataEmissao": "2025-08-12",
+    "dataVencimento": "2025-10-11",
+    "valorNominal": 833.33,
+    "tipoCobranca": "SIMPLES",
+    "situacao": "A_RECEBER",
+    "dataSituacao": "2025-08-12",
+    "arquivada": false,
+    "descontos": [],
+    "pagador": {
+      "cpfCnpj": "20528464760",
+      "tipoPessoa": "FISICA",
+      "nome": "GABRIEL DE JESUS SANTANA SERRI",
+      "endereco": "RUA MIGUEL ANGELO",
+      "bairro": "CENTRO",
+      "cidade": "SERRA",
+      "uf": "ES",
+      "cep": "29165460",
+      "email": "",
+      "ddd": "",
+      "telefone": "",
+      "numero": "100",
+      "complemento": ""
+    }
+  },
+  "boleto": {
+    "nossoNumero": "90398347552",
+    "codigoBarras": "07794123100000833330001112134234790398347552",
+    "linhaDigitavel": "07790001161213423479303983475520412310000083333"
+  },
+  "pix": {
+    "txid": "3464705361755009067000AQbt8rakTAtAT",
+    "pixCopiaECola": "00020101021226980014BR.GOV.BCB.PIX2576spi-qrcode.bancointer.com.br/spi/pj/v2/cobv/de13214ae3604f499a9604b09889970c5204000053039865406833.335802BR5901*6007VITORIA61082901819062070503***63041F51"
+  }
+}
+[INTER] ⚠️ QR Code generation not implemented yet
+[INTER] ✅ Collection retrieved and enriched successfully
+[INTER] 📊 Linha digitável: 07790001161213423479303983475520412310000083333
+[INTER] 📊 Código de barras: 07794123100000833330001112134234790398347552
+[INTER] 📊 PIX disponível: Sim
+[INTER] ========== RESPONSE DETAILS ==========
+[INTER] 📊 STATUS: 200 OK
+[INTER] 📋 RESPONSE HEADERS: {
+  'content-length': '974',
+  'content-type': 'application/json',
+  date: 'Tue, 12 Aug 2025 17:34:02 GMT',
+  server: 'istio-envoy',
+  'strict-transport-security': 'max-age=31536000; includeSubDomains',
+  traceparent: '00-40ac73fe323b0e798bbded58e7cc5864-1b9fc7a8d6d9bda1-00',
+  'x-envoy-upstream-service-time': '63',
+  'x-rate-limit-remaining': '119',
+  'x-rate-limit-time': '1755020102813',
+  'x-upstream-time': '66'
+}
+[INTER] 🔍 Response Content-Type: application/json
+[INTER] 🔍 Is PDF Response: false
+[INTER] 📦 Response buffer size: 974 bytes
+[INTER] ✅ Response OK
+[INTER] =====================================
+[INTER] 📊 Collection data: {
+  "cobranca": {
+    "codigoSolicitacao": "96c8ac2f-f26d-4198-89a1-5751152d3d04",
+    "seuNumero": "SX68997-4",
+    "dataEmissao": "2025-08-12",
+    "dataVencimento": "2025-12-10",
+    "valorNominal": 833.33,
+    "tipoCobranca": "SIMPLES",
+    "situacao": "A_RECEBER",
+    "dataSituacao": "2025-08-12",
+    "arquivada": false,
+    "descontos": [],
+    "pagador": {
+      "cpfCnpj": "20528464760",
+      "tipoPessoa": "FISICA",
+      "nome": "GABRIEL DE JESUS SANTANA SERRI",
+      "endereco": "RUA MIGUEL ANGELO",
+      "bairro": "CENTRO",
+      "cidade": "SERRA",
+      "uf": "ES",
+      "cep": "29165460",
+      "email": "",
+      "ddd": "",
+      "telefone": "",
+      "numero": "100",
+      "complemento": ""
+    }
+  },
+  "boleto": {
+    "nossoNumero": "90398347644",
+    "codigoBarras": "07797129100000833330001112134234790398347644",
+    "linhaDigitavel": "07790001161213423479303983476445712910000083333"
+  },
+  "pix": {
+    "txid": "3464705361755009069000HzHZjMi3wBWKH",
+    "pixCopiaECola": "00020101021226980014BR.GOV.BCB.PIX2576spi-qrcode.bancointer.com.br/spi/pj/v2/cobv/488648fbb82d4513ae1c593011beede85204000053039865406833.335802BR5901*6007VITORIA61082901819062070503***6304418A"
+  }
+}
+[INTER] ⚠️ QR Code generation not implemented yet
+[INTER] ✅ Collection retrieved and enriched successfully
+[INTER] 📊 Linha digitável: 07790001161213423479303983476445712910000083333
+[INTER] 📊 Código de barras: 07797129100000833330001112134234790398347644
+[INTER] 📊 PIX disponível: Sim
+[INTER] ========== RESPONSE DETAILS ==========
+[INTER] 📊 STATUS: 200 OK
+[INTER] 📋 RESPONSE HEADERS: {
+  'content-length': '974',
+  'content-type': 'application/json',
+  date: 'Tue, 12 Aug 2025 17:34:02 GMT',
+  server: 'istio-envoy',
+  'strict-transport-security': 'max-age=31536000; includeSubDomains',
+  traceparent: '00-343b6dc76f6afea8357b5bc23ece701a-d1c5a9765649c891-00',
+  'x-envoy-upstream-service-time': '51',
+  'x-rate-limit-remaining': '119',
+  'x-rate-limit-time': '1755020102815',
+  'x-upstream-time': '72'
+}
+[INTER] 🔍 Response Content-Type: application/json
+[INTER] 🔍 Is PDF Response: false
+[INTER] 📦 Response buffer size: 974 bytes
+[INTER] ✅ Response OK
+[INTER] =====================================
+[INTER] 📊 Collection data: {
+  "cobranca": {
+    "codigoSolicitacao": "957e99ca-083f-4652-8d06-bc537772ec1f",
+    "seuNumero": "SX69889-5",
+    "dataEmissao": "2025-08-12",
+    "dataVencimento": "2026-01-09",
+    "valorNominal": 833.33,
+    "tipoCobranca": "SIMPLES",
+    "situacao": "A_RECEBER",
+    "dataSituacao": "2025-08-12",
+    "arquivada": false,
+    "descontos": [],
+    "pagador": {
+      "cpfCnpj": "20528464760",
+      "tipoPessoa": "FISICA",
+      "nome": "GABRIEL DE JESUS SANTANA SERRI",
+      "endereco": "RUA MIGUEL ANGELO",
+      "bairro": "CENTRO",
+      "cidade": "SERRA",
+      "uf": "ES",
+      "cep": "29165460",
+      "email": "",
+      "ddd": "",
+      "telefone": "",
+      "numero": "100",
+      "complemento": ""
+    }
+  },
+  "boleto": {
+    "nossoNumero": "90398347651",
+    "codigoBarras": "07791132100000833330001112134234790398347651",
+    "linhaDigitavel": "07790001161213423479303983476510113210000083333"
+  },
+  "pix": {
+    "txid": "3464705361755009070000hRxAP6Vj76BRe",
+    "pixCopiaECola": "00020101021226980014BR.GOV.BCB.PIX2576spi-qrcode.bancointer.com.br/spi/pj/v2/cobv/dccce7772f2246f8996b3eaabcbbb7e55204000053039865406833.335802BR5901*6007VITORIA61082901819062070503***63042E2F"
+  }
+}
+[INTER] ⚠️ QR Code generation not implemented yet
+[INTER] ✅ Collection retrieved and enriched successfully
+[INTER] 📊 Linha digitável: 07790001161213423479303983476510113210000083333
+[INTER] 📊 Código de barras: 07791132100000833330001112134234790398347651
+[INTER] 📊 PIX disponível: Sim
+[INTER] ========== RESPONSE DETAILS ==========
+[INTER] 📊 STATUS: 200 OK
+[INTER] 📋 RESPONSE HEADERS: {
+  'content-length': '974',
+  'content-type': 'application/json',
+  date: 'Tue, 12 Aug 2025 17:34:02 GMT',
+  server: 'istio-envoy',
+  'strict-transport-security': 'max-age=31536000; includeSubDomains',
+  traceparent: '00-a0610be11ff3ac7f2c8268bc6aa9b3c8-692e2fc39ec7b83f-00',
+  'x-envoy-upstream-service-time': '64',
+  'x-rate-limit-remaining': '119',
+  'x-rate-limit-time': '1755020102823',
+  'x-upstream-time': '67'
+}
+[INTER] 🔍 Response Content-Type: application/json
+[INTER] 🔍 Is PDF Response: false
+[INTER] 📦 Response buffer size: 974 bytes
+[INTER] ✅ Response OK
+[INTER] =====================================
+[INTER] 📊 Collection data: {
+  "cobranca": {
+    "codigoSolicitacao": "73e76cfe-f8f8-4638-ac83-d8e809e06eef",
+    "seuNumero": "SX65500-1",
+    "dataEmissao": "2025-08-12",
+    "dataVencimento": "2025-09-11",
+    "valorNominal": 833.33,
+    "tipoCobranca": "SIMPLES",
+    "situacao": "A_RECEBER",
+    "dataSituacao": "2025-08-12",
+    "arquivada": false,
+    "descontos": [],
+    "pagador": {
+      "cpfCnpj": "20528464760",
+      "tipoPessoa": "FISICA",
+      "nome": "GABRIEL DE JESUS SANTANA SERRI",
+      "endereco": "RUA MIGUEL ANGELO",
+      "bairro": "CENTRO",
+      "cidade": "SERRA",
+      "uf": "ES",
+      "cep": "29165460",
+      "email": "",
+      "ddd": "",
+      "telefone": "",
+      "numero": "100",
+      "complemento": ""
+    }
+  },
+  "boleto": {
+    "nossoNumero": "90398347529",
+    "codigoBarras": "07796120100000833330001112134234790398347529",
+    "linhaDigitavel": "07790001161213423479303983475298612010000083333"
+  },
+  "pix": {
+    "txid": "3464705361755009066000qnQtMuJEEgumF",
+    "pixCopiaECola": "00020101021226980014BR.GOV.BCB.PIX2576spi-qrcode.bancointer.com.br/spi/pj/v2/cobv/ca98248abf0b4cd8abd60b0f8983f7675204000053039865406833.335802BR5901*6007VITORIA61082901819062070503***63047D98"
+  }
+}
+[INTER] ⚠️ QR Code generation not implemented yet
+[INTER] ✅ Collection retrieved and enriched successfully
+[INTER] 📊 Linha digitável: 07790001161213423479303983475298612010000083333
+[INTER] 📊 Código de barras: 07796120100000833330001112134234790398347529
+[INTER] 📊 PIX disponível: Sim
+[DEBUG] Gerando URL assinada para: proposta-88a44696-9b63-42ee-aa81-15f9519d24cb/1754923128364-(1776)%20Hans%20Zimmer%20-%20Interstellar%20(Space%20Sounds)%20-%20YouTube%20-%20Google%20Chrome%2007_08_2025%2013_48_06.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV80OTVlMjJjYS1lMDMxLTQ0Y2YtOTM3Zi03N2M3ZWNiMTk2YzkiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJkb2N1bWVudHMvcHJvcG9zdGEtODhhNDQ2OTYtOWI2My00MmVlLWFhODEtMTVmOTUxOWQyNGNiLzE3NTQ5MjMxMjgzNjQtKDE3NzYpIEhhbnMgWmltbWVyIC0gSW50ZXJzdGVsbGFyIChTcGFjZSBTb3VuZHMpIC0gWW91VHViZSAtIEdvb2dsZSBDaHJvbWUgMDdfMDhfMjAyNSAxM180OF8wNi5wbmciLCJpYXQiOjE3NTQ5MjMxMzMsImV4cCI6MTc1NDkyNjczM30.SSLBc2_xbNhF7MV_kMuYXeQIcP-d137-umbhy12meI4
+[INTER COLLECTIONS] Found 24 collections for proposal 88a44696-9b63-42ee-aa81-15f9519d24cb

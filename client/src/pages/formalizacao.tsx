@@ -1607,30 +1607,12 @@ export default function Formalizacao() {
                                                     } catch (error: any) {
                                                       console.error("[PDF DOWNLOAD] Erro:", error);
                                                       
-                                                      // Se falhar, copiar código de barras como fallback
-                                                      if (boleto.codigoBarras || boleto.linhaDigitavel) {
-                                                        try {
-                                                          const codigo = boleto.linhaDigitavel || boleto.codigoBarras;
-                                                          await navigator.clipboard.writeText(codigo);
-                                                          toast({
-                                                            title: "PDF indisponível - Código copiado",
-                                                            description: "Use no internet banking ou PIX para pagar.",
-                                                            variant: "default",
-                                                          });
-                                                        } catch {
-                                                          toast({
-                                                            title: "PDF indisponível",
-                                                            description: "Use o QR Code PIX ou linha digitável acima para pagar.",
-                                                            variant: "destructive",
-                                                          });
-                                                        }
-                                                      } else {
-                                                        toast({
-                                                          title: "PDF indisponível",
-                                                          description: "Use o QR Code PIX acima para pagar.",
-                                                          variant: "destructive",
-                                                        });
-                                                      }
+                                                      // SEMPRE informar que o PDF está disponível e pode tentar novamente
+                                                      toast({
+                                                        title: "Erro temporário ao baixar PDF",
+                                                        description: "Por favor, tente novamente em alguns segundos. O PDF está disponível.",
+                                                        variant: "destructive",
+                                                      });
                                                     }
                                                   }}
                                                   className="border-blue-600 text-blue-400 hover:bg-blue-600/10"
@@ -1643,38 +1625,11 @@ export default function Formalizacao() {
                                           ))}
                                         </div>
                                       ) : (
-                                        (interBoletoData?.codigoSolicitacao ||
-                                          proposta.interCodigoSolicitacao) && (
-                                          <div className="rounded border border-gray-700 bg-gray-800 p-3">
-                                            <p className="mb-1 text-sm text-gray-400">
-                                              Código do Boleto:
-                                            </p>
-                                            <div className="flex items-center gap-2">
-                                              <code className="flex-1 font-mono text-orange-400">
-                                                {interBoletoData?.codigoSolicitacao ||
-                                                  proposta.interCodigoSolicitacao}
-                                              </code>
-                                              <Button
-                                                size="sm"
-                                                variant="ghost"
-                                                onClick={() => {
-                                                  const codigo =
-                                                    interBoletoData?.codigoSolicitacao ||
-                                                    proposta.interCodigoSolicitacao ||
-                                                    "";
-                                                  navigator.clipboard.writeText(codigo);
-                                                  toast({
-                                                    title: "Copiado!",
-                                                    description:
-                                                      "Código do boleto copiado para a área de transferência",
-                                                  });
-                                                }}
-                                              >
-                                                <Copy className="h-3 w-3" />
-                                              </Button>
-                                            </div>
-                                          </div>
-                                        )
+                                        <div className="rounded border border-gray-700 bg-gray-800 p-3">
+                                          <p className="text-sm text-gray-400">
+                                            Aguardando processamento dos boletos...
+                                          </p>
+                                        </div>
                                       )}
 
                                       <div className="grid grid-cols-3 gap-3">
@@ -1688,11 +1643,11 @@ export default function Formalizacao() {
                                               const { apiRequest } = await import("@/lib/queryClient");
                                               const response = await apiRequest(`/api/inter/realtime-update/${proposta.id}`, {
                                                 method: "POST",
-                                              });
+                                              }) as { updated: number; removed: number; message?: string };
 
                                               if (response.updated > 0 || response.removed > 0) {
-                                                // Recarregar dados após atualização
-                                                refetchCollections();
+                                                // Recarregar a página para mostrar os dados atualizados
+                                                window.location.reload();
                                                 
                                                 toast({
                                                   title: "Status atualizado!",

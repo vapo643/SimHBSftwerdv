@@ -1,37 +1,62 @@
 #!/usr/bin/env node
 /**
- * SCRIPT DE CORREÇÃO EMERGENCIAL
- * Cria boletos REAIS no Banco Inter para substituir códigos inválidos
+ * SCRIPT PARA ATUALIZAR DADOS COMPLETOS DOS BOLETOS
+ * Busca linha digitável, código de barras e PIX para todos os boletos
  */
 
 const https = require('https');
-const fs = require('fs');
 const { Client } = require('pg');
 
-// Configuração do banco de dados
 const DATABASE_URL = process.env.DATABASE_URL;
 const INTER_CLIENT_ID = process.env.INTER_CLIENT_ID;
 const INTER_CLIENT_SECRET = process.env.INTER_CLIENT_SECRET;
 const INTER_CERTIFICATE = process.env.INTER_CERTIFICATE;
 const INTER_PRIVATE_KEY = process.env.INTER_PRIVATE_KEY;
-const INTER_CONTA_CORRENTE = process.env.INTER_CONTA_CORRENTE || "346470536";
 
-console.log('🚀 SCRIPT DE CORREÇÃO DE BOLETOS INTER');
+console.log('🔧 ATUALIZAÇÃO DE DADOS DOS BOLETOS');
 console.log('=====================================\n');
 
-// Função para obter token OAuth do Inter
-async function getInterToken() {
+// Função para formatar certificado PEM
+function formatPemCertificate(cert) {
+  if (cert.includes('\n')) return cert;
+  
+  const certMatch = cert.match(/-----BEGIN CERTIFICATE-----(.+)-----END CERTIFICATE-----/);
+  if (certMatch) {
+    const certBody = certMatch[1].trim();
+    const formattedBody = certBody.match(/.{1,64}/g).join('\n');
+    return `-----BEGIN CERTIFICATE-----\n${formattedBody}\n-----END CERTIFICATE-----`;
+  }
+  return cert;
+}
+
+// Função para formatar chave privada PEM
+function formatPemPrivateKey(key) {
+  if (key.includes('\n')) return key;
+  
+  let keyMatch = key.match(/-----BEGIN PRIVATE KEY-----(.+)-----END PRIVATE KEY-----/);
+  if (keyMatch) {
+    const keyBody = keyMatch[1].trim();
+    const formattedBody = keyBody.match(/.{1,64}/g).join('\n');
+    return `-----BEGIN PRIVATE KEY-----\n${formattedBody}\n-----END PRIVATE KEY-----`;
+  }
+  
+  keyMatch = key.match(/-----BEGIN RSA PRIVATE KEY-----(.+)-----END RSA PRIVATE KEY-----/);
+  if (keyMatch) {
+    const keyBody = keyMatch[1].trim();
+    const formattedBody = keyBody.match(/.{1,64}/g).join('\n');
+    return `-----BEGIN RSA PRIVATE KEY-----\n${formattedBody}\n-----END RSA PRIVATE KEY-----`;
+  }
+  
+  return key;
+}
+
+const cert = formatPemCertificate(INTER_CERTIFICATE);
+const key = formatPemPrivateKey(INTER_PRIVATE_KEY);
+
+// Obter token OAuth
+async function getAccessToken() {
   return new Promise((resolve, reject) => {
-    console.log('🔑 Obtendo token de acesso do Inter...');
-    
-    // Preparar certificado
-    const cert = INTER_CERTIFICATE.replace(/\\n/g, '\n');
-    const key = INTER_PRIVATE_KEY.replace(/\\n/g, '\n');
-    
-    const postData = 'client_id=' + INTER_CLIENT_ID +
-                    '&client_secret=' + INTER_CLIENT_SECRET +
-                    '&grant_type=client_credentials' +
-                    '&scope=cob.read cob.write';
+    const formBody = `client_id=${INTER_CLIENT_ID}&client_secret=${INTER_CLIENT_SECRET}&grant_type=client_credentials&scope=boleto-cobranca.read boleto-cobranca.write`;
     
     const options = {
       hostname: 'cdpj.partners.bancointer.com.br',
@@ -40,7 +65,7 @@ async function getInterToken() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        'Content-Length': Buffer.byteLength(postData)
+        'Content-Length': Buffer.byteLength(formBody)
       },
       cert: cert,
       key: key,
@@ -54,10 +79,9 @@ async function getInterToken() {
         try {
           const result = JSON.parse(data);
           if (result.access_token) {
-            console.log('✅ Token obtido com sucesso!\n');
             resolve(result.access_token);
           } else {
-            reject(new Error('Token não retornado: ' + data));
+            reject(new Error('Token não retornado'));
           }
         } catch (e) {
           reject(e);
@@ -66,29 +90,22 @@ async function getInterToken() {
     });
     
     req.on('error', reject);
-    req.write(postData);
+    req.write(formBody);
     req.end();
   });
 }
 
-// Função para criar boleto no Inter
-async function criarBoletoInter(token, dadosBoleto) {
+// Buscar detalhes do boleto
+async function buscarDetalhesBoleto(token, codigoSolicitacao) {
   return new Promise((resolve, reject) => {
-    const cert = INTER_CERTIFICATE.replace(/\\n/g, '\n');
-    const key = INTER_PRIVATE_KEY.replace(/\\n/g, '\n');
-    
-    const postData = JSON.stringify(dadosBoleto);
-    
     const options = {
       hostname: 'cdpj.partners.bancointer.com.br',
       port: 443,
-      path: '/cobranca/v3/cobrancas',
-      method: 'POST',
+      path: `/cobranca/v3/cobrancas/${codigoSolicitacao}`,
+      method: 'GET',
       headers: {
         'Authorization': 'Bearer ' + token,
-        'Content-Type': 'application/json',
-        'Content-Length': Buffer.byteLength(postData),
-        'x-conta-corrente': INTER_CONTA_CORRENTE
+        'Content-Type': 'application/json'
       },
       cert: cert,
       key: key,
@@ -101,155 +118,114 @@ async function criarBoletoInter(token, dadosBoleto) {
       res.on('end', () => {
         try {
           const result = JSON.parse(data);
-          if (res.statusCode === 200 || res.statusCode === 201) {
+          if (res.statusCode === 200) {
             resolve(result);
           } else {
-            reject(new Error(`Erro ${res.statusCode}: ${data}`));
+            console.error(`Erro ao buscar boleto ${codigoSolicitacao}:`, result);
+            resolve(null);
           }
         } catch (e) {
-          reject(e);
+          resolve(null);
         }
       });
     });
     
-    req.on('error', reject);
-    req.write(postData);
+    req.on('error', () => resolve(null));
     req.end();
   });
 }
 
 // Função principal
-async function corrigirBoletos() {
+async function atualizarTodosBoletos() {
   const client = new Client({ 
     connectionString: DATABASE_URL,
     ssl: { rejectUnauthorized: false }
   });
   
   try {
+    console.log('🔑 Obtendo token de acesso...');
+    const token = await getAccessToken();
+    console.log('✅ Token obtido\n');
+    
     await client.connect();
     console.log('✅ Conectado ao banco de dados\n');
     
-    // Buscar boletos com códigos inválidos
+    // Buscar todos os boletos
     const query = `
-      SELECT id, numero_parcela, total_parcelas, valor_nominal, codigo_solicitacao, seu_numero
+      SELECT id, numero_parcela, codigo_solicitacao
       FROM inter_collections 
       WHERE proposta_id = '88a44696-9b63-42ee-aa81-15f9519d24cb'
         AND is_active = true
+        AND codigo_solicitacao IS NOT NULL
       ORDER BY numero_parcela
     `;
     
     const result = await client.query(query);
-    console.log(`📋 Encontrados ${result.rows.length} boletos para corrigir\n`);
+    console.log(`📋 ${result.rows.length} boletos para atualizar\n`);
     
-    // Obter token do Inter
-    const token = await getInterToken();
+    let atualizados = 0;
     
-    let successCount = 0;
-    let failCount = 0;
-    
-    // Processar cada boleto
     for (const boleto of result.rows) {
-      try {
-        console.log(`\n🔄 Processando parcela ${boleto.numero_parcela}/${boleto.total_parcelas}`);
-        console.log(`   Código antigo: ${boleto.codigo_solicitacao}`);
+      console.log(`\n📝 Parcela ${boleto.numero_parcela}: ${boleto.codigo_solicitacao}`);
+      
+      const detalhes = await buscarDetalhesBoleto(token, boleto.codigo_solicitacao);
+      
+      if (detalhes) {
+        // Extrair dados importantes
+        const linhaDigitavel = detalhes.boleto?.linhaDigitavel || '';
+        const codigoBarras = detalhes.boleto?.codigoBarras || '';
+        const nossoNumero = detalhes.boleto?.nossoNumero || '';
+        const pixCopiaECola = detalhes.pix?.pixCopiaECola || '';
+        const txid = detalhes.pix?.txid || '';
         
-        // Calcular data de vencimento
-        const hoje = new Date();
-        const vencimento = new Date(hoje);
-        vencimento.setDate(hoje.getDate() + (boleto.numero_parcela * 30));
+        console.log(`  ✓ Linha digitável: ${linhaDigitavel ? 'SIM' : 'NÃO'}`);
+        console.log(`  ✓ Código de barras: ${codigoBarras ? 'SIM' : 'NÃO'}`);
+        console.log(`  ✓ PIX: ${pixCopiaECola ? 'SIM' : 'NÃO'}`);
         
-        // Dados do boleto
-        const dadosBoleto = {
-          seuNumero: boleto.seu_numero || `PROP-${Date.now()}-${boleto.numero_parcela}`,
-          valorNominal: parseFloat(boleto.valor_nominal),
-          dataVencimento: vencimento.toISOString().split('T')[0],
-          numDiasAgenda: 30,
-          pagador: {
-            cpfCnpj: "20528464760",
-            tipoPessoa: "FISICA",
-            nome: "GABRIEL DE JESUS SANTANA SERRI",
-            endereco: "RUA MIGUEL ANGELO",
-            numero: "100",
-            bairro: "CENTRO",
-            cidade: "SERRA",
-            uf: "ES",
-            cep: "29165460",
-            email: "gabrieldjesus238@gmail.com",
-            telefone: "27998538565"
-          },
-          mensagem: {
-            linha1: `Parcela ${boleto.numero_parcela}/${boleto.total_parcelas}`
-          },
-          desconto1: {
-            codigoDesconto: "NAOTEMDESCONTO",
-            taxa: 0,
-            valor: 0
-          },
-          multa: {
-            codigoMulta: "PERCENTUAL",
-            taxa: 2,
-            valor: 0
-          },
-          mora: {
-            codigoMora: "TAXAMENSAL",
-            taxa: 1,
-            valor: 0
-          }
-        };
+        // Atualizar banco
+        await client.query(
+          `UPDATE inter_collections 
+           SET linha_digitavel = $1, 
+               codigo_barras = $2, 
+               nosso_numero = $3,
+               pix_copia_e_cola = $4,
+               pix_txid = $5,
+               updated_at = NOW()
+           WHERE id = $6`,
+          [linhaDigitavel, codigoBarras, nossoNumero, pixCopiaECola, txid, boleto.id]
+        );
         
-        console.log('   Criando boleto no Inter...');
-        const response = await criarBoletoInter(token, dadosBoleto);
-        
-        if (response.codigoSolicitacao) {
-          console.log(`   ✅ Boleto criado! Código REAL: ${response.codigoSolicitacao}`);
-          
-          // Atualizar banco de dados
-          const updateQuery = `
-            UPDATE inter_collections 
-            SET codigo_solicitacao = $1,
-                nosso_numero = $2,
-                situacao = 'EMITIDO',
-                updated_at = NOW()
-            WHERE id = $3
-          `;
-          
-          await client.query(updateQuery, [
-            response.codigoSolicitacao,
-            response.nossoNumero || '',
-            boleto.id
-          ]);
-          
-          console.log('   ✅ Banco de dados atualizado');
-          successCount++;
-        } else {
-          throw new Error('Código de solicitação não retornado');
-        }
-        
-      } catch (error) {
-        console.error(`   ❌ Erro: ${error.message}`);
-        failCount++;
+        atualizados++;
+        console.log(`  ✅ Boleto atualizado`);
+      } else {
+        console.log(`  ❌ Não foi possível buscar detalhes`);
       }
+      
+      // Pausa entre requisições
+      await new Promise(r => setTimeout(r, 300));
     }
     
-    console.log('\n✅ PROCESSO CONCLUÍDO!');
-    console.log(`   Sucesso: ${successCount} boletos`);
-    console.log(`   Falhas: ${failCount} boletos`);
+    console.log('\n' + '='.repeat(60));
+    console.log(`✅ PROCESSO CONCLUÍDO!`);
+    console.log(`${atualizados}/${result.rows.length} boletos atualizados com sucesso`);
+    console.log('='.repeat(60));
     
   } catch (error) {
-    console.error('❌ ERRO FATAL:', error);
-    process.exit(1);
+    console.error('\n❌ ERRO:', error.message);
   } finally {
     await client.end();
+    console.log('\n🔒 Conexão fechada');
   }
 }
 
 // Executar
-corrigirBoletos()
+console.log('Iniciando atualização de dados dos boletos...\n');
+atualizarTodosBoletos()
   .then(() => {
-    console.log('\n🎉 Script finalizado com sucesso!');
+    console.log('\n✅ Script finalizado!');
     process.exit(0);
   })
   .catch((error) => {
-    console.error('\n❌ Script falhou:', error);
+    console.error('\n❌ Erro:', error.message);
     process.exit(1);
   });
