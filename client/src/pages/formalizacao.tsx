@@ -645,11 +645,14 @@ export default function Formalizacao() {
     if (initialClickSignData?.signUrl) {
       console.log("✅ [CLICKSIGN] Link encontrado, definindo estado posterior");
       setClickSignData(initialClickSignData as ClickSignData);
+    } else if (!clickSignData) {
+      // 🛡️ PROTEÇÃO: Só reseta se não tem dados locais (evita race condition com webhook)
+      console.log("📭 [CLICKSIGN] Sem link e sem estado local, mantendo estado inicial");
+      setClickSignData(null);
     } else {
-      console.log("📭 [CLICKSIGN] Sem link, mantendo estado inicial");
-      setClickSignData(null); // Limpar estado para mostrar botão azul
+      console.log("🔒 [CLICKSIGN] Mantendo dados locais existentes (não resetar)");
     }
-  }, [initialClickSignData]);
+  }, [initialClickSignData, clickSignData]);
 
   // 🔄 REALTIME: Escutar mudanças na tabela propostas
   useEffect(() => {
@@ -672,25 +675,32 @@ export default function Formalizacao() {
           console.log("📡 [REALTIME] Evento recebido:", payload);
           
           if (payload.eventType === 'UPDATE') {
-            console.log("✅ [REALTIME] Proposta atualizada, recarregando dados...");
+            console.log("✅ [REALTIME] Proposta atualizada, analisando mudanças...");
             
-            // Atualizar dados da proposta
+            // Atualizar dados da proposta (sempre necessário)
             queryClient.invalidateQueries({
               queryKey: ["/api/propostas", propostaId, "formalizacao"]
             });
             
-            // Atualizar status do ClickSign
-            queryClient.invalidateQueries({
-              queryKey: ["/api/clicksign/status", propostaId]
-            });
+            // 🎯 CORREÇÃO: Só invalidar ClickSign se necessário para evitar race condition
+            const oldData = payload.old;
+            const newData = payload.new;
+            
+            if (oldData?.status !== newData?.status || 
+                oldData?.clicksign_sign_url !== newData?.clicksign_sign_url) {
+              console.log("🔄 [REALTIME] Status ClickSign mudou, atualizando query");
+              queryClient.invalidateQueries({
+                queryKey: ["/api/clicksign/status", propostaId]
+              });
+            } else {
+              console.log("🔒 [REALTIME] Status ClickSign inalterado, preservando estado local");
+            }
             
             // Atualizar boletos
             queryClient.invalidateQueries({
               queryKey: ["/api/inter/collections", propostaId]
             });
             
-            // 🔇 SILENCIAR TOAST de realtime para evitar confusão na UX do ClickSign
-            // Apenas loggar a atualização
             console.log("🔄 [REALTIME] Proposta atualizada silenciosamente");
           }
         }
@@ -1063,7 +1073,7 @@ export default function Formalizacao() {
                                             description:
                                               "Contrato enviado para ClickSign com sucesso!",
                                           });
-                                          refetch(); // Recarregar dados da proposta
+                                          // ❌ REMOVIDO: refetch() causava race condition com webhook
                                         } catch (error: any) {
                                           console.error("❌ [CLICKSIGN] Erro ao enviar:", error);
                                           toast({
