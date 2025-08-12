@@ -1,170 +1,88 @@
+#!/usr/bin/env node
 /**
- * Script para extrair certificado e chave privada de arquivo .pfx
- * Uso: node extract-certificate.cjs nome_arquivo.pfx senha_certificado
+ * Script para extrair e processar certificado do Banco Inter
  */
 
 const fs = require('fs');
-const { execSync } = require('child_process');
-const path = require('path');
 
-console.log('========================================');
-console.log('🔐 EXTRATOR DE CERTIFICADO INTER');
-console.log('Converte .pfx para formato de secrets');
-console.log('========================================\n');
+const INTER_CERTIFICATE = process.env.INTER_CERTIFICATE;
+const INTER_PRIVATE_KEY = process.env.INTER_PRIVATE_KEY;
 
-// Verificar argumentos
-const args = process.argv.slice(2);
-if (args.length < 1) {
-  console.log('❌ Uso: node extract-certificate.cjs <arquivo.pfx> [senha]');
-  console.log('📁 Arquivos .pfx disponíveis:');
-  
-  const files = fs.readdirSync('.').filter(f => f.endsWith('.pfx'));
-  if (files.length === 0) {
-    console.log('   Nenhum arquivo .pfx encontrado na pasta atual');
-    console.log('   Faça upload do arquivo .pfx primeiro');
-  } else {
-    files.forEach(f => console.log(`   - ${f}`));
-    console.log(`\n💡 Exemplo: node extract-certificate.cjs ${files[0]} sua_senha`);
-  }
-  process.exit(1);
-}
+console.log('📋 ANÁLISE DO CERTIFICADO INTER');
+console.log('================================\n');
 
-const pfxFile = args[0];
-const password = args[1] || '';
-
-// Verificar se arquivo existe
-if (!fs.existsSync(pfxFile)) {
-  console.log(`❌ Arquivo não encontrado: ${pfxFile}`);
-  console.log('📁 Arquivos disponíveis:');
-  fs.readdirSync('.').filter(f => f.endsWith('.pfx')).forEach(f => console.log(`   - ${f}`));
-  process.exit(1);
-}
-
-console.log(`📋 Processando arquivo: ${pfxFile}`);
-console.log(`🔑 Senha fornecida: ${password ? '***' : 'Nenhuma'}`);
-
-// Verificar se OpenSSL está disponível
-try {
-  execSync('openssl version', { stdio: 'ignore' });
-  console.log('✅ OpenSSL encontrado');
-} catch (error) {
-  console.log('❌ OpenSSL não encontrado. Tentando instalar...');
-  try {
-    execSync('apt update && apt install -y openssl', { stdio: 'ignore' });
-    console.log('✅ OpenSSL instalado com sucesso');
-  } catch (installError) {
-    console.log('❌ Falha ao instalar OpenSSL. Tentando método alternativo...');
-  }
-}
-
-try {
-  console.log('\n🔄 Extraindo certificado...');
+function analisarTexto(texto, nome) {
+  console.log(`\n${nome}:`);
+  console.log('- Tamanho:', texto.length, 'caracteres');
+  console.log('- Primeiros 100 chars:', texto.substring(0, 100));
+  console.log('- Últimos 50 chars:', texto.substring(texto.length - 50));
   
-  // Extrair certificado
-  const certCommand = password 
-    ? `openssl pkcs12 -in "${pfxFile}" -clcerts -nokeys -out temp_cert.pem -password pass:"${password}"`
-    : `openssl pkcs12 -in "${pfxFile}" -clcerts -nokeys -out temp_cert.pem -nodes`;
+  // Verificar se é Base64
+  const isBase64 = /^[A-Za-z0-9+/]+=*$/.test(texto.replace(/\s/g, ''));
+  console.log('- Parece ser Base64?', isBase64);
   
-  execSync(certCommand);
+  // Verificar se tem headers PEM
+  const hasPemHeaders = texto.includes('BEGIN') && texto.includes('END');
+  console.log('- Tem headers PEM?', hasPemHeaders);
   
-  // Extrair chave privada
-  console.log('🔄 Extraindo chave privada...');
-  const keyCommand = password
-    ? `openssl pkcs12 -in "${pfxFile}" -nocerts -nodes -out temp_key.pem -password pass:"${password}"`
-    : `openssl pkcs12 -in "${pfxFile}" -nocerts -nodes -out temp_key.pem`;
-  
-  execSync(keyCommand);
-  
-  // Ler arquivos extraídos
-  let certContent = '';
-  let keyContent = '';
-  
-  if (fs.existsSync('temp_cert.pem')) {
-    certContent = fs.readFileSync('temp_cert.pem', 'utf8');
-    fs.unlinkSync('temp_cert.pem'); // Limpar arquivo temporário
-  }
-  
-  if (fs.existsSync('temp_key.pem')) {
-    keyContent = fs.readFileSync('temp_key.pem', 'utf8');
-    fs.unlinkSync('temp_key.pem'); // Limpar arquivo temporário
-  }
-  
-  // Processar conteúdo do certificado
-  const certMatch = certContent.match(/-----BEGIN CERTIFICATE-----[\s\S]*?-----END CERTIFICATE-----/);
-  const certificate = certMatch ? certMatch[0].trim() : '';
-  
-  // Processar conteúdo da chave privada
-  const keyMatch = keyContent.match(/-----BEGIN PRIVATE KEY-----[\s\S]*?-----END PRIVATE KEY-----/) ||
-                   keyContent.match(/-----BEGIN RSA PRIVATE KEY-----[\s\S]*?-----END RSA PRIVATE KEY-----/);
-  const privateKey = keyMatch ? keyMatch[0].trim() : '';
-  
-  console.log('\n========================================');
-  console.log('✅ EXTRAÇÃO CONCLUÍDA COM SUCESSO');
-  console.log('========================================\n');
-  
-  if (certificate) {
-    console.log('📋 INTER_CERTIFICATE:');
-    console.log('   Copie este valor para o secret INTER_CERTIFICATE:');
-    console.log('   ----------------------------------------');
-    console.log(certificate);
-    console.log('   ----------------------------------------\n');
-  } else {
-    console.log('❌ Certificado não encontrado no arquivo');
-  }
-  
-  if (privateKey) {
-    console.log('🔑 INTER_PRIVATE_KEY:');
-    console.log('   Copie este valor para o secret INTER_PRIVATE_KEY:');
-    console.log('   ----------------------------------------');
-    console.log(privateKey);
-    console.log('   ----------------------------------------\n');
-  } else {
-    console.log('❌ Chave privada não encontrada no arquivo');
-  }
-  
-  if (certificate && privateKey) {
-    console.log('🎯 PRÓXIMOS PASSOS:');
-    console.log('1. Copiar o CERTIFICADO acima para o secret INTER_CERTIFICATE');
-    console.log('2. Copiar a CHAVE PRIVADA acima para o secret INTER_PRIVATE_KEY');
-    console.log('3. Configurar os outros secrets (CLIENT_ID, CLIENT_SECRET)');
-    console.log('4. Testar a conexão');
-    
-    // Salvar em arquivo para referência
-    const outputFile = `certificado_extraido_${Date.now()}.txt`;
-    const output = `INTER_CERTIFICATE:\n${certificate}\n\nINTER_PRIVATE_KEY:\n${privateKey}\n`;
-    fs.writeFileSync(outputFile, output);
-    console.log(`5. Backup salvo em: ${outputFile}`);
-    
-  } else {
-    console.log('❌ Falha na extração. Verifique:');
-    console.log('   - Se a senha está correta');
-    console.log('   - Se o arquivo .pfx é válido');
-    console.log('   - Se o arquivo é do Banco Inter');
-  }
-  
-} catch (error) {
-  console.log('\n❌ ERRO DURANTE A EXTRAÇÃO:');
-  console.log(error.message);
-  
-  if (error.message.includes('invalid password') || error.message.includes('MAC verify failure')) {
-    console.log('\n💡 POSSÍVEL PROBLEMA: Senha incorreta');
-    console.log('   - Verifique se a senha do certificado está correta');
-    console.log('   - A senha foi fornecida pelo banco quando baixou o .pfx');
-  } else if (error.message.includes('No such file')) {
-    console.log('\n💡 POSSÍVEL PROBLEMA: Arquivo não encontrado');
-    console.log('   - Verifique se o nome do arquivo está correto');
-    console.log('   - Certifique-se que fez upload do arquivo .pfx');
-  } else {
-    console.log('\n💡 SOLUÇÕES:');
-    console.log('   1. Tentar novamente com senha correta');
-    console.log('   2. Baixar novo certificado do portal Inter');
-    console.log('   3. Verificar se arquivo não está corrompido');
-  }
-  
-  // Limpar arquivos temporários
-  ['temp_cert.pem', 'temp_key.pem'].forEach(file => {
-    if (fs.existsSync(file)) {
-      fs.unlinkSync(file);
+  if (isBase64 && !hasPemHeaders) {
+    try {
+      const decoded = Buffer.from(texto, 'base64').toString('utf-8');
+      console.log('- Decodificado tem headers PEM?', decoded.includes('BEGIN') && decoded.includes('END'));
+      
+      if (decoded.includes('BEGIN')) {
+        console.log('✅ FORMATO CORRETO: Base64 contendo PEM');
+        // Salvar versão decodificada
+        fs.writeFileSync(`${nome}-decoded.pem`, decoded);
+        console.log(`  Salvo em: ${nome}-decoded.pem`);
+        return decoded;
+      }
+    } catch (e) {
+      console.log('- Erro ao decodificar:', e.message);
     }
-  });
+  }
+  
+  if (hasPemHeaders) {
+    console.log('✅ FORMATO CORRETO: PEM direto');
+    fs.writeFileSync(`${nome}-direct.pem`, texto);
+    console.log(`  Salvo em: ${nome}-direct.pem`);
+    return texto;
+  }
+  
+  // Tentar forçar formato PEM
+  if (!hasPemHeaders && texto.length > 100) {
+    console.log('⚠️ Tentando adicionar headers PEM...');
+    const lines = texto.match(/.{1,64}/g) || [];
+    const pemFormatted = nome.includes('CERT') 
+      ? `-----BEGIN CERTIFICATE-----\n${lines.join('\n')}\n-----END CERTIFICATE-----`
+      : `-----BEGIN RSA PRIVATE KEY-----\n${lines.join('\n')}\n-----END RSA PRIVATE KEY-----`;
+    
+    fs.writeFileSync(`${nome}-forced.pem`, pemFormatted);
+    console.log(`  Salvo em: ${nome}-forced.pem`);
+    return pemFormatted;
+  }
+  
+  return texto;
 }
+
+// Analisar certificado
+const certProcessado = analisarTexto(INTER_CERTIFICATE, 'INTER_CERTIFICATE');
+
+// Analisar chave privada
+const keyProcessado = analisarTexto(INTER_PRIVATE_KEY, 'INTER_PRIVATE_KEY');
+
+// Criar arquivo de configuração JSON
+const config = {
+  certificate: certProcessado,
+  privateKey: keyProcessado,
+  clientId: process.env.INTER_CLIENT_ID,
+  clientSecret: process.env.INTER_CLIENT_SECRET,
+  contaCorrente: process.env.INTER_CONTA_CORRENTE || "346470536"
+};
+
+fs.writeFileSync('certificate-debug.json', JSON.stringify(config, null, 2));
+console.log('\n✅ Configuração salva em: certificate-debug.json');
+
+console.log('\n📊 RESUMO:');
+console.log('- Certificado processado:', certProcessado.substring(0, 50).includes('BEGIN') ? '✅' : '❌');
+console.log('- Chave privada processada:', keyProcessado.substring(0, 50).includes('BEGIN') ? '✅' : '❌');

@@ -5036,6 +5036,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Inter Real-time Status Update Route
   app.use("/api/inter", interRealtimeRouter);
+  
+  // Inter Fix Route - Regenerar boletos com códigos reais
+  const interFixBoletosRouter = (await import("./routes/inter-fix-boletos.js")).default;
+  app.use("/api/inter-fix", interFixBoletosRouter);
 
   // Register Cobranças routes
   const cobrancasRouter = (await import("./routes/cobrancas.js")).default;

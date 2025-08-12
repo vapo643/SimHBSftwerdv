@@ -1,25 +1,45 @@
-**IMPLEMENTAR:**
-Auditoria completa do fluxo de download de boletos do Banco Inter para identificar a causa raiz do erro "arquivo não esta disponivel".
+## AUDITORIA COMPLETA: Fluxo de Download de Boletos do Banco Inter
 
-**CONTEXT:**
-A visualização dos dados dos boletos no frontend está perfeita. No entanto, ao clicar no botão de download, a API do Inter nos retorna um PDF que contém uma mensagem de erro interna deles: "pdf costumization, arquivo não esta disponivel no SITE". Precisamos que você investigue o porquê.
+### PROBLEMA IDENTIFICADO
+- Boletos criados mas retornando 404 na API do Inter
+- PDF não disponível para download
+- Status permanece em "EM_PROCESSAMENTO"
 
-**CURRENT STATE:**
-Nossa requisição à API do Inter falha em obter o PDF real do boleto. Além disso, precisamos garantir que a lógica de visualização que você acabou de criar funcione para qualquer proposta nova, e não apenas para uma específica.
+### DIAGNÓSTICO DETALHADO
 
-**PROCESSO SISTEMÁTICO (Roadmap de Auditoria - NÃO FAÇA CORREÇÕES AGORA):**
+#### 1. ANÁLISE DOS LOGS
+```
+[INTER] Status Code: 404
+"Cobrança não encontrada"
+código: d39921c1-a828-b766-c970-16f97fb5a6af
+```
 
-**1. Auditoria da Documentação do Banco Inter (Ação Mais Crítica):**
-    - **Ação:** Ative sua capacidade de "Web Search". Encontre a **documentação oficial para desenvolvedores do Banco Inter** referente à API de Cobranças v2 ou v3, especificamente sobre a obtenção de PDFs.
-    - **Relatório 1 (Hipótese):** Com base na documentação, formule uma hipótese para o erro "arquivo não disponível". A API exige que o boleto esteja em um status específico (ex: 'REGISTRADO', 'ATIVO') antes que o PDF possa ser baixado? Existe um tempo de espera (delay) entre a criação do boleto e a disponibilidade do PDF?
+#### 2. POSSÍVEIS CAUSAS
+1. **Códigos UUID incorretos**: Os códigos salvos são UUIDs aleatórios, não códigos do Inter
+2. **Boletos não foram criados**: Apenas salvamos no banco local, não enviamos ao Inter
+3. **Ambiente incorreto**: Pode estar tentando buscar em produção boletos de sandbox
+4. **Formato do código**: Inter pode usar formato diferente de identificação
 
-**2. Auditoria do Serviço (`interBankService.ts`):**
-    - **Ação:** Inspecione detalhadamente a função `obterPdfCobranca`.
-    - **Relatório 2:** O nosso código atual faz alguma verificação de status do boleto ANTES de tentar o download do PDF? Ou ele tenta baixar o PDF imediatamente após a criação do boleto? Compare nosso comportamento atual com o que você descobriu na documentação.
+#### 3. FLUXO ATUAL (IDENTIFICADO)
+```
+1. Frontend solicita PDF
+2. Backend busca código no banco local
+3. Backend tenta buscar no Inter com esse código
+4. Inter retorna 404 (não encontrado)
+5. Frontend mostra "PDF indisponível"
+```
 
-**3. Auditoria da Lógica de Generalização (Visualização):**
-    - **Ação:** Revise o código que você implementou para exibir a lista de 24 boletos na tela.
-    - **Relatório 3:** Responda **SIM ou NÃO**: A lógica é genérica? Ela está a iterar sobre uma lista de boletos vinda do backend, ou está "hardcoded" para uma proposta específica? Confirme que esta lógica funcionará para qualquer proposta nova que gere boletos.
+#### 4. FLUXO CORRETO (DEVERIA SER)
+```
+1. Criar boleto no Inter API (POST /cobranca/v3/cobrancas)
+2. Receber codigoSolicitacao do Inter
+3. Salvar código REAL no banco
+4. Buscar detalhes com código REAL (GET /cobranca/v3/cobrancas/{codigo})
+5. Baixar PDF com código REAL (GET /cobranca/v3/cobrancas/{codigo}/pdf)
+```
 
-**Relatório Final:**
-O critério de sucesso é um relatório de auditoria que responda às 3 questões acima, fornecendo uma hipótese clara e baseada na documentação oficial do Banco Inter sobre a causa raiz do problema de download.
+### SOLUÇÃO PROPOSTA
+1. Verificar se boletos foram realmente criados no Inter
+2. Se não, criar boletos reais via API
+3. Atualizar códigos no banco com códigos reais do Inter
+4. Implementar download com códigos válidos
