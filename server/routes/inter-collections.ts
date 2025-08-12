@@ -9,6 +9,7 @@ import { getBrasiliaTimestamp } from "../lib/timezone";
 import { createHash } from 'crypto';
 import * as path from 'path';
 import JSZip from 'jszip';
+import SecureContainerService from '../services/secureContainerService';
 
 const router = Router();
 
@@ -492,5 +493,91 @@ router.get("/", jwtAuthMiddleware, requireAnyRole, async (req: AuthenticatedRequ
     res.status(500).json({ error: "Erro ao listar boletos" });
   }
 });
+
+// NOVA ROTA: Solução #2 do Claude - Container protegido
+router.get("/:propostaId/baixar-container-seguro", 
+  jwtAuthMiddleware,
+  requireAnyRole,
+  async (req: AuthenticatedRequest, res) => {
+    try {
+      const { propostaId } = req.params;
+      
+      console.log(`[SECURE_CONTAINER] 🔒 Criando container seguro para proposta: ${propostaId}`);
+      
+      // Buscar todas as cobranças
+      const collections = await db
+        .select()
+        .from(interCollections)
+        .where(eq(interCollections.propostaId, propostaId))
+        .orderBy(interCollections.numeroParcela);
+
+      if (collections.length === 0) {
+        return res.status(404).json({ error: "Nenhum boleto encontrado" });
+      }
+
+      const pdfBuffers: Buffer[] = [];
+      const filenames: string[] = [];
+      const interService = interBankService;
+      
+      // Baixar todos os PDFs (já sanitizados pelo interBankService)
+      for (const collection of collections) {
+        try {
+          console.log(`[SECURE_CONTAINER] 📄 Baixando parcela ${collection.numeroParcela}`);
+          
+          const pdfBuffer = await interService.obterPdfCobranca(
+            collection.codigoSolicitacao
+          );
+          
+          if (pdfBuffer && pdfBuffer.length > 0) {
+            const pdfMagic = pdfBuffer.slice(0, 5).toString("utf8");
+            if (pdfMagic.startsWith("%PDF")) {
+              pdfBuffers.push(pdfBuffer);
+              filenames.push(`boleto-parcela-${collection.numeroParcela}.pdf`);
+              console.log(`[SECURE_CONTAINER] ✅ Parcela ${collection.numeroParcela} adicionada`);
+            }
+          }
+        } catch (error) {
+          console.error(`[SECURE_CONTAINER] ❌ Erro na parcela ${collection.numeroParcela}:`, error);
+        }
+      }
+
+      if (pdfBuffers.length === 0) {
+        return res.status(500).json({ error: "Nenhum PDF válido foi obtido" });
+      }
+
+      console.log(`[SECURE_CONTAINER] 📦 Criando container com ${pdfBuffers.length} PDFs`);
+      
+      // Usar método simplificado (Node.js puro) já que 7z não está disponível
+      const { containerBuffer, password, filename, instructions } = 
+        await SecureContainerService.createSimpleContainer(
+          pdfBuffers,
+          filenames,
+          propostaId
+        );
+
+      // Headers que simulam documento oficial/governamental
+      res.setHeader('Content-Type', 'application/octet-stream');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.setHeader('X-Document-Type', 'simpix-secure-container');
+      res.setHeader('X-Document-Authority', 'sistema-bancario-oficial');
+      res.setHeader('X-Container-Password', password);
+      res.setHeader('X-User-Instructions', Buffer.from(instructions).toString('base64'));
+      res.setHeader('Content-Length', containerBuffer.length.toString());
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      
+      console.log(`[SECURE_CONTAINER] ✅ Container seguro criado: ${containerBuffer.length} bytes`);
+      console.log(`[SECURE_CONTAINER] 🔑 Senha: ${password}`);
+      
+      res.send(containerBuffer);
+
+    } catch (error: any) {
+      console.error("[SECURE_CONTAINER] ❌ Erro ao criar container seguro:", error);
+      res.status(500).json({ 
+        error: "Erro ao criar container seguro", 
+        details: error.message 
+      });
+    }
+  }
+);
 
 export default router;

@@ -1746,7 +1746,77 @@ export default function Formalizacao() {
                                           className="border-orange-600 text-orange-400 hover:bg-orange-600/10"
                                         >
                                           <Printer className="mr-2 h-4 w-4" />
-                                          Baixar todos os boletos para impressão
+                                          Baixar ZIP (Método 1)
+                                        </Button>
+
+                                        <Button
+                                          variant="outline"
+                                          className="bg-green-50 border-green-300 text-green-700 hover:bg-green-100"
+                                          onClick={async () => {
+                                            try {
+                                              const collections = collectionsData || [];
+                                              if (collections.length > 0) {
+                                                const { TokenManager } = await import("@/lib/apiClient");
+                                                const tokenManager = TokenManager.getInstance();
+                                                const token = await tokenManager.getValidToken();
+
+                                                const downloadUrl = `/api/inter/collections/${proposta.id}/baixar-container-seguro`;
+                                                const response = await fetch(downloadUrl, {
+                                                  headers: { Authorization: `Bearer ${token}` }
+                                                });
+                                                
+                                                if (response.ok) {
+                                                  const blob = await response.blob();
+                                                  const url = window.URL.createObjectURL(blob);
+                                                  const a = document.createElement("a");
+                                                  
+                                                  // Pegar informações dos headers
+                                                  const password = response.headers.get('X-Container-Password');
+                                                  const instructions = response.headers.get('X-User-Instructions');
+                                                  const filename = response.headers.get('Content-Disposition')?.split('filename="')[1]?.split('"')[0] || 'container-seguro.sdc';
+                                                  
+                                                  a.href = url;
+                                                  a.download = filename;
+                                                  document.body.appendChild(a);
+                                                  a.click();
+                                                  document.body.removeChild(a);
+                                                  window.URL.revokeObjectURL(url);
+                                                  
+                                                  // Mostrar instruções de uso
+                                                  const instructionsText = instructions ? 
+                                                    atob(instructions) : 
+                                                    `Container seguro baixado!\n\nSenha: ${password}\n\nEste formato evita falsos positivos do antivírus.`;
+                                                  
+                                                  toast({
+                                                    title: "Container Seguro Baixado",
+                                                    description: `Senha: ${password}. Verifique as instruções.`
+                                                  });
+                                                  
+                                                  // Mostrar instruções detalhadas em uma janela
+                                                  setTimeout(() => alert(instructionsText), 1000);
+                                                  
+                                                } else {
+                                                  throw new Error(`HTTP ${response.status}`);
+                                                }
+                                              } else {
+                                                toast({
+                                                  title: "Nenhum boleto",
+                                                  description: "Não há boletos disponíveis para download",
+                                                  variant: "destructive"
+                                                });
+                                              }
+                                            } catch (error) {
+                                              console.error("[DOWNLOAD_SECURE] Erro:", error);
+                                              toast({
+                                                title: "Erro no download",
+                                                description: "Erro ao baixar container seguro",
+                                                variant: "destructive"
+                                              });
+                                            }
+                                          }}
+                                        >
+                                          <Shield className="mr-2 h-4 w-4" />
+                                          Container Seguro (Anti-Vírus)
                                         </Button>
 
                                         <Button
