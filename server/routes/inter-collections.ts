@@ -126,16 +126,9 @@ router.get(
 
       console.log(`[INTER COLLECTIONS] Encontradas ${collections.length} parcelas para download`);
 
-      // Buscar dados da proposta para nomeação
-      const propostaData = await db
-        .select()
-        .from(propostas)
-        .where(eq(propostas.id, parseInt(propostaId)))
-        .limit(1);
-
-      const proposta = propostaData[0];
-      const nomeCliente = proposta?.clienteNome?.toUpperCase().replace(/\s+/g, '_').substring(0, 20) || 'CLIENTE';
-      const cpfPrimeiros3 = proposta?.clienteCpf?.substring(0, 3) || '000';
+      // Nome do ZIP mais simples (formato anterior)  
+      const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+      const zipFilename = `boletos_proposta_${propostaId}_${timestamp}.zip`;
 
       // Criar ZIP com todos os boletos
       const zip = new JSZip();
@@ -154,9 +147,8 @@ router.get(
             // Verificar se é PDF válido
             const pdfMagic = pdfBuffer.slice(0, 5).toString("utf8");
             if (pdfMagic.startsWith("%PDF")) {
-              // Nome do arquivo: BOLETO_01_CLIENTE_NOME123.pdf
-              const numeroFormatado = (collection.numeroParcela || 1).toString().padStart(2, '0');
-              const filename = `BOLETO_${numeroFormatado}_CLIENTE_${nomeCliente}${cpfPrimeiros3}.pdf`;
+              // Nome do arquivo: boleto-CODIGO.pdf (formato anterior)
+              const filename = `boleto-${collection.codigoSolicitacao.slice(0, 8)}.pdf`;
               
               zip.file(filename, pdfBuffer);
               sucessos++;
@@ -191,10 +183,6 @@ router.get(
         compression: 'DEFLATE',
         compressionOptions: { level: 6 }
       });
-
-      // Nome do arquivo ZIP
-      const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-      const zipFilename = `BOLETOS_${nomeCliente}${cpfPrimeiros3}_${timestamp}.zip`;
 
       console.log(`[INTER COLLECTIONS] ✅ ZIP gerado: ${zipFilename} (${zipBuffer.length} bytes)`);
 

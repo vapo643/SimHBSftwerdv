@@ -1712,7 +1712,7 @@ export default function Formalizacao() {
                                                   const url = window.URL.createObjectURL(blob);
                                                   const a = document.createElement("a");
                                                   a.href = url;
-                                                  a.download = `BOLETOS_${proposta.id}_${new Date().toISOString().slice(0, 10)}.zip`;
+                                                  a.download = `boletos_proposta_${proposta.id}_${new Date().toISOString().slice(0, 10).replace(/-/g, '')}.zip`;
                                                   document.body.appendChild(a);
                                                   a.click();
                                                   document.body.removeChild(a);

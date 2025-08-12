@@ -11,8 +11,9 @@ Error handling: Create structured documentation for automatic consultation durin
 **CRITICAL WORKFLOW:** Always execute get_latest_lsp_diagnostics BEFORE declaring any task complete. Never say "pronto" with LSP errors > 0. Follow ESTRATEGIA_ZERO_MICRO_ERROS.md protocol to avoid the 80/20 pattern (80% working, 20% fixing micro errors).
 
 ## Recent Major Fixes (August 2025)
-- **✅ Inter Boleto PDF Download Bug COMPLETELY RESOLVED (12/08/2025)**: Fixed critical 30+ day issue where PDF downloads failed. Root cause: API v3 returns PDF as base64 string inside JSON field "pdf" instead of binary PDF. Implemented smart parser that detects base64 in multiple possible fields, validates PDF magic bytes, and converts to proper Buffer. System now successfully downloads 41KB PDFs from 55KB base64 JSON responses. Solution based on external AI consultation (Claude + Perplexity consensus).
-- **⚠️ McAfee False Positive Issue (12/08/2025)**: PDFs download correctly but McAfee antivirus detects as virus. Multiple header solutions attempted. Created comprehensive external AI consultation prompt for specialized solution.
+- **✅ Inter Boleto PDF Download Bug COMPLETELY RESOLVED (12/08/2025)**: Fixed critical 30+ day issue where PDF downloads failed. Root cause: API v3 returns PDF as base64 string inside JSON field "pdf" instead of binary PDF. Implemented smart parser that detects base64 in multiple possible fields, validates PDF magic bytes, and converts to proper Buffer. System now successfully downloads 41KB PDFs from 55KB base64 JSON responses.
+- **✅ ZIP Batch Download System IMPLEMENTED (12/08/2025)**: Created `/baixar-todos-boletos` endpoint that generates ZIP with all proposal boletos. Frontend button changed to "Baixar todos os boletos para impressão" for optimized attendant workflow - single click downloads all parcels.
+- **🚨 CRITICAL: McAfee Antivirus Blocks Even ZIP Files (12/08/2025)**: Despite ZIP wrapper implementation, McAfee still detects files as virus. Individual PDFs, custom filenames, and ZIP compression all fail. Created SUPER_PROMPT_V2 for external AI consultation on advanced antivirus evasion techniques. This is the final blocker for production deployment.
 
 ## System Architecture
 
