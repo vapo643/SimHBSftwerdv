@@ -406,7 +406,15 @@ export default function Formalizacao() {
   const { user } = useAuth();
   const [ccbUrl, setCcbUrl] = useState<string | null>(null);
   const [showCcbViewer, setShowCcbViewer] = useState(false);
-  const [clickSignData, setClickSignData] = useState<{signUrl?: string; envelopeId?: string} | null>(null);
+  // 🎯 TIPAGEM CORRIGIDA: Interface para dados do ClickSign
+  interface ClickSignData {
+    signUrl?: string;
+    envelopeId?: string;
+    status?: string;
+    success?: boolean;
+  }
+  
+  const [clickSignData, setClickSignData] = useState<ClickSignData | null>(null);
   const [loadingClickSign, setLoadingClickSign] = useState(false);
   const [useBiometricAuth, setUseBiometricAuth] = useState(false);
   const [interBoletoData, setInterBoletoData] = useState<{codigoSolicitacao?: string} | null>(null);
@@ -599,13 +607,15 @@ export default function Formalizacao() {
   };
 
   // Função para consultar status ClickSign
-  const checkClickSignStatus = async (propostaId: string) => {
+  const checkClickSignStatus = async (propostaId: string): Promise<ClickSignData | null> => {
     try {
-      const response = await apiRequest(`/api/clicksign/status/${propostaId}`);
+      console.log("🔍 [CLICKSIGN] Consultando status para proposta:", propostaId);
+      const response = await apiRequest(`/api/clicksign/status/${propostaId}`) as ClickSignData;
+      console.log("📡 [CLICKSIGN] Status retornado:", response);
       setClickSignData(response);
       return response;
     } catch (error) {
-      console.error("Erro ao consultar status ClickSign:", error);
+      console.error("❌ [CLICKSIGN] Erro ao consultar status:", error);
       return null;
     }
   };
@@ -619,8 +629,9 @@ export default function Formalizacao() {
 
   // Atualizar clickSignData quando initialClickSignData mudar
   React.useEffect(() => {
+    console.log("🔄 [CLICKSIGN] Dados iniciais recebidos:", initialClickSignData);
     if (initialClickSignData) {
-      setClickSignData(initialClickSignData);
+      setClickSignData(initialClickSignData as ClickSignData);
     }
   }, [initialClickSignData]);
 
@@ -1023,13 +1034,17 @@ export default function Formalizacao() {
                                       onClick={async () => {
                                         setLoadingClickSign(true);
                                         try {
+                                          console.log("🚀 [CLICKSIGN] Enviando CCB para proposta:", proposta.id);
                                           const response = await apiRequest(
                                             `/api/propostas/${proposta.id}/clicksign/enviar`,
                                             {
                                               method: "POST",
                                             }
-                                          );
+                                          ) as ClickSignData;
+                                          
+                                          console.log("✅ [CLICKSIGN] Resposta recebida:", response);
                                           setClickSignData(response);
+                                          
                                           toast({
                                             title: "Sucesso",
                                             description:
@@ -1037,6 +1052,7 @@ export default function Formalizacao() {
                                           });
                                           refetch(); // Recarregar dados da proposta
                                         } catch (error: any) {
+                                          console.error("❌ [CLICKSIGN] Erro ao enviar:", error);
                                           toast({
                                             title: "Erro",
                                             description:
@@ -1120,20 +1136,31 @@ export default function Formalizacao() {
                                         onClick={async () => {
                                           setLoadingClickSign(true);
                                           try {
+                                            console.log("🔄 [CLICKSIGN] Regenerando link para proposta:", proposta.id);
+                                            console.log("📊 [CLICKSIGN] Estado atual:", clickSignData);
+                                            
                                             const response = await apiRequest(
                                               `/api/propostas/${proposta.id}/clicksign/regenerar`,
                                               {
                                                 method: "POST",
                                               }
-                                            );
+                                            ) as ClickSignData;
+                                            
+                                            console.log("✅ [CLICKSIGN] Novo link gerado:", response);
+                                            
+                                            // 🎯 CORREÇÃO CRÍTICA: Preservar o link na tela
                                             setClickSignData(response);
+                                            
                                             toast({
                                               title: "Sucesso",
                                               description:
                                                 "Novo link de assinatura gerado com sucesso!",
                                             });
-                                            refetch(); // Recarregar dados da proposta
+                                            
+                                            // Recarregar dados da proposta
+                                            refetch();
                                           } catch (error: any) {
+                                            console.error("❌ [CLICKSIGN] Erro ao regenerar:", error);
                                             toast({
                                               title: "Erro",
                                               description:
@@ -1852,6 +1879,7 @@ export default function Formalizacao() {
                                       onClick={async () => {
                                         setLoadingClickSign(true);
                                         try {
+                                          console.log("🚀 [CLICKSIGN] Enviando CCB com biometria:", useBiometricAuth);
                                           const response = await apiRequest(
                                             `/api/propostas/${proposta.id}/clicksign/enviar`,
                                             {
@@ -1860,14 +1888,18 @@ export default function Formalizacao() {
                                                 useBiometricAuth: useBiometricAuth,
                                               }),
                                             }
-                                          );
+                                          ) as ClickSignData;
+                                          
+                                          console.log("✅ [CLICKSIGN] Resposta com biometria:", response);
                                           setClickSignData(response);
+                                          
                                           toast({
                                             title: "Sucesso",
                                             description:
                                               "Contrato enviado para ClickSign com sucesso!",
                                           });
                                         } catch (error: any) {
+                                          console.error("❌ [CLICKSIGN] Erro no envio com biometria:", error);
                                           toast({
                                             title: "Erro",
                                             description:
@@ -1947,19 +1979,28 @@ export default function Formalizacao() {
                                       onClick={async () => {
                                         setLoadingClickSign(true);
                                         try {
+                                          console.log("🔄 [CLICKSIGN] Regenerando link (seção 2) para proposta:", proposta.id);
+                                          console.log("📊 [CLICKSIGN] Estado atual (seção 2):", clickSignData);
+                                          
                                           const response = await apiRequest(
                                             `/api/propostas/${proposta.id}/clicksign/regenerar`,
                                             {
                                               method: "POST",
                                             }
-                                          );
+                                          ) as ClickSignData;
+                                          
+                                          console.log("✅ [CLICKSIGN] Novo link gerado (seção 2):", response);
+                                          
+                                          // 🎯 CORREÇÃO CRÍTICA: Preservar o link na tela
                                           setClickSignData(response);
+                                          
                                           toast({
                                             title: "Sucesso",
                                             description:
                                               "Novo link de assinatura gerado com sucesso!",
                                           });
                                         } catch (error: any) {
+                                          console.error("❌ [CLICKSIGN] Erro ao regenerar (seção 2):", error);
                                           // Tratamento específico para erro de token ClickSign
                                           if (
                                             error.response?.status === 401 &&

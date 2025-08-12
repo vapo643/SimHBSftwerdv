@@ -1,0 +1,31 @@
+**IMPLEMENTAR:**
+Correção do bug no botão "Gerar Link de Novo" e implementação da lógica de estados correta para os botões de envio para o ClickSign na "Tela de Formalização".
+
+**CONTEXT:**
+O fluxo de geração de link de assinatura do ClickSign está com a lógica da interface do usuário (UI) quebrada. Quando o usuário tenta gerar um link novamente, o link existente desaparece. Além disso, a UI não diferencia claramente entre o estado inicial (sem link) e o estado posterior (com link gerado), o que confunde o operador.
+
+**CURRENT STATE:**
+Ao clicar em "Gerar Link de Novo", uma notificação de sucesso aparece, mas o link de assinatura some da tela. A tela não possui uma lógica de estados para mostrar "Enviar para ClickSign" vs. "Gerar de Novo".
+
+**EXPECTED (Estado Final de Sucesso):**
+Uma máquina de estados com dois fluxos claros e funcionais:
+
+**1. Estado Inicial (Proposta NUNCA enviada ao ClickSign):**
+    - Apenas um botão azul primário com o texto "Enviar para ClickSign" é visível.
+    - Ao clicar neste botão, a chamada à API é feita, e a UI é atualizada para o "Estado Posterior".
+
+**2. Estado Posterior (Link JÁ gerado):**
+    - O link de assinatura do ClickSign é exibido claramente na tela.
+    - O botão "Enviar para ClickSign" desaparece.
+    - Um novo botão ou link secundário com o texto "Gerar de Novo" aparece.
+    - Ao clicar em "Gerar de Novo", uma nova chamada à API é feita, e o link de assinatura na tela é **ATUALIZADO** com o novo valor retornado, **SEM NUNCA desaparecer**.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+- **Lógica de Estado no Frontend:** No componente React da "Tela de Formalização", implemente uma lógica de estado (ex: `useState`) para controlar qual botão é exibido, com base na existência de um link de assinatura para a proposta em questão.
+- **Correção do Bug "Link Some":** Investigue a função que é chamada pelo botão "Gerar de Novo". O bug provavelmente está na forma como o estado da UI é atualizado após a resposta da API. Garanta que, após a chamada bem-sucedida, o novo link retornado pela API **substitua o valor antigo no estado**, em vez de limpá-lo.
+
+**TESTE (Validação Final Obrigatória):**
+1.  **Cenário 1:** Abra uma proposta que NUNCA foi enviada ao ClickSign. Valide que apenas o botão azul "Enviar para ClickSign" aparece.
+2.  Clique no botão. Valide que o link aparece e o botão muda para "Gerar de Novo".
+3.  **Cenário 2:** Na mesma proposta, clique no botão "Gerar de Novo". Valide que o link na tela é **ATUALIZADO** para um novo valor e **NÃO** desaparece.
+4.  Execute o **Protocolo 5-CHECK** (`get_latest_lsp_diagnostics`, etc.) antes de concluir.
