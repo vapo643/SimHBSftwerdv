@@ -98,8 +98,6 @@ interface Proposta {
   assinaturaEletronicaConcluida: boolean;
   biometriaConcluida: boolean;
   caminhoCcbAssinado?: string;
-  interBoletoGerado?: boolean;
-  interCodigoSolicitacao?: string;
   // Backend fields (camelCase)
   lojaId: number;
   createdAt: string;
@@ -111,6 +109,15 @@ interface Proposta {
   dataAssinatura?: string;
   dataPagamento?: string;
   observacoesFormalização?: string;
+  // ClickSign fields
+  clicksignDocumentKey?: string;
+  clicksignSignerKey?: string;
+  clicksignStatus?: string;
+  clicksignSentAt?: string;
+  clicksignSignedAt?: string;
+  // Inter Bank fields
+  interBoletoGerado?: boolean;
+  interCodigoSolicitacao?: string;
 }
 
 const updateFormalizacaoSchema = z.object({
@@ -398,22 +405,22 @@ export default function Formalizacao() {
   const { user } = useAuth();
   const [ccbUrl, setCcbUrl] = useState<string | null>(null);
   const [showCcbViewer, setShowCcbViewer] = useState(false);
-  const [clickSignData, setClickSignData] = useState<unknown>(null);
+  const [clickSignData, setClickSignData] = useState<{signUrl?: string; envelopeId?: string} | null>(null);
   const [loadingClickSign, setLoadingClickSign] = useState(false);
   const [useBiometricAuth, setUseBiometricAuth] = useState(false);
-  const [interBoletoData, setInterBoletoData] = useState<unknown>(null);
+  const [interBoletoData, setInterBoletoData] = useState<{codigoSolicitacao?: string} | null>(null);
   const [loadingInter, setLoadingInter] = useState(false);
   const [boletosGerados, setBoletosGerados] = useState<any[]>([]);
 
   const propostaId = params?.id;
 
   // Query para buscar boletos gerados
-  const { data: collectionsData } = useQuery({
+  const { data: collectionsData } = useQuery<any[]>({
     queryKey: ["/api/inter/collections", propostaId],
-    queryFn: async () => {
+    queryFn: async (): Promise<any[]> => {
       if (!propostaId) return [];
-      const response = await apiRequest(`/api/inter/collections/${propostaId}`);
-      return response;
+      const response = await apiRequest(`/api/inter/collections/${propostaId}`) as any[];
+      return Array.isArray(response) ? response : [];
     },
     enabled: !!propostaId,
   });
@@ -425,16 +432,16 @@ export default function Formalizacao() {
     refetch,
   } = useQuery<Proposta>({
     queryKey: ["/api/propostas", propostaId, "formalizacao"],
-    queryFn: async () => {
+    queryFn: async (): Promise<Proposta> => {
       console.log(`🔍 [DEBUG] Buscando dados de formalização para proposta: ${propostaId}`);
-      const response = await apiRequest(`/api/propostas/${propostaId}/formalizacao`);
+      const response = await apiRequest(`/api/propostas/${propostaId}/formalizacao`) as Proposta;
       console.log(`🔍 [DEBUG] Dados recebidos do backend:`, response);
-      console.log(`🔍 [DEBUG] Cliente Data:`, response.clienteData);
-      console.log(`🔍 [DEBUG] Condicoes Data:`, response.condicoesData);
+      console.log(`🔍 [DEBUG] Cliente Data:`, response.cliente_data);
+      console.log(`🔍 [DEBUG] Condicoes Data:`, response.condicoes_data);
       console.log(`🔍 [DEBUG] Data Aprovação:`, response.dataAprovacao);
-      console.log(`🔍 [DEBUG] Documentos - Total:`, response.documentos?.length || 0);
-      console.log(`🔍 [DEBUG] Documentos - Estrutura:`, response.documentos);
-      console.log(`🔍 [DEBUG] Primeiro documento:`, response.documentos?.[0]);
+      console.log(`🔍 [DEBUG] Documentos - Total:`, response.documentos_adicionais?.length || 0);
+      console.log(`🔍 [DEBUG] Documentos - Estrutura:`, response.documentos_adicionais);
+      console.log(`🔍 [DEBUG] Primeiro documento:`, response.documentos_adicionais?.[0]);
       return response;
     },
     enabled: !!propostaId,
@@ -443,7 +450,7 @@ export default function Formalizacao() {
   const form = useForm<UpdateFormalizacaoForm>({
     resolver: zodResolver(updateFormalizacaoSchema),
     defaultValues: {
-      status: proposta?.status as unknown,
+      status: proposta?.status as "documentos_enviados" | "contratos_preparados" | "contratos_assinados" | "pronto_pagamento" | "pago" | undefined,
       documentosAdicionais: proposta?.documentosAdicionais || [],
       contratoGerado: proposta?.contratoGerado || false,
       contratoAssinado: proposta?.contratoAssinado || false,
@@ -509,12 +516,12 @@ export default function Formalizacao() {
 
       const response = await apiRequest(`/api/propostas/${propostaId}/gerar-ccb`, {
         method: "POST",
-      });
+      }) as {success?: boolean; message?: string};
 
       if (response.success) {
         toast({
           title: "Sucesso",
-          description: response.message,
+          description: response.message || "CCB gerada com sucesso",
         });
         // Recarregar dados para atualizar status ccbGerado
         refetch();
@@ -533,7 +540,7 @@ export default function Formalizacao() {
   const viewCCB = async (propostaId: string) => {
     try {
       // ✅ CORREÇÃO: Usar endpoint de formalização padrão
-      const response = await apiRequest(`/api/formalizacao/${propostaId}/ccb`);
+      const response = await apiRequest(`/api/formalizacao/${propostaId}/ccb`) as {ccb_gerado?: boolean; publicUrl?: string};
       if (response.ccb_gerado === false) {
         toast({
           title: "CCB não disponível",
@@ -567,7 +574,7 @@ export default function Formalizacao() {
 
       const response = await apiRequest(`/api/clicksign/send-ccb/${propostaId}`, {
         method: "POST",
-      });
+      }) as {success?: boolean; signUrl?: string; envelopeId?: string};
 
       if (response.success) {
         toast({
