@@ -1565,16 +1565,21 @@ export default function Formalizacao() {
                                                         return;
                                                       }
 
-                                                      // Fazer download com autenticação correta usando apiRequest
+                                                      // Fazer download com autenticação correta usando TokenManager
                                                       console.log(`[PDF DOWNLOAD] Usando código: ${boleto.codigoSolicitacao}`);
                                                       console.log(`[PDF DOWNLOAD] Nosso número: ${boleto.nossoNumero || 'não definido'}`);
                                                       console.log(`[PDF DOWNLOAD] Seu número: ${boleto.seuNumero || 'não definido'}`);
                                                       
-                                                      // Usar apiRequest para autenticação automática, mas ainda precisamos tratar como blob
-                                                      const token = localStorage.getItem('token');
+                                                      // Obter token usando o TokenManager
+                                                      const { TokenManager } = await import("@/lib/apiClient");
+                                                      const tokenManager = TokenManager.getInstance();
+                                                      const token = await tokenManager.getValidToken();
+                                                      
                                                       if (!token) {
                                                         throw new Error('Token de acesso não encontrado');
                                                       }
+                                                      
+                                                      console.log(`[PDF DOWNLOAD] Token obtido com sucesso (${token.length} caracteres)`);
                                                       
                                                       const response = await fetch(`/api/inter/collections/${boleto.codigoSolicitacao}/pdf`, {
                                                         method: 'GET',
