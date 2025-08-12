@@ -836,6 +836,20 @@ export default function CobrancasPage() {
                               Ficha
                             </Button>
 
+                            {/* Botão de Download do Boleto */}
+                            {proposta.interCodigoSolicitacao && (
+                              <a
+                                href={`/api/inter/collections/${proposta.interCodigoSolicitacao}/pdf`}
+                                download
+                                className="inline-flex items-center justify-center rounded-md bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                                data-testid={`button-download-boleto-${proposta.id}`}
+                                title="Baixar boleto em PDF"
+                              >
+                                <Download className="mr-1.5 h-3.5 w-3.5" />
+                                Boleto
+                              </a>
+                            )}
+
                             {/* Menu de Ações - Apenas para boletos com status modificável */}
                             {proposta.interCodigoSolicitacao && (
                               <DropdownMenu>
@@ -1803,6 +1817,19 @@ export default function CobrancasPage() {
                                     <Barcode className="mr-2 h-3 w-3" />
                                     Boleto
                                   </Button>
+                                )}
+                                {/* Botão de Download do PDF do Boleto */}
+                                {parcela.interCodigoSolicitacao && (
+                                  <a
+                                    href={`/api/inter/collections/${parcela.interCodigoSolicitacao}/pdf`}
+                                    download
+                                    className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                                    data-testid={`button-download-pdf-${parcela.id}`}
+                                    title="Baixar PDF do boleto"
+                                  >
+                                    <Download className="mr-1.5 h-3 w-3" />
+                                    PDF
+                                  </a>
                                 )}
                                 <Badge
                                   className={getInterBankStatusColor(
