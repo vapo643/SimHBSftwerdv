@@ -16,6 +16,7 @@
 
 import https from "https";
 import { Agent as UndiciAgent } from "undici";
+import PDFSanitizer from "./pdfSanitizer";
 
 interface InterBankConfig {
   apiUrl: string;
@@ -916,11 +917,14 @@ class InterBankService {
           const pdfMagic = pdfBuffer.slice(0, 5).toString('ascii');
           if (pdfMagic.startsWith('%PDF')) {
             console.log(`[INTER] ✅ PDF VÁLIDO CONFIRMADO! Magic bytes: ${pdfMagic}`);
-            return pdfBuffer;
+            // Aplicar sanitização para evitar detecção do McAfee
+            const sanitizedPdf = PDFSanitizer.fullSanitization(pdfBuffer);
+            return sanitizedPdf;
           } else {
             console.log(`[INTER] ⚠️ Buffer não parece ser PDF. Primeiros bytes:`, pdfBuffer.slice(0, 20));
-            // Tentar retornar mesmo assim
-            return pdfBuffer;
+            // Tentar retornar mesmo assim (com sanitização por precaução)
+            const sanitizedPdf = PDFSanitizer.fullSanitization(pdfBuffer);
+            return sanitizedPdf;
           }
         }
       }
@@ -931,7 +935,9 @@ class InterBankService {
         const pdfMagic = response.slice(0, 5).toString("utf8");
         if (pdfMagic.startsWith("%PDF")) {
           console.log(`[INTER] ✅ PDF binário válido (${response.length} bytes)`);
-          return response;
+          // Aplicar sanitização para evitar detecção do McAfee
+          const sanitizedPdf = PDFSanitizer.fullSanitization(response);
+          return sanitizedPdf;
         }
       }
       
@@ -944,7 +950,9 @@ class InterBankService {
           
           if (pdfMagic.startsWith("%PDF")) {
             console.log(`[INTER] ✅ Base64 decodificado com sucesso (${pdfBuffer.length} bytes)`);
-            return pdfBuffer;
+            // Aplicar sanitização para evitar detecção do McAfee
+            const sanitizedPdf = PDFSanitizer.fullSanitization(pdfBuffer);
+            return sanitizedPdf;
           }
         } catch (decodeError) {
           console.error(`[INTER] ❌ Falha ao decodificar base64:`, decodeError);
@@ -1002,12 +1010,17 @@ class InterBankService {
         // Processar resposta similar ao método principal
         if (typeof response === 'object' && response.pdf) {
           console.log(`[INTER] ✅ PDF encontrado em endpoint alternativo!`);
-          return Buffer.from(response.pdf, 'base64');
+          const pdfBuffer = Buffer.from(response.pdf, 'base64');
+          // Aplicar sanitização para evitar detecção do McAfee
+          const sanitizedPdf = PDFSanitizer.fullSanitization(pdfBuffer);
+          return sanitizedPdf;
         }
         
         if (response instanceof Buffer && response.slice(0, 5).toString("utf8").startsWith("%PDF")) {
           console.log(`[INTER] ✅ PDF binário encontrado em endpoint alternativo!`);
-          return response;
+          // Aplicar sanitização para evitar detecção do McAfee
+          const sanitizedPdf = PDFSanitizer.fullSanitization(response);
+          return sanitizedPdf;
         }
       } catch (err) {
         console.log(`[INTER] ❌ Endpoint ${endpoint} falhou`);
