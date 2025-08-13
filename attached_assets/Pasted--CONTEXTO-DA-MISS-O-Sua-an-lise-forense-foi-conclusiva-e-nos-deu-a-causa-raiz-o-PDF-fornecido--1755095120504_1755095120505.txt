@@ -1,0 +1,21 @@
+**CONTEXTO DA MISSÃO:**
+Sua análise forense foi conclusiva e nos deu a causa raiz: o PDF fornecido pelo Banco Inter está estruturalmente malformado, o que provavelmente causa o falso positivo do McAfee. A Interação 4 do nosso "Debate Máximo" é uma missão de pesquisa focada: re-validar a documentação do Banco Inter com este novo conhecimento.
+
+**PROCESSO SISTEMÁTICO (Roadmap de Pesquisa de Documentação):**
+
+**1. Pesquisa por Parâmetros de Geração de PDF:**
+    - **Ação:** Use sua capacidade de "Web Search" para revisar a documentação oficial da API de Cobranças v3 do Banco Inter.
+    - **Foco da Pesquisa:** Procure por quaisquer parâmetros opcionais na requisição `GET /.../pdf` (ou na requisição de *criação* do boleto) que possam controlar a **versão do PDF**, o **nível de compressão**, o **gerador de PDF utilizado** (ex: `pdf_version=1.7`, `engine=modern`, etc.), ou qualquer flag que indique um formato de resposta alternativo.
+
+**2. Pesquisa por "Known Issues" (Problemas Conhecidos):**
+    - **Ação:** Pesquise em fóruns de desenvolvedores, GitHub, Stack Overflow e no próprio portal de desenvolvedores do Banco Inter.
+    - **Foco da Pesquisa:** Use termos como "Banco Inter API PDF corrompido", "Inter API PDF McAfee", "iText 2.1.7 Inter API", "Inter API stream endstream mismatch". O objetivo é descobrir se outros desenvolvedores já relataram este problema.
+
+**3. Análise de SDKs Oficiais:**
+    - **Ação:** Verifique se o Banco Inter oferece um SDK oficial em qualquer linguagem (Java, Python, PHP, etc.).
+    - **Foco da Análise:** Se encontrar um SDK, analise o código-fonte dele, especificamente a parte que lida com o download de PDFs. Procure por headers especiais, parâmetros de query ou qualquer lógica de tratamento que não esteja evidente na documentação principal da API.
+
+**Relatório Final:**
+O critério de sucesso é um relatório de pesquisa que responda às seguintes perguntas:
+1.  Existe alguma forma documentada ou não documentada de solicitar à API um PDF "mais limpo", em uma versão mais moderna, ou com uma estrutura diferente?
+2.  Este problema de PDF malformado ou de falso positivo com antivírus é um problema conhecido pela comunidade de desenvolvedores que integra com o Banco Inter? Se sim, quais soluções eles propuseram?
