@@ -1,0 +1,58 @@
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Implementar o padrão de re-tentativa automática (Retry) com espera crescente (Exponential Backoff) em todos os nossos workers da Job Queue.
+* **Intenção Estratégica (O Porquê):** Nossos workers agora executam operações críticas de longa duração que dependem de APIs externas. Essas APIs podem falhar temporariamente. Precisamos garantir que nossos jobs não falhem permanentemente por causa de uma instabilidade momentânea na rede ou no serviço externo. A lógica de retry automático tornará nosso sistema antifrágil.
+* **Histórico Relevante (Consulta Obrigatória):** Consulte o seu próprio relatório `AUDITORIA_ARQUITETURAL_FLUXO_FORMALIZACAO.md`. Sua implementação é a solução direta para a Proposta D: "Implementação de Retry com Backoff" e o problema de "Ausência de Retry" que você diagnosticou.
+* **Modelo Mental (Como se Encaixa):** A biblioteca BullMQ, que estamos a usar, possui configurações de retry nativas. Esta missão consiste em configurar corretamente essas opções na declaração dos nossos Workers (`server/worker.ts`). A lógica não será manual, mas sim uma configuração declarativa que o BullMQ executará para nós.
+* **Riscos Antecipados:** **Risco:** Uma falha permanente (ex: um bug no nosso código) poderia causar um loop infinito de retries. **Contramedida:** A implementação deve definir um número máximo e finito de tentativas (ex: 3 ou 5 tentativas) para cada job.
+
+---
+
+**IMPLEMENTAR:**
+Configuração de re-tentativa automática com backoff exponencial para os workers das filas `pdf-processing` e `boleto-sync`.
+
+**PRINCÍPIOS INEGOCIÁVEIS DE ARQUITETURA:**
+1.  **EXCLUSIVIDADE DO SUPABASE:** Este sistema opera **100% no ecossistema Supabase** (Banco de Dados PostgreSQL, Autenticação, Storage). Sob **NENHUMA circunstância**, você deve criar, conectar ou utilizar qualquer outro provedor de banco de dados, especialmente o **Neon**. Qualquer necessidade de banco de dados deve ser resolvida dentro da nossa instância Supabase existente.
+
+
+**CURRENT STATE:**
+Os workers estão funcionais, mas se uma chamada de API falhar uma única vez, o job é marcado como `failed` permanentemente, exigindo intervenção manual.
+
+**EXPECTED (Estado Final de Sucesso):**
+Workers configurados de tal forma que, se um job falhar devido a um erro de rede ou de API externa, o BullMQ automaticamente:
+1.  Espere um tempo (ex: 10 segundos).
+2.  Tente executar o job novamente.
+3.  Se falhar de novo, espere um tempo maior (ex: 20 segundos).
+4.  Se falhar novamente, espere um tempo ainda maior (ex: 40 segundos).
+5.  Desista após um número máximo de tentativas e marque o job como `failed`.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+**1. Configuração dos Workers:**
+    - **Ação:** Modifique o ficheiro `server/worker.ts`.
+    - **Implementação:** Na instanciação dos seus `Workers` do BullMQ, adicione o objeto de configuração `opts` para definir a estratégia de re-tentativa.
+    - **Código de Exemplo (implemente algo similar):**
+      ```typescript
+      const workerOpts = {
+        attempts: 5, // Tentar um total de 5 vezes
+        backoff: {
+          type: 'exponential', // Estratégia de espera exponencial
+          delay: 10000,      // Começar com 10 segundos de espera
+        },
+      };
+
+      const pdfWorker = new Worker('pdf-processing', async job => { ... }, workerOpts);
+      const syncWorker = new Worker('boleto-sync', async job => { ... }, workerOpts);
+      ```
+
+**2. Validação da Configuração:**
+    - **Ação:** Para validar, você precisará simular uma falha.
+    - **Implementação:** Crie um **endpoint de teste temporário** que adicione um job a uma das filas. Dentro da lógica do worker para este job de teste, adicione um código que **sempre lance um erro** (ex: `throw new Error('Simulando falha de API');`).
+    - **Teste:** Chame este endpoint.
+
+**PROTOCOLO OBRIGatório 5-CHECK:**
+1.  Mapear os arquivos envolvidos.
+2.  Garantir que a configuração de `attempts` e `backoff` seja aplicada a **TODOS** os workers.
+3.  Executar `get_latest_lsp_diagnostics` para garantir ZERO erros.
+4.  O critério de sucesso é observar nos logs do **processo Worker** que, após a falha simulada, ele loga mensagens como `[WORKER] Job X failed. Retrying in Y ms...` com o tempo de espera a aumentar a cada tentativa.
+5.  O job deve, ao final, ser marcado como `failed` após esgotar as 5 tentativas.
