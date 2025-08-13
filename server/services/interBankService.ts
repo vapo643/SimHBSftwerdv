@@ -16,6 +16,7 @@
 
 import https from "https";
 import { Agent as UndiciAgent } from "undici";
+import { createServerSupabaseAdminClient } from "../lib/supabase";
 
 
 interface InterBankConfig {
@@ -924,6 +925,38 @@ class InterBankService {
           const pdfMagic = pdfBuffer.slice(0, 5).toString('ascii');
           if (pdfMagic.startsWith('%PDF')) {
             console.log(`[INTER] ✅ PDF VÁLIDO CONFIRMADO! Magic bytes: ${pdfMagic}`);
+            
+            // CAPTURA DE EVIDÊNCIA: Salvar PDF no Supabase Storage
+            try {
+              const timestamp = Date.now();
+              const fileName = `quarentena-mcafee/${codigoSolicitacao}-${timestamp}.pdf`;
+              
+              console.log(`[INTER] 🔬 EVIDÊNCIA: Salvando PDF em ${fileName}...`);
+              
+              const supabaseAdmin = createServerSupabaseAdminClient();
+              const { data, error } = await supabaseAdmin.storage
+                .from('documents')
+                .upload(fileName, pdfBuffer, {
+                  contentType: 'application/pdf',
+                  cacheControl: '3600',
+                  upsert: false
+                });
+                
+              if (error) {
+                console.error(`[INTER] ❌ Erro ao salvar evidência:`, error);
+              } else {
+                const { data: publicUrl } = supabaseAdmin.storage
+                  .from('documents')
+                  .getPublicUrl(fileName);
+                  
+                console.log(`[INTER] ✅ EVIDÊNCIA CAPTURADA: ${publicUrl.publicUrl}`);
+                console.log(`[INTER] 📊 Tamanho do arquivo: ${pdfBuffer.length} bytes`);
+                console.log(`[INTER] 🔗 URL COMPLETA DO SUPABASE: ${publicUrl.publicUrl}`);
+              }
+            } catch (storageError) {
+              console.error(`[INTER] ⚠️ Falha ao salvar evidência, mas continuando:`, storageError);
+            }
+            
             return pdfBuffer;
           } else {
             console.log(`[INTER] ⚠️ Buffer não parece ser PDF. Primeiros bytes:`, pdfBuffer.slice(0, 20));
@@ -938,6 +971,38 @@ class InterBankService {
         const pdfMagic = response.slice(0, 5).toString("utf8");
         if (pdfMagic.startsWith("%PDF")) {
           console.log(`[INTER] ✅ PDF binário válido (${response.length} bytes)`);
+          
+          // CAPTURA DE EVIDÊNCIA: Salvar PDF no Supabase Storage
+          try {
+            const timestamp = Date.now();
+            const fileName = `quarentena-mcafee/${codigoSolicitacao}-${timestamp}.pdf`;
+            
+            console.log(`[INTER] 🔬 EVIDÊNCIA: Salvando PDF em ${fileName}...`);
+            
+            const supabaseAdmin = createServerSupabaseAdminClient();
+            const { data, error } = await supabaseAdmin.storage
+              .from('documents')
+              .upload(fileName, response, {
+                contentType: 'application/pdf',
+                cacheControl: '3600',
+                upsert: false
+              });
+              
+            if (error) {
+              console.error(`[INTER] ❌ Erro ao salvar evidência:`, error);
+            } else {
+              const { data: publicUrl } = supabaseAdmin.storage
+                .from('documents')
+                .getPublicUrl(fileName);
+                
+              console.log(`[INTER] ✅ EVIDÊNCIA CAPTURADA: ${publicUrl.publicUrl}`);
+              console.log(`[INTER] 📊 Tamanho do arquivo: ${response.length} bytes`);
+              console.log(`[INTER] 🔗 URL COMPLETA DO SUPABASE: ${publicUrl.publicUrl}`);
+            }
+          } catch (storageError) {
+            console.error(`[INTER] ⚠️ Falha ao salvar evidência, mas continuando:`, storageError);
+          }
+          
           return response;
         }
       }
@@ -951,6 +1016,38 @@ class InterBankService {
           
           if (pdfMagic.startsWith("%PDF")) {
             console.log(`[INTER] ✅ Base64 decodificado com sucesso (${pdfBuffer.length} bytes)`);
+            
+            // CAPTURA DE EVIDÊNCIA: Salvar PDF no Supabase Storage
+            try {
+              const timestamp = Date.now();
+              const fileName = `quarentena-mcafee/${codigoSolicitacao}-${timestamp}.pdf`;
+              
+              console.log(`[INTER] 🔬 EVIDÊNCIA: Salvando PDF em ${fileName}...`);
+              
+              const supabaseAdmin = createServerSupabaseAdminClient();
+              const { data, error } = await supabaseAdmin.storage
+                .from('documents')
+                .upload(fileName, pdfBuffer, {
+                  contentType: 'application/pdf',
+                  cacheControl: '3600',
+                  upsert: false
+                });
+                
+              if (error) {
+                console.error(`[INTER] ❌ Erro ao salvar evidência:`, error);
+              } else {
+                const { data: publicUrl } = supabaseAdmin.storage
+                  .from('documents')
+                  .getPublicUrl(fileName);
+                  
+                console.log(`[INTER] ✅ EVIDÊNCIA CAPTURADA: ${publicUrl.publicUrl}`);
+                console.log(`[INTER] 📊 Tamanho do arquivo: ${pdfBuffer.length} bytes`);
+                console.log(`[INTER] 🔗 URL COMPLETA DO SUPABASE: ${publicUrl.publicUrl}`);
+              }
+            } catch (storageError) {
+              console.error(`[INTER] ⚠️ Falha ao salvar evidência, mas continuando:`, storageError);
+            }
+            
             return pdfBuffer;
           }
         } catch (decodeError) {
