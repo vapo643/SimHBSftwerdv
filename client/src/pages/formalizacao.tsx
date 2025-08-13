@@ -1546,7 +1546,32 @@ export default function Formalizacao() {
                                                   </div>
                                                 )}
                                               </div>
-                              
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="rounded border border-gray-700 bg-gray-800 p-3">
+                          <p className="text-sm text-gray-400">
+                            Aguardando processamento dos boletos...
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Documents Tab */}
+              {activeTab === "documents" && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <FileText className="h-5 w-5" />
+                      Documentos
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
                       <div className="flex items-center gap-3 rounded-lg bg-gray-50 p-4">
                         <div
                           className={`flex h-10 w-10 items-center justify-center rounded-full ${
