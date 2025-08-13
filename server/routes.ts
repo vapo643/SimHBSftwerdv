@@ -5179,6 +5179,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use("/api/jobs", jobStatusRoutes);
   app.use("/api", testQueueRoutes);
   app.use("/api/test", testRetryRoutes);
+  
+  // Teste temporário para verificar refatoração do Mock Queue
+  const testMockQueueWorkerRoutes = (await import("./routes/test-mock-queue-worker")).default;
+  app.use("/api/test-mock-queue-worker", testMockQueueWorkerRoutes);
 
   // CCB Diagnostics routes
   const ccbDiagnosticsRouter = (await import("./routes/ccb-diagnostics")).default;

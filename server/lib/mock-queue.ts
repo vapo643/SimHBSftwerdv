@@ -1,11 +1,14 @@
 /**
  * Mock Queue Implementation for Development
- * Simulates BullMQ behavior without requiring Redis
+ * REFATORADO: Agora executa a lógica REAL do worker em vez de apenas simular
  * 
  * In production, use the real queues.ts with Redis
  */
 
 import { EventEmitter } from 'events';
+import { pdfMergeService } from '../services/pdfMergeService';
+import { boletoStorageService } from '../services/boletoStorageService';
+import { clickSignService } from '../services/clickSignService';
 
 interface JobData {
   id: string;
@@ -86,16 +89,191 @@ class MockQueue extends EventEmitter {
     jobData.processedAt = new Date();
     
     console.log(`[MOCK QUEUE ${this.name}] 🔄 Processing job ${jobId}`);
+    console.log(`[MOCK QUEUE ${this.name}] Executando lógica REAL do worker...`);
     
-    // Simulate processing time
-    setTimeout(() => {
+    const startTime = Date.now();
+    
+    try {
+      // REFATORAÇÃO: Executar a lógica REAL do worker baseado no tipo de fila
+      let result: any;
+      
+      // Criar um mock job com interface compatível
+      const mockJob = {
+        id: jobId,
+        data: jobData.data,
+        updateProgress: async (progress: number) => {
+          jobData.progress = progress;
+          console.log(`[MOCK JOB ${jobId}] Progress: ${progress}%`);
+        }
+      };
+      
+      // Executar processamento real baseado na fila
+      switch (this.name) {
+        case 'pdf-processing':
+          result = await this.processPdfJob(mockJob);
+          break;
+          
+        case 'boleto-sync':
+          result = await this.processBoletoJob(mockJob);
+          break;
+          
+        case 'document-processing':
+          // TODO: Implementar quando necessário
+          result = { success: true, message: 'Document processing not yet implemented' };
+          break;
+          
+        case 'notifications':
+          // TODO: Implementar quando necessário
+          result = { success: true, message: 'Notification processing not yet implemented' };
+          break;
+          
+        default:
+          throw new Error(`Unknown queue: ${this.name}`);
+      }
+      
       jobData.status = 'completed';
       jobData.completedAt = new Date();
       jobData.progress = 100;
       
-      console.log(`[MOCK QUEUE ${this.name}] ✅ Completed job ${jobId}`);
-      this.emit('completed', { ...jobData });
-    }, 2000);
+      const duration = Date.now() - startTime;
+      console.log(`[MOCK QUEUE ${this.name}] ✅ Job ${jobId} completed in ${duration}ms`);
+      console.log(`[MOCK QUEUE ${this.name}] Result:`, result);
+      
+      this.emit('completed', { ...jobData, result });
+      
+    } catch (error: any) {
+      jobData.status = 'failed';
+      jobData.failedReason = error.message || 'Unknown error';
+      jobData.completedAt = new Date();
+      
+      const duration = Date.now() - startTime;
+      console.error(`[MOCK QUEUE ${this.name}] ❌ Job ${jobId} failed after ${duration}ms:`, error);
+      
+      this.emit('failed', { ...jobData, error });
+    }
+  }
+  
+  /**
+   * Processar jobs de PDF (carnê) - Lógica REAL do worker.ts
+   */
+  private async processPdfJob(job: any) {
+    console.log(`[WORKER:PDF] 🔄 Processing job ${job.id} - Type: ${job.data.type}`);
+    const startTime = Date.now();
+
+    try {
+      switch (job.data.type) {
+        case 'GENERATE_CARNE':
+          console.log(`[WORKER:PDF] 📚 Generating carnê for proposal ${job.data.propostaId}`);
+          
+          await job.updateProgress(10);
+          
+          // Gerar o carnê usando o serviço real
+          const pdfBuffer = await pdfMergeService.gerarCarneParaProposta(job.data.propostaId);
+          
+          await job.updateProgress(70);
+          
+          // Salvar no storage
+          const signedUrl = await pdfMergeService.salvarCarneNoStorage(
+            job.data.propostaId,
+            pdfBuffer
+          );
+          
+          await job.updateProgress(100);
+          
+          const pdfDuration = Date.now() - startTime;
+          console.log(`[WORKER:PDF] ✅ Carnê generated successfully in ${pdfDuration}ms`);
+          
+          return {
+            success: true,
+            propostaId: job.data.propostaId,
+            url: signedUrl,
+            size: pdfBuffer.length,
+            processingTime: pdfDuration,
+          };
+
+        case 'MERGE_PDFS':
+          console.log(`[WORKER:PDF] 🔀 Merging PDFs for proposal ${job.data.propostaId}`);
+          return { success: true, message: 'PDF merge not yet implemented' };
+
+        default:
+          throw new Error(`Unknown job type: ${job.data.type}`);
+      }
+    } catch (error) {
+      const errorDuration = Date.now() - startTime;
+      console.error(`[WORKER:PDF] ❌ Job ${job.id} failed after ${errorDuration}ms:`, error);
+      throw error;
+    }
+  }
+  
+  /**
+   * Processar jobs de boleto - Lógica REAL do worker.ts
+   */
+  private async processBoletoJob(job: any) {
+    console.log(`[WORKER:BOLETO] 🔄 Processing job ${job.id} - Type: ${job.data.type}`);
+    const startTime = Date.now();
+
+    try {
+      switch (job.data.type) {
+        case 'SYNC_BOLETOS':
+          console.log(`[WORKER:BOLETO] 📥 Syncing boletos for proposal ${job.data.propostaId}`);
+          
+          await job.updateProgress(10);
+          
+          // Sincronizar boletos usando o serviço real
+          const result = await boletoStorageService.sincronizarBoletosDaProposta(
+            job.data.propostaId
+          );
+          
+          await job.updateProgress(100);
+          
+          const syncDuration = Date.now() - startTime;
+          console.log(`[WORKER:BOLETO] ✅ Synced ${result.boletosProcessados}/${result.totalBoletos} boletos in ${syncDuration}ms`);
+          
+          return {
+            success: result.success,
+            propostaId: result.propostaId,
+            totalBoletos: result.totalBoletos,
+            boletosProcessados: result.boletosProcessados,
+            boletosComErro: result.boletosComErro,
+            erros: result.erros,
+            processingTime: syncDuration,
+          };
+
+        case 'GENERATE_AND_SYNC_CARNE':
+          console.log(`[WORKER:BOLETO] 📚 Full carnê generation for proposal ${job.data.propostaId}`);
+          
+          await job.updateProgress(10);
+          const syncResult = await boletoStorageService.sincronizarBoletosDaProposta(
+            job.data.propostaId
+          );
+          
+          await job.updateProgress(50);
+          
+          const carneResult = await boletoStorageService.gerarCarneDoStorage(
+            job.data.propostaId
+          );
+          
+          await job.updateProgress(100);
+          
+          const fullDuration = Date.now() - startTime;
+          console.log(`[WORKER:BOLETO] ✅ Full carnê process completed in ${fullDuration}ms`);
+          
+          return {
+            success: carneResult.success,
+            propostaId: job.data.propostaId,
+            syncResult,
+            carneUrl: carneResult.url,
+            processingTime: fullDuration,
+          };
+
+        default:
+          throw new Error(`Unknown job type: ${job.data.type}`);
+      }
+    } catch (error) {
+      const boletoErrorDuration = Date.now() - startTime;
+      console.error(`[WORKER:BOLETO] ❌ Job ${job.id} failed after ${boletoErrorDuration}ms:`, error);
+      throw error;
+    }
   }
 
   async getJobCounts() {
