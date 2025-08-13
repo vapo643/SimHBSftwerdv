@@ -1451,13 +1451,13 @@ export default function Formalizacao() {
                                                   throw new Error(syncData.message || "Erro na sincronização");
                                                 }
                                                 
-                                                // PASSO B: Geração do carnê
+                                                // PASSO B: Solicitar geração do carnê (retorna jobId)
                                                 toast({
                                                   title: "Sincronização concluída",
-                                                  description: "Gerando o carnê...",
+                                                  description: "Iniciando geração do carnê...",
                                                 });
                                                 
-                                                // Segunda chamada: gerar carnê a partir dos PDFs no Storage
+                                                // Segunda chamada: iniciar geração do carnê
                                                 const carneResponse = await apiRequest(
                                                   `/api/propostas/${proposta.id}/gerar-carne`,
                                                   {
@@ -1467,18 +1467,76 @@ export default function Formalizacao() {
                                                 
                                                 const carneData = carneResponse as any;
                                                 
-                                                if (!carneData.success || !carneData.url) {
-                                                  throw new Error(carneData.message || "URL do carnê não encontrada");
+                                                if (!carneData.success) {
+                                                  throw new Error(carneData.message || "Falha ao iniciar geração");
                                                 }
                                                 
-                                                // PASSO C: Salvar URL do carnê para botão específico
-                                                setCarneUrl(carneData.url);
-                                                setCarneTotalBoletos(collectionsData.length);
+                                                // Verificar se carnê já existe
+                                                if (carneData.existingFile && carneData.data?.url) {
+                                                  // Carnê já existe - disponibilizar download imediatamente
+                                                  setCarneUrl(carneData.data.url);
+                                                  setCarneTotalBoletos(collectionsData.length);
+                                                  setLoadingCarne(false);
+                                                  
+                                                  toast({
+                                                    title: "Carnê já disponível!",
+                                                    description: `PDF consolidado com ${collectionsData.length} boletos pronto para download`,
+                                                  });
+                                                  return;
+                                                }
                                                 
+                                                // Verificar se temos jobId para polling
+                                                if (!carneData.jobId) {
+                                                  throw new Error("ID do job não retornado");
+                                                }
+                                                
+                                                // PASSO C: Polling do status do job
                                                 toast({
-                                                  title: "Carnê gerado com sucesso!",
-                                                  description: `PDF consolidado com ${collectionsData.length} boletos está pronto para download`,
+                                                  title: "Processando carnê...",
+                                                  description: "Aguarde enquanto geramos o PDF consolidado",
                                                 });
+                                                
+                                                const jobId = carneData.jobId;
+                                                let attempts = 0;
+                                                const maxAttempts = 20; // 20 tentativas x 3 segundos = 1 minuto
+                                                
+                                                const pollJobStatus = async (): Promise<void> => {
+                                                  attempts++;
+                                                  
+                                                  const statusResponse = await apiRequest(
+                                                    `/api/jobs/${jobId}/status`,
+                                                    {
+                                                      method: "GET",
+                                                    }
+                                                  );
+                                                  
+                                                  const statusData = statusResponse as any;
+                                                  
+                                                  if (statusData.status === 'completed' && statusData.data?.url) {
+                                                    // Job concluído com sucesso
+                                                    setCarneUrl(statusData.data.url);
+                                                    setCarneTotalBoletos(collectionsData.length);
+                                                    setLoadingCarne(false);
+                                                    
+                                                    toast({
+                                                      title: "Carnê pronto para download!",
+                                                      description: `PDF consolidado com ${collectionsData.length} boletos gerado com sucesso`,
+                                                    });
+                                                    return;
+                                                  } else if (statusData.status === 'failed') {
+                                                    // Job falhou
+                                                    throw new Error(statusData.data?.error || "Falha na geração do carnê");
+                                                  } else if (attempts >= maxAttempts) {
+                                                    // Timeout
+                                                    throw new Error("Tempo limite excedido. Tente novamente.");
+                                                  } else {
+                                                    // Job ainda em processamento - continuar polling
+                                                    setTimeout(pollJobStatus, 3000); // Aguardar 3 segundos e tentar novamente
+                                                  }
+                                                };
+                                                
+                                                // Iniciar polling
+                                                await pollJobStatus();
                                                 
                                               } catch (error: any) {
                                                 console.error("Erro no fluxo de geração de carnê:", error);
@@ -1487,7 +1545,6 @@ export default function Formalizacao() {
                                                   description: error.message || "Não foi possível completar o processo de geração do carnê",
                                                   variant: "destructive",
                                                 });
-                                              } finally {
                                                 setLoadingCarne(false);
                                               }
                                             }}

@@ -53,6 +53,46 @@ router.post(
       
       console.log(`[CARNE API - PRODUCER] ✅ Proposta válida - ID: ${proposta.id}, Nome: ${proposta.cliente_nome}`);
       
+      // VERIFICAR SE JÁ EXISTE CARNÊ NO STORAGE
+      console.log(`[CARNE API - PRODUCER] 🔍 Verificando se já existe carnê no Storage...`);
+      
+      const { data: existingFiles, error: listError } = await supabase
+        .storage
+        .from('documents')
+        .list(`propostas/${id}/carnes`, {
+          limit: 1,
+          sortBy: { column: 'created_at', order: 'desc' }
+        });
+      
+      if (!listError && existingFiles && existingFiles.length > 0) {
+        // Carnê já existe - retornar URL do arquivo existente
+        const fileName = existingFiles[0].name;
+        const filePath = `propostas/${id}/carnes/${fileName}`;
+        
+        console.log(`[CARNE API - PRODUCER] ✅ Carnê já existe: ${fileName}`);
+        
+        // Gerar URL assinada para o carnê existente
+        const { data: signedUrlData, error: signedUrlError } = await supabase
+          .storage
+          .from('documents')
+          .createSignedUrl(filePath, 3600); // 1 hora
+        
+        if (!signedUrlError && signedUrlData?.signedUrl) {
+          return res.json({
+            success: true,
+            message: 'Carnê já foi gerado anteriormente',
+            status: 'completed',
+            existingFile: true,
+            data: {
+              propostaId: id,
+              url: signedUrlData.signedUrl,
+              fileName: fileName,
+              hint: 'Use a URL para fazer download do carnê existente'
+            }
+          });
+        }
+      }
+      
       // NOVO: Adicionar job à fila em vez de processar sincronamente
       console.log(`[CARNE API - PRODUCER] 📥 Adicionando job à fila pdf-processing...`);
       

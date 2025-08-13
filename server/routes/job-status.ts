@@ -36,55 +36,63 @@ router.get(
       let job = null;
       let queueName = null;
       
-      // Para a implementação mock, vamos simular a resposta
-      // Em produção com Redis, usaríamos: const job = await queue.getJob(jobId);
+      // Buscar job real das filas (desenvolvimento usa mock-queue)
+      // Verificar em qual fila o job está baseado no prefixo do ID
+      if (jobId.startsWith('pdf-processing')) {
+        queueName = 'pdf-processing';
+        job = await queues.pdfProcessing.getJob(jobId);
+      } else if (jobId.startsWith('boleto-sync')) {
+        queueName = 'boleto-sync';
+        job = await queues.boletoSync.getJob(jobId);
+      } else if (jobId.startsWith('document-processing')) {
+        queueName = 'document-processing';
+        job = await queues.document.getJob(jobId);
+      } else if (jobId.startsWith('notifications')) {
+        queueName = 'notifications';
+        job = await queues.notification.getJob(jobId);
+      }
       
-      // Simulação para desenvolvimento
-      // Assumir que jobs com ID começando com 'pdf-processing' ou 'boleto-sync' estão nessas filas
-      if (jobId.startsWith('pdf-processing') || jobId.startsWith('boleto-sync')) {
-        queueName = jobId.startsWith('pdf-processing') ? 'pdf-processing' : 'boleto-sync';
+      if (job) {
+        // Job encontrado - retornar dados reais
+        const state = await job.getState();
+        const progress = job.progress;
+        const returnvalue = job.returnvalue;
         
-        // Simular diferentes estados baseado no tempo
-        const jobNumber = parseInt(jobId.split('-').pop() || '0');
-        const elapsed = Date.now() % 10000; // Ciclo de 10 segundos
+        console.log(`[JOB STATUS API] 📊 Job ${jobId} - Status: ${state}, Progress: ${progress}%`);
         
-        let status = 'waiting';
-        let progress = 0;
-        let returnvalue = null;
+        // Formatar a resposta baseada no estado real do job
+        let responseData = null;
         
-        if (elapsed < 2000) {
-          status = 'waiting';
-          progress = 0;
-        } else if (elapsed < 8000) {
-          status = 'active';
-          progress = Math.floor((elapsed - 2000) / 60); // 0-100%
-        } else {
-          status = 'completed';
-          progress = 100;
-          // Simular resultado de sucesso
-          returnvalue = {
-            success: true,
-            propostaId: req.params.propostaId || 'PROP-123456',
-            carneUrl: `https://storage.example.com/propostas/carne-${jobId}.pdf`,
-            message: 'Carnê gerado com sucesso',
-            processingTime: 3500,
+        if (state === 'completed' && returnvalue) {
+          // Para jobs de carnê, incluir a URL do carnê se disponível
+          responseData = {
+            success: returnvalue.success || false,
+            propostaId: returnvalue.propostaId,
+            url: returnvalue.url, // URL do Storage para download
+            message: returnvalue.message || 'Processamento concluído',
+            processingTime: returnvalue.processingTime,
+            size: returnvalue.size,
+            timestamp: new Date().toISOString()
+          };
+        } else if (state === 'failed') {
+          responseData = {
+            success: false,
+            error: job.failedReason || 'Erro desconhecido no processamento',
             timestamp: new Date().toISOString()
           };
         }
-        
-        console.log(`[JOB STATUS API] 📊 Job ${jobId} - Status: ${status}, Progress: ${progress}%`);
         
         return res.json({
           success: true,
           jobId,
           queue: queueName,
-          status,
-          progress,
-          data: returnvalue,
+          status: state,
+          progress: progress || 0,
+          data: responseData,
           timestamps: {
-            created: new Date(Date.now() - 5000).toISOString(),
-            processed: status === 'active' || status === 'completed' ? new Date(Date.now() - 3000).toISOString() : null,
-            completed: status === 'completed' ? new Date().toISOString() : null
+            created: job.timestamp ? new Date(job.timestamp).toISOString() : null,
+            processed: job.processedOn ? new Date(job.processedOn).toISOString() : null,
+            completed: job.finishedOn ? new Date(job.finishedOn).toISOString() : null
           }
         });
       }

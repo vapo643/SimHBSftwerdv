@@ -42,6 +42,7 @@ class MockJob {
 
 class MockQueue extends EventEmitter {
   private jobs: Map<string, JobData> = new Map();
+  private activeJobs: Map<string, MockJob> = new Map();
   private jobCounter = 0;
   name: string;
 
@@ -65,6 +66,7 @@ class MockQueue extends EventEmitter {
     };
 
     this.jobs.set(jobId, jobData);
+    this.activeJobs.set(jobId, job); // Armazenar o MockJob também
     
     console.log(`[DEV QUEUE ${this.name}] ➕ Added job ${jobId}:`, {
       name: jobName,
@@ -134,6 +136,7 @@ class MockQueue extends EventEmitter {
       jobData.status = 'completed';
       jobData.completedAt = new Date();
       jobData.progress = 100;
+      (jobData as any).result = result; // Salvar o resultado para o getJob
       
       const duration = Date.now() - startTime;
       console.log(`[DEV QUEUE ${this.name}] ✅ Job ${jobId} completed in ${duration}ms`);
@@ -289,6 +292,30 @@ class MockQueue extends EventEmitter {
     });
 
     return counts;
+  }
+
+  /**
+   * Buscar um job pelo ID
+   */
+  async getJob(jobId: string): Promise<any> {
+    const jobData = this.jobs.get(jobId);
+    const mockJob = this.activeJobs.get(jobId);
+    
+    if (!jobData || !mockJob) {
+      return null;
+    }
+    
+    // Adicionar propriedades extras para compatibilidade com o endpoint de status
+    const job = mockJob as any;
+    job.getState = async () => jobData.status;
+    job.progress = jobData.progress;
+    job.returnvalue = jobData.status === 'completed' ? (jobData as any).result : null;
+    job.failedReason = jobData.failedReason;
+    job.timestamp = jobData.createdAt.getTime();
+    job.processedOn = jobData.processedAt?.getTime();
+    job.finishedOn = jobData.completedAt?.getTime();
+    
+    return job;
   }
 }
 

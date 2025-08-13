@@ -152,7 +152,7 @@ export class PdfMergeService {
       console.log(`[PDF MERGE] 💾 Salvando carnê no Supabase Storage...`);
       
       const timestamp = getBrasiliaTimestamp().replace(/[^0-9]/g, '');
-      const fileName = `carnes/${propostaId}/carne_${timestamp}.pdf`;
+      const fileName = `propostas/${propostaId}/carnes/carne-${timestamp}.pdf`;
       
       // Upload para o Supabase Storage
       const supabase = createServerSupabaseAdminClient();
