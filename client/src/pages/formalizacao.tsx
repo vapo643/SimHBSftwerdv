@@ -433,6 +433,8 @@ export default function Formalizacao() {
   const [interBoletoData, setInterBoletoData] = useState<{codigoSolicitacao?: string} | null>(null);
   const [loadingInter, setLoadingInter] = useState(false);
   const [loadingCarne, setLoadingCarne] = useState(false);
+  const [carneUrl, setCarneUrl] = useState<string | null>(null);
+  const [carneTotalBoletos, setCarneTotalBoletos] = useState<number>(0);
   const [boletosGerados, setBoletosGerados] = useState<any[]>([]);
 
   const propostaId = params?.id;
@@ -1469,18 +1471,13 @@ export default function Formalizacao() {
                                                   throw new Error(carneData.message || "URL do carnê não encontrada");
                                                 }
                                                 
-                                                // PASSO C: Download do carnê
-                                                const link = document.createElement("a");
-                                                link.href = carneData.url;
-                                                link.download = `carne-proposta-${proposta.id}.pdf`;
-                                                link.target = "_blank";
-                                                document.body.appendChild(link);
-                                                link.click();
-                                                document.body.removeChild(link);
+                                                // PASSO C: Salvar URL do carnê para botão específico
+                                                setCarneUrl(carneData.url);
+                                                setCarneTotalBoletos(collectionsData.length);
                                                 
                                                 toast({
                                                   title: "Carnê gerado com sucesso!",
-                                                  description: `PDF consolidado com ${collectionsData.length} boletos baixado`,
+                                                  description: `PDF consolidado com ${collectionsData.length} boletos está pronto para download`,
                                                 });
                                                 
                                               } catch (error: any) {
@@ -1508,6 +1505,34 @@ export default function Formalizacao() {
                                                 Gerar Carnê para Impressão
                                               </div>
                                             )}
+                                          </Button>
+                                        )}
+
+                                        {/* Botão para baixar carnê - aparece após geração */}
+                                        {carneUrl && (
+                                          <Button
+                                            size="sm"
+                                            onClick={() => {
+                                              // Download do carnê via URL assinada
+                                              const link = document.createElement("a");
+                                              link.href = carneUrl;
+                                              link.download = `carne-proposta-${proposta.id}.pdf`;
+                                              link.target = "_blank";
+                                              document.body.appendChild(link);
+                                              link.click();
+                                              document.body.removeChild(link);
+                                              
+                                              toast({
+                                                title: "Download iniciado",
+                                                description: `Carnê com ${carneTotalBoletos} boletos`
+                                              });
+                                            }}
+                                            className="border-green-600 text-green-400 hover:bg-green-600/10 bg-green-900/20"
+                                          >
+                                            <div className="flex items-center">
+                                              <Download className="mr-2 h-4 w-4" />
+                                              Baixar Carnê ({carneTotalBoletos} boletos)
+                                            </div>
                                           </Button>
                                         )}
                                       </div>
