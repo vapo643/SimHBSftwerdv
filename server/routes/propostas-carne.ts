@@ -229,8 +229,9 @@ router.post(
         }
       });
       
-      // Retornar resposta imediata
+      // Retornar resposta imediata no formato esperado pelo frontend
       return res.json({
+        success: true,
         status: 'sincronização iniciada',
         propostaId: id,
         message: 'Os boletos estão sendo sincronizados em background'
