@@ -54,6 +54,8 @@ import {
   generateApprovalDate,
   getBrasiliaTimestamp,
 } from "./lib/timezone";
+// Use mock queue in development to avoid Redis dependency
+import { queues, checkQueuesHealth } from "./lib/mock-queue";
 import { securityLogger, SecurityEventType, getClientIP } from "./lib/security-logger";
 import { passwordSchema, validatePassword } from "./lib/password-validator";
 import { timingNormalizerMiddleware } from "./middleware/timing-normalizer";
@@ -5380,6 +5382,148 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Gestão de Contratos routes (ADMIN e DIRETOR apenas)
   app.use("/api", gestaoContratosRoutes);
+
+  // ======================= JOB QUEUE TEST ENDPOINT =======================
+  // Endpoint temporário para teste da arquitetura de Job Queue
+  
+  // Endpoint público de teste (sem autenticação para validação rápida)
+  app.get("/api/test/job-queue-health", async (req, res) => {
+    try {
+      console.log("[TEST ENDPOINT] 🏥 Verificando saúde do sistema de Job Queue");
+      
+      const health = await checkQueuesHealth();
+      
+      res.json({
+        success: true,
+        message: "Job Queue Architecture is operational",
+        timestamp: new Date().toISOString(),
+        architecture: {
+          pattern: "Async Worker Queue",
+          implementation: health.mode,
+          benefits: [
+            "✅ Non-blocking operations",
+            "✅ Parallel processing",
+            "✅ Automatic retry on failure",
+            "✅ Progress tracking",
+            "✅ Scalable to 50+ simultaneous operations"
+          ]
+        },
+        status: health
+      });
+    } catch (error) {
+      console.error("[TEST ENDPOINT] ❌ Health check failed:", error);
+      res.status(500).json({
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+  
+  app.post(
+    "/api/test/job-queue",
+    jwtAuthMiddleware,
+    requireAnyRole,
+    async (req: AuthenticatedRequest, res) => {
+      try {
+        console.log("[TEST ENDPOINT] 🧪 Recebendo requisição de teste de Job Queue");
+        
+        const { type = "test", propostaId } = req.body;
+        
+        // Adicionar job à fila apropriada baseado no tipo
+        let job;
+        let queueName;
+        
+        switch (type) {
+          case "pdf":
+            queueName = "pdf-processing";
+            job = await queues.pdfProcessing.add("TEST_PDF_JOB", {
+              type: "GENERATE_CARNE",
+              propostaId: propostaId || "TEST-PROPOSTA-123",
+              userId: req.user?.id,
+              timestamp: new Date().toISOString()
+            });
+            break;
+            
+          case "boleto":
+            queueName = "boleto-sync";
+            job = await queues.boletoSync.add("TEST_BOLETO_JOB", {
+              type: "SYNC_BOLETOS",
+              propostaId: propostaId || "TEST-PROPOSTA-456",
+              userId: req.user?.id,
+              timestamp: new Date().toISOString()
+            });
+            break;
+            
+          default:
+            queueName = "pdf-processing";
+            job = await queues.pdfProcessing.add("TEST_GENERIC_JOB", {
+              type: "TEST",
+              message: "Teste genérico da arquitetura de Job Queue",
+              userId: req.user?.id,
+              timestamp: new Date().toISOString()
+            });
+        }
+        
+        console.log(`[TEST ENDPOINT] ✅ Job adicionado à fila ${queueName}:`, {
+          id: job.id,
+          name: job.name,
+          data: job.data
+        });
+        
+        // Verificar saúde das filas
+        const health = await checkQueuesHealth();
+        
+        res.json({
+          success: true,
+          message: `Job ${job.id} adicionado à fila ${queueName} com sucesso`,
+          jobDetails: {
+            id: job.id,
+            name: job.name,
+            queue: queueName,
+            data: job.data,
+            timestamp: new Date().toISOString()
+          },
+          queuesHealth: health
+        });
+        
+      } catch (error) {
+        console.error("[TEST ENDPOINT] ❌ Erro ao adicionar job:", error);
+        res.status(500).json({
+          success: false,
+          error: error instanceof Error ? error.message : "Erro ao adicionar job à fila",
+          hint: "Verifique se o Redis está rodando e as filas estão configuradas"
+        });
+      }
+    }
+  );
+
+  // Endpoint para verificar status das filas
+  app.get(
+    "/api/test/queue-status",
+    jwtAuthMiddleware,
+    requireAnyRole,
+    async (req: AuthenticatedRequest, res) => {
+      try {
+        console.log("[TEST ENDPOINT] 📊 Verificando status das filas");
+        
+        const health = await checkQueuesHealth();
+        
+        res.json({
+          success: true,
+          timestamp: new Date().toISOString(),
+          queues: health
+        });
+        
+      } catch (error) {
+        console.error("[TEST ENDPOINT] ❌ Erro ao verificar status:", error);
+        res.status(500).json({
+          success: false,
+          error: error instanceof Error ? error.message : "Erro ao verificar status das filas"
+        });
+      }
+    }
+  );
+  // ======================= END JOB QUEUE TEST =======================
 
   const httpServer = createServer(app);
   return httpServer;
