@@ -1,0 +1,37 @@
+**IMPLEMENTAR:**
+Um novo serviço de backend para orquestrar o download de todos os boletos de uma proposta do Banco Inter e salvá-los em uma estrutura de pastas organizada no Supabase Storage.
+
+**CONTEXT:**
+Nossa estratégia de download e fusão em tempo real falhou em testes e se mostrou arquiteturalmente inferior. Estamos a pivotar para uma arquitetura superior, mais robusta e assíncrona. Esta missão é para construir a fundação deste novo fluxo: um serviço que popula nosso Supabase Storage com os PDFs individuais de cada boleto.
+
+**CURRENT STATE:**
+O sistema tenta baixar e fundir os PDFs em uma única requisição, o que é frágil e propenso a erros.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  Um novo serviço (ex: `boletoStorageService.ts`) com uma função principal, `sincronizarBoletosDaProposta(propostaId)`.
+2.  Quando esta função for chamada, ela deve:
+    a. Baixar **TODOS** os PDFs de boletos individuais associados à proposta do Banco Inter de forma sequencial e confiável.
+    b. Para cada PDF baixado, salvá-lo em nosso Supabase Storage.
+3.  Os ficheiros devem ser salvos seguindo uma nova e rigorosa estrutura de pastas: `propostas/{propostaId}/boletos/emitidos_pendentes/{codigoSolicitacao}.pdf`.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+**1. Criação do Novo Serviço (`boletoStorageService.ts`):**
+    - **Ação:** Crie o novo ficheiro de serviço.
+    - **Implementação:** Desenvolva a função `sincronizarBoletosDaProposta(propostaId)`. A lógica interna deve:
+        1.  Buscar no nosso banco de dados todos os `codigoSolicitacao` para o `propostaId` fornecido.
+        2.  Executar um **loop sequencial** (`for...of`) sobre la lista de códigos.
+        3.  Dentro do loop:
+            - Chamar `interBankService.obterPdfCobranca()` para baixar o buffer do PDF.
+            - Chamar o nosso serviço do Supabase Storage para fazer o upload deste buffer para o caminho de ficheiro correto (ex: `propostas/874e2dce.../boletos/emitidos_pendentes/73e76cfe....pdf`).
+
+**2. Criação do Endpoint de Gatilho:**
+    - **Ação:** Crie um novo endpoint de API para acionar este processo, por exemplo: `POST /api/propostas/:id/sincronizar-boletos`.
+    - **Implementação:** Este endpoint deve ser protegido por nosso middleware de autenticação e, ao ser chamado, deve invocar a função `sincronizarBoletosDaProposta` em background. Ele pode retornar imediatamente uma mensagem como `{ "status": "sincronização iniciada" }`.
+
+**PROTOCOLO OBRIGATÓRIO 5-CHECK:**
+1.  Mapear todos os arquivos envolvidos.
+2.  Implementar de forma modular.
+3.  Executar `get_latest_lsp_diagnostics` para garantir ZERO erros.
+4.  Criar um script de teste para validar o serviço de forma isolada.
+5.  O critério de sucesso é que, após chamar o novo endpoint, todos os PDFs individuais de uma proposta de teste apareçam na estrutura de pastas correta no nosso bucket do Supabase Storage.
