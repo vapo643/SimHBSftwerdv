@@ -174,8 +174,9 @@ router.get(
 );
 
 /**
- * Endpoint para sincronizar boletos do Banco Inter para o Storage
+ * REFATORADO: Endpoint para SOLICITAR sincronização de boletos (PRODUTOR)
  * POST /api/propostas/:id/sincronizar-boletos
+ * Retorna jobId imediatamente enquanto o worker processa em background
  */
 router.post(
   '/:id/sincronizar-boletos',
@@ -186,8 +187,15 @@ router.post(
       const { id } = req.params;
       const userId = req.user?.id;
       
-      console.log(`[BOLETO SYNC API] 🚀 Sincronização solicitada para proposta: ${id}`);
-      console.log(`[BOLETO SYNC API] 👤 Usuário: ${userId}`);
+      console.log(`[BOLETO SYNC API - PRODUCER] 🎯 Solicitação de sincronização para proposta: ${id}`);
+      console.log(`[BOLETO SYNC API - PRODUCER] 👤 Usuário: ${userId}`);
+      
+      // Validação básica
+      if (!id || typeof id !== 'string') {
+        return res.status(400).json({
+          error: 'ID da proposta inválido'
+        });
+      }
       
       // Validar se a proposta existe
       const { createServerSupabaseAdminClient } = await import('../lib/supabase');
@@ -195,115 +203,56 @@ router.post(
       
       const { data: proposta, error } = await supabase
         .from('propostas')
-        .select('id, status')
+        .select('id, status, cliente_nome')
         .eq('id', String(id))
         .single();
       
       if (error || !proposta) {
-        console.error(`[BOLETO SYNC API] ❌ Proposta não encontrada: ${id}`);
+        console.error(`[BOLETO SYNC API - PRODUCER] ❌ Proposta não encontrada: ${id}`);
         return res.status(404).json({
           error: 'Proposta não encontrada'
         });
       }
       
-      // Importar e executar o serviço de sincronização
-      const { boletoStorageService } = await import('../services/boletoStorageService');
+      console.log(`[BOLETO SYNC API - PRODUCER] ✅ Proposta válida - ID: ${proposta.id}`);
       
-      // Executar sincronização em background (não bloquear a resposta)
-      setImmediate(async () => {
-        try {
-          const resultado = await boletoStorageService.sincronizarBoletosDaProposta(id);
-          console.log(`[BOLETO SYNC API] ✅ Sincronização concluída:`, resultado);
-        } catch (error) {
-          console.error(`[BOLETO SYNC API] ❌ Erro na sincronização:`, error);
+      // NOVO: Adicionar job à fila boleto-sync em vez de processar sincronamente
+      console.log(`[BOLETO SYNC API - PRODUCER] 📥 Adicionando job à fila boleto-sync...`);
+      
+      const job = await queues.boletoSync.add('SYNC_BOLETOS', {
+        type: 'SYNC_BOLETOS',
+        propostaId: id,
+        userId: userId,
+        clienteNome: proposta.cliente_nome,
+        timestamp: new Date().toISOString()
+      });
+      
+      console.log(`[BOLETO SYNC API - PRODUCER] ✅ Job ${job.id} adicionado à fila com sucesso`);
+      
+      // Retornar resposta IMEDIATA com o jobId
+      return res.json({
+        success: true,
+        message: 'Sincronização de boletos iniciada',
+        jobId: job.id,
+        status: 'processing',
+        data: {
+          propostaId: id,
+          propostaNumero: `PROP-${proposta.id}`,
+          clienteNome: proposta.cliente_nome,
+          hint: 'Use o jobId para consultar o status em /api/jobs/{jobId}/status'
         }
       });
       
-      // Retornar resposta imediata no formato esperado pelo frontend
-      return res.json({
-        success: true,
-        status: 'sincronização iniciada',
-        propostaId: id,
-        message: 'Os boletos estão sendo sincronizados em background'
-      });
-      
     } catch (error: any) {
-      console.error(`[BOLETO SYNC API] ❌ Erro ao iniciar sincronização:`, error);
+      console.error(`[BOLETO SYNC API - PRODUCER] ❌ Erro ao solicitar sincronização:`, error);
       return res.status(500).json({
-        error: 'Erro ao iniciar sincronização',
+        error: 'Erro ao solicitar sincronização',
         message: error.message || 'Erro desconhecido'
       });
     }
   }
 );
 
-/**
- * Endpoint para gerar carnê a partir dos boletos salvos no Storage
- * POST /api/propostas/:id/gerar-carne
- */
-router.post(
-  '/:id/gerar-carne',
-  jwtAuthMiddleware,
-  requireAnyRole,
-  async (req: AuthenticatedRequest, res) => {
-    try {
-      const { id } = req.params;
-      const userId = req.user?.id;
-      
-      console.log(`[CARNE STORAGE API] 📚 Geração de carnê do Storage solicitada para proposta: ${id}`);
-      console.log(`[CARNE STORAGE API] 👤 Usuário: ${userId}`);
-      
-      // Validar se a proposta existe
-      const { createServerSupabaseAdminClient } = await import('../lib/supabase');
-      const supabase = createServerSupabaseAdminClient();
-      
-      const { data: proposta, error } = await supabase
-        .from('propostas')
-        .select('id, status')
-        .eq('id', String(id))
-        .single();
-      
-      if (error || !proposta) {
-        console.error(`[CARNE STORAGE API] ❌ Proposta não encontrada: ${id}`);
-        return res.status(404).json({
-          error: 'Proposta não encontrada'
-        });
-      }
-      
-      // Importar e executar o serviço de geração de carnê
-      const { boletoStorageService } = await import('../services/boletoStorageService');
-      
-      console.log(`[CARNE STORAGE API] 🔄 Gerando carnê do Storage...`);
-      const resultado = await boletoStorageService.gerarCarneDoStorage(id);
-      
-      if (resultado.success && resultado.url) {
-        console.log(`[CARNE STORAGE API] ✅ Carnê gerado com sucesso`);
-        
-        return res.json({
-          success: true,
-          propostaId: id,
-          url: resultado.url,
-          message: 'Carnê gerado com sucesso a partir dos boletos armazenados'
-        });
-      } else {
-        console.error(`[CARNE STORAGE API] ❌ Erro na geração do carnê:`, resultado.error);
-        
-        return res.status(500).json({
-          success: false,
-          error: 'Erro ao gerar carnê',
-          message: resultado.error || 'Erro desconhecido'
-        });
-      }
-      
-    } catch (error: any) {
-      console.error(`[CARNE STORAGE API] ❌ Erro ao gerar carnê:`, error);
-      return res.status(500).json({
-        success: false,
-        error: 'Erro ao processar requisição',
-        message: error.message || 'Erro desconhecido'
-      });
-    }
-  }
-);
+// Endpoint duplicado removido - Usando o endpoint assíncrono refatorado acima
 
 export default router;

@@ -40,9 +40,9 @@ router.get(
       // Em produção com Redis, usaríamos: const job = await queue.getJob(jobId);
       
       // Simulação para desenvolvimento
-      // Assumir que jobs com ID começando com 'pdf-processing' estão nessa fila
-      if (jobId.startsWith('pdf-processing')) {
-        queueName = 'pdf-processing';
+      // Assumir que jobs com ID começando com 'pdf-processing' ou 'boleto-sync' estão nessas filas
+      if (jobId.startsWith('pdf-processing') || jobId.startsWith('boleto-sync')) {
+        queueName = jobId.startsWith('pdf-processing') ? 'pdf-processing' : 'boleto-sync';
         
         // Simular diferentes estados baseado no tempo
         const jobNumber = parseInt(jobId.split('-').pop() || '0');
