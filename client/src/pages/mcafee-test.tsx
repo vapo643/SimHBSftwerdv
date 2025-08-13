@@ -53,9 +53,10 @@ export default function McAfeeTestPage() {
       const endTime = Date.now();
       const duration = endTime - startTime;
 
-      // Response do api.get retorna { data: blob } quando responseType='blob'
-      const blob = response.data || response;
-      if (blob && blob instanceof Blob) {
+      // Verificação explícita de sucesso para um Blob
+      if (response && response.data instanceof Blob && response.status === 200) {
+        // CASO DE SUCESSO: Toda a lógica de download aqui
+        const blob = response.data;
         const contentType = blob.type;
         const contentLength = blob.size;
         
@@ -89,7 +90,8 @@ export default function McAfeeTestPage() {
         console.log(`[MCAFEE_TEST] ✅ ${method.name} - Download iniciado`);
         
       } else {
-        throw new Error('Falha ao processar o download - resposta inválida do servidor');
+        // Se a resposta não for o que esperamos, lance um erro explícito e legível
+        throw new Error(`Resposta inesperada do servidor: Status ${response.status || 'desconhecido'}`);
       }
       
     } catch (error: any) {

@@ -1,0 +1,35 @@
+**BUG:**
+Nosso diagnóstico forense foi conclusivo. O erro `[object Blob]` ocorre porque nossa função `api.get` rejeita a promessa ao receber uma resposta do tipo 'blob', fazendo com que nosso código de tratamento de SUCESSO seja ignorado e o código de tratamento de ERRO seja executado indevidamente.
+
+**PROCESSO SISTEMÁTICO (Roadmap de Correção Definitivo):**
+
+**1. Isolamento do Ponto de Falha:**
+    - **Ação:** Concentre-se exclusivamente na função `testMethod` dentro do ficheiro `client/src/pages/mcafee-test.tsx`.
+
+**2. Implementação da Correção Arquitetural:**
+    - **Ação:** Refatore a lógica `try/catch` para tratar explicitamente a resposta de 'blob' como um caso de sucesso.
+    - **Implementação:**
+        a. Mantenha a chamada `const response = await api.get(...)` dentro do bloco `try`.
+        b. **IMEDIATAMENTE APÓS** a chamada, adicione uma verificação explícita de sucesso. A lógica deve ser:
+            ```typescript
+            // ... dentro do bloco try
+            const response = await api.get(...);
+
+            // Verificação explícita de sucesso para um Blob
+            if (response && response.data instanceof Blob && response.status === 200) {
+                // CASO DE SUCESSO:
+                // Mova TODA a lógica de download que já existe (URL.createObjectURL, a.click(), etc.) para DENTRO deste bloco 'if'.
+                // Registre o resultado de SUCESSO na sua lista de 'Test Results' aqui dentro.
+            } else {
+                // Se a resposta não for o que esperamos, lance um erro explícito e legível.
+                throw new Error(`Resposta inesperada do servidor: Status ${response.status || 'desconhecido'}`);
+            }
+            ```
+        c. **Refinamento do Bloco `catch`:** O bloco `catch` agora só será acionado para erros de rede genuínos ou pelo erro que nós mesmos lançamos. Garanta que a mensagem de erro exibida seja sempre uma string de texto legível.
+
+**3. Validação Final (Protocolo 5-CHECK):**
+    - **Ação Obrigatória:** Execute `get_latest_lsp_diagnostics` para garantir ZERO erros.
+    - **Teste Obrigatório:** Após a correção, acesse a página `/mcafee-test` e clique no botão "Testar Download" para o "PDF com Bypass".
+    - **Relatório Final:** O critério de sucesso é duplo:
+        1. O navegador deve iniciar o **download do ficheiro `boleto-bypass.pdf`** com sucesso.
+        2. O erro `[object Blob]` deve **desaparecer permanentemente** da lista de resultados, sendo substituído por uma entrada de 'SUCESSO'.
