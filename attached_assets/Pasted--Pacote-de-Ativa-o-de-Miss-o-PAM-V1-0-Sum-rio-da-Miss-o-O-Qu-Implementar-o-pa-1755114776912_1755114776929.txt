@@ -1,0 +1,44 @@
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Implementar o padrão de projeto "Circuit Breaker" para encapsular todas as chamadas de API externas (`ClickSign`, `Banco Inter`) e prevenir falhas em cascata.
+* **Intenção Estratégica (O Porquê):** Se um serviço externo ficar indisponível, nossa política de retry pode sobrecarregá-lo ainda mais e consumir nossos próprios recursos de worker em tentativas inúteis. O Circuit Breaker age como um disjuntor elétrico: ele "abre o circuito" (para de fazer chamadas) quando detecta muitas falhas, dando tempo para o serviço externo se recuperar e protegendo a estabilidade do nosso sistema.
+* **Histórico Relevante (Consulta Obrigatória):** Consulte o seu próprio relatório `AUDITORIA_ARQUITETURAL_FLUXO_FORMALIZACAO.md`. Esta missão é a implementação direta da sua **Proposta B: Circuit Breaker Pattern**.
+* **Modelo Mental (Como se Encaixa):** O Circuit Breaker será um "wrapper" em volta das nossas chamadas de API. Em vez de chamar `axios.get(...)` ou `fetch(...)` diretamente, chamaremos `circuitBreaker.fire(...)`. Ele irá gerir os estados: `FECHADO` (operações normais), `ABERTO` (falha imediata, sem chamar a API) e `SEMI-ABERTO` (permite uma única tentativa para verificar se o serviço se recuperou).
+* **Riscos Antecipados:** **Risco:** Uma configuração de limiares (thresholds) muito sensível pode abrir o circuito desnecessariamente. **Contramedida:** A implementação deve começar com valores de threshold conservadores e permitir que sejam configuráveis via variáveis de ambiente.
+
+---
+
+**IMPLEMENTAR:**
+A integração do padrão de Circuit Breaker para todas as chamadas de API externas nos nossos serviços (`interBankService.ts`, `clicksignService.ts`).
+
+**CURRENT STATE:**
+As chamadas de API são diretas (com retries). Se o serviço externo estiver indisponível, cada job na nossa fila de retry tentará o número máximo de vezes, consumindo recursos e tempo.
+
+**EXPECTED (Estado Final de Sucesso):**
+As chamadas de API são envolvidas por um Circuit Breaker. Se a taxa de erro para o Banco Inter exceder um limiar, o disjuntor "abre", e todas as tentativas subsequentes de chamá-lo (de qualquer worker) falham **imediatamente** por um período, retornando um erro específico (ex: "Circuit Breaker ABERTO"), protegendo ambos os sistemas.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+**1. Instalação da Dependência:**
+    - **Ação:** Instale uma biblioteca robusta de Circuit Breaker. A recomendada é `opossum`: `npm install opossum`.
+
+**2. Criação e Configuração dos Breakers:**
+    - **Ação:** Crie instâncias separadas do Circuit Breaker para cada serviço externo.
+    - **Implementação:**
+        - Em `interBankService.ts`, crie e configure um `interApiBreaker`.
+        - Em `clicksignService.ts`, crie e configure um `clicksignApiBreaker`.
+        - Use opções de configuração sensatas, como as que você mesmo sugeriu no seu relatório de auditoria (ex: `timeout: 5000`, `errorThresholdPercentage: 50`, `resetTimeout: 30000`).
+
+**3. Integração nas Funções de API:**
+    - **Ação:** Refatore todas as funções que fazem chamadas de rede externas (ex: `obterPdfCobranca`, `enviarParaAssinatura`, `getAccessToken`, etc.).
+    - **Implementação:** Em vez de chamar a API diretamente, envolva a chamada com o método `.fire()` do breaker correspondente. Ex: `await interApiBreaker.fire(parametros)`.
+
+**4. Lógica de Fallback e Tratamento de Erro:**
+    - **Ação:** Implemente a lógica de tratamento de erro para quando o disjuntor estiver aberto.
+    - **Implementação:** O bloco `catch` deve verificar se o erro é do tipo `CircuitBreakerOpenError`. Se for, o job deve falhar imediatamente com uma mensagem de log clara, como `'[CIRCUIT_BREAKER] Circuito para API do Banco Inter está aberto. Job falhou imediatamente.'`, para que o BullMQ possa agendar o retry para muito mais tarde, sem gastar as tentativas imediatas.
+
+**PROTOCOLO OBRIGATÓRIO 5-CHECK:**
+1.  Mapear os arquivos de serviço envolvidos.
+2.  Garantir que **TODAS** as chamadas externas estejam protegidas pelos breakers.
+3.  Executar `get_latest_lsp_diagnostics` para garantir ZERO erros.
+4.  O critério de sucesso é **provar que o disjuntor abre e fecha**. Crie um teste simulado onde você força a chamada de API a sempre falhar e observe nos logs o breaker a mudar de estado (`closed` -> `open` -> `half-open` -> `closed`).

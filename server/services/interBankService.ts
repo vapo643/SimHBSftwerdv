@@ -16,6 +16,7 @@
 
 import https from "https";
 import { Agent as UndiciAgent } from "undici";
+import { createCircuitBreaker, INTER_BREAKER_OPTIONS, isCircuitBreakerOpen, formatCircuitBreakerError } from "../lib/circuit-breaker";
 
 interface InterBankConfig {
   apiUrl: string;
@@ -133,6 +134,8 @@ class InterBankService {
     token: string;
     expiresAt: number;
   } | null = null;
+  private tokenBreaker: any;
+  private apiBreaker: any;
 
   constructor() {
     // Auto-detect if we're using production credentials based on presence of INTER_CONTA_CORRENTE
@@ -158,12 +161,52 @@ class InterBankService {
         "[INTER] ⚠️ Client credentials not configured. Inter Bank integration will not work."
       );
     }
+
+    console.log("[INTER] 🔴 Circuit Breakers will be initialized on first use");
   }
 
   /**
-   * Get OAuth2 access token (cached for 60 minutes)
+   * Initialize circuit breakers lazily
+   */
+  private initializeBreakers() {
+    if (!this.tokenBreaker) {
+      this.tokenBreaker = createCircuitBreaker(
+        async () => this.getAccessTokenDirect(),
+        { ...INTER_BREAKER_OPTIONS, name: 'interTokenBreaker' }
+      );
+    }
+    
+    if (!this.apiBreaker) {
+      this.apiBreaker = createCircuitBreaker(
+        async (endpoint: string, method: string, data?: any, headers?: any) => {
+          return this.makeRequestDirect(endpoint, method, data, headers);
+        },
+        { ...INTER_BREAKER_OPTIONS, name: 'interApiBreaker' }
+      );
+    }
+  }
+
+  /**
+   * Get OAuth2 access token WITH circuit breaker protection
    */
   private async getAccessToken(): Promise<string> {
+    this.initializeBreakers();
+    
+    try {
+      return await this.tokenBreaker.fire();
+    } catch (error) {
+      if (isCircuitBreakerOpen(error)) {
+        console.log(formatCircuitBreakerError(error, 'Inter Token API'));
+        throw new Error('Inter Bank token service temporarily unavailable');
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Direct token fetch (called by circuit breaker)
+   */
+  private async getAccessTokenDirect(): Promise<string> {
     try {
       // Check if we have a valid cached token
       if (this.tokenCache && Date.now() < this.tokenCache.expiresAt) {
@@ -407,10 +450,32 @@ class InterBankService {
   }
 
   /**
-   * Make authenticated request to Inter API WITH mTLS
-   * CRITICAL FIX: Now properly uses HTTPS with mTLS configuration like getAccessToken
+   * Make authenticated request to Inter API WITH circuit breaker protection
    */
   private async makeRequest(
+    endpoint: string,
+    method: "GET" | "POST" | "PATCH" | "DELETE" | "PUT" = "GET",
+    data?: any,
+    additionalHeaders?: Record<string, string>
+  ): Promise<any> {
+    this.initializeBreakers();
+    
+    try {
+      return await this.apiBreaker.fire(endpoint, method, data, additionalHeaders);
+    } catch (error) {
+      if (isCircuitBreakerOpen(error)) {
+        console.log(formatCircuitBreakerError(error, 'Inter API'));
+        throw new Error('Inter Bank API temporarily unavailable - circuit breaker is OPEN');
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Direct API request (called by circuit breaker)
+   * CRITICAL FIX: Now properly uses HTTPS with mTLS configuration like getAccessToken
+   */
+  private async makeRequestDirect(
     endpoint: string,
     method: "GET" | "POST" | "PATCH" | "DELETE" | "PUT" = "GET",
     data?: any,

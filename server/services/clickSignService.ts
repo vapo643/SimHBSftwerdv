@@ -8,9 +8,12 @@
  * - Electronic signature workflow
  * - Webhook handling
  * - Status tracking
+ * - Circuit breaker protection for all API calls
  *
  * Documentation: https://developers.clicksign.com/
  */
+
+import { createCircuitBreaker, CLICKSIGN_BREAKER_OPTIONS, isCircuitBreakerOpen, formatCircuitBreakerError } from "../lib/circuit-breaker";
 
 interface ClickSignConfig {
   apiUrl: string;
@@ -71,6 +74,7 @@ interface ClickSignResult {
 
 class ClickSignService {
   private config: ClickSignConfig;
+  private apiBreaker: any;
 
   constructor() {
     // SEMPRE usar API de produção - conforme solicitado pelo usuário
@@ -90,6 +94,47 @@ class ClickSignService {
     if (!this.config.apiToken) {
       console.warn("[CLICKSIGN] ⚠️ API token not configured. ClickSign integration will not work.");
     }
+
+    console.log("[CLICKSIGN] 🔴 Circuit Breaker will be initialized on first use");
+  }
+
+  /**
+   * Initialize circuit breaker lazily
+   */
+  private initializeBreaker() {
+    if (!this.apiBreaker) {
+      this.apiBreaker = createCircuitBreaker(
+        async (url: string, options?: RequestInit) => {
+          return this.fetchDirect(url, options);
+        },
+        { ...CLICKSIGN_BREAKER_OPTIONS, name: 'clickSignApiBreaker' }
+      );
+      console.log("[CLICKSIGN] 🔴 Circuit Breaker initialized for API protection");
+    }
+  }
+
+  /**
+   * Fetch with circuit breaker protection
+   */
+  private async fetchWithBreaker(url: string, options?: RequestInit): Promise<Response> {
+    this.initializeBreaker();
+    
+    try {
+      return await this.apiBreaker.fire(url, options);
+    } catch (error) {
+      if (isCircuitBreakerOpen(error)) {
+        console.log(formatCircuitBreakerError(error, 'ClickSign API'));
+        throw new Error('ClickSign API temporarily unavailable - circuit breaker is OPEN');
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Direct fetch (called by circuit breaker)
+   */
+  private async fetchDirect(url: string, options?: RequestInit): Promise<Response> {
+    return fetch(url, options);
   }
 
   /**
@@ -102,7 +147,7 @@ class ClickSignService {
         return false;
       }
 
-      const response = await fetch(
+      const response = await this.fetchWithBreaker(
         `${this.config.apiUrl}/account?access_token=${this.config.apiToken}`
       );
       const success = response.ok;
@@ -130,7 +175,7 @@ class ClickSignService {
       formData.append("document[path]", `/CCB/${filename}`);
       formData.append("document[content_type]", "application/pdf");
 
-      const response = await fetch(
+      const response = await this.fetchWithBreaker(
         `${this.config.apiUrl}/documents?access_token=${this.config.apiToken}`,
         {
           method: "POST",
@@ -190,7 +235,7 @@ class ClickSignService {
         );
 
         try {
-          const response = await fetch(downloadUrl, {
+          const response = await this.fetchWithBreaker(downloadUrl, {
             method: "GET",
             headers: {
               Accept: "application/pdf",
@@ -253,7 +298,7 @@ class ClickSignService {
                     `[CLICKSIGN] 🔗 Found PDF URL in JSON: ${downloadUrl.substring(0, 100)}...`
                   );
 
-                  const pdfResponse = await fetch(downloadUrl);
+                  const pdfResponse = await this.fetchWithBreaker(downloadUrl);
                   if (pdfResponse.ok) {
                     const pdfBuffer = Buffer.from(await pdfResponse.arrayBuffer());
                     if (pdfBuffer.length > 4 && pdfBuffer.toString("ascii", 0, 4) === "%PDF") {
@@ -304,7 +349,7 @@ class ClickSignService {
 
       try {
         const checkUrl = `${this.config.apiUrl}/documents/${documentKey}?access_token=${this.config.apiToken}`;
-        const checkResponse = await fetch(checkUrl, {
+        const checkResponse = await this.fetchWithBreaker(checkUrl, {
           method: "GET",
           headers: {
             Accept: "application/json",
@@ -357,7 +402,7 @@ class ClickSignService {
         },
       };
 
-      const response = await fetch(
+      const response = await this.fetchWithBreaker(
         `${this.config.apiUrl}/signers?access_token=${this.config.apiToken}`,
         {
           method: "POST",
@@ -407,7 +452,7 @@ class ClickSignService {
         },
       };
 
-      const response = await fetch(
+      const response = await this.fetchWithBreaker(
         `${this.config.apiUrl}/lists?access_token=${this.config.apiToken}`,
         {
           method: "POST",
@@ -450,7 +495,7 @@ class ClickSignService {
         },
       };
 
-      const response = await fetch(
+      const response = await this.fetchWithBreaker(
         `${this.config.apiUrl}/list/${listKey}/request_signature?access_token=${this.config.apiToken}`,
         {
           method: "POST",
@@ -522,7 +567,7 @@ class ClickSignService {
    */
   async getDocumentStatus(documentKey: string): Promise<any> {
     try {
-      const response = await fetch(
+      const response = await this.fetchWithBreaker(
         `${this.config.apiUrl}/documents/${documentKey}?access_token=${this.config.apiToken}`
       );
 
@@ -542,7 +587,7 @@ class ClickSignService {
    */
   async getListStatus(listKey: string): Promise<any> {
     try {
-      const response = await fetch(
+      const response = await this.fetchWithBreaker(
         `${this.config.apiUrl}/lists/${listKey}?access_token=${this.config.apiToken}`
       );
 
