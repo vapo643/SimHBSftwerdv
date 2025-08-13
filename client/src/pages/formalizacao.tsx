@@ -432,6 +432,7 @@ export default function Formalizacao() {
   const [useBiometricAuth, setUseBiometricAuth] = useState(false);
   const [interBoletoData, setInterBoletoData] = useState<{codigoSolicitacao?: string} | null>(null);
   const [loadingInter, setLoadingInter] = useState(false);
+  const [loadingCarne, setLoadingCarne] = useState(false);
   const [boletosGerados, setBoletosGerados] = useState<any[]>([]);
 
   const propostaId = params?.id;
@@ -1419,59 +1420,94 @@ export default function Formalizacao() {
                                           </span>
                                         </div>
                                         
-                                        {/* Botão para baixar carnê completo */}
+                                        {/* Botão para gerar carnê completo - NOVO FLUXO DE DOIS PASSOS */}
                                         {collectionsData && collectionsData.length > 1 && (
                                           <Button
                                             size="sm"
                                             variant="outline"
                                             onClick={async () => {
                                               try {
+                                                setLoadingCarne(true);
+                                                
+                                                // PASSO A: Sincronização de boletos
                                                 toast({
-                                                  title: "Gerando carnê...",
-                                                  description: "Preparando PDF com todos os boletos",
+                                                  title: "Iniciando sincronização dos boletos",
+                                                  description: "Aguarde...",
                                                 });
                                                 
-                                                // Usar apiRequest para garantir autenticação correta
-                                                const response = await apiRequest(
-                                                  `/api/propostas/${proposta.id}/carne-pdf`,
+                                                // Primeira chamada: sincronizar boletos do Inter para o Storage
+                                                const syncResponse = await apiRequest(
+                                                  `/api/propostas/${proposta.id}/sincronizar-boletos`,
                                                   {
-                                                    method: "GET",
+                                                    method: "POST",
                                                   }
                                                 );
                                                 
-                                                // Response já é o JSON quando usando apiRequest
-                                                const data = response as any;
+                                                const syncData = syncResponse as any;
                                                 
-                                                if (data.success && data.data?.downloadUrl) {
-                                                  // Baixar o carnê
-                                                  const link = document.createElement("a");
-                                                  link.href = data.data.downloadUrl;
-                                                  link.download = `carne-proposta-${proposta.id}.pdf`;
-                                                  link.target = "_blank";
-                                                  document.body.appendChild(link);
-                                                  link.click();
-                                                  document.body.removeChild(link);
-                                                  
-                                                  toast({
-                                                    title: "Carnê baixado!",
-                                                    description: `PDF com ${collectionsData.length} boletos gerado com sucesso`,
-                                                  });
-                                                } else {
-                                                  throw new Error(data.error || "URL de download não encontrada");
+                                                if (!syncData.success) {
+                                                  throw new Error(syncData.message || "Erro na sincronização");
                                                 }
-                                              } catch (error) {
-                                                console.error("Erro ao baixar carnê:", error);
+                                                
+                                                // PASSO B: Geração do carnê
                                                 toast({
-                                                  title: "Erro",
-                                                  description: "Não foi possível gerar o carnê de boletos",
+                                                  title: "Sincronização concluída",
+                                                  description: "Gerando o carnê...",
+                                                });
+                                                
+                                                // Segunda chamada: gerar carnê a partir dos PDFs no Storage
+                                                const carneResponse = await apiRequest(
+                                                  `/api/propostas/${proposta.id}/gerar-carne`,
+                                                  {
+                                                    method: "POST",
+                                                  }
+                                                );
+                                                
+                                                const carneData = carneResponse as any;
+                                                
+                                                if (!carneData.success || !carneData.url) {
+                                                  throw new Error(carneData.message || "URL do carnê não encontrada");
+                                                }
+                                                
+                                                // PASSO C: Download do carnê
+                                                const link = document.createElement("a");
+                                                link.href = carneData.url;
+                                                link.download = `carne-proposta-${proposta.id}.pdf`;
+                                                link.target = "_blank";
+                                                document.body.appendChild(link);
+                                                link.click();
+                                                document.body.removeChild(link);
+                                                
+                                                toast({
+                                                  title: "Carnê gerado com sucesso!",
+                                                  description: `PDF consolidado com ${collectionsData.length} boletos baixado`,
+                                                });
+                                                
+                                              } catch (error: any) {
+                                                console.error("Erro no fluxo de geração de carnê:", error);
+                                                toast({
+                                                  title: "Erro ao gerar carnê",
+                                                  description: error.message || "Não foi possível completar o processo de geração do carnê",
                                                   variant: "destructive",
                                                 });
+                                              } finally {
+                                                setLoadingCarne(false);
                                               }
                                             }}
+                                            disabled={loadingCarne}
                                             className="border-blue-600 text-blue-400 hover:bg-blue-600/10"
                                           >
-                                            <FileText className="mr-2 h-4 w-4" />
-                                            Baixar Carnê Completo
+                                            {loadingCarne ? (
+                                              <div className="flex items-center">
+                                                <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-blue-400"></div>
+                                                Processando...
+                                              </div>
+                                            ) : (
+                                              <div className="flex items-center">
+                                                <Printer className="mr-2 h-4 w-4" />
+                                                Gerar Carnê para Impressão
+                                              </div>
+                                            )}
                                           </Button>
                                         )}
                                       </div>
