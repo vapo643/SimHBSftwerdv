@@ -5019,8 +5019,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const interCollectionsRouter = (await import("./routes/inter-collections.js")).default;
   app.use("/api/inter/collections", interCollectionsRouter);
   
-  const mcafeeBypassRouter = (await import("./routes/mcafee-bypass.js")).default;
-  app.use("/api/mcafee-bypass", mcafeeBypassRouter);
+
 
   // Register Inter Fix Collections (emergency endpoint)
   const interFixRouter = (await import("./routes/inter-fix-collections.js")).default;
