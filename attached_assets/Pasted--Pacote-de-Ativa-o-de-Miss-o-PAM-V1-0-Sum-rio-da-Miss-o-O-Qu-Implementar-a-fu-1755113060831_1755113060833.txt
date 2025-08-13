@@ -1,0 +1,64 @@
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Implementar a fundação de uma arquitetura de processamento de tarefas assíncrono, utilizando uma Job Queue com BullMQ e um broker Redis.
+* **Intenção Estratégica (O Porquê):** Nossa auditoria arquitetural provou que o processamento síncrono de tarefas pesadas (geração de PDFs, sincronização de boletos) na nossa API principal é o nosso maior gargalo e ponto de falha. Esta missão irá desacoplar estas tarefas, garantindo que a nossa API permaneça sempre rápida e responsiva, enquanto o trabalho pesado é executado de forma segura em background.
+* **Histórico Relevante (Consulta Obrigatória):** Ative sua base de conhecimento. Consulte o seu próprio relatório `AUDITORIA_ARQUITETURAL_FLUXO_FORMALIZACAO.md`. Sua implementação deve ser a solução direta para os problemas de "Event Loop Bloqueado" e "Baixa Capacidade de Processamento Simultâneo" que você mesmo diagnosticou.
+* **Modelo Mental (Como se Encaixa):** Esta é uma mudança de paradigma. Nossa API Express.js se tornará um "Produtor" de tarefas. Ela não executará mais o trabalho pesado; sua única função será validar a requisição e adicionar um "job" a uma fila no Redis. Precisaremos de um novo processo Node.js, completamente separado, que atuará como o "Consumidor" (ou "Worker"), que irá escutar a fila, pegar os jobs e executá-los.
+* **Riscos Antecipados:** **Risco:** A configuração do Redis é um novo ponto de falha. **Contramedida:** A implementação deve incluir logs detalhados para o enfileiramento de jobs e para o início/sucesso/falha do processamento no worker.
+
+---
+
+**IMPLEMENTAR:**
+A fundação da nossa nova arquitetura de processamento assíncrono com BullMQ.
+
+**PRINCÍPIOS INEGOCIÁVEIS DE ARQUITETURA:**
+1.  **EXCLUSIVIDADE DO SUPABASE:** Este sistema opera **100% no ecossistema Supabase** (Banco de Dados PostgreSQL, Autenticação, Storage). Sob **NENHUMA circunstância**, você deve criar, conectar ou utilizar qualquer outro provedor de banco de dados, especialmente o **Neon**. Qualquer necessidade de banco de dados deve ser resolvida dentro da nossa instância Supabase existente.
+
+**CURRENT STATE:**
+O servidor Express.js executa todas as tarefas na mesma thread, bloqueando a aplicação.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  As dependências `bullmq` e `ioredis` instaladas.
+2.  Uma nova configuração que conecta o sistema ao Redis.
+3.  Um novo ficheiro de serviço que define nossas filas (inicialmente, uma fila chamada `pdf-processing`).
+4.  Um novo ficheiro executável para o nosso processo "Worker" (ex: `server/worker.ts`).
+5.  A aplicação principal (API) e o novo Worker a correrem em paralelo.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+**1. Configuração da Infraestrutura:**
+    - **Ação:** Instale as dependências necessárias: `npm install bullmq ioredis`.
+    - **Ação:** Adicione as variáveis de conexão do Redis aos nossos 'Secrets' do Replit.
+
+**2. Criação da Fila (Queue):**
+    - **Ação:** Crie um novo ficheiro (ex: `server/lib/queues.ts`) que inicializa e exporta uma instância da fila BullMQ.
+    - **Implementação:**
+      ```typescript
+      import { Queue } from 'bullmq';
+      export const pdfQueue = new Queue('pdf-processing', { connection: { host: process.env.REDIS_HOST, port: process.env.REDIS_PORT } });
+      ```
+
+**3. Criação do Processo Worker:**
+    - **Ação:** Crie um novo ficheiro `server/worker.ts`.
+    - **Implementação:** Este ficheiro deve importar a `pdfQueue` e definir um `Worker`. Inicialmente, a lógica do worker pode ser um placeholder que apenas loga os dados do job recebido.
+      ```typescript
+      import { Worker } from 'bullmq';
+      import { pdfQueue } from './lib/queues';
+
+      const worker = new Worker('pdf-processing', async job => {
+        console.log(`[WORKER] Processando job ${job.id} com dados:`, job.data);
+        // A lógica de negócio real será adicionada aqui depois.
+      });
+
+      console.log('[WORKER] Processo worker iniciado. Aguardando jobs...');
+      ```
+
+**4. Modificação do Script de Inicialização:**
+    - **Ação:** Atualize o comando `dev` no seu `package.json` para iniciar tanto o servidor da API quanto o novo processo worker simultaneamente. Você pode usar uma ferramenta como `npm-run-all` ou `concurrently`.
+
+**PROTOCOLO OBRIGATÓRIO 5-CHECK:**
+1.  Mapear todos os arquivos novos e modificados.
+2.  Garantir que a separação entre "Produtor" (API) e "Consumidor" (Worker) seja clara.
+3.  Executar `get_latest_lsp_diagnostics` para garantir ZERO erros.
+4.  Criar um endpoint de teste temporário na API que simplesmente adiciona um job à `pdfQueue`.
+5.  O critério final de sucesso é chamar este endpoint de teste e ver a mensagem `[WORKER] Processando job...` aparecer no console do seu processo worker.

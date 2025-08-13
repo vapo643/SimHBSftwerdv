@@ -49,6 +49,7 @@ import gestaoContratosRoutes from "./routes/gestao-contratos";
 import testCcbCoordinatesRoutes from "./routes/test-ccb-coordinates";
 import propostasCarneRoutes from "./routes/propostas-carne";
 import jobStatusRoutes from "./routes/job-status";
+import testQueueRoutes from "./routes/test-queue";
 import {
   getBrasiliaDate,
   formatBrazilianDateTime,
@@ -5080,6 +5081,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Job Status routes (para consultar status de jobs assíncronos)
   app.use("/api/jobs", jobStatusRoutes);
+  app.use("/api", testQueueRoutes);
 
   // CCB Diagnostics routes
   const ccbDiagnosticsRouter = (await import("./routes/ccb-diagnostics")).default;
