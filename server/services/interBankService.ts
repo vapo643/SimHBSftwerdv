@@ -16,9 +16,6 @@
 
 import https from "https";
 import { Agent as UndiciAgent } from "undici";
-import { createServerSupabaseAdminClient } from "../lib/supabase";
-import { PDFDocument } from "pdf-lib";
-
 
 interface InterBankConfig {
   apiUrl: string;
@@ -824,63 +821,12 @@ class InterBankService {
   }
 
   /**
-   * Repara um PDF com estrutura malformada usando pdf-lib
-   * Resolve o problema de stream/endstream mismatch que causa detecção de falso positivo
-   * @param pdfBuffer Buffer do PDF malformado
-   * @returns Buffer do PDF reparado
-   */
-  private async repararPdfBuffer(pdfBuffer: Buffer): Promise<Buffer> {
-    try {
-      console.log(`[INTER] 🔧 Iniciando reparo do PDF (${pdfBuffer.length} bytes)...`);
-      
-      // Carrega o PDF, ignorando erros estruturais se possível
-      const pdfDoc = await PDFDocument.load(pdfBuffer, { 
-        ignoreEncryption: true,
-        updateMetadata: false 
-      });
-      
-      console.log(`[INTER] ✅ PDF carregado com sucesso para reparo`);
-      console.log(`[INTER] 📊 Páginas no documento: ${pdfDoc.getPageCount()}`);
-      
-      // Simplesmente salvar o documento novamente irá reconstruir
-      // a estrutura e corrigir o problema de stream/endstream
-      const pdfBytesReparados = await pdfDoc.save();
-      const bufferReparado = Buffer.from(pdfBytesReparados);
-      
-      console.log(`[INTER] ✅ PDF reparado com sucesso (${bufferReparado.length} bytes)`);
-      console.log(`[INTER] 🔍 Diferença de tamanho: ${bufferReparado.length - pdfBuffer.length} bytes`);
-      
-      // Validar que o PDF reparado é válido
-      const pdfMagic = bufferReparado.slice(0, 5).toString('ascii');
-      if (pdfMagic.startsWith('%PDF')) {
-        console.log(`[INTER] ✅ PDF reparado é válido! Magic bytes: ${pdfMagic}`);
-      } else {
-        console.log(`[INTER] ⚠️ PDF reparado pode ter problemas. Magic bytes: ${pdfMagic}`);
-      }
-      
-      return bufferReparado;
-    } catch (error) {
-      console.error(`[INTER] ❌ Falha ao reparar o PDF:`, error);
-      console.error(`[INTER] ⚠️ Retornando buffer original sem reparo`);
-      // Em caso de falha, retorne o buffer original para não quebrar o fluxo
-      return pdfBuffer;
-    }
-  }
-
-  /**
    * Get collection PDF using direct API endpoint
    * CORREÇÃO: API Inter exige Accept: application/json mas retorna PDF
    */
   async obterPdfCobranca(codigoSolicitacao: string): Promise<Buffer> {
     console.log(`[INTER] 📄 SOLUÇÃO IDENTIFICADA: API v3 retorna PDF como base64 em JSON`);
     console.log(`[INTER] 🔍 Processando codigoSolicitacao: ${codigoSolicitacao}`);
-
-    // VALIDAÇÃO CRÍTICA: Garantir que só processamos UUIDs válidos
-    if (!this.isValidUUID(codigoSolicitacao)) {
-      console.error(`[INTER] ❌ ERRO CRÍTICO: Tentativa de buscar PDF com ID inválido: ${codigoSolicitacao}`);
-      console.error(`[INTER] ❌ IDs como "CORRETO-", "SX-", etc. são inválidos! Apenas UUIDs do Inter são aceitos.`);
-      throw new Error(`ID inválido para PDF: ${codigoSolicitacao}. Deve ser um UUID válido da API do Inter.`);
-    }
 
     try {
       // Verificar se cobrança existe
@@ -970,46 +916,10 @@ class InterBankService {
           const pdfMagic = pdfBuffer.slice(0, 5).toString('ascii');
           if (pdfMagic.startsWith('%PDF')) {
             console.log(`[INTER] ✅ PDF VÁLIDO CONFIRMADO! Magic bytes: ${pdfMagic}`);
-            
-            // CAPTURA DE EVIDÊNCIA: Salvar PDF no Supabase Storage
-            try {
-              const timestamp = Date.now();
-              const fileName = `quarentena-mcafee/${codigoSolicitacao}-${timestamp}.pdf`;
-              
-              console.log(`[INTER] 🔬 EVIDÊNCIA: Salvando PDF em ${fileName}...`);
-              
-              const supabaseAdmin = createServerSupabaseAdminClient();
-              const { data, error } = await supabaseAdmin.storage
-                .from('documents')
-                .upload(fileName, pdfBuffer, {
-                  contentType: 'application/pdf',
-                  cacheControl: '3600',
-                  upsert: false
-                });
-                
-              if (error) {
-                console.error(`[INTER] ❌ Erro ao salvar evidência:`, error);
-              } else {
-                const { data: publicUrl } = supabaseAdmin.storage
-                  .from('documents')
-                  .getPublicUrl(fileName);
-                  
-                console.log(`[INTER] ✅ EVIDÊNCIA CAPTURADA: ${publicUrl.publicUrl}`);
-                console.log(`[INTER] 📊 Tamanho do arquivo: ${pdfBuffer.length} bytes`);
-                console.log(`[INTER] 🔗 URL COMPLETA DO SUPABASE: ${publicUrl.publicUrl}`);
-              }
-            } catch (storageError) {
-              console.error(`[INTER] ⚠️ Falha ao salvar evidência, mas continuando:`, storageError);
-            }
-            
-            // REPARO DO PDF: Corrigir estrutura malformada
-            console.log(`[INTER] 🔧 APLICANDO REPARO AO PDF...`);
-            const pdfReparado = await this.repararPdfBuffer(pdfBuffer);
-            console.log(`[INTER] ✅ PDF REPARADO E PRONTO PARA DOWNLOAD`);
-            
-            return pdfReparado;
+            return pdfBuffer;
           } else {
             console.log(`[INTER] ⚠️ Buffer não parece ser PDF. Primeiros bytes:`, pdfBuffer.slice(0, 20));
+            // Tentar retornar mesmo assim
             return pdfBuffer;
           }
         }
@@ -1021,44 +931,7 @@ class InterBankService {
         const pdfMagic = response.slice(0, 5).toString("utf8");
         if (pdfMagic.startsWith("%PDF")) {
           console.log(`[INTER] ✅ PDF binário válido (${response.length} bytes)`);
-          
-          // CAPTURA DE EVIDÊNCIA: Salvar PDF no Supabase Storage
-          try {
-            const timestamp = Date.now();
-            const fileName = `quarentena-mcafee/${codigoSolicitacao}-${timestamp}.pdf`;
-            
-            console.log(`[INTER] 🔬 EVIDÊNCIA: Salvando PDF em ${fileName}...`);
-            
-            const supabaseAdmin = createServerSupabaseAdminClient();
-            const { data, error } = await supabaseAdmin.storage
-              .from('documents')
-              .upload(fileName, response, {
-                contentType: 'application/pdf',
-                cacheControl: '3600',
-                upsert: false
-              });
-              
-            if (error) {
-              console.error(`[INTER] ❌ Erro ao salvar evidência:`, error);
-            } else {
-              const { data: publicUrl } = supabaseAdmin.storage
-                .from('documents')
-                .getPublicUrl(fileName);
-                
-              console.log(`[INTER] ✅ EVIDÊNCIA CAPTURADA: ${publicUrl.publicUrl}`);
-              console.log(`[INTER] 📊 Tamanho do arquivo: ${response.length} bytes`);
-              console.log(`[INTER] 🔗 URL COMPLETA DO SUPABASE: ${publicUrl.publicUrl}`);
-            }
-          } catch (storageError) {
-            console.error(`[INTER] ⚠️ Falha ao salvar evidência, mas continuando:`, storageError);
-          }
-          
-          // REPARO DO PDF: Corrigir estrutura malformada
-          console.log(`[INTER] 🔧 APLICANDO REPARO AO PDF (Buffer direto)...`);
-          const pdfReparadoDireto = await this.repararPdfBuffer(response);
-          console.log(`[INTER] ✅ PDF REPARADO E PRONTO PARA DOWNLOAD`);
-          
-          return pdfReparadoDireto;
+          return response;
         }
       }
       
@@ -1071,44 +944,7 @@ class InterBankService {
           
           if (pdfMagic.startsWith("%PDF")) {
             console.log(`[INTER] ✅ Base64 decodificado com sucesso (${pdfBuffer.length} bytes)`);
-            
-            // CAPTURA DE EVIDÊNCIA: Salvar PDF no Supabase Storage
-            try {
-              const timestamp = Date.now();
-              const fileName = `quarentena-mcafee/${codigoSolicitacao}-${timestamp}.pdf`;
-              
-              console.log(`[INTER] 🔬 EVIDÊNCIA: Salvando PDF em ${fileName}...`);
-              
-              const supabaseAdmin = createServerSupabaseAdminClient();
-              const { data, error } = await supabaseAdmin.storage
-                .from('documents')
-                .upload(fileName, pdfBuffer, {
-                  contentType: 'application/pdf',
-                  cacheControl: '3600',
-                  upsert: false
-                });
-                
-              if (error) {
-                console.error(`[INTER] ❌ Erro ao salvar evidência:`, error);
-              } else {
-                const { data: publicUrl } = supabaseAdmin.storage
-                  .from('documents')
-                  .getPublicUrl(fileName);
-                  
-                console.log(`[INTER] ✅ EVIDÊNCIA CAPTURADA: ${publicUrl.publicUrl}`);
-                console.log(`[INTER] 📊 Tamanho do arquivo: ${pdfBuffer.length} bytes`);
-                console.log(`[INTER] 🔗 URL COMPLETA DO SUPABASE: ${publicUrl.publicUrl}`);
-              }
-            } catch (storageError) {
-              console.error(`[INTER] ⚠️ Falha ao salvar evidência, mas continuando:`, storageError);
-            }
-            
-            // REPARO DO PDF: Corrigir estrutura malformada
-            console.log(`[INTER] 🔧 APLICANDO REPARO AO PDF (String base64)...`);
-            const pdfReparadoString = await this.repararPdfBuffer(pdfBuffer);
-            console.log(`[INTER] ✅ PDF REPARADO E PRONTO PARA DOWNLOAD`);
-            
-            return pdfReparadoString;
+            return pdfBuffer;
           }
         } catch (decodeError) {
           console.error(`[INTER] ❌ Falha ao decodificar base64:`, decodeError);
@@ -1138,22 +974,9 @@ class InterBankService {
     }
   }
   
-  // Validação de UUID para garantir que só usamos códigos reais do Inter
-  private isValidUUID(str: string): boolean {
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    return uuidRegex.test(str);
-  }
-
   // Método auxiliar para tentar endpoints alternativos
   private async tentarEndpointsAlternativos(codigoSolicitacao: string): Promise<Buffer> {
     console.log(`[INTER] 🔄 Testando endpoints alternativos para PDF...`);
-    
-    // CRÍTICO: Rejeitar IDs inválidos que causam erro 400
-    if (!this.isValidUUID(codigoSolicitacao)) {
-      console.error(`[INTER] ❌ ERRO CRÍTICO: ID inválido detectado: ${codigoSolicitacao}`);
-      console.error(`[INTER] ❌ Este não é um UUID válido do Inter. IDs como "CORRETO-" são inválidos!`);
-      throw new Error(`ID inválido: ${codigoSolicitacao}. Deve ser um UUID válido da API do Inter.`);
-    }
     
     const alternativeEndpoints = [
       `/cobranca/v3/cobrancas/${codigoSolicitacao}/pdf/download`,
@@ -1179,8 +1002,7 @@ class InterBankService {
         // Processar resposta similar ao método principal
         if (typeof response === 'object' && response.pdf) {
           console.log(`[INTER] ✅ PDF encontrado em endpoint alternativo!`);
-          const pdfBuffer = Buffer.from(response.pdf, 'base64');
-          return pdfBuffer;
+          return Buffer.from(response.pdf, 'base64');
         }
         
         if (response instanceof Buffer && response.slice(0, 5).toString("utf8").startsWith("%PDF")) {
@@ -1203,35 +1025,42 @@ class InterBankService {
     console.log(`[INTER] 🔍 DEBUG MODE: Analisando resposta completa da API`);
     
     const token = await this.getAccessToken();
-    const url = `${this.config.apiUrl}/cobranca/v3/cobrancas/${codigoSolicitacao}/pdf`;
+    const url = `${this.apiUrl}/cobranca/v3/cobrancas/${codigoSolicitacao}/pdf`;
     
     const headers = {
       'Authorization': `Bearer ${token}`,
       'Accept': 'application/json',
-      'x-conta-corrente': this.config.contaCorrente
+      'x-conta-corrente': this.contaCorrente
     };
     
+    const httpsAgent = new https.Agent({
+      cert: formatCertificate(this.certificate),
+      key: formatPrivateKey(this.privateKey),
+      rejectUnauthorized: true
+    });
+    
     try {
-      const response = await this.makeRequest(
-        `/cobranca/v3/cobrancas/${codigoSolicitacao}/pdf`,
-        "GET",
-        null,
-        headers
-      );
+      const response = await axios.get(url, {
+        headers,
+        httpsAgent,
+        timeout: 30000
+      });
       
       console.log('[INTER] 🔍 RESPOSTA COMPLETA DA API:');
-      console.log('Data type:', typeof response);
-      console.log('Data length:', JSON.stringify(response).length);
+      console.log('Status:', response.status);
+      console.log('Headers:', response.headers);
+      console.log('Data type:', typeof response.data);
+      console.log('Data length:', JSON.stringify(response.data).length);
       
       // Se for objeto, mostrar estrutura
-      if (typeof response === 'object') {
-        console.log('Object keys:', Object.keys(response));
+      if (typeof response.data === 'object') {
+        console.log('Object keys:', Object.keys(response.data));
         console.log('Sample (first 1000 chars):');
-        console.log(JSON.stringify(response, null, 2).substring(0, 1000));
+        console.log(JSON.stringify(response.data, null, 2).substring(0, 1000));
         
         // Verificar cada campo
-        for (const key in response) {
-          const value = response[key];
+        for (const key in response.data) {
+          const value = response.data[key];
           console.log(`Field '${key}':`, {
             type: typeof value,
             length: typeof value === 'string' ? value.length : 'N/A',
@@ -1240,7 +1069,7 @@ class InterBankService {
         }
       }
       
-      return response;
+      return response.data;
     } catch (error: any) {
       console.error('[INTER] ❌ Debug failed:', error.message);
       throw error;

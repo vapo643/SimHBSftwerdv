@@ -12,10 +12,6 @@ import { z } from "zod";
 import { db } from "../lib/supabase.js";
 import { interCollections, propostas, historicoObservacoesCobranca } from "@shared/schema";
 import { eq, and } from "drizzle-orm";
-// PURGA: Alternative format service removido
-import * as fs from "fs";
-import * as path from "path";
-import { promisify } from "util";
 
 const router = express.Router();
 
@@ -1051,9 +1047,111 @@ router.get(
 );
 
 /**
- * ENDPOINT REMOVIDO: PNG conversion foi removido da base de código
- * Este endpoint estava sendo usado para bypass de antivírus
+ * Cancel collection
+ * POST /api/inter/collections/:codigoSolicitacao/cancel
  */
+router.post(
+  "/collections/:codigoSolicitacao/cancel",
+  jwtAuthMiddleware,
+  async (req: AuthenticatedRequest, res) => {
+    try {
+      const { codigoSolicitacao } = req.params;
+      const { motivoCancelamento } = req.body;
+
+      if (!motivoCancelamento) {
+        return res.status(400).json({
+          success: false,
+          error: "motivoCancelamento is required",
+        });
+      }
+
+      console.log(`[INTER] Cancelling collection: ${codigoSolicitacao}`);
+
+      await interBankService.cancelarCobranca(codigoSolicitacao, motivoCancelamento);
+
+      res.json({
+        success: true,
+        message: "Collection cancelled successfully",
+        timestamp: getBrasiliaTimestamp(),
+      });
+    } catch (error) {
+      console.error("[INTER] Failed to cancel collection:", error);
+      res.status(500).json({
+        success: false,
+        error: "Failed to cancel collection",
+        details: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  }
+);
+
+/**
+ * Get collections summary/metrics
+ * GET /api/inter/summary
+ */
+/**
+ * Get collections info for a proposal - Calculate remaining debt
+ * GET /api/inter/collections/proposal/:propostaId
+ */
+router.get(
+  "/collections/proposal/:propostaId",
+  jwtAuthMiddleware,
+  async (req: AuthenticatedRequest, res) => {
+    try {
+      const { propostaId } = req.params;
+
+      // Get proposal data
+      const proposta = await db
+        .select()
+        .from(propostas)
+        .where(eq(propostas.id, parseInt(propostaId)))
+        .limit(1);
+
+      if (proposta.length === 0) {
+        return res.status(404).json({ error: "Proposta não encontrada" });
+      }
+
+      // Get all collections for this proposal
+      const boletos = await db
+        .select()
+        .from(interCollections)
+        .where(eq(interCollections.propostaId, propostaId));
+
+      // Calculate remaining debt
+      const valorTotal = Number(proposta[0].valorTotalFinanciado) || 0;
+      const valorPago = boletos
+        .filter(b => b.situacao === "RECEBIDO" || b.situacao === "PAGO")
+        .reduce((sum, b) => sum + Number(b.valorTotalRecebido || b.valorNominal), 0);
+
+      const valorRestante = valorTotal - valorPago;
+
+      // Get active boletos
+      const boletosAtivos = boletos.filter(
+        b => b.isActive && !["RECEBIDO", "PAGO", "CANCELADO"].includes(b.situacao || "")
+      );
+
+      res.json({
+        valorTotal,
+        valorPago,
+        valorRestante,
+        boletosAtivos: boletosAtivos.map(b => ({
+          codigoSolicitacao: b.codigoSolicitacao,
+          valor: Number(b.valorNominal),
+          dataVencimento: b.dataVencimento,
+          situacao: b.situacao,
+          numeroParcela: b.numeroParcela,
+        })),
+        totalBoletosAtivos: boletosAtivos.length,
+      });
+    } catch (error) {
+      console.error("[INTER] Failed to get proposal collections:", error);
+      res.status(500).json({
+        error: "Falha ao buscar informações de cobrança",
+        details: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  }
+);
 
 router.get("/summary", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
@@ -1248,5 +1346,3 @@ router.get("/test-auth", async (req, res) => {
 });
 
 export { router as interRoutes };
-
-export default router;

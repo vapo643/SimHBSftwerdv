@@ -29,7 +29,6 @@ import AlterarEmail from "@/pages/configuracoes/alterar-email";
 import Configuracoes from "@/pages/configuracoes";
 import AceiteAtendente from "@/pages/aceite-atendente";
 import GestaoContratos from "@/pages/GestaoContratos";
-
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -156,7 +155,6 @@ function Router() {
           <MonitoramentoAvancadoPage />
         </ProtectedRoute>
       </Route>
-
       <Route path="/">
         <ProtectedRoute>
           <Dashboard />
