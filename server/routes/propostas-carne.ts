@@ -5,15 +5,18 @@ import { pdfMergeService } from '../services/pdfMergeService';
 import { db } from '../lib/supabase';
 import { propostas } from '@shared/schema';
 import { eq } from 'drizzle-orm';
+// Import the queue system (using mock in development)
+import { queues } from '../lib/mock-queue';
 
 const router = Router();
 
 /**
- * Endpoint para gerar e baixar carnê de boletos (PDF consolidado)
- * GET /api/propostas/:id/carne-pdf
+ * REFATORADO: Endpoint para SOLICITAR geração de carnê (PRODUTOR)
+ * POST /api/propostas/:id/gerar-carne
+ * Retorna jobId imediatamente enquanto o worker processa em background
  */
-router.get(
-  '/:id/carne-pdf',
+router.post(
+  '/:id/gerar-carne',
   jwtAuthMiddleware,
   requireAnyRole,
   async (req: AuthenticatedRequest, res) => {
@@ -21,16 +24,17 @@ router.get(
       const { id } = req.params;
       const userId = req.user?.id;
       
-      console.log(`[CARNE API] 📚 Requisição de carnê para proposta: ${id}`);
-      console.log(`[CARNE API] 👤 Usuário: ${userId}`);
+      console.log(`[CARNE API - PRODUCER] 🎯 Solicitação de carnê para proposta: ${id}`);
+      console.log(`[CARNE API - PRODUCER] 👤 Usuário: ${userId}`);
       
-      // Validar se a proposta existe - usando Supabase diretamente como no storage.ts
+      // Validação básica
       if (!id || typeof id !== 'string') {
         return res.status(400).json({
           error: 'ID da proposta inválido'
         });
       }
       
+      // Validar se a proposta existe
       const { createServerSupabaseAdminClient } = await import('../lib/supabase');
       const supabase = createServerSupabaseAdminClient();
       
@@ -41,81 +45,67 @@ router.get(
         .single();
       
       if (error || !proposta) {
-        console.error(`[CARNE API] ❌ Proposta não encontrada: ${id}`, error);
+        console.error(`[CARNE API - PRODUCER] ❌ Proposta não encontrada: ${id}`, error);
         return res.status(404).json({
           error: 'Proposta não encontrada'
         });
       }
       
-      console.log(`[CARNE API] ✅ Proposta válida - ID: ${proposta.id}, Nome: ${proposta.cliente_nome}`);
+      console.log(`[CARNE API - PRODUCER] ✅ Proposta válida - ID: ${proposta.id}, Nome: ${proposta.cliente_nome}`);
       
-      // Gerar o carnê (download e fusão dos PDFs)
-      console.log(`[CARNE API] 🔄 Iniciando geração do carnê...`);
+      // NOVO: Adicionar job à fila em vez de processar sincronamente
+      console.log(`[CARNE API - PRODUCER] 📥 Adicionando job à fila pdf-processing...`);
       
-      const pdfBuffer = await pdfMergeService.gerarCarneParaProposta(id);
+      const job = await queues.pdfProcessing.add('GENERATE_CARNE', {
+        type: 'GENERATE_CARNE',
+        propostaId: id,
+        userId: userId,
+        clienteNome: proposta.cliente_nome,
+        timestamp: new Date().toISOString()
+      });
       
-      if (!pdfBuffer || pdfBuffer.length === 0) {
-        console.error(`[CARNE API] ❌ Falha ao gerar carnê - buffer vazio`);
-        return res.status(500).json({
-          error: 'Falha ao gerar carnê',
-          message: 'O PDF gerado está vazio'
-        });
-      }
+      console.log(`[CARNE API - PRODUCER] ✅ Job ${job.id} adicionado à fila com sucesso`);
       
-      console.log(`[CARNE API] ✅ Carnê gerado com sucesso (${pdfBuffer.length} bytes)`);
-      
-      // Salvar no Supabase Storage e obter URL assinada
-      console.log(`[CARNE API] 💾 Salvando carnê no storage...`);
-      
-      const signedUrl = await pdfMergeService.salvarCarneNoStorage(id, pdfBuffer);
-      
-      if (!signedUrl) {
-        console.error(`[CARNE API] ❌ Falha ao gerar URL de download`);
-        return res.status(500).json({
-          error: 'Falha ao gerar URL de download'
-        });
-      }
-      
-      console.log(`[CARNE API] ✅ URL assinada gerada com sucesso`);
-      
-      // Retornar resposta de sucesso
+      // Retornar resposta IMEDIATA com o jobId
       return res.json({
         success: true,
-        message: 'Carnê gerado com sucesso',
+        message: 'Geração de carnê iniciada',
+        jobId: job.id,
+        status: 'processing',
         data: {
           propostaId: id,
-          propostaNumero: `PROP-${proposta.id}`, // Formato padronizado
+          propostaNumero: `PROP-${proposta.id}`,
           clienteNome: proposta.cliente_nome,
-          downloadUrl: signedUrl,
-          size: pdfBuffer.length,
-          expiresIn: '1 hora'
+          hint: 'Use o jobId para consultar o status em /api/jobs/{jobId}/status'
         }
       });
       
     } catch (error: any) {
-      console.error(`[CARNE API] ❌ Erro ao gerar carnê:`, error);
-      
-      // Tratar diferentes tipos de erro
-      if (error.message?.includes('Nenhum boleto encontrado')) {
-        return res.status(404).json({
-          error: 'Nenhum boleto encontrado',
-          message: 'Esta proposta não possui boletos gerados'
-        });
-      }
-      
-      if (error.message?.includes('não foi possível baixar')) {
-        return res.status(502).json({
-          error: 'Falha ao baixar boletos',
-          message: 'Não foi possível baixar os boletos do banco'
-        });
-      }
-      
-      // Erro genérico
+      console.error(`[CARNE API - PRODUCER] ❌ Erro ao solicitar carnê:`, error);
       return res.status(500).json({
-        error: 'Erro ao gerar carnê',
-        message: error.message || 'Erro desconhecido ao processar carnê'
+        error: 'Erro ao solicitar geração de carnê',
+        message: error.message || 'Erro desconhecido'
       });
     }
+  }
+);
+
+/**
+ * Endpoint LEGACY mantido temporariamente para compatibilidade
+ * GET /api/propostas/:id/carne-pdf
+ */
+router.get(
+  '/:id/carne-pdf',
+  jwtAuthMiddleware,
+  requireAnyRole,
+  async (req: AuthenticatedRequest, res) => {
+    // Redirecionar para o novo fluxo
+    console.log(`[CARNE API] ⚠️ DEPRECATED: Redirecionando para novo endpoint assíncrono`);
+    return res.status(410).json({
+      error: 'Endpoint descontinuado',
+      message: 'Use POST /api/propostas/:id/gerar-carne para iniciar a geração e GET /api/jobs/:jobId/status para consultar o status',
+      deprecated: true
+    });
   }
 );
 

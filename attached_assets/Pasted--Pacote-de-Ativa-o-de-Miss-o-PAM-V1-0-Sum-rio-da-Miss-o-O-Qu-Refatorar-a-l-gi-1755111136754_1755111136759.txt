@@ -1,0 +1,44 @@
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Refatorar a lógica de geração de "carnê" de boletos para que seja executada de forma assíncrona por um worker da nova Job Queue (BullMQ), em vez de bloquear a API principal.
+* **Intenção Estratégica (O Porquê):** A geração síncrona de carnês foi identificada como nosso principal gargalo de performance. Mover esta lógica para um worker assíncrono é o primeiro passo prático para tornar nosso sistema resiliente e escalável, garantindo que a experiência do usuário na UI seja sempre rápida.
+* **Histórico Relevante (Consulta Obrigatória):** Consulte o seu próprio relatório `AUDITORIA_ARQUITETURAL_FLUXO_FORMALIZACAO.md`. Sua implementação deve ser a solução direta para o "Gargalo 1: Geração e Fusão de PDFs" que você diagnosticou.
+* **Modelo Mental (Como se Encaixa):** A API (`POST /api/propostas/:id/gerar-carne`) não irá mais realizar o trabalho pesado. Ela se tornará um **Produtor** que apenas adiciona um job à fila `pdf-processing`. O **Worker** (`server/worker.ts`) que você acabou de criar será o **Consumidor** que executará a lógica de download, fusão e armazenamento que hoje está na rota da API.
+* **Riscos Antecipados:** **Risco:** O frontend não saberá quando o processo assíncrono terminou. **Contramedida:** A API deve retornar um `jobId`. O frontend precisará de um novo endpoint para consultar o status do job (`/api/jobs/:jobId/status`) e saber quando o download está pronto.
+
+---
+
+**IMPLEMENTAR:**
+Migração da lógica de geração de "carnê" de boletos para ser executada por um worker assíncrono na nova arquitetura de Job Queue.
+
+**CURRENT STATE:**
+Temos uma arquitetura de Job Queue funcional, mas vazia. A lógica de geração de carnês ainda reside no endpoint da API, bloqueando a thread principal do servidor.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  O endpoint `POST /api/propostas/:id/gerar-carne` é refatorado para ser um **Produtor**: ele apenas adiciona um job à fila `pdf-processing` com o `propostaId` e retorna imediatamente uma resposta com o `jobId`.
+2.  O processo **Worker** (`server/worker.ts`) é modificado para consumir jobs da fila `pdf-processing`.
+3.  Toda a lógica pesada de buscar PDFs do Storage, fundi-los e salvar o carnê final (do `boletoStorageService.gerarCarneDoStorage`) é movida de dentro da rota da API para dentro do processo do Worker.
+4.  Um **novo endpoint `GET /api/jobs/:jobId/status`** é criado para que o frontend possa consultar o estado de um job (ex: `waiting`, `active`, `completed`, `failed`) e, se `completed`, obter a URL final do carnê.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+**1. Refatorar a API (Produtor):**
+    - **Ação:** Modifique o endpoint `POST /api/propostas/:id/gerar-carne`. Remova a chamada direta ao `boletoStorageService.gerarCarneDoStorage`.
+    - **Implementação:** Adicione a lógica para criar um job na `pdfQueue` com os dados necessários (`propostaId`) e retorne o `jobId` na resposta.
+
+**2. Implementar o Worker (Consumidor):**
+    - **Ação:** No ficheiro `server/worker.ts`, na lógica do `Worker` para a fila `pdf-processing`.
+    - **Implementação:** Chame a função `boletoStorageService.gerarCarneDoStorage(job.data.propostaId)`. Garanta que o worker trate os casos de sucesso (retornando a URL do carnê) e falha do job.
+
+**3. Criar o Endpoint de Status do Job:**
+    - **Ação:** Implemente a nova rota `GET /api/jobs/:jobId/status`.
+    - **Implementação:** Esta rota deve usar as funções do BullMQ para encontrar o job pelo `jobId`, verificar seu estado (`job.getState()`) e seu valor de retorno (`job.returnvalue`), e retornar essas informações para o frontend.
+
+**PROTOCOLO OBRIGATÓRIO 5-CHECK:**
+1.  Mapear os arquivos envolvidos.
+2.  Garantir a separação clara entre Produtor e Consumidor.
+3.  Executar `get_latest_lsp_diagnostics` para garantir ZERO erros.
+4.  Realizar um teste funcional em duas etapas:
+    a. Chame o endpoint `POST /api/propostas/:id/gerar-carne` e valide que a resposta é **imediata** e contém um `jobId`.
+    b. Verifique os logs do **processo Worker** para confirmar que ele iniciou o processamento.
+5.  O critério final de sucesso é, após o worker terminar, chamar o novo endpoint `GET /api/jobs/:jobId/status` e validar que o status é `completed` e que a resposta contém a URL do carnê no Supabase Storage.

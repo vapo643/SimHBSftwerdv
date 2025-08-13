@@ -114,7 +114,7 @@ const boletoWorker = new Worker(
             boletosProcessados: result.boletosProcessados,
             boletosComErro: result.boletosComErro,
             erros: result.erros,
-            processingTime: duration,
+            processingTime: syncDuration,
           };
 
         case 'GENERATE_AND_SYNC_CARNE':
