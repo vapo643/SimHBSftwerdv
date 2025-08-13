@@ -1265,10 +1265,11 @@ export default function Formalizacao() {
                           (proposta.assinaturaEletronicaConcluida || proposta.status === "contratos_assinados")
                         ) {
                           return (
-                            <div key={step.id} className="mb-4">
-                              <div className="space-y-4">
-                                {/* Interface do Banco Inter */}
-                                <div className="mt-3 rounded-lg border border-orange-700 bg-orange-900/20 p-4">
+                            <Card key={step.id} className="mb-4">
+                              <CardContent className="p-6">
+                                <div className="space-y-4">
+                                  {/* Interface do Banco Inter */}
+                                  <div className="mt-3 rounded-lg border border-orange-700 bg-orange-900/20 p-4">
                                   <div className="mb-3 flex items-center justify-between">
                                     <h5 className="flex items-center gap-2 font-medium text-orange-300">
                                       <Building2 className="h-5 w-5" />
@@ -1546,20 +1547,23 @@ export default function Formalizacao() {
                                                   </div>
                                                 )}
                                               </div>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="rounded border border-gray-700 bg-gray-800 p-3">
-                          <p className="text-sm text-gray-400">
-                            Aguardando processamento dos boletos...
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
+                                            </div>
+                                          ))}
+                                        </div>
+                                      ) : (
+                                        <div className="rounded border border-gray-700 bg-gray-800 p-3">
+                                          <p className="text-sm text-gray-400">
+                                            Aguardando processamento dos boletos...
+                                          </p>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          );
+                        }
 
               {/* Documents Tab */}
               {activeTab === "documents" && (
