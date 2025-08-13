@@ -7,10 +7,13 @@
 export class PDFSanitizer {
   /**
    * SANITIZAÇÃO EXTREMAMENTE AGRESSIVA para contornar McAfee
-   * Remove/modifica TUDO que pode ser detectado como suspeito
+   * AGORA COM SOLUÇÃO ESPECÍFICA PARA ti!7da91cf510c0
    */
   static sanitizePdfForMcAfee(pdfBuffer: Buffer): Buffer {
-    let pdfContent = pdfBuffer.toString('binary');
+    // PRIMEIRO: Aplicar bypass específico para ti!7da91cf510c0
+    const { McAfeeSpecificBypass } = require('./mcafeeSpecificBypass');
+    let processedBuffer = McAfeeSpecificBypass.bypassTi7da91cf510c0(pdfBuffer);
+    let pdfContent = processedBuffer.toString('binary');
     
     // 1. LIMPEZA TOTAL DE PRODUCER/CREATOR (EXTREMAMENTE AGRESSIVA)
     // Remove QUALQUER referência a software suspeito

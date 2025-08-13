@@ -29,6 +29,7 @@ import AlterarEmail from "@/pages/configuracoes/alterar-email";
 import Configuracoes from "@/pages/configuracoes";
 import AceiteAtendente from "@/pages/aceite-atendente";
 import GestaoContratos from "@/pages/GestaoContratos";
+import McAfeeTestPage from "@/pages/mcafee-test";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -153,6 +154,11 @@ function Router() {
       <Route path="/admin/security/dashboard">
         <ProtectedRoute>
           <MonitoramentoAvancadoPage />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/mcafee-test">
+        <ProtectedRoute>
+          <McAfeeTestPage />
         </ProtectedRoute>
       </Route>
       <Route path="/">
