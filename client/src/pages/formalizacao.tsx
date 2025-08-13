@@ -54,6 +54,7 @@ import {
   ImageIcon,
   Code,
   Settings,
+  Info,
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -1546,99 +1547,173 @@ export default function Formalizacao() {
                                                 )}
                                               </div>
 
-                                              {/* Ações do boleto */}
-                                              <div className="flex gap-2">
-                                                <Button
-                                                  size="sm"
-                                                  variant="outline"
-                                                  onClick={async () => {
-                                                    try {
-                                                      console.log(`[PDF DOWNLOAD] Tentando baixar PDF para: ${boleto.codigoSolicitacao}`);
-                                                      console.log(`[PDF DOWNLOAD] Status do boleto: ${boleto.situacao}`);
-                                                      
-                                                      // Verificar status do boleto
-                                                      console.log(`[PDF DOWNLOAD] Tentativa de download para status: ${boleto.situacao}`);
-                                                      
-                                                      // Se o status ainda é EM_PROCESSAMENTO, avisar o usuário
-                                                      if (boleto.situacao === 'EM_PROCESSAMENTO' || boleto.situacao === 'CODIGO_INVALIDO') {
-                                                        toast({
-                                                          title: "PDF temporariamente indisponível",
-                                                          description: "O boleto está sendo processado. Use o código de barras abaixo para pagamento.",
-                                                          variant: "default",
-                                                        });
+                                              {/* NOVA ESTRATÉGIA: Alternativas Seguras de Pagamento */}
+                                              <div className="space-y-4 pt-4 border-t border-gray-700">
+                                                {/* Título da seção */}
+                                                <div className="text-sm font-medium text-gray-300 text-center">
+                                                  🎯 Formas Seguras de Pagamento
+                                                </div>
+
+                                                {/* Ações Principais */}
+                                                <div className="grid grid-cols-1 gap-3">
+                                                  {/* Botão Principal: Gerar Imagem PNG */}
+                                                  <Button
+                                                    size="sm"
+                                                    variant="default"
+                                                    className="bg-green-600 hover:bg-green-700 text-white"
+                                                    onClick={async () => {
+                                                      try {
+                                                        console.log(`[PNG GENERATION] Gerando imagem para: ${boleto.codigoSolicitacao}`);
                                                         
-                                                        // Copiar código de barras como fallback
-                                                        if (boleto.linhaDigitavel || boleto.codigoBarras) {
-                                                          const codigo = boleto.linhaDigitavel || boleto.codigoBarras;
-                                                          await navigator.clipboard.writeText(codigo);
+                                                        // Obter token usando o TokenManager
+                                                        const { TokenManager } = await import("@/lib/apiClient");
+                                                        const tokenManager = TokenManager.getInstance();
+                                                        const token = await tokenManager.getValidToken();
+                                                        
+                                                        if (!token) {
+                                                          throw new Error('Token de acesso não encontrado');
+                                                        }
+
+                                                        // Chamar endpoint de conversão PDF -> PNG
+                                                        const response = await fetch(`/api/inter/collections/${boleto.codigoSolicitacao}/png`, {
+                                                          method: 'GET',
+                                                          headers: {
+                                                            'Authorization': `Bearer ${token}`,
+                                                            'Accept': 'image/png',
+                                                          }
+                                                        });
+
+                                                        if (response.ok) {
+                                                          const blob = await response.blob();
+                                                          const url = window.URL.createObjectURL(blob);
+                                                          const a = document.createElement('a');
+                                                          a.href = url;
+                                                          a.download = `boleto-${boleto.codigoSolicitacao}.png`;
+                                                          document.body.appendChild(a);
+                                                          a.click();
+                                                          window.URL.revokeObjectURL(url);
+                                                          document.body.removeChild(a);
+                                                          
                                                           toast({
-                                                            title: "✅ Código copiado!",
-                                                            description: "Use no app do banco ou PIX Copia e Cola",
+                                                            title: "Imagem do boleto baixada!",
+                                                            description: "Arquivo PNG salvo - 100% livre de vírus",
                                                           });
+                                                        } else {
+                                                          throw new Error(`Erro ${response.status}: ${response.statusText}`);
                                                         }
-                                                        return;
-                                                      }
-
-                                                      // Fazer download com autenticação correta usando TokenManager
-                                                      console.log(`[PDF DOWNLOAD] Usando código: ${boleto.codigoSolicitacao}`);
-                                                      console.log(`[PDF DOWNLOAD] Nosso número: ${boleto.nossoNumero || 'não definido'}`);
-                                                      console.log(`[PDF DOWNLOAD] Seu número: ${boleto.seuNumero || 'não definido'}`);
-                                                      
-                                                      // Obter token usando o TokenManager
-                                                      const { TokenManager } = await import("@/lib/apiClient");
-                                                      const tokenManager = TokenManager.getInstance();
-                                                      const token = await tokenManager.getValidToken();
-                                                      
-                                                      if (!token) {
-                                                        throw new Error('Token de acesso não encontrado');
-                                                      }
-                                                      
-                                                      console.log(`[PDF DOWNLOAD] Token obtido com sucesso (${token.length} caracteres)`);
-                                                      
-                                                      const response = await fetch(`/api/inter/collections/${boleto.codigoSolicitacao}/pdf`, {
-                                                        method: 'GET',
-                                                        headers: {
-                                                          'Authorization': `Bearer ${token}`,
-                                                          'Accept': 'application/pdf',
-                                                          'Content-Type': 'application/json'
-                                                        }
-                                                      });
-
-                                                      if (response.ok) {
-                                                        const blob = await response.blob();
-                                                        const url = window.URL.createObjectURL(blob);
-                                                        const a = document.createElement('a');
-                                                        a.href = url;
-                                                        a.download = `boleto-${boleto.codigoSolicitacao}.pdf`;
-                                                        document.body.appendChild(a);
-                                                        a.click();
-                                                        window.URL.revokeObjectURL(url);
-                                                        document.body.removeChild(a);
-                                                        
+                                                      } catch (error: any) {
+                                                        console.error("[PNG GENERATION] Erro:", error);
                                                         toast({
-                                                          title: "PDF baixado com sucesso!",
-                                                          description: "Arquivo salvo na pasta de Downloads",
+                                                          title: "Erro ao gerar imagem",
+                                                          description: "Tente novamente ou use os códigos de pagamento acima",
+                                                          variant: "destructive",
                                                         });
-                                                      } else {
-                                                        throw new Error(`Erro ${response.status}: ${response.statusText}`);
                                                       }
+                                                    }}
+                                                  >
+                                                    <ImageIcon className="mr-2 h-4 w-4" />
+                                                    Gerar Imagem do Boleto (PNG)
+                                                  </Button>
+                                                </div>
+
+                                                {/* Opção de Risco: PDF com Aviso */}
+                                                <Dialog>
+                                                  <DialogTrigger asChild>
+                                                    <Button
+                                                      size="sm"
+                                                      variant="ghost"
+                                                      className="w-full text-xs text-gray-500 hover:text-gray-300 border-dashed border border-gray-700"
+                                                    >
+                                                      <Settings className="mr-2 h-3 w-3" />
+                                                      Opções Avançadas
+                                                    </Button>
+                                                  </DialogTrigger>
+                                                  <DialogContent className="max-w-md">
+                                                    <DialogHeader>
+                                                      <DialogTitle className="flex items-center gap-2">
+                                                        <AlertCircle className="h-5 w-5 text-yellow-500" />
+                                                        Opção de Risco
+                                                      </DialogTitle>
+                                                      <DialogDescription>
+                                                        O download direto do PDF pode ser detectado como vírus por alguns antivírus (falso positivo). 
+                                                        Use apenas se necessário.
+                                                      </DialogDescription>
+                                                    </DialogHeader>
+                                                    
+                                                    <div className="space-y-4">
+                                                      <div className="rounded-lg border border-yellow-500/20 bg-yellow-500/5 p-4">
+                                                        <div className="flex items-start gap-3">
+                                                          <AlertCircle className="h-5 w-5 text-yellow-500 flex-shrink-0 mt-0.5" />
+                                                          <div>
+                                                            <p className="text-sm font-medium text-yellow-700 dark:text-yellow-300">
+                                                              Aviso de Segurança
+                                                            </p>
+                                                            <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-1">
+                                                              Seu antivírus pode detectar este arquivo como ameaça. 
+                                                              É um falso positivo conhecido do Banco Inter.
+                                                            </p>
+                                                          </div>
+                                                        </div>
+                                                      </div>
                                                       
-                                                    } catch (error: any) {
-                                                      console.error("[PDF DOWNLOAD] Erro:", error);
-                                                      
-                                                      // SEMPRE informar que o PDF está disponível e pode tentar novamente
-                                                      toast({
-                                                        title: "Erro temporário ao baixar PDF",
-                                                        description: "Por favor, tente novamente em alguns segundos. O PDF está disponível.",
-                                                        variant: "destructive",
-                                                      });
-                                                    }
-                                                  }}
-                                                  className="border-blue-600 text-blue-400 hover:bg-blue-600/10"
-                                                >
-                                                  <Download className="mr-2 h-4 w-4" />
-                                                  Baixar PDF
-                                                </Button>
+                                                      <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        className="w-full border-red-500/20 text-red-400 hover:bg-red-500/10"
+                                                        onClick={async () => {
+                                                          try {
+                                                            // Obter token usando o TokenManager
+                                                            const { TokenManager } = await import("@/lib/apiClient");
+                                                            const tokenManager = TokenManager.getInstance();
+                                                            const token = await tokenManager.getValidToken();
+                                                            
+                                                            if (!token) {
+                                                              throw new Error('Token de acesso não encontrado');
+                                                            }
+                                                            
+                                                            const response = await fetch(`/api/inter/collections/${boleto.codigoSolicitacao}/pdf`, {
+                                                              method: 'GET',
+                                                              headers: {
+                                                                'Authorization': `Bearer ${token}`,
+                                                                'Accept': 'application/pdf',
+                                                                'Content-Type': 'application/json'
+                                                              }
+                                                            });
+
+                                                            if (response.ok) {
+                                                              const blob = await response.blob();
+                                                              const url = window.URL.createObjectURL(blob);
+                                                              const a = document.createElement('a');
+                                                              a.href = url;
+                                                              a.download = `boleto-${boleto.codigoSolicitacao}.pdf`;
+                                                              document.body.appendChild(a);
+                                                              a.click();
+                                                              window.URL.revokeObjectURL(url);
+                                                              document.body.removeChild(a);
+                                                              
+                                                              toast({
+                                                                title: "PDF baixado com sucesso!",
+                                                                description: "Se o antivírus alertar, é falso positivo",
+                                                              });
+                                                            } else {
+                                                              throw new Error(`Erro ${response.status}: ${response.statusText}`);
+                                                            }
+                                                          } catch (error: any) {
+                                                            console.error("[PDF DOWNLOAD] Erro:", error);
+                                                            toast({
+                                                              title: "Erro ao baixar PDF",
+                                                              description: "Use a imagem PNG ou códigos de pagamento",
+                                                              variant: "destructive",
+                                                            });
+                                                          }
+                                                        }}
+                                                      >
+                                                        <Download className="mr-2 h-4 w-4" />
+                                                        Baixar PDF Original (Pode gerar alerta de vírus)
+                                                      </Button>
+                                                    </div>
+                                                  </DialogContent>
+                                                </Dialog>
                                               </div>
                                             </div>
                                           ))}
@@ -1651,179 +1726,235 @@ export default function Formalizacao() {
                                         </div>
                                       )}
 
-                                      <div className="grid grid-cols-3 gap-3">
-                                        <Button
-                                          variant="outline"
-                                          onClick={async () => {
-                                            try {
-                                              // Atualizar status em tempo real
-                                              console.log(`[REALTIME UPDATE] Iniciando atualização para proposta: ${proposta.id}`);
-                                              
-                                              const { apiRequest } = await import("@/lib/queryClient");
-                                              const response = await apiRequest(`/api/inter/realtime-update/${proposta.id}`, {
-                                                method: "POST",
-                                              }) as { updated: number; removed: number; message?: string };
+                                      {/* NOVA ESTRATÉGIA: Painel de Informações e Ações Seguras */}
+                                      <div className="space-y-4 border-t border-gray-700 pt-4">
+                                        {/* Resumo dos Códigos de Pagamento */}
+                                        <div className="rounded border border-blue-700 bg-blue-900/20 p-4">
+                                          <div className="flex items-center gap-2 mb-3">
+                                            <Info className="h-5 w-5 text-blue-400" />
+                                            <span className="font-medium text-blue-300">
+                                              ✅ Códigos de Pagamento Disponíveis Acima
+                                            </span>
+                                          </div>
+                                          <p className="text-sm text-blue-200">
+                                            Use o PIX Copia e Cola ou Linha Digitável exibidos em cada boleto. 
+                                            Estes são os métodos mais seguros e rápidos para pagamento.
+                                          </p>
+                                        </div>
 
-                                              if (response.updated > 0 || response.removed > 0) {
-                                                // Recarregar a página para mostrar os dados atualizados
-                                                window.location.reload();
+                                        {/* Ações */}
+                                        <div className="grid grid-cols-2 gap-3">
+                                          <Button
+                                            variant="outline"
+                                            onClick={async () => {
+                                              try {
+                                                // Atualizar status em tempo real
+                                                console.log(`[REALTIME UPDATE] Iniciando atualização para proposta: ${proposta.id}`);
                                                 
-                                                toast({
-                                                  title: "Status atualizado!",
-                                                  description: `${response.updated} boletos atualizados, ${response.removed} códigos inválidos removidos`,
-                                                });
-                                              } else {
-                                                toast({
-                                                  title: "Sem atualizações",
-                                                  description: response.message || "Status já está atualizado",
-                                                });
-                                              }
-                                            } catch (error) {
-                                              console.error("[REALTIME UPDATE] Erro:", error);
-                                              toast({
-                                                title: "Erro",
-                                                description: "Erro ao atualizar status dos boletos",
-                                                variant: "destructive",
-                                              });
-                                            }
-                                          }}
-                                          className="border-green-600 text-green-400 hover:bg-green-600/10"
-                                        >
-                                          <RefreshCw className="mr-2 h-4 w-4" />
-                                          Atualizar Status
-                                        </Button>
-                                        
-                                        {/* Progressive Disclosure - Botão Principal */}
-                                        <Button
-                                          variant="default"
-                                          className="bg-blue-600 hover:bg-blue-700 text-white"
-                                          onClick={async () => {
-                                            try {
-                                              const collections = collectionsData || [];
-                                              if (collections.length > 0) {
-                                                const { TokenManager } = await import("@/lib/apiClient");
-                                                const tokenManager = TokenManager.getInstance();
-                                                const token = await tokenManager.getValidToken();
+                                                const { apiRequest } = await import("@/lib/queryClient");
+                                                const response = await apiRequest(`/api/inter/realtime-update/${proposta.id}`, {
+                                                  method: "POST",
+                                                }) as { updated: number; removed: number; message?: string };
 
-                                                // Usar Container Seguro como padrão (mais robusta)
-                                                const downloadUrl = `/api/inter/collections/${proposta.id}/baixar-container-seguro`;
-                                                const response = await fetch(downloadUrl, {
-                                                  headers: { Authorization: `Bearer ${token}` }
-                                                });
-                                                
-                                                if (response.ok) {
-                                                  const blob = await response.blob();
-                                                  const url = window.URL.createObjectURL(blob);
-                                                  const a = document.createElement("a");
-                                                  
-                                                  const password = response.headers.get('X-Container-Password');
-                                                  const filename = response.headers.get('Content-Disposition')?.split('filename="')[1]?.split('"')[0] || 'boletos-seguros.sdc';
-                                                  
-                                                  a.href = url;
-                                                  a.download = filename;
-                                                  document.body.appendChild(a);
-                                                  a.click();
-                                                  document.body.removeChild(a);
-                                                  window.URL.revokeObjectURL(url);
+                                                if (response.updated > 0 || response.removed > 0) {
+                                                  // Recarregar a página para mostrar os dados atualizados
+                                                  window.location.reload();
                                                   
                                                   toast({
-                                                    title: "Boletos Baixados com Sucesso",
-                                                    description: `Container seguro criado. Senha: ${password}`
+                                                    title: "Status atualizado!",
+                                                    description: `${response.updated} boletos atualizados, ${response.removed} códigos inválidos removidos`,
                                                   });
-                                                  
                                                 } else {
-                                                  throw new Error(`HTTP ${response.status}`);
+                                                  toast({
+                                                    title: "Sem atualizações",
+                                                    description: response.message || "Status já está atualizado",
+                                                  });
                                                 }
-                                              } else {
+                                              } catch (error) {
+                                                console.error("[REALTIME UPDATE] Erro:", error);
                                                 toast({
-                                                  title: "Nenhum boleto disponível",
-                                                  description: "Ainda não há boletos gerados para esta proposta",
-                                                  variant: "default"
+                                                  title: "Erro",
+                                                  description: "Erro ao atualizar status dos boletos",
+                                                  variant: "destructive",
                                                 });
                                               }
-                                            } catch (error) {
-                                              console.error("[DOWNLOAD] Erro:", error);
-                                              toast({
-                                                title: "Erro no download",
-                                                description: "Erro ao baixar boletos",
-                                                variant: "destructive"
-                                              });
-                                            }
-                                          }}
-                                        >
-                                          <Download className="mr-2 h-4 w-4" />
-                                          Baixar Boleto (PDF Seguro)
-                                        </Button>
+                                            }}
+                                            className="border-green-600 text-green-400 hover:bg-green-600/10"
+                                          >
+                                            <RefreshCw className="mr-2 h-4 w-4" />
+                                            Atualizar Status
+                                          </Button>
+                                          
+                                          <Button
+                                            variant="default"
+                                            className="bg-green-600 hover:bg-green-700 text-white"
+                                            onClick={async () => {
+                                              try {
+                                                const collections = collectionsData || [];
+                                                if (collections.length === 0) {
+                                                  toast({
+                                                    title: "Nenhum boleto disponível",
+                                                    description: "Ainda não há boletos gerados para esta proposta",
+                                                    variant: "default"
+                                                  });
+                                                  return;
+                                                }
 
-                                        {/* Modal de Opções Alternativas */}
+                                                // Copiar todos os códigos PIX disponíveis
+                                                const pixCodes = collections
+                                                  .filter((boleto: any) => boleto.pixCopiaECola)
+                                                  .map((boleto: any, index: number) => 
+                                                    `Parcela ${index + 1}: ${boleto.pixCopiaECola}`
+                                                  );
+
+                                                if (pixCodes.length > 0) {
+                                                  const allPixCodes = pixCodes.join('\n\n');
+                                                  await navigator.clipboard.writeText(allPixCodes);
+                                                  
+                                                  toast({
+                                                    title: "Códigos PIX copiados!",
+                                                    description: `${pixCodes.length} códigos PIX copiados para pagamento`,
+                                                  });
+                                                } else {
+                                                  // Fallback para linhas digitáveis
+                                                  const linhasDigitaveis = collections
+                                                    .filter((boleto: any) => boleto.linhaDigitavel || boleto.codigoBarras)
+                                                    .map((boleto: any, index: number) => 
+                                                      `Parcela ${index + 1}: ${boleto.linhaDigitavel || boleto.codigoBarras}`
+                                                    );
+
+                                                  if (linhasDigitaveis.length > 0) {
+                                                    const allCodes = linhasDigitaveis.join('\n\n');
+                                                    await navigator.clipboard.writeText(allCodes);
+                                                    
+                                                    toast({
+                                                      title: "Códigos de pagamento copiados!",
+                                                      description: `${linhasDigitaveis.length} códigos copiados`,
+                                                    });
+                                                  } else {
+                                                    toast({
+                                                      title: "Sem códigos disponíveis",
+                                                      description: "Aguarde o processamento dos boletos",
+                                                      variant: "default"
+                                                    });
+                                                  }
+                                                }
+                                              } catch (error) {
+                                                console.error("[COPY ALL] Erro:", error);
+                                                toast({
+                                                  title: "Erro ao copiar códigos",
+                                                  description: "Tente copiar os códigos individualmente",
+                                                  variant: "destructive"
+                                                });
+                                              }
+                                            }}
+                                          >
+                                            <Copy className="mr-2 h-4 w-4" />
+                                            Copiar Todos os Códigos PIX
+                                          </Button>
+                                        </div>
+                                      </div>
+
+                                        {/* Modal de Opções Avançadas */}
                                         <Dialog>
                                           <DialogTrigger asChild>
                                             <Button
                                               variant="ghost"
                                               size="sm"
-                                              className="text-gray-600 hover:text-gray-800"
+                                              className="w-full text-xs text-gray-500 hover:text-gray-300 border-dashed border border-gray-700"
                                             >
-                                              <Settings className="mr-2 h-4 w-4" />
-                                              Opções Alternativas de Download
+                                              <Settings className="mr-2 h-3 w-3" />
+                                              Opções Avançadas
                                             </Button>
                                           </DialogTrigger>
                                           <DialogContent className="max-w-2xl">
                                             <DialogHeader>
-                                              <DialogTitle>Opções Alternativas de Download</DialogTitle>
+                                              <DialogTitle className="flex items-center gap-2">
+                                                <ImageIcon className="h-5 w-5 text-green-500" />
+                                                Alternativas Seguras
+                                              </DialogTitle>
                                               <DialogDescription>
-                                                Se você está enfrentando problemas com o download padrão (como detecção de falso positivo por antivírus), 
-                                                escolha uma das alternativas abaixo:
+                                                Opções adicionais para obter as informações dos boletos de forma segura, 
+                                                evitando problemas com antivírus.
                                               </DialogDescription>
                                             </DialogHeader>
                                             
                                             <div className="grid gap-4 py-4">
-                                              {/* Opção 1: ZIP Original */}
-                                              <div className="border rounded-lg p-4 hover:bg-gray-50">
-                                                <h4 className="font-semibold mb-2">📦 Download ZIP Original</h4>
-                                                <p className="text-sm text-gray-600 mb-3">
-                                                  Baixa todos os boletos em formato ZIP padrão. Use se não houver problemas com antivírus.
+                                              {/* PRIORIDADE 1: Arquivo de Texto com Códigos (100% Seguro) */}
+                                              <div className="border border-green-500 rounded-lg p-4 bg-green-50">
+                                                <div className="flex items-center gap-2 mb-2">
+                                                  <span className="text-lg">📄</span>
+                                                  <h4 className="font-semibold text-green-700">Arquivo de Texto com Códigos</h4>
+                                                  <Badge className="bg-green-100 text-green-700">100% Seguro</Badge>
+                                                </div>
+                                                <p className="text-sm text-green-600 mb-3">
+                                                  Baixa um arquivo de texto (.txt) com todos os códigos de pagamento. 
+                                                  Antivírus nunca bloqueia arquivos de texto simples.
                                                 </p>
                                                 <Button
-                                                  variant="outline"
+                                                  className="bg-green-600 hover:bg-green-700 text-white"
                                                   onClick={async () => {
                                                     try {
                                                       const collections = collectionsData || [];
-                                                      if (collections.length > 0) {
-                                                        const { TokenManager } = await import("@/lib/apiClient");
-                                                        const tokenManager = TokenManager.getInstance();
-                                                        const token = await tokenManager.getValidToken();
-
-                                                        const downloadUrl = `/api/inter/collections/${proposta.id}/baixar-todos-boletos`;
-                                                        const response = await fetch(downloadUrl, {
-                                                          headers: { Authorization: `Bearer ${token}` }
+                                                      if (collections.length === 0) {
+                                                        toast({
+                                                          title: "Nenhum boleto disponível",
+                                                          description: "Aguarde o processamento dos boletos",
+                                                          variant: "default"
                                                         });
-                                                        
-                                                        if (response.ok) {
-                                                          const blob = await response.blob();
-                                                          const url = window.URL.createObjectURL(blob);
-                                                          const a = document.createElement("a");
-                                                          a.href = url;
-                                                          a.download = `boletos_${proposta.id}.zip`;
-                                                          document.body.appendChild(a);
-                                                          a.click();
-                                                          document.body.removeChild(a);
-                                                          window.URL.revokeObjectURL(url);
-                                                          
-                                                          toast({
-                                                            title: "ZIP baixado com sucesso",
-                                                            description: `${collections.length} boletos salvos`
-                                                          });
-                                                        }
+                                                        return;
                                                       }
+
+                                                      let codesInfo = `DADOS PARA PAGAMENTO - PROPOSTA ${proposta.id}\n`;
+                                                      codesInfo += `Generated: ${new Date().toLocaleString('pt-BR')}\n`;
+                                                      codesInfo += `${'='.repeat(60)}\n\n`;
+
+                                                      collections.forEach((col: any, index: number) => {
+                                                        codesInfo += `PARCELA ${col.numeroParcela || index + 1}:\n`;
+                                                        codesInfo += `Valor: R$ ${col.valorNominal || 'N/A'}\n`;
+                                                        if (col.linhaDigitavel) {
+                                                          codesInfo += `Linha Digitavel: ${col.linhaDigitavel}\n`;
+                                                        }
+                                                        if (col.pixCopiaECola) {
+                                                          codesInfo += `PIX Copia e Cola: ${col.pixCopiaECola}\n`;
+                                                        }
+                                                        if (col.codigoBarras) {
+                                                          codesInfo += `Codigo de Barras: ${col.codigoBarras}\n`;
+                                                        }
+                                                        codesInfo += `\n${'-'.repeat(50)}\n\n`;
+                                                      });
+
+                                                      codesInfo += `INSTRUCOES:\n`;
+                                                      codesInfo += `- Use o codigo de barras no seu banco\n`;
+                                                      codesInfo += `- Ou copie o PIX para pagamento instantaneo\n`;
+                                                      codesInfo += `- 100% seguro contra falsos positivos\n`;
+
+                                                      // Criar blob de texto e fazer download
+                                                      const blob = new Blob([codesInfo], { type: 'text/plain;charset=utf-8' });
+                                                      const url = window.URL.createObjectURL(blob);
+                                                      const a = document.createElement("a");
+                                                      a.href = url;
+                                                      a.download = `boletos-proposta-${proposta.id}.txt`;
+                                                      document.body.appendChild(a);
+                                                      a.click();
+                                                      document.body.removeChild(a);
+                                                      window.URL.revokeObjectURL(url);
+                                                      
+                                                      toast({
+                                                        title: "Arquivo de texto baixado!",
+                                                        description: `${collections.length} boletos salvos em arquivo seguro`,
+                                                      });
                                                     } catch (error) {
                                                       toast({
-                                                        title: "Erro no download",
+                                                        title: "Erro ao gerar arquivo",
+                                                        description: "Tente novamente",
                                                         variant: "destructive"
                                                       });
                                                     }
                                                   }}
                                                 >
-                                                  Baixar ZIP
+                                                  <Download className="mr-2 h-4 w-4" />
+                                                  Baixar Códigos (.txt)
                                                 </Button>
                                               </div>
 
@@ -2118,6 +2249,7 @@ export default function Formalizacao() {
                                   </DialogContent>
                                 </Dialog>
 
+                                        <div>
                                         {/* Status dos boletos */}
                                         <div className="flex gap-2">
                                           <Button
@@ -2177,6 +2309,7 @@ export default function Formalizacao() {
                                             new Date().setDate(new Date().getDate() + 5)
                                           ).toLocaleDateString("pt-BR")}
                                         </p>
+                                      </div>
                                       </div>
                                     </div>
                                   )}

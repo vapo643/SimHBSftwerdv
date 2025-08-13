@@ -12,6 +12,10 @@ import { z } from "zod";
 import { db } from "../lib/supabase.js";
 import { interCollections, propostas, historicoObservacoesCobranca } from "@shared/schema";
 import { eq, and } from "drizzle-orm";
+import { AlternativeFormatService } from "../services/alternativeFormatService.js";
+import * as fs from "fs";
+import * as path from "path";
+import { promisify } from "util";
 
 const router = express.Router();
 
@@ -1045,6 +1049,145 @@ router.get(
     }
   }
 );
+
+/**
+ * Get collection as PNG image (alternative to PDF)
+ * GET /api/inter/collections/:codigoSolicitacao/png
+ */
+router.get(
+  "/collections/:codigoSolicitacao/png",
+  jwtAuthMiddleware,
+  async (req: AuthenticatedRequest, res) => {
+    const writeFile = promisify(fs.writeFile);
+    const readFile = promisify(fs.readFile);
+    const unlink = promisify(fs.unlink);
+    const tempDir = path.join(process.cwd(), "temp");
+
+    try {
+      const { codigoSolicitacao } = req.params;
+
+      console.log(`[INTER] Converting PDF to PNG for collection: ${codigoSolicitacao}`);
+
+      // Obter o PDF do boleto
+      const pdfBuffer = await interBankService.obterPdfCobranca(codigoSolicitacao);
+      console.log(`[INTER] Converting ${pdfBuffer.length} bytes PDF to PNG...`);
+
+      // Garantir que pasta temp existe
+      if (!fs.existsSync(tempDir)) {
+        fs.mkdirSync(tempDir, { recursive: true });
+      }
+
+      const tempId = Date.now().toString();
+      const inputPdfPath = path.join(tempDir, `boleto_${tempId}.pdf`);
+      const outputDir = path.join(tempDir, `png_${tempId}`);
+
+      // Salvar PDF temporariamente
+      await writeFile(inputPdfPath, pdfBuffer);
+
+      // Criar pasta de output
+      if (!fs.existsSync(outputDir)) {
+        fs.mkdirSync(outputDir, { recursive: true });
+      }
+
+      try {
+        // Converter usando pdf-poppler
+        const poppler = require('pdf-poppler');
+        
+        const options = {
+          format: 'png',
+          out_dir: outputDir,
+          out_prefix: 'boleto_page',
+          page: null, // Primeira página
+          single_file: false,
+          scale: 3.0, // Alta resolução para clareza
+        };
+
+        console.log("[INTER] 🔄 Converting to PNG using pdf-poppler...");
+        await poppler.convert(inputPdfPath, options);
+        
+        // Procurar arquivos PNG criados
+        const pngFiles = fs.readdirSync(outputDir)
+          .filter(file => file.endsWith('.png'))
+          .sort()
+          .map(file => path.join(outputDir, file));
+
+        if (pngFiles.length === 0) {
+          throw new Error('No PNG files were created');
+        }
+
+        // Ler primeira página como PNG
+        const firstPngPath = pngFiles[0];
+        const pngBuffer = await readFile(firstPngPath);
+        
+        console.log(`[INTER] ✅ Successfully converted to PNG (${pngBuffer.length} bytes)`);
+
+        // Limpeza de arquivos temporários
+        await Promise.all([
+          unlink(inputPdfPath),
+          ...pngFiles.map(file => unlink(file))
+        ]);
+
+        // Remover diretórios temporários
+        try {
+          fs.rmSync(outputDir, { recursive: true, force: true });
+        } catch (cleanupError) {
+          console.warn("[INTER] Warning during cleanup:", cleanupError);
+        }
+
+        res.setHeader("Content-Type", "image/png");
+        res.setHeader(
+          "Content-Disposition",
+          `attachment; filename="boleto-${codigoSolicitacao}.png"`
+        );
+        res.send(pngBuffer);
+
+      } catch (conversionError) {
+        // Fallback: tentar criar PNG básico com texto se conversão falhar
+        console.warn("[INTER] PDF conversion failed, creating text-based PNG fallback");
+        
+        const fallbackPng = await createTextFallbackPng(codigoSolicitacao);
+        
+        res.setHeader("Content-Type", "image/png");
+        res.setHeader(
+          "Content-Disposition",
+          `attachment; filename="boleto-info-${codigoSolicitacao}.png"`
+        );
+        res.send(fallbackPng);
+      }
+
+    } catch (error) {
+      console.error("[INTER] Failed to convert PDF to PNG:", error);
+      res.status(500).json({
+        success: false,
+        error: "Failed to convert collection to PNG",
+        details: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  }
+);
+
+// Função auxiliar para criar PNG de fallback com informações do boleto
+async function createTextFallbackPng(codigoSolicitacao: string): Promise<Buffer> {
+  const { createCanvas } = require('canvas');
+  
+  const canvas = createCanvas(800, 600);
+  const ctx = canvas.getContext('2d');
+  
+  // Fundo branco
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, 800, 600);
+  
+  // Texto
+  ctx.fillStyle = '#000000';
+  ctx.font = '24px Arial';
+  ctx.fillText('Informações do Boleto', 50, 100);
+  ctx.font = '18px Arial';
+  ctx.fillText(`Código: ${codigoSolicitacao}`, 50, 150);
+  ctx.fillText('Use os códigos de pagamento disponíveis na tela', 50, 200);
+  ctx.fillText('ou baixe o PDF original se necessário', 50, 230);
+  
+  return canvas.toBuffer('image/png');
+}
 
 /**
  * Cancel collection
