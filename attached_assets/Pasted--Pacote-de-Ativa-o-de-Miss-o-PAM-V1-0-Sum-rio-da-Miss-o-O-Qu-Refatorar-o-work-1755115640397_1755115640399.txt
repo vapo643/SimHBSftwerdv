@@ -1,0 +1,54 @@
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Refatorar o worker de `sincronização de boletos` para substituir o loop sequencial por um mecanismo de processamento paralelo inteligente em lotes (batch processing).
+* **Intenção Estratégica (O Porquê):** O download sequencial de boletos, embora seguro, é lento (estimado em ~2.2 minutos para 24 boletos). A implementação do processamento em lotes nos permitirá baixar múltiplos boletos simultaneamente de forma controlada, reduzindo drasticamente o tempo total de sincronização sem acionar os limites de rate limiting da API do Banco Inter.
+* **Histórico Relevante (Consulta Obrigatória):** Consulte o seu próprio relatório `AUDITORIA_ARQUITETURAL_FLUXO_FORMALIZACAO.md`. Esta missão é a implementação direta da sua **Proposta C: Processamento Paralelo Inteligente**.
+* **Modelo Mental (Como se Encaixa):** A lógica será contida dentro do processador do job `boleto-sync` no ficheiro `server/worker.ts`. Em vez de um `for...of` que processa um boleto de cada vez, a lógica irá dividir a lista total de boletos em "pedaços" (lotes) menores (ex: 5 boletos) e processar cada lote em paralelo usando `Promise.all`.
+* **Riscos Antecipados:** **Risco:** Um tamanho de lote (batch size) muito grande pode acionar o rate limiting da API que tentamos evitar. **Contramedida:** O tamanho do lote deve ser uma constante configurável (ex: `const BATCH_SIZE = 5;`) no topo do ficheiro, facilitando o ajuste fino sem a necessidade de alterar a lógica principal.
+
+---
+
+**IMPLEMENTAR:**
+A otimização de performance do worker de sincronização de boletos através da implementação de processamento paralelo em lotes.
+
+**CURRENT STATE:**
+O worker `boleto-sync` processa um boleto de cada vez em um loop sequencial, com um delay fixo entre cada um, tornando o processo lento e ineficiente.
+
+**EXPECTED (Estado Final de Sucesso):**
+O worker `boleto-sync` processa a lista de boletos em lotes paralelos de tamanho controlado. O tempo total para sincronizar uma proposta de 24 boletos é drasticamente reduzido (a meta é uma redução de pelo menos 70%).
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+**1. Refatoração do Worker (`server/worker.ts`):**
+    - **Ação:** Modifique a lógica dentro do processador de jobs da fila `boleto-sync`.
+    - **Implementação:**
+        a. Defina um tamanho de lote configurável no topo: `const BATCH_SIZE = 5;`.
+        b. Substitua o loop sequencial `for...of` por um loop que itere sobre a lista de boletos em "pedaços" do tamanho do `BATCH_SIZE`.
+        c. Dentro do loop principal, use `Promise.all` para processar o lote atual de boletos em paralelo.
+        d. Mantenha um `delay` (ex: 1 segundo) **ENTRE os lotes**, não entre cada boleto individual.
+
+    - **Código de Exemplo (implemente a sua própria versão baseada neste conceito):**
+      ```typescript
+      const BATCH_SIZE = 5;
+      const boletos = [...]; // Lista de todos os boletos a sincronizar
+
+      for (let i = 0; i < boletos.length; i += BATCH_SIZE) {
+        const batch = boletos.slice(i, i + BATCH_SIZE);
+        
+        const resultados = await Promise.all(
+          batch.map(boleto => processarUmBoleto(boleto).catch(e => ({ error: e, boletoId: boleto.id })))
+        );
+        
+        // Lógica para tratar erros dentro do lote, se necessário...
+
+        if (i + BATCH_SIZE < boletos.length) {
+          await new Promise(r => setTimeout(r, 1000)); // Delay entre lotes
+        }
+      }
+      ```
+
+**PROTOCOLO OBRIGATÓRIO 5-CHECK:**
+1.  Mapear os arquivos envolvidos.
+2.  Garantir que o tratamento de erro seja robusto dentro do `Promise.all` para que a falha em um boleto não interrompa o lote inteiro.
+3.  Executar `get_latest_lsp_diagnostics` para garantir ZERO erros.
+4.  O critério de sucesso é **provar a melhoria de performance**. Execute uma sincronização de uma proposta de 24 boletos e, utilizando logs com `console.time()` e `console.timeEnd()`, reporte o tempo total de execução. Compare este novo tempo com o tempo estimado da arquitetura antiga (~2 minutos) para validar a otimização.
