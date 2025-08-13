@@ -1,0 +1,855 @@
+      "numero": "100",
+      "complemento": ""
+    }
+  },
+  "boleto": {
+    "nossoNumero": "90390250309",
+    "codigoBarras": "07797120000000166670001112134234790390250309",
+    "linhaDigitavel": "07790001161213423479303902503097712000000016667"
+  },
+  "pix": {
+    "txid": "34647053617543847170007pfTFSGRVxzzg",
+    "pixCopiaECola": "00020101021226980014BR.GOV.BCB.PIX2576spi-qrcode.bancointer.com.br/spi/pj/v2/cobv/36f1fba26ee54800a37c3d2fd92bfcf15204000053039865406166.675802BR5901*6007VITORIA61082901819062070503***63048A4E"
+  }
+}
+[INTER] ⚠️ QR Code generation not implemented yet
+[INTER] ✅ Collection retrieved and enriched successfully
+[INTER] 📊 Linha digitável: 07790001161213423479303902503097712000000016667
+[INTER] 📊 Código de barras: 07797120000000166670001112134234790390250309
+[INTER] 📊 PIX disponível: Sim
+[INTER] ✅ Cobrança existe, prosseguindo para PDF...
+[INTER] 🔍 STEP 2: Buscando PDF (esperando JSON com base64)...
+[INTER] ========== REQUEST DETAILS ==========
+[INTER] 🌐 FULL URL: https://cdpj.partners.bancointer.com.br/cobranca/v3/cobrancas/222e3b63-333d-478a-b571-693af12869b6/pdf
+[INTER] 🔧 METHOD: GET
+[INTER] 🪙 TOKEN (first 20 chars):', 1563de62-e0c0-4a0e-a...
+[INTER] ===================================
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] 🏦 CONTA CORRENTE HEADER ADDED: 346470536
+[INTER] 🔑 ALL HEADERS: {
+  "Authorization": "Bearer 1563de62-e0c0-4a0e-ab2c-5ae8fb2d057b",
+  "Accept": "application/json",
+  "User-Agent": "SIMPIX-Inter-Integration/1.0",
+  "Content-Type": "application/json",
+  "x-conta-corrente": "346470536"
+}
+[INTER] ========== RESPONSE DETAILS ==========
+[INTER] 📊 STATUS: 200 OK
+[INTER] 📋 RESPONSE HEADERS: {
+  'content-type': 'application/json',
+  date: 'Wed, 13 Aug 2025 13:53:40 GMT',
+  server: 'istio-envoy',
+  'strict-transport-security': 'max-age=31536000; includeSubDomains',
+  traceparent: '00-9ae6b9fbf9edc41ef3a5fc0ee9578ee5-7fdc4009fc85e335-00',
+  'x-envoy-upstream-service-time': '112',
+  'x-rate-limit-remaining': '119',
+  'x-rate-limit-time': '1755093280318',
+  'x-upstream-time': '117',
+  'transfer-encoding': 'chunked'
+}
+[INTER] 🔍 Response Content-Type: application/json
+[INTER] 🔍 Is PDF Response: false
+[INTER] 📦 Response buffer size: 55354 bytes
+[INTER] ✅ Response OK
+[INTER] =====================================
+[INTER] 📊 Tipo de resposta: object
+[INTER] 📋 Resposta é JSON, procurando campo base64...
+[INTER] 📋 Campos disponíveis no JSON: [ 'pdf' ]
+[INTER] ✅ Campo 'pdf' encontrado com 55344 caracteres
+[INTER] ✅ Base64 encontrado no campo 'pdf'
+[INTER] 📊 Tamanho do base64: 55344 caracteres
+[INTER] ✅ PDF convertido: 41506 bytes
+[INTER] ✅ PDF VÁLIDO CONFIRMADO! Magic bytes: %PDF-
+[PDF_SANITIZER] 🚨 INICIANDO SANITIZAÇÃO EXTREMAMENTE AGRESSIVA
+[PDF_SANITIZER] Tamanho original: 41506 bytes
+[PDF_SANITIZER] ⚠️ Erro durante sanitização, retornando PDF original: require is not defined
+[MCAFEE_BYPASS] 🎯 Aplicando bypass específico para ti!7da91cf510c0
+[MCAFEE_BYPASS] ✅ Bypass ti!7da91cf510c0 aplicado com sucesso
+[MCAFEE_BYPASS] 📊 Tamanho original: 41506 -> Novo: 41946
+[MCAFEE_BYPASS] ✅ Bypass aplicado na parcela 2
+[MCAFEE_BYPASS] 📄 Processando parcela 3
+[MCAFEE_BYPASS] 🔍 UUID: e01209d8-7263-448b-b5f7-2376892fdfd7
+[INTER] 📄 SOLUÇÃO IDENTIFICADA: API v3 retorna PDF como base64 em JSON
+[INTER] 🔍 Processando codigoSolicitacao: e01209d8-7263-448b-b5f7-2376892fdfd7
+[INTER] 🔍 STEP 1: Verificando se cobrança existe...
+[INTER] 📋 Retrieving collection: e01209d8-7263-448b-b5f7-2376892fdfd7
+[INTER] ========== REQUEST DETAILS ==========
+[INTER] 🌐 FULL URL: https://cdpj.partners.bancointer.com.br/cobranca/v3/cobrancas/e01209d8-7263-448b-b5f7-2376892fdfd7
+[INTER] 🔧 METHOD: GET
+[INTER] 🪙 TOKEN (first 20 chars):', 1563de62-e0c0-4a0e-a...
+[INTER] ===================================
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] 🏦 CONTA CORRENTE HEADER ADDED: 346470536
+[INTER] 🔑 ALL HEADERS: {
+  "Authorization": "Bearer 1563de62-e0c0-4a0e-ab2c-5ae8fb2d057b",
+  "Accept": "application/json",
+  "User-Agent": "SIMPIX-Inter-Integration/1.0",
+  "x-conta-corrente": "346470536"
+}
+[INTER] ========== RESPONSE DETAILS ==========
+[INTER] 📊 STATUS: 200 OK
+[INTER] 📋 RESPONSE HEADERS: {
+  'content-type': 'application/json',
+  date: 'Wed, 13 Aug 2025 13:53:40 GMT',
+  server: 'istio-envoy',
+  'strict-transport-security': 'max-age=31536000; includeSubDomains',
+  traceparent: '00-3bdcf0acdb89861326e2867ee18b2249-de0b2b46f8aa24cc-00',
+  'x-envoy-upstream-service-time': '124',
+  'x-rate-limit-remaining': '119',
+  'x-rate-limit-time': '1755093280575',
+  'x-upstream-time': '127',
+  'content-length': '1173'
+}
+[INTER] 🔍 Response Content-Type: application/json
+[INTER] 🔍 Is PDF Response: false
+[INTER] 📦 Response buffer size: 1173 bytes
+[INTER] ✅ Response OK
+[INTER] =====================================
+[INTER] 📊 Collection data: {
+  "cobranca": {
+    "codigoSolicitacao": "e01209d8-7263-448b-b5f7-2376892fdfd7",
+    "seuNumero": "902183dd-b5d1-4",
+    "dataEmissao": "2025-08-05",
+    "dataVencimento": "2025-10-10",
+    "valorNominal": 166.67,
+    "tipoCobranca": "SIMPLES",
+    "situacao": "CANCELADO",
+    "dataSituacao": "2025-08-06",
+    "arquivada": false,
+    "descontos": [
+      {
+        "codigo": "PERCENTUALDATAINFORMADA",
+        "quantidadeDias": 0,
+        "taxa": 0.01
+      }
+    ],
+    "multa": {
+      "codigo": "PERCENTUAL",
+      "taxa": 2
+    },
+    "mora": {
+      "codigo": "TAXAMENSAL",
+      "taxa": 1
+    },
+    "pagador": {
+      "cpfCnpj": "20528464760",
+      "tipoPessoa": "FISICA",
+      "nome": "Gabriel de Jesus Santana Serri",
+      "endereco": "Rua miguel angelo",
+      "bairro": "Centro",
+      "cidade": "Serra",
+      "uf": "ES",
+      "cep": "29165460",
+      "email": "gabrieldjesus238@gmail.com",
+      "ddd": "27",
+      "telefone": "27998538565",
+      "numero": "100",
+      "complemento": ""
+    }
+  },
+  "boleto": {
+    "nossoNumero": "90390250325",
+    "codigoBarras": "07792123000000166670001112134234790390250325",
+    "linhaDigitavel": "07790001161213423479303902503253212300000016667"
+  },
+  "pix": {
+    "txid": "3464705361754384718000NA6AR78slHoft",
+    "pixCopiaECola": "00020101021226980014BR.GOV.BCB.PIX2576spi-qrcode.bancointer.com.br/spi/pj/v2/cobv/4a6f058d81414b21b349ef993ced07e95204000053039865406166.675802BR5901*6007VITORIA61082901819062070503***63048715"
+  }
+}
+[INTER] ⚠️ QR Code generation not implemented yet
+[INTER] ✅ Collection retrieved and enriched successfully
+[INTER] 📊 Linha digitável: 07790001161213423479303902503253212300000016667
+[INTER] 📊 Código de barras: 07792123000000166670001112134234790390250325
+[INTER] 📊 PIX disponível: Sim
+[INTER] ✅ Cobrança existe, prosseguindo para PDF...
+[INTER] 🔍 STEP 2: Buscando PDF (esperando JSON com base64)...
+[INTER] ========== REQUEST DETAILS ==========
+[INTER] 🌐 FULL URL: https://cdpj.partners.bancointer.com.br/cobranca/v3/cobrancas/e01209d8-7263-448b-b5f7-2376892fdfd7/pdf
+[INTER] 🔧 METHOD: GET
+[INTER] 🪙 TOKEN (first 20 chars):', 1563de62-e0c0-4a0e-a...
+[INTER] ===================================
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] 🏦 CONTA CORRENTE HEADER ADDED: 346470536
+[INTER] 🔑 ALL HEADERS: {
+  "Authorization": "Bearer 1563de62-e0c0-4a0e-ab2c-5ae8fb2d057b",
+  "Accept": "application/json",
+  "User-Agent": "SIMPIX-Inter-Integration/1.0",
+  "Content-Type": "application/json",
+  "x-conta-corrente": "346470536"
+}
+[INTER] ========== RESPONSE DETAILS ==========
+[INTER] 📊 STATUS: 200 OK
+[INTER] 📋 RESPONSE HEADERS: {
+  'content-type': 'application/json',
+  date: 'Wed, 13 Aug 2025 13:53:40 GMT',
+  server: 'istio-envoy',
+  'strict-transport-security': 'max-age=31536000; includeSubDomains',
+  traceparent: '00-fd418431c9489bf3af033703562277fd-0f8154c84be7d17c-00',
+  'x-envoy-upstream-service-time': '96',
+  'x-rate-limit-remaining': '119',
+  'x-rate-limit-time': '1755093280843',
+  'x-upstream-time': '99',
+  'transfer-encoding': 'chunked'
+}
+[INTER] 🔍 Response Content-Type: application/json
+[INTER] 🔍 Is PDF Response: false
+[INTER] 📦 Response buffer size: 55142 bytes
+[INTER] ✅ Response OK
+[INTER] =====================================
+[INTER] 📊 Tipo de resposta: object
+[INTER] 📋 Resposta é JSON, procurando campo base64...
+[INTER] 📋 Campos disponíveis no JSON: [ 'pdf' ]
+[INTER] ✅ Campo 'pdf' encontrado com 55132 caracteres
+[INTER] ✅ Base64 encontrado no campo 'pdf'
+[INTER] 📊 Tamanho do base64: 55132 caracteres
+[INTER] ✅ PDF convertido: 41349 bytes
+[INTER] ✅ PDF VÁLIDO CONFIRMADO! Magic bytes: %PDF-
+[PDF_SANITIZER] 🚨 INICIANDO SANITIZAÇÃO EXTREMAMENTE AGRESSIVA
+[PDF_SANITIZER] Tamanho original: 41349 bytes
+[PDF_SANITIZER] ⚠️ Erro durante sanitização, retornando PDF original: require is not defined
+[MCAFEE_BYPASS] 🎯 Aplicando bypass específico para ti!7da91cf510c0
+[MCAFEE_BYPASS] ✅ Bypass ti!7da91cf510c0 aplicado com sucesso
+[MCAFEE_BYPASS] 📊 Tamanho original: 41349 -> Novo: 41789
+[MCAFEE_BYPASS] ✅ Bypass aplicado na parcela 3
+[MCAFEE_BYPASS] 📄 Processando parcela 4
+[MCAFEE_BYPASS] 🔍 UUID: 44a467d1-e93f-4e91-b1f9-c79438ef5eea
+[INTER] 📄 SOLUÇÃO IDENTIFICADA: API v3 retorna PDF como base64 em JSON
+[INTER] 🔍 Processando codigoSolicitacao: 44a467d1-e93f-4e91-b1f9-c79438ef5eea
+[INTER] 🔍 STEP 1: Verificando se cobrança existe...
+[INTER] 📋 Retrieving collection: 44a467d1-e93f-4e91-b1f9-c79438ef5eea
+[INTER] ========== REQUEST DETAILS ==========
+[INTER] 🌐 FULL URL: https://cdpj.partners.bancointer.com.br/cobranca/v3/cobrancas/44a467d1-e93f-4e91-b1f9-c79438ef5eea
+[INTER] 🔧 METHOD: GET
+[INTER] 🪙 TOKEN (first 20 chars):', 1563de62-e0c0-4a0e-a...
+[INTER] ===================================
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] 🏦 CONTA CORRENTE HEADER ADDED: 346470536
+[INTER] 🔑 ALL HEADERS: {
+  "Authorization": "Bearer 1563de62-e0c0-4a0e-ab2c-5ae8fb2d057b",
+  "Accept": "application/json",
+  "User-Agent": "SIMPIX-Inter-Integration/1.0",
+  "x-conta-corrente": "346470536"
+}
+[INTER] ========== RESPONSE DETAILS ==========
+[INTER] 📊 STATUS: 200 OK
+[INTER] 📋 RESPONSE HEADERS: {
+  'content-type': 'application/json',
+  date: 'Wed, 13 Aug 2025 13:53:41 GMT',
+  server: 'istio-envoy',
+  'strict-transport-security': 'max-age=31536000; includeSubDomains',
+  traceparent: '00-19859adc5f2a0a50a7a340e2bc25f96f-d9a4c7b5af233cd0-00',
+  'x-envoy-upstream-service-time': '79',
+  'x-rate-limit-remaining': '119',
+  'x-rate-limit-time': '1755093281082',
+  'x-upstream-time': '80',
+  'content-length': '1173'
+}
+[INTER] 🔍 Response Content-Type: application/json
+[INTER] 🔍 Is PDF Response: false
+[INTER] 📦 Response buffer size: 1173 bytes
+[INTER] ✅ Response OK
+[INTER] =====================================
+[INTER] 📊 Collection data: {
+  "cobranca": {
+    "codigoSolicitacao": "44a467d1-e93f-4e91-b1f9-c79438ef5eea",
+    "seuNumero": "902183dd-b5d1-4",
+    "dataEmissao": "2025-08-05",
+    "dataVencimento": "2025-11-10",
+    "valorNominal": 166.67,
+    "tipoCobranca": "SIMPLES",
+    "situacao": "CANCELADO",
+    "dataSituacao": "2025-08-06",
+    "arquivada": false,
+    "descontos": [
+      {
+        "codigo": "PERCENTUALDATAINFORMADA",
+        "quantidadeDias": 0,
+        "taxa": 0.01
+      }
+    ],
+    "multa": {
+      "codigo": "PERCENTUAL",
+      "taxa": 2
+    },
+    "mora": {
+      "codigo": "TAXAMENSAL",
+      "taxa": 1
+    },
+    "pagador": {
+      "cpfCnpj": "20528464760",
+      "tipoPessoa": "FISICA",
+      "nome": "Gabriel de Jesus Santana Serri",
+      "endereco": "Rua miguel angelo",
+      "bairro": "Centro",
+      "cidade": "Serra",
+      "uf": "ES",
+      "cep": "29165460",
+      "email": "gabrieldjesus238@gmail.com",
+      "ddd": "27",
+      "telefone": "27998538565",
+      "numero": "100",
+      "complemento": ""
+    }
+  },
+  "boleto": {
+    "nossoNumero": "90390250333",
+    "codigoBarras": "07792126100000166670001112134234790390250333",
+    "linhaDigitavel": "07790001161213423479303902503337212610000016667"
+  },
+  "pix": {
+    "txid": "3464705361754384719000GrGwYtVPs1byj",
+    "pixCopiaECola": "00020101021226980014BR.GOV.BCB.PIX2576spi-qrcode.bancointer.com.br/spi/pj/v2/cobv/669bd975f5e7457599630a1f8473359a5204000053039865406166.675802BR5901*6007VITORIA61082901819062070503***6304E23E"
+  }
+}
+[INTER] ⚠️ QR Code generation not implemented yet
+[INTER] ✅ Collection retrieved and enriched successfully
+[INTER] 📊 Linha digitável: 07790001161213423479303902503337212610000016667
+[INTER] 📊 Código de barras: 07792126100000166670001112134234790390250333
+[INTER] 📊 PIX disponível: Sim
+[INTER] ✅ Cobrança existe, prosseguindo para PDF...
+[INTER] 🔍 STEP 2: Buscando PDF (esperando JSON com base64)...
+[INTER] ========== REQUEST DETAILS ==========
+[INTER] 🌐 FULL URL: https://cdpj.partners.bancointer.com.br/cobranca/v3/cobrancas/44a467d1-e93f-4e91-b1f9-c79438ef5eea/pdf
+[INTER] 🔧 METHOD: GET
+[INTER] 🪙 TOKEN (first 20 chars):', 1563de62-e0c0-4a0e-a...
+[INTER] ===================================
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] 🏦 CONTA CORRENTE HEADER ADDED: 346470536
+[INTER] 🔑 ALL HEADERS: {
+  "Authorization": "Bearer 1563de62-e0c0-4a0e-ab2c-5ae8fb2d057b",
+  "Accept": "application/json",
+  "User-Agent": "SIMPIX-Inter-Integration/1.0",
+  "Content-Type": "application/json",
+  "x-conta-corrente": "346470536"
+}
+[INTER] ========== RESPONSE DETAILS ==========
+[INTER] 📊 STATUS: 200 OK
+[INTER] 📋 RESPONSE HEADERS: {
+  'content-type': 'application/json',
+  date: 'Wed, 13 Aug 2025 13:53:41 GMT',
+  server: 'istio-envoy',
+  'strict-transport-security': 'max-age=31536000; includeSubDomains',
+  traceparent: '00-ff298c4721cfbc809d5641bea96e4906-796ef243cea73ef8-00',
+  'x-envoy-upstream-service-time': '201',
+  'x-rate-limit-remaining': '119',
+  'x-rate-limit-time': '1755093281304',
+  'x-upstream-time': '203',
+  'transfer-encoding': 'chunked'
+}
+[INTER] 🔍 Response Content-Type: application/json
+[INTER] 🔍 Is PDF Response: false
+[INTER] 📦 Response buffer size: 55706 bytes
+[INTER] ✅ Response OK
+[INTER] =====================================
+[INTER] 📊 Tipo de resposta: object
+[INTER] 📋 Resposta é JSON, procurando campo base64...
+[INTER] 📋 Campos disponíveis no JSON: [ 'pdf' ]
+[INTER] ✅ Campo 'pdf' encontrado com 55696 caracteres
+[INTER] ✅ Base64 encontrado no campo 'pdf'
+[INTER] 📊 Tamanho do base64: 55696 caracteres
+[INTER] ✅ PDF convertido: 41771 bytes
+[INTER] ✅ PDF VÁLIDO CONFIRMADO! Magic bytes: %PDF-
+[PDF_SANITIZER] 🚨 INICIANDO SANITIZAÇÃO EXTREMAMENTE AGRESSIVA
+[PDF_SANITIZER] Tamanho original: 41771 bytes
+[PDF_SANITIZER] ⚠️ Erro durante sanitização, retornando PDF original: require is not defined
+[MCAFEE_BYPASS] 🎯 Aplicando bypass específico para ti!7da91cf510c0
+[MCAFEE_BYPASS] ✅ Bypass ti!7da91cf510c0 aplicado com sucesso
+[MCAFEE_BYPASS] 📊 Tamanho original: 41771 -> Novo: 42211
+[MCAFEE_BYPASS] ✅ Bypass aplicado na parcela 4
+[MCAFEE_BYPASS] 📄 Processando parcela 5
+[MCAFEE_BYPASS] 🔍 UUID: 06f3888f-c067-494a-a619-18d14bc59d8a
+[INTER] 📄 SOLUÇÃO IDENTIFICADA: API v3 retorna PDF como base64 em JSON
+[INTER] 🔍 Processando codigoSolicitacao: 06f3888f-c067-494a-a619-18d14bc59d8a
+[INTER] 🔍 STEP 1: Verificando se cobrança existe...
+[INTER] 📋 Retrieving collection: 06f3888f-c067-494a-a619-18d14bc59d8a
+[INTER] ========== REQUEST DETAILS ==========
+[INTER] 🌐 FULL URL: https://cdpj.partners.bancointer.com.br/cobranca/v3/cobrancas/06f3888f-c067-494a-a619-18d14bc59d8a
+[INTER] 🔧 METHOD: GET
+[INTER] 🪙 TOKEN (first 20 chars):', 1563de62-e0c0-4a0e-a...
+[INTER] ===================================
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] 🏦 CONTA CORRENTE HEADER ADDED: 346470536
+[INTER] 🔑 ALL HEADERS: {
+  "Authorization": "Bearer 1563de62-e0c0-4a0e-ab2c-5ae8fb2d057b",
+  "Accept": "application/json",
+  "User-Agent": "SIMPIX-Inter-Integration/1.0",
+  "x-conta-corrente": "346470536"
+}
+[INTER] ========== RESPONSE DETAILS ==========
+[INTER] 📊 STATUS: 200 OK
+[INTER] 📋 RESPONSE HEADERS: {
+  'content-type': 'application/json',
+  date: 'Wed, 13 Aug 2025 13:53:41 GMT',
+  server: 'istio-envoy',
+  'strict-transport-security': 'max-age=31536000; includeSubDomains',
+  traceparent: '00-6aa337da0e0d44400bdd2c1e1c7e3999-cf202cc9fd0659d5-01',
+  'x-envoy-upstream-service-time': '86',
+  'x-rate-limit-remaining': '119',
+  'x-rate-limit-time': '1755093281649',
+  'x-upstream-time': '87',
+  'content-length': '1173'
+}
+[INTER] 🔍 Response Content-Type: application/json
+[INTER] 🔍 Is PDF Response: false
+[INTER] 📦 Response buffer size: 1173 bytes
+[INTER] ✅ Response OK
+[INTER] =====================================
+[INTER] 📊 Collection data: {
+  "cobranca": {
+    "codigoSolicitacao": "06f3888f-c067-494a-a619-18d14bc59d8a",
+    "seuNumero": "902183dd-b5d1-4",
+    "dataEmissao": "2025-08-05",
+    "dataVencimento": "2025-12-10",
+    "valorNominal": 166.67,
+    "tipoCobranca": "SIMPLES",
+    "situacao": "CANCELADO",
+    "dataSituacao": "2025-08-06",
+    "arquivada": false,
+    "descontos": [
+      {
+        "codigo": "PERCENTUALDATAINFORMADA",
+        "quantidadeDias": 0,
+        "taxa": 0.01
+      }
+    ],
+    "multa": {
+      "codigo": "PERCENTUAL",
+      "taxa": 2
+    },
+    "mora": {
+      "codigo": "TAXAMENSAL",
+      "taxa": 1
+    },
+    "pagador": {
+      "cpfCnpj": "20528464760",
+      "tipoPessoa": "FISICA",
+      "nome": "Gabriel de Jesus Santana Serri",
+      "endereco": "Rua miguel angelo",
+      "bairro": "Centro",
+      "cidade": "Serra",
+      "uf": "ES",
+      "cep": "29165460",
+      "email": "gabrieldjesus238@gmail.com",
+      "ddd": "27",
+      "telefone": "27998538565",
+      "numero": "100",
+      "complemento": ""
+    }
+  },
+  "boleto": {
+    "nossoNumero": "90390250341",
+    "codigoBarras": "07797129100000166670001112134234790390250341",
+    "linhaDigitavel": "07790001161213423479303902503410712910000016667"
+  },
+  "pix": {
+    "txid": "3464705361754384719000KTl22DEFXu3zT",
+    "pixCopiaECola": "00020101021226980014BR.GOV.BCB.PIX2576spi-qrcode.bancointer.com.br/spi/pj/v2/cobv/1878c4fd9b094c36b0ee64a63d8f27b25204000053039865406166.675802BR5901*6007VITORIA61082901819062070503***630414C9"
+  }
+}
+[INTER] ⚠️ QR Code generation not implemented yet
+[INTER] ✅ Collection retrieved and enriched successfully
+[INTER] 📊 Linha digitável: 07790001161213423479303902503410712910000016667
+[INTER] 📊 Código de barras: 07797129100000166670001112134234790390250341
+[INTER] 📊 PIX disponível: Sim
+[INTER] ✅ Cobrança existe, prosseguindo para PDF...
+[INTER] 🔍 STEP 2: Buscando PDF (esperando JSON com base64)...
+[INTER] ========== REQUEST DETAILS ==========
+[INTER] 🌐 FULL URL: https://cdpj.partners.bancointer.com.br/cobranca/v3/cobrancas/06f3888f-c067-494a-a619-18d14bc59d8a/pdf
+[INTER] 🔧 METHOD: GET
+[INTER] 🪙 TOKEN (first 20 chars):', 1563de62-e0c0-4a0e-a...
+[INTER] ===================================
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] 🏦 CONTA CORRENTE HEADER ADDED: 346470536
+[INTER] 🔑 ALL HEADERS: {
+  "Authorization": "Bearer 1563de62-e0c0-4a0e-ab2c-5ae8fb2d057b",
+  "Accept": "application/json",
+  "User-Agent": "SIMPIX-Inter-Integration/1.0",
+  "Content-Type": "application/json",
+  "x-conta-corrente": "346470536"
+}
+[INTER] ========== RESPONSE DETAILS ==========
+[INTER] 📊 STATUS: 200 OK
+[INTER] 📋 RESPONSE HEADERS: {
+  'content-type': 'application/json',
+  date: 'Wed, 13 Aug 2025 13:53:42 GMT',
+  server: 'istio-envoy',
+  'strict-transport-security': 'max-age=31536000; includeSubDomains',
+  traceparent: '00-98a0500aff7391e956ad6cea1d450ab4-afdf68dde7ce3d36-00',
+  'x-envoy-upstream-service-time': '140',
+  'x-rate-limit-remaining': '119',
+  'x-rate-limit-time': '1755093281878',
+  'x-upstream-time': '141',
+  'transfer-encoding': 'chunked'
+}
+[INTER] 🔍 Response Content-Type: application/json
+[INTER] 🔍 Is PDF Response: false
+[INTER] 📦 Response buffer size: 55758 bytes
+[INTER] ✅ Response OK
+[INTER] =====================================
+[INTER] 📊 Tipo de resposta: object
+[INTER] 📋 Resposta é JSON, procurando campo base64...
+[INTER] 📋 Campos disponíveis no JSON: [ 'pdf' ]
+[INTER] ✅ Campo 'pdf' encontrado com 55748 caracteres
+[INTER] ✅ Base64 encontrado no campo 'pdf'
+[INTER] 📊 Tamanho do base64: 55748 caracteres
+[INTER] ✅ PDF convertido: 41809 bytes
+[INTER] ✅ PDF VÁLIDO CONFIRMADO! Magic bytes: %PDF-
+[PDF_SANITIZER] 🚨 INICIANDO SANITIZAÇÃO EXTREMAMENTE AGRESSIVA
+[PDF_SANITIZER] Tamanho original: 41809 bytes
+[PDF_SANITIZER] ⚠️ Erro durante sanitização, retornando PDF original: require is not defined
+[MCAFEE_BYPASS] 🎯 Aplicando bypass específico para ti!7da91cf510c0
+[MCAFEE_BYPASS] ✅ Bypass ti!7da91cf510c0 aplicado com sucesso
+[MCAFEE_BYPASS] 📊 Tamanho original: 41809 -> Novo: 42249
+[MCAFEE_BYPASS] ✅ Bypass aplicado na parcela 5
+[MCAFEE_BYPASS] 📄 Processando parcela 6
+[MCAFEE_BYPASS] 🔍 UUID: a3f3986e-4e47-4c1b-b436-d3eb21ef01c9
+[INTER] 📄 SOLUÇÃO IDENTIFICADA: API v3 retorna PDF como base64 em JSON
+[INTER] 🔍 Processando codigoSolicitacao: a3f3986e-4e47-4c1b-b436-d3eb21ef01c9
+[INTER] 🔍 STEP 1: Verificando se cobrança existe...
+[INTER] 📋 Retrieving collection: a3f3986e-4e47-4c1b-b436-d3eb21ef01c9
+[INTER] ========== REQUEST DETAILS ==========
+[INTER] 🌐 FULL URL: https://cdpj.partners.bancointer.com.br/cobranca/v3/cobrancas/a3f3986e-4e47-4c1b-b436-d3eb21ef01c9
+[INTER] 🔧 METHOD: GET
+[INTER] 🪙 TOKEN (first 20 chars):', 1563de62-e0c0-4a0e-a...
+[INTER] ===================================
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] 🏦 CONTA CORRENTE HEADER ADDED: 346470536
+[INTER] 🔑 ALL HEADERS: {
+  "Authorization": "Bearer 1563de62-e0c0-4a0e-ab2c-5ae8fb2d057b",
+  "Accept": "application/json",
+  "User-Agent": "SIMPIX-Inter-Integration/1.0",
+  "x-conta-corrente": "346470536"
+}
+[INTER] ========== RESPONSE DETAILS ==========
+[INTER] 📊 STATUS: 200 OK
+[INTER] 📋 RESPONSE HEADERS: {
+  'content-type': 'application/json',
+  date: 'Wed, 13 Aug 2025 13:53:42 GMT',
+  server: 'istio-envoy',
+  'strict-transport-security': 'max-age=31536000; includeSubDomains',
+  traceparent: '00-0cd3f3f17c12db8d57bc97808ba69b01-a04e18ba3c84517f-00',
+  'x-envoy-upstream-service-time': '67',
+  'x-rate-limit-remaining': '119',
+  'x-rate-limit-time': '1755093282163',
+  'x-upstream-time': '69',
+  'content-length': '1173'
+}
+[INTER] 🔍 Response Content-Type: application/json
+[INTER] 🔍 Is PDF Response: false
+[INTER] 📦 Response buffer size: 1173 bytes
+[INTER] ✅ Response OK
+[INTER] =====================================
+[INTER] 📊 Collection data: {
+  "cobranca": {
+    "codigoSolicitacao": "a3f3986e-4e47-4c1b-b436-d3eb21ef01c9",
+    "seuNumero": "902183dd-b5d1-4",
+    "dataEmissao": "2025-08-05",
+    "dataVencimento": "2026-01-10",
+    "valorNominal": 166.67,
+    "tipoCobranca": "SIMPLES",
+    "situacao": "CANCELADO",
+    "dataSituacao": "2025-08-06",
+    "arquivada": false,
+    "descontos": [
+      {
+        "codigo": "PERCENTUALDATAINFORMADA",
+        "quantidadeDias": 0,
+        "taxa": 0.01
+      }
+    ],
+    "multa": {
+      "codigo": "PERCENTUAL",
+      "taxa": 2
+    },
+    "mora": {
+      "codigo": "TAXAMENSAL",
+      "taxa": 1
+    },
+    "pagador": {
+      "cpfCnpj": "20528464760",
+      "tipoPessoa": "FISICA",
+      "nome": "Gabriel de Jesus Santana Serri",
+      "endereco": "Rua miguel angelo",
+      "bairro": "Centro",
+      "cidade": "Serra",
+      "uf": "ES",
+      "cep": "29165460",
+      "email": "gabrieldjesus238@gmail.com",
+      "ddd": "27",
+      "telefone": "27998538565",
+      "numero": "100",
+      "complemento": ""
+    }
+  },
+  "boleto": {
+    "nossoNumero": "90390250457",
+    "codigoBarras": "07797132200000166670001112134234790390250457",
+    "linhaDigitavel": "07790001161213423479303902504574713220000016667"
+  },
+  "pix": {
+    "txid": "3464705361754384721000Ix2uF090pjqXn",
+    "pixCopiaECola": "00020101021226980014BR.GOV.BCB.PIX2576spi-qrcode.bancointer.com.br/spi/pj/v2/cobv/55ae025cad3c42ac83a41206a12d048f5204000053039865406166.675802BR5901*6007VITORIA61082901819062070503***6304C803"
+  }
+}
+[INTER] ⚠️ QR Code generation not implemented yet
+[INTER] ✅ Collection retrieved and enriched successfully
+[INTER] 📊 Linha digitável: 07790001161213423479303902504574713220000016667
+[INTER] 📊 Código de barras: 07797132200000166670001112134234790390250457
+[INTER] 📊 PIX disponível: Sim
+[INTER] ✅ Cobrança existe, prosseguindo para PDF...
+[INTER] 🔍 STEP 2: Buscando PDF (esperando JSON com base64)...
+[INTER] ========== REQUEST DETAILS ==========
+[INTER] 🌐 FULL URL: https://cdpj.partners.bancointer.com.br/cobranca/v3/cobrancas/a3f3986e-4e47-4c1b-b436-d3eb21ef01c9/pdf
+[INTER] 🔧 METHOD: GET
+[INTER] 🪙 TOKEN (first 20 chars):', 1563de62-e0c0-4a0e-a...
+[INTER] ===================================
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] 🏦 CONTA CORRENTE HEADER ADDED: 346470536
+[INTER] 🔑 ALL HEADERS: {
+  "Authorization": "Bearer 1563de62-e0c0-4a0e-ab2c-5ae8fb2d057b",
+  "Accept": "application/json",
+  "User-Agent": "SIMPIX-Inter-Integration/1.0",
+  "Content-Type": "application/json",
+  "x-conta-corrente": "346470536"
+}
+[INTER] ========== RESPONSE DETAILS ==========
+[INTER] 📊 STATUS: 200 OK
+[INTER] 📋 RESPONSE HEADERS: {
+  'content-type': 'application/json',
+  date: 'Wed, 13 Aug 2025 13:53:42 GMT',
+  server: 'istio-envoy',
+  'strict-transport-security': 'max-age=31536000; includeSubDomains',
+  traceparent: '00-42c5f7ddef42f1d2d547fd2a7e2bd8ee-b30e25faa7a59ddf-00',
+  'x-envoy-upstream-service-time': '161',
+  'x-rate-limit-remaining': '119',
+  'x-rate-limit-time': '1755093282373',
+  'x-upstream-time': '163',
+  'transfer-encoding': 'chunked'
+}
+[INTER] 🔍 Response Content-Type: application/json
+[INTER] 🔍 Is PDF Response: false
+[INTER] 📦 Response buffer size: 55438 bytes
+[INTER] ✅ Response OK
+[INTER] =====================================
+[INTER] 📊 Tipo de resposta: object
+[INTER] 📋 Resposta é JSON, procurando campo base64...
+[INTER] 📋 Campos disponíveis no JSON: [ 'pdf' ]
+[INTER] ✅ Campo 'pdf' encontrado com 55428 caracteres
+[INTER] ✅ Base64 encontrado no campo 'pdf'
+[INTER] 📊 Tamanho do base64: 55428 caracteres
+[INTER] ✅ PDF convertido: 41571 bytes
+[INTER] ✅ PDF VÁLIDO CONFIRMADO! Magic bytes: %PDF-
+[PDF_SANITIZER] 🚨 INICIANDO SANITIZAÇÃO EXTREMAMENTE AGRESSIVA
+[PDF_SANITIZER] Tamanho original: 41571 bytes
+[PDF_SANITIZER] ⚠️ Erro durante sanitização, retornando PDF original: require is not defined
+[MCAFEE_BYPASS] 🎯 Aplicando bypass específico para ti!7da91cf510c0
+[MCAFEE_BYPASS] ✅ Bypass ti!7da91cf510c0 aplicado com sucesso
+[MCAFEE_BYPASS] 📊 Tamanho original: 41571 -> Novo: 42011
+[MCAFEE_BYPASS] ✅ Bypass aplicado na parcela 6
+[MCAFEE_BYPASS] ❌ Erro geral: require is not defined
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /902183dd-b5d1-4e20-8a72-79d3d3559d4d
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/mcafee-test
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-13T13:54:02.822Z'
+}
+[MCAFEE_BYPASS] 🎯 ATIVANDO BYPASS ESPECÍFICO para ti!7da91cf510c0
+[MCAFEE_BYPASS] 📋 Proposta: 902183dd-b5d1-4e20-8a72-79d3d3559d4d
+[MCAFEE_BYPASS] 📋 Encontrados 8 boletos
+[MCAFEE_BYPASS] ✅ 8 boletos com UUIDs válidos
+[MCAFEE_BYPASS] 🖼️ Criando container de imagem para bypass total
+[INTER] 📄 SOLUÇÃO IDENTIFICADA: API v3 retorna PDF como base64 em JSON
+[INTER] 🔍 Processando codigoSolicitacao: f05af659-0abe-48bc-872f-c550ea096b2e
+[INTER] 🔍 STEP 1: Verificando se cobrança existe...
+[INTER] 📋 Retrieving collection: f05af659-0abe-48bc-872f-c550ea096b2e
+[INTER] ========== REQUEST DETAILS ==========
+[INTER] 🌐 FULL URL: https://cdpj.partners.bancointer.com.br/cobranca/v3/cobrancas/f05af659-0abe-48bc-872f-c550ea096b2e
+[INTER] 🔧 METHOD: GET
+[INTER] 🪙 TOKEN (first 20 chars):', 1563de62-e0c0-4a0e-a...
+[INTER] ===================================
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] 🏦 CONTA CORRENTE HEADER ADDED: 346470536
+[INTER] 🔑 ALL HEADERS: {
+  "Authorization": "Bearer 1563de62-e0c0-4a0e-ab2c-5ae8fb2d057b",
+  "Accept": "application/json",
+  "User-Agent": "SIMPIX-Inter-Integration/1.0",
+  "x-conta-corrente": "346470536"
+}
+[INTER] ========== RESPONSE DETAILS ==========
+[INTER] 📊 STATUS: 200 OK
+[INTER] 📋 RESPONSE HEADERS: {
+  'content-type': 'application/json',
+  date: 'Wed, 13 Aug 2025 13:54:04 GMT',
+  server: 'istio-envoy',
+  'strict-transport-security': 'max-age=31536000; includeSubDomains',
+  traceparent: '00-86e1e705b9211a7332997cb0d004addb-c486c978b9ef0fcc-00',
+  'x-envoy-upstream-service-time': '78',
+  'x-rate-limit-remaining': '118',
+  'x-rate-limit-time': '1755093278365',
+  'x-upstream-time': '79',
+  'content-length': '1175'
+}
+[INTER] 🔍 Response Content-Type: application/json
+[INTER] 🔍 Is PDF Response: false
+[INTER] 📦 Response buffer size: 1175 bytes
+[INTER] ✅ Response OK
+[INTER] =====================================
+[INTER] 📊 Collection data: {
+  "cobranca": {
+    "codigoSolicitacao": "f05af659-0abe-48bc-872f-c550ea096b2e",
+    "seuNumero": "902183dd-b5d1-4",
+    "dataEmissao": "2025-08-04",
+    "dataVencimento": "2025-08-09",
+    "valorNominal": 1000,
+    "tipoCobranca": "SIMPLES",
+    "situacao": "CANCELADO",
+    "dataSituacao": "2025-08-06",
+    "arquivada": false,
+    "descontos": [
+      {
+        "codigo": "PERCENTUALDATAINFORMADA",
+        "quantidadeDias": 0,
+        "taxa": 0.01
+      }
+    ],
+    "multa": {
+      "codigo": "PERCENTUAL",
+      "taxa": 2
+    },
+    "mora": {
+      "codigo": "TAXAMENSAL",
+      "taxa": 1
+    },
+    "pagador": {
+      "cpfCnpj": "20528464760",
+      "tipoPessoa": "FISICA",
+      "nome": "Gabriel de Jesus Santana Serri",
+      "endereco": "Rua miguel angelo",
+      "bairro": "Centro",
+      "cidade": "Serra",
+      "uf": "ES",
+      "cep": "29165460",
+      "email": "gabrieldjesus238@gmail.com",
+      "ddd": "27",
+      "telefone": "27998538565",
+      "numero": "100",
+      "complemento": ""
+    }
+  },
+  "boleto": {
+    "nossoNumero": "90389608897",
+    "codigoBarras": "07793116800001000000001112134234790389608897",
+    "linhaDigitavel": "07790001161213423479303896088972311680000100000"
+  },
+  "pix": {
+    "txid": "34647053617543307170000Uixf03MaO0sj",
+    "pixCopiaECola": "00020101021226980014BR.GOV.BCB.PIX2576spi-qrcode.bancointer.com.br/spi/pj/v2/cobv/dfea989aaf2042ffb9f3203e3d96cb8e52040000530398654071000.005802BR5901*6007VITORIA61082901819062070503***63049D6B"
+  }
+}
+[INTER] ⚠️ QR Code generation not implemented yet
+[INTER] ✅ Collection retrieved and enriched successfully
+[INTER] 📊 Linha digitável: 07790001161213423479303896088972311680000100000
+[INTER] 📊 Código de barras: 07793116800001000000001112134234790389608897
+[INTER] 📊 PIX disponível: Sim
+[INTER] ✅ Cobrança existe, prosseguindo para PDF...
+[INTER] 🔍 STEP 2: Buscando PDF (esperando JSON com base64)...
+[INTER] ========== REQUEST DETAILS ==========
+[INTER] 🌐 FULL URL: https://cdpj.partners.bancointer.com.br/cobranca/v3/cobrancas/f05af659-0abe-48bc-872f-c550ea096b2e/pdf
+[INTER] 🔧 METHOD: GET
+[INTER] 🪙 TOKEN (first 20 chars):', 1563de62-e0c0-4a0e-a...
+[INTER] ===================================
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] 🏦 CONTA CORRENTE HEADER ADDED: 346470536
+[INTER] 🔑 ALL HEADERS: {
+  "Authorization": "Bearer 1563de62-e0c0-4a0e-ab2c-5ae8fb2d057b",
+  "Accept": "application/json",
+  "User-Agent": "SIMPIX-Inter-Integration/1.0",
+  "Content-Type": "application/json",
+  "x-conta-corrente": "346470536"
+}
+[INTER] ========== RESPONSE DETAILS ==========
+[INTER] 📊 STATUS: 200 OK
+[INTER] 📋 RESPONSE HEADERS: {
+  'content-type': 'application/json',
+  date: 'Wed, 13 Aug 2025 13:54:04 GMT',
+  server: 'istio-envoy',
+  'strict-transport-security': 'max-age=31536000; includeSubDomains',
+  traceparent: '00-312b336cf93bdafd2403834b7b0e07bd-946433e4fa8aabc6-00',
+  'x-envoy-upstream-service-time': '88',
+  'x-rate-limit-remaining': '118',
+  'x-rate-limit-time': '1755093278569',
+  'x-upstream-time': '92',
+  'transfer-encoding': 'chunked'
+}
+[INTER] 🔍 Response Content-Type: application/json
+[INTER] 🔍 Is PDF Response: false
+[INTER] 📦 Response buffer size: 55214 bytes
+[INTER] ✅ Response OK
+[INTER] =====================================
+[INTER] 📊 Tipo de resposta: object
+[INTER] 📋 Resposta é JSON, procurando campo base64...
+[INTER] 📋 Campos disponíveis no JSON: [ 'pdf' ]
+[INTER] ✅ Campo 'pdf' encontrado com 55204 caracteres
+[INTER] ✅ Base64 encontrado no campo 'pdf'
+[INTER] 📊 Tamanho do base64: 55204 caracteres
+[INTER] ✅ PDF convertido: 41401 bytes
+[INTER] ✅ PDF VÁLIDO CONFIRMADO! Magic bytes: %PDF-
+[PDF_SANITIZER] 🚨 INICIANDO SANITIZAÇÃO EXTREMAMENTE AGRESSIVA
+[PDF_SANITIZER] Tamanho original: 41401 bytes
+[PDF_SANITIZER] ⚠️ Erro durante sanitização, retornando PDF original: require is not defined
+[MCAFEE_BYPASS] 🖼️ Criando container imagem para bypass total
+[MCAFEE_BYPASS] ❌ Erro ao criar container imagem: Error: libuuid.so.1: cannot open shared object file: No such file or directory
+    at Module._extensions..node (node:internal/modules/cjs/loader:1651:18)
+    at Module.load (node:internal/modules/cjs/loader:1275:32)
+    at Module._load (node:internal/modules/cjs/loader:1096:12)
+    at Module.require (node:internal/modules/cjs/loader:1298:19)
+    at require (node:internal/modules/helpers:182:18)
+    at Object.<anonymous> (/home/runner/workspace/node_modules/canvas/lib/bindings.js:3:18)
+    at Module._compile (node:internal/modules/cjs/loader:1529:14)
+    at Object.transformer (/home/runner/workspace/node_modules/tsx/dist/register-D46fvsV_.cjs:3:1104)
+    at Module.load (node:internal/modules/cjs/loader:1275:32)
+    at Module._load (node:internal/modules/cjs/loader:1096:12)
+    at Module.require (node:internal/modules/cjs/loader:1298:19)
+    at require (node:internal/modules/helpers:182:18)
+    at Object.<anonymous> (/home/runner/workspace/node_modules/canvas/lib/canvas.js:9:18)
+    at Module._compile (node:internal/modules/cjs/loader:1529:14)
+    at Object.transformer (/home/runner/workspace/node_modules/tsx/dist/register-D46fvsV_.cjs:3:1104)
+    at Module.load (node:internal/modules/cjs/loader:1275:32)
+    at Module._load (node:internal/modules/cjs/loader:1096:12)
+    at Module.require (node:internal/modules/cjs/loader:1298:19)
+    at require (node:internal/modules/helpers:182:18)
+    at Object.<anonymous> (/home/runner/workspace/node_modules/canvas/index.js:1:16)
+    at Module._compile (node:internal/modules/cjs/loader:1529:14)
+    at Object.transformer (/home/runner/workspace/node_modules/tsx/dist/register-D46fvsV_.cjs:3:1104)
+    at Module.load (node:internal/modules/cjs/loader:1275:32)
+    at Module._load (node:internal/modules/cjs/loader:1096:12)
+    at cjsLoader (node:internal/modules/esm/translators:298:15)
+    at ModuleWrap.<anonymous> (node:internal/modules/esm/translators:240:7)
+    at ModuleJob.run (node:internal/modules/esm/module_job:263:25)
+    at async ModuleLoader.import (node:internal/modules/esm/loader:540:24)
+    at async Function.createImageContainer (/home/runner/workspace/server/services/mcafeeSpecificBypass.ts:106:43)
+    at async <anonymous> (/home/runner/workspace/server/routes/mcafee-bypass.ts:143:34) {
+  code: 'ERR_DLOPEN_FAILED'
+}
+[MCAFEE_BYPASS] ❌ Erro geral: libuuid.so.1: cannot open shared object file: No such file or directory

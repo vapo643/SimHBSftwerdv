@@ -45,27 +45,33 @@ export default function McAfeeTestPage() {
     try {
       console.log(`[MCAFEE_TEST] 🎯 Testando método: ${method.name}`);
       
-      // Usar api.get que gerencia automaticamente a autenticação JWT
-      const response = await api.get(`/api/mcafee-bypass/${selectedProposta}${method.params}`, {
-        responseType: 'blob'
+      // Usar fetch direto para contornar problemas do api.get com blobs
+      const token = localStorage.getItem('supabase.auth.token') || 
+                   JSON.parse(localStorage.getItem('sb-kvoktlxgsqkbegwbdoek-auth-token') || '{}')?.access_token;
+      
+      console.log(`[MCAFEE_TEST] 🔍 Token encontrado:`, !!token);
+      
+      const response = await fetch(`/api/mcafee-bypass/${selectedProposta}${method.params}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
 
-      console.log(`[MCAFEE_TEST] 🔍 Response recebida:`, {
-        hasResponse: !!response,
-        hasData: !!response?.data,
-        isBlob: response?.data instanceof Blob,
-        status: response?.status,
-        dataType: typeof response?.data,
-        responseKeys: Object.keys(response || {})
-      });
+      console.log(`[MCAFEE_TEST] 🔍 Response status:`, response.status);
+      console.log(`[MCAFEE_TEST] 🔍 Response headers:`, Object.fromEntries(response.headers.entries()));
 
       const endTime = Date.now();
       const duration = endTime - startTime;
 
-      // Verificação explícita de sucesso para um Blob - ajustada para ser mais permissiva
-      if (response && response.data instanceof Blob) {
+      if (response.ok) {
+        const blob = await response.blob();
+        console.log(`[MCAFEE_TEST] 🔍 Blob recebido:`, {
+          size: blob.size,
+          type: blob.type
+        });
         // CASO DE SUCESSO: Toda a lógica de download aqui
-        const blob = response.data;
         const contentType = blob.type;
         const contentLength = blob.size;
         
@@ -99,9 +105,13 @@ export default function McAfeeTestPage() {
         console.log(`[MCAFEE_TEST] ✅ ${method.name} - Download iniciado`);
         
       } else {
-        // Se a resposta não for o que esperamos, lance um erro explícito e legível
-        console.log(`[MCAFEE_TEST] ❌ Resposta inesperada:`, response);
-        throw new Error(`Resposta inesperada do servidor: Status ${response?.status || 'desconhecido'}, Data type: ${typeof response?.data}`);
+        const errorText = await response.text();
+        console.log(`[MCAFEE_TEST] ❌ Erro HTTP:`, {
+          status: response.status,
+          statusText: response.statusText,
+          errorText
+        });
+        throw new Error(`Erro HTTP ${response.status}: ${errorText || response.statusText}`);
       }
       
     } catch (error: any) {
