@@ -24,29 +24,30 @@ router.get(
       console.log(`[CARNE API] 📚 Requisição de carnê para proposta: ${id}`);
       console.log(`[CARNE API] 👤 Usuário: ${userId}`);
       
-      // Validar se a proposta existe
-      // Converter ID para número se necessário
-      const numericId = parseInt(id);
-      if (isNaN(numericId)) {
+      // Validar se a proposta existe - usando Supabase diretamente como no storage.ts
+      if (!id || typeof id !== 'string') {
         return res.status(400).json({
           error: 'ID da proposta inválido'
         });
       }
       
-      const proposta = await db
-        .select()
-        .from(propostas)
-        .where(eq(propostas.id, numericId))
-        .limit(1);
+      const { createServerSupabaseAdminClient } = await import('../lib/supabase');
+      const supabase = createServerSupabaseAdminClient();
       
-      if (!proposta || proposta.length === 0) {
-        console.error(`[CARNE API] ❌ Proposta não encontrada: ${id}`);
+      const { data: proposta, error } = await supabase
+        .from('propostas')
+        .select('id, status, cliente_nome')
+        .eq('id', String(id))
+        .single();
+      
+      if (error || !proposta) {
+        console.error(`[CARNE API] ❌ Proposta não encontrada: ${id}`, error);
         return res.status(404).json({
           error: 'Proposta não encontrada'
         });
       }
       
-      console.log(`[CARNE API] ✅ Proposta válida - ID: ${proposta[0].id}`);
+      console.log(`[CARNE API] ✅ Proposta válida - ID: ${proposta.id}, Nome: ${proposta.cliente_nome}`);
       
       // Gerar o carnê (download e fusão dos PDFs)
       console.log(`[CARNE API] 🔄 Iniciando geração do carnê...`);
@@ -83,7 +84,8 @@ router.get(
         message: 'Carnê gerado com sucesso',
         data: {
           propostaId: id,
-          propostaNumero: `PROP-${proposta[0].id}`, // Formato padronizado
+          propostaNumero: `PROP-${proposta.id}`, // Formato padronizado
+          clienteNome: proposta.cliente_nome,
           downloadUrl: signedUrl,
           size: pdfBuffer.length,
           expiresIn: '1 hora'
@@ -131,22 +133,23 @@ router.get(
       
       console.log(`[CARNE API] 📥 Download direto de carnê para proposta: ${id}`);
       
-      // Validar proposta
-      // Converter ID para número se necessário
-      const numericId = parseInt(id);
-      if (isNaN(numericId)) {
+      // Validar proposta (ID é UUID string) - usando Supabase diretamente
+      if (!id || typeof id !== 'string') {
         return res.status(400).json({
           error: 'ID da proposta inválido'
         });
       }
       
-      const proposta = await db
-        .select()
-        .from(propostas)
-        .where(eq(propostas.id, numericId))
-        .limit(1);
+      const { createServerSupabaseAdminClient } = await import('../lib/supabase');
+      const supabase = createServerSupabaseAdminClient();
       
-      if (!proposta || proposta.length === 0) {
+      const { data: proposta, error } = await supabase
+        .from('propostas')
+        .select('id, cliente_nome')
+        .eq('id', String(id))
+        .single();
+      
+      if (error || !proposta) {
         return res.status(404).json({
           error: 'Proposta não encontrada'
         });
@@ -159,7 +162,7 @@ router.get(
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader(
         'Content-Disposition',
-        `attachment; filename="carne-proposta-${proposta[0].id}.pdf"`
+        `attachment; filename="carne-proposta-${proposta.id}.pdf"`
       );
       res.setHeader('Content-Length', pdfBuffer.length.toString());
       res.setHeader('X-Content-Type-Options', 'nosniff');
