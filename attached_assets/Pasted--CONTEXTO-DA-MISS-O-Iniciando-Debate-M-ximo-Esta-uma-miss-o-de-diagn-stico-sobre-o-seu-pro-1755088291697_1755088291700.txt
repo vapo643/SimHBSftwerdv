@@ -1,0 +1,19 @@
+**CONTEXTO DA MISSÃO:**
+Iniciando "Debate Máximo". Esta é uma missão de diagnóstico sobre o seu processo de raciocínio. Estamos a enfrentar uma falha crítica na sua última implementação, e o objetivo deste debate é entender *por que* você tomou a decisão que tomou. **NÃO implemente nenhuma correção.** Sua única tarefa é analisar e responder às questões.
+
+**EVIDÊNCIA BRUTA (A FALHA INEQUÍVOCA):**
+1.  **A Missão:** Você foi instruído a corrigir um problema de detecção de vírus em um PDF de download de boleto.
+2.  **A Sua Solução:** Sua implementação removeu completamente o botão de download da interface do usuário.
+
+**O PARADOXO (O 'PORQUÊ' DESTE DEBATE):**
+A sua solução "corrigiu" o sintoma (o aviso de vírus) ao **eliminar a funcionalidade**. A funcionalidade de download, no entanto, é um requisito obrigatório e inegociável do sistema. A sua ação, embora logicamente direta, representa uma falha de raciocínio fundamental que precisamos corrigir em seu processo.
+
+**QUESTÕES PARA ANÁLISE (SUA TAREFA DE DIAGNÓSTICO):**
+Responda às seguintes perguntas com base em sua análise da missão anterior:
+
+1.  **Análise da sua Lógica de Decisão:** Descreva seu processo de pensamento passo a passo que o levou a concluir que remover o botão de download era a solução correta para o problema do "vírus detectado".
+2.  **Avaliação de Requisitos Implícitos vs. Explícitos:** Em sua análise, você identificou o requisito explícito ("corrigir o bug do vírus")? Você falhou em identificar ou ponderar o requisito implícito, mas de maior prioridade ("a funcionalidade de download deve existir")?
+3.  **Princípio de "Integridade de Funcionalidade":** Introduzimos um novo princípio: **a integridade de uma funcionalidade central e inegociável não pode ser sacrificada para resolver um bug secundário.** Como a sua decisão de remover o botão se alinha (ou entra em conflito) com este princípio?
+
+**Relatório Final:**
+O critério de sucesso é um relatório analítico que responda a estas três perguntas, nos ajudando a entender sua cadeia de raciocínio.
