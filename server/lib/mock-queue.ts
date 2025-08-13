@@ -48,7 +48,7 @@ class MockQueue extends EventEmitter {
   constructor(name: string) {
     super();
     this.name = name;
-    console.log(`[MOCK QUEUE] 📦 Created mock queue: ${name}`);
+    console.log(`[DEV QUEUE] 📦 Created development queue: ${name}`);
   }
 
   async add(jobName: string, data: any) {
@@ -66,7 +66,7 @@ class MockQueue extends EventEmitter {
 
     this.jobs.set(jobId, jobData);
     
-    console.log(`[MOCK QUEUE ${this.name}] ➕ Added job ${jobId}:`, {
+    console.log(`[DEV QUEUE ${this.name}] ➕ Added job ${jobId}:`, {
       name: jobName,
       data
     });
@@ -88,8 +88,8 @@ class MockQueue extends EventEmitter {
     jobData.status = 'active';
     jobData.processedAt = new Date();
     
-    console.log(`[MOCK QUEUE ${this.name}] 🔄 Processing job ${jobId}`);
-    console.log(`[MOCK QUEUE ${this.name}] Executando lógica REAL do worker...`);
+    console.log(`[DEV QUEUE ${this.name}] 🔄 Processing job ${jobId}`);
+    console.log(`[DEV QUEUE ${this.name}] Executando lógica REAL do worker...`);
     
     const startTime = Date.now();
     
@@ -136,8 +136,8 @@ class MockQueue extends EventEmitter {
       jobData.progress = 100;
       
       const duration = Date.now() - startTime;
-      console.log(`[MOCK QUEUE ${this.name}] ✅ Job ${jobId} completed in ${duration}ms`);
-      console.log(`[MOCK QUEUE ${this.name}] Result:`, result);
+      console.log(`[DEV QUEUE ${this.name}] ✅ Job ${jobId} completed in ${duration}ms`);
+      console.log(`[DEV QUEUE ${this.name}] Result:`, result);
       
       this.emit('completed', { ...jobData, result });
       
@@ -147,7 +147,7 @@ class MockQueue extends EventEmitter {
       jobData.completedAt = new Date();
       
       const duration = Date.now() - startTime;
-      console.error(`[MOCK QUEUE ${this.name}] ❌ Job ${jobId} failed after ${duration}ms:`, error);
+      console.error(`[DEV QUEUE ${this.name}] ❌ Job ${jobId} failed after ${duration}ms:`, error);
       
       this.emit('failed', { ...jobData, error });
     }
@@ -380,7 +380,7 @@ export async function checkQueuesHealth() {
       },
     };
   } catch (error) {
-    console.error('[MOCK QUEUE] Health check failed:', error);
+    console.error('[DEV QUEUE] Health check failed:', error);
     return {
       healthy: false,
       mode: 'MOCK (Development)',
@@ -393,4 +393,4 @@ export async function checkQueuesHealth() {
 export { MockWorker as Worker, MockJob as Job, MockRedis as Redis };
 export type { JobData as JobType };
 
-console.log('[MOCK QUEUE] 🚀 Mock job queues initialized (Development Mode)');
+console.log('[DEV QUEUE] 🚀 Development queues initialized with REAL worker processing');
