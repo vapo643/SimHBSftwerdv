@@ -14,6 +14,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { getSupabase } from "@/lib/supabase";
 import {
   CheckCircle,
@@ -44,6 +52,8 @@ import {
   Barcode,
   RefreshCw,
   ImageIcon,
+  Code,
+  Settings,
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -1683,76 +1693,10 @@ export default function Formalizacao() {
                                           Atualizar Status
                                         </Button>
                                         
+                                        {/* Progressive Disclosure - Botão Principal */}
                                         <Button
-                                          variant="outline"
-                                          onClick={async () => {
-                                            try {
-                                              // Verificar se existem boletos
-                                              const collections = collectionsData || [];
-                                              if (collections.length > 0) {
-                                                console.log(`[DOWNLOAD_ZIP] Iniciando download de ${collections.length} boletos`);
-                                                
-                                                // Importar TokenManager para obter token válido
-                                                const { TokenManager } = await import("@/lib/apiClient");
-                                                const tokenManager = TokenManager.getInstance();
-                                                const token = await tokenManager.getValidToken();
-
-                                                if (!token) {
-                                                  throw new Error("Não autenticado");
-                                                }
-
-                                                const downloadUrl = `/api/inter/collections/${proposta.id}/baixar-todos-boletos`;
-                                                const response = await fetch(downloadUrl, {
-                                                  headers: {
-                                                    Authorization: `Bearer ${token}`,
-                                                  },
-                                                });
-                                                
-                                                if (response.ok) {
-                                                  const blob = await response.blob();
-                                                  const url = window.URL.createObjectURL(blob);
-                                                  const a = document.createElement("a");
-                                                  a.href = url;
-                                                  a.download = `boletos_proposta_${proposta.id}_${new Date().toISOString().slice(0, 10).replace(/-/g, '')}.zip`;
-                                                  document.body.appendChild(a);
-                                                  a.click();
-                                                  document.body.removeChild(a);
-                                                  window.URL.revokeObjectURL(url);
-                                                  
-                                                  toast({
-                                                    title: "Download concluído",
-                                                    description: `ZIP com ${collections.length} boletos baixado com sucesso`,
-                                                    variant: "default",
-                                                  });
-                                                } else {
-                                                  const errorData = await response.json().catch(() => ({}));
-                                                  throw new Error(errorData.message || "Erro ao gerar arquivo ZIP");
-                                                }
-                                              } else {
-                                                toast({
-                                                  title: "Sem boletos",
-                                                  description: "Nenhum boleto foi gerado ainda para esta proposta",
-                                                  variant: "default",
-                                                });
-                                              }
-                                            } catch (error) {
-                                              console.error("[DOWNLOAD_ZIP] Erro:", error);
-                                              toast({
-                                                title: "Erro no download",
-                                                description: "Erro ao baixar arquivo ZIP com os boletos",
-                                                variant: "destructive",
-                                              });
-                                            }
-                                          }}
-                                          className="border-orange-600 text-orange-400 hover:bg-orange-600/10"
-                                        >
-                                          <Printer className="mr-2 h-4 w-4" />
-                                          Baixar ZIP (Método 1)
-                                        </Button>
-
-                                        <Button
-                                          variant="outline"
-                                          className="bg-green-50 border-green-300 text-green-700 hover:bg-green-100"
+                                          variant="default"
+                                          className="bg-blue-600 hover:bg-blue-700 text-white"
                                           onClick={async () => {
                                             try {
                                               const collections = collectionsData || [];
@@ -1761,6 +1705,7 @@ export default function Formalizacao() {
                                                 const tokenManager = TokenManager.getInstance();
                                                 const token = await tokenManager.getValidToken();
 
+                                                // Usar Container Seguro como padrão (mais robusta)
                                                 const downloadUrl = `/api/inter/collections/${proposta.id}/baixar-container-seguro`;
                                                 const response = await fetch(downloadUrl, {
                                                   headers: { Authorization: `Bearer ${token}` }
@@ -1771,10 +1716,8 @@ export default function Formalizacao() {
                                                   const url = window.URL.createObjectURL(blob);
                                                   const a = document.createElement("a");
                                                   
-                                                  // Pegar informações dos headers
                                                   const password = response.headers.get('X-Container-Password');
-                                                  const instructions = response.headers.get('X-User-Instructions');
-                                                  const filename = response.headers.get('Content-Disposition')?.split('filename="')[1]?.split('"')[0] || 'container-seguro.sdc';
+                                                  const filename = response.headers.get('Content-Disposition')?.split('filename="')[1]?.split('"')[0] || 'boletos-seguros.sdc';
                                                   
                                                   a.href = url;
                                                   a.download = filename;
@@ -1783,103 +1726,215 @@ export default function Formalizacao() {
                                                   document.body.removeChild(a);
                                                   window.URL.revokeObjectURL(url);
                                                   
-                                                  // Mostrar instruções de uso
-                                                  const instructionsText = instructions ? 
-                                                    atob(instructions) : 
-                                                    `Container seguro baixado!\n\nSenha: ${password}\n\nEste formato evita falsos positivos do antivírus.`;
-                                                  
                                                   toast({
-                                                    title: "Container Seguro Baixado",
-                                                    description: `Senha: ${password}. Verifique as instruções.`
+                                                    title: "Boletos Baixados com Sucesso",
+                                                    description: `Container seguro criado. Senha: ${password}`
                                                   });
-                                                  
-                                                  // Mostrar instruções detalhadas em uma janela
-                                                  setTimeout(() => alert(instructionsText), 1000);
                                                   
                                                 } else {
                                                   throw new Error(`HTTP ${response.status}`);
                                                 }
                                               } else {
                                                 toast({
-                                                  title: "Nenhum boleto",
-                                                  description: "Não há boletos disponíveis para download",
-                                                  variant: "destructive"
+                                                  title: "Nenhum boleto disponível",
+                                                  description: "Ainda não há boletos gerados para esta proposta",
+                                                  variant: "default"
                                                 });
                                               }
                                             } catch (error) {
-                                              console.error("[DOWNLOAD_SECURE] Erro:", error);
+                                              console.error("[DOWNLOAD] Erro:", error);
                                               toast({
                                                 title: "Erro no download",
-                                                description: "Erro ao baixar container seguro",
+                                                description: "Erro ao baixar boletos",
                                                 variant: "destructive"
                                               });
                                             }
                                           }}
                                         >
-                                          <Shield className="mr-2 h-4 w-4" />
-                                          Container Seguro (Anti-Vírus)
+                                          <Download className="mr-2 h-4 w-4" />
+                                          Baixar Boleto (PDF Seguro)
                                         </Button>
 
-                                        <Button
-                                          variant="outline"
-                                          className="bg-orange-50 border-orange-300 text-orange-700 hover:bg-orange-100"
-                                          onClick={async () => {
-                                            try {
-                                              const { TokenManager } = await import("@/lib/apiClient");
-                                              const tokenManager = TokenManager.getInstance();
-                                              const token = await tokenManager.getValidToken();
+                                        {/* Modal de Opções Alternativas */}
+                                        <Dialog>
+                                          <DialogTrigger asChild>
+                                            <Button
+                                              variant="ghost"
+                                              size="sm"
+                                              className="text-gray-600 hover:text-gray-800"
+                                            >
+                                              <Settings className="mr-2 h-4 w-4" />
+                                              Opções Alternativas de Download
+                                            </Button>
+                                          </DialogTrigger>
+                                          <DialogContent className="max-w-2xl">
+                                            <DialogHeader>
+                                              <DialogTitle>Opções Alternativas de Download</DialogTitle>
+                                              <DialogDescription>
+                                                Se você está enfrentando problemas com o download padrão (como detecção de falso positivo por antivírus), 
+                                                escolha uma das alternativas abaixo:
+                                              </DialogDescription>
+                                            </DialogHeader>
+                                            
+                                            <div className="grid gap-4 py-4">
+                                              {/* Opção 1: ZIP Original */}
+                                              <div className="border rounded-lg p-4 hover:bg-gray-50">
+                                                <h4 className="font-semibold mb-2">📦 Download ZIP Original</h4>
+                                                <p className="text-sm text-gray-600 mb-3">
+                                                  Baixa todos os boletos em formato ZIP padrão. Use se não houver problemas com antivírus.
+                                                </p>
+                                                <Button
+                                                  variant="outline"
+                                                  onClick={async () => {
+                                                    try {
+                                                      const collections = collectionsData || [];
+                                                      if (collections.length > 0) {
+                                                        const { TokenManager } = await import("@/lib/apiClient");
+                                                        const tokenManager = TokenManager.getInstance();
+                                                        const token = await tokenManager.getValidToken();
 
-                                              const downloadUrl = `/api/inter/collections/${proposta.id}/download-fragmentado`;
-                                              const response = await fetch(downloadUrl, {
-                                                headers: { Authorization: `Bearer ${token}` }
-                                              });
-                                              
-                                              if (response.ok) {
-                                                const blob = await response.blob();
-                                                const url = window.URL.createObjectURL(blob);
-                                                const a = document.createElement("a");
-                                                
-                                                const filename = response.headers.get('Content-Disposition')?.split('filename="')[1]?.split('"')[0] || 'documentos-fragmentados.html';
-                                                
-                                                a.href = url;
-                                                a.download = filename;
-                                                document.body.appendChild(a);
-                                                a.click();
-                                                document.body.removeChild(a);
-                                                window.URL.revokeObjectURL(url);
-                                                
-                                                toast({
-                                                  title: "Solução Claude Aplicada",
-                                                  description: "HTML com fragmentação - reconstitui PDF no navegador"
-                                                });
-                                                
-                                              } else {
-                                                const error = await response.json();
-                                                throw new Error(error.message || `HTTP ${response.status}`);
-                                              }
-                                            } catch (error: any) {
-                                              console.error("[FRAGMENT] Erro:", error);
-                                              toast({
-                                                title: "Erro na fragmentação",
-                                                description: error.message,
-                                                variant: "destructive"
-                                              });
-                                            }
-                                          }}
-                                        >
-                                          <Code className="mr-2 h-4 w-4" />
-                                          Fragmentado (Solução Claude)
-                                        </Button>
-                                        
-                                        <Button
-                                          variant="outline"  
-                                          className="bg-green-50 border-green-300 text-green-700 hover:bg-green-100"
-                                          onClick={async () => {
-                                            try {
-                                              const collections = collectionsData || [];
-                                              if (collections.length > 0) {
-                                                // Criar modal/janela com APENAS códigos de barra e PIX
-                                                let codesInfo = "🏦 DADOS PARA PAGAMENTO - SEM DOWNLOAD NECESSÁRIO\n\n";
+                                                        const downloadUrl = `/api/inter/collections/${proposta.id}/baixar-todos-boletos`;
+                                                        const response = await fetch(downloadUrl, {
+                                                          headers: { Authorization: `Bearer ${token}` }
+                                                        });
+                                                        
+                                                        if (response.ok) {
+                                                          const blob = await response.blob();
+                                                          const url = window.URL.createObjectURL(blob);
+                                                          const a = document.createElement("a");
+                                                          a.href = url;
+                                                          a.download = `boletos_${proposta.id}.zip`;
+                                                          document.body.appendChild(a);
+                                                          a.click();
+                                                          document.body.removeChild(a);
+                                                          window.URL.revokeObjectURL(url);
+                                                          
+                                                          toast({
+                                                            title: "ZIP baixado com sucesso",
+                                                            description: `${collections.length} boletos salvos`
+                                                          });
+                                                        }
+                                                      }
+                                                    } catch (error) {
+                                                      toast({
+                                                        title: "Erro no download",
+                                                        variant: "destructive"
+                                                      });
+                                                    }
+                                                  }}
+                                                >
+                                                  Baixar ZIP
+                                                </Button>
+                                              </div>
+
+                                              {/* Opção 2: Fragmentado (Claude) */}
+                                              <div className="border rounded-lg p-4 hover:bg-gray-50">
+                                                <h4 className="font-semibold mb-2">🧩 Download Fragmentado</h4>
+                                                <p className="text-sm text-gray-600 mb-3">
+                                                  HTML que reconstitui o PDF no navegador. Contorna detecções agressivas de antivírus.
+                                                </p>
+                                                <Button
+                                                  variant="outline"
+                                                  onClick={async () => {
+                                                    try {
+                                                      const { TokenManager } = await import("@/lib/apiClient");
+                                                      const tokenManager = TokenManager.getInstance();
+                                                      const token = await tokenManager.getValidToken();
+
+                                                      const downloadUrl = `/api/inter/collections/${proposta.id}/download-fragmentado`;
+                                                      const response = await fetch(downloadUrl, {
+                                                        headers: { Authorization: `Bearer ${token}` }
+                                                      });
+                                                      
+                                                      if (response.ok) {
+                                                        const blob = await response.blob();
+                                                        const url = window.URL.createObjectURL(blob);
+                                                        const a = document.createElement("a");
+                                                        a.href = url;
+                                                        a.download = "boletos-fragmentados.html";
+                                                        document.body.appendChild(a);
+                                                        a.click();
+                                                        document.body.removeChild(a);
+                                                        window.URL.revokeObjectURL(url);
+                                                        
+                                                        toast({
+                                                          title: "HTML fragmentado baixado",
+                                                          description: "Abra o arquivo HTML para acessar os boletos"
+                                                        });
+                                                      }
+                                                    } catch (error) {
+                                                      toast({
+                                                        title: "Erro no download",
+                                                        variant: "destructive"
+                                                      });
+                                                    }
+                                                  }}
+                                                >
+                                                  Baixar HTML Fragmentado
+                                                </Button>
+                                              </div>
+
+                                              {/* Opção 3: Converter para Imagem */}
+                                              <div className="border rounded-lg p-4 hover:bg-gray-50">
+                                                <h4 className="font-semibold mb-2">🖼️ Converter para Imagem (PNG)</h4>
+                                                <p className="text-sm text-gray-600 mb-3">
+                                                  Converte boletos em imagens PNG. Útil quando PDFs são bloqueados completamente.
+                                                </p>
+                                                <Button
+                                                  variant="outline"
+                                                  onClick={async () => {
+                                                    try {
+                                                      const { TokenManager } = await import("@/lib/apiClient");
+                                                      const tokenManager = TokenManager.getInstance();
+                                                      const token = await tokenManager.getValidToken();
+
+                                                      const downloadUrl = `/api/inter/collections/${proposta.id}/download-png`;
+                                                      const response = await fetch(downloadUrl, {
+                                                        headers: { Authorization: `Bearer ${token}` }
+                                                      });
+                                                      
+                                                      if (response.ok) {
+                                                        const blob = await response.blob();
+                                                        const url = window.URL.createObjectURL(blob);
+                                                        const a = document.createElement("a");
+                                                        a.href = url;
+                                                        a.download = "boletos-imagens.zip";
+                                                        document.body.appendChild(a);
+                                                        a.click();
+                                                        document.body.removeChild(a);
+                                                        window.URL.revokeObjectURL(url);
+                                                        
+                                                        toast({
+                                                          title: "Imagens baixadas",
+                                                          description: "Boletos convertidos para PNG"
+                                                        });
+                                                      }
+                                                    } catch (error) {
+                                                      toast({
+                                                        title: "Erro na conversão",
+                                                        variant: "destructive"
+                                                      });
+                                                    }
+                                                  }}
+                                                >
+                                                  Converter para PNG
+                                                </Button>
+                                              </div>
+
+                                              {/* Opção 4: Apenas Códigos */}
+                                              <div className="border rounded-lg p-4 hover:bg-gray-50">
+                                                <h4 className="font-semibold mb-2">📋 Visualizar Apenas Códigos</h4>
+                                                <p className="text-sm text-gray-600 mb-3">
+                                                  Exibe apenas códigos de barras e PIX. Sem download de arquivos.
+                                                </p>
+                                                <Button
+                                                  variant="outline"
+                                                  onClick={async () => {
+                                                    try {
+                                                      const collections = collectionsData || [];
+                                                      if (collections.length > 0) {
+                                                        // Criar modal/janela com APENAS códigos de barra e PIX
+                                                        let codesInfo = "🏦 DADOS PARA PAGAMENTO - SEM DOWNLOAD NECESSÁRIO\n\n";
                                                 
                                                 collections.forEach((col: any, index: number) => {
                                                   codesInfo += `📄 PARCELA ${col.numeroParcela || index + 1}:\n`;
@@ -1991,13 +2046,18 @@ export default function Formalizacao() {
                                             }
                                           }}
                                         >
-                                          <QrCode className="mr-2 h-4 w-4" />
-                                          APENAS CÓDIGOS (SEM DOWNLOAD)
+                                          Visualizar Códigos
                                         </Button>
+                                      </div>
 
+                                      {/* Opção 5: Formatos Alternativos */}
+                                      <div className="border rounded-lg p-4 hover:bg-gray-50">
+                                        <h4 className="font-semibold mb-2">📦 Todos os Formatos Alternativos</h4>
+                                        <p className="text-sm text-gray-600 mb-3">
+                                          Baixa ZIP com múltiplos formatos: PNG, Word, Excel, CSV e HTML.
+                                        </p>
                                         <Button
                                           variant="outline"
-                                          className="bg-purple-50 border-purple-300 text-purple-700 hover:bg-purple-100"
                                           onClick={async () => {
                                             try {
                                               const collections = collectionsData || [];
@@ -2051,115 +2111,55 @@ export default function Formalizacao() {
                                             }
                                           }}
                                         >
-                                          <FileText className="mr-2 h-4 w-4" />
-                                          Formatos Alternativos (FINAL)
+                                          Baixar Formatos Alternativos
                                         </Button>
+                                      </div>
+                                    </div>
+                                  </DialogContent>
+                                </Dialog>
 
-                                        <Button
-                                          variant="outline"
-                                          className="bg-red-50 border-red-300 text-red-700 hover:bg-red-100"
-                                          onClick={async () => {
-                                            try {
-                                              const collections = collectionsData || [];
-                                              if (collections.length > 0) {
-                                                const { TokenManager } = await import("@/lib/apiClient");
-                                                const tokenManager = TokenManager.getInstance();
-                                                const token = await tokenManager.getValidToken();
+                                        {/* Status dos boletos */}
+                                        <div className="flex gap-2">
+                                          <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={async () => {
+                                              try {
+                                                const collections = collectionsData || [];
+                                                if (collections.length > 0) {
+                                                  const statusInfo = collections
+                                                    .map(
+                                                      (col: any) =>
+                                                        `Parcela ${col.numeroParcela}: ${col.situacao || "Aguardando"}`
+                                                    )
+                                                    .join("\n");
 
-                                                const downloadUrl = `/api/inter/collections/${proposta.id}/baixar-pdf-via-imagem`;
-                                                const response = await fetch(downloadUrl, {
-                                                  headers: { Authorization: `Bearer ${token}` }
-                                                });
-                                                
-                                                if (response.ok) {
-                                                  const blob = await response.blob();
-                                                  const url = window.URL.createObjectURL(blob);
-                                                  const a = document.createElement("a");
-                                                  
-                                                  const filename = response.headers.get('Content-Disposition')?.split('filename="')[1]?.split('"')[0] || 'boletos-limpos.zip';
-                                                  
-                                                  a.href = url;
-                                                  a.download = filename;
-                                                  document.body.appendChild(a);
-                                                  a.click();
-                                                  document.body.removeChild(a);
-                                                  window.URL.revokeObjectURL(url);
-                                                  
                                                   toast({
-                                                    title: "Solução #3 Aplicada",
-                                                    description: "PDFs convertidos via PDF-to-Image. Impossível detecção!"
+                                                    title: "Status dos Boletos",
+                                                    description: statusInfo || "Nenhum boleto encontrado",
                                                   });
-                                                  
                                                 } else {
-                                                  const error = await response.json();
-                                                  throw new Error(error.message || `HTTP ${response.status}`);
+                                                  toast({
+                                                    title: "Sem boletos",
+                                                    description: "Nenhum boleto foi gerado ainda para esta proposta",
+                                                    variant: "default",
+                                                  });
                                                 }
-                                              } else {
+                                              } catch (error) {
+                                                console.error("[INTER] Erro ao consultar boletos:", error);
                                                 toast({
-                                                  title: "Nenhum boleto",
-                                                  description: "Não há boletos disponíveis para conversão",
-                                                  variant: "destructive"
+                                                  title: "Erro",
+                                                  description: "Erro ao consultar status dos boletos",
+                                                  variant: "destructive",
                                                 });
                                               }
-                                            } catch (error: any) {
-                                              console.error("[PDF_TO_IMAGE] Erro:", error);
-                                              toast({
-                                                title: "Erro na conversão",
-                                                description: `Solução #3 falhou: ${error.message}`,
-                                                variant: "destructive"
-                                              });
-                                            }
-                                          }}
-                                        >
-                                          <ImageIcon className="mr-2 h-4 w-4" />
-                                          PDF-to-Image (RADICAL)
-                                        </Button>
-
-                                        <Button
-                                          variant="outline"
-                                          onClick={async () => {
-                                            try {
-                                              // Buscar coleções para esta proposta
-                                              const collections = collectionsData || [];
-                                              if (collections.length > 0) {
-                                                // Mostrar informações de todas as coleções
-                                                const statusInfo = collections
-                                                  .map(
-                                                    (col: any) =>
-                                                      `Parcela ${col.numeroParcela}: ${col.situacao || "Aguardando"}`
-                                                  )
-                                                  .join("\n");
-
-                                                toast({
-                                                  title: "Status dos Boletos",
-                                                  description:
-                                                    statusInfo || "Nenhum boleto encontrado",
-                                                });
-                                              } else {
-                                                toast({
-                                                  title: "Sem boletos",
-                                                  description:
-                                                    "Nenhum boleto foi gerado ainda para esta proposta",
-                                                  variant: "default",
-                                                });
-                                              }
-                                            } catch (error) {
-                                              console.error(
-                                                "[INTER] Erro ao consultar boletos:",
-                                                error
-                                              );
-                                              toast({
-                                                title: "Erro",
-                                                description: "Erro ao consultar status dos boletos",
-                                                variant: "destructive",
-                                              });
-                                            }
-                                          }}
-                                          className="border-orange-600 text-orange-400 hover:bg-orange-600/10"
-                                        >
-                                          <FileText className="mr-2 h-4 w-4" />
-                                          Ver Detalhes
-                                        </Button>
+                                            }}
+                                            className="text-gray-600"
+                                          >
+                                            <FileText className="mr-2 h-3 w-3" />
+                                            Ver Detalhes
+                                          </Button>
+                                        </div>
                                       </div>
 
                                       <div className="mt-2 text-xs text-gray-400">
