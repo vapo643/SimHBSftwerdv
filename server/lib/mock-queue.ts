@@ -48,17 +48,9 @@ class MockQueue extends EventEmitter {
     console.log(`[MOCK QUEUE] 📦 Created mock queue: ${name}`);
   }
 
-  async add(jobName: string, data: any, opts: any = {}) {
+  async add(jobName: string, data: any) {
     const jobId = `${this.name}-${++this.jobCounter}`;
     const job = new MockJob(jobId, jobName, data);
-    
-    // Add retry configuration to mock job
-    (job as any).opts = {
-      attempts: opts.attempts || 5,
-      backoff: opts.backoff || { type: 'exponential', delay: 10000 },
-      ...opts
-    };
-    (job as any).attemptsMade = 1;
     
     const jobData: JobData = {
       id: jobId,

@@ -20,28 +20,11 @@ const redisConnection = new Redis({
   enableReadyCheck: false,
 });
 
-// Worker configuration 
+// Worker configuration
 const workerOptions: WorkerOptions = {
   connection: redisConnection,
   concurrency: 5, // Process up to 5 jobs simultaneously
 };
-
-// Default job options with retry configuration
-// These will be applied when adding jobs to the queue
-export const defaultJobOptions = {
-  attempts: 5, // Total of 5 attempts (1 initial + 4 retries)
-  backoff: {
-    type: 'exponential' as const, // Exponential backoff strategy
-    delay: 10000, // Start with 10 seconds delay (10s → 20s → 40s → 80s → 160s)
-  },
-  removeOnComplete: true,
-  removeOnFail: false, // Keep failed jobs for debugging
-};
-
-console.log('[WORKER CONFIG] 🔄 Retry configuration enabled:');
-console.log('[WORKER CONFIG] - Max attempts: 5');
-console.log('[WORKER CONFIG] - Backoff type: Exponential');
-console.log('[WORKER CONFIG] - Initial delay: 10s → 20s → 40s → 80s → 160s');
 
 // =============== PDF PROCESSING WORKER ===============
 const pdfWorker = new Worker(
@@ -52,12 +35,6 @@ const pdfWorker = new Worker(
 
     try {
       switch (job.data.type) {
-        case 'TEST_RETRY':
-          // TEST JOB: Always fails to test retry mechanism
-          console.log(`[WORKER:PDF] 🧪 TEST JOB - Designed to fail`);
-          console.log(`[WORKER:PDF] 📊 Attempt ${job.attemptsMade}/${job.opts.attempts}`);
-          throw new Error('Simulated API failure for testing retry mechanism');
-          
         case 'GENERATE_CARNE':
           console.log(`[WORKER:PDF] 📚 Generating carnê for proposal ${job.data.propostaId}`);
           
@@ -100,7 +77,6 @@ const pdfWorker = new Worker(
     } catch (error) {
       const errorDuration = Date.now() - startTime;
       console.error(`[WORKER:PDF] ❌ Job ${job.id} failed after ${errorDuration}ms:`, error);
-      console.log(`[WORKER:PDF] 🔄 Attempt ${job.attemptsMade}/${job.opts.attempts} - Will retry with exponential backoff`);
       throw error; // Re-throw to trigger retry
     }
   },
@@ -116,12 +92,6 @@ const boletoWorker = new Worker(
 
     try {
       switch (job.data.type) {
-        case 'TEST_RETRY_BOLETO':
-          // TEST JOB: Always fails to test retry mechanism
-          console.log(`[WORKER:BOLETO] 🧪 TEST JOB - Designed to fail`);
-          console.log(`[WORKER:BOLETO] 📊 Attempt ${job.attemptsMade}/${job.opts.attempts}`);
-          throw new Error('Simulated boleto sync failure for testing retry mechanism');
-          
         case 'SYNC_BOLETOS':
           console.log(`[WORKER:BOLETO] 📥 Syncing boletos for proposal ${job.data.propostaId}`);
           
@@ -182,7 +152,6 @@ const boletoWorker = new Worker(
     } catch (error) {
       const boletoErrorDuration = Date.now() - startTime;
       console.error(`[WORKER:BOLETO] ❌ Job ${job.id} failed after ${boletoErrorDuration}ms:`, error);
-      console.log(`[WORKER:BOLETO] 🔄 Attempt ${job.attemptsMade}/${job.opts.attempts} - Will retry with exponential backoff`);
       throw error;
     }
   },
@@ -214,7 +183,6 @@ const documentWorker = new Worker(
     } catch (error) {
       const duration = Date.now() - startTime;
       console.error(`[WORKER:DOC] ❌ Job ${job.id} failed after ${duration}ms:`, error);
-      console.log(`[WORKER:DOC] 🔄 Attempt ${job.attemptsMade}/${job.opts.attempts} - Will retry with exponential backoff`);
       throw error;
     }
   },

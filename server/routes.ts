@@ -5080,10 +5080,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Job Status routes (para consultar status de jobs assíncronos)
   app.use("/api/jobs", jobStatusRoutes);
-  
-  // TEMPORARY: Test endpoints for retry validation (remove after testing Phase 1.4)
-  const testRetryRoutes = (await import("./routes/test-retry")).default;
-  app.use("/api/test", testRetryRoutes);
 
   // CCB Diagnostics routes
   const ccbDiagnosticsRouter = (await import("./routes/ccb-diagnostics")).default;
