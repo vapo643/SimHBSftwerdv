@@ -43,7 +43,7 @@ router.get('/verify-worker-execution', async (req, res) => {
       jobId: job.id,
       propostaId: propostaId,
       expectedLogs: [
-        '[MOCK QUEUE pdf-processing] Executando lógica REAL do worker...',
+        '[DEV QUEUE pdf-processing] Executando lógica REAL do worker...',
         '[WORKER:PDF] Processing job...',
         '[WORKER:PDF] Generating carnê...',
         'Logs de fusão de PDFs',

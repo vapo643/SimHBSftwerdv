@@ -36,7 +36,7 @@ class MockJob {
 
   async updateProgress(progress: number) {
     this.progress = progress;
-    console.log(`[MOCK JOB ${this.id}] Progress: ${progress}%`);
+    console.log(`[DEV JOB ${this.id}] Progress: ${progress}%`);
   }
 }
 
@@ -103,7 +103,7 @@ class MockQueue extends EventEmitter {
         data: jobData.data,
         updateProgress: async (progress: number) => {
           jobData.progress = progress;
-          console.log(`[MOCK JOB ${jobId}] Progress: ${progress}%`);
+          console.log(`[DEV JOB ${jobId}] Progress: ${progress}%`);
         }
       };
       
@@ -301,23 +301,23 @@ class MockWorker extends EventEmitter {
     this.queueName = queueName;
     this.processor = processor;
     
-    console.log(`[MOCK WORKER] 👷 Created mock worker for queue: ${queueName}`);
+    console.log(`[DEV WORKER] 👷 Created mock worker for queue: ${queueName}`);
     
     // Simulate worker ready
     setTimeout(() => {
-      console.log(`[MOCK WORKER] ✅ Worker ready for queue: ${queueName}`);
+      console.log(`[DEV WORKER] ✅ Worker ready for queue: ${queueName}`);
     }, 100);
   }
 
   async close() {
-    console.log(`[MOCK WORKER] 🛑 Closing worker for queue: ${this.queueName}`);
+    console.log(`[DEV WORKER] 🛑 Closing worker for queue: ${this.queueName}`);
   }
 }
 
 // Mock Redis connection
 class MockRedis {
   constructor(config: any) {
-    console.log(`[MOCK REDIS] 🔴 Mock Redis initialized (no actual connection)`);
+    console.log(`[DEV REDIS] 🔴 Mock Redis initialized (no actual connection)`);
   }
 
   on(event: string, handler: Function) {
@@ -371,7 +371,7 @@ export async function checkQueuesHealth() {
 
     return {
       healthy: true,
-      mode: 'MOCK (Development)',
+      mode: 'DEV (Development)',
       queues: {
         pdfProcessing: results[0],
         boletoSync: results[1],
@@ -383,7 +383,7 @@ export async function checkQueuesHealth() {
     console.error('[DEV QUEUE] Health check failed:', error);
     return {
       healthy: false,
-      mode: 'MOCK (Development)',
+      mode: 'DEV (Development)',
       error: error instanceof Error ? error.message : 'Unknown error',
     };
   }
