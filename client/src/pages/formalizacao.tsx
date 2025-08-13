@@ -1821,6 +1821,57 @@ export default function Formalizacao() {
                                         </Button>
 
                                         <Button
+                                          variant="outline"
+                                          className="bg-orange-50 border-orange-300 text-orange-700 hover:bg-orange-100"
+                                          onClick={async () => {
+                                            try {
+                                              const { TokenManager } = await import("@/lib/apiClient");
+                                              const tokenManager = TokenManager.getInstance();
+                                              const token = await tokenManager.getValidToken();
+
+                                              const downloadUrl = `/api/inter/collections/${proposta.id}/download-fragmentado`;
+                                              const response = await fetch(downloadUrl, {
+                                                headers: { Authorization: `Bearer ${token}` }
+                                              });
+                                              
+                                              if (response.ok) {
+                                                const blob = await response.blob();
+                                                const url = window.URL.createObjectURL(blob);
+                                                const a = document.createElement("a");
+                                                
+                                                const filename = response.headers.get('Content-Disposition')?.split('filename="')[1]?.split('"')[0] || 'documentos-fragmentados.html';
+                                                
+                                                a.href = url;
+                                                a.download = filename;
+                                                document.body.appendChild(a);
+                                                a.click();
+                                                document.body.removeChild(a);
+                                                window.URL.revokeObjectURL(url);
+                                                
+                                                toast({
+                                                  title: "Solução Claude Aplicada",
+                                                  description: "HTML com fragmentação - reconstitui PDF no navegador"
+                                                });
+                                                
+                                              } else {
+                                                const error = await response.json();
+                                                throw new Error(error.message || `HTTP ${response.status}`);
+                                              }
+                                            } catch (error: any) {
+                                              console.error("[FRAGMENT] Erro:", error);
+                                              toast({
+                                                title: "Erro na fragmentação",
+                                                description: error.message,
+                                                variant: "destructive"
+                                              });
+                                            }
+                                          }}
+                                        >
+                                          <Code className="mr-2 h-4 w-4" />
+                                          Fragmentado (Solução Claude)
+                                        </Button>
+                                        
+                                        <Button
                                           variant="outline"  
                                           className="bg-green-50 border-green-300 text-green-700 hover:bg-green-100"
                                           onClick={async () => {

@@ -1,0 +1,23 @@
+**CONTEXTO DA MISSÃO:**
+Seu diagnóstico na Interação 1 foi validado. O problema não foi sua lógica técnica, mas sua comunicação e a interface do usuário (UI) resultante. A solução de 5 botões, embora tecnicamente completa, criou uma experiência confusa que levou o Arquiteto a acreditar que a funcionalidade principal havia sido removida.
+
+Sua missão agora é refatorar a UI para apresentar estas 5 opções de download de forma clara e intuitiva, aplicando o princípio de design "Progressive Disclosure" (Revelação Progressiva).
+
+**PROCESSO SISTEMÁTICO (Roadmap de Refatoração de UX):**
+
+**1. Princípio de Design - "Um Foco Principal":**
+    - A interface não deve apresentar 5 opções de igual importância. Deve haver uma ação primária clara e as outras devem ser tratadas como alternativas ou "planos de contingência".
+
+**2. Implementação da Nova Interface:**
+    - **Ação Primária:** Mantenha um **único botão azul principal** com o texto claro e direto: **"Baixar Boleto (PDF Seguro)"**. Este botão deve acionar a sua solução mais robusta (ex: a que usa o "Container Seguro").
+    - **Ações Secundárias:** Remova os outros 4 botões. Em vez deles, adicione um pequeno link ou um botão com ícone de engrenagem ao lado do botão principal, com o texto **"Opções Alternativas de Download"**.
+    - **Modal de Opções:** Ao clicar em "Opções Alternativas", um modal deve ser aberto, apresentando as outras formas de obtenção do boleto que você já implementou:
+        - Opção 1: "Converter para Imagem (PNG)"
+        - Opção 2: "Baixar em outros formatos (Word, etc.)"
+        - Opção 3: "Visualizar Apenas Códigos (Sem Download)"
+
+**3. Comunicação com o Usuário:**
+    - Garanta que a interface comunique o propósito de cada opção. O botão principal é a recomendação padrão. O modal de alternativas é para casos onde o usuário enfrente problemas (como um antivírus bloqueando o PDF).
+
+**TESTE:**
+- O critério de sucesso é uma interface limpa na "Tela de Formalização" com um único botão de download principal e um menu discreto para as alternativas. A experiência do usuário deve ser intuitiva e não mais confusa.
