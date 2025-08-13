@@ -21,6 +21,7 @@ const redisConnection = new Redis({
 });
 
 // Worker configuration
+// AUDITORIA FASE 2.1 - CONFIGURAÇÃO DE RETRY ADICIONADA
 const workerOptions: WorkerOptions = {
   connection: redisConnection,
   concurrency: 5, // Process up to 5 jobs simultaneously
