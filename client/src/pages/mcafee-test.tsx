@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertCircle, Download, Shield, FileText, Image } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { api } from '@/lib/apiClient';
+import { TokenManager } from '@/lib/apiClient';
 
 export default function McAfeeTestPage() {
   const [testResults, setTestResults] = useState<any[]>([]);
@@ -45,11 +45,15 @@ export default function McAfeeTestPage() {
     try {
       console.log(`[MCAFEE_TEST] 🎯 Testando método: ${method.name}`);
       
-      // Usar fetch direto para contornar problemas do api.get com blobs
-      const token = localStorage.getItem('supabase.auth.token') || 
-                   JSON.parse(localStorage.getItem('sb-kvoktlxgsqkbegwbdoek-auth-token') || '{}')?.access_token;
+      // Usar TokenManager para obter token válido
+      const tokenManager = TokenManager.getInstance();
+      const token = await tokenManager.getValidToken();
       
-      console.log(`[MCAFEE_TEST] 🔍 Token encontrado:`, !!token);
+      console.log(`[MCAFEE_TEST] 🔍 Token válido obtido:`, !!token);
+      
+      if (!token) {
+        throw new Error('Não foi possível obter token de autenticação válido');
+      }
       
       const response = await fetch(`/api/mcafee-bypass/${selectedProposta}${method.params}`, {
         method: 'GET',
