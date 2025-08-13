@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertCircle, Download, Shield, FileText, Image } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { api } from '@/lib/apiClient';
 
 export default function McAfeeTestPage() {
   const [testResults, setTestResults] = useState<any[]>([]);
@@ -44,23 +45,21 @@ export default function McAfeeTestPage() {
     try {
       console.log(`[MCAFEE_TEST] 🎯 Testando método: ${method.name}`);
       
-      const response = await fetch(`/api/mcafee-bypass/${selectedProposta}${method.params}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        }
+      // Usar api.get que gerencia automaticamente a autenticação JWT
+      const response = await api.get(`/api/mcafee-bypass/${selectedProposta}${method.params}`, {
+        responseType: 'blob'
       });
 
       const endTime = Date.now();
       const duration = endTime - startTime;
 
-      if (response.ok) {
-        const contentType = response.headers.get('content-type');
-        const contentLength = response.headers.get('content-length');
+      // Response do api.get já é um blob quando responseType='blob'
+      if (response && response instanceof Blob) {
+        const contentType = response.type;
+        const contentLength = response.size;
         
         // Criar link de download
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
+        const url = window.URL.createObjectURL(response);
         const a = document.createElement('a');
         a.style.display = 'none';
         a.href = url;
@@ -81,7 +80,7 @@ export default function McAfeeTestPage() {
           status: 'SUCESSO',
           duration: `${duration}ms`,
           contentType,
-          size: contentLength ? `${Math.round(parseInt(contentLength) / 1024)}KB` : 'N/A',
+          size: contentLength ? `${Math.round(contentLength / 1024)}KB` : 'N/A',
           timestamp: new Date().toLocaleTimeString()
         };
         
@@ -89,8 +88,7 @@ export default function McAfeeTestPage() {
         console.log(`[MCAFEE_TEST] ✅ ${method.name} - Download iniciado`);
         
       } else {
-        const errorText = await response.text();
-        throw new Error(`HTTP ${response.status}: ${errorText}`);
+        throw new Error('Resposta inválida do servidor');
       }
       
     } catch (error: any) {
