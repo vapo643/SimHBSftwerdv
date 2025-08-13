@@ -1,0 +1,30 @@
+**IMPLEMENTAR:**
+Auditoria arquitetural completa da solução recém-implementada para o problema de "vírus detectado" no download de PDFs de boletos.
+
+**CONTEXT:**
+Você acabou de implementar uma possível solução para o problema onde o antivírus McAfee bloqueia nossos PDFs de boletos. Antes de testarmos a funcionalidade, preciso, como Arquiteto, de um relatório completo da sua solução para entender *como* ela funciona, *onde* foi implementada e se ela é uma solução robusta ou apenas um paliativo.
+
+**CURRENT STATE:**
+O código foi modificado por você para tentar resolver o problema de detecção de vírus. Não conhecemos os detalhes da sua implementação.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um relatório de auditoria claro e detalhado que responda a todas as questões abaixo, explicando a sua solução em nível de código e arquitetura.
+
+**CONSTRAINTS (Roadmap de Auditoria Arquitetural - NÃO FAÇA CORREÇÕES):**
+
+**1. Análise da Solução Implementada:**
+    - **Ação:** Descreva em detalhe qual foi a solução técnica que você implementou. Você modificou a forma como o PDF é gerado no backend? Você adicionou alguma camada de "sanitização"? Você está a usar um formato alternativo, como o "Container Seguro" que você mencionou anteriormente?
+
+**2. Rastreamento do Fluxo de Download (Ponta-a-Ponta):**
+    - **Ação:** Descreva o fluxo de dados exato que ocorre quando o usuário clica no botão "Baixar Boleto (PDF Seguro)" no frontend.
+    - **Verificação:** A sua correção foi implementada na **"requisição raiz"** que busca o PDF no backend (ex: no serviço `interBankService.ts`)? Ou foi uma modificação apenas no frontend? Onde exatamente o PDF é obtido/gerado?
+
+**3. Localização do Código-Chave:**
+    - **Ação:** Aponte os ficheiros e as **linhas de código exatas** que foram modificadas ou adicionadas para implementar esta solução. Precisamos saber onde está a "raiz" da sua correção.
+
+**4. Análise de Robustez e Validade da Solução:**
+    - **Ação:** Com base no seu conhecimento, esta solução é uma prática recomendada e robusta para resolver problemas de falso-positivos em PDFs? Ou é uma solução experimental ("workaround")?
+    - **Pesquisa:** Existe de fato uma solução canônica ou oficial para este tipo de problema com PDFs gerados e a API do Banco Inter, ou esta é uma solução criativa baseada nas limitações atuais?
+
+**Relatório Final:**
+O critério de sucesso desta missão não é um teste funcional, mas sim a entrega de um relatório de auditoria que me deixe 100% ciente da arquitetura e da validade da sua solução.

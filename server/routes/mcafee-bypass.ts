@@ -47,14 +47,7 @@ router.get("/:propostaId",
       console.log(`[MCAFEE_BYPASS] 📋 Proposta: ${propostaId}`);
       
       // Buscar boletos com validação rigorosa de UUID
-      const collections = await storage.drizzle
-        .select()
-        .from(interCollections)
-        .where(and(
-          eq(interCollections.propostaId, propostaId),
-          eq(interCollections.isActive, true)
-        ))
-        .orderBy(interCollections.numeroParcela);
+      const collections = await storage.getInterCollectionsByProposalId(propostaId);
 
       if (collections.length === 0) {
         return res.status(404).json({ error: "Nenhum boleto encontrado" });
