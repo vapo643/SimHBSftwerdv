@@ -436,6 +436,13 @@ export default function Formalizacao() {
   const [carneUrl, setCarneUrl] = useState<string | null>(null);
   const [carneTotalBoletos, setCarneTotalBoletos] = useState<number>(0);
   const [boletosGerados, setBoletosGerados] = useState<any[]>([]);
+  const [existingCarne, setExistingCarne] = useState<{
+    hasCarnet: boolean;
+    url: string | null;
+    fileName: string | null;
+    totalBoletos: number | null;
+  } | null>(null);
+  const [regenerateBoletos, setRegenerateBoletos] = useState<number | null>(null);
 
   const propostaId = params?.id;
 
@@ -453,6 +460,33 @@ export default function Formalizacao() {
     staleTime: 1 * 60 * 1000, // Cache por 1 minuto
     refetchOnWindowFocus: false, // Não refetch quando janela ganha foco
   });
+
+  // Verificar se já existe carnê ao carregar a página
+  useEffect(() => {
+    const checkExistingCarne = async () => {
+      if (!propostaId) return;
+      
+      try {
+        const response = await apiRequest(`/api/propostas-carne-status/${propostaId}`) as any;
+        
+        if (response.hasCarnet) {
+          setExistingCarne(response);
+          setCarneUrl(response.url);
+          setCarneTotalBoletos(response.totalBoletos || 0);
+          
+          // Mostrar toast informando que carnê já existe
+          toast({
+            title: "Carnê já disponível",
+            description: `Carnê com ${response.totalBoletos} boletos já foi gerado anteriormente`,
+          });
+        }
+      } catch (error) {
+        console.log("[CARNÊ STATUS] Erro ao verificar status do carnê:", error);
+      }
+    };
+
+    checkExistingCarne();
+  }, [propostaId]);
 
   // Query para buscar boletos gerados - OTIMIZADA (após proposta carregar)
   const { data: collectionsData } = useQuery<any[]>({
@@ -1423,7 +1457,7 @@ export default function Formalizacao() {
                                         </div>
                                         
                                         {/* Botão para gerar carnê completo - NOVO FLUXO DE DOIS PASSOS */}
-                                        {collectionsData && collectionsData.length > 1 && (
+                                        {collectionsData && collectionsData.length > 1 && !existingCarne?.hasCarnet && (
                                           <Button
                                             size="sm"
                                             variant="outline"
@@ -1437,11 +1471,17 @@ export default function Formalizacao() {
                                                   description: "Aguarde...",
                                                 });
                                                 
+                                                // Determinar número de boletos a sincronizar
+                                                const numeroBoletos = regenerateBoletos || collectionsData.length;
+                                                
                                                 // Primeira chamada: sincronizar boletos do Inter para o Storage
                                                 const syncResponse = await apiRequest(
                                                   `/api/propostas/${proposta.id}/sincronizar-boletos`,
                                                   {
                                                     method: "POST",
+                                                    body: JSON.stringify({ 
+                                                      numeroBoletos: numeroBoletos 
+                                                    }),
                                                   }
                                                 );
                                                 
@@ -1565,8 +1605,76 @@ export default function Formalizacao() {
                                           </Button>
                                         )}
 
-                                        {/* Botão para baixar carnê - aparece após geração */}
-                                        {carneUrl && (
+                                        {/* Botão para download de carnê existente */}
+                                        {existingCarne?.hasCarnet && (
+                                          <div className="flex items-center gap-2">
+                                            <Button
+                                              size="sm"
+                                              onClick={() => {
+                                                // Download do carnê existente
+                                                const link = document.createElement("a");
+                                                link.href = existingCarne.url!;
+                                                link.download = `carne-proposta-${proposta.id}.pdf`;
+                                                link.target = "_blank";
+                                                document.body.appendChild(link);
+                                                link.click();
+                                                document.body.removeChild(link);
+                                                
+                                                toast({
+                                                  title: "Download iniciado",
+                                                  description: `Carnê com ${existingCarne.totalBoletos} boletos`
+                                                });
+                                              }}
+                                              className="border-green-600 text-green-400 hover:bg-green-600/10 bg-green-900/20"
+                                            >
+                                              <div className="flex items-center">
+                                                <Download className="mr-2 h-4 w-4" />
+                                                Baixar Carnê Existente ({existingCarne.totalBoletos} boletos)
+                                              </div>
+                                            </Button>
+                                            
+                                            {/* Opção para regenerar com N-1 parcelas */}
+                                            {collectionsData && collectionsData.length > 1 && (
+                                              <Button
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={() => {
+                                                  // Perguntar quantas parcelas regenerar
+                                                  const maxParcelas = collectionsData.length;
+                                                  const numParcelas = prompt(
+                                                    `Deseja regenerar o carnê com quantas parcelas? (máximo: ${maxParcelas}, padrão: ${maxParcelas - 1})`
+                                                  );
+                                                  
+                                                  if (numParcelas) {
+                                                    const num = parseInt(numParcelas);
+                                                    if (num > 0 && num <= maxParcelas) {
+                                                      setRegenerateBoletos(num);
+                                                      setExistingCarne(null); // Limpar carnê existente
+                                                      setCarneUrl(null);
+                                                      toast({
+                                                        title: "Pronto para regenerar",
+                                                        description: `Clique em "Gerar Carnê" para criar um novo com ${num} parcelas`,
+                                                      });
+                                                    } else {
+                                                      toast({
+                                                        title: "Número inválido",
+                                                        description: `Por favor, escolha entre 1 e ${maxParcelas} parcelas`,
+                                                        variant: "destructive",
+                                                      });
+                                                    }
+                                                  }
+                                                }}
+                                                className="text-yellow-400 border-yellow-600 hover:bg-yellow-600/10"
+                                              >
+                                                <RefreshCw className="mr-2 h-4 w-4" />
+                                                Regenerar com N-1
+                                              </Button>
+                                            )}
+                                          </div>
+                                        )}
+
+                                        {/* Botão para baixar carnê após geração */}
+                                        {carneUrl && !existingCarne?.hasCarnet && (
                                           <Button
                                             size="sm"
                                             onClick={() => {
