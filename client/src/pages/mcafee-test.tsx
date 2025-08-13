@@ -53,13 +53,14 @@ export default function McAfeeTestPage() {
       const endTime = Date.now();
       const duration = endTime - startTime;
 
-      // Response do api.get já é um blob quando responseType='blob'
-      if (response && response instanceof Blob) {
-        const contentType = response.type;
-        const contentLength = response.size;
+      // Response do api.get retorna { data: blob } quando responseType='blob'
+      const blob = response.data || response;
+      if (blob && blob instanceof Blob) {
+        const contentType = blob.type;
+        const contentLength = blob.size;
         
         // Criar link de download
-        const url = window.URL.createObjectURL(response);
+        const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.style.display = 'none';
         a.href = url;
@@ -88,7 +89,7 @@ export default function McAfeeTestPage() {
         console.log(`[MCAFEE_TEST] ✅ ${method.name} - Download iniciado`);
         
       } else {
-        throw new Error('Resposta inválida do servidor');
+        throw new Error('Falha ao processar o download - resposta inválida do servidor');
       }
       
     } catch (error: any) {
@@ -96,12 +97,12 @@ export default function McAfeeTestPage() {
         method: method.name,
         status: 'ERRO',
         duration: `${Date.now() - startTime}ms`,
-        error: error.message,
+        error: error.message || 'Falha ao processar o download',
         timestamp: new Date().toLocaleTimeString()
       };
       
       setTestResults(prev => [result, ...prev]);
-      console.error(`[MCAFEE_TEST] ❌ ${method.name}:`, error.message);
+      console.error(`[MCAFEE_TEST] ❌ ${method.name}:`, error.message || 'Erro desconhecido');
     }
     
     setIsLoading(false);

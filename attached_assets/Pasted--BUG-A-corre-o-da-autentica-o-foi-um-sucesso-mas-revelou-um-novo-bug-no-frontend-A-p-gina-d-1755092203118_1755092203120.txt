@@ -1,0 +1,23 @@
+**BUG:**
+A correção da autenticação foi um sucesso, mas revelou um novo bug no frontend. A página de teste `/mcafee-test` agora exibe o erro `[object Blob]` ao tentar o download. Isso indica que o frontend está a receber o ficheiro PDF, mas a lógica de tratamento da resposta está a falhar e a exibir o objeto do ficheiro em vez de iniciar o download.
+
+**PROCESSO SISTEMÁTICO (Roadmap de Correção):**
+
+**1. Isolamento do Ponto de Falha:**
+    - **Ação:** Concentre-se exclusivamente no ficheiro `client/src/pages/mcafee-test.tsx`. Específicamente, na função que é chamada quando os botões de download são clicados.
+
+**2. Implementação da Correção Cirúrgica:**
+    - **Ação:** Inspecione a lógica `async/await` ou a cadeia de promessas (`.then()`, `.catch()`) da sua função de download.
+    - **Implementação:** O erro está na forma como a resposta bem-sucedida está a ser tratada. Garanta que, quando a API retorna uma resposta `200 OK` com o Blob do PDF, o seu código execute a seguinte lógica:
+        a. Crie uma URL temporária para o Blob recebido usando `URL.createObjectURL(response.data)`.
+        b. Crie um elemento de link (`<a>`) invisível na memória.
+        c. Atribua a URL do Blob ao `href` do link.
+        d. Defina o atributo `download` do link com um nome de ficheiro apropriado (ex: `boleto-bypass.pdf`).
+        e. Acione programaticamente um clique neste link (`link.click()`).
+        f. Limpe a URL do objeto (`URL.revokeObjectURL(url)`) para libertar memória.
+    - **Importante:** A lógica de tratamento de erro (`.catch()`) não deve mais tentar exibir a resposta, mas sim uma mensagem de erro legível (ex: "Falha ao processar o download").
+
+**3. Validação Final (Protocolo 5-CHECK):**
+    - **Ação Obrigatória:** Execute `get_latest_lsp_diagnostics` para garantir ZERO erros.
+    - **Teste Obrigatório:** Após a correção, acesse a página `/mcafee-test` e clique no botão "Testar Download" para o "PDF com Bypass".
+    - **Relatório Final:** O critério de sucesso é o navegador iniciar o **download do ficheiro `boleto-bypass.pdf` com sucesso**. O erro `[object Blob]` deve ter desaparecido completamente.
