@@ -12,6 +12,7 @@ Error handling: Create structured documentation for automatic consultation durin
 
 ## Recent Major Fixes (August 2025)
 - **✅ Inter Boleto PDF Download Bug COMPLETELY RESOLVED (12/08/2025)**: Fixed critical 30+ day issue where PDF downloads failed. Root cause: API v3 returns PDF as base64 string inside JSON field "pdf" instead of binary PDF. Implemented smart parser that detects base64 in multiple possible fields, validates PDF magic bytes, and converts to proper Buffer. System now successfully downloads 41KB PDFs from 55KB base64 JSON responses. Solution based on external AI consultation (Claude + Perplexity consensus).
+- **✅ Carnê de Boletos Implementation (13/08/2025)**: Added complete functionality to generate a single PDF containing all payment slips (carnê). Features include: PDF merging service using pdf-lib, API endpoints for carnê generation with Storage and direct download options, frontend button in formalization page to download merged PDF when multiple boletos exist. System automatically fetches all boletos, downloads individual PDFs, merges them into a single document, and provides download link. Test script included for validation.
 
 ## System Architecture
 

@@ -1409,13 +1409,75 @@ export default function Formalizacao() {
                                   ) : (
                                     // Boletos já gerados - mostrar lista
                                     <div className="space-y-3">
-                                      <div className="flex items-center gap-2 rounded border border-green-700 bg-green-900/20 p-3">
-                                        <CheckCircle className="h-5 w-5 text-green-400" />
-                                        <span className="font-medium text-green-300">
-                                          {collectionsData && collectionsData.length > 0
-                                            ? `${collectionsData.length} boleto(s) gerado(s) com sucesso`
-                                            : "Boletos gerados com sucesso"}
-                                        </span>
+                                      <div className="flex items-center justify-between rounded border border-green-700 bg-green-900/20 p-3">
+                                        <div className="flex items-center gap-2">
+                                          <CheckCircle className="h-5 w-5 text-green-400" />
+                                          <span className="font-medium text-green-300">
+                                            {collectionsData && collectionsData.length > 0
+                                              ? `${collectionsData.length} boleto(s) gerado(s) com sucesso`
+                                              : "Boletos gerados com sucesso"}
+                                          </span>
+                                        </div>
+                                        
+                                        {/* Botão para baixar carnê completo */}
+                                        {collectionsData && collectionsData.length > 1 && (
+                                          <Button
+                                            size="sm"
+                                            variant="outline"
+                                            onClick={async () => {
+                                              try {
+                                                toast({
+                                                  title: "Gerando carnê...",
+                                                  description: "Preparando PDF com todos os boletos",
+                                                });
+                                                
+                                                const response = await fetch(
+                                                  `/api/propostas/${proposta.id}/carne-pdf`,
+                                                  {
+                                                    headers: {
+                                                      Authorization: `Bearer ${localStorage.getItem("token")}`,
+                                                    },
+                                                  }
+                                                );
+                                                
+                                                if (!response.ok) {
+                                                  throw new Error("Erro ao gerar carnê");
+                                                }
+                                                
+                                                const data = await response.json();
+                                                
+                                                if (data.data?.downloadUrl) {
+                                                  // Baixar o carnê
+                                                  const link = document.createElement("a");
+                                                  link.href = data.data.downloadUrl;
+                                                  link.download = `carne-proposta-${proposta.id}.pdf`;
+                                                  link.target = "_blank";
+                                                  document.body.appendChild(link);
+                                                  link.click();
+                                                  document.body.removeChild(link);
+                                                  
+                                                  toast({
+                                                    title: "Carnê baixado!",
+                                                    description: `PDF com ${collectionsData.length} boletos gerado com sucesso`,
+                                                  });
+                                                } else {
+                                                  throw new Error("URL de download não encontrada");
+                                                }
+                                              } catch (error) {
+                                                console.error("Erro ao baixar carnê:", error);
+                                                toast({
+                                                  title: "Erro",
+                                                  description: "Não foi possível gerar o carnê de boletos",
+                                                  variant: "destructive",
+                                                });
+                                              }
+                                            }}
+                                            className="border-blue-600 text-blue-400 hover:bg-blue-600/10"
+                                          >
+                                            <FileText className="mr-2 h-4 w-4" />
+                                            Baixar Carnê Completo
+                                          </Button>
+                                        )}
                                       </div>
 
                                       {/* Listar todos os boletos gerados */}
