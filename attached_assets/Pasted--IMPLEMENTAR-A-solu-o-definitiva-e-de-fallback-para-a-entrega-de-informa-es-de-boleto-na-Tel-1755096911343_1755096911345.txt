@@ -1,0 +1,36 @@
+**IMPLEMENTAR:**
+A solução definitiva e de fallback para a entrega de informações de boleto na "Tela de Formalização", contornando a necessidade de download direto do PDF defeituoso do Banco Inter.
+
+**CONTEXT:**
+Nosso "Debate Máximo" concluiu que o PDF do Banco Inter é inerentemente defeituoso e não pode ser reparado de forma confiável para evitar alertas de antivírus. Nossa estratégia agora é pivotar: em vez de forçar o download do PDF, vamos priorizar a entrega dos dados de pagamento de formas alternativas e mais seguras.
+
+**CURRENT STATE:**
+Qualquer tentativa de download do PDF resulta em um alerta de vírus, quebrando a confiança do usuário e tornando a funcionalidade inutilizável.
+
+**EXPECTED (Estado Final de Sucesso):**
+Uma nova interface na "Tela de Formalização" que oferece ao usuário maneiras seguras e funcionais de obter as informações de pagamento, com o download direto do PDF sendo a opção de menor prioridade e com um aviso claro.
+
+**CONSTRAINTS (A Nova Arquitetura de UX e Lógica):**
+
+**1. Remoção da Ação Primária:**
+    - **Ação:** O botão principal "Baixar Boleto (PDF)" deve ser **REMOVIDO** ou drasticamente alterado. O download direto não é mais nossa solução primária.
+
+**2. Implementação da Solução Primária (Visualização de Códigos):**
+    - **Ação:** No lugar do botão de download, a UI deve exibir diretamente os dados mais importantes do boleto: a **Linha Digitável** e o **PIX Copia e Cola**.
+    - **Implementação:** Adicione botões de "Copiar" ao lado de cada um. Esta é agora a forma **principal e recomendada** para o usuário obter as informações de pagamento.
+
+**3. Implementação do Fallback Seguro (Container de Imagem):**
+    - **Ação:** Adicione um botão secundário, claramente visível, com o texto **"Gerar Imagem do Boleto (PNG)"**.
+    - **Implementação:** Reative a lógica que você já havia criado: no backend, converta o PDF defeituoso em uma imagem PNG. Esta imagem deve ser retornada e baixada pelo navegador.
+    - **Justificativa:** Imagens PNG têm uma probabilidade muito menor de serem falsamente detectadas como vírus.
+
+**4. A Opção de Risco (Download Direto com Aviso):**
+    - **Ação:** Adicione um link ou botão de menor destaque, talvez dentro de um menu "Opções Avançadas", com o texto **"Baixar PDF Original (Pode gerar alerta de vírus)"**.
+    - **Implementação:** Este link deve acionar o download do PDF (seja o original ou o "reparado"), mas a UI deve, ao lado do link, exibir um ícone de aviso e um tooltip explicando o risco de falso positivo.
+
+**TESTE:**
+- O critério de sucesso é uma interface na "Tela de Formalização" que:
+    1. Prioriza a cópia dos códigos de pagamento.
+    2. Oferece a conversão para PNG como uma alternativa segura e visível.
+    3. Esconde o download direto do PDF como uma opção de último recurso, com um aviso claro ao usuário.
+- A funcionalidade principal do sistema não deve mais ser bloqueada pelo problema do antivírus.
