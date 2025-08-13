@@ -1431,22 +1431,18 @@ export default function Formalizacao() {
                                                   description: "Preparando PDF com todos os boletos",
                                                 });
                                                 
-                                                const response = await fetch(
+                                                // Usar apiRequest para garantir autenticação correta
+                                                const response = await apiRequest(
                                                   `/api/propostas/${proposta.id}/carne-pdf`,
                                                   {
-                                                    headers: {
-                                                      Authorization: `Bearer ${localStorage.getItem("token")}`,
-                                                    },
+                                                    method: "GET",
                                                   }
                                                 );
                                                 
-                                                if (!response.ok) {
-                                                  throw new Error("Erro ao gerar carnê");
-                                                }
+                                                // Response já é o JSON quando usando apiRequest
+                                                const data = response as any;
                                                 
-                                                const data = await response.json();
-                                                
-                                                if (data.data?.downloadUrl) {
+                                                if (data.success && data.data?.downloadUrl) {
                                                   // Baixar o carnê
                                                   const link = document.createElement("a");
                                                   link.href = data.data.downloadUrl;
@@ -1461,7 +1457,7 @@ export default function Formalizacao() {
                                                     description: `PDF com ${collectionsData.length} boletos gerado com sucesso`,
                                                   });
                                                 } else {
-                                                  throw new Error("URL de download não encontrada");
+                                                  throw new Error(data.error || "URL de download não encontrada");
                                                 }
                                               } catch (error) {
                                                 console.error("Erro ao baixar carnê:", error);

@@ -42,9 +42,10 @@ export class PdfMergeService {
       const pdfBuffers: Buffer[] = [];
       const errors: string[] = [];
       
-      for (const collection of collections) {
+      for (let i = 0; i < collections.length; i++) {
+        const collection = collections[i];
         try {
-          console.log(`[PDF MERGE] 📄 Baixando PDF parcela ${collection.numeroParcela}/${collection.totalParcelas}...`);
+          console.log(`[PDF MERGE] 📄 Baixando PDF parcela ${collection.numeroParcela}/${collection.totalParcelas} (${i + 1}/${collections.length})...`);
           
           const pdfBuffer = await interBankService.obterPdfCobranca(collection.codigoSolicitacao);
           
@@ -60,6 +61,12 @@ export class PdfMergeService {
           
           pdfBuffers.push(pdfBuffer);
           console.log(`[PDF MERGE] ✅ PDF parcela ${collection.numeroParcela} baixado com sucesso (${pdfBuffer.length} bytes)`);
+          
+          // Delay entre requisições para evitar rate limiting (exceto na última)
+          if (i < collections.length - 1) {
+            console.log(`[PDF MERGE] ⏳ Aguardando 2s antes da próxima requisição...`);
+            await new Promise(resolve => setTimeout(resolve, 2000));
+          }
           
         } catch (error: any) {
           console.error(`[PDF MERGE] ❌ Erro ao baixar parcela ${collection.numeroParcela}:`, error.message);

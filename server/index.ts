@@ -30,10 +30,14 @@ import { registerRoutes } from "./routes";
     log("🚀 Starting autonomous security monitoring...");
 
     const scanner = getSecurityScanner();
-    scanner.start();
+    if (scanner) {
+      scanner.start();
+    }
 
     const vulnDetector = getVulnerabilityDetector();
-    vulnDetector.start();
+    if (vulnDetector && typeof vulnDetector.start === 'function') {
+      vulnDetector.start();
+    }
 
     const depScanner = getDependencyScanner();
     depScanner.start();
