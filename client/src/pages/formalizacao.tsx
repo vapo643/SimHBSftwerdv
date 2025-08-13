@@ -2311,7 +2311,6 @@ export default function Formalizacao() {
                                         </p>
                                       </div>
                                       </div>
-                                    </div>
                                   )}
                                 </div>
                               </div>
