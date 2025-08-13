@@ -1821,6 +1821,130 @@ export default function Formalizacao() {
                                         </Button>
 
                                         <Button
+                                          variant="outline"  
+                                          className="bg-green-50 border-green-300 text-green-700 hover:bg-green-100"
+                                          onClick={async () => {
+                                            try {
+                                              const collections = collectionsData || [];
+                                              if (collections.length > 0) {
+                                                // Criar modal/janela com APENAS códigos de barra e PIX
+                                                let codesInfo = "🏦 DADOS PARA PAGAMENTO - SEM DOWNLOAD NECESSÁRIO\n\n";
+                                                
+                                                collections.forEach((col: any, index: number) => {
+                                                  codesInfo += `📄 PARCELA ${col.numeroParcela || index + 1}:\n`;
+                                                  codesInfo += `💰 Valor: R$ ${col.valorNominal || 'N/A'}\n`;
+                                                  if (col.codigoBarras) {
+                                                    codesInfo += `📋 Código de Barras:\n${col.codigoBarras}\n`;
+                                                  }
+                                                  if (col.linhaDigitavel) {
+                                                    codesInfo += `🔢 Linha Digitável:\n${col.linhaDigitavel}\n`;
+                                                  }
+                                                  if (col.pixCopiaECola) {
+                                                    codesInfo += `📱 PIX Copia e Cola:\n${col.pixCopiaECola}\n`;
+                                                  }
+                                                  codesInfo += "\n" + "─".repeat(50) + "\n\n";
+                                                });
+                                                
+                                                codesInfo += "💡 INSTRUÇÕES:\n";
+                                                codesInfo += "• Use o código de barras no seu banco\n";
+                                                codesInfo += "• Ou copie o PIX para pagamento instantâneo\n";
+                                                codesInfo += "• Sem necessidade de download de arquivos\n";
+                                                codesInfo += "• Pagamento 100% seguro via sistema bancário\n";
+                                                
+                                                // Criar textarea para copiar facilmente
+                                                const modal = document.createElement('div');
+                                                modal.style.cssText = `
+                                                  position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                                                  background: rgba(0,0,0,0.5); z-index: 9999; 
+                                                  display: flex; align-items: center; justify-content: center;
+                                                `;
+                                                
+                                                const content = document.createElement('div');
+                                                content.style.cssText = `
+                                                  background: white; padding: 30px; border-radius: 12px; 
+                                                  max-width: 800px; max-height: 80%; overflow-y: auto;
+                                                  box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+                                                `;
+                                                
+                                                content.innerHTML = `
+                                                  <div style="text-align: center; margin-bottom: 20px;">
+                                                    <h2 style="color: #059669; margin: 0; font-size: 24px;">✅ SOLUÇÃO FINAL</h2>
+                                                    <p style="color: #6B7280; margin: 10px 0;">Use os dados abaixo - sem downloads</p>
+                                                  </div>
+                                                  <textarea readonly style="
+                                                    width: 100%; height: 400px; padding: 15px; 
+                                                    border: 2px solid #10B981; border-radius: 8px;
+                                                    font-family: monospace; font-size: 14px;
+                                                    background: #F0FDF4; resize: none;
+                                                  ">${codesInfo}</textarea>
+                                                  <div style="text-align: center; margin-top: 20px;">
+                                                    <button id="copyBtn" style="
+                                                      background: #10B981; color: white; border: none; 
+                                                      padding: 12px 24px; border-radius: 6px; cursor: pointer;
+                                                      font-weight: 600; margin-right: 10px;
+                                                    ">📋 Copiar Tudo</button>
+                                                    <button id="closeBtn" style="
+                                                      background: #6B7280; color: white; border: none; 
+                                                      padding: 12px 24px; border-radius: 6px; cursor: pointer;
+                                                      font-weight: 600;
+                                                    ">✖️ Fechar</button>
+                                                  </div>
+                                                `;
+                                                
+                                                modal.appendChild(content);
+                                                document.body.appendChild(modal);
+                                                
+                                                // Event listeners
+                                                document.getElementById('copyBtn')?.addEventListener('click', () => {
+                                                  const textarea = content.querySelector('textarea') as HTMLTextAreaElement;
+                                                  textarea.select();
+                                                  document.execCommand('copy');
+                                                  const btn = document.getElementById('copyBtn');
+                                                  if (btn) {
+                                                    btn.textContent = '✅ Copiado!';
+                                                    btn.style.background = '#059669';
+                                                    setTimeout(() => {
+                                                      btn.textContent = '📋 Copiar Tudo';
+                                                      btn.style.background = '#10B981';
+                                                    }, 2000);
+                                                  }
+                                                });
+                                                
+                                                document.getElementById('closeBtn')?.addEventListener('click', () => {
+                                                  document.body.removeChild(modal);
+                                                });
+                                                
+                                                modal.addEventListener('click', (e) => {
+                                                  if (e.target === modal) document.body.removeChild(modal);
+                                                });
+                                                
+                                                toast({
+                                                  title: "Solução Final Ativa",
+                                                  description: "Use apenas códigos de barra e PIX - sem downloads"
+                                                });
+                                                
+                                              } else {
+                                                toast({
+                                                  title: "Nenhum boleto",
+                                                  description: "Não há boletos disponíveis",
+                                                  variant: "destructive"
+                                                });
+                                              }
+                                            } catch (error: any) {
+                                              console.error("[CODES_ONLY] Erro:", error);
+                                              toast({
+                                                title: "Erro ao obter códigos",
+                                                description: error.message,
+                                                variant: "destructive"
+                                              });
+                                            }
+                                          }}
+                                        >
+                                          <QrCode className="mr-2 h-4 w-4" />
+                                          APENAS CÓDIGOS (SEM DOWNLOAD)
+                                        </Button>
+
+                                        <Button
                                           variant="outline"
                                           className="bg-purple-50 border-purple-300 text-purple-700 hover:bg-purple-100"
                                           onClick={async () => {
