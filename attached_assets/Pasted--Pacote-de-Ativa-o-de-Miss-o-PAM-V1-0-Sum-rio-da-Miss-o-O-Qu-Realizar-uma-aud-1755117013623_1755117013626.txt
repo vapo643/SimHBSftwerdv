@@ -1,0 +1,35 @@
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Realizar uma auditoria completa para identificar e erradicar todo e qualquer `mock data` do sistema, com foco na correção da falha recém-descoberta na geração de "carnês", para deixar o fluxo de formalização 100% pronto para produção.
+* **Intenção Estratégica (O Porquê):** Dados mockados são um risco inaceitável em um sistema que lida com informações financeiras reais. Eles podem levar a testes com falsos positivos e a bugs em produção. A falha na geração do carnê indica que nossa arquitetura, embora assíncrona, ainda possui pontos de falha ou dependências de dados estáticos que precisam ser eliminados.
+* **Histórico Relevante (Consulta Obrigatória):** Consulte a pasta `/docs/erros_e_solucoes/` e revise os relatórios sobre a implementação da Job Queue e da geração de carnês. A falha atual provavelmente reside na passagem de dados entre a API (Produtor) e o Worker (Consumidor), ou no próprio worker que pode estar a usar dados de teste em vez dos dados reais do job.
+* **Modelo Mental (Como se Encaixa):** Esta é uma missão de "hardening" (endurecimento). Estamos a passar de uma arquitetura funcional em teoria para uma arquitetura pronta para o mundo real. A auditoria deve varrer o código em busca de dados estáticos e substituí-los por chamadas dinâmicas e reais ao nosso banco de dados (Supabase).
+* **Riscos Antecipados:** **Risco:** A remoção de `mock data` pode revelar falhas em partes do código que dependiam deles para funcionar. **Contramedida:** A missão será dividida em duas fases: primeiro uma auditoria para identificar todos os pontos de `mock data`, e só depois a fase de remoção e correção.
+
+---
+
+**IMPLEMENTAR:**
+Auditoria e erradicação de `mock data` e correção da falha no fluxo de geração de carnê assíncrono.
+
+**CURRENT STATE:**
+O sistema possui uma arquitetura de job queue funcional, mas a geração de carnês está a falhar em um teste com dados reais. Suspeitamos que a causa seja o uso de `mock data` ou uma falha na passagem de dados para o worker.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um sistema 100% livre de dados mockados, onde o fluxo de geração de carnê funciona perfeitamente com dados reais do banco de dados, tornando a "Tela de Formalização" pronta para produção.
+
+**CONSTRAINTS (Roadmap de Auditoria e Correção):**
+
+**FASE 1: Diagnóstico (Auditoria de Mock Data e Causa Raiz do Erro) - NÃO FAÇA CORREÇÕES AINDA**
+1.  **Auditoria de Mock Data:**
+    - **Ação:** Execute uma busca global em todo o projeto por `mock data`, dados estáticos ou "hardcoded" que são usados em vez de dados dinâmicos. Preste atenção especial aos serviços (`server/services/`), rotas (`server/routes/`) e componentes de UI (`client/src/pages/`).
+    - **Relatório:** Liste todos os ficheiros e linhas de código onde encontrou `mock data`.
+2.  **Diagnóstico do Erro do Carnê:**
+    - **Ação:** Adicione logs detalhados ao endpoint `POST /api/propostas/:id/gerar-carne` (Produtor) e ao `worker.ts` (Consumidor). Precisamos ver o `job.data` exato que o worker recebe. Execute o fluxo de geração de carnê que está a falhar.
+    - **Relatório:** Apresente os logs da execução falha do job do carnê, junto com sua hipótese para a causa raiz do erro.
+
+**FASE 2: Correção (Implementação) - SÓ EXECUTE APÓS APROVAÇÃO DA FASE 1**
+1.  **Ação de Correção:** Com base no seu relatório de diagnóstico, refatore o código para remover todo o `mock data`, substituindo-o por chamadas reais ao banco de dados ou passando os dados dinâmicos corretamente através do job.
+2.  **Ação de Correção:** Corrija o bug específico na geração do carnê, garantindo que o worker receba e processe os dados reais da proposta.
+
+**PROTOCOLO OBRIGATÓRIO 5-CHECK:**
+- A missão só será considerada concluída após a execução bem-sucedida da FASE 2 e de um teste ponta-a-ponta com dados 100% reais, resultando no download correto do carnê.
