@@ -17,6 +17,7 @@
 import https from "https";
 import { Agent as UndiciAgent } from "undici";
 import { createServerSupabaseAdminClient } from "../lib/supabase";
+import { PDFDocument } from "pdf-lib";
 
 
 interface InterBankConfig {
@@ -823,6 +824,50 @@ class InterBankService {
   }
 
   /**
+   * Repara um PDF com estrutura malformada usando pdf-lib
+   * Resolve o problema de stream/endstream mismatch que causa detecção de falso positivo
+   * @param pdfBuffer Buffer do PDF malformado
+   * @returns Buffer do PDF reparado
+   */
+  private async repararPdfBuffer(pdfBuffer: Buffer): Promise<Buffer> {
+    try {
+      console.log(`[INTER] 🔧 Iniciando reparo do PDF (${pdfBuffer.length} bytes)...`);
+      
+      // Carrega o PDF, ignorando erros estruturais se possível
+      const pdfDoc = await PDFDocument.load(pdfBuffer, { 
+        ignoreEncryption: true,
+        updateMetadata: false 
+      });
+      
+      console.log(`[INTER] ✅ PDF carregado com sucesso para reparo`);
+      console.log(`[INTER] 📊 Páginas no documento: ${pdfDoc.getPageCount()}`);
+      
+      // Simplesmente salvar o documento novamente irá reconstruir
+      // a estrutura e corrigir o problema de stream/endstream
+      const pdfBytesReparados = await pdfDoc.save();
+      const bufferReparado = Buffer.from(pdfBytesReparados);
+      
+      console.log(`[INTER] ✅ PDF reparado com sucesso (${bufferReparado.length} bytes)`);
+      console.log(`[INTER] 🔍 Diferença de tamanho: ${bufferReparado.length - pdfBuffer.length} bytes`);
+      
+      // Validar que o PDF reparado é válido
+      const pdfMagic = bufferReparado.slice(0, 5).toString('ascii');
+      if (pdfMagic.startsWith('%PDF')) {
+        console.log(`[INTER] ✅ PDF reparado é válido! Magic bytes: ${pdfMagic}`);
+      } else {
+        console.log(`[INTER] ⚠️ PDF reparado pode ter problemas. Magic bytes: ${pdfMagic}`);
+      }
+      
+      return bufferReparado;
+    } catch (error) {
+      console.error(`[INTER] ❌ Falha ao reparar o PDF:`, error);
+      console.error(`[INTER] ⚠️ Retornando buffer original sem reparo`);
+      // Em caso de falha, retorne o buffer original para não quebrar o fluxo
+      return pdfBuffer;
+    }
+  }
+
+  /**
    * Get collection PDF using direct API endpoint
    * CORREÇÃO: API Inter exige Accept: application/json mas retorna PDF
    */
@@ -957,7 +1002,12 @@ class InterBankService {
               console.error(`[INTER] ⚠️ Falha ao salvar evidência, mas continuando:`, storageError);
             }
             
-            return pdfBuffer;
+            // REPARO DO PDF: Corrigir estrutura malformada
+            console.log(`[INTER] 🔧 APLICANDO REPARO AO PDF...`);
+            const pdfReparado = await this.repararPdfBuffer(pdfBuffer);
+            console.log(`[INTER] ✅ PDF REPARADO E PRONTO PARA DOWNLOAD`);
+            
+            return pdfReparado;
           } else {
             console.log(`[INTER] ⚠️ Buffer não parece ser PDF. Primeiros bytes:`, pdfBuffer.slice(0, 20));
             return pdfBuffer;
@@ -1003,7 +1053,12 @@ class InterBankService {
             console.error(`[INTER] ⚠️ Falha ao salvar evidência, mas continuando:`, storageError);
           }
           
-          return response;
+          // REPARO DO PDF: Corrigir estrutura malformada
+          console.log(`[INTER] 🔧 APLICANDO REPARO AO PDF (Buffer direto)...`);
+          const pdfReparadoDireto = await this.repararPdfBuffer(response);
+          console.log(`[INTER] ✅ PDF REPARADO E PRONTO PARA DOWNLOAD`);
+          
+          return pdfReparadoDireto;
         }
       }
       
@@ -1048,7 +1103,12 @@ class InterBankService {
               console.error(`[INTER] ⚠️ Falha ao salvar evidência, mas continuando:`, storageError);
             }
             
-            return pdfBuffer;
+            // REPARO DO PDF: Corrigir estrutura malformada
+            console.log(`[INTER] 🔧 APLICANDO REPARO AO PDF (String base64)...`);
+            const pdfReparadoString = await this.repararPdfBuffer(pdfBuffer);
+            console.log(`[INTER] ✅ PDF REPARADO E PRONTO PARA DOWNLOAD`);
+            
+            return pdfReparadoString;
           }
         } catch (decodeError) {
           console.error(`[INTER] ❌ Falha ao decodificar base64:`, decodeError);

@@ -1,0 +1,55 @@
+**IMPLEMENTAR:**
+A solução definitiva para o bug de "vírus detectado": um mecanismo de "reparo de PDF" em tempo real, utilizando a biblioteca `pdf-lib` para corrigir a estrutura malformada dos boletos recebidos do Banco Inter.
+
+**CONTEXT:**
+Nosso "Debate Máximo" concluiu que o problema do antivírus é um falso positivo causado por um PDF estruturalmente defeituoso fornecido pelo Banco Inter. Sua pesquisa na comunidade revelou que a solução mais eficaz é "reparar" o PDF após o download. Esta é a missão para implementar essa solução final.
+
+**CURRENT STATE:**
+Nossa função `obterPdfCobranca` baixa o PDF defeituoso e o salva em quarentena. Não há nenhuma lógica de reparo.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um fluxo de download onde:
+1.  O PDF é baixado do Banco Inter.
+2.  O buffer deste PDF é passado por uma função de reparo que usa `pdf-lib` para carregá-lo e salvá-lo novamente na memória.
+3.  O **buffer do PDF reparado (e não o original)** é o que é retornado ao usuário para download.
+4.  O ficheiro final baixado pelo usuário não aciona mais o alerta do McAfee.
+
+**CONSTRAINTS (Roadmap de Implementação Cirúrgico):**
+
+**1. Isolamento da Lógica de Reparo:**
+    - **Ação:** Crie uma nova função assíncrona privada dentro do `interBankService.ts` chamada `repararPdfBuffer(pdfBuffer: Buffer): Promise<Buffer>`.
+
+**2. Implementação da Função de Reparo:**
+    - **Ação:** Dentro da função `repararPdfBuffer`, utilize a biblioteca `pdf-lib`.
+    - **Implementação (Código-Chave):**
+      ```typescript
+      import { PDFDocument } from 'pdf-lib';
+
+      // ... dentro da função de reparo
+      try {
+        // Carrega o PDF, ignorando erros estruturais se possível
+        const pdfDoc = await PDFDocument.load(pdfBuffer, { 
+          ignoreEncryption: true,
+          updateMetadata: false 
+        });
+
+        // Simplesmente salvar o documento novamente irá reconstruir
+        // a estrutura e corrigir o problema de stream/endstream.
+        const pdfBytesReparados = await pdfDoc.save();
+
+        return Buffer.from(pdfBytesReparados);
+      } catch (error) {
+        console.error('[REPARO PDF] Falha ao reparar o buffer:', error);
+        // Em caso de falha, retorne o buffer original para não quebrar o fluxo.
+        return pdfBuffer;
+      }
+      ```
+
+**3. Integração no Fluxo de Download:**
+    - **Ação:** Modifique a função principal `obterPdfCobranca`.
+    - **Implementação:** Após receber o `pdfBuffer` original do Banco Inter, passe-o pela nova função `repararPdfBuffer` antes de salvá-lo em quarentena e de retorná-lo na resposta da API. O buffer retornado ao usuário final deve ser sempre o buffer reparado.
+
+**TESTE:**
+- Após a implementação, execute a função de download.
+- **Validação 1:** O download do PDF deve continuar a funcionar.
+- **Validação 2 (Crítica):** Submeta o ficheiro PDF baixado a um scanner de vírus online (como o VirusTotal) ou teste na máquina com McAfee para confirmar que a detecção "ti!7da91cf510c0" desapareceu.
