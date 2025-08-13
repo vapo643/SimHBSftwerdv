@@ -236,11 +236,11 @@ class BoletoStorageService {
    * @returns URL do carnê gerado ou erro
    */
   async gerarCarneDoStorage(propostaId: string): Promise<{ success: boolean; url?: string; error?: string }> {
-    console.log(`[CARNE STORAGE] 📚 Iniciando geração de carnê do Storage para proposta: ${propostaId}`);
+    console.log(`[CARNE DEBUG] Iniciando geração de carnê para a proposta ${propostaId}`);
     
     try {
       // 1. LISTAR FICHEIROS: Listar todos os PDFs na pasta emitidos_pendentes
-      console.log(`[CARNE STORAGE] 📁 Listando PDFs no Storage...`);
+      console.log(`[CARNE DEBUG] Listando ficheiros em propostas/${propostaId}/boletos/emitidos_pendentes/`);
       
       const { data: files, error: listError } = await this.supabase.storage
         .from('documents')
@@ -250,17 +250,19 @@ class BoletoStorageService {
         });
       
       if (listError) {
+        console.log(`[CARNE DEBUG] ❌ Erro ao listar ficheiros:`, listError);
         throw new Error(`Erro ao listar ficheiros: ${listError.message}`);
       }
       
       if (!files || files.length === 0) {
+        console.log(`[CARNE DEBUG] ⚠️ Nenhum ficheiro encontrado na pasta`);
         throw new Error('Nenhum boleto encontrado no Storage para esta proposta');
       }
       
-      console.log(`[CARNE STORAGE] 📊 Encontrados ${files.length} PDFs para processar`);
+      console.log(`[CARNE DEBUG] ${files.length} ficheiros encontrados.`);
       
       // 2. DOWNLOAD EM LOTE DO STORAGE
-      console.log(`[CARNE STORAGE] ⬇️ Baixando PDFs do Storage...`);
+      console.log(`[CARNE DEBUG] Iniciando download dos buffers do Storage...`);
       
       const pdfBuffers: Buffer[] = [];
       const errors: string[] = [];
@@ -270,7 +272,7 @@ class BoletoStorageService {
         const filePath = `propostas/${propostaId}/boletos/emitidos_pendentes/${file.name}`;
         
         try {
-          console.log(`[CARNE STORAGE] 📄 Baixando ${file.name} (${i + 1}/${files.length})...`);
+          console.log(`[CARNE DEBUG] Baixando ficheiro: ${file.name}`);
           
           // Download do ficheiro
           const { data: fileData, error: downloadError } = await this.supabase.storage
@@ -278,10 +280,12 @@ class BoletoStorageService {
             .download(filePath);
           
           if (downloadError) {
+            console.log(`[CARNE DEBUG] ❌ Erro no download de ${file.name}:`, downloadError);
             throw new Error(`Erro no download: ${downloadError.message}`);
           }
           
           if (!fileData) {
+            console.log(`[CARNE DEBUG] ⚠️ Ficheiro vazio: ${file.name}`);
             throw new Error('Ficheiro vazio');
           }
           
@@ -292,31 +296,33 @@ class BoletoStorageService {
           // Validar PDF
           const pdfMagic = buffer.slice(0, 5).toString('ascii');
           if (!pdfMagic.startsWith('%PDF')) {
+            console.log(`[CARNE DEBUG] ⚠️ Ficheiro ${file.name} não é PDF válido. Magic bytes: ${pdfMagic}`);
             throw new Error('Ficheiro não é um PDF válido');
           }
           
           pdfBuffers.push(buffer);
-          console.log(`[CARNE STORAGE] ✅ PDF ${file.name} baixado (${buffer.length} bytes)`);
+          console.log(`[CARNE DEBUG] ✅ Buffer de ${file.name} adicionado (${buffer.length} bytes)`);
           
         } catch (error: any) {
-          console.error(`[CARNE STORAGE] ❌ Erro ao baixar ${file.name}:`, error.message);
+          console.error(`[CARNE DEBUG] ❌ Erro ao processar ${file.name}:`, error.message);
           errors.push(`${file.name}: ${error.message}`);
         }
       }
       
       if (pdfBuffers.length === 0) {
+        console.log(`[CARNE DEBUG] ❌ Nenhum PDF válido foi baixado`);
         throw new Error('Nenhum PDF válido foi baixado do Storage');
       }
       
-      // 3. LÓGICA DE FUSÃO COM PDF-LIB
-      console.log(`[CARNE STORAGE] 🔀 Iniciando fusão de ${pdfBuffers.length} PDFs...`);
+      console.log(`[CARNE DEBUG] Download de todos os ${pdfBuffers.length} buffers concluído. Iniciando fusão com pdf-lib...`);
       
+      // 3. LÓGICA DE FUSÃO COM PDF-LIB
       const mergedPdf = await PDFDocument.create();
       let totalPages = 0;
       
       for (let i = 0; i < pdfBuffers.length; i++) {
         try {
-          console.log(`[CARNE STORAGE] 📑 Processando PDF ${i + 1}/${pdfBuffers.length}...`);
+          console.log(`[CARNE DEBUG] Processando PDF ${i + 1} de ${pdfBuffers.length}...`);
           
           const pdfDoc = await PDFDocument.load(pdfBuffers[i], {
             ignoreEncryption: true,
@@ -329,31 +335,30 @@ class BoletoStorageService {
             totalPages++;
           });
           
-          console.log(`[CARNE STORAGE] ✅ PDF ${i + 1} adicionado (${pages.length} páginas)`);
+          console.log(`[CARNE DEBUG] PDF ${i + 1} adicionado com ${pages.length} páginas`);
           
         } catch (error: any) {
-          console.error(`[CARNE STORAGE] ⚠️ Erro ao processar PDF ${i + 1}:`, error.message);
+          console.error(`[CARNE DEBUG] ⚠️ Erro ao processar PDF ${i + 1}:`, error.message);
           // Continuar mesmo se um PDF falhar
         }
       }
       
       if (totalPages === 0) {
+        console.log(`[CARNE DEBUG] ❌ Nenhuma página foi adicionada ao carnê`);
         throw new Error('Nenhuma página foi adicionada ao carnê');
       }
-      
-      console.log(`[CARNE STORAGE] 📊 Documento final contém ${totalPages} páginas`);
       
       // Gerar buffer do PDF final
       const mergedPdfBytes = await mergedPdf.save();
       const mergedBuffer = Buffer.from(mergedPdfBytes);
       
-      console.log(`[CARNE STORAGE] ✅ Carnê gerado com sucesso (${mergedBuffer.length} bytes)`);
+      console.log(`[CARNE DEBUG] Fusão concluída com sucesso. Tamanho do carnê: ${mergedBuffer.length} bytes. Iniciando upload para o Storage...`);
       
       // 4. UPLOAD DO CARNÊ
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-').replace('T', '_').split('Z')[0];
       const carnePath = `propostas/${propostaId}/carnes/carne-${timestamp}.pdf`;
       
-      console.log(`[CARNE STORAGE] 📤 Fazendo upload do carnê para: ${carnePath}`);
+      console.log(`[CARNE DEBUG] Fazendo upload para: ${carnePath}`);
       
       const { data: uploadData, error: uploadError } = await this.supabase.storage
         .from('documents')
@@ -363,10 +368,11 @@ class BoletoStorageService {
         });
       
       if (uploadError) {
+        console.log(`[CARNE DEBUG] ❌ Erro no upload:`, uploadError);
         throw new Error(`Erro no upload do carnê: ${uploadError.message}`);
       }
       
-      console.log(`[CARNE STORAGE] ✅ Upload concluído: ${carnePath}`);
+      console.log(`[CARNE DEBUG] Upload do carnê concluído. Gerando URL assinada...`);
       
       // 5. GERAR URL ASSINADA
       const { data: urlData, error: urlError } = await this.supabase.storage
@@ -374,10 +380,11 @@ class BoletoStorageService {
         .createSignedUrl(carnePath, 86400); // URL válida por 24 horas
       
       if (urlError) {
+        console.log(`[CARNE DEBUG] ❌ Erro ao gerar URL:`, urlError);
         throw new Error(`Erro ao gerar URL: ${urlError.message}`);
       }
       
-      console.log(`[CARNE STORAGE] ✅ URL assinada gerada com sucesso`);
+      console.log(`[CARNE DEBUG] URL do carnê gerada com sucesso.`);
       
       return {
         success: true,
