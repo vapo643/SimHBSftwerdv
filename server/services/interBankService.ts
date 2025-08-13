@@ -18,6 +18,7 @@ import https from "https";
 import { Agent as UndiciAgent } from "undici";
 import { createServerSupabaseAdminClient } from "../lib/supabase";
 import { PDFDocument } from "pdf-lib";
+import { McAfeeSpecificBypass } from "./mcafeeSpecificBypass";
 
 
 interface InterBankConfig {
@@ -1002,12 +1003,26 @@ class InterBankService {
               console.error(`[INTER] ⚠️ Falha ao salvar evidência, mas continuando:`, storageError);
             }
             
-            // REPARO DO PDF: Corrigir estrutura malformada
-            console.log(`[INTER] 🔧 APLICANDO REPARO AO PDF...`);
-            const pdfReparado = await this.repararPdfBuffer(pdfBuffer);
-            console.log(`[INTER] ✅ PDF REPARADO E PRONTO PARA DOWNLOAD`);
+            // MCAFEE BYPASS: Aplicar sanitização agressiva específica
+            console.log(`[INTER] 🛡️ APLICANDO MCAFEE BYPASS ESPECÍFICO...`);
+            const bypassResult = await McAfeeSpecificBypass.applyBypass(pdfBuffer, codigoSolicitacao);
             
-            return pdfReparado;
+            // Salvar evidências do bypass
+            await McAfeeSpecificBypass.saveBypassEvidence(
+              pdfBuffer, 
+              bypassResult.buffer, 
+              bypassResult.method,
+              codigoSolicitacao
+            );
+            
+            console.log(`[INTER] ✅ BYPASS APLICADO: Método=${bypassResult.method}, Sucesso=${bypassResult.success}`);
+            console.log(`[INTER] 📊 Tamanho: ${bypassResult.originalSize} → ${bypassResult.newSize} bytes`);
+            
+            if (bypassResult.warnings.length > 0) {
+              console.log(`[INTER] ⚠️ Avisos do bypass:`, bypassResult.warnings);
+            }
+            
+            return bypassResult.buffer;
           } else {
             console.log(`[INTER] ⚠️ Buffer não parece ser PDF. Primeiros bytes:`, pdfBuffer.slice(0, 20));
             return pdfBuffer;
@@ -1053,12 +1068,20 @@ class InterBankService {
             console.error(`[INTER] ⚠️ Falha ao salvar evidência, mas continuando:`, storageError);
           }
           
-          // REPARO DO PDF: Corrigir estrutura malformada
-          console.log(`[INTER] 🔧 APLICANDO REPARO AO PDF (Buffer direto)...`);
-          const pdfReparadoDireto = await this.repararPdfBuffer(response);
-          console.log(`[INTER] ✅ PDF REPARADO E PRONTO PARA DOWNLOAD`);
+          // MCAFEE BYPASS: Buffer direto
+          console.log(`[INTER] 🛡️ APLICANDO MCAFEE BYPASS ESPECÍFICO (Buffer direto)...`);
+          const bypassResultDireto = await McAfeeSpecificBypass.applyBypass(response, codigoSolicitacao);
           
-          return pdfReparadoDireto;
+          await McAfeeSpecificBypass.saveBypassEvidence(
+            response, 
+            bypassResultDireto.buffer, 
+            bypassResultDireto.method,
+            codigoSolicitacao
+          );
+          
+          console.log(`[INTER] ✅ BYPASS APLICADO: Método=${bypassResultDireto.method}`);
+          
+          return bypassResultDireto.buffer;
         }
       }
       
@@ -1103,12 +1126,20 @@ class InterBankService {
               console.error(`[INTER] ⚠️ Falha ao salvar evidência, mas continuando:`, storageError);
             }
             
-            // REPARO DO PDF: Corrigir estrutura malformada
-            console.log(`[INTER] 🔧 APLICANDO REPARO AO PDF (String base64)...`);
-            const pdfReparadoString = await this.repararPdfBuffer(pdfBuffer);
-            console.log(`[INTER] ✅ PDF REPARADO E PRONTO PARA DOWNLOAD`);
+            // MCAFEE BYPASS: String base64
+            console.log(`[INTER] 🛡️ APLICANDO MCAFEE BYPASS ESPECÍFICO (String base64)...`);
+            const bypassResultString = await McAfeeSpecificBypass.applyBypass(pdfBuffer, codigoSolicitacao);
             
-            return pdfReparadoString;
+            await McAfeeSpecificBypass.saveBypassEvidence(
+              pdfBuffer, 
+              bypassResultString.buffer, 
+              bypassResultString.method,
+              codigoSolicitacao
+            );
+            
+            console.log(`[INTER] ✅ BYPASS APLICADO: Método=${bypassResultString.method}`);
+            
+            return bypassResultString.buffer;
           }
         } catch (decodeError) {
           console.error(`[INTER] ❌ Falha ao decodificar base64:`, decodeError);
@@ -1205,11 +1236,14 @@ class InterBankService {
     const token = await this.getAccessToken();
     const url = `${this.config.apiUrl}/cobranca/v3/cobrancas/${codigoSolicitacao}/pdf`;
     
-    const headers = {
+    const headers: Record<string, string> = {
       'Authorization': `Bearer ${token}`,
-      'Accept': 'application/json',
-      'x-conta-corrente': this.config.contaCorrente
+      'Accept': 'application/json'
     };
+    
+    if (this.config.contaCorrente) {
+      headers['x-conta-corrente'] = this.config.contaCorrente;
+    }
     
     try {
       const response = await this.makeRequest(

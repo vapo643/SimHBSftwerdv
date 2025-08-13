@@ -5377,6 +5377,274 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Gestão de Contratos routes (ADMIN e DIRETOR apenas)
   app.use("/api", gestaoContratosRoutes);
 
+  // ==========================================
+  // MCAFEE BYPASS ENDPOINTS
+  // ==========================================
+  
+  // Import do serviço de bypass específico do McAfee
+  const { McAfeeSpecificBypass } = await import("./services/mcafeeSpecificBypass");
+  const { InterBankService } = await import("./services/interBankService");
+  
+  // Endpoint específico para bypass do McAfee
+  app.get(
+    "/api/mcafee-bypass/:codigoSolicitacao",
+    jwtAuthMiddleware,
+    requireAnyRole,
+    async (req: AuthenticatedRequest, res) => {
+      try {
+        const { codigoSolicitacao } = req.params;
+        const { method } = req.query; // pdf_sanitized, png_container, text_fallback
+        
+        console.log(`[MCAFEE API] 🛡️ Solicitação de bypass para código: ${codigoSolicitacao}`);
+        console.log(`[MCAFEE API] 🔧 Método solicitado: ${method || 'auto'}`);
+        
+        // Primeiro, obter o PDF original do Inter
+        const interService = new InterBankService();
+        const pdfBuffer = await interService.obterPdfCobranca(codigoSolicitacao);
+        
+        // Aplicar bypass específico
+        const bypassResult = await McAfeeSpecificBypass.applyBypass(pdfBuffer, codigoSolicitacao);
+        
+        // Salvar evidências
+        await McAfeeSpecificBypass.saveBypassEvidence(
+          pdfBuffer,
+          bypassResult.buffer,
+          bypassResult.method,
+          codigoSolicitacao
+        );
+        
+        console.log(`[MCAFEE API] ✅ Bypass aplicado com sucesso`);
+        console.log(`[MCAFEE API] 📊 Método: ${bypassResult.method}, Sucesso: ${bypassResult.success}`);
+        
+        // Definir headers apropriados baseado no tipo de arquivo
+        const contentType = bypassResult.method === 'text_fallback' ? 'text/plain' : 'application/pdf';
+        const extension = bypassResult.method === 'text_fallback' ? '.txt' : '.pdf';
+        const fileName = `boleto-${codigoSolicitacao}-${bypassResult.method}${extension}`;
+        
+        res.setHeader('Content-Type', contentType);
+        res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+        res.setHeader('Content-Length', bypassResult.buffer.length);
+        res.setHeader('X-Bypass-Method', bypassResult.method);
+        res.setHeader('X-Bypass-Success', bypassResult.success.toString());
+        res.setHeader('X-Original-Size', bypassResult.originalSize.toString());
+        res.setHeader('X-New-Size', bypassResult.newSize.toString());
+        
+        if (bypassResult.warnings.length > 0) {
+          res.setHeader('X-Bypass-Warnings', JSON.stringify(bypassResult.warnings));
+        }
+        
+        res.send(bypassResult.buffer);
+        
+      } catch (error: any) {
+        console.error(`[MCAFEE API] ❌ Erro no bypass:`, error.message);
+        res.status(500).json({
+          error: 'Falha no bypass do McAfee',
+          message: error.message,
+          codigo: codigoSolicitacao
+        });
+      }
+    }
+  );
+  
+  // Página de teste para o bypass do McAfee
+  app.get("/mcafee-test", (req, res) => {
+    const testPageHtml = `
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste McAfee Bypass</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .card { border: 1px solid #ddd; padding: 20px; margin: 20px 0; border-radius: 8px; }
+        .input-group { margin: 15px 0; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input[type="text"], select { width: 300px; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin: 5px; }
+        button:hover { background: #0056b3; }
+        .danger { background: #dc3545; }
+        .danger:hover { background: #c82333; }
+        .success { background: #28a745; }
+        .success:hover { background: #218838; }
+        .result { margin-top: 20px; padding: 15px; border-radius: 4px; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .success-result { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛡️ Teste McAfee Bypass ti!7da91cf510c0</h1>
+        
+        <div class="card">
+            <h2>Informações do Sistema</h2>
+            <p><strong>Threat Específico:</strong> ti!7da91cf510c0</p>
+            <p><strong>Estratégias Disponíveis:</strong></p>
+            <ul>
+                <li><strong>pdf_sanitized:</strong> Sanitização agressiva com metadados Microsoft</li>
+                <li><strong>png_container:</strong> Conversão PDF → PNG → PDF limpo</li>
+                <li><strong>text_fallback:</strong> Fallback seguro em texto puro</li>
+                <li><strong>auto:</strong> Aplicar automaticamente a melhor estratégia</li>
+            </ul>
+        </div>
+        
+        <div class="card">
+            <h2>Teste de Bypass</h2>
+            <div class="input-group">
+                <label for="codigo">Código da Solicitação (Banco Inter):</label>
+                <input type="text" id="codigo" placeholder="e.g., 126dffb8-a53f-40af-a7df-04b07fdbed3b">
+            </div>
+            
+            <div class="input-group">
+                <label for="metodo">Método de Bypass:</label>
+                <select id="metodo">
+                    <option value="">Auto (Recomendado)</option>
+                    <option value="pdf_sanitized">PDF Sanitizado</option>
+                    <option value="png_container">PNG Container</option>
+                    <option value="text_fallback">Texto Seguro</option>
+                </select>
+            </div>
+            
+            <button onclick="testarBypass()" class="success">🛡️ Aplicar Bypass</button>
+            <button onclick="baixarOriginal()" class="danger">⚠️ Download Original (Para Comparação)</button>
+        </div>
+        
+        <div id="resultado" class="result" style="display: none;"></div>
+    </div>
+
+    <script>
+        async function testarBypass() {
+            const codigo = document.getElementById('codigo').value.trim();
+            const metodo = document.getElementById('metodo').value;
+            const resultado = document.getElementById('resultado');
+            
+            if (!codigo) {
+                mostrarResultado('Por favor, insira o código da solicitação.', 'error');
+                return;
+            }
+            
+            mostrarResultado('🔄 Aplicando bypass... Aguarde...', 'info');
+            
+            try {
+                const url = '/api/mcafee-bypass/' + encodeURIComponent(codigo) + (metodo ? '?method=' + metodo : '');
+                
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': 'Bearer ' + getAuthToken()
+                    }
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Falha na requisição');
+                }
+                
+                // Extrair informações dos headers
+                const method = response.headers.get('X-Bypass-Method');
+                const success = response.headers.get('X-Bypass-Success');
+                const originalSize = response.headers.get('X-Original-Size');
+                const newSize = response.headers.get('X-New-Size');
+                const warnings = response.headers.get('X-Bypass-Warnings');
+                
+                // Baixar o arquivo
+                const blob = await response.blob();
+                const filename = 'boleto-' + codigo + '-bypass-' + method + (method === 'text_fallback' ? '.txt' : '.pdf');
+                
+                const downloadUrl = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = downloadUrl;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(downloadUrl);
+                document.body.removeChild(a);
+                
+                let resultHtml = '✅ <strong>Bypass aplicado com sucesso!</strong><br>';
+                resultHtml += '📊 <strong>Método:</strong> ' + method + '<br>';
+                resultHtml += '🎯 <strong>Sucesso:</strong> ' + success + '<br>';
+                resultHtml += '📏 <strong>Tamanho:</strong> ' + originalSize + ' → ' + newSize + ' bytes<br>';
+                resultHtml += '📥 <strong>Arquivo baixado:</strong> ' + filename;
+                
+                if (warnings && warnings !== 'null') {
+                    resultHtml += '<br>⚠️ <strong>Avisos:</strong> ' + warnings;
+                }
+                
+                mostrarResultado(resultHtml, 'success-result');
+                
+            } catch (error) {
+                console.error('Erro no bypass:', error);
+                mostrarResultado('❌ <strong>Erro:</strong> ' + error.message, 'error');
+            }
+        }
+        
+        async function baixarOriginal() {
+            const codigo = document.getElementById('codigo').value.trim();
+            
+            if (!codigo) {
+                mostrarResultado('Por favor, insira o código da solicitação.', 'error');
+                return;
+            }
+            
+            mostrarResultado('🔄 Baixando PDF original... Aguarde...', 'info');
+            
+            try {
+                const url = '/api/inter/boleto/' + encodeURIComponent(codigo) + '/pdf';
+                
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': 'Bearer ' + getAuthToken()
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Falha ao baixar PDF original');
+                }
+                
+                const blob = await response.blob();
+                const filename = 'boleto-' + codigo + '-original.pdf';
+                
+                const downloadUrl = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = downloadUrl;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(downloadUrl);
+                document.body.removeChild(a);
+                
+                mostrarResultado('📥 <strong>PDF original baixado:</strong> ' + filename + '<br>⚠️ <strong>ATENÇÃO:</strong> Este arquivo pode ser detectado como ameaça pelo McAfee.', 'warning');
+                
+            } catch (error) {
+                console.error('Erro no download:', error);
+                mostrarResultado('❌ <strong>Erro:</strong> ' + error.message, 'error');
+            }
+        }
+        
+        function mostrarResultado(mensagem, tipo) {
+            const resultado = document.getElementById('resultado');
+            resultado.innerHTML = mensagem;
+            resultado.className = 'result ' + tipo;
+            resultado.style.display = 'block';
+        }
+        
+        function getAuthToken() {
+            // Buscar token do localStorage (ajustar conforme sistema de auth do projeto)
+            return localStorage.getItem('authToken') || localStorage.getItem('sb-dvglgxrvhmtsixaabxha-auth-token') || '';
+        }
+    </script>
+</body>
+</html>
+    `;
+    
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.send(testPageHtml);
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
