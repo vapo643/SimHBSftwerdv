@@ -1,0 +1,26 @@
+**IMPLEMENTAR:**
+Auditoria de diagnóstico completa do fluxo de autenticação (JWT) para a nova rota de bypass do McAfee (`/api/mcafee-bypass`).
+
+**CONTEXT:**
+A validação da nossa solução de bypass para o McAfee falhou. Todas as tentativas de download a partir da página de teste `/mcafee-test` estão a resultar em um erro `HTTP 401 Unauthorized`. Isso indica que as requisições do frontend para o nosso novo endpoint de backend não estão a ser autenticadas corretamente.
+
+**CURRENT STATE:**
+A página de teste existe, mas é incapaz de se comunicar com seu próprio backend devido a uma falha de token.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um relatório de auditoria detalhado que identifique o ponto exato da falha na cadeia de autenticação: **Frontend -> Middleware -> Backend**.
+
+**CONSTRAINTS (Roadmap de Auditoria - NÃO FAÇA CORREÇÕES AGORA):**
+
+**1. Auditoria do Frontend (`client/src/pages/mcafee-test.tsx`):**
+    - **Ação:** Inspecione o código que é executado quando os botões de teste de download são clicados.
+    - **Relatório:** Apresente o trecho de código da requisição (`fetch` ou `axios`). Confirme se este código está a:
+        a. Obter o token JWT do nosso estado de autenticação (AuthContext, local storage, etc.).
+        b. Adicionar o token a um header `Authorization` no formato `Bearer {token}`. Se este código estiver ausente, declare `[LÓGICA DE ENVIO DE TOKEN AUSENTE]`.
+
+**2. Auditoria do Backend (`server/routes/mcafee-bypass.ts`):**
+    - **Ação:** Inspecione o ficheiro que define a nova rota da API.
+    - **Relatório:** Confirme se o nosso middleware de autenticação (`jwtAuthMiddleware`) está a ser aplicado à rota. Apresente a linha de código onde o middleware é (ou deveria ser) invocado. Se a chamada ao middleware estiver ausente, declare `[CHAMADA DE MIDDLEWARE AUSENTE]`.
+
+**Relatório Final:**
+O critério de sucesso é um relatório de auditoria que responda a estas duas questões, nos dando um diagnóstico claro de por que a autenticação está a falhar.
