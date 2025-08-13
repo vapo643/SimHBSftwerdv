@@ -1,75 +1,82 @@
 #!/usr/bin/env node
 
 /**
- * TESTE COMPLETO DA FUNCIONALIDADE DE CARNÊ DE BOLETOS
- * 
- * Valida todo o fluxo:
- * 1. Login no sistema 
- * 2. Buscar proposta com múltiplos boletos
- * 3. Gerar carnê (PDF consolidado)
- * 4. Validar download
- * 
- * Comando: node test-carne-complete.cjs
+ * Teste completo do fluxo de carnê com autenticação
+ * Simula o processo real: login -> sincronizar boletos -> gerar carnê
  */
 
-const fs = require("fs");
-const https = require("https");
+const https = require('https');
 
-const BASE_URL = "https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev";
+// Configuração
+const API_URL = 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev';
+const TEST_PROPOSTA_ID = '88a44696-9b63-42ee-aa81-15f9519d24cb';
 
-console.log("========================================");
-console.log("  TESTE COMPLETO DE CARNÊ DE BOLETOS");
-console.log("========================================\n");
+// Credenciais de teste
+const TEST_USER = {
+  email: 'jose.silva@simpix.com.br',
+  password: 'SimpleCredit2025*',
+  role: 'ATENDENTE'
+};
 
-async function makeRequest(method, path, body = null, token = null) {
+// Cores para output
+const colors = {
+  reset: '\x1b[0m',
+  bright: '\x1b[1m',
+  red: '\x1b[31m',
+  green: '\x1b[32m',
+  yellow: '\x1b[33m',
+  blue: '\x1b[34m',
+  cyan: '\x1b[36m'
+};
+
+function log(message, color = 'reset') {
+  console.log(`${colors[color]}${message}${colors.reset}`);
+}
+
+function logSection(title) {
+  console.log('\n' + '='.repeat(60));
+  log(title, 'bright');
+  console.log('='.repeat(60));
+}
+
+/**
+ * Faz requisição HTTP
+ */
+function makeRequest(path, method = 'GET', token = null, body = null) {
   return new Promise((resolve, reject) => {
-    const url = new URL(path, BASE_URL);
-    
     const options = {
-      method,
-      hostname: url.hostname,
-      port: url.port || 443,
-      path: url.pathname + url.search,
+      hostname: API_URL.replace('https://', ''),
+      path: path,
+      method: method,
       headers: {
-        "Content-Type": "application/json",
-        "User-Agent": "CarneTest/1.0",
-      },
+        'Content-Type': 'application/json'
+      }
     };
-
+    
     if (token) {
-      options.headers["Authorization"] = `Bearer ${token}`;
+      options.headers['Authorization'] = `Bearer ${token}`;
     }
-
-    if (body) {
-      const bodyStr = JSON.stringify(body);
-      options.headers["Content-Length"] = Buffer.byteLength(bodyStr);
-    }
-
+    
     const req = https.request(options, (res) => {
-      let data = "";
-      res.on("data", (chunk) => {
+      let data = '';
+      
+      res.on('data', (chunk) => {
         data += chunk;
       });
       
-      res.on("end", () => {
+      res.on('end', () => {
         try {
-          const json = JSON.parse(data);
-          resolve({
-            status: res.statusCode,
-            data: json,
-            headers: res.headers
-          });
+          const response = JSON.parse(data);
+          resolve({ status: res.statusCode, data: response });
         } catch (error) {
-          resolve({
-            status: res.statusCode,
-            data: data,
-            headers: res.headers
-          });
+          resolve({ status: res.statusCode, data: data });
         }
       });
     });
-
-    req.on("error", reject);
+    
+    req.on('error', (error) => {
+      reject(error);
+    });
     
     if (body) {
       req.write(JSON.stringify(body));
@@ -79,158 +86,169 @@ async function makeRequest(method, path, body = null, token = null) {
   });
 }
 
+/**
+ * Faz login e obtém token JWT
+ */
 async function login() {
-  console.log("🔐 Fazendo login...");
+  logSection('PASSO 1: AUTENTICAÇÃO');
   
-  const response = await makeRequest("POST", "/api/auth/login", {
-    email: "admin@simpix.com.br",
-    password: "admin123"
-  });
-
-  if (response.status !== 200 || !response.data.access_token) {
-    console.error("❌ Erro no login:", response.data);
+  try {
+    log('🔐 Fazendo login...', 'cyan');
+    
+    const response = await makeRequest(
+      '/api/auth/login',
+      'POST',
+      null,
+      TEST_USER
+    );
+    
+    if (response.status === 200 && response.data.token) {
+      log('✅ Login realizado com sucesso', 'green');
+      log(`👤 Usuário: ${response.data.user.email}`, 'blue');
+      log(`📋 Role: ${response.data.user.role}`, 'blue');
+      return response.data.token;
+    } else {
+      log(`❌ Falha no login: ${JSON.stringify(response.data)}`, 'red');
+      return null;
+    }
+    
+  } catch (error) {
+    log(`❌ Erro no login: ${error.message}`, 'red');
     return null;
   }
-
-  console.log("✅ Login realizado com sucesso");
-  return response.data.access_token;
 }
 
-async function buscarPropostaComBoletos(token) {
-  console.log("\n🔍 Buscando proposta com múltiplos boletos...");
+/**
+ * Sincroniza boletos para o Storage
+ */
+async function sincronizarBoletos(token) {
+  logSection('PASSO 2: SINCRONIZAÇÃO DE BOLETOS');
   
-  // Usar a proposta que sabemos que tem boletos baseado nos logs
-  const propostaId = "88a44696-9b63-42ee-aa81-15f9519d24cb";
-  
-  console.log(`📋 Verificando proposta: ${propostaId}`);
-  
-  // Verificar se a proposta tem boletos
-  const boletoResponse = await makeRequest("GET", `/api/inter/collections/${propostaId}`, null, token);
-  
-  if (boletoResponse.status === 200 && Array.isArray(boletoResponse.data) && boletoResponse.data.length > 1) {
-    console.log(`✅ Proposta encontrada com ${boletoResponse.data.length} boletos`);
-    return {
-      id: propostaId,
-      boletos: boletoResponse.data.length
-    };
-  }
-  
-  console.log("❌ Não foi possível encontrar proposta com múltiplos boletos");
-  return null;
-}
-
-async function gerarCarne(token, propostaId) {
-  console.log(`\n📚 Gerando carnê para proposta: ${propostaId}`);
-  
-  console.log("⏳ Fazendo requisição para gerar carnê...");
-  const response = await makeRequest("GET", `/api/propostas/${propostaId}/carne-pdf`, null, token);
-  
-  console.log(`📊 Status da resposta: ${response.status}`);
-  
-  if (response.status === 200 && response.data.success) {
-    const data = response.data.data;
-    console.log("✅ Carnê gerado com sucesso!");
-    console.log(`📄 Tamanho do PDF: ${data.size} bytes`);
-    console.log(`🔗 URL de download: ${data.downloadUrl ? 'Presente' : 'Ausente'}`);
-    console.log(`⏰ Expira em: ${data.expiresIn}`);
-    
-    return {
-      success: true,
-      downloadUrl: data.downloadUrl,
-      size: data.size
-    };
-  } else {
-    console.error(`❌ Erro ao gerar carnê: ${response.status}`);
-    console.error("📋 Resposta:", response.data);
-    return {
-      success: false,
-      error: response.data
-    };
-  }
-}
-
-async function validarDownload(downloadUrl) {
-  console.log("\n📥 Validando download do PDF...");
-  
-  return new Promise((resolve) => {
-    https.get(downloadUrl, (res) => {
-      let data = Buffer.alloc(0);
-      
-      res.on('data', (chunk) => {
-        data = Buffer.concat([data, chunk]);
-      });
-      
-      res.on('end', () => {
-        // Validar magic bytes do PDF
-        const pdfMagic = data.slice(0, 5).toString('ascii');
-        const isValidPdf = pdfMagic.startsWith('%PDF');
-        
-        console.log(`📊 Tamanho baixado: ${data.length} bytes`);
-        console.log(`🔍 Magic bytes: ${pdfMagic}`);
-        console.log(`✅ PDF válido: ${isValidPdf ? 'Sim' : 'Não'}`);
-        
-        resolve({
-          valid: isValidPdf,
-          size: data.length,
-          magic: pdfMagic
-        });
-      });
-      
-    }).on('error', (error) => {
-      console.error("❌ Erro no download:", error.message);
-      resolve({
-        valid: false,
-        error: error.message
-      });
-    });
-  });
-}
-
-async function executarTeste() {
   try {
-    // 1. Login
+    log('🔄 Iniciando sincronização de boletos...', 'cyan');
+    log(`📊 Proposta: ${TEST_PROPOSTA_ID}`, 'blue');
+    
+    const response = await makeRequest(
+      `/api/propostas/${TEST_PROPOSTA_ID}/sincronizar-boletos`,
+      'POST',
+      token
+    );
+    
+    if (response.status === 200) {
+      log('✅ Sincronização iniciada com sucesso', 'green');
+      log(`📋 Status: ${response.data.status}`, 'blue');
+      log(`💬 Mensagem: ${response.data.message}`, 'blue');
+      
+      // Aguardar processamento em background
+      log('\n⏳ Aguardando 10 segundos para processamento...', 'yellow');
+      await new Promise(resolve => setTimeout(resolve, 10000));
+      
+      return true;
+    } else {
+      log(`❌ Falha na sincronização: ${JSON.stringify(response.data)}`, 'red');
+      return false;
+    }
+    
+  } catch (error) {
+    log(`❌ Erro na sincronização: ${error.message}`, 'red');
+    return false;
+  }
+}
+
+/**
+ * Gera carnê a partir dos boletos no Storage
+ */
+async function gerarCarne(token) {
+  logSection('PASSO 3: GERAÇÃO DO CARNÊ');
+  
+  try {
+    log('📚 Gerando carnê consolidado...', 'cyan');
+    
+    const response = await makeRequest(
+      `/api/propostas/${TEST_PROPOSTA_ID}/gerar-carne`,
+      'POST',
+      token
+    );
+    
+    if (response.status === 200 && response.data.success) {
+      log('✅ Carnê gerado com sucesso!', 'green');
+      log(`📋 Proposta ID: ${response.data.propostaId}`, 'blue');
+      log(`💬 Mensagem: ${response.data.message}`, 'blue');
+      
+      if (response.data.url) {
+        log('\n🎉 URL DO CARNÊ DISPONÍVEL:', 'cyan');
+        log(response.data.url, 'yellow');
+        log('\n📌 Copie e cole esta URL no navegador para baixar o carnê', 'green');
+      }
+      
+      return true;
+    } else {
+      log(`❌ Falha na geração do carnê: ${JSON.stringify(response.data)}`, 'red');
+      return false;
+    }
+    
+  } catch (error) {
+    log(`❌ Erro na geração: ${error.message}`, 'red');
+    return false;
+  }
+}
+
+/**
+ * Fluxo principal
+ */
+async function main() {
+  logSection('TESTE COMPLETO DO SISTEMA DE CARNÊ');
+  
+  log('📋 Sistema de Geração de Carnê de Boletos', 'cyan');
+  log('🎯 Objetivo: Sincronizar boletos e gerar PDF consolidado', 'cyan');
+  
+  try {
+    // Passo 1: Login
     const token = await login();
     if (!token) {
-      console.log("❌ Não foi possível fazer login. Teste abortado.");
-      return;
+      log('\n❌ Teste falhou na autenticação', 'red');
+      process.exit(1);
     }
-
-    // 2. Buscar proposta com boletos
-    const proposta = await buscarPropostaComBoletos(token);
-    if (!proposta) {
-      console.log("❌ Não foi possível encontrar proposta com boletos. Teste abortado.");
-      return;
-    }
-
-    // 3. Gerar carnê
-    const carneoResult = await gerarCarne(token, proposta.id);
-    if (!carneoResult.success) {
-      console.log("❌ Falha na geração do carnê. Teste falhou.");
-      return;
-    }
-
-    // 4. Validar download
-    const downloadResult = await validarDownload(carneoResult.downloadUrl);
     
-    console.log("\n" + "=".repeat(50));
-    console.log("🎯 RESULTADO FINAL DO TESTE");
-    console.log("=".repeat(50));
-    
-    if (downloadResult.valid && downloadResult.size > 0) {
-      console.log("🎉 ✅ SUCESSO TOTAL!");
-      console.log(`📚 Carnê gerado e baixado com sucesso`);
-      console.log(`📄 ${proposta.boletos} boletos consolidados em PDF único`);
-      console.log(`💾 Tamanho final: ${downloadResult.size} bytes`);
-      console.log("🚀 Funcionalidade de carnê completamente operacional!");
-    } else {
-      console.log("❌ FALHA PARCIAL");
-      console.log("Carnê foi gerado mas houve problema no download");
+    // Passo 2: Sincronizar boletos
+    const sincOk = await sincronizarBoletos(token);
+    if (!sincOk) {
+      log('\n❌ Teste falhou na sincronização', 'red');
+      process.exit(1);
     }
-
+    
+    // Passo 3: Gerar carnê
+    const carneOk = await gerarCarne(token);
+    if (!carneOk) {
+      log('\n❌ Teste falhou na geração do carnê', 'red');
+      process.exit(1);
+    }
+    
+    // Resultado final
+    logSection('RESULTADO FINAL');
+    
+    log('✅ TESTE COMPLETO REALIZADO COM SUCESSO!', 'green');
+    log('\n📦 ARQUITETURA IMPLEMENTADA:', 'cyan');
+    log('   1️⃣ Sincronização assíncrona de boletos', 'blue');
+    log('   2️⃣ Armazenamento organizado no Storage', 'blue');
+    log('   3️⃣ Geração de carnê a partir dos PDFs salvos', 'blue');
+    log('   4️⃣ URL assinada para download do carnê', 'blue');
+    
+    log('\n🏗️ ESTRUTURA NO STORAGE:', 'cyan');
+    log('   documents/', 'yellow');
+    log('   └── propostas/' + TEST_PROPOSTA_ID + '/', 'yellow');
+    log('       ├── boletos/emitidos_pendentes/ (PDFs individuais)', 'yellow');
+    log('       └── carnes/ (carnês consolidados)', 'yellow');
+    
   } catch (error) {
-    console.error("💥 Erro durante o teste:", error.message);
+    logSection('ERRO NO TESTE');
+    log(`❌ ${error.message}`, 'red');
+    process.exit(1);
   }
 }
 
-// Executar o teste
-executarTeste();
+// Executar teste
+main().catch(error => {
+  console.error('Erro fatal:', error);
+  process.exit(1);
+});

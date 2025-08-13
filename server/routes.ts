@@ -5042,65 +5042,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const interFixBoletosRouter = (await import("./routes/inter-fix-boletos.js")).default;
   app.use("/api/inter-fix", interFixBoletosRouter);
 
-  // Boleto Storage Sync Endpoint - Sincronizar boletos para Storage
-  app.post(
-    "/api/propostas/:id/sincronizar-boletos",
-    jwtAuthMiddleware,
-    requireAnyRole,
-    async (req: AuthenticatedRequest, res) => {
-      try {
-        const { id } = req.params;
-        const userId = req.user?.id;
-        
-        console.log(`[BOLETO SYNC API] 🚀 Sincronização solicitada para proposta: ${id}`);
-        console.log(`[BOLETO SYNC API] 👤 Usuário: ${userId}`);
-        
-        // Validar se a proposta existe
-        const { createServerSupabaseAdminClient } = await import('./lib/supabase');
-        const supabase = createServerSupabaseAdminClient();
-        
-        const { data: proposta, error } = await supabase
-          .from('propostas')
-          .select('id, status')
-          .eq('id', String(id))
-          .single();
-        
-        if (error || !proposta) {
-          console.error(`[BOLETO SYNC API] ❌ Proposta não encontrada: ${id}`);
-          return res.status(404).json({
-            error: 'Proposta não encontrada'
-          });
-        }
-        
-        // Importar e executar o serviço de sincronização
-        const { boletoStorageService } = await import('./services/boletoStorageService');
-        
-        // Executar sincronização em background (não bloquear a resposta)
-        setImmediate(async () => {
-          try {
-            const resultado = await boletoStorageService.sincronizarBoletosDaProposta(id);
-            console.log(`[BOLETO SYNC API] ✅ Sincronização concluída:`, resultado);
-          } catch (error) {
-            console.error(`[BOLETO SYNC API] ❌ Erro na sincronização:`, error);
-          }
-        });
-        
-        // Retornar resposta imediata
-        return res.json({
-          status: 'sincronização iniciada',
-          propostaId: id,
-          message: 'Os boletos estão sendo sincronizados em background'
-        });
-        
-      } catch (error: any) {
-        console.error(`[BOLETO SYNC API] ❌ Erro ao iniciar sincronização:`, error);
-        return res.status(500).json({
-          error: 'Erro ao iniciar sincronização',
-          message: error.message || 'Erro desconhecido'
-        });
-      }
-    }
-  );
+  // Endpoints movidos para server/routes/propostas-carne.ts para melhor organização
 
   // Register Cobranças routes
   const cobrancasRouter = (await import("./routes/cobrancas.js")).default;

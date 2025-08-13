@@ -183,4 +183,136 @@ router.get(
   }
 );
 
+/**
+ * Endpoint para sincronizar boletos do Banco Inter para o Storage
+ * POST /api/propostas/:id/sincronizar-boletos
+ */
+router.post(
+  '/:id/sincronizar-boletos',
+  jwtAuthMiddleware,
+  requireAnyRole,
+  async (req: AuthenticatedRequest, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user?.id;
+      
+      console.log(`[BOLETO SYNC API] 🚀 Sincronização solicitada para proposta: ${id}`);
+      console.log(`[BOLETO SYNC API] 👤 Usuário: ${userId}`);
+      
+      // Validar se a proposta existe
+      const { createServerSupabaseAdminClient } = await import('../lib/supabase');
+      const supabase = createServerSupabaseAdminClient();
+      
+      const { data: proposta, error } = await supabase
+        .from('propostas')
+        .select('id, status')
+        .eq('id', String(id))
+        .single();
+      
+      if (error || !proposta) {
+        console.error(`[BOLETO SYNC API] ❌ Proposta não encontrada: ${id}`);
+        return res.status(404).json({
+          error: 'Proposta não encontrada'
+        });
+      }
+      
+      // Importar e executar o serviço de sincronização
+      const { boletoStorageService } = await import('../services/boletoStorageService');
+      
+      // Executar sincronização em background (não bloquear a resposta)
+      setImmediate(async () => {
+        try {
+          const resultado = await boletoStorageService.sincronizarBoletosDaProposta(id);
+          console.log(`[BOLETO SYNC API] ✅ Sincronização concluída:`, resultado);
+        } catch (error) {
+          console.error(`[BOLETO SYNC API] ❌ Erro na sincronização:`, error);
+        }
+      });
+      
+      // Retornar resposta imediata
+      return res.json({
+        status: 'sincronização iniciada',
+        propostaId: id,
+        message: 'Os boletos estão sendo sincronizados em background'
+      });
+      
+    } catch (error: any) {
+      console.error(`[BOLETO SYNC API] ❌ Erro ao iniciar sincronização:`, error);
+      return res.status(500).json({
+        error: 'Erro ao iniciar sincronização',
+        message: error.message || 'Erro desconhecido'
+      });
+    }
+  }
+);
+
+/**
+ * Endpoint para gerar carnê a partir dos boletos salvos no Storage
+ * POST /api/propostas/:id/gerar-carne
+ */
+router.post(
+  '/:id/gerar-carne',
+  jwtAuthMiddleware,
+  requireAnyRole,
+  async (req: AuthenticatedRequest, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user?.id;
+      
+      console.log(`[CARNE STORAGE API] 📚 Geração de carnê do Storage solicitada para proposta: ${id}`);
+      console.log(`[CARNE STORAGE API] 👤 Usuário: ${userId}`);
+      
+      // Validar se a proposta existe
+      const { createServerSupabaseAdminClient } = await import('../lib/supabase');
+      const supabase = createServerSupabaseAdminClient();
+      
+      const { data: proposta, error } = await supabase
+        .from('propostas')
+        .select('id, status')
+        .eq('id', String(id))
+        .single();
+      
+      if (error || !proposta) {
+        console.error(`[CARNE STORAGE API] ❌ Proposta não encontrada: ${id}`);
+        return res.status(404).json({
+          error: 'Proposta não encontrada'
+        });
+      }
+      
+      // Importar e executar o serviço de geração de carnê
+      const { boletoStorageService } = await import('../services/boletoStorageService');
+      
+      console.log(`[CARNE STORAGE API] 🔄 Gerando carnê do Storage...`);
+      const resultado = await boletoStorageService.gerarCarneDoStorage(id);
+      
+      if (resultado.success && resultado.url) {
+        console.log(`[CARNE STORAGE API] ✅ Carnê gerado com sucesso`);
+        
+        return res.json({
+          success: true,
+          propostaId: id,
+          url: resultado.url,
+          message: 'Carnê gerado com sucesso a partir dos boletos armazenados'
+        });
+      } else {
+        console.error(`[CARNE STORAGE API] ❌ Erro na geração do carnê:`, resultado.error);
+        
+        return res.status(500).json({
+          success: false,
+          error: 'Erro ao gerar carnê',
+          message: resultado.error || 'Erro desconhecido'
+        });
+      }
+      
+    } catch (error: any) {
+      console.error(`[CARNE STORAGE API] ❌ Erro ao gerar carnê:`, error);
+      return res.status(500).json({
+        success: false,
+        error: 'Erro ao processar requisição',
+        message: error.message || 'Erro desconhecido'
+      });
+    }
+  }
+);
+
 export default router;

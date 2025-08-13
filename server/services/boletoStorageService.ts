@@ -11,6 +11,7 @@
 import { interBankService } from './interBankService';
 import { storage } from '../storage';
 import { supabaseAdmin } from '../lib/supabase-admin';
+import { PDFDocument } from 'pdf-lib';
 
 interface BoletoSyncResult {
   success: boolean;
@@ -226,6 +227,170 @@ class BoletoStorageService {
     } catch (error) {
       console.error(`[BOLETO STORAGE] Erro ao limpar:`, error);
       return false;
+    }
+  }
+
+  /**
+   * Gera um carnê (PDF consolidado) a partir dos boletos salvos no Storage
+   * @param propostaId ID da proposta
+   * @returns URL do carnê gerado ou erro
+   */
+  async gerarCarneDoStorage(propostaId: string): Promise<{ success: boolean; url?: string; error?: string }> {
+    console.log(`[CARNE STORAGE] 📚 Iniciando geração de carnê do Storage para proposta: ${propostaId}`);
+    
+    try {
+      // 1. LISTAR FICHEIROS: Listar todos os PDFs na pasta emitidos_pendentes
+      console.log(`[CARNE STORAGE] 📁 Listando PDFs no Storage...`);
+      
+      const { data: files, error: listError } = await this.supabase.storage
+        .from('documents')
+        .list(`propostas/${propostaId}/boletos/emitidos_pendentes`, {
+          limit: 100,
+          sortBy: { column: 'name', order: 'asc' }
+        });
+      
+      if (listError) {
+        throw new Error(`Erro ao listar ficheiros: ${listError.message}`);
+      }
+      
+      if (!files || files.length === 0) {
+        throw new Error('Nenhum boleto encontrado no Storage para esta proposta');
+      }
+      
+      console.log(`[CARNE STORAGE] 📊 Encontrados ${files.length} PDFs para processar`);
+      
+      // 2. DOWNLOAD EM LOTE DO STORAGE
+      console.log(`[CARNE STORAGE] ⬇️ Baixando PDFs do Storage...`);
+      
+      const pdfBuffers: Buffer[] = [];
+      const errors: string[] = [];
+      
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const filePath = `propostas/${propostaId}/boletos/emitidos_pendentes/${file.name}`;
+        
+        try {
+          console.log(`[CARNE STORAGE] 📄 Baixando ${file.name} (${i + 1}/${files.length})...`);
+          
+          // Download do ficheiro
+          const { data: fileData, error: downloadError } = await this.supabase.storage
+            .from('documents')
+            .download(filePath);
+          
+          if (downloadError) {
+            throw new Error(`Erro no download: ${downloadError.message}`);
+          }
+          
+          if (!fileData) {
+            throw new Error('Ficheiro vazio');
+          }
+          
+          // Converter Blob para Buffer
+          const arrayBuffer = await fileData.arrayBuffer();
+          const buffer = Buffer.from(arrayBuffer);
+          
+          // Validar PDF
+          const pdfMagic = buffer.slice(0, 5).toString('ascii');
+          if (!pdfMagic.startsWith('%PDF')) {
+            throw new Error('Ficheiro não é um PDF válido');
+          }
+          
+          pdfBuffers.push(buffer);
+          console.log(`[CARNE STORAGE] ✅ PDF ${file.name} baixado (${buffer.length} bytes)`);
+          
+        } catch (error: any) {
+          console.error(`[CARNE STORAGE] ❌ Erro ao baixar ${file.name}:`, error.message);
+          errors.push(`${file.name}: ${error.message}`);
+        }
+      }
+      
+      if (pdfBuffers.length === 0) {
+        throw new Error('Nenhum PDF válido foi baixado do Storage');
+      }
+      
+      // 3. LÓGICA DE FUSÃO COM PDF-LIB
+      console.log(`[CARNE STORAGE] 🔀 Iniciando fusão de ${pdfBuffers.length} PDFs...`);
+      
+      const mergedPdf = await PDFDocument.create();
+      let totalPages = 0;
+      
+      for (let i = 0; i < pdfBuffers.length; i++) {
+        try {
+          console.log(`[CARNE STORAGE] 📑 Processando PDF ${i + 1}/${pdfBuffers.length}...`);
+          
+          const pdfDoc = await PDFDocument.load(pdfBuffers[i], {
+            ignoreEncryption: true,
+            throwOnInvalidObject: false
+          });
+          
+          const pages = await mergedPdf.copyPages(pdfDoc, pdfDoc.getPageIndices());
+          pages.forEach(page => {
+            mergedPdf.addPage(page);
+            totalPages++;
+          });
+          
+          console.log(`[CARNE STORAGE] ✅ PDF ${i + 1} adicionado (${pages.length} páginas)`);
+          
+        } catch (error: any) {
+          console.error(`[CARNE STORAGE] ⚠️ Erro ao processar PDF ${i + 1}:`, error.message);
+          // Continuar mesmo se um PDF falhar
+        }
+      }
+      
+      if (totalPages === 0) {
+        throw new Error('Nenhuma página foi adicionada ao carnê');
+      }
+      
+      console.log(`[CARNE STORAGE] 📊 Documento final contém ${totalPages} páginas`);
+      
+      // Gerar buffer do PDF final
+      const mergedPdfBytes = await mergedPdf.save();
+      const mergedBuffer = Buffer.from(mergedPdfBytes);
+      
+      console.log(`[CARNE STORAGE] ✅ Carnê gerado com sucesso (${mergedBuffer.length} bytes)`);
+      
+      // 4. UPLOAD DO CARNÊ
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').replace('T', '_').split('Z')[0];
+      const carnePath = `propostas/${propostaId}/carnes/carne-${timestamp}.pdf`;
+      
+      console.log(`[CARNE STORAGE] 📤 Fazendo upload do carnê para: ${carnePath}`);
+      
+      const { data: uploadData, error: uploadError } = await this.supabase.storage
+        .from('documents')
+        .upload(carnePath, mergedBuffer, {
+          contentType: 'application/pdf',
+          upsert: true
+        });
+      
+      if (uploadError) {
+        throw new Error(`Erro no upload do carnê: ${uploadError.message}`);
+      }
+      
+      console.log(`[CARNE STORAGE] ✅ Upload concluído: ${carnePath}`);
+      
+      // 5. GERAR URL ASSINADA
+      const { data: urlData, error: urlError } = await this.supabase.storage
+        .from('documents')
+        .createSignedUrl(carnePath, 86400); // URL válida por 24 horas
+      
+      if (urlError) {
+        throw new Error(`Erro ao gerar URL: ${urlError.message}`);
+      }
+      
+      console.log(`[CARNE STORAGE] ✅ URL assinada gerada com sucesso`);
+      
+      return {
+        success: true,
+        url: urlData.signedUrl
+      };
+      
+    } catch (error: any) {
+      console.error(`[CARNE STORAGE] ❌ Erro crítico na geração do carnê:`, error);
+      
+      return {
+        success: false,
+        error: error.message || 'Erro desconhecido'
+      };
     }
   }
 
