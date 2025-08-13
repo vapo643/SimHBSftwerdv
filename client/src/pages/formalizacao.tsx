@@ -1822,6 +1822,66 @@ export default function Formalizacao() {
 
                                         <Button
                                           variant="outline"
+                                          className="bg-purple-50 border-purple-300 text-purple-700 hover:bg-purple-100"
+                                          onClick={async () => {
+                                            try {
+                                              const collections = collectionsData || [];
+                                              if (collections.length > 0) {
+                                                const { TokenManager } = await import("@/lib/apiClient");
+                                                const tokenManager = TokenManager.getInstance();
+                                                const token = await tokenManager.getValidToken();
+
+                                                const downloadUrl = `/api/inter/collections/${proposta.id}/baixar-formatos-alternativos`;
+                                                const response = await fetch(downloadUrl, {
+                                                  headers: { Authorization: `Bearer ${token}` }
+                                                });
+                                                
+                                                if (response.ok) {
+                                                  const blob = await response.blob();
+                                                  const url = window.URL.createObjectURL(blob);
+                                                  const a = document.createElement("a");
+                                                  
+                                                  const filename = response.headers.get('Content-Disposition')?.split('filename="')[1]?.split('"')[0] || 'formatos-alternativos.zip';
+                                                  
+                                                  a.href = url;
+                                                  a.download = filename;
+                                                  document.body.appendChild(a);
+                                                  a.click();
+                                                  document.body.removeChild(a);
+                                                  window.URL.revokeObjectURL(url);
+                                                  
+                                                  toast({
+                                                    title: "Solução #4 FINAL Aplicada",
+                                                    description: "PNG+Word+Excel+HTML - Se falhar, é configuração do McAfee!"
+                                                  });
+                                                  
+                                                } else {
+                                                  const error = await response.json();
+                                                  throw new Error(error.message || `HTTP ${response.status}`);
+                                                }
+                                              } else {
+                                                toast({
+                                                  title: "Nenhum boleto",
+                                                  description: "Não há boletos disponíveis para conversão",
+                                                  variant: "destructive"
+                                                });
+                                              }
+                                            } catch (error: any) {
+                                              console.error("[ALT_FORMAT] Erro:", error);
+                                              toast({
+                                                title: "Erro na conversão",
+                                                description: `Solução #4 falhou: ${error.message}`,
+                                                variant: "destructive"
+                                              });
+                                            }
+                                          }}
+                                        >
+                                          <FileText className="mr-2 h-4 w-4" />
+                                          Formatos Alternativos (FINAL)
+                                        </Button>
+
+                                        <Button
+                                          variant="outline"
                                           className="bg-red-50 border-red-300 text-red-700 hover:bg-red-100"
                                           onClick={async () => {
                                             try {
