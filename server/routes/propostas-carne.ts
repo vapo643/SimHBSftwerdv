@@ -56,13 +56,16 @@ router.post(
       // NOVO: Adicionar job à fila em vez de processar sincronamente
       console.log(`[CARNE API - PRODUCER] 📥 Adicionando job à fila pdf-processing...`);
       
+      // Import default job options for retry configuration
+      const { defaultJobOptions } = await import('../worker');
+      
       const job = await queues.pdfProcessing.add('GENERATE_CARNE', {
         type: 'GENERATE_CARNE',
         propostaId: id,
         userId: userId,
         clienteNome: proposta.cliente_nome,
         timestamp: new Date().toISOString()
-      });
+      }, defaultJobOptions);
       
       console.log(`[CARNE API - PRODUCER] ✅ Job ${job.id} adicionado à fila com sucesso`);
       
@@ -219,13 +222,16 @@ router.post(
       // NOVO: Adicionar job à fila boleto-sync em vez de processar sincronamente
       console.log(`[BOLETO SYNC API - PRODUCER] 📥 Adicionando job à fila boleto-sync...`);
       
+      // Import default job options for retry configuration
+      const { defaultJobOptions } = await import('../worker');
+      
       const job = await queues.boletoSync.add('SYNC_BOLETOS', {
         type: 'SYNC_BOLETOS',
         propostaId: id,
         userId: userId,
         clienteNome: proposta.cliente_nome,
         timestamp: new Date().toISOString()
-      });
+      }, defaultJobOptions);
       
       console.log(`[BOLETO SYNC API - PRODUCER] ✅ Job ${job.id} adicionado à fila com sucesso`);
       
