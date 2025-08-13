@@ -50,11 +50,20 @@ export default function McAfeeTestPage() {
         responseType: 'blob'
       });
 
+      console.log(`[MCAFEE_TEST] 🔍 Response recebida:`, {
+        hasResponse: !!response,
+        hasData: !!response?.data,
+        isBlob: response?.data instanceof Blob,
+        status: response?.status,
+        dataType: typeof response?.data,
+        responseKeys: Object.keys(response || {})
+      });
+
       const endTime = Date.now();
       const duration = endTime - startTime;
 
-      // Verificação explícita de sucesso para um Blob
-      if (response && response.data instanceof Blob && response.status === 200) {
+      // Verificação explícita de sucesso para um Blob - ajustada para ser mais permissiva
+      if (response && response.data instanceof Blob) {
         // CASO DE SUCESSO: Toda a lógica de download aqui
         const blob = response.data;
         const contentType = blob.type;
@@ -91,15 +100,24 @@ export default function McAfeeTestPage() {
         
       } else {
         // Se a resposta não for o que esperamos, lance um erro explícito e legível
-        throw new Error(`Resposta inesperada do servidor: Status ${response.status || 'desconhecido'}`);
+        console.log(`[MCAFEE_TEST] ❌ Resposta inesperada:`, response);
+        throw new Error(`Resposta inesperada do servidor: Status ${response?.status || 'desconhecido'}, Data type: ${typeof response?.data}`);
       }
       
     } catch (error: any) {
+      console.log(`[MCAFEE_TEST] ❌ Erro capturado:`, {
+        error,
+        message: error.message,
+        type: typeof error,
+        isBlob: error instanceof Blob,
+        errorString: String(error)
+      });
+      
       const result = {
         method: method.name,
         status: 'ERRO',
         duration: `${Date.now() - startTime}ms`,
-        error: error.message || 'Falha ao processar o download',
+        error: typeof error === 'string' ? error : (error.message || 'Falha ao processar o download'),
         timestamp: new Date().toLocaleTimeString()
       };
       
