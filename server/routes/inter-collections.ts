@@ -525,6 +525,14 @@ router.get("/:propostaId/baixar-container-seguro",
       for (const collection of collections) {
         try {
           console.log(`[SECURE_CONTAINER] 📄 Baixando parcela ${collection.numeroParcela}`);
+          console.log(`[SECURE_CONTAINER] 🔍 Usando UUID: ${collection.codigoSolicitacao}`);
+          
+          // VALIDAÇÃO: Garantir que só tentamos com UUIDs válidos
+          if (!collection.codigoSolicitacao || collection.codigoSolicitacao.startsWith('CORRETO-') || collection.codigoSolicitacao.startsWith('SX')) {
+            console.error(`[SECURE_CONTAINER] ❌ ID INVÁLIDO detectado: ${collection.codigoSolicitacao}`);
+            console.error(`[SECURE_CONTAINER] ❌ Pulando parcela ${collection.numeroParcela} - UUID inválido`);
+            continue;
+          }
           
           const pdfBuffer = await interService.obterPdfCobranca(
             collection.codigoSolicitacao

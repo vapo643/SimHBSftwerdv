@@ -829,6 +829,13 @@ class InterBankService {
     console.log(`[INTER] 📄 SOLUÇÃO IDENTIFICADA: API v3 retorna PDF como base64 em JSON`);
     console.log(`[INTER] 🔍 Processando codigoSolicitacao: ${codigoSolicitacao}`);
 
+    // VALIDAÇÃO CRÍTICA: Garantir que só processamos UUIDs válidos
+    if (!this.isValidUUID(codigoSolicitacao)) {
+      console.error(`[INTER] ❌ ERRO CRÍTICO: Tentativa de buscar PDF com ID inválido: ${codigoSolicitacao}`);
+      console.error(`[INTER] ❌ IDs como "CORRETO-", "SX-", etc. são inválidos! Apenas UUIDs do Inter são aceitos.`);
+      throw new Error(`ID inválido para PDF: ${codigoSolicitacao}. Deve ser um UUID válido da API do Inter.`);
+    }
+
     try {
       // Verificar se cobrança existe
       console.log(`[INTER] 🔍 STEP 1: Verificando se cobrança existe...`);
@@ -982,9 +989,22 @@ class InterBankService {
     }
   }
   
+  // Validação de UUID para garantir que só usamos códigos reais do Inter
+  private isValidUUID(str: string): boolean {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(str);
+  }
+
   // Método auxiliar para tentar endpoints alternativos
   private async tentarEndpointsAlternativos(codigoSolicitacao: string): Promise<Buffer> {
     console.log(`[INTER] 🔄 Testando endpoints alternativos para PDF...`);
+    
+    // CRÍTICO: Rejeitar IDs inválidos que causam erro 400
+    if (!this.isValidUUID(codigoSolicitacao)) {
+      console.error(`[INTER] ❌ ERRO CRÍTICO: ID inválido detectado: ${codigoSolicitacao}`);
+      console.error(`[INTER] ❌ Este não é um UUID válido do Inter. IDs como "CORRETO-" são inválidos!`);
+      throw new Error(`ID inválido: ${codigoSolicitacao}. Deve ser um UUID válido da API do Inter.`);
+    }
     
     const alternativeEndpoints = [
       `/cobranca/v3/cobrancas/${codigoSolicitacao}/pdf/download`,
@@ -1038,42 +1058,35 @@ class InterBankService {
     console.log(`[INTER] 🔍 DEBUG MODE: Analisando resposta completa da API`);
     
     const token = await this.getAccessToken();
-    const url = `${this.apiUrl}/cobranca/v3/cobrancas/${codigoSolicitacao}/pdf`;
+    const url = `${this.config.apiUrl}/cobranca/v3/cobrancas/${codigoSolicitacao}/pdf`;
     
     const headers = {
       'Authorization': `Bearer ${token}`,
       'Accept': 'application/json',
-      'x-conta-corrente': this.contaCorrente
+      'x-conta-corrente': this.config.contaCorrente
     };
     
-    const httpsAgent = new https.Agent({
-      cert: formatCertificate(this.certificate),
-      key: formatPrivateKey(this.privateKey),
-      rejectUnauthorized: true
-    });
-    
     try {
-      const response = await axios.get(url, {
-        headers,
-        httpsAgent,
-        timeout: 30000
-      });
+      const response = await this.makeRequest(
+        `/cobranca/v3/cobrancas/${codigoSolicitacao}/pdf`,
+        "GET",
+        null,
+        headers
+      );
       
       console.log('[INTER] 🔍 RESPOSTA COMPLETA DA API:');
-      console.log('Status:', response.status);
-      console.log('Headers:', response.headers);
-      console.log('Data type:', typeof response.data);
-      console.log('Data length:', JSON.stringify(response.data).length);
+      console.log('Data type:', typeof response);
+      console.log('Data length:', JSON.stringify(response).length);
       
       // Se for objeto, mostrar estrutura
-      if (typeof response.data === 'object') {
-        console.log('Object keys:', Object.keys(response.data));
+      if (typeof response === 'object') {
+        console.log('Object keys:', Object.keys(response));
         console.log('Sample (first 1000 chars):');
-        console.log(JSON.stringify(response.data, null, 2).substring(0, 1000));
+        console.log(JSON.stringify(response, null, 2).substring(0, 1000));
         
         // Verificar cada campo
-        for (const key in response.data) {
-          const value = response.data[key];
+        for (const key in response) {
+          const value = response[key];
           console.log(`Field '${key}':`, {
             type: typeof value,
             length: typeof value === 'string' ? value.length : 'N/A',
@@ -1082,7 +1095,7 @@ class InterBankService {
         }
       }
       
-      return response.data;
+      return response;
     } catch (error: any) {
       console.error('[INTER] ❌ Debug failed:', error.message);
       throw error;
