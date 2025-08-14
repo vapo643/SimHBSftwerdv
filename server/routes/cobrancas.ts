@@ -37,8 +37,72 @@ router.get("/", async (req: any, res) => {
       )`
     );
 
+    // 🔧 PAM V1.0 - CORREÇÃO DA QUERY: Seleção explícita de todos os campos necessários
     const propostasData = await db
-      .select()
+      .select({
+        // Campos essenciais da proposta
+        id: propostas.id,
+        numeroProposta: propostas.numeroProposta,
+        lojaId: propostas.lojaId,
+        status: propostas.status,
+        
+        // 🎯 DADOS DO CLIENTE - SELEÇÃO EXPLÍCITA OBRIGATÓRIA
+        clienteNome: propostas.clienteNome,
+        clienteCpf: propostas.clienteCpf,
+        clienteEmail: propostas.clienteEmail,
+        clienteTelefone: propostas.clienteTelefone,
+        clienteDataNascimento: propostas.clienteDataNascimento,
+        clienteRenda: propostas.clienteRenda,
+        clienteRg: propostas.clienteRg,
+        clienteOrgaoEmissor: propostas.clienteOrgaoEmissor,
+        clienteRgUf: propostas.clienteRgUf,
+        clienteRgDataEmissao: propostas.clienteRgDataEmissao,
+        clienteEstadoCivil: propostas.clienteEstadoCivil,
+        clienteNacionalidade: propostas.clienteNacionalidade,
+        clienteLocalNascimento: propostas.clienteLocalNascimento,
+        
+        // Endereço completo
+        clienteCep: propostas.clienteCep,
+        clienteEndereco: propostas.clienteEndereco,
+        clienteLogradouro: propostas.clienteLogradouro,
+        clienteNumero: propostas.clienteNumero,
+        clienteComplemento: propostas.clienteComplemento,
+        clienteBairro: propostas.clienteBairro,
+        clienteCidade: propostas.clienteCidade,
+        clienteUf: propostas.clienteUf,
+        clienteOcupacao: propostas.clienteOcupacao,
+        
+        // Dados PJ
+        tipoPessoa: propostas.tipoPessoa,
+        clienteRazaoSocial: propostas.clienteRazaoSocial,
+        clienteCnpj: propostas.clienteCnpj,
+        
+        // Dados financeiros necessários para cálculos
+        valor: propostas.valor,
+        prazo: propostas.prazo,
+        valorTac: propostas.valorTac,
+        valorIof: propostas.valorIof,
+        valorTotalFinanciado: propostas.valorTotalFinanciado,
+        valorLiquidoLiberado: propostas.valorLiquidoLiberado,
+        taxaJuros: propostas.taxaJuros,
+        
+        // Dados de aprovação
+        dataAprovacao: propostas.dataAprovacao,
+        ccbGerado: propostas.ccbGerado,
+        assinaturaEletronicaConcluida: propostas.assinaturaEletronicaConcluida,
+        
+        // Dados de pagamento para modal
+        dadosPagamentoBanco: propostas.dadosPagamentoBanco,
+        dadosPagamentoAgencia: propostas.dadosPagamentoAgencia,
+        dadosPagamentoConta: propostas.dadosPagamentoConta,
+        dadosPagamentoTipo: propostas.dadosPagamentoTipo,
+        dadosPagamentoPix: propostas.dadosPagamentoPix,
+        dadosPagamentoTipoPix: propostas.dadosPagamentoTipoPix,
+        
+        // Timestamps
+        createdAt: propostas.createdAt,
+        deletedAt: propostas.deletedAt,
+      })
       .from(propostas)
       .where(whereConditions)
       .orderBy(desc(propostas.createdAt));
