@@ -244,6 +244,11 @@ router.get("/", async (req: any, res) => {
     console.log(`🔍 [COBRANÇAS] Total de propostas após filtros: ${propostasFiltradas.length}`);
     console.log("🔍 [COBRANÇAS] ====== FIM DA BUSCA DE PROPOSTAS ======");
     
+    // 🔬 PAM V1.0 - INSTRUMENTAÇÃO FORENSE: EVIDÊNCIA BRUTA DO BACKEND
+    console.log('--- EVIDÊNCIA BRUTA DO BACKEND ---');
+    console.log(JSON.stringify(propostasFiltradas, null, 2));
+    console.log('--- FIM DA EVIDÊNCIA ---');
+    
     res.json(propostasFiltradas);
   } catch (error) {
     console.error("Erro ao buscar propostas de cobrança:", error);
