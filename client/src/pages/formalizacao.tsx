@@ -96,8 +96,6 @@ interface Proposta {
   data_pagamento?: string;
   observacoes_formalizacao?: string;
   // Novos campos de formalização
-  ccbGerado: boolean;
-  assinaturaEletronicaConcluida: boolean;
   biometriaConcluida: boolean;
   caminhoCcbAssinado?: string;
   // Backend fields (camelCase)
@@ -423,7 +421,7 @@ export default function Formalizacao() {
   }
 
   interface CCBResponse {
-    ccb_gerado?: boolean;
+    status?: string;
     publicUrl?: string;
   }
   
@@ -713,8 +711,8 @@ export default function Formalizacao() {
   const viewCCB = async (propostaId: string) => {
     try {
       // ✅ CORREÇÃO: Usar endpoint de formalização padrão
-      const response = await apiRequest(`/api/formalizacao/${propostaId}/ccb`) as {ccb_gerado?: boolean; publicUrl?: string};
-      if (response.ccb_gerado === false) {
+      const response = await apiRequest(`/api/formalizacao/${propostaId}/ccb`) as {status?: string; publicUrl?: string};
+      if (!response.publicUrl) {
         toast({
           title: "CCB não disponível",
           description: "A CCB ainda não foi gerada para esta proposta",
@@ -788,7 +786,7 @@ export default function Formalizacao() {
   const { data: initialClickSignData } = useQuery({
     queryKey: ["/api/clicksign/status", propostaId],
     queryFn: () => checkClickSignStatus(propostaId!),
-    enabled: !!propostaId && !!proposta && !!proposta?.ccbGerado && proposta?.status !== "contratos_assinados",
+    enabled: !!propostaId && !!proposta && (proposta?.status === "CCB_GERADA" || proposta?.status === "AGUARDANDO_ASSINATURA"),
     staleTime: 2 * 60 * 1000, // Cache por 2 minutos
     refetchOnWindowFocus: false, // Não refetch quando janela ganha foco
     retry: 1, // Reduzir tentativas
@@ -933,9 +931,9 @@ export default function Formalizacao() {
       title: "CCB Gerada",
       description: "Cédula de Crédito Bancário gerada automaticamente",
       icon: FileText,
-      status: proposta.ccbGerado ? "completed" : "current",
-      date: proposta.ccbGerado ? formatDate(proposta.createdAt) : "Pendente",
-      completed: proposta.ccbGerado,
+      status: proposta.status === "CCB_GERADA" || proposta.status === "AGUARDANDO_ASSINATURA" || proposta.status === "ASSINATURA_CONCLUIDA" || proposta.status === "BOLETOS_EMITIDOS" ? "completed" : "current",
+      date: proposta.status === "CCB_GERADA" || proposta.status === "AGUARDANDO_ASSINATURA" || proposta.status === "ASSINATURA_CONCLUIDA" || proposta.status === "BOLETOS_EMITIDOS" ? formatDate(proposta.createdAt) : "Pendente",
+      completed: proposta.status === "CCB_GERADA" || proposta.status === "AGUARDANDO_ASSINATURA" || proposta.status === "ASSINATURA_CONCLUIDA" || proposta.status === "BOLETOS_EMITIDOS",
       interactive: true,
       etapa: "ccb_gerado" as const,
     },
@@ -944,16 +942,16 @@ export default function Formalizacao() {
       title: "Assinatura Eletrônica",
       description: "Documento enviado para ClickSign para assinatura",
       icon: Signature,
-      status: (proposta.assinaturaEletronicaConcluida || proposta.status === "contratos_assinados")
+      status: (proposta.status === "ASSINATURA_CONCLUIDA" || proposta.status === "BOLETOS_EMITIDOS" || proposta.status === "contratos_assinados")
         ? "completed"
-        : proposta.ccbGerado
+        : proposta.status === "CCB_GERADA" || proposta.status === "AGUARDANDO_ASSINATURA" || proposta.status === "ASSINATURA_CONCLUIDA" || proposta.status === "BOLETOS_EMITIDOS"
           ? "current"
           : "pending",
-      date: (proposta.assinaturaEletronicaConcluida || proposta.status === "contratos_assinados") 
+      date: (proposta.status === "ASSINATURA_CONCLUIDA" || proposta.status === "BOLETOS_EMITIDOS" || proposta.status === "contratos_assinados") 
         ? formatDate(proposta.dataAssinatura || proposta.createdAt) 
         : "Pendente",
-      completed: proposta.assinaturaEletronicaConcluida || proposta.status === "contratos_assinados",
-      interactive: proposta.ccbGerado,
+      completed: proposta.status === "ASSINATURA_CONCLUIDA" || proposta.status === "BOLETOS_EMITIDOS" || proposta.status === "contratos_assinados",
+      interactive: proposta.status === "CCB_GERADA" || proposta.status === "AGUARDANDO_ASSINATURA" || proposta.status === "ASSINATURA_CONCLUIDA" || proposta.status === "BOLETOS_EMITIDOS",
       etapa: "assinatura_eletronica" as const,
     },
     {
@@ -963,14 +961,14 @@ export default function Formalizacao() {
       icon: Shield,
       status: (proposta.biometriaConcluida || proposta.status === "contratos_assinados")
         ? "completed"
-        : proposta.assinaturaEletronicaConcluida
+        : proposta.status === "ASSINATURA_CONCLUIDA" || proposta.status === "BOLETOS_EMITIDOS"
           ? "current"
           : "pending",
       date: (proposta.biometriaConcluida || proposta.status === "contratos_assinados") 
         ? formatDate(proposta.dataAssinatura || proposta.createdAt) 
         : "Pendente",
       completed: proposta.biometriaConcluida || proposta.status === "contratos_assinados",
-      interactive: proposta.assinaturaEletronicaConcluida,
+      interactive: proposta.status === "ASSINATURA_CONCLUIDA" || proposta.status === "BOLETOS_EMITIDOS",
       etapa: "biometria" as const,
     },
     {
@@ -980,12 +978,12 @@ export default function Formalizacao() {
       icon: Building2,
       status: proposta.interBoletoGerado
         ? "completed"
-        : (proposta.assinaturaEletronicaConcluida || proposta.status === "contratos_assinados")
+        : (proposta.status === "ASSINATURA_CONCLUIDA" || proposta.status === "BOLETOS_EMITIDOS" || proposta.status === "contratos_assinados")
           ? "current"
           : "pending",
       date: proposta.interBoletoGerado ? formatDate(proposta.createdAt) : "Pendente",
       completed: proposta.interBoletoGerado || false,
-      interactive: proposta.assinaturaEletronicaConcluida || proposta.status === "contratos_assinados",
+      interactive: proposta.status === "ASSINATURA_CONCLUIDA" || proposta.status === "BOLETOS_EMITIDOS" || proposta.status === "contratos_assinados",
       etapa: "banco_inter" as const,
     },
     {
@@ -1179,7 +1177,7 @@ export default function Formalizacao() {
                         }
 
                         // Para a etapa de assinatura eletrônica, mostrar interface customizada
-                        if (step.etapa === "assinatura_eletronica" && proposta.ccbGerado) {
+                        if (step.etapa === "assinatura_eletronica" && proposta.status === "CCB_GERADA" || proposta.status === "AGUARDANDO_ASSINATURA" || proposta.status === "ASSINATURA_CONCLUIDA" || proposta.status === "BOLETOS_EMITIDOS") {
                           return (
                             <div key={step.id} className="mb-4">
                               <div className="space-y-4">
@@ -1195,9 +1193,9 @@ export default function Formalizacao() {
                                 />
 
                                 {/* 🎯 ESTADO INICIAL: Botão azul quando CCB gerada mas sem assinatura */}
-                                {proposta.ccbGerado && 
+                                {proposta.status === "CCB_GERADA" || proposta.status === "AGUARDANDO_ASSINATURA" || proposta.status === "ASSINATURA_CONCLUIDA" || proposta.status === "BOLETOS_EMITIDOS" && 
                                  proposta.status !== "contratos_assinados" && 
-                                 !proposta.assinaturaEletronicaConcluida &&
+                                 !proposta.status === "ASSINATURA_CONCLUIDA" || proposta.status === "BOLETOS_EMITIDOS" &&
                                  !clickSignData?.signUrl && 
                                  !initialClickSignData?.signUrl && (
                                   <div className="mt-3 rounded-lg border border-blue-700 bg-blue-900/20 p-4">
@@ -1263,7 +1261,7 @@ export default function Formalizacao() {
                                 )}
 
                                 {/* ✅ CONTRATO ASSINADO: Mostrar confirmação */}
-                                {(proposta.status === "contratos_assinados" || proposta.assinaturaEletronicaConcluida) && (
+                                {(proposta.status === "contratos_assinados" || proposta.status === "ASSINATURA_CONCLUIDA" || proposta.status === "BOLETOS_EMITIDOS") && (
                                   <div className="mt-3 rounded-lg border border-green-700 bg-green-900/20 p-4">
                                     <div className="mb-3 flex items-center">
                                       <CheckCircle className="mr-2 h-5 w-5 text-green-400" />
@@ -1280,9 +1278,9 @@ export default function Formalizacao() {
 
                                 {/* 🎯 ESTADO POSTERIOR: Link existe (novo ou antigo) - manter fixo até assinatura */}
                                 {(clickSignData?.signUrl || initialClickSignData?.signUrl || proposta.clicksignSignUrl) && 
-                                 proposta.ccbGerado && 
+                                 proposta.status === "CCB_GERADA" || proposta.status === "AGUARDANDO_ASSINATURA" || proposta.status === "ASSINATURA_CONCLUIDA" || proposta.status === "BOLETOS_EMITIDOS" && 
                                  proposta.status !== "contratos_assinados" && 
-                                 !proposta.assinaturaEletronicaConcluida && (
+                                 !proposta.status === "ASSINATURA_CONCLUIDA" || proposta.status === "BOLETOS_EMITIDOS" && (
                                   <div className="mt-3 rounded-lg border border-green-700 bg-green-900/20 p-4">
                                     <div className="mb-3 flex items-center">
                                       <CheckCircle className="mr-2 h-5 w-5 text-green-400" />
@@ -1403,7 +1401,7 @@ export default function Formalizacao() {
                         // Para a etapa do Banco Inter, mostrar interface customizada
                         if (
                           step.etapa === "banco_inter" &&
-                          (proposta.assinaturaEletronicaConcluida || proposta.status === "contratos_assinados")
+                          (proposta.status === "ASSINATURA_CONCLUIDA" || proposta.status === "BOLETOS_EMITIDOS" || proposta.status === "contratos_assinados")
                         ) {
                           return (
                             <div key={step.id} className="mb-4">
@@ -2329,7 +2327,7 @@ export default function Formalizacao() {
                               )}
 
                               {/* Botões para CCB e ClickSign */}
-                              {step.id === 2 && proposta.ccbGerado && (
+                              {step.id === 2 && proposta.status === "CCB_GERADA" || proposta.status === "AGUARDANDO_ASSINATURA" || proposta.status === "ASSINATURA_CONCLUIDA" || proposta.status === "BOLETOS_EMITIDOS" && (
                                 <div className="mt-3">
                                   <Button
                                     onClick={async () => {
@@ -2338,7 +2336,7 @@ export default function Formalizacao() {
                                         const response = await apiRequest(
                                           `/api/formalizacao/${proposta.id}/ccb`
                                         ) as CCBResponse;
-                                        if (response.ccb_gerado === false) {
+                                        if (response.status === false) {
                                           toast({
                                             title: "CCB não disponível",
                                             description:
@@ -2368,8 +2366,8 @@ export default function Formalizacao() {
                               )}
 
                               {step.id === 3 &&
-                                proposta.ccbGerado &&
-                                !proposta.assinaturaEletronicaConcluida && (
+                                proposta.status === "CCB_GERADA" || proposta.status === "AGUARDANDO_ASSINATURA" || proposta.status === "ASSINATURA_CONCLUIDA" || proposta.status === "BOLETOS_EMITIDOS" &&
+                                !proposta.status === "ASSINATURA_CONCLUIDA" || proposta.status === "BOLETOS_EMITIDOS" && (
                                   <div className="mt-3 rounded-lg border border-blue-700 bg-blue-900/20 p-4">
                                     <div className="mb-3 flex items-center justify-between">
                                       <h5 className="font-medium text-blue-300">
@@ -2613,7 +2611,7 @@ export default function Formalizacao() {
                     propostaId={proposta.id}
                     documents={[]}
                     ccbDocumentoUrl={
-                      proposta.ccbGerado ? `/api/propostas/${proposta.id}/ccb-url` : undefined
+                      proposta.status === "CCB_GERADA" || proposta.status === "AGUARDANDO_ASSINATURA" || proposta.status === "ASSINATURA_CONCLUIDA" || proposta.status === "BOLETOS_EMITIDOS" ? `/api/propostas/${proposta.id}/ccb-url` : undefined
                     }
                   />
                 </CardContent>

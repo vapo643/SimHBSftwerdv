@@ -47,15 +47,21 @@ export default function FilaAnalise() {
   });
 
   const getStatusBadge = (status: string) => {
-    const statusMap = {
-      aguardando_analise: { label: "Pendente", variant: "secondary" as const },
-      em_analise: { label: "Em Análise", variant: "default" as const },
-      aprovado: { label: "Aprovado", variant: "default" as const },
-      rejeitado: { label: "Rejeitado", variant: "destructive" as const },
+    const statusMap: Record<string, { label: string; variant: "secondary" | "default" | "destructive" | "outline" }> = {
+      // Status V2.0
+      CCB_GERADA: { label: "CCB Gerada", variant: "default" },
+      AGUARDANDO_ASSINATURA: { label: "Aguardando Assinatura", variant: "secondary" },
+      ASSINATURA_CONCLUIDA: { label: "Assinatura Concluída", variant: "default" },
+      BOLETOS_EMITIDOS: { label: "Boletos Emitidos", variant: "default" },
+      // Status antigos
+      aguardando_analise: { label: "Pendente", variant: "secondary" },
+      em_analise: { label: "Em Análise", variant: "default" },
+      aprovado: { label: "Aprovado", variant: "default" },
+      rejeitado: { label: "Rejeitado", variant: "destructive" },
     };
 
     return (
-      statusMap[status as keyof typeof statusMap] || { label: status, variant: "outline" as const }
+      statusMap[status] || statusMap[status.toUpperCase()] || { label: status, variant: "outline" as const }
     );
   };
 

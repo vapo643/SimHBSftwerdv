@@ -98,8 +98,9 @@ export default function GestaoContratos() {
           method: "POST",
         });
 
-        if (response.url) {
-          window.open(response.url, "_blank");
+        const typedResponse = response as { url?: string };
+        if (typedResponse.url) {
+          window.open(typedResponse.url, "_blank");
         } else {
           console.error("URL do CCB não disponível");
         }

@@ -42,24 +42,34 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 const getStatusColor = (status: string) => {
-  switch (status.toLowerCase()) {
-    case "aprovado":
-      return "bg-green-100 text-green-800 border-green-200";
-    case "em_analise":
+  switch (status.toUpperCase()) {
+    // Status V2.0
+    case "CCB_GERADA":
       return "bg-blue-100 text-blue-800 border-blue-200";
-    case "aguardando_analise":
+    case "AGUARDANDO_ASSINATURA":
       return "bg-yellow-100 text-yellow-800 border-yellow-200";
-    case "pendenciado":
-      return "bg-orange-100 text-orange-800 border-orange-200";
-    case "rejeitado":
-      return "bg-red-100 text-red-800 border-red-200";
-    case "pago":
-      return "bg-emerald-100 text-emerald-800 border-emerald-200";
-    case "pronto_pagamento":
+    case "ASSINATURA_CONCLUIDA":
+      return "bg-green-100 text-green-800 border-green-200";
+    case "BOLETOS_EMITIDOS":
       return "bg-purple-100 text-purple-800 border-purple-200";
-    case "rascunho":
+    // Status antigos mantidos para compatibilidade
+    case "APROVADO":
+      return "bg-green-100 text-green-800 border-green-200";
+    case "EM_ANALISE":
+      return "bg-blue-100 text-blue-800 border-blue-200";
+    case "AGUARDANDO_ANALISE":
+      return "bg-yellow-100 text-yellow-800 border-yellow-200";
+    case "PENDENCIADO":
+      return "bg-orange-100 text-orange-800 border-orange-200";
+    case "REJEITADO":
+      return "bg-red-100 text-red-800 border-red-200";
+    case "PAGO":
+      return "bg-emerald-100 text-emerald-800 border-emerald-200";
+    case "PRONTO_PAGAMENTO":
+      return "bg-purple-100 text-purple-800 border-purple-200";
+    case "RASCUNHO":
       return "bg-gray-100 text-gray-800 border-gray-200";
-    case "cancelado":
+    case "CANCELADO":
       return "bg-slate-100 text-slate-800 border-slate-200";
     default:
       return "bg-gray-100 text-gray-800 border-gray-200";
@@ -67,30 +77,60 @@ const getStatusColor = (status: string) => {
 };
 
 const getStatusText = (status: string) => {
-  switch (status.toLowerCase()) {
-    case "aguardando_analise":
+  switch (status.toUpperCase()) {
+    // Status V2.0
+    case "CCB_GERADA":
+      return "CCB Gerada";
+    case "AGUARDANDO_ASSINATURA":
+      return "Aguardando Assinatura";
+    case "ASSINATURA_CONCLUIDA":
+      return "Assinatura Concluída";
+    case "BOLETOS_EMITIDOS":
+      return "Boletos Emitidos";
+    // Status antigos mantidos para compatibilidade
+    case "AGUARDANDO_ANALISE":
       return "Aguardando Análise";
-    case "em_analise":
+    case "EM_ANALISE":
       return "Em Análise";
-    case "pronto_pagamento":
+    case "PRONTO_PAGAMENTO":
       return "Pronto para Pagamento";
+    case "APROVADO":
+      return "Aprovado";
+    case "REJEITADO":
+      return "Rejeitado";
+    case "PENDENCIADO":
+      return "Pendenciado";
+    case "PAGO":
+      return "Pago";
+    case "CANCELADO":
+      return "Cancelado";
     default:
       return status.replace(/_/g, " ").replace(/^\w/, (c: string) => c.toUpperCase());
   }
 };
 
 const getStatusIcon = (status: string) => {
-  switch (status.toLowerCase()) {
-    case "aprovado":
-      return <CheckCircle2 className="h-4 w-4" />;
-    case "rejeitado":
-      return <XCircle className="h-4 w-4" />;
-    case "em_analise":
-    case "aguardando_analise":
+  switch (status.toUpperCase()) {
+    // Status V2.0
+    case "CCB_GERADA":
+      return <FileText className="h-4 w-4" />;
+    case "AGUARDANDO_ASSINATURA":
       return <Clock className="h-4 w-4" />;
-    case "pendenciado":
+    case "ASSINATURA_CONCLUIDA":
+      return <CheckCircle2 className="h-4 w-4" />;
+    case "BOLETOS_EMITIDOS":
+      return <Banknote className="h-4 w-4" />;
+    // Status antigos mantidos para compatibilidade
+    case "APROVADO":
+      return <CheckCircle2 className="h-4 w-4" />;
+    case "REJEITADO":
+      return <XCircle className="h-4 w-4" />;
+    case "EM_ANALISE":
+    case "AGUARDANDO_ANALISE":
+      return <Clock className="h-4 w-4" />;
+    case "PENDENCIADO":
       return <AlertCircle className="h-4 w-4" />;
-    case "pago":
+    case "PAGO":
       return <Banknote className="h-4 w-4" />;
     default:
       return <FileText className="h-4 w-4" />;
