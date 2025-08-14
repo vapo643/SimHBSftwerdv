@@ -22,10 +22,15 @@ router.post(
   async (req: AuthenticatedRequest, res) => {
     try {
       const { id } = req.params;
+      const { codigosSolicitacao } = req.body; // Lista opcional de códigos para carnê parcial
       const userId = req.user?.id;
       
       console.log(`[CARNE API - PRODUCER] 🎯 Solicitação de carnê para proposta: ${id}`);
       console.log(`[CARNE API - PRODUCER] 👤 Usuário: ${userId}`);
+      
+      if (codigosSolicitacao && Array.isArray(codigosSolicitacao)) {
+        console.log(`[CARNE API - PRODUCER] 📋 Carnê parcial solicitado: ${codigosSolicitacao.length} boletos`);
+      }
       
       // Validação básica
       if (!id || typeof id !== 'string') {
@@ -101,6 +106,7 @@ router.post(
         propostaId: id,
         userId: userId,
         clienteNome: proposta.cliente_nome,
+        codigosSolicitacao: codigosSolicitacao, // Lista opcional para carnê parcial
         timestamp: new Date().toISOString()
       });
       

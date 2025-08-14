@@ -443,6 +443,18 @@ export default function Formalizacao() {
     totalBoletos: number | null;
   } | null>(null);
   const [regenerateBoletos, setRegenerateBoletos] = useState<number | null>(null);
+  
+  // Estado para Storage Status - Consciência de Storage
+  const [storageStatus, setStorageStatus] = useState<{
+    totalBoletos: number;
+    boletosInStorage: number;
+    missingBoletos: string[];
+    hasCarnet: boolean;
+    carnetUrl: string | null;
+    needsSync: boolean;
+    needsCorrection: boolean;
+  } | null>(null);
+  const [checkingStorage, setCheckingStorage] = useState(false);
 
   const propostaId = params?.id;
 
@@ -461,32 +473,65 @@ export default function Formalizacao() {
     refetchOnWindowFocus: false, // Não refetch quando janela ganha foco
   });
 
-  // Verificar se já existe carnê ao carregar a página
-  useEffect(() => {
-    const checkExistingCarne = async () => {
-      if (!propostaId) return;
+  // Função para verificar status do Storage
+  const checkStorageStatus = async () => {
+    if (!propostaId) return;
+    
+    setCheckingStorage(true);
+    try {
+      const response = await apiRequest(`/api/propostas/${propostaId}/storage-status`) as any;
       
-      try {
-        const response = await apiRequest(`/api/propostas-carne-status/${propostaId}`) as any;
-        
-        if (response.hasCarnet) {
-          setExistingCarne(response);
-          setCarneUrl(response.url);
-          setCarneTotalBoletos(response.totalBoletos || 0);
-          
-          // Mostrar toast informando que carnê já existe
-          toast({
-            title: "Carnê já disponível",
-            description: `Carnê com ${response.totalBoletos} boletos já foi gerado anteriormente`,
-          });
+      // Mapear resposta da API para o formato esperado
+      const totalBoletos = response.totalParcelas || 0;
+      const boletosInStorage = response.fileCount || 0;
+      const hasCarnet = response.carneExists || false;
+      const carnetUrl = response.carneUrl || null;
+      
+      // Determinar estados baseados no syncStatus
+      const needsSync = response.syncStatus === 'nenhum';
+      const needsCorrection = response.syncStatus === 'incompleto';
+      
+      // Calcular boletos faltantes
+      const missingBoletos: string[] = [];
+      if (response.boletosNoStorage && totalBoletos > 0) {
+        for (let i = 1; i <= totalBoletos; i++) {
+          const boletoId = `boleto-${i}`;
+          if (!response.boletosNoStorage.includes(boletoId)) {
+            missingBoletos.push(boletoId);
+          }
         }
-      } catch (error) {
-        console.log("[CARNÊ STATUS] Erro ao verificar status do carnê:", error);
       }
-    };
-
-    checkExistingCarne();
-  }, [propostaId]);
+      
+      setStorageStatus({
+        totalBoletos,
+        boletosInStorage,
+        missingBoletos,
+        hasCarnet,
+        carnetUrl,
+        needsSync,
+        needsCorrection,
+      });
+      
+      // Se carnê existe, atualizar estado
+      if (hasCarnet && carnetUrl) {
+        setExistingCarne({
+          hasCarnet: true,
+          url: carnetUrl,
+          fileName: response.carneFileName || null,
+          totalBoletos: totalBoletos,
+        });
+        setCarneUrl(carnetUrl);
+        setCarneTotalBoletos(totalBoletos);
+      }
+      
+      return response;
+    } catch (error) {
+      console.error("[STORAGE STATUS] Erro ao verificar status:", error);
+      return null;
+    } finally {
+      setCheckingStorage(false);
+    }
+  };
 
   // Query para buscar boletos gerados - OTIMIZADA (após proposta carregar)
   const { data: collectionsData } = useQuery<any[]>({
@@ -503,6 +548,13 @@ export default function Formalizacao() {
     refetchOnWindowFocus: false, // Não refetch quando janela ganha foco
     retry: 1, // Reduzir tentativas de retry
   });
+
+  // Verificar status do storage quando boletos mudam
+  useEffect(() => {
+    if (propostaId && collectionsData && collectionsData.length > 0) {
+      checkStorageStatus();
+    }
+  }, [propostaId, collectionsData]);
 
   const form = useForm<UpdateFormalizacaoForm>({
     resolver: zodResolver(updateFormalizacaoSchema),
@@ -1456,220 +1508,214 @@ export default function Formalizacao() {
                                           </span>
                                         </div>
                                         
-                                        {/* Botão para gerar carnê completo - NOVO FLUXO DE DOIS PASSOS */}
-                                        {collectionsData && collectionsData.length > 1 && !existingCarne?.hasCarnet && (
-                                          <Button
-                                            size="sm"
-                                            variant="outline"
-                                            onClick={async () => {
-                                              try {
-                                                setLoadingCarne(true);
-                                                
-                                                // PASSO A: Sincronização de boletos
-                                                toast({
-                                                  title: "Iniciando sincronização dos boletos",
-                                                  description: "Aguarde...",
-                                                });
-                                                
-                                                // Determinar número de boletos a sincronizar
-                                                const numeroBoletos = regenerateBoletos || collectionsData.length;
-                                                
-                                                // Primeira chamada: sincronizar boletos do Inter para o Storage
-                                                const syncResponse = await apiRequest(
-                                                  `/api/propostas/${proposta.id}/sincronizar-boletos`,
-                                                  {
-                                                    method: "POST",
-                                                    body: JSON.stringify({ 
-                                                      numeroBoletos: numeroBoletos 
-                                                    }),
-                                                  }
-                                                );
-                                                
-                                                const syncData = syncResponse as any;
-                                                
-                                                if (!syncData.success) {
-                                                  throw new Error(syncData.message || "Erro na sincronização");
-                                                }
-                                                
-                                                // PASSO B: Solicitar geração do carnê (retorna jobId)
-                                                toast({
-                                                  title: "Sincronização concluída",
-                                                  description: "Iniciando geração do carnê...",
-                                                });
-                                                
-                                                // Segunda chamada: iniciar geração do carnê
-                                                const carneResponse = await apiRequest(
-                                                  `/api/propostas/${proposta.id}/gerar-carne`,
-                                                  {
-                                                    method: "POST",
-                                                  }
-                                                );
-                                                
-                                                const carneData = carneResponse as any;
-                                                
-                                                if (!carneData.success) {
-                                                  throw new Error(carneData.message || "Falha ao iniciar geração");
-                                                }
-                                                
-                                                // Verificar se carnê já existe
-                                                if (carneData.existingFile && carneData.data?.url) {
-                                                  // Carnê já existe - disponibilizar download imediatamente
-                                                  setCarneUrl(carneData.data.url);
-                                                  setCarneTotalBoletos(collectionsData.length);
-                                                  setLoadingCarne(false);
-                                                  
-                                                  toast({
-                                                    title: "Carnê já disponível!",
-                                                    description: `PDF consolidado com ${collectionsData.length} boletos pronto para download`,
-                                                  });
-                                                  return;
-                                                }
-                                                
-                                                // Verificar se temos jobId para polling
-                                                if (!carneData.jobId) {
-                                                  throw new Error("ID do job não retornado");
-                                                }
-                                                
-                                                // PASSO C: Polling do status do job
-                                                toast({
-                                                  title: "Processando carnê...",
-                                                  description: "Aguarde enquanto geramos o PDF consolidado",
-                                                });
-                                                
-                                                const jobId = carneData.jobId;
-                                                let attempts = 0;
-                                                const maxAttempts = 20; // 20 tentativas x 3 segundos = 1 minuto
-                                                
-                                                const pollJobStatus = async (): Promise<void> => {
-                                                  attempts++;
-                                                  
-                                                  const statusResponse = await apiRequest(
-                                                    `/api/jobs/${jobId}/status`,
-                                                    {
-                                                      method: "GET",
-                                                    }
-                                                  );
-                                                  
-                                                  const statusData = statusResponse as any;
-                                                  
-                                                  if (statusData.status === 'completed' && statusData.data?.url) {
-                                                    // Job concluído com sucesso
-                                                    setCarneUrl(statusData.data.url);
-                                                    setCarneTotalBoletos(collectionsData.length);
-                                                    setLoadingCarne(false);
-                                                    
-                                                    toast({
-                                                      title: "Carnê pronto para download!",
-                                                      description: `PDF consolidado com ${collectionsData.length} boletos gerado com sucesso`,
-                                                    });
-                                                    return;
-                                                  } else if (statusData.status === 'failed') {
-                                                    // Job falhou
-                                                    throw new Error(statusData.data?.error || "Falha na geração do carnê");
-                                                  } else if (attempts >= maxAttempts) {
-                                                    // Timeout
-                                                    throw new Error("Tempo limite excedido. Tente novamente.");
-                                                  } else {
-                                                    // Job ainda em processamento - continuar polling
-                                                    setTimeout(pollJobStatus, 3000); // Aguardar 3 segundos e tentar novamente
-                                                  }
-                                                };
-                                                
-                                                // Iniciar polling
-                                                await pollJobStatus();
-                                                
-                                              } catch (error: any) {
-                                                console.error("Erro no fluxo de geração de carnê:", error);
-                                                toast({
-                                                  title: "Erro ao gerar carnê",
-                                                  description: error.message || "Não foi possível completar o processo de geração do carnê",
-                                                  variant: "destructive",
-                                                });
-                                                setLoadingCarne(false);
-                                              }
-                                            }}
-                                            disabled={loadingCarne}
-                                            className="border-blue-600 text-blue-400 hover:bg-blue-600/10"
-                                          >
-                                            {loadingCarne ? (
-                                              <div className="flex items-center">
-                                                <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-blue-400"></div>
-                                                Processando...
-                                              </div>
-                                            ) : (
-                                              <div className="flex items-center">
-                                                <Printer className="mr-2 h-4 w-4" />
-                                                Gerar Carnê para Impressão
+                                        {/* MÁQUINA DE ESTADOS UI - CONSCIÊNCIA DE STORAGE */}
+                                        {collectionsData && collectionsData.length > 1 && (
+                                          <div className="space-y-2">
+                                            {/* Indicador de status do Storage */}
+                                            {storageStatus && (
+                                              <div className="text-xs text-gray-400">
+                                                {storageStatus.boletosInStorage} de {storageStatus.totalBoletos} boletos no storage
+                                                {storageStatus.hasCarnet && " | Carnê disponível"}
                                               </div>
                                             )}
-                                          </Button>
-                                        )}
-
-                                        {/* Botão para download de carnê existente */}
-                                        {existingCarne?.hasCarnet && (
-                                          <div className="flex items-center gap-2">
-                                            <Button
-                                              size="sm"
-                                              onClick={() => {
-                                                // Download do carnê existente
-                                                const link = document.createElement("a");
-                                                link.href = existingCarne.url!;
-                                                link.download = `carne-proposta-${proposta.id}.pdf`;
-                                                link.target = "_blank";
-                                                document.body.appendChild(link);
-                                                link.click();
-                                                document.body.removeChild(link);
-                                                
-                                                toast({
-                                                  title: "Download iniciado",
-                                                  description: `Carnê com ${existingCarne.totalBoletos} boletos`
-                                                });
-                                              }}
-                                              className="border-green-600 text-green-400 hover:bg-green-600/10 bg-green-900/20"
-                                            >
-                                              <div className="flex items-center">
-                                                <Download className="mr-2 h-4 w-4" />
-                                                Baixar Carnê Existente ({existingCarne.totalBoletos} boletos)
-                                              </div>
-                                            </Button>
                                             
-                                            {/* Opção para regenerar com N-1 parcelas */}
-                                            {collectionsData && collectionsData.length > 1 && (
-                                              <Button
-                                                size="sm"
-                                                variant="outline"
-                                                onClick={() => {
-                                                  // Perguntar quantas parcelas regenerar
-                                                  const maxParcelas = collectionsData.length;
-                                                  const numParcelas = prompt(
-                                                    `Deseja regenerar o carnê com quantas parcelas? (máximo: ${maxParcelas}, padrão: ${maxParcelas - 1})`
-                                                  );
-                                                  
-                                                  if (numParcelas) {
-                                                    const num = parseInt(numParcelas);
-                                                    if (num > 0 && num <= maxParcelas) {
-                                                      setRegenerateBoletos(num);
-                                                      setExistingCarne(null); // Limpar carnê existente
-                                                      setCarneUrl(null);
+                                            {/* Botões condicionais baseados no estado */}
+                                            {(() => {
+                                              // Estado 1: Carnê já existe - botão de download
+                                              if (storageStatus?.hasCarnet && storageStatus?.carnetUrl) {
+                                                return (
+                                                  <Button
+                                                    size="sm"
+                                                    variant="default"
+                                                    className="bg-green-600 hover:bg-green-700"
+                                                    onClick={() => {
+                                                      window.open(storageStatus.carnetUrl!, "_blank");
+                                                    }}
+                                                  >
+                                                    <Download className="mr-2 h-4 w-4" />
+                                                    Baixar Carnê ({storageStatus.totalBoletos} boletos)
+                                                  </Button>
+                                                );
+                                              }
+                                              
+                                              // Estado 2: Sincronização incompleta - botão de correção
+                                              if (storageStatus?.needsCorrection) {
+                                                return (
+                                                  <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    className="border-yellow-600 text-yellow-600 hover:bg-yellow-600 hover:text-white"
+                                                    onClick={async () => {
+                                                      try {
+                                                        setLoadingCarne(true);
+                                                        toast({
+                                                          title: "Corrigindo sincronização",
+                                                          description: "Removendo dados incompletos e reiniciando...",
+                                                        });
+                                                        
+                                                        // Chamar endpoint de correção
+                                                        const response = await apiRequest(
+                                                          `/api/propostas/${proposta.id}/corrigir-sincronizacao`,
+                                                          { method: "POST" }
+                                                        );
+                                                        
+                                                        const data = response as any;
+                                                        if (data.success) {
+                                                          toast({
+                                                            title: "Correção iniciada",
+                                                            description: `Re-sincronização em andamento. Job ID: ${data.jobId}`,
+                                                          });
+                                                          
+                                                          // Aguardar um pouco e recarregar status
+                                                          setTimeout(async () => {
+                                                            await checkStorageStatus();
+                                                          }, 3000);
+                                                        }
+                                                      } catch (error: any) {
+                                                        toast({
+                                                          title: "Erro",
+                                                          description: error.message || "Erro ao corrigir sincronização",
+                                                          variant: "destructive",
+                                                        });
+                                                      } finally {
+                                                        setLoadingCarne(false);
+                                                      }
+                                                    }}
+                                                    disabled={loadingCarne}
+                                                  >
+                                                    {loadingCarne ? (
+                                                      <div className="flex items-center">
+                                                        <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2"></div>
+                                                        Corrigindo...
+                                                      </div>
+                                                    ) : (
+                                                      <>
+                                                        <AlertCircle className="mr-2 h-4 w-4" />
+                                                        Corrigir Sincronização
+                                                      </>
+                                                    )}
+                                                  </Button>
+                                                );
+                                              }
+                                              
+                                              // Estado 3: Boletos sincronizados, gerar carnê
+                                              if (storageStatus?.boletosInStorage === storageStatus?.totalBoletos && !storageStatus?.hasCarnet) {
+                                                return (
+                                                  <Button
+                                                    size="sm"
+                                                    variant="default"
+                                                    className="bg-blue-600 hover:bg-blue-700"
+                                                    onClick={async () => {
+                                                      try {
+                                                        setLoadingCarne(true);
+                                                        toast({
+                                                          title: "Gerando carnê",
+                                                          description: "Consolidando todos os boletos em um único PDF...",
+                                                        });
+                                                        
+                                                        // Chamar endpoint de geração de carnê
+                                                        const response = await apiRequest(
+                                                          `/api/propostas/${proposta.id}/gerar-carne`,
+                                                          { method: "POST" }
+                                                        );
+                                                        
+                                                        const data = response as any;
+                                                        if (data.success) {
+                                                          toast({
+                                                            title: "Carnê gerado!",
+                                                            description: "Carnê consolidado disponível para download",
+                                                          });
+                                                          
+                                                          // Recarregar status para obter URL
+                                                          await checkStorageStatus();
+                                                        }
+                                                      } catch (error: any) {
+                                                        toast({
+                                                          title: "Erro",
+                                                          description: error.message || "Erro ao gerar carnê",
+                                                          variant: "destructive",
+                                                        });
+                                                      } finally {
+                                                        setLoadingCarne(false);
+                                                      }
+                                                    }}
+                                                    disabled={loadingCarne}
+                                                  >
+                                                    {loadingCarne ? (
+                                                      <div className="flex items-center">
+                                                        <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2"></div>
+                                                        Gerando carnê...
+                                                      </div>
+                                                    ) : (
+                                                      <>
+                                                        <FileText className="mr-2 h-4 w-4" />
+                                                        Gerar Carnê
+                                                      </>
+                                                    )}
+                                                  </Button>
+                                                );
+                                              }
+                                              
+                                              // Estado 4: Precisa sincronizar
+                                              return (
+                                                <Button
+                                                  size="sm"
+                                                  variant="outline"
+                                                  onClick={async () => {
+                                                    try {
+                                                      setLoadingCarne(true);
                                                       toast({
-                                                        title: "Pronto para regenerar",
-                                                        description: `Clique em "Gerar Carnê" para criar um novo com ${num} parcelas`,
+                                                        title: "Sincronizando boletos",
+                                                        description: `Baixando ${collectionsData.length} boletos do Banco Inter...`,
                                                       });
-                                                    } else {
+                                                      
+                                                      // Sincronizar boletos
+                                                      const response = await apiRequest(
+                                                        `/api/propostas/${proposta.id}/sincronizar-boletos`,
+                                                        {
+                                                          method: "POST",
+                                                          body: JSON.stringify({
+                                                            numeroBoletos: collectionsData.length
+                                                          }),
+                                                        }
+                                                      );
+                                                      
+                                                      const data = response as any;
+                                                      if (data.success) {
+                                                        toast({
+                                                          title: "Sincronização concluída",
+                                                          description: `${data.sucessos} boletos sincronizados com sucesso`,
+                                                        });
+                                                        
+                                                        // Recarregar status
+                                                        await checkStorageStatus();
+                                                      }
+                                                    } catch (error: any) {
                                                       toast({
-                                                        title: "Número inválido",
-                                                        description: `Por favor, escolha entre 1 e ${maxParcelas} parcelas`,
+                                                        title: "Erro",
+                                                        description: error.message || "Erro ao sincronizar boletos",
                                                         variant: "destructive",
                                                       });
+                                                    } finally {
+                                                      setLoadingCarne(false);
                                                     }
-                                                  }
-                                                }}
-                                                className="text-yellow-400 border-yellow-600 hover:bg-yellow-600/10"
-                                              >
-                                                <RefreshCw className="mr-2 h-4 w-4" />
-                                                Regenerar com N-1
-                                              </Button>
-                                            )}
+                                                  }}
+                                                  disabled={loadingCarne || checkingStorage}
+                                                >
+                                                  {loadingCarne ? (
+                                                    <div className="flex items-center">
+                                                      <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2"></div>
+                                                      Sincronizando...
+                                                    </div>
+                                                  ) : (
+                                                    <>
+                                                      <RefreshCw className="mr-2 h-4 w-4" />
+                                                      Sincronizar Boletos
+                                                    </>
+                                                  )}
+                                                </Button>
+                                              );
+                                            })()}
                                           </div>
                                         )}
 
