@@ -49,6 +49,7 @@ import gestaoContratosRoutes from "./routes/gestao-contratos";
 import testCcbCoordinatesRoutes from "./routes/test-ccb-coordinates";
 import propostasCarneRoutes from "./routes/propostas-carne";
 import propostasCarneStatusRoutes from "./routes/propostas-carne-status";
+import propostasCarneCheckRoutes from "./routes/propostas-carne-check";
 import propostasStorageStatusRoutes from "./routes/propostas-storage-status";
 import propostasCorrigirSincronizacaoRoutes from "./routes/propostas-corrigir-sincronizacao";
 import jobStatusRoutes from "./routes/job-status";
@@ -5178,6 +5179,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Register Propostas Carnê routes
   app.use("/api/propostas", propostasCarneRoutes);
   app.use("/api", propostasCarneStatusRoutes);
+  app.use(propostasCarneCheckRoutes);
   app.use("/api/propostas", propostasStorageStatusRoutes);
   app.use("/api/propostas", propostasCorrigirSincronizacaoRoutes);
   

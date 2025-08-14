@@ -455,8 +455,68 @@ export default function Formalizacao() {
     needsCorrection: boolean;
   } | null>(null);
   const [checkingStorage, setCheckingStorage] = useState(false);
+  
+  // Estado para carnê status automático - PAM V1.0
+  const [carneStatus, setCarneStatus] = useState<{
+    exists: boolean;
+    url: string | null;
+    fileName: string | null;
+    isLoading: boolean;
+  }>({
+    exists: false,
+    url: null,
+    fileName: null,
+    isLoading: true,
+  });
 
   const propostaId = params?.id;
+
+  // Função para verificar automaticamente status do carnê - PAM V1.0
+  const checkCarneStatus = async () => {
+    if (!propostaId) return;
+    
+    setCarneStatus(prev => ({ ...prev, isLoading: true }));
+    
+    try {
+      console.log("[PAM V1.0] Verificando status do carnê para proposta:", propostaId);
+      const response = await apiRequest(`/api/propostas/${propostaId}/carne-status`) as {
+        carneExists: boolean;
+        url?: string;
+        fileName?: string;
+        createdAt?: string;
+        size?: number;
+        error?: string;
+      };
+      
+      console.log("[PAM V1.0] Resposta do carne-status:", response);
+      
+      setCarneStatus({
+        exists: response.carneExists || false,
+        url: response.url || null,
+        fileName: response.fileName || null,
+        isLoading: false,
+      });
+      
+      // Se carnê existe, atualizar outros estados relacionados
+      if (response.carneExists && response.url) {
+        setCarneUrl(response.url);
+        setExistingCarne({
+          hasCarnet: true,
+          url: response.url,
+          fileName: response.fileName || null,
+          totalBoletos: collectionsData?.length || 0,
+        });
+      }
+    } catch (error) {
+      console.error("[PAM V1.0] Erro ao verificar status do carnê:", error);
+      setCarneStatus({
+        exists: false,
+        url: null,
+        fileName: null,
+        isLoading: false,
+      });
+    }
+  };
 
   const {
     data: proposta,
@@ -555,6 +615,14 @@ export default function Formalizacao() {
       checkStorageStatus();
     }
   }, [propostaId, collectionsData]);
+  
+  // PAM V1.0 - Verificar status do carnê automaticamente quando proposta carrega
+  useEffect(() => {
+    if (proposta && propostaId && collectionsData && collectionsData.length > 0) {
+      console.log("[PAM V1.0] Proposta carregada, verificando carnê automaticamente");
+      checkCarneStatus();
+    }
+  }, [proposta, propostaId, collectionsData]);
 
   const form = useForm<UpdateFormalizacaoForm>({
     resolver: zodResolver(updateFormalizacaoSchema),
@@ -1519,10 +1587,31 @@ export default function Formalizacao() {
                                               </div>
                                             )}
                                             
-                                            {/* Botões condicionais baseados no estado */}
+                                            {/* PAM V1.0 - Botões condicionais baseados no estado automático */}
                                             {(() => {
-                                              // Estado 1: Carnê já existe - botão de download
-                                              if (storageStatus?.hasCarnet && storageStatus?.carnetUrl) {
+                                              // Estado 1: Carnê já existe (PAM V1.0 - verificação automática)
+                                              if (carneStatus.exists && carneStatus.url) {
+                                                return (
+                                                  <Button
+                                                    size="sm"
+                                                    variant="default"
+                                                    className="bg-green-600 hover:bg-green-700"
+                                                    onClick={() => {
+                                                      window.open(carneStatus.url!, "_blank");
+                                                      toast({
+                                                        title: "Download iniciado",
+                                                        description: `Carnê com ${collectionsData?.length || 0} boletos`
+                                                      });
+                                                    }}
+                                                  >
+                                                    <Download className="mr-2 h-4 w-4" />
+                                                    Baixar Carnê ({collectionsData?.length || 0} boletos)
+                                                  </Button>
+                                                );
+                                              }
+                                              
+                                              // Estado alternativo: usar storageStatus se carneStatus ainda carregando
+                                              if (!carneStatus.isLoading && storageStatus?.hasCarnet && storageStatus?.carnetUrl) {
                                                 return (
                                                   <Button
                                                     size="sm"
@@ -1598,8 +1687,8 @@ export default function Formalizacao() {
                                                 );
                                               }
                                               
-                                              // Estado 3: Boletos sincronizados, gerar carnê
-                                              if (storageStatus?.boletosInStorage === storageStatus?.totalBoletos && !storageStatus?.hasCarnet) {
+                                              // Estado 3: Boletos sincronizados, gerar carnê (PAM V1.0 - verificação automática)
+                                              if (!carneStatus.exists && !carneStatus.isLoading && storageStatus?.boletosInStorage === storageStatus?.totalBoletos) {
                                                 return (
                                                   <Button
                                                     size="sm"
@@ -1626,7 +1715,8 @@ export default function Formalizacao() {
                                                             description: "Carnê consolidado disponível para download",
                                                           });
                                                           
-                                                          // Recarregar status para obter URL
+                                                          // Recarregar status automático PAM V1.0
+                                                          await checkCarneStatus();
                                                           await checkStorageStatus();
                                                         }
                                                       } catch (error: any) {
@@ -1639,17 +1729,22 @@ export default function Formalizacao() {
                                                         setLoadingCarne(false);
                                                       }
                                                     }}
-                                                    disabled={loadingCarne}
+                                                    disabled={loadingCarne || carneStatus.isLoading}
                                                   >
                                                     {loadingCarne ? (
                                                       <div className="flex items-center">
                                                         <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2"></div>
                                                         Gerando carnê...
                                                       </div>
+                                                    ) : carneStatus.isLoading ? (
+                                                      <div className="flex items-center">
+                                                        <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2"></div>
+                                                        Verificando status...
+                                                      </div>
                                                     ) : (
                                                       <>
-                                                        <FileText className="mr-2 h-4 w-4" />
-                                                        Gerar Carnê
+                                                        <Printer className="mr-2 h-4 w-4" />
+                                                        Gerar Carnê para Impressão
                                                       </>
                                                     )}
                                                   </Button>
