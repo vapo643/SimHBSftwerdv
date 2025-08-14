@@ -596,6 +596,97 @@ export const updatePropostaSchema = createInsertSchema(propostas).partial().omit
   userId: true,
 });
 
+// 🔒 PAM V1.0 - SCHEMA DE VALIDAÇÃO RIGOROSA PARA CRIAÇÃO DE PROPOSTAS
+// Schema blindado para prevenir dados corrompidos/NULL em campos críticos
+export const createPropostaValidationSchema = z.object({
+  // Dados obrigatórios da loja/contexto
+  lojaId: z.number().int().positive("ID da loja é obrigatório"),
+  
+  // 🚨 CAMPOS CRÍTICOS DE CLIENTE - OBRIGATÓRIOS E NÃO-VAZIOS
+  clienteNome: z.string()
+    .min(1, "Nome do cliente é obrigatório")
+    .max(200, "Nome do cliente não pode exceder 200 caracteres")
+    .trim(),
+  
+  clienteCpf: z.string()
+    .min(11, "CPF deve ter pelo menos 11 caracteres")
+    .max(14, "CPF não pode exceder 14 caracteres")
+    .regex(/^\d{3}\.?\d{3}\.?\d{3}-?\d{2}$/, "CPF deve estar em formato válido")
+    .trim(),
+  
+  clienteEmail: z.string()
+    .email("Email deve ter formato válido")
+    .min(1, "Email é obrigatório")
+    .max(255, "Email não pode exceder 255 caracteres")
+    .trim(),
+  
+  clienteTelefone: z.string()
+    .min(10, "Telefone deve ter pelo menos 10 caracteres")
+    .max(20, "Telefone não pode exceder 20 caracteres")
+    .trim(),
+  
+  // 🔒 DADOS FINANCEIROS CRÍTICOS - OBRIGATÓRIOS
+  valor: z.number()
+    .positive("Valor do empréstimo deve ser positivo")
+    .min(100, "Valor mínimo é R$ 100,00")
+    .max(1000000, "Valor máximo é R$ 1.000.000,00"),
+  
+  prazo: z.number()
+    .int("Prazo deve ser um número inteiro")
+    .positive("Prazo deve ser positivo")
+    .min(1, "Prazo mínimo é 1 mês")
+    .max(120, "Prazo máximo é 120 meses"),
+  
+  // Campos opcionais mas com validação quando presentes
+  clienteDataNascimento: z.string().optional(),
+  clienteRenda: z.string().optional(),
+  clienteRg: z.string().optional(),
+  clienteOrgaoEmissor: z.string().optional(),
+  clienteRgUf: z.string().optional(),
+  clienteRgDataEmissao: z.string().optional(),
+  clienteEstadoCivil: z.string().optional(),
+  clienteNacionalidade: z.string().optional(),
+  clienteLocalNascimento: z.string().optional(),
+  
+  // Endereço - opcional mas validado quando presente
+  clienteCep: z.string().optional(),
+  clienteLogradouro: z.string().optional(),
+  clienteNumero: z.string().optional(),
+  clienteComplemento: z.string().optional(),
+  clienteBairro: z.string().optional(),
+  clienteCidade: z.string().optional(),
+  clienteUf: z.string().optional(),
+  clienteOcupacao: z.string().optional(),
+  
+  // Dados de PJ - opcional
+  tipoPessoa: z.enum(["PF", "PJ"]).default("PF"),
+  clienteRazaoSocial: z.string().optional(),
+  clienteCnpj: z.string().optional(),
+  
+  // Dados do empréstimo
+  finalidade: z.string().optional(),
+  garantia: z.string().optional(),
+  
+  // IDs relacionais opcionais
+  produtoId: z.number().int().positive().optional(),
+  tabelaComercialId: z.number().int().positive().optional(),
+  
+  // Status inicial
+  status: z.string().default("aguardando_analise"),
+  
+  // Dados de pagamento - todos opcionais
+  metodoPagamento: z.string().optional(),
+  dadosPagamentoBanco: z.string().optional(),
+  dadosPagamentoAgencia: z.string().optional(),
+  dadosPagamentoConta: z.string().optional(),
+  dadosPagamentoDigito: z.string().optional(),
+  dadosPagamentoPix: z.string().optional(),
+  dadosPagamentoTipoPix: z.string().optional(),
+  dadosPagamentoPixBanco: z.string().optional(),
+  dadosPagamentoPixNomeTitular: z.string().optional(),
+  dadosPagamentoPixCpfTitular: z.string().optional(),
+}).strict(); // strict() impede campos extras não especificados
+
 export const insertTabelaComercialSchema = createInsertSchema(tabelasComerciais).omit({
   id: true,
   createdAt: true,

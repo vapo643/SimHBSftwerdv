@@ -20,6 +20,7 @@ import {
 import {
   insertPropostaSchema,
   updatePropostaSchema,
+  createPropostaValidationSchema,
   insertGerenteLojaSchema,
   insertLojaSchema,
   updateLojaSchema,
@@ -2341,14 +2342,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/propostas", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     try {
-      // ID será gerado automaticamente pela sequência do banco (300001, 300002, etc.)
-      // Não precisamos gerar ID aqui pois o serial fará isso automaticamente
+      // 🔒 PAM V1.0 - VALIDAÇÃO RIGOROSA DE INTEGRIDADE DE DADOS
+      // BARREIRA DE PROTEÇÃO: Nenhuma proposta com dados críticos NULL pode passar
+      
+      // Preparar dados para validação
+      const dataForValidation = {
+        ...req.body,
+        lojaId: req.body.lojaId || req.user?.loja_id, // Fallback to user's loja_id if not provided
+      };
+
+      // 🚨 VALIDAÇÃO CRÍTICA: Bloquear IMEDIATAMENTE se dados obrigatórios estão ausentes
+      try {
+        await createPropostaValidationSchema.parseAsync(dataForValidation);
+        console.log("✅ [VALIDAÇÃO] Dados da proposta passaram na validação rigorosa");
+      } catch (error) {
+        const validationError = error as any; // Type assertion para ZodError
+        console.error("🚨 [VALIDAÇÃO FALHOU] Dados inválidos detectados:", {
+          error: validationError.errors || validationError.message,
+          dadosRecebidos: {
+            clienteNome: dataForValidation.clienteNome,
+            clienteCpf: dataForValidation.clienteCpf,
+            clienteEmail: dataForValidation.clienteEmail,
+            clienteTelefone: dataForValidation.clienteTelefone,
+            valor: dataForValidation.valor,
+            prazo: dataForValidation.prazo,
+          }
+        });
+        
+        return res.status(400).json({
+          message: "Dados da proposta são inválidos",
+          errors: validationError.errors || [{ message: validationError.message }],
+          details: "Todos os campos obrigatórios devem ser preenchidos corretamente"
+        });
+      }
 
       // Add userId to the request body (ID será gerado automaticamente pelo banco)
       const dataWithId = {
-        ...req.body,
+        ...dataForValidation,
         userId: req.user?.id,
-        lojaId: req.body.lojaId || req.user?.loja_id, // Fallback to user's loja_id if not provided
       };
 
       // DEBUG: Log dados recebidos do frontend
