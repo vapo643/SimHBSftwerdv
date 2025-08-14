@@ -1,0 +1,52 @@
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Corrigir a lógica de persistência de dados no endpoint de criação de propostas para popular tanto as colunas relacionais dedicadas (`cliente_nome`, etc.) quanto a coluna JSON (`cliente_data`), garantindo a integridade dos dados e o princípio de Fonte Única da Verdade (SSOT).
+* **Intenção Estratégica (O Porquê):** Sua auditoria forense provou que a inconsistência de dados é nossa falha mais crítica. Ao garantir que a "porta de entrada" (`POST /api/propostas`) salve os dados em todos os locais corretos, eliminamos a causa raiz de múltiplos bugs em cascata e restauramos a confiança no nosso sistema de dados.
+* **Histórico Relevante (Consulta Obrigatória):** Seu diagnóstico forense é a fonte da verdade. Ele provou que a falha está no mapeamento entre a recepção dos dados e o comando de `insert`. Esta missão é a implementação direta da correção para o problema que você mesmo diagnosticou.
+* **Modelo Mental (Como se Encaixa):** Você atuará como um Engenheiro de Dados. Sua tarefa é garantir a consistência e a redundância saudável dos dados. Ao receber os dados do cliente, você deve escrevê-los em dois lugares: nas colunas individuais para consultas relacionais e na coluna JSON para artefatos como a geração de PDFs.
+* **Riscos Antecipados:** **Risco:** Um erro no mapeamento pode levar a dados dessincronizados. **Contramedida:** A fonte da verdade são os dados individuais recebidos do frontend. O objeto JSON e as colunas relacionais devem ser populados a partir da mesma fonte na mesma operação.
+
+---
+
+**IMPLEMENTAR:**
+Correção da lógica de mapeamento de dados no endpoint `POST /api/propostas`.
+
+**BUG:**
+Seu diagnóstico confirmou: ao criar uma proposta, o backend está a salvar todos os dados do cliente apenas na coluna JSON `cliente_data`, deixando as colunas relacionais dedicadas (`cliente_nome`, `cliente_cpf`, `cliente_email`, `cliente_telefone`) como `NULL`.
+
+**PROCESSO SISTEMÁTICO (Roadmap de Correção Definitivo):**
+
+**1. Isolamento do Ponto de Falha:**
+    - **Ação:** Concentre-se nos ficheiros `server/routes.ts` (onde os dados são transformados) e `server/storage.ts` (onde a inserção no banco ocorre).
+
+**2. Implementação da Correção (Dupla Escrita):**
+    - **Ação:** Modifique a lógica de criação de propostas para que, ao receber os dados individuais do frontend (`clienteNome`, `clienteCpf`, etc.), ela execute as duas ações a seguir:
+        a. **Manter a Lógica JSON:** Continue a popular o objeto `clienteData` com todos os dados do cliente, como já é feito.
+        b. **Popular as Colunas Relacionais (A Correção Crítica):** No objeto final que é passado para o comando `supabase.from('propostas').insert({...})`, adicione explicitamente o mapeamento para as colunas relacionais dedicadas.
+
+    - **Lógica de Exemplo (implemente no local correto):**
+      ```typescript
+      // O objeto final para o insert deve se parecer com isto:
+      await supabase.from("propostas").insert({
+        id: proposta.id,
+        status: proposta.status,
+        // ... outros campos que já existem
+        
+        // A LÓGICA DE DADOS DO CLIENTE CORRIGIDA:
+        cliente_data: clienteData, // Mantém o JSON completo
+        
+        // A CORREÇÃO CRÍTICA - POPULAR AS COLUNAS DEDICADAS:
+        cliente_nome: dataWithId.clienteNome,
+        cliente_cpf: dataWithId.clienteCpf,
+        cliente_email: dataWithId.clienteEmail,
+        cliente_telefone: dataWithId.clienteTelefone
+        // ... adicione quaisquer outros campos relacionais diretos que existam
+      });
+      ```
+
+**PROTOCOLO OBRIGATÓRIO 5-CHECK:**
+1.  Mapear os arquivos envolvidos.
+2.  Garantir que a lógica de "dupla escrita" seja implementada.
+3.  Executar `get_latest_lsp_diagnostics`.
+4.  **Teste Obrigatório:** Crie uma **NOVA PROPOSTA** através da interface, preenchendo todos os dados do cliente.
+5.  **Validação Direta no Banco:** O critério final de sucesso é executar uma query `SELECT` na nova proposta e provar que **TANTO** a coluna JSON `cliente_data` **QUANTO** as colunas individuais (`cliente_nome`, `cliente_cpf`, etc.) estão **CORRETAMENTE PREENCHIDAS**. Apresente o resultado desta query como prova final.

@@ -2494,6 +2494,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         // Personal references (store as JSONB)
         referenciaPessoal: dataWithId.referenciaPessoal || [],
+        
+        // ⚡ PAM V1.0 CORREÇÃO CRÍTICA - DUPLA ESCRITA
+        // Populando colunas relacionais dedicadas para garantir integridade
+        clienteNome: dataWithId.clienteNome,
+        clienteCpf: dataWithId.clienteCpf,
+        clienteEmail: dataWithId.clienteEmail,
+        clienteTelefone: dataWithId.clienteTelefone,
       };
 
       // DEBUG: Log dados que serão persistidos

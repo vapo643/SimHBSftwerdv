@@ -445,6 +445,7 @@ export class DatabaseStorage implements IStorage {
     const condicoesData = proposta.condicoesData || {};
 
     // Insert with the real database schema
+    // ⚡ PAM V1.0 CORREÇÃO - DUPLA ESCRITA: JSON + Colunas Relacionais
     const { data, error } = await supabase
       .from("propostas")
       .insert({
@@ -454,8 +455,29 @@ export class DatabaseStorage implements IStorage {
         user_id: proposta.userId,
         produto_id: proposta.produtoId,
         tabela_comercial_id: proposta.tabelaComercialId,
-        cliente_data: clienteData,
+        cliente_data: clienteData, // Mantém o JSON completo
         condicoes_data: condicoesData,
+        
+        // ⚡ CORREÇÃO CRÍTICA - Populando colunas relacionais dedicadas
+        cliente_nome: proposta.clienteNome || clienteData.nome,
+        cliente_cpf: proposta.clienteCpf || clienteData.cpf,
+        cliente_email: proposta.clienteEmail || clienteData.email,
+        cliente_telefone: proposta.clienteTelefone || clienteData.telefone,
+        
+        // Dados de pagamento também nas colunas dedicadas
+        metodo_pagamento: proposta.metodo_pagamento,
+        dados_pagamento_banco: proposta.dados_pagamento_banco,
+        dados_pagamento_agencia: proposta.dados_pagamento_agencia,
+        dados_pagamento_conta: proposta.dados_pagamento_conta,
+        dados_pagamento_digito: proposta.dados_pagamento_digito,
+        dados_pagamento_tipo: proposta.dados_pagamento_tipo,
+        dados_pagamento_pix: proposta.dados_pagamento_pix,
+        dados_pagamento_tipo_pix: proposta.dados_pagamento_tipo_pix,
+        dados_pagamento_pix_banco: proposta.dados_pagamento_pix_banco,
+        dados_pagamento_pix_nome_titular: proposta.dados_pagamento_pix_nome_titular,
+        dados_pagamento_pix_cpf_titular: proposta.dados_pagamento_pix_cpf_titular,
+        dados_pagamento_nome_titular: proposta.dados_pagamento_nome_titular,
+        dados_pagamento_cpf_titular: proposta.dados_pagamento_cpf_titular,
       })
       .select()
       .single();
@@ -466,6 +488,15 @@ export class DatabaseStorage implements IStorage {
     }
 
     console.log(`[DEBUG] Proposta ${data.id} criada com sucesso`);
+    console.log(`✅ [PAM V1.0] DUPLA ESCRITA EXECUTADA:`, {
+      id: data.id,
+      cliente_nome: data.cliente_nome,
+      cliente_cpf: data.cliente_cpf,
+      cliente_email: data.cliente_email,
+      cliente_telefone: data.cliente_telefone,
+      cliente_data_nome: data.cliente_data?.nome,
+      cliente_data_cpf: data.cliente_data?.cpf
+    });
 
     // Documents will be uploaded and associated separately via /api/propostas/:id/documentos endpoint
 
