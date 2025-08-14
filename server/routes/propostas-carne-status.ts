@@ -12,33 +12,54 @@ router.get('/propostas/:id/carne-status', jwtMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
     
+    // PAM V1.0 - DIAGNÓSTICO: Log do propostaId exato recebido
+    console.log(`[PAM V1.0 DIAGNÓSTICO] 📋 PROPOSTA_ID RECEBIDO: "${id}" (type: ${typeof id})`);
+    
     console.log(`[CARNE STATUS] 🔍 Verificando status do carnê para proposta: ${id}`);
+    
+    // PAM V1.0 - DIAGNÓSTICO: Log do caminho COMPLETO sendo verificado
+    const fullStoragePath = `propostas/${id}/carnes`;
+    console.log(`[PAM V1.0 DIAGNÓSTICO] 📁 CAMINHO_STORAGE_COMPLETO: "${fullStoragePath}"`);
     
     // Buscar arquivos de carnê no Storage
     const { data: files, error: listError } = await supabase
       .storage
       .from('documents')
-      .list(`propostas/${id}/carnes`, {
+      .list(fullStoragePath, {
         limit: 1,
         sortBy: { column: 'created_at', order: 'desc' }
       });
     
+    // PAM V1.0 - DIAGNÓSTICO: Log do resultado da verificação no Storage
+    console.log(`[PAM V1.0 DIAGNÓSTICO] 🔍 RESULTADO_VERIFICACAO_STORAGE:`);
+    console.log(`[PAM V1.0 DIAGNÓSTICO]   - listError:`, listError);
+    console.log(`[PAM V1.0 DIAGNÓSTICO]   - files found:`, files ? files.length : 'null');
+    console.log(`[PAM V1.0 DIAGNÓSTICO]   - files data:`, JSON.stringify(files, null, 2));
+    
     if (listError) {
       console.error('[CARNE STATUS] ❌ Erro ao listar arquivos:', listError);
-      return res.json({
+      const errorResponse = {
         success: true,
+        carneExists: false,
         hasCarnet: false,
         message: 'Nenhum carnê encontrado'
-      });
+      };
+      // PAM V1.0 - DIAGNÓSTICO: Log do JSON exato sendo enviado (caso de erro)
+      console.log(`[PAM V1.0 DIAGNÓSTICO] 📤 JSON_ENVIADO_FRONTEND (ERROR):`, JSON.stringify(errorResponse, null, 2));
+      return res.json(errorResponse);
     }
     
     if (!files || files.length === 0) {
       console.log('[CARNE STATUS] ℹ️ Nenhum carnê encontrado');
-      return res.json({
+      const noCarneResponse = {
         success: true,
+        carneExists: false,
         hasCarnet: false,
         message: 'Nenhum carnê encontrado'
-      });
+      };
+      // PAM V1.0 - DIAGNÓSTICO: Log do JSON exato sendo enviado (nenhum arquivo)
+      console.log(`[PAM V1.0 DIAGNÓSTICO] 📤 JSON_ENVIADO_FRONTEND (NO_FILES):`, JSON.stringify(noCarneResponse, null, 2));
+      return res.json(noCarneResponse);
     }
     
     // Carnê existe - gerar URL assinada
@@ -70,15 +91,21 @@ router.get('/propostas/:id/carne-status', jwtMiddleware, async (req, res) => {
     
     console.log(`[CARNE STATUS] ✅ URL assinada gerada com sucesso`);
     
-    return res.json({
+    const successResponse = {
       success: true,
+      carneExists: true,
       hasCarnet: true,
       fileName: fileName,
       url: signedUrlData.signedUrl,
       totalBoletos: totalBoletos,
       createdAt: files[0].created_at,
       message: 'Carnê disponível para download'
-    });
+    };
+    
+    // PAM V1.0 - DIAGNÓSTICO: Log do JSON exato sendo enviado (sucesso)
+    console.log(`[PAM V1.0 DIAGNÓSTICO] 📤 JSON_ENVIADO_FRONTEND (SUCCESS):`, JSON.stringify(successResponse, null, 2));
+    
+    return res.json(successResponse);
     
   } catch (error) {
     console.error('[CARNE STATUS] ❌ Erro:', error);
