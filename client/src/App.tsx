@@ -13,7 +13,6 @@ import FilaAnalise from "@/pages/credito/fila";
 import AnaliseManual from "@/pages/credito/analise";
 import Pagamentos from "@/pages/financeiro/pagamentos";
 import CobrancasPage from "@/pages/financeiro/CobrancasPage";
-import CobrancasPageV2 from "@/pages/cobrancas"; // PAM V1.0 - Nova Tela de Cobranças
 import Formalizacao from "@/pages/formalizacao";
 import TabelasComerciais from "@/pages/configuracoes/tabelas";
 import UsuariosPage from "@/pages/admin/usuarios";
@@ -74,11 +73,6 @@ function Router() {
       <Route path="/financeiro/cobrancas">
         <ProtectedRoute>
           <CobrancasPage />
-        </ProtectedRoute>
-      </Route>
-      <Route path="/cobrancas">
-        <ProtectedRoute>
-          <CobrancasPageV2 />
         </ProtectedRoute>
       </Route>
       <Route path="/formalizacao">

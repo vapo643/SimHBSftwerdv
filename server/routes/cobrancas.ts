@@ -15,37 +15,21 @@ import { jwtAuthMiddleware } from "../lib/jwt-auth-middleware";
 const router = Router();
 
 // GET /api/cobrancas - Lista todas as propostas com informações de cobrança
-// PAM V1.0: Regra de negócio específica - assinaturaEletronicaConcluida + EXISTS inter_collections
-router.get("/", jwtAuthMiddleware, async (req: any, res) => {
+router.get("/", async (req: any, res) => {
   try {
     const { status, atraso } = req.query;
     const userRole = req.user?.role || "";
-    
-    // PAM V1.0 - Verificar permissão: apenas COBRANCA e ADMINISTRADOR
-    if (!userRole || !["ADMINISTRADOR", "COBRANCA", "FINANCEIRO"].includes(userRole)) {
-      console.log("[COBRANCAS] Acesso negado - Role:", userRole);
-      return res.status(403).json({ 
-        message: "Acesso negado. Apenas usuários COBRANCA, FINANCEIRO ou ADMINISTRADOR podem acessar.", 
-        requiredRoles: ["COBRANCA", "FINANCEIRO", "ADMINISTRADOR"],
-        userRole 
-      });
-    }
 
-    // PAM V1.0 - Buscar propostas com regra de negócio específica:
-    // 1. assinaturaEletronicaConcluida = true
-    // 2. EXISTS registro em inter_collections
+    // Buscar apenas propostas com CCB assinado e assinatura eletrônica concluída
     const propostasData = await db
       .select()
       .from(propostas)
       .where(
         and(
           sql`${propostas.deletedAt} IS NULL`,
-          eq(propostas.assinaturaEletronicaConcluida, true),
-          // Verificar se existe registro em inter_collections
-          sql`EXISTS (
-            SELECT 1 FROM inter_collections 
-            WHERE inter_collections.proposta_id = ${propostas.id}
-          )`
+          inArray(propostas.status, ["aprovado", "pronto_pagamento", "pago"]),
+          eq(propostas.ccbGerado, true),
+          eq(propostas.assinaturaEletronicaConcluida, true)
         )
       )
       .orderBy(desc(propostas.createdAt));

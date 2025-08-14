@@ -203,40 +203,6 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
                   })}
               </div>
 
-              {/* PAM V1.0 - Área de Cobranças */}
-              {(user?.role === "COBRANCA" ||
-                user?.role === "FINANCEIRO" ||
-                user?.role === "ADMINISTRADOR" ||
-                user?.role === "DIRETOR") && (
-                <div className="space-y-2">
-                  <div className="px-3 pb-2">
-                    <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Área de Cobranças
-                    </h3>
-                  </div>
-                  <Link
-                    href="/cobrancas"
-                    onClick={handleNavClick}
-                    className={`group flex items-center gap-3 rounded-xl px-3 py-3 transition-all duration-200 ${
-                      location === "/cobrancas"
-                        ? "scale-105 transform bg-gradient-to-r from-orange-500 to-red-600 text-white shadow-lg"
-                        : "hover:bg-accent/50 hover:scale-102 text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    <div
-                      className={`rounded-lg p-2 ${location === "/cobrancas" ? "bg-white/20" : "bg-accent/30 group-hover:bg-accent"} transition-colors`}
-                    >
-                      <Receipt className="h-4 w-4" />
-                    </div>
-                    <span
-                      className={`font-medium ${location === "/cobrancas" ? "text-white" : ""}`}
-                    >
-                      💼 Cobranças PAM V1.0
-                    </span>
-                  </Link>
-                </div>
-              )}
-
               {/* Área Financeira */}
               {(user?.role === "FINANCEIRO" ||
                 user?.role === "ADMINISTRADOR" ||
