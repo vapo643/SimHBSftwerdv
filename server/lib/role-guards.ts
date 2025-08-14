@@ -71,6 +71,32 @@ export function requireAnyRole(req: AuthenticatedRequest, res: Response, next: N
 }
 
 /**
+ * PAM V1.0 - Guard para COBRANCA ou ADMINISTRADOR
+ */
+export function requireCobrancaOrAdmin(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+): void {
+  if (!req.user) {
+    res.status(401).json({ message: "Usuário não autenticado" });
+    return;
+  }
+
+  const allowedRoles = ["COBRANCA", "ADMINISTRADOR", "FINANCEIRO"];
+  if (!req.user.role || !allowedRoles.includes(req.user.role)) {
+    res.status(403).json({
+      message: "Acesso negado. Permissões de cobrança ou administrador requeridas.",
+      requiredRoles: allowedRoles,
+      userRole: req.user.role,
+    });
+    return;
+  }
+
+  next();
+}
+
+/**
  * Guard customizável que aceita uma lista de roles
  */
 export function requireRoles(roles: string[]) {
