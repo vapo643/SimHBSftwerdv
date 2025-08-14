@@ -456,7 +456,7 @@ export default function Formalizacao() {
   } | null>(null);
   const [checkingStorage, setCheckingStorage] = useState(false);
   
-  // Estado para carnê status automático - PAM V1.0
+  // Estado para carnê status automático
   const [carneStatus, setCarneStatus] = useState<{
     exists: boolean;
     url: string | null;
@@ -471,25 +471,14 @@ export default function Formalizacao() {
 
   const propostaId = params?.id;
 
-  // Função para verificar automaticamente status do carnê - PAM V1.0
+  // Função para verificar automaticamente status do carnê
   const checkCarneStatus = async () => {
     if (!propostaId) return;
-    
-    // PAM V1.0 - DIAGNÓSTICO: Log do propostaId exato sendo usado
-    console.log(`[PAM V1.0 DIAGNÓSTICO FRONTEND] 🆔 PROPOSTA_ID_USADO: "${propostaId}" (type: ${typeof propostaId})`);
-    
-    // PAM V1.0 - DIAGNÓSTICO: Log da URL completa sendo construída
-    const apiUrl = `/api/propostas/${propostaId}/carne-status`;
-    console.log(`[PAM V1.0 DIAGNÓSTICO FRONTEND] 🌐 URL_API_CONSTRUIDA: "${apiUrl}"`);
-    
-    // PAM V1.0 - DIAGNÓSTICO: Log do momento da chamada
-    console.log(`[PAM V1.0 DIAGNÓSTICO FRONTEND] ⏰ MOMENTO_CHAMADA_API: ${new Date().toISOString()}`);
     
     setCarneStatus(prev => ({ ...prev, isLoading: true }));
     
     try {
-      console.log("[PAM V1.0] Verificando status do carnê para proposta:", propostaId);
-      const response = await apiRequest(apiUrl) as {
+      const response = await apiRequest(`/api/propostas/${propostaId}/carne-status`) as {
         carneExists: boolean;
         url?: string;
         fileName?: string;
@@ -498,23 +487,12 @@ export default function Formalizacao() {
         error?: string;
       };
       
-      // PAM V1.0 - DIAGNÓSTICO: Log da resposta COMPLETA e NÃO TRATADA do backend
-      console.log(`[PAM V1.0 DIAGNÓSTICO FRONTEND] 📥 RESPOSTA_COMPLETA_BACKEND:`, JSON.stringify(response, null, 2));
-      
-      console.log("[PAM V1.0] Resposta do carne-status:", response);
-      
-      // PAM V1.0 - DIAGNÓSTICO: Preparar o estado final antes de definir
-      const newCarneState = {
+      setCarneStatus({
         exists: response.carneExists || false,
         url: response.url || null,
         fileName: response.fileName || null,
         isLoading: false,
-      };
-      
-      // PAM V1.0 - DIAGNÓSTICO: Log do valor final sendo definido no estado React
-      console.log(`[PAM V1.0 DIAGNÓSTICO FRONTEND] 🎯 ESTADO_REACT_FINAL_DEFINIDO:`, JSON.stringify(newCarneState, null, 2));
-      
-      setCarneStatus(newCarneState);
+      });
       
       // Se carnê existe, atualizar outros estados relacionados
       if (response.carneExists && response.url) {
@@ -527,19 +505,13 @@ export default function Formalizacao() {
         });
       }
     } catch (error) {
-      console.error("[PAM V1.0] Erro ao verificar status do carnê:", error);
-      
-      // PAM V1.0 - DIAGNÓSTICO: Log do estado de erro sendo definido
-      const errorState = {
+      console.error("Erro ao verificar status do carnê:", error);
+      setCarneStatus({
         exists: false,
         url: null,
         fileName: null,
         isLoading: false,
-      };
-      
-      console.log(`[PAM V1.0 DIAGNÓSTICO FRONTEND] ❌ ESTADO_REACT_ERRO_DEFINIDO:`, JSON.stringify(errorState, null, 2));
-      
-      setCarneStatus(errorState);
+      });
     }
   };
 
@@ -641,21 +613,10 @@ export default function Formalizacao() {
     }
   }, [propostaId, collectionsData]);
   
-  // PAM V1.0 - Verificar status do carnê automaticamente quando proposta carrega
+  // Auto-verificar status do carnê quando proposta carrega
   useEffect(() => {
-    // PAM V1.0 - DIAGNÓSTICO: Log das condições do useEffect
-    console.log(`[PAM V1.0 DIAGNÓSTICO FRONTEND] 🔄 USEEFFECT_TRIGGERED:`);
-    console.log(`[PAM V1.0 DIAGNÓSTICO FRONTEND]   - proposta exists:`, !!proposta);
-    console.log(`[PAM V1.0 DIAGNÓSTICO FRONTEND]   - propostaId:`, propostaId);
-    console.log(`[PAM V1.0 DIAGNÓSTICO FRONTEND]   - collectionsData exists:`, !!collectionsData);
-    console.log(`[PAM V1.0 DIAGNÓSTICO FRONTEND]   - collectionsData length:`, collectionsData?.length);
-    
     if (proposta && propostaId && collectionsData && collectionsData.length > 0) {
-      console.log("[PAM V1.0] Proposta carregada, verificando carnê automaticamente");
-      console.log(`[PAM V1.0 DIAGNÓSTICO FRONTEND] ✅ CONDICOES_ATENDIDAS - CHAMANDO checkCarneStatus()`);
       checkCarneStatus();
-    } else {
-      console.log(`[PAM V1.0 DIAGNÓSTICO FRONTEND] ❌ CONDICOES_NAO_ATENDIDAS - checkCarneStatus() NÃO será chamada`);
     }
   }, [proposta, propostaId, collectionsData]);
 
@@ -1622,21 +1583,9 @@ export default function Formalizacao() {
                                               </div>
                                             )}
                                             
-                                            {/* PAM V1.0 - Botões condicionais baseados no estado automático */}
+                                            {/* Botões condicionais baseados no estado automático */}
                                             {(() => {
-                                              // PAM V1.0 - DIAGNÓSTICO: Log do estado no momento da renderização
-                                              console.log(`[PAM V1.0 DIAGNÓSTICO FRONTEND] 🎨 RENDERIZACAO_BOTOES - Estado atual:`, JSON.stringify(carneStatus, null, 2));
-                                              
-                                              // Estado 1: Carnê já existe (PAM V1.0 - verificação automática)
-                                              if (carneStatus.exists && carneStatus.url) {
-                                                console.log(`[PAM V1.0 DIAGNÓSTICO FRONTEND] 🟢 RENDERIZANDO: Botão BAIXAR carnê (verde)`);
-                                              } else if (!carneStatus.exists && !carneStatus.isLoading && storageStatus?.boletosInStorage === storageStatus?.totalBoletos) {
-                                                console.log(`[PAM V1.0 DIAGNÓSTICO FRONTEND] 🔵 RENDERIZANDO: Botão GERAR carnê (azul)`);
-                                              } else {
-                                                console.log(`[PAM V1.0 DIAGNÓSTICO FRONTEND] ⚪ RENDERIZANDO: Estado alternativo ou carregamento`);
-                                              }
-                                              
-                                              // Estado 1: Carnê já existe (PAM V1.0 - verificação automática)
+                                              // Estado 1: Carnê já existe
                                               if (carneStatus.exists && carneStatus.url) {
                                                 return (
                                                   <Button

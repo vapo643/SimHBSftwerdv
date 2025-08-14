@@ -112,7 +112,7 @@ export const statusEnum = pgEnum("status", [
 ]);
 
 export const propostas = pgTable("propostas", {
-  id: serial("id").primaryKey(),
+  id: text("id").primaryKey(), // UUID string format
   lojaId: integer("loja_id").notNull(), // Multi-tenant key
 
   // Relacionamentos de negócio

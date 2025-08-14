@@ -31,7 +31,7 @@ router.get("/:id/storage-status", async (req: Request, res: Response) => {
     const [proposta] = await db
       .select()
       .from(propostas)
-      .where(eq(propostas.id, parseInt(id)))
+      .where(eq(propostas.id, id))
       .limit(1);
       
     if (!proposta) {
