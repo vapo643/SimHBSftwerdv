@@ -13,13 +13,14 @@ export function setupSecurityHeaders() {
       "'unsafe-eval'", // Necessário para Vite em dev
       "https://cdnjs.cloudflare.com", // Para bibliotecas externas
       "https://unpkg.com",
+      "https://replit.com", // Para banner de desenvolvimento Replit
     ],
     styleSrc: [
       "'self'",
       "'unsafe-inline'", // Necessário para styled components
       "https://fonts.googleapis.com",
     ],
-    fontSrc: ["'self'", "https://fonts.gstatic.com"],
+    fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"], // data: necessário para fontes embutidas do ambiente Replit
     imgSrc: ["'self'", "data:", "https:", "blob:"],
     connectSrc: [
       "'self'",

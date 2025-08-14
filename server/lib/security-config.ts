@@ -17,10 +17,10 @@ export const helmetConfig = {
     directives: {
       defaultSrc: ["'self'"],
       styleSrc: ["'self'", "'unsafe-inline'", "https:"],
-      scriptSrc: ["'self'", "'unsafe-eval'"], // unsafe-eval necessário para Vite em desenvolvimento
+      scriptSrc: ["'self'", "'unsafe-eval'", "https://replit.com"], // unsafe-eval necessário para Vite, replit.com para banner de desenvolvimento
       imgSrc: ["'self'", "data:", "https:"],
       connectSrc: ["'self'", "ws:", "wss:"], // WebSocket para Vite HMR
-      fontSrc: ["'self'", "https:"],
+      fontSrc: ["'self'", "https:", "data:"], // data: necessário para fontes embutidas do ambiente Replit
       objectSrc: ["'none'"],
       mediaSrc: ["'self'"],
       frameSrc: ["'none'"],

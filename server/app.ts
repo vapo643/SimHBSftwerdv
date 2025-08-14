@@ -37,12 +37,13 @@ export async function createApp() {
   if (config.security.enableHelmet) {
     app.use(setupSecurityHeaders());
     app.use(additionalSecurityHeaders);
-    // Temporarily disable CSP in development to fix blank screen issue
+    // Apply appropriate CSP based on environment
     if (process.env.NODE_ENV !== "development") {
       app.use(strictCSP);
       log("🔒 [SECURITY] Enhanced security headers and strict CSP activated");
     } else {
-      log("🔧 [DEV] CSP disabled in development mode for debugging");
+      // Development mode uses basic helmet CSP only (more permissive for Vite/React)
+      log("🔧 [DEV] Using basic CSP configuration optimized for Vite development");
     }
   }
 
