@@ -97,13 +97,16 @@ export const statusEnum = pgEnum("status", [
   "aguardando_analise",
   "em_analise",
   "pendente",
+  "pendenciado", // Status órfão formalizado - usado em dashboard e análise
   "aprovado",
   "aguardando_aceite_atendente", // Novo status após aprovação do analista
   "aceito_atendente", // Aceito pelo atendente, pronto para formalização
   "rejeitado",
   "documentos_enviados",
   "contratos_preparados",
+  "em_formalizacao", // Status órfão formalizado - usado durante processo de formalização
   "contratos_assinados",
+  "assinado", // Status órfão formalizado - usado em sync de documentos
   "pronto_pagamento",
   "pagamento_autorizado", // Novo status após confirmação de veracidade
   "pago",

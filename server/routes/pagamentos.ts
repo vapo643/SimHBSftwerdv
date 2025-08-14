@@ -261,8 +261,8 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
           // OBRIGATÓRIO: CCB deve estar assinada
           eq(propostas.ccbGerado, true),
           eq(propostas.assinaturaEletronicaConcluida, true),
-          // Status deve ser pronto_pagamento, aprovado OU pago (para histórico)
-          inArray(propostas.status, ["pronto_pagamento", "aprovado", "pago"])
+          // Status deve ser contratos_assinados, pronto_pagamento OU pago (para histórico)
+          inArray(propostas.status, ["contratos_assinados", "pronto_pagamento", "pago"])
         )
       )
       .orderBy(desc(propostas.dataAprovacao));

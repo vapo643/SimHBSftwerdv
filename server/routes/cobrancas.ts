@@ -28,7 +28,7 @@ router.get("/", async (req: any, res) => {
     
     let whereConditions = and(
       sql`${propostas.deletedAt} IS NULL`,
-      inArray(propostas.status, ["aprovado", "pronto_pagamento", "pago"]),
+      inArray(propostas.status, ["contratos_assinados", "pronto_pagamento", "pago"]),
       eq(propostas.ccbGerado, true),
       eq(propostas.assinaturaEletronicaConcluida, true)
     );
@@ -257,7 +257,7 @@ router.get("/kpis", async (req, res) => {
       .where(
         and(
           sql`${propostas.deletedAt} IS NULL`,
-          inArray(propostas.status, ["aprovado", "pronto_pagamento", "pago"])
+          inArray(propostas.status, ["contratos_assinados", "pronto_pagamento", "pago"])
         )
       );
 
@@ -762,7 +762,7 @@ router.get("/exportar/inadimplentes", async (req, res) => {
       .where(
         and(
           sql`${propostas.deletedAt} IS NULL`,
-          inArray(propostas.status, ["aprovado", "pronto_pagamento", "pago"])
+          inArray(propostas.status, ["contratos_assinados", "pronto_pagamento", "pago"])
         )
       );
 
