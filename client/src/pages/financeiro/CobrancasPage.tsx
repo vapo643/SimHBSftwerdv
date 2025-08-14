@@ -541,16 +541,24 @@ export default function CobrancasPage() {
     }
   };
 
-  // Filtrar propostas localmente pela busca
+  // Filtrar propostas localmente pela busca (lógica robusta para campos vazios)
   const propostasFiltradas = propostas?.filter((proposta: any) => {
-    if (!searchTerm) return true;
-
+    if (!searchTerm) return true; // Sem busca = mostrar todas
+    
     const search = searchTerm.toLowerCase();
-    return (
-      proposta.nomeCliente?.toLowerCase().includes(search) ||
-      proposta.cpfCliente?.includes(searchTerm) ||
-      proposta.numeroContrato?.toLowerCase().includes(search) ||
-      proposta.id?.includes(searchTerm)
+    
+    // Cria lista de campos pesquisáveis, removendo valores vazios/null/undefined
+    const searchableFields = [
+      proposta.nomeCliente,
+      proposta.cpfCliente, 
+      proposta.numeroContrato,
+      proposta.id,
+      proposta.numero_proposta // Adicionar campo de número da proposta
+    ].filter(Boolean); // Remove valores falsy (null, undefined, "", 0, false)
+    
+    // Verifica se algum dos campos válidos contém o termo de busca
+    return searchableFields.some(field => 
+      String(field).toLowerCase().includes(search)
     );
   });
 
