@@ -1,0 +1,39 @@
+**IMPLEMENTAR:**
+Correção da configuração do Vite para restaurar a funcionalidade de Hot Module Replacement (HMR) no ambiente de desenvolvimento do Replit.
+
+**CONTEXT:**
+O console do navegador mostra que o cliente Vite está a tentar conectar-se a uma URL de WebSocket inválida (`wss://localhost:undefined`), o que causa a falha da conexão e quebra o HMR. Isso força os desenvolvedores a recarregarem a página manualmente a cada alteração, o que é ineficiente e reduz drasticamente a produtividade.
+
+**CURRENT STATE:**
+O HMR está quebrado devido a uma configuração incorreta do servidor WebSocket do Vite, que não reconhece o ambiente de proxy do Replit.
+
+**EXPECTED (Estado Final de Sucesso):**
+A conexão WebSocket do Vite é estabelecida com sucesso. O HMR funciona perfeitamente. O erro `Failed to construct 'WebSocket'` desaparece completamente do console.
+
+**CONSTRAINTS (Roadmap de Correção):**
+1.  **Diagnóstico:** Inspecione o ficheiro de configuração do Vite (`vite.config.ts` ou similar).
+2.  **Implementação:** Ajuste a configuração do `server` no Vite para que ele entenda corretamente o ambiente de proxy do Replit. A solução geralmente envolve configurar explicitamente a propriedade `hmr`.
+
+    **Exemplo de Solução Provável (adapte se necessário):**
+    ```javascript
+    // Dentro de vite.config.ts
+    export default defineConfig({
+      // ... outras configurações
+      server: {
+        hmr: {
+          // Use as variáveis de ambiente do Replit para construir a URL correta
+          clientPort: 443,
+          host: `${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.replit.dev`,
+        }
+      }
+    });
+    ```
+    **Nota:** Investigue as variáveis de ambiente disponíveis no Replit para encontrar as mais adequadas para construir a URL pública do host.
+
+**PROTOCOLO OBRIGATÓRIO 5-CHECK:**
+1.  Mapear o ficheiro `vite.config.ts`.
+2.  Aplicar a configuração `server.hmr`.
+3.  Executar `get_latest_lsp_diagnostics`.
+4.  O critério final de sucesso é duplo:
+    a. Nenhum erro de conexão WebSocket no console do navegador.
+    b. Faça uma pequena alteração visual em um componente React (ex: mude um texto) e valide que a alteração aparece no navegador **instantaneamente, sem um recarregamento completo da página**.
