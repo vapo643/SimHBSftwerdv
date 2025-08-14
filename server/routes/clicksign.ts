@@ -11,6 +11,8 @@ import { interBankService } from "../services/interBankService.js";
 import { storage } from "../storage.js";
 import { jwtAuthMiddleware, type AuthenticatedRequest } from "../lib/jwt-auth-middleware.js";
 import { getBrasiliaTimestamp } from "../lib/timezone.js";
+// STATUS V2.0: Import do serviço de auditoria
+import { logStatusTransition } from "../services/auditService.js";
 
 const router = express.Router();
 
@@ -121,9 +123,27 @@ router.post("/send-ccb/:propostaId", jwtAuthMiddleware, async (req: Authenticate
       clicksignStatus: "pending",
       clicksignSignUrl: clickSignResult.signUrl,
       clicksignSentAt: new Date(getBrasiliaTimestamp()),
+      status: "AGUARDANDO_ASSINATURA",
+    });
+
+    // STATUS V2.0: Registrar transição de status
+    await logStatusTransition({
+      propostaId: propostaId,
+      fromStatus: proposta.status || "CCB_GERADA",
+      toStatus: "AGUARDANDO_ASSINATURA",
+      triggeredBy: "api",
+      userId: req.user?.id,
+      metadata: {
+        service: "clickSignService",
+        action: "sendCCBForSignature",
+        documentKey: clickSignResult.documentKey,
+        signUrl: clickSignResult.signUrl,
+        timestamp: new Date().toISOString()
+      }
     });
 
     console.log(`[CLICKSIGN] ✅ CCB sent successfully for proposal: ${propostaId}`);
+    console.log(`[CLICKSIGN V2.0] Status atualizado para AGUARDANDO_ASSINATURA`);
 
     res.json({
       success: true,

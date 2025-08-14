@@ -17,6 +17,8 @@ import { interBankService } from './interBankService';
 import { storage } from '../storage';
 import { supabaseAdmin } from '../lib/supabase-admin';
 import { PDFDocument } from 'pdf-lib';
+// STATUS V2.0: Import do serviço de auditoria
+import { logStatusTransition } from './auditService';
 
 // Configuração do tamanho do lote para processamento paralelo
 const BATCH_SIZE = 5;
@@ -168,6 +170,34 @@ class BoletoStorageService {
 
       // 3. Determinar sucesso geral
       result.success = result.boletosProcessados > 0;
+      
+      // STATUS V2.0: Se todos os boletos foram processados com sucesso, atualizar status
+      if (result.success && result.boletosProcessados === result.totalBoletos) {
+        // Buscar status atual da proposta
+        const proposta = await storage.getPropostaById(propostaId);
+        
+        // Atualizar status para BOLETOS_EMITIDOS
+        await storage.updateProposta(propostaId, {
+          status: 'BOLETOS_EMITIDOS' as const
+        });
+        
+        // Registrar transição de status
+        await logStatusTransition({
+          propostaId: propostaId,
+          fromStatus: proposta?.status || 'ASSINATURA_CONCLUIDA',
+          toStatus: 'BOLETOS_EMITIDOS',
+          triggeredBy: 'system',
+          metadata: {
+            service: 'boletoStorageService',
+            action: 'sincronizarBoletosDaProposta',
+            totalBoletos: result.totalBoletos,
+            boletosProcessados: result.boletosProcessados,
+            timestamp: new Date().toISOString()
+          }
+        });
+        
+        console.log(`[BOLETO STORAGE V2.0] Status atualizado para BOLETOS_EMITIDOS`);
+      }
       
       // 4. Log final e tempo total
       console.timeEnd(`[BOLETO STORAGE] ⏱️ Tempo total de sincronização`);

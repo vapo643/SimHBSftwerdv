@@ -16,6 +16,8 @@ import { ptBR } from "date-fns/locale";
 import { CoordinateAdjustment, applyCoordinateAdjustments } from "./ccbCoordinateMapper";
 // USANDO NOVAS COORDENADAS DO USUÁRIO
 import { USER_CCB_COORDINATES, getCoordinateForSystemField } from "./ccbUserCoordinates";
+// STATUS V2.0: Import do serviço de auditoria
+import { logStatusTransition } from "./auditService";
 
 // Interface removida - usando any para dados completos da proposta
 // Isso permite acesso a TODOS os campos JSON sem restrições de tipo
@@ -1021,16 +1023,33 @@ export class CCBGenerationService {
       }
 
       // 8. Atualizar banco de dados
-      await db.execute(sql`
+      const [updatedProposal] = await db.execute(sql`
         UPDATE propostas 
         SET 
           ccb_gerado = true,
           caminho_ccb = ${filePath},
-          ccb_gerado_em = NOW()
+          ccb_gerado_em = NOW(),
+          status = 'CCB_GERADA'
         WHERE id = ${proposalId}
+        RETURNING status
       `);
 
+      // STATUS V2.0: Registrar transição de status
+      await logStatusTransition({
+        propostaId: proposalId,
+        fromStatus: proposalData.status || 'aprovado',
+        toStatus: 'CCB_GERADA',
+        triggeredBy: 'system',
+        metadata: {
+          service: 'ccbGenerationService',
+          action: 'generateCCB',
+          filePath: filePath,
+          timestamp: new Date().toISOString()
+        }
+      });
+
       console.log(`✅ [CCB] Geração CORRETA concluída! Arquivo: ${filePath}`);
+      console.log(`✅ [CCB V2.0] Status atualizado para CCB_GERADA`);
       console.log(`✅ [CCB] IMPORTANTE: Template preservado com logo e formatação`);
       console.log(`✅ [CCB] Dados preenchidos: Nome, CPF e Valor`);
       console.log(`✅ [CCB] Próximo passo: Ajustar coordenadas conforme feedback visual`);

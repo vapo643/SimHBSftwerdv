@@ -13,6 +13,8 @@ import crypto from "crypto";
 import { storage } from "../storage.js";
 import { interBankService } from "./interBankService.js";
 import { getBrasiliaTimestamp } from "../lib/timezone.js";
+// STATUS V2.0: Import do serviço de auditoria
+import { logStatusTransition } from "./auditService.js";
 
 interface WebhookEvent {
   event: string;
@@ -202,18 +204,36 @@ class ClickSignWebhookService {
       assinaturaEletronicaConcluida: true,
       biometriaConcluida: true, // ClickSign biometria acontece no mesmo processo
       dataAssinatura: new Date(now),
-      status: "contratos_assinados" as const,
+      status: "ASSINATURA_CONCLUIDA" as const,
     };
 
     await storage.updateProposta(proposta.id, updateData);
+
+    // STATUS V2.0: Registrar transição de status
+    await logStatusTransition({
+      propostaId: proposta.id,
+      fromStatus: proposta.status || "AGUARDANDO_ASSINATURA",
+      toStatus: "ASSINATURA_CONCLUIDA",
+      triggeredBy: "webhook",
+      webhookEventId: data.document?.key || data.list?.key,
+      metadata: {
+        service: "clickSignWebhookService",
+        action: "handleAutoClose",
+        eventType: "auto_close",
+        documentKey: data.document?.key,
+        timestamp: now
+      }
+    });
 
     await storage.createPropostaLog({
       propostaId: proposta.id,
       autorId: "clicksign-webhook",
       statusAnterior: proposta.status,
-      statusNovo: "contratos_assinados",
+      statusNovo: "ASSINATURA_CONCLUIDA",
       observacao: "✅ CCB assinado com sucesso + Biometria validada - Finalização automática",
     });
+
+    console.log(`[CLICKSIGN V2.0] Status atualizado para ASSINATURA_CONCLUIDA`);
 
     // CRITICAL: Trigger automatic boleto generation
     console.log(`[CLICKSIGN → INTER] 🚀 Triggering automatic boleto generation`);
