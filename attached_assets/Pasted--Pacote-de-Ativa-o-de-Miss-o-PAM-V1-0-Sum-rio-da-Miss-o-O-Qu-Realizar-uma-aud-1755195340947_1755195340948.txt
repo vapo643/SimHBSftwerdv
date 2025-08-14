@@ -1,0 +1,46 @@
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Realizar uma auditoria arquitetural completa do nosso sistema de status de propostas e planejar a migração para um novo modelo de "fonte única da verdade", onde o status é atualizado automaticamente por eventos de API e webhooks.
+* **Intenção Estratégica (O Porquê):** O sistema atual está quebrado. Ele depende de múltiplos campos para inferir o estado de uma proposta, causando inconsistências graves. Precisamos de um sistema de status robusto e automatizado que seja a espinha dorsal confiável do nosso workflow.
+* **Histórico Relevante (Consulta Obrigatória):** O bug atual na "Tela de Cobranças" (que não exibe dados do cliente e mostra propostas erradas) é o sintoma final de uma doença arquitetural que estamos a curar agora. Todas as implementações de filtro anteriores estão obsoletas.
+* **Modelo Mental (Como se Encaixa):** Você atuará como o Arquiteto Chefe. Sua missão é analisar a arquitetura de eventos do sistema (chamadas de API, webhooks) e mapear como cada evento deve, obrigatoriamente, causar uma transição no novo e unificado `status` da proposta.
+* **Riscos Antecipados:** **Risco:** Esta é a refatoração mais crítica que já fizemos. **Contramedida:** Esta primeira fase é **APENAS DE ANÁLISE E PLANEJAMENTO**. Nenhuma linha de código de implementação será escrita até que o seu plano seja aprovado.
+
+---
+
+**IMPLEMENTAR:**
+Um relatório de auditoria e um plano de migração para o nosso novo sistema de status. **NÃO FAÇA MODIFICAÇÕES DE LÓGICA.**
+
+**CURRENT STATE:**
+O `status` da proposta é inconsistente. As telas usam uma combinação de `status` e flags booleanas para filtrar dados, resultando em bugs e perda de informação.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um documento de planejamento detalhado que será a nossa "bíblia" para a refatoração.
+
+**CONSTRAINTS (Roadmap de Análise e Planejamento):**
+
+**1. Mapeamento do Novo Workflow de Status:**
+    * **Ação:** O Arquiteto definiu o novo fluxo canônico. Sua tarefa é formalizá-lo e identificar os gatilhos técnicos.
+    * **Relatório:** Crie uma tabela mapeando o novo fluxo:
+
+| Novo Status | Gatilho Técnico (O que causa a mudança) |
+| :--- | :--- |
+| `CCB_GERADA` | Sucesso na chamada do nosso serviço interno de geração de PDF. |
+| `AGUARDANDO_ASSINATURA`| Sucesso na chamada da API da ClickSign para enviar o documento. |
+| `ASSINATURA_CONCLUIDA` | Recebimento do webhook `document.signed` da ClickSign. |
+| `BOLETOS_EMITIDOS` | Sucesso na chamada da API do Banco Inter para gerar todos os boletos. |
+
+**2. Análise de Impacto (Gap Analysis):**
+    * **Ação:** Compare o fluxo atual com este novo fluxo ideal.
+    * **Relatório:** Liste todos os pontos no código onde a lógica de atualização de status precisa ser **adicionada ou modificada** para implementar os gatilhos acima. (Ex: "No `clicksignService.ts`, após o envio, adicionar a lógica para mudar o status para `AGUARDANDO_ASSINATURA`").
+
+**3. Planejamento da Migração do Banco de Dados:**
+    * **Ação:** Planeje a atualização do nosso `enum` de status.
+    * **Relatório:** Liste os novos status que precisam ser adicionados ao `enum` da tabela `propostas`.
+
+**4. Arquitetura da Query Universal:**
+    * **Ação:** Projete a nova query Drizzle que será usada pelas telas de "Cobranças" e "Pagamentos".
+    * **Relatório:** A query deve ser extremamente simples. Ela deve selecionar propostas onde o `status` seja igual ao status final do fluxo de formalização (ex: `BOLETOS_EMITIDOS`). Descreva como esta query substituirá a lógica complexa atual.
+
+**Relatório Final:**
+O critério de sucesso é a entrega deste documento de planejamento completo. Ele será a base para as próximas interações do nosso debate.
