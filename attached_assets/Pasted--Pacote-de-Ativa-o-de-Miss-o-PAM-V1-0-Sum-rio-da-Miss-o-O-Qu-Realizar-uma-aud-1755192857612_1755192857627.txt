@@ -1,0 +1,39 @@
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Realizar uma auditoria forense completa do fluxo de dados da "Tela de Cobranças" para identificar a causa raiz exata pela qual propostas válidas não estão a ser exibidas.
+* **Intenção Estratégica (O Porquê):** A confiança da equipe de cobranças na nossa plataforma foi comprometida. A tela não está a mostrar todos os contratos que deveria, representando um risco operacional severo. Antes de qualquer correção, precisamos de um diagnóstico 100% preciso.
+* **Histórico Relevante (Consulta Obrigatória):** Em nossa última auditoria, você identificou a query principal em `server/routes/cobrancas.ts`. No entanto, a implementação dessa query ou a forma como o frontend a consome está a falhar. Sua análise deve focar na discrepância entre a regra de negócio esperada e o que o código está de fato a fazer.
+* **Modelo Mental (Como se Encaixa):** Atue como um auditor de sistemas. Sua tarefa é ler e analisar o código, não o modificar. Você deve rastrear o fluxo de dados desde a definição da regra de negócio no backend até a renderização no frontend e encontrar o ponto de quebra.
+* **Riscos Antecipados:** **Risco:** Uma análise superficial levará a outra correção falha. **Contramedida:** A sua missão não é resolver, mas sim **PROVAR** onde está o erro, apresentando o código como evidência.
+
+---
+
+**IMPLEMENTAR:**
+Auditoria de diagnóstico completa. **NÃO FAÇA NENHUMA MODIFICAÇÃO.**
+
+**CURRENT STATE:**
+A "Tela de Cobranças" está a omitir propostas que, pela regra de negócio, deveriam estar visíveis (propostas com CCB assinada e boletos gerados).
+
+**EXPECTED (Estado Final de Sucesso):**
+Um relatório de diagnóstico detalhado que responda às seguintes questões com trechos de código como evidência.
+
+**CONSTRAINTS (Roadmap de Auditoria Forense):**
+
+**1. Re-validação da Regra de Negócio no Backend:**
+    - **Ação:** Localize novamente a query Drizzle principal no endpoint `GET /api/cobrancas`.
+    - **Análise Crítica:** A regra de negócio correta é: "mostrar propostas com `assinaturaEletronicaConcluida = true` E que possuam pelo menos um boleto **ATIVO** (não `CANCELADO` ou `EXPIRADO`) na tabela `inter_collections`".
+    - **Relatório:** A query atual implementa **EXATAMENTE** esta lógica? Apresente a cláusula `WHERE` completa e aponte qualquer desvio desta regra.
+
+**2. Análise da Lógica de Filtragem (Frontend vs. Backend):**
+    - **Ação:** Inspecione o componente `client/src/pages/financeiro/CobrancasPage.tsx`.
+    - **Análise Crítica:** O frontend envia parâmetros de filtro para o backend (`statusFilter`, `atrasoFilter`). Como o backend lida com estes filtros? Existe a possibilidade de um filtro padrão no frontend estar a esconder as propostas que faltam?
+    - **Relatório:** Descreva como os filtros do frontend e a lógica de filtragem do backend interagem. Há alguma combinação de filtros que poderia causar a omissão de dados?
+
+**3. Análise do Tratamento de Dados (O Ponto Cego):**
+    - **Ação:** A query do backend retorna uma lista de propostas. O frontend recebe esta lista.
+    - **Hipótese:** É possível que o frontend esteja a aplicar uma segunda camada de filtragem **APÓS** receber os dados da API?
+    - **Análise Crítica:** Inspecione o código do frontend que renderiza a tabela. Existe alguma lógica (`.filter()` em um array, por exemplo) que possa estar a remover propostas da lista antes de exibi-las?
+    - **Relatório:** Confirme se existe ou não uma filtragem de dados secundária no frontend. Se existir, apresente o trecho de código.
+
+**Relatório Final:**
+O critério de sucesso é um relatório forense que nos dê uma ou mais hipóteses claras, baseadas em evidências do código, para explicar por que a tabela de cobranças está desatualizada.
