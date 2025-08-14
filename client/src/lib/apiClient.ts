@@ -459,8 +459,13 @@ export async function apiClient<T = any>(
       }
 
       // PASSO 5.5: Use enhanced ApiError class with full response data
+      const errorMessage = 
+        (typeof data === 'object' && data !== null && 'message' in data && typeof (data as any).message === 'string') 
+          ? (data as any).message 
+          : (typeof data === 'string' ? data : `HTTP Error ${response.status}`);
+      
       throw new ApiError(
-        (data as unknown)?.message || (data as string) || `HTTP Error ${response.status}`,
+        errorMessage,
         response.status,
         response.statusText,
         response,

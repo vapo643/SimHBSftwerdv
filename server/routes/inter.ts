@@ -81,10 +81,10 @@ router.patch(
   jwtAuthMiddleware,
   async (req: AuthenticatedRequest, res) => {
     try {
-      // Check user permissions
-      if (req.user?.role !== "ADMINISTRADOR") {
+      // Check user permissions - ADMIN ou FINANCEIRO podem prorrogar vencimentos
+      if (req.user?.role !== "ADMINISTRADOR" && req.user?.role !== "FINANCEIRO") {
         return res.status(403).json({
-          error: "Apenas administradores podem modificar cobranças",
+          error: "Apenas administradores e equipe financeira podem prorrogar vencimentos",
         });
       }
 
@@ -262,6 +262,72 @@ router.patch(
 );
 
 /**
+ * Modify single boleto - Endpoint unificado para modificações
+ * PATCH /api/cobrancas/boletos/:codigoSolicitacao
+ */
+router.patch(
+  "/cobrancas/boletos/:codigoSolicitacao",
+  jwtAuthMiddleware,
+  async (req: AuthenticatedRequest, res) => {
+    try {
+      // Validação de permissões - ADMIN ou FINANCEIRO
+      if (req.user?.role !== "ADMINISTRADOR" && req.user?.role !== "FINANCEIRO") {
+        return res.status(403).json({
+          error: "Apenas administradores e equipe financeira podem modificar boletos",
+        });
+      }
+
+      const { codigoSolicitacao } = req.params;
+      const { action, dataVencimento, desconto } = req.body;
+
+      console.log("🔍 [MODIFICAR-BOLETO] ====== INÍCIO DA MODIFICAÇÃO ======");
+      console.log("🔍 [MODIFICAR-BOLETO] Dados recebidos:", {
+        codigoSolicitacao,
+        action,
+        dataVencimento,
+        desconto,
+        usuario: req.user?.email,
+      });
+
+      // Construir payload baseado na ação
+      let updatePayload: any = {};
+      
+      if (action === "prorrogar" && dataVencimento) {
+        updatePayload.dataVencimento = dataVencimento;
+      } else if (action === "desconto" && desconto) {
+        updatePayload.desconto = desconto;
+      } else {
+        return res.status(400).json({ error: "Ação ou dados inválidos" });
+      }
+
+      // Chamar API do Inter
+      await interBankService.editarCobranca(codigoSolicitacao, updatePayload);
+
+      // Atualizar banco local
+      await db.update(interCollections)
+        .set({
+          ...updatePayload,
+          updatedAt: new Date(getBrasiliaTimestamp()),
+        })
+        .where(eq(interCollections.codigoSolicitacao, codigoSolicitacao));
+
+      console.log("🔍 [MODIFICAR-BOLETO] ✅ Modificação concluída com sucesso");
+
+      res.json({
+        success: true,
+        message: `Boleto ${codigoSolicitacao} modificado com sucesso`,
+      });
+    } catch (error) {
+      console.error("🔍 [MODIFICAR-BOLETO] ❌ Erro:", error);
+      res.status(500).json({
+        error: "Falha ao modificar boleto",
+        details: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  }
+);
+
+/**
  * Apply settlement discount - Desconto para Quitação
  * POST /api/inter/collections/settlement-discount
  */
@@ -270,10 +336,10 @@ router.post(
   jwtAuthMiddleware,
   async (req: AuthenticatedRequest, res) => {
     try {
-      // Check user permissions
-      if (req.user?.role !== "ADMINISTRADOR") {
+      // Check user permissions - ADMIN ou FINANCEIRO podem aplicar descontos
+      if (req.user?.role !== "ADMINISTRADOR" && req.user?.role !== "FINANCEIRO") {
         return res.status(403).json({
-          error: "Apenas administradores podem aplicar descontos de quitação",
+          error: "Apenas administradores e equipe financeira podem aplicar descontos de quitação",
         });
       }
 

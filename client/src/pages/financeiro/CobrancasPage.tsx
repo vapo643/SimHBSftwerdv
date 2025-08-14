@@ -205,6 +205,8 @@ export default function CobrancasPage() {
   // Verificar se o usuário tem role de cobrança
   const isCobrancaUser = user?.role === "COBRANÇA";
   const isAdmin = user?.role === "ADMINISTRADOR";
+  const isFinanceiro = user?.role === "FINANCEIRO";
+  const canModifyBoletos = isAdmin || isFinanceiro; // ADMIN ou FINANCEIRO podem modificar boletos
 
   // Buscar informações de dívida para desconto de quitação
   const {
@@ -934,11 +936,11 @@ export default function CobrancasPage() {
                                 <DropdownMenuContent align="end">
                                   <DropdownMenuItem
                                     onClick={() => {
-                                      if (!isAdmin) {
+                                      if (!canModifyBoletos) {
                                         toast({
                                           title: "Acesso Negado",
                                           description:
-                                            "Apenas administradores podem prorrogar vencimentos",
+                                            "Apenas administradores e equipe financeira podem prorrogar vencimentos",
                                           variant: "destructive",
                                         });
                                         return;
@@ -967,7 +969,7 @@ export default function CobrancasPage() {
                                       setShowProrrogarModal(true);
                                     }}
                                     disabled={
-                                      !isAdmin ||
+                                      !canModifyBoletos ||
                                       ["PAGO", "CANCELADO", "RECEBIDO"].includes(
                                         proposta.interSituacao?.toUpperCase() || ""
                                       )
@@ -979,11 +981,11 @@ export default function CobrancasPage() {
 
                                   <DropdownMenuItem
                                     onClick={() => {
-                                      if (!isAdmin) {
+                                      if (!canModifyBoletos) {
                                         toast({
                                           title: "Acesso Negado",
                                           description:
-                                            "Apenas administradores podem aplicar descontos",
+                                            "Apenas administradores e equipe financeira podem aplicar descontos",
                                           variant: "destructive",
                                         });
                                         return;
@@ -1013,7 +1015,7 @@ export default function CobrancasPage() {
                                       setShowDescontoModal(true);
                                     }}
                                     disabled={
-                                      !isAdmin ||
+                                      !canModifyBoletos ||
                                       ["PAGO", "CANCELADO", "RECEBIDO"].includes(
                                         proposta.interSituacao?.toUpperCase() || ""
                                       )
