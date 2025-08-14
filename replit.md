@@ -37,10 +37,12 @@ Error handling: Create structured documentation for automatic consultation durin
 
 ### Database Schema
 - PostgreSQL with Drizzle ORM.
-- Key tables: `users`, `propostas`, `parceiros`, `lojas`, `produtos`, `tabelas_comerciais`, `produto_tabela_comercial`, `comunicacao_logs`, `proposta_logs`, `parcelas`, `audit_delete_log`, `inter_collections`, `inter_webhooks`, `inter_callbacks`.
-- `propostas` table includes detailed client data, loan conditions, formalization tracking, and status.
+- Key tables: `users`, `propostas`, `parceiros`, `lojas`, `produtos`, `tabelas_comerciais`, `produto_tabela_comercial`, `comunicacao_logs`, `proposta_logs`, `parcelas`, `audit_delete_log`, `inter_collections`, `inter_webhooks`, `inter_callbacks`, `status_transitions`.
+- `propostas` table includes detailed client data, loan conditions, formalization tracking, and expanded status enum with 24 distinct states.
+- `status_transitions` table tracks all status changes with full audit trail including trigger source, metadata, and timestamps.
 - Soft deletes implemented using `deleted_at` columns.
 - Sequential numeric IDs for `propostas.id` starting at 300001.
+- Status V2.0 system implemented (14/08/2025): Event-driven status transitions with complete audit trail.
 
 ## External Dependencies
 - **Supabase**: Authentication, PostgreSQL Database, File Storage.

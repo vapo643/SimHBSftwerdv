@@ -93,23 +93,45 @@ export const gerenteLojas = pgTable(
 );
 
 export const statusEnum = pgEnum("status", [
+  // Status iniciais
   "rascunho",
   "aguardando_analise",
   "em_analise",
   "pendente",
   "pendenciado", // Status órfão formalizado - usado em dashboard e análise
   "aprovado",
+  "rejeitado",
+  
+  // Status de aceite
   "aguardando_aceite_atendente", // Novo status após aprovação do analista
   "aceito_atendente", // Aceito pelo atendente, pronto para formalização
-  "rejeitado",
+  
+  // Status de formalização V2.0
+  "CCB_GERADA", // Novo: CCB gerado com sucesso
+  "AGUARDANDO_ASSINATURA", // Novo: Enviado para ClickSign
+  "ASSINATURA_PENDENTE", // Novo: Cliente visualizou mas não assinou
+  "ASSINATURA_CONCLUIDA", // Novo: CCB totalmente assinado
+  
+  // Status de documentos (legado)
   "documentos_enviados",
   "contratos_preparados",
   "em_formalizacao", // Status órfão formalizado - usado durante processo de formalização
   "contratos_assinados",
   "assinado", // Status órfão formalizado - usado em sync de documentos
+  
+  // Status de pagamento V2.0
+  "BOLETOS_EMITIDOS", // Novo: Todos boletos gerados no Inter
+  "PAGAMENTO_PENDENTE", // Novo: Aguardando primeiro pagamento
+  "PAGAMENTO_PARCIAL", // Novo: Pelo menos 1 parcela paga
+  "INADIMPLENTE", // Novo: Atraso > 30 dias
+  "QUITADO", // Novo: Todas parcelas pagas (substitui "pago")
+  
+  // Status de pagamento (legado)
   "pronto_pagamento",
   "pagamento_autorizado", // Novo status após confirmação de veracidade
-  "pago",
+  "pago", // Legado: mantido para compatibilidade
+  
+  // Status administrativos
   "cancelado",
   "suspensa",
 ]);
@@ -659,6 +681,22 @@ export const security_logs = pgTable("security_logs", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Status Transitions Audit Table - Sistema de Status V2.0
+export const statusTransitions = pgTable("status_transitions", {
+  id: serial("id").primaryKey(),
+  propostaId: text("proposta_id")
+    .notNull()
+    .references(() => propostas.id, { onDelete: "cascade" }),
+  fromStatus: text("from_status"), // Pode ser null para criação inicial
+  toStatus: text("to_status").notNull(),
+  triggeredBy: text("triggered_by").notNull(), // 'api', 'webhook', 'manual', 'scheduler', 'system'
+  metadata: jsonb("metadata"), // Dados adicionais sobre a transição
+  userId: uuid("user_id"), // Usuário que realizou a ação (quando aplicável)
+  webhookEventId: text("webhook_event_id"), // ID do evento de webhook (quando aplicável)
+  errorMessage: text("error_message"), // Para transições que falharam
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // TypeScript Types
 export type InsertParceiro = z.infer<typeof insertParceiroSchema>;
 export type Parceiro = typeof parceiros.$inferSelect;
@@ -698,3 +736,10 @@ export type InterCallback = typeof interCallbacks.$inferSelect;
 // Referência Pessoal types
 export type InsertReferenciaPessoal = z.infer<typeof insertReferenciaPessoalSchema>;
 export type ReferenciaPessoal = typeof referenciaPessoal.$inferSelect;
+
+// Status Transitions types - Sistema de Status V2.0
+export const insertStatusTransitionSchema = createInsertSchema(statusTransitions)
+  .omit({ id: true, createdAt: true });
+
+export type InsertStatusTransition = z.infer<typeof insertStatusTransitionSchema>;
+export type StatusTransition = typeof statusTransitions.$inferSelect;

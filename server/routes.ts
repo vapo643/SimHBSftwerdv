@@ -55,6 +55,7 @@ import propostasCorrigirSincronizacaoRoutes from "./routes/propostas-corrigir-si
 import jobStatusRoutes from "./routes/job-status";
 import testQueueRoutes from "./routes/test-queue";
 import testRetryRoutes from "./routes/test-retry";
+import testAuditRoutes from "./routes/test-audit";
 import {
   getBrasiliaDate,
   formatBrazilianDateTime,
@@ -5189,6 +5190,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use("/api/jobs", jobStatusRoutes);
   app.use("/api", testQueueRoutes);
   app.use("/api/test", testRetryRoutes);
+  
+  // Test Audit routes - Sistema de Status V2.0
+  app.use("/api/test-audit", testAuditRoutes);
   
   // Teste temporário para verificar refatoração do Mock Queue
   const testMockQueueWorkerRoutes = (await import("./routes/test-mock-queue-worker")).default;
