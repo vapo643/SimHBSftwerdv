@@ -181,21 +181,6 @@ export default function Cobrancas() {
       const response = await apiRequest("/api/cobrancas", {
         method: "GET",
       });
-      
-      // 🔍 DEBUG AUDITORIA: Estrutura dos dados que chegam da API
-      console.log("🔍 [AUDITORIA FRONTEND] Total propostas recebidas:", response?.length || 0);
-      if (response && response.length > 0) {
-        console.log("🔍 [AUDITORIA FRONTEND] Primeira proposta - estrutura completa:", response[0]);
-        console.log("🔍 [AUDITORIA FRONTEND] Campos críticos da primeira proposta:", {
-          id: response[0]?.id,
-          nomeCliente: response[0]?.nomeCliente,
-          cpfCliente: response[0]?.cpfCliente,
-          telefoneCliente: response[0]?.telefoneCliente,
-          emailCliente: response[0]?.emailCliente,
-          valorTotal: response[0]?.valorTotal
-        });
-      }
-      
       return response as PropostaCobranca[];
     },
   });
