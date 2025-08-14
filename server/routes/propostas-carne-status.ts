@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { supabase } from '../lib/supabase.js';
+import { createServerSupabaseAdminClient } from '../lib/supabase.js';
 import { jwtAuthMiddleware as jwtMiddleware } from '../lib/jwt-auth-middleware.js';
 
 const router = Router();
@@ -20,6 +20,10 @@ router.get('/propostas/:id/carne-status', jwtMiddleware, async (req, res) => {
     // PAM V1.0 - DIAGNÓSTICO: Log do caminho COMPLETO sendo verificado
     const fullStoragePath = `propostas/${id}/carnes`;
     console.log(`[PAM V1.0 DIAGNÓSTICO] 📁 CAMINHO_STORAGE_COMPLETO: "${fullStoragePath}"`);
+    
+    // PAM V1.0 - CORREÇÃO: Usar admin client igual ao endpoint /gerar-carne
+    const supabase = createServerSupabaseAdminClient();
+    console.log(`[PAM V1.0 DIAGNÓSTICO] 🔧 CORREÇÃO: Usando Admin Client (igual ao /gerar-carne)`);
     
     // Buscar arquivos de carnê no Storage
     const { data: files, error: listError } = await supabase

@@ -40,5 +40,25 @@
 ### HIPÓTESE INICIAL
 O carnê existe no Supabase Storage mas a informação não está chegando corretamente ao estado React que controla a renderização da UI.
 
-### ANÁLISE PRELIMINAR
-[A ser preenchido após coleta de evidências]
+### ANÁLISE DEFINITIVA - CAUSA RAIZ IDENTIFICADA
+
+**🚨 PROBLEMA:** Discrepância de clientes Supabase entre endpoints
+
+**EVIDÊNCIA FORENSE:**
+1. **Endpoint `/gerar-carne`**: Usa `createServerSupabaseAdminClient()` (admin client)
+   - RESULTADO: Encontra carnê ✅ `[CARNE API - PRODUCER] ✅ Carnê já existe: carne-2025-08-13_18-24-48-667.pdf`
+
+2. **Endpoint `/carne-status`**: Usa `import { supabase }` (regular client)
+   - RESULTADO: Não encontra carnê ❌ `files found: 0`
+
+**CAUSA:** O client regular tem restrições RLS (Row Level Security) no Storage que impedem acesso a arquivos que o admin client consegue ver.
+
+### CORREÇÃO IMPLEMENTADA
+
+✅ **Alteração no `/api/propostas/:id/carne-status`:**
+- Substituído client regular por admin client
+- Adicionado log de diagnóstico da correção
+- Mantida instrumentação PAM V1.0 para validação
+
+### TESTE DA CORREÇÃO
+[Aguardando execução do teste pós-correção]
