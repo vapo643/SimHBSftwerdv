@@ -20,18 +20,48 @@ router.get("/", async (req: any, res) => {
     const { status, atraso } = req.query;
     const userRole = req.user?.role || "";
 
-    // Buscar apenas propostas com CCB assinado e assinatura eletrônica concluída
+    console.log("🔍 [COBRANÇAS] ====== INÍCIO DA BUSCA DE PROPOSTAS ======");
+    console.log("🔍 [COBRANÇAS] Filtros aplicados:", { status, atraso });
+
+    // Primeiro, buscar propostas que têm boletos ATIVOS (não cancelados)
+    const propostasComBoletosAtivos = await db
+      .selectDistinct({ propostaId: interCollections.propostaId })
+      .from(interCollections)
+      .where(
+        and(
+          sql`${interCollections.situacao} NOT IN ('CANCELADO', 'EXPIRADO')`,
+          sql`${interCollections.isActive} = true`
+        )
+      );
+
+    const propostaIdsComBoletosAtivos = propostasComBoletosAtivos.map(p => p.propostaId);
+    
+    console.log(`🔍 [COBRANÇAS] Encontradas ${propostaIdsComBoletosAtivos.length} propostas com boletos ativos`);
+
+    // Agora buscar apenas propostas com CCB assinado, assinatura concluída E que tenham boletos ativos
+    let whereConditions = and(
+      sql`${propostas.deletedAt} IS NULL`,
+      inArray(propostas.status, ["aprovado", "pronto_pagamento", "pago"]),
+      eq(propostas.ccbGerado, true),
+      eq(propostas.assinaturaEletronicaConcluida, true)
+    );
+
+    // Só incluir propostas que têm boletos ativos
+    if (propostaIdsComBoletosAtivos.length > 0) {
+      whereConditions = and(
+        whereConditions,
+        inArray(propostas.id, propostaIdsComBoletosAtivos)
+      );
+    } else {
+      // Se não há propostas com boletos ativos, retornar array vazio
+      console.log("🔍 [COBRANÇAS] Nenhuma proposta com boletos ativos encontrada");
+      return res.json([]);
+    }
+
     const propostasData = await db
       .select()
       .from(propostas)
-      .where(
-        and(
-          sql`${propostas.deletedAt} IS NULL`,
-          inArray(propostas.status, ["aprovado", "pronto_pagamento", "pago"]),
-          eq(propostas.ccbGerado, true),
-          eq(propostas.assinaturaEletronicaConcluida, true)
-        )
-      )
+      .where(whereConditions)
       .orderBy(desc(propostas.createdAt));
 
     // Para cada proposta, buscar suas parcelas e calcular status de cobrança
@@ -44,11 +74,17 @@ router.get("/", async (req: any, res) => {
           .where(eq(parcelas.propostaId, proposta.id))
           .orderBy(parcelas.numeroParcela);
 
-        // Buscar boletos do Inter Bank
+        // Buscar boletos do Inter Bank - apenas boletos ATIVOS (não cancelados)
         const boletosInter = await db
           .select()
           .from(interCollections)
-          .where(eq(interCollections.propostaId, proposta.id));
+          .where(
+            and(
+              eq(interCollections.propostaId, proposta.id),
+              sql`${interCollections.situacao} NOT IN ('CANCELADO', 'EXPIRADO')`,
+              eq(interCollections.isActive, true)
+            )
+          );
 
         // Calcular estatísticas
         const hoje = new Date();
@@ -149,19 +185,23 @@ router.get("/", async (req: any, res) => {
       })
     );
 
-    // Filtrar apenas propostas que têm boletos gerados (no Inter ou nas parcelas)
+    // Filtrar apenas propostas que têm boletos gerados e ATIVOS
     const propostasComBoletos = propostasComCobranca.filter(p => {
-      // Verifica se tem parcelas com boletos OU se tem boletos no Inter
-      return (
-        p.parcelas.length > 0 &&
-        p.parcelas.some(
-          parcela =>
-            parcela.interPixCopiaECola ||
+      // Verifica se tem parcelas com boletos ATIVOS no Inter
+      const temBoletosAtivos = p.parcelas.some(
+        parcela =>
+          (parcela.interPixCopiaECola ||
             parcela.interLinhaDigitavel ||
-            parcela.interCodigoBarras ||
-            parcela.codigoBoleto
-        )
+            parcela.interCodigoBarras) &&
+          parcela.interSituacao !== 'CANCELADO' &&
+          parcela.interSituacao !== 'EXPIRADO'
       );
+      
+      if (!temBoletosAtivos) {
+        console.log(`🔍 [COBRANÇAS] Proposta ${p.id.slice(0, 8)} removida - sem boletos ativos`);
+      }
+      
+      return p.parcelas.length > 0 && temBoletosAtivos;
     });
 
     // Aplicar filtros
@@ -206,6 +246,9 @@ router.get("/", async (req: any, res) => {
       propostasFiltradas = propostasFiltradas.filter(p => p.diasAtraso > 30);
     }
 
+    console.log(`🔍 [COBRANÇAS] Total de propostas retornadas: ${propostasFiltradas.length}`);
+    console.log("🔍 [COBRANÇAS] ====== FIM DA BUSCA DE PROPOSTAS ======");
+    
     res.json(propostasFiltradas);
   } catch (error) {
     console.error("Erro ao buscar propostas de cobrança:", error);

@@ -322,17 +322,25 @@ export default function CobrancasPage() {
         },
         (payload) => {
           console.log("📡 [REALTIME] Evento de UPDATE recebido em propostas:", payload);
+          console.log("📡 [REALTIME] Dados alterados:", {
+            id: payload.new?.id,
+            assinaturaEletronicaConcluida: payload.new?.assinatura_eletronica_concluida,
+            ccbGerado: payload.new?.ccb_gerado
+          });
           
           // Invalidar as queries para forçar um refetch
           queryClient.invalidateQueries({ queryKey: ['/api/cobrancas'] });
           queryClient.invalidateQueries({ queryKey: ['/api/cobrancas/kpis'] });
           
-          // Mostrar notificação suave
-          toast({
-            title: "Atualização recebida",
-            description: "A tabela de cobranças foi atualizada automaticamente",
-            duration: 2000,
-          });
+          // Se uma assinatura foi concluída, notificar
+          if (payload.new?.assinatura_eletronica_concluida === true && 
+              payload.old?.assinatura_eletronica_concluida !== true) {
+            toast({
+              title: "Nova proposta assinada",
+              description: "Uma nova proposta foi assinada e pode aparecer na lista",
+              duration: 3000,
+            });
+          }
         }
       )
       .on(
@@ -344,18 +352,43 @@ export default function CobrancasPage() {
         },
         (payload) => {
           console.log("📡 [REALTIME] Evento recebido em inter_collections:", payload);
+          console.log("📡 [REALTIME] Tipo de evento:", payload.eventType);
+          console.log("📡 [REALTIME] Dados do boleto:", {
+            propostaId: payload.new?.proposta_id || payload.old?.proposta_id,
+            situacao: payload.new?.situacao || payload.old?.situacao,
+            isActive: payload.new?.is_active
+          });
           
           // Invalidar as queries para forçar um refetch
           queryClient.invalidateQueries({ queryKey: ['/api/cobrancas'] });
           queryClient.invalidateQueries({ queryKey: ['/api/cobrancas/kpis'] });
           
-          // Se foi um pagamento (UPDATE com situacao = RECEBIDO)
-          if (payload.eventType === 'UPDATE' && payload.new?.situacao === 'RECEBIDO') {
+          // Notificações específicas por tipo de evento
+          if (payload.eventType === 'INSERT') {
+            console.log("📡 [REALTIME] Novo boleto inserido - atualizando lista");
             toast({
-              title: "✅ Pagamento recebido",
-              description: `Boleto ${payload.new?.seuNumero || ''} foi pago`,
-              duration: 3000,
+              title: "Novos boletos gerados",
+              description: "A lista de cobranças foi atualizada com novos boletos",
+              duration: 2000,
             });
+          } else if (payload.eventType === 'UPDATE') {
+            // Se o boleto foi cancelado
+            if (payload.new?.situacao === 'CANCELADO' && payload.old?.situacao !== 'CANCELADO') {
+              console.log("📡 [REALTIME] Boleto cancelado - verificando se proposta deve sair da lista");
+              toast({
+                title: "Boleto cancelado",
+                description: "Um boleto foi cancelado e a lista foi atualizada",
+                duration: 2000,
+              });
+            }
+            // Se foi um pagamento
+            else if (payload.new?.situacao === 'RECEBIDO') {
+              toast({
+                title: "✅ Pagamento recebido",
+                description: `Boleto ${payload.new?.seu_numero || ''} foi pago`,
+                duration: 3000,
+              });
+            }
           }
         }
       )
