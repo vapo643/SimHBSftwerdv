@@ -23,14 +23,18 @@ router.get("/", async (req: any, res) => {
     console.log("🔍 [COBRANÇAS] ====== INÍCIO DA BUSCA DE PROPOSTAS ======");
     console.log("🔍 [COBRANÇAS] Filtros aplicados:", { status, atraso });
 
-    // NOVA ESTRATÉGIA: Buscar TODAS as propostas elegíveis primeiro
-    console.log("🔍 [COBRANÇAS] Buscando TODAS as propostas com CCB assinado...");
+    // NOVA REGRA ARQUITETURAL: Exibir apenas propostas com boletos gerados na inter_collections
+    console.log("🔍 [COBRANÇAS] PAM V1.0 - Buscando propostas que possuem boletos...");
     
+    // REGRA ABSOLUTA: Se tem boleto, aparece na cobrança. Se não tem, não aparece.
     let whereConditions = and(
       sql`${propostas.deletedAt} IS NULL`,
-      inArray(propostas.status, ["contratos_assinados", "pronto_pagamento", "pago"]),
-      eq(propostas.ccbGerado, true),
-      eq(propostas.assinaturaEletronicaConcluida, true)
+      // EXISTS subquery: propostas que têm pelo menos 1 boleto na inter_collections
+      sql`EXISTS (
+        SELECT 1 
+        FROM ${interCollections} 
+        WHERE ${interCollections.propostaId} = ${propostas.id}
+      )`
     );
 
     const propostasData = await db
@@ -39,7 +43,7 @@ router.get("/", async (req: any, res) => {
       .where(whereConditions)
       .orderBy(desc(propostas.createdAt));
     
-    console.log(`🔍 [COBRANÇAS] Encontradas ${propostasData.length} propostas com CCB assinado`);
+    console.log(`🔍 [COBRANÇAS] PAM V1.0 - Encontradas ${propostasData.length} propostas com boletos gerados`);
 
     // Para cada proposta, buscar suas parcelas e calcular status de cobrança
     const propostasComCobranca = await Promise.all(
@@ -250,14 +254,19 @@ router.get("/", async (req: any, res) => {
 // GET /api/cobrancas/kpis - Retorna KPIs de inadimplência
 router.get("/kpis", async (req, res) => {
   try {
-    // Buscar todas as propostas ativas
+    // PAM V1.0: Buscar apenas propostas com boletos (regra consistente)
     const propostasData = await db
       .select()
       .from(propostas)
       .where(
         and(
           sql`${propostas.deletedAt} IS NULL`,
-          inArray(propostas.status, ["contratos_assinados", "pronto_pagamento", "pago"])
+          // EXISTS: apenas propostas que têm boletos na inter_collections
+          sql`EXISTS (
+            SELECT 1 
+            FROM ${interCollections} 
+            WHERE ${interCollections.propostaId} = ${propostas.id}
+          )`
         )
       );
 
@@ -755,14 +764,19 @@ router.get("/inter-status/:codigoSolicitacao", async (req: any, res) => {
 // GET /api/cobrancas/exportar/inadimplentes - Exportar lista de inadimplentes para Excel
 router.get("/exportar/inadimplentes", async (req, res) => {
   try {
-    // Buscar propostas inadimplentes
+    // PAM V1.0: Buscar apenas propostas inadimplentes com boletos (regra consistente)
     const propostasData = await db
       .select()
       .from(propostas)
       .where(
         and(
           sql`${propostas.deletedAt} IS NULL`,
-          inArray(propostas.status, ["contratos_assinados", "pronto_pagamento", "pago"])
+          // EXISTS: apenas propostas que têm boletos na inter_collections
+          sql`EXISTS (
+            SELECT 1 
+            FROM ${interCollections} 
+            WHERE ${interCollections.propostaId} = ${propostas.id}
+          )`
         )
       );
 
