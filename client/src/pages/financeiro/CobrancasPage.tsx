@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { getSupabase } from "@/lib/supabase";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -302,6 +303,78 @@ export default function CobrancasPage() {
     queryKey: ["/api/cobrancas/kpis"],
     queryFn: () => apiRequest("/api/cobrancas/kpis"),
   });
+
+  // 🔄 REALTIME: Escutar mudanças nas tabelas propostas e inter_collections
+  useEffect(() => {
+    console.log("🔄 [REALTIME] Configurando escuta para atualizações de cobranças");
+    
+    const supabase = getSupabase();
+    const channel = supabase
+      .channel('cobrancas-realtime-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'propostas'
+        },
+        (payload) => {
+          console.log("📡 [REALTIME] Evento de UPDATE recebido em propostas:", payload);
+          
+          // Invalidar as queries para forçar um refetch
+          queryClient.invalidateQueries({ queryKey: ['/api/cobrancas'] });
+          queryClient.invalidateQueries({ queryKey: ['/api/cobrancas/kpis'] });
+          
+          // Mostrar notificação suave
+          toast({
+            title: "Atualização recebida",
+            description: "A tabela de cobranças foi atualizada automaticamente",
+            duration: 2000,
+          });
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // Escutar todos os eventos (INSERT, UPDATE, DELETE)
+          schema: 'public',
+          table: 'inter_collections'
+        },
+        (payload) => {
+          console.log("📡 [REALTIME] Evento recebido em inter_collections:", payload);
+          
+          // Invalidar as queries para forçar um refetch
+          queryClient.invalidateQueries({ queryKey: ['/api/cobrancas'] });
+          queryClient.invalidateQueries({ queryKey: ['/api/cobrancas/kpis'] });
+          
+          // Se foi um pagamento (UPDATE com situacao = RECEBIDO)
+          if (payload.eventType === 'UPDATE' && payload.new?.situacao === 'RECEBIDO') {
+            toast({
+              title: "✅ Pagamento recebido",
+              description: `Boleto ${payload.new?.seuNumero || ''} foi pago`,
+              duration: 3000,
+            });
+          }
+        }
+      )
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          console.log("✅ [REALTIME] Conectado ao canal de atualizações de cobranças");
+        } else if (status === 'CHANNEL_ERROR') {
+          console.error("❌ [REALTIME] Erro ao conectar ao canal");
+        } else if (status === 'TIMED_OUT') {
+          console.error("⏱️ [REALTIME] Timeout ao conectar");
+        } else if (status === 'CLOSED') {
+          console.log("🔌 [REALTIME] Canal fechado");
+        }
+      });
+
+    // Cleanup ao desmontar o componente
+    return () => {
+      console.log("🧹 [REALTIME] Removendo canal de escuta de cobranças");
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient, toast]);
 
   // Buscar ficha do cliente
   const { data: fichaCliente, isLoading: loadingFicha } = useQuery<FichaCliente>({
