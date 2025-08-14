@@ -631,7 +631,7 @@ export default function Pagamentos() {
                       <TableRow key={pagamento.id} className="hover:bg-muted/50 cursor-pointer">
                         <TableCell className="font-medium">
                           <div className="space-y-1">
-                            <div>{pagamento.numeroContrato}</div>
+                            <div>#{pagamento.numeroProposta || pagamento.numeroContrato}</div>
                             <div className="text-xs text-muted-foreground">{pagamento.produto}</div>
                           </div>
                         </TableCell>

@@ -1135,6 +1135,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const baseQuery = db
         .select({
           id: propostas.id,
+          numeroProposta: propostas.numeroProposta, // PAM V1.0 - Sequential number for UI
           status: propostas.status,
           clienteData: propostas.clienteData,
           condicoesData: propostas.condicoesData,
@@ -1933,6 +1934,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const result = await db
             .select({
               id: propostas.id,
+              numero_proposta: propostas.numeroProposta, // PAM V1.0 - Sequential number
               status: propostas.status,
               cliente_data: propostas.clienteData,
               condicoes_data: propostas.condicoesData,
@@ -3400,10 +3402,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         console.log(`[${getBrasiliaTimestamp()}] 🔍 STEP 1 - Fazendo query direta no Supabase...`);
 
-        // Buscar proposta usando Supabase diretamente
+        // Buscar proposta usando Supabase diretamente - incluindo numeroProposta
         const { data: proposta, error: propostaError } = await supabase
           .from("propostas")
-          .select("*")
+          .select("*, numero_proposta")
           .eq("id", propostaId)
           .single();
 

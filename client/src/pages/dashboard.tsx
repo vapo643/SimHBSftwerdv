@@ -469,7 +469,7 @@ const Dashboard: React.FC = () => {
                           )}
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          ID: #{proposta.id} | CPF: {proposta.cpfCliente || "Não informado"}
+                          Proposta: #{proposta.numeroProposta || proposta.id} | CPF: {proposta.cpfCliente || "Não informado"}
                         </div>
                         <div className="text-sm text-muted-foreground">
                           Criado em:{" "}

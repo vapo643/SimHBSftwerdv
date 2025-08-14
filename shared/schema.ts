@@ -112,7 +112,8 @@ export const statusEnum = pgEnum("status", [
 ]);
 
 export const propostas = pgTable("propostas", {
-  id: text("id").primaryKey(), // UUID string format
+  id: text("id").primaryKey(), // UUID string format - used internally
+  numeroProposta: integer("numero_proposta").notNull().unique(), // User-facing sequential number starting at 300001
   lojaId: integer("loja_id").notNull(), // Multi-tenant key
 
   // Relacionamentos de negócio
