@@ -23,22 +23,9 @@ router.get("/", async (req: any, res) => {
     console.log("🔍 [COBRANÇAS] ====== INÍCIO DA BUSCA DE PROPOSTAS ======");
     console.log("🔍 [COBRANÇAS] Filtros aplicados:", { status, atraso });
 
-    // Primeiro, buscar propostas que têm boletos ATIVOS (não cancelados)
-    const propostasComBoletosAtivos = await db
-      .selectDistinct({ propostaId: interCollections.propostaId })
-      .from(interCollections)
-      .where(
-        and(
-          sql`${interCollections.situacao} NOT IN ('CANCELADO', 'EXPIRADO')`,
-          sql`${interCollections.isActive} = true`
-        )
-      );
-
-    const propostaIdsComBoletosAtivos = propostasComBoletosAtivos.map(p => p.propostaId);
+    // NOVA ESTRATÉGIA: Buscar TODAS as propostas elegíveis primeiro
+    console.log("🔍 [COBRANÇAS] Buscando TODAS as propostas com CCB assinado...");
     
-    console.log(`🔍 [COBRANÇAS] Encontradas ${propostaIdsComBoletosAtivos.length} propostas com boletos ativos`);
-
-    // Agora buscar apenas propostas com CCB assinado, assinatura concluída E que tenham boletos ativos
     let whereConditions = and(
       sql`${propostas.deletedAt} IS NULL`,
       inArray(propostas.status, ["aprovado", "pronto_pagamento", "pago"]),
@@ -46,23 +33,13 @@ router.get("/", async (req: any, res) => {
       eq(propostas.assinaturaEletronicaConcluida, true)
     );
 
-    // Só incluir propostas que têm boletos ativos
-    if (propostaIdsComBoletosAtivos.length > 0) {
-      whereConditions = and(
-        whereConditions,
-        inArray(propostas.id, propostaIdsComBoletosAtivos)
-      );
-    } else {
-      // Se não há propostas com boletos ativos, retornar array vazio
-      console.log("🔍 [COBRANÇAS] Nenhuma proposta com boletos ativos encontrada");
-      return res.json([]);
-    }
-
     const propostasData = await db
       .select()
       .from(propostas)
       .where(whereConditions)
       .orderBy(desc(propostas.createdAt));
+    
+    console.log(`🔍 [COBRANÇAS] Encontradas ${propostasData.length} propostas com CCB assinado`);
 
     // Para cada proposta, buscar suas parcelas e calcular status de cobrança
     const propostasComCobranca = await Promise.all(
@@ -74,17 +51,11 @@ router.get("/", async (req: any, res) => {
           .where(eq(parcelas.propostaId, proposta.id))
           .orderBy(parcelas.numeroParcela);
 
-        // Buscar boletos do Inter Bank - apenas boletos ATIVOS (não cancelados)
-        const boletosInter = await db
+        // Buscar TODOS os boletos do Inter Bank para análise (incluindo cancelados)
+        const todosBoletosInter = await db
           .select()
           .from(interCollections)
-          .where(
-            and(
-              eq(interCollections.propostaId, proposta.id),
-              sql`${interCollections.situacao} NOT IN ('CANCELADO', 'EXPIRADO')`,
-              eq(interCollections.isActive, true)
-            )
-          );
+          .where(eq(interCollections.propostaId, proposta.id));
 
         // Calcular estatísticas
         const hoje = new Date();
@@ -117,7 +88,7 @@ router.get("/", async (req: any, res) => {
           }
 
           // Adicionar dados do boleto Inter se existir
-          const boletoInter = boletosInter.find(b => b.numeroParcela === parcela.numeroParcela);
+          const boletoInter = todosBoletosInter.find(b => b.numeroParcela === parcela.numeroParcela);
 
           return {
             ...parcela,
@@ -139,11 +110,14 @@ router.get("/", async (req: any, res) => {
           statusCobranca = "inadimplente";
         }
 
-        // Pegar o primeiro boleto Inter para mostrar na tabela principal
+        // Pegar o primeiro boleto Inter ATIVO para mostrar na tabela principal
+        const boletosAtivos = todosBoletosInter.filter(b => 
+          b.situacao !== 'CANCELADO' && b.situacao !== 'EXPIRADO' && b.isActive
+        );
         const primeiroBoletoPendente =
-          boletosInter.find(b =>
+          boletosAtivos.find(b =>
             ["A_RECEBER", "ATRASADO", "EM_PROCESSAMENTO"].includes(b.situacao || "")
-          ) || boletosInter[0];
+          ) || boletosAtivos[0];
 
         return {
           id: proposta.id,
@@ -185,27 +159,43 @@ router.get("/", async (req: any, res) => {
       })
     );
 
-    // Filtrar apenas propostas que têm boletos gerados e ATIVOS
-    const propostasComBoletos = propostasComCobranca.filter(p => {
-      // Verifica se tem parcelas com boletos ATIVOS no Inter
-      const temBoletosAtivos = p.parcelas.some(
-        parcela =>
-          (parcela.interPixCopiaECola ||
-            parcela.interLinhaDigitavel ||
-            parcela.interCodigoBarras) &&
-          parcela.interSituacao !== 'CANCELADO' &&
-          parcela.interSituacao !== 'EXPIRADO'
-      );
-      
-      if (!temBoletosAtivos) {
-        console.log(`🔍 [COBRANÇAS] Proposta ${p.id.slice(0, 8)} removida - sem boletos ativos`);
+    // NOVA LÓGICA: Filtrar propostas elegíveis para cobrança
+    const propostasElegiveis = propostasComCobranca.filter(p => {
+      // REGRA 1: Se NÃO tem parcelas, incluir (proposta aprovada sem parcelas criadas)
+      if (p.parcelas.length === 0) {
+        console.log(`🔍 [COBRANÇAS] Proposta ${p.id.slice(0, 8)} (${p.nomeCliente || 'Sem nome'}) INCLUÍDA - aprovada sem parcelas criadas`);
+        return true;
       }
       
-      return p.parcelas.length > 0 && temBoletosAtivos;
+      // Contar boletos do Inter nas parcelas
+      const boletosInter = p.parcelas.filter(parcela => 
+        parcela.interPixCopiaECola || parcela.interLinhaDigitavel || parcela.interCodigoBarras
+      );
+      
+      // REGRA 2: Se tem parcelas mas NÃO tem boletos do Inter, incluir (pronta para gerar boletos)
+      if (boletosInter.length === 0) {
+        console.log(`🔍 [COBRANÇAS] Proposta ${p.id.slice(0, 8)} (${p.nomeCliente || 'Sem nome'}) INCLUÍDA - tem parcelas, pronta para gerar boletos`);
+        return true;
+      }
+      
+      // Contar boletos ATIVOS no Inter
+      const boletosAtivos = boletosInter.filter(parcela => 
+        parcela.interSituacao !== 'CANCELADO' && parcela.interSituacao !== 'EXPIRADO'
+      );
+      
+      // REGRA 3: Se TEM boletos do Inter, incluir apenas se há pelo menos 1 ativo
+      if (boletosAtivos.length > 0) {
+        console.log(`🔍 [COBRANÇAS] Proposta ${p.id.slice(0, 8)} (${p.nomeCliente || 'Sem nome'}) INCLUÍDA - ${boletosAtivos.length} boletos ativos de ${boletosInter.length} total`);
+        return true;
+      }
+      
+      // REGRA 4: Se tem boletos mas TODOS cancelados, excluir
+      console.log(`🔍 [COBRANÇAS] Proposta ${p.id.slice(0, 8)} (${p.nomeCliente || 'Sem nome'}) EXCLUÍDA - todos os ${boletosInter.length} boletos cancelados`);
+      return false;
     });
 
     // Aplicar filtros
-    let propostasFiltradas = propostasComBoletos;
+    let propostasFiltradas = propostasElegiveis;
 
     // FILTRO AUTOMÁTICO PARA USUÁRIOS DE COBRANÇA
     // Usuários com role "COBRANÇA" veem apenas: inadimplentes, em atraso ou que vencem em 3 dias
@@ -214,7 +204,7 @@ router.get("/", async (req: any, res) => {
       const em3Dias = new Date();
       em3Dias.setDate(hoje.getDate() + 3);
 
-      propostasFiltradas = propostasComBoletos.filter(p => {
+      propostasFiltradas = propostasElegiveis.filter(p => {
         // Inadimplentes ou em atraso
         if (p.status === "inadimplente" || p.diasAtraso > 0) {
           return true;
@@ -246,7 +236,8 @@ router.get("/", async (req: any, res) => {
       propostasFiltradas = propostasFiltradas.filter(p => p.diasAtraso > 30);
     }
 
-    console.log(`🔍 [COBRANÇAS] Total de propostas retornadas: ${propostasFiltradas.length}`);
+    console.log(`🔍 [COBRANÇAS] Total de propostas elegíveis: ${propostasElegiveis.length}`);
+    console.log(`🔍 [COBRANÇAS] Total de propostas após filtros: ${propostasFiltradas.length}`);
     console.log("🔍 [COBRANÇAS] ====== FIM DA BUSCA DE PROPOSTAS ======");
     
     res.json(propostasFiltradas);

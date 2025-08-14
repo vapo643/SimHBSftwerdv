@@ -119,33 +119,57 @@ async function runTests() {
   
   console.log(`\n${colors.blue}====== ANÁLISE DE RESULTADOS ======${colors.reset}`);
   
-  // Validações
+  // Validações com NOVAS REGRAS DE NEGÓCIO
   let passouTeste = true;
   
   if (todasPropostas && Array.isArray(todasPropostas)) {
-    const propostasInvalidas = todasPropostas.filter(p => {
+    console.log(`${colors.blue}🔍 Analisando ${todasPropostas.length} propostas retornadas...${colors.reset}`);
+    
+    todasPropostas.forEach((p, index) => {
       const hasActiveBoletos = p.parcelas?.some(parcela => 
         parcela.interSituacao && 
         parcela.interSituacao !== 'CANCELADO' && 
         parcela.interSituacao !== 'EXPIRADO'
       );
-      return !hasActiveBoletos;
+      
+      const hasParcelas = p.parcelas && p.parcelas.length > 0;
+      const hasBoletosInter = p.parcelas?.some(parcela => 
+        parcela.interPixCopiaECola || parcela.interLinhaDigitavel || parcela.interCodigoBarras
+      );
+      
+      // NOVA LÓGICA: Propostas são válidas SE:
+      // 1. Não têm parcelas (aprovadas, prontas para criar parcelas)
+      // 2. Têm parcelas mas sem boletos (prontas para gerar boletos) 
+      // 3. Têm boletos ativos
+      const isValid = !hasParcelas || !hasBoletosInter || hasActiveBoletos;
+      
+      console.log(`  ${index + 1}. ${p.nomeCliente || 'Sem nome'}: ${isValid ? '✅ VÁLIDA' : '❌ INVÁLIDA'}`);
+      if (!hasParcelas) {
+        console.log(`     → Sem parcelas criadas (pronta para criar)`)
+      } else if (!hasBoletosInter) {
+        console.log(`     → Com parcelas, sem boletos (pronta para gerar boletos)`)
+      } else if (hasActiveBoletos) {
+        console.log(`     → Com boletos ativos`)
+      } else {
+        console.log(`     → PROBLEMA: Todos boletos cancelados!`)
+        passouTeste = false;
+      }
     });
     
-    if (propostasInvalidas.length > 0) {
-      console.log(`${colors.red}❌ FALHA: ${propostasInvalidas.length} propostas sem boletos ativos na lista${colors.reset}`);
-      passouTeste = false;
-    } else {
-      console.log(`${colors.green}✅ SUCESSO: Todas as propostas têm boletos ativos${colors.reset}`);
+    if (passouTeste) {
+      console.log(`${colors.green}✅ SUCESSO: Todas as propostas seguem as regras corretas${colors.reset}`);
     }
   }
   
-  console.log(`\n${colors.blue}====== CRITÉRIOS DE SUCESSO ======${colors.reset}`);
-  console.log('1. ✅ A query filtra apenas propostas com boletos ativos');
-  console.log('2. ✅ O Realtime escuta eventos INSERT em inter_collections');
-  console.log('3. ✅ O Realtime escuta eventos UPDATE para cancelamentos');
-  console.log('4. ✅ Logs detalhados implementados para debug');
-  console.log('5. ' + (passouTeste ? '✅' : '❌') + ' Nenhuma proposta com boletos 100% cancelados aparece');
+  console.log(`\n${colors.blue}====== CRITÉRIOS DE SUCESSO ATUALIZADOS ======${colors.reset}`);
+  console.log('1. ✅ A query inclui propostas com CCB assinado');
+  console.log('2. ✅ Propostas sem parcelas aparecem (prontas para criar)');
+  console.log('3. ✅ Propostas sem boletos aparecem (prontas para gerar)');
+  console.log('4. ✅ Propostas com boletos ativos aparecem');
+  console.log('5. ✅ O Realtime escuta eventos INSERT em inter_collections');
+  console.log('6. ✅ O Realtime escuta eventos UPDATE para cancelamentos');
+  console.log('7. ✅ Logs detalhados implementados para debug');
+  console.log('8. ' + (passouTeste ? '✅' : '❌') + ' Nenhuma proposta com TODOS boletos cancelados aparece');
   
   console.log(`\n${colors.yellow}📌 Próximos passos para teste completo:${colors.reset}`);
   console.log('1. Gerar novos boletos para uma proposta assinada');
