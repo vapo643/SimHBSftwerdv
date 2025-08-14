@@ -61,13 +61,25 @@ router.post(
       // VERIFICAR SE JÁ EXISTE CARNÊ NO STORAGE
       console.log(`[CARNE API - PRODUCER] 🔍 Verificando se já existe carnê no Storage...`);
       
+      // PAM V1.0 - DIAGNÓSTICO APROFUNDADO: Log do caminho e resultado EXATO
+      const gearCarneStoragePath = `propostas/${id}/carnes`;
+      console.log(`[PAM V1.0 DIAGNÓSTICO] 🔍 /gerar-carne CAMINHO_EXATO: "${gearCarneStoragePath}"`);
+      
       const { data: existingFiles, error: listError } = await supabase
         .storage
         .from('documents')
-        .list(`propostas/${id}/carnes`, {
+        .list(gearCarneStoragePath, {
           limit: 1,
           sortBy: { column: 'created_at', order: 'desc' }
         });
+      
+      // PAM V1.0 - DIAGNÓSTICO APROFUNDADO: Log COMPLETO do resultado
+      console.log(`[PAM V1.0 DIAGNÓSTICO] 🔍 /gerar-carne RESULTADO_COMPLETO:`);
+      console.log(`[PAM V1.0 DIAGNÓSTICO]   - Bucket: documents`);
+      console.log(`[PAM V1.0 DIAGNÓSTICO]   - Path: ${gearCarneStoragePath}`);
+      console.log(`[PAM V1.0 DIAGNÓSTICO]   - listError:`, listError);
+      console.log(`[PAM V1.0 DIAGNÓSTICO]   - existingFiles length:`, existingFiles ? existingFiles.length : 'null');
+      console.log(`[PAM V1.0 DIAGNÓSTICO]   - existingFiles data:`, JSON.stringify(existingFiles, null, 2));
       
       if (!listError && existingFiles && existingFiles.length > 0) {
         // Carnê já existe - retornar URL do arquivo existente
@@ -75,6 +87,12 @@ router.post(
         const filePath = `propostas/${id}/carnes/${fileName}`;
         
         console.log(`[CARNE API - PRODUCER] ✅ Carnê já existe: ${fileName}`);
+        
+        // PAM V1.0 - DIAGNÓSTICO: Log DETALHES do arquivo encontrado
+        console.log(`[PAM V1.0 DIAGNÓSTICO] 🔍 /gerar-carne ARQUIVO_ENCONTRADO:`);
+        console.log(`[PAM V1.0 DIAGNÓSTICO]   - fileName: ${fileName}`);
+        console.log(`[PAM V1.0 DIAGNÓSTICO]   - filePath: ${filePath}`);
+        console.log(`[PAM V1.0 DIAGNÓSTICO]   - arquivo completo:`, JSON.stringify(existingFiles[0], null, 2));
         
         // Gerar URL assinada para o carnê existente
         const { data: signedUrlData, error: signedUrlError } = await supabase
