@@ -5,9 +5,9 @@
 
 import { Bell } from "lucide-react";
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
-import { queryClient } from "@/lib/queryClient";
+import { apiRequest } from "@/lib/queryClient";
 
 interface Notificacao {
   id: number;
@@ -25,6 +25,7 @@ interface Notificacao {
 
 export function NotificationBell() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const queryClient = useQueryClient();
 
   // Buscar notificações a cada 60 segundos
   const { data, isLoading } = useQuery({
@@ -36,62 +37,62 @@ export function NotificationBell() {
   const notificacoes = (data as any)?.notificacoes || [];
   const totalNaoLidas = (data as any)?.totalNaoLidas || 0;
 
-  // Marcar notificação como lida
-  const marcarComoLida = async (id: number) => {
-    try {
-      const response = await fetch(`/api/alertas/notificacoes/${id}/marcar-lida`, {
+  // Mutação para marcar notificação como lida
+  const marcarComoLidaMutation = useMutation({
+    mutationFn: async (id: number) => {
+      return await apiRequest(`/api/alertas/notificacoes/${id}/marcar-lida`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
       });
-
-      if (response.ok) {
-        // Invalidar cache para atualizar contagem
-        queryClient.invalidateQueries({ queryKey: ["/api/alertas/notificacoes"] });
-      }
-    } catch (error) {
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/alertas/notificacoes"] });
+    },
+    onError: (error) => {
       console.error("Erro ao marcar notificação como lida:", error);
-    }
+    },
+  });
+
+  const marcarComoLida = (id: number) => {
+    marcarComoLidaMutation.mutate(id);
   };
 
-  // Marcar todas como lidas
-  const marcarTodasComoLidas = async () => {
-    try {
-      const response = await fetch("/api/alertas/notificacoes/marcar-todas-lidas", {
+  // Mutação para marcar todas como lidas
+  const marcarTodasComoLidasMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest("/api/alertas/notificacoes/marcar-todas-lidas", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
       });
-
-      if (response.ok) {
-        queryClient.invalidateQueries({ queryKey: ["/api/alertas/notificacoes"] });
-      }
-    } catch (error) {
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/alertas/notificacoes"] });
+    },
+    onError: (error) => {
       console.error("Erro ao marcar todas como lidas:", error);
-    }
+    },
+  });
+
+  // Mutação para limpar histórico (arquivar todas)
+  const limparHistoricoMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest("/api/alertas/notificacoes/all", {
+        method: "DELETE",
+      });
+    },
+    onSuccess: () => {
+      console.log('✅ Cache de notificações invalidado. A UI será atualizada.');
+      queryClient.invalidateQueries({ queryKey: ["/api/alertas/notificacoes"] });
+    },
+    onError: (error) => {
+      console.error("Erro ao limpar histórico:", error);
+    },
+  });
+
+  const marcarTodasComoLidas = () => {
+    marcarTodasComoLidasMutation.mutate();
   };
 
-  // Limpar histórico (arquivar todas)
-  const limparHistorico = async () => {
-    try {
-      const response = await fetch("/api/alertas/notificacoes/all", {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-      });
-
-      if (response.ok) {
-        queryClient.invalidateQueries({ queryKey: ["/api/alertas/notificacoes"] });
-      }
-    } catch (error) {
-      console.error("Erro ao limpar histórico:", error);
-    }
+  const limparHistorico = () => {
+    limparHistoricoMutation.mutate();
   };
 
   return (

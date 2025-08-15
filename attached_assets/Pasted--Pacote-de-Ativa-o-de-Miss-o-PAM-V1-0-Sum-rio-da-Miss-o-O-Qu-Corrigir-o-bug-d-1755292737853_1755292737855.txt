@@ -1,0 +1,52 @@
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Corrigir o bug de atualização da UI no dropdown de notificações, garantindo que a lista seja limpa visualmente para o usuário imediatamente após ele clicar em "Limpar Histórico".
+* **Intenção Estratégica (O Porquê):** A funcionalidade de "Limpar Histórico" está quebrada do ponto de vista do usuário, pois não fornece o feedback visual esperado de que a ação foi bem-sucedida. Precisamos fechar este loop para que a experiência do usuário seja completa e confiável.
+* **Histórico Relevante (Consulta Obrigatória):** A falha em invalidar queries do `TanStack Query` após uma `mutation` (como um `DELETE`) é um erro comum de implementação. A solução está na correta utilização do callback `onSuccess` para acionar o `queryClient.invalidateQueries`.
+* **Modelo Mental (Como se Encaixa):** Você atuará como um Engenheiro de Frontend a depurar um problema de gerenciamento de estado. A ação (`DELETE`) está a funcionar, mas a "reação" (a atualização da UI) está em falta.
+* **Riscos Antecipados:** Nenhum. Esta é uma correção de baixo risco e focada em um único ficheiro.
+
+---
+
+**IMPLEMENTAR:**
+Correção da lógica de re-fetch de dados após a limpeza do histórico de notificações.
+
+**BUG:**
+Ao clicar em "Limpar Histórico", a chamada de API para o backend (`DELETE /api/notificacoes/all`) é bem-sucedida, mas a lista de notificações na UI não é atualizada, permanecendo visível até que a página seja recarregada manualmente.
+
+**PROCESSO SISTEMÁTICO (Roadmap de Correção Cirúrgico):**
+
+**1. Isolamento do Código:**
+    - **Ação:** Concentre-se exclusivamente no ficheiro do componente `<NotificationDropdown />` (ou onde a lógica do sino de notificações reside).
+
+**2. Localização da Falha:**
+    - **Ação:** Encontre a lógica `useMutation` do `TanStack Query` que você implementou para a ação "Limpar Histórico".
+
+**3. Implementação da Correção:**
+    - **Ação:** Dentro da `mutation`, você precisa adicionar um callback `onSuccess`.
+    - **Implementação:** Dentro deste callback `onSuccess`, você **DEVE** chamar a função `queryClient.invalidateQueries` para invalidar a query que busca as notificações. A `queryKey` a ser invalidada é provavelmente `['/api/notificacoes']`. Isso forçará o `TanStack Query` a buscar os dados novamente, que agora retornarão uma lista vazia, atualizando a UI.
+
+    - **Código de Exemplo para a Lógica de Correção:**
+      ```typescript
+      // Exemplo da lógica a ser implementada
+      const queryClient = useQueryClient(); // Garanta que o queryClient está disponível no componente
+
+      const mutation = useMutation({
+        mutationFn: () => apiRequest('/api/notificacoes/all', { method: 'DELETE' }),
+        onSuccess: () => {
+          // A CORREÇÃO CRÍTICA VAI AQUI:
+          queryClient.invalidateQueries({ queryKey: ['/api/notificacoes'] });
+          console.log('Cache de notificações invalidado. A UI será atualizada.');
+        },
+        onError: (error) => {
+          // Lógica de erro...
+        }
+      });
+      ```
+
+**PROTOCOLO OBRIGATÓRIO 5-CHECK:**
+1.  Mapear o ficheiro e a função `mutation` exata.
+2.  Garantir a importação e o uso correto do `useQueryClient`.
+3.  Executar `get_latest_lsp_diagnostics`.
+4.  Realizar o teste funcional completo.
+5.  O critério final de sucesso é clicar no botão "Limpar Histórico" e validar que a lista e o badge no sino desaparecem **imediatamente**, sem a necessidade de recarregar a página.
