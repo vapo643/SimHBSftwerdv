@@ -788,6 +788,34 @@ export const statusTransitions = pgTable("status_transitions", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// PAM V1.0 Blueprint V2.0 - Tabela de Solicitações de Modificação para Workflow de Aprovação
+export const solicitacoesModificacao = pgTable("solicitacoes_modificacao", {
+  id: serial("id").primaryKey(),
+  propostaId: text("proposta_id")
+    .notNull()
+    .references(() => propostas.id, { onDelete: "cascade" }),
+  codigoSolicitacao: text("codigo_solicitacao"), // Código da solicitação no Banco Inter
+  tipoSolicitacao: text("tipo_solicitacao").notNull(), // 'desconto' ou 'prorrogacao'
+  dadosSolicitacao: jsonb("dados_solicitacao").notNull(), // JSON com dados específicos da solicitação
+  status: text("status").notNull().default("pendente"), // 'pendente', 'aprovado', 'rejeitado', 'executado'
+  solicitadoPorId: uuid("solicitado_por_id")
+    .notNull()
+    .references(() => profiles.id),
+  solicitadoPorNome: text("solicitado_por_nome").notNull(),
+  solicitadoPorRole: text("solicitado_por_role").notNull(),
+  aprovadoPorId: uuid("aprovado_por_id")
+    .references(() => profiles.id),
+  aprovadoPorNome: text("aprovado_por_nome"),
+  observacaoSolicitante: text("observacao_solicitante"),
+  observacaoAprovador: text("observacao_aprovador"),
+  motivoRejeicao: text("motivo_rejeicao"),
+  dataAprovacao: timestamp("data_aprovacao"),
+  dataExecucao: timestamp("data_execucao"),
+  erroExecucao: text("erro_execucao"), // Erro caso falhe ao executar no Inter
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // TypeScript Types
 export type InsertParceiro = z.infer<typeof insertParceiroSchema>;
 export type Parceiro = typeof parceiros.$inferSelect;
@@ -834,3 +862,30 @@ export const insertStatusTransitionSchema = createInsertSchema(statusTransitions
 
 export type InsertStatusTransition = z.infer<typeof insertStatusTransitionSchema>;
 export type StatusTransition = typeof statusTransitions.$inferSelect;
+
+// Solicitações Modificação types - PAM V1.0 Blueprint V2.0
+export const insertSolicitacaoModificacaoSchema = createInsertSchema(solicitacoesModificacao)
+  .omit({ 
+    id: true, 
+    createdAt: true, 
+    updatedAt: true,
+    aprovadoPorId: true,
+    aprovadoPorNome: true,
+    dataAprovacao: true,
+    dataExecucao: true,
+    erroExecucao: true
+  });
+
+export const updateSolicitacaoModificacaoSchema = createInsertSchema(solicitacoesModificacao)
+  .partial()
+  .omit({ 
+    id: true, 
+    createdAt: true,
+    solicitadoPorId: true,
+    solicitadoPorNome: true,
+    solicitadoPorRole: true
+  });
+
+export type InsertSolicitacaoModificacao = z.infer<typeof insertSolicitacaoModificacaoSchema>;
+export type UpdateSolicitacaoModificacao = z.infer<typeof updateSolicitacaoModificacaoSchema>;
+export type SolicitacaoModificacao = typeof solicitacoesModificacao.$inferSelect;

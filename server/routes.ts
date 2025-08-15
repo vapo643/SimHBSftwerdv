@@ -78,7 +78,7 @@ export const UserDataSchema = z
     fullName: z.string().min(3, "Nome completo é obrigatório"),
     email: z.string().email("Formato de email inválido"),
     password: passwordSchema, // ASVS 6.2.4 & 6.2.7 - Enhanced password validation
-    role: z.enum(["ADMINISTRADOR", "DIRETOR", "GERENTE", "ATENDENTE", "ANALISTA", "FINANCEIRO"]),
+    role: z.enum(["ADMINISTRADOR", "DIRETOR", "GERENTE", "ATENDENTE", "ANALISTA", "FINANCEIRO", "SUPERVISOR_COBRANCA", "COBRANCA"]),
     lojaId: z.number().int().nullable().optional(),
     lojaIds: z.array(z.number().int()).nullable().optional(),
   })

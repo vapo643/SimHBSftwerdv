@@ -7,6 +7,7 @@ import {
   historicoObservacoesCobranca,
   interCollections,
   profiles,
+  solicitacoesModificacao,
 } from "@shared/schema";
 import { eq, and, sql, desc, gte, lte, inArray, or, not } from "drizzle-orm";
 import { format, parseISO, differenceInDays, isAfter } from "date-fns";
@@ -118,7 +119,39 @@ router.get("/", async (req: any, res) => {
       })
       .from(propostas)
       .where(whereConditions)
-      .orderBy(desc(propostas.createdAt));
+      // PAM V1.0 Blueprint V2.0 - Ordenação Inteligente Multinível
+      // Priorização: 1. Inadimplentes > 2. Próximos a Vencer > 3. Outros
+      // Sub-ordenação: Por valor descendente dentro de cada categoria
+      .orderBy(
+        sql`
+          CASE 
+            -- Prioridade 1: Inadimplentes (qualquer parcela vencida)
+            WHEN EXISTS (
+              SELECT 1 FROM parcelas p 
+              WHERE p.proposta_id = ${propostas.id} 
+              AND p.data_vencimento < CURRENT_DATE 
+              AND p.status != 'pago'
+            ) THEN 1
+            
+            -- Prioridade 2: Próximos a Vencer (vence nos próximos 7 dias)
+            WHEN EXISTS (
+              SELECT 1 FROM parcelas p 
+              WHERE p.proposta_id = ${propostas.id} 
+              AND p.data_vencimento BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL '7 days'
+              AND p.status != 'pago'
+            ) THEN 2
+            
+            -- Prioridade 3: Outros (em dia, vencimento distante)
+            ELSE 3
+          END ASC,
+          
+          -- Sub-ordenação por valor total financiado (maior primeiro)
+          ${propostas.valorTotalFinanciado} DESC NULLS LAST,
+          
+          -- Desempate final por data de criação
+          ${propostas.createdAt} DESC
+        `
+      );
     
     // 🔧 PAM V1.0 - INSTRUMENTAÇÃO BACKEND PONTO 2
     console.log('[DEBUG-BACKEND-2] Resultado BRUTO do DB:', {
@@ -901,25 +934,26 @@ router.get("/exportar/inadimplentes", async (req, res) => {
   }
 });
 
-// PAM V1.0 - NOVOS ENDPOINTS DE AÇÃO PRIMÁRIA
+// PAM V1.0 Blueprint V2.0 - ENDPOINTS COM WORKFLOW DE APROVAÇÃO
 
 /**
- * PATCH /api/cobrancas/boletos/:codigoSolicitacao/prorrogar
- * Prorroga o vencimento de um boleto no Banco Inter
+ * POST /api/cobrancas/boletos/:codigoSolicitacao/solicitar-prorrogacao
+ * Cria uma solicitação de prorrogação que precisa ser aprovada pelo supervisor
  */
-router.patch("/boletos/:codigoSolicitacao/prorrogar", jwtAuthMiddleware, async (req: any, res) => {
+router.post("/boletos/:codigoSolicitacao/solicitar-prorrogacao", jwtAuthMiddleware, async (req: any, res) => {
   try {
     const { codigoSolicitacao } = req.params;
-    const { novaDataVencimento } = req.body;
+    const { novaDataVencimento, observacao } = req.body;
     const userRole = req.user?.role;
     const userId = req.user?.id;
+    const userName = req.user?.fullName || req.user?.email;
 
-    // VALIDAÇÃO DE PERMISSÃO - Primeira etapa conforme protocolo
-    if (!userRole || !["ADMINISTRADOR", "COBRANCA", "GERENTE"].includes(userRole)) {
+    // Blueprint V2.0: Apenas COBRANCA e ADMINISTRADOR podem solicitar
+    if (!userRole || !["ADMINISTRADOR", "COBRANCA", "SUPERVISOR_COBRANCA"].includes(userRole)) {
       console.log(`[PRORROGAR] Acesso negado - User: ${userId}, Role: ${userRole}`);
       return res.status(403).json({ 
         error: "Acesso negado",
-        message: "Você não tem permissão para prorrogar vencimentos" 
+        message: "Você não tem permissão para solicitar prorrogações" 
       });
     }
 
@@ -950,7 +984,7 @@ router.patch("/boletos/:codigoSolicitacao/prorrogar", jwtAuthMiddleware, async (
       });
     }
 
-    console.log(`[PRORROGAR] Iniciando prorrogação - Código: ${codigoSolicitacao}, Nova data: ${novaDataVencimento}`);
+    console.log(`[PRORROGAR] Criando solicitação - Código: ${codigoSolicitacao}, Nova data: ${novaDataVencimento}`);
 
     // Buscar boleto no banco local
     const [boletoLocal] = await db
@@ -974,90 +1008,130 @@ router.patch("/boletos/:codigoSolicitacao/prorrogar", jwtAuthMiddleware, async (
       });
     }
 
-    // Chamar serviço do Banco Inter
-    const { interBankService } = await import("../services/interBankService");
-    
-    try {
-      // Editar cobrança no Banco Inter
-      const resultado = await interBankService.editarCobranca(codigoSolicitacao, {
-        dataVencimento: novaDataVencimento,
-      });
+    // Blueprint V2.0: Se for ADMINISTRADOR ou SUPERVISOR_COBRANCA, aprova automaticamente
+    const isAutoApproved = ["ADMINISTRADOR", "SUPERVISOR_COBRANCA"].includes(userRole);
 
-      console.log(`[PRORROGAR] Resposta do Inter:`, resultado);
-
-      // Atualizar banco local
-      await db
-        .update(interCollections)
-        .set({
-          dataVencimento: novaDataVencimento,
-          updatedAt: new Date(),
+    // Criar solicitação de modificação
+    const [novaSolicitacao] = await db
+      .insert(solicitacoesModificacao)
+      .values({
+        propostaId: boletoLocal.propostaId,
+        codigoSolicitacao: codigoSolicitacao,
+        tipoSolicitacao: "prorrogacao",
+        dadosSolicitacao: {
+          novaDataVencimento: novaDataVencimento,
+          dataVencimentoOriginal: boletoLocal.dataVencimento,
+          valorBoleto: boletoLocal.valorNominal,
+          numeroParcela: boletoLocal.numeroParcela
+        },
+        status: isAutoApproved ? "aprovado" : "pendente",
+        solicitadoPorId: userId,
+        solicitadoPorNome: userName,
+        solicitadoPorRole: userRole,
+        observacaoSolicitante: observacao,
+        ...(isAutoApproved && {
+          aprovadoPorId: userId,
+          aprovadoPorNome: userName,
+          dataAprovacao: new Date(),
+          observacaoAprovador: "Auto-aprovado por permissão elevada"
         })
-        .where(eq(interCollections.codigoSolicitacao, codigoSolicitacao));
+      })
+      .returning();
 
-      // Atualizar parcela correspondente se houver
-      if (boletoLocal.numeroParcela && boletoLocal.propostaId) {
+    // Se foi auto-aprovado, executar imediatamente
+    if (isAutoApproved) {
+      try {
+        const { interBankService } = await import("../services/interBankService");
+        
+        // Executar no Banco Inter
+        await interBankService.editarCobranca(codigoSolicitacao, {
+          dataVencimento: novaDataVencimento,
+        });
+
+        // Atualizar status para executado
         await db
-          .update(parcelas)
+          .update(solicitacoesModificacao)
+          .set({
+            status: "executado",
+            dataExecucao: new Date(),
+          })
+          .where(eq(solicitacoesModificacao.id, novaSolicitacao.id));
+
+        // Atualizar banco local
+        await db
+          .update(interCollections)
           .set({
             dataVencimento: novaDataVencimento,
             updatedAt: new Date(),
           })
-          .where(
-            and(
-              eq(parcelas.propostaId, boletoLocal.propostaId),
-              eq(parcelas.numeroParcela, boletoLocal.numeroParcela)
-            )
-          );
-      }
+          .where(eq(interCollections.codigoSolicitacao, codigoSolicitacao));
 
-      console.log(`[PRORROGAR] Vencimento prorrogado com sucesso`);
+        console.log(`[PRORROGAR] Solicitação auto-aprovada e executada com sucesso`);
+        
+        return res.json({
+          success: true,
+          message: "Prorrogação executada com sucesso",
+          solicitacaoId: novaSolicitacao.id,
+          autoApproved: true,
+          codigoSolicitacao,
+          novaDataVencimento,
+        });
+      } catch (error: any) {
+        // Se falhar, atualizar com erro
+        await db
+          .update(solicitacoesModificacao)
+          .set({
+            status: "aprovado",
+            erroExecucao: error.message || "Erro ao executar no Banco Inter",
+          })
+          .where(eq(solicitacoesModificacao.id, novaSolicitacao.id));
 
-      res.json({
-        success: true,
-        message: "Vencimento prorrogado com sucesso",
-        codigoSolicitacao,
-        novaDataVencimento,
-      });
-    } catch (interError: any) {
-      console.error(`[PRORROGAR] Erro na API do Inter:`, interError);
-      
-      // Tratar erro específico do Inter
-      if (interError.response?.status === 400) {
-        return res.status(400).json({ 
-          error: "Erro ao prorrogar",
-          message: "O Banco Inter rejeitou a solicitação. Verifique os dados e tente novamente.",
-          detalhes: interError.response?.data
+        console.error(`[PRORROGAR] Erro na execução automática:`, error);
+        return res.status(500).json({
+          error: "Erro na execução",
+          message: "Solicitação aprovada mas houve erro ao executar no Banco Inter",
+          solicitacaoId: novaSolicitacao.id,
         });
       }
-      
-      throw interError;
     }
+
+    console.log(`[PRORROGAR] Solicitação criada e aguardando aprovação`);
+
+    res.json({
+      success: true,
+      message: "Solicitação de prorrogação criada e aguardando aprovação do supervisor",
+      solicitacaoId: novaSolicitacao.id,
+      status: "pendente",
+      codigoSolicitacao,
+      novaDataVencimento,
+    });
   } catch (error) {
     console.error("[PRORROGAR] Erro geral:", error);
     res.status(500).json({ 
       error: "Erro interno",
-      message: "Erro ao prorrogar vencimento do boleto" 
+      message: "Erro ao criar solicitação de prorrogação" 
     });
   }
 });
 
 /**
- * POST /api/cobrancas/boletos/:codigoSolicitacao/aplicar-desconto
- * Aplica desconto em um boleto no Banco Inter
+ * POST /api/cobrancas/boletos/:codigoSolicitacao/solicitar-desconto
+ * Cria uma solicitação de desconto que precisa ser aprovada pelo supervisor
  */
-router.post("/boletos/:codigoSolicitacao/aplicar-desconto", jwtAuthMiddleware, async (req: any, res) => {
+router.post("/boletos/:codigoSolicitacao/solicitar-desconto", jwtAuthMiddleware, async (req: any, res) => {
   try {
     const { codigoSolicitacao } = req.params;
-    const { tipoDesconto, valorDesconto, dataLimiteDesconto } = req.body;
+    const { tipoDesconto, valorDesconto, dataLimiteDesconto, observacao } = req.body;
     const userRole = req.user?.role;
     const userId = req.user?.id;
+    const userName = req.user?.fullName || req.user?.email;
 
-    // VALIDAÇÃO DE PERMISSÃO - Primeira etapa conforme protocolo
-    if (!userRole || !["ADMINISTRADOR", "COBRANCA", "GERENTE"].includes(userRole)) {
+    // Blueprint V2.0: Apenas COBRANCA e ADMINISTRADOR podem solicitar
+    if (!userRole || !["ADMINISTRADOR", "COBRANCA", "SUPERVISOR_COBRANCA"].includes(userRole)) {
       console.log(`[DESCONTO] Acesso negado - User: ${userId}, Role: ${userRole}`);
       return res.status(403).json({ 
         error: "Acesso negado",
-        message: "Você não tem permissão para aplicar descontos" 
+        message: "Você não tem permissão para solicitar descontos" 
       });
     }
 
@@ -1094,7 +1168,7 @@ router.post("/boletos/:codigoSolicitacao/aplicar-desconto", jwtAuthMiddleware, a
       });
     }
 
-    console.log(`[DESCONTO] Iniciando aplicação - Código: ${codigoSolicitacao}, Tipo: ${tipoDesconto}, Valor: ${valorDesconto}`);
+    console.log(`[DESCONTO] Criando solicitação - Código: ${codigoSolicitacao}, Tipo: ${tipoDesconto}, Valor: ${valorDesconto}`);
 
     // Buscar boleto no banco local
     const [boletoLocal] = await db
@@ -1118,92 +1192,356 @@ router.post("/boletos/:codigoSolicitacao/aplicar-desconto", jwtAuthMiddleware, a
       });
     }
 
-    // Preparar payload para o Inter
-    const descontoPayload: any = {
-      codigoDesconto: "DESCONTO1", // Código do desconto
-      taxa: tipoDesconto === "PERCENTUAL" ? valorDescontoNum : 0,
-      valor: tipoDesconto === "FIXO" ? valorDescontoNum : 0,
-    };
+    // Blueprint V2.0: Se for ADMINISTRADOR ou SUPERVISOR_COBRANCA, aprova automaticamente
+    const isAutoApproved = ["ADMINISTRADOR", "SUPERVISOR_COBRANCA"].includes(userRole);
 
-    // Adicionar data limite se fornecida
-    if (dataLimiteDesconto) {
-      const dataLimite = new Date(dataLimiteDesconto);
-      if (!isNaN(dataLimite.getTime())) {
-        descontoPayload.dataDesconto = dataLimiteDesconto;
-      }
-    }
-
-    // Chamar serviço do Banco Inter
-    const { interBankService } = await import("../services/interBankService");
-    
-    try {
-      // Editar cobrança no Banco Inter com desconto
-      const resultado = await interBankService.editarCobranca(codigoSolicitacao, {
-        desconto: descontoPayload,
-      });
-
-      console.log(`[DESCONTO] Resposta do Inter:`, resultado);
-
-      // Calcular novo valor se desconto fixo
-      let novoValor = Number(boletoLocal.valorNominal || 0);
-      if (tipoDesconto === "FIXO") {
-        novoValor = Math.max(0, novoValor - valorDescontoNum);
-      } else {
-        novoValor = novoValor * (1 - valorDescontoNum / 100);
-      }
-
-      // Atualizar banco local
-      await db
-        .update(interCollections)
-        .set({
-          // valorDesconto: valorDescontoNum, // TODO: Adicionar campo ao schema
-          // tipoDesconto, // TODO: Adicionar campo ao schema  
-          // dataLimiteDesconto, // TODO: Adicionar campo ao schema
-          // valorComDesconto: novoValor, // TODO: Adicionar campo ao schema
-          updatedAt: new Date(),
+    // Criar solicitação de modificação
+    const [novaSolicitacao] = await db
+      .insert(solicitacoesModificacao)
+      .values({
+        propostaId: boletoLocal.propostaId,
+        codigoSolicitacao: codigoSolicitacao,
+        tipoSolicitacao: "desconto",
+        dadosSolicitacao: {
+          tipoDesconto: tipoDesconto,
+          valorDesconto: valorDesconto,
+          dataLimiteDesconto: dataLimiteDesconto,
+          valorBoletoOriginal: boletoLocal.valorNominal,
+          numeroParcela: boletoLocal.numeroParcela
+        },
+        status: isAutoApproved ? "aprovado" : "pendente",
+        solicitadoPorId: userId,
+        solicitadoPorNome: userName,
+        solicitadoPorRole: userRole,
+        observacaoSolicitante: observacao,
+        ...(isAutoApproved && {
+          aprovadoPorId: userId,
+          aprovadoPorNome: userName,
+          dataAprovacao: new Date(),
+          observacaoAprovador: "Auto-aprovado por permissão elevada"
         })
-        .where(eq(interCollections.codigoSolicitacao, codigoSolicitacao));
+      })
+      .returning();
 
-      // Registrar na tabela de histórico
-      if (boletoLocal.propostaId) {
-        // await db.insert(historicoObservacoesCobranca).values({
-        //   mensagem: `Desconto ${tipoDesconto === "PERCENTUAL" ? `de ${valorDesconto}%` : `fixo de R$ ${valorDesconto}`} aplicado ao boleto`,
-        //   criadoPor: req.user?.name || "Sistema",
-        //   tipoAcao: "DESCONTO_APLICADO",
-        // }); // TODO: Verificar schema correto
-        console.log(`[DESCONTO] Histórico: Desconto ${tipoDesconto} de ${valorDesconto} aplicado`);
-      }
+    // Se foi auto-aprovado, executar imediatamente
+    if (isAutoApproved) {
+      try {
+        const { interBankService } = await import("../services/interBankService");
+        
+        // Preparar payload para o Inter
+        const descontoPayload: any = {
+          codigoDesconto: "DESCONTO1",
+          taxa: tipoDesconto === "PERCENTUAL" ? valorDescontoNum : 0,
+          valor: tipoDesconto === "FIXO" ? valorDescontoNum : 0,
+        };
 
-      console.log(`[DESCONTO] Desconto aplicado com sucesso`);
+        if (dataLimiteDesconto) {
+          descontoPayload.dataDesconto = dataLimiteDesconto;
+        }
 
-      res.json({
-        success: true,
-        message: "Desconto aplicado com sucesso",
-        codigoSolicitacao,
-        tipoDesconto,
-        valorDesconto,
-        valorOriginal: boletoLocal.valorNominal,
-        valorComDesconto: novoValor,
-      });
-    } catch (interError: any) {
-      console.error(`[DESCONTO] Erro na API do Inter:`, interError);
-      
-      // Tratar erro específico do Inter
-      if (interError.response?.status === 400) {
-        return res.status(400).json({ 
-          error: "Erro ao aplicar desconto",
-          message: "O Banco Inter rejeitou a solicitação. Verifique os dados e tente novamente.",
-          detalhes: interError.response?.data
+        // Executar no Banco Inter
+        await interBankService.editarCobranca(codigoSolicitacao, {
+          desconto: descontoPayload,
+        });
+
+        // Atualizar status para executado
+        await db
+          .update(solicitacoesModificacao)
+          .set({
+            status: "executado",
+            dataExecucao: new Date(),
+          })
+          .where(eq(solicitacoesModificacao.id, novaSolicitacao.id));
+
+        console.log(`[DESCONTO] Solicitação auto-aprovada e executada com sucesso`);
+        
+        return res.json({
+          success: true,
+          message: "Desconto aplicado com sucesso",
+          solicitacaoId: novaSolicitacao.id,
+          autoApproved: true,
+          codigoSolicitacao,
+          tipoDesconto,
+          valorDesconto,
+        });
+      } catch (error: any) {
+        // Se falhar, atualizar com erro
+        await db
+          .update(solicitacoesModificacao)
+          .set({
+            status: "aprovado",
+            erroExecucao: error.message || "Erro ao executar no Banco Inter",
+          })
+          .where(eq(solicitacoesModificacao.id, novaSolicitacao.id));
+
+        console.error(`[DESCONTO] Erro na execução automática:`, error);
+        return res.status(500).json({
+          error: "Erro na execução",
+          message: "Solicitação aprovada mas houve erro ao executar no Banco Inter",
+          solicitacaoId: novaSolicitacao.id,
         });
       }
-      
-      throw interError;
     }
+
+    console.log(`[DESCONTO] Solicitação criada e aguardando aprovação`);
+
+    res.json({
+      success: true,
+      message: "Solicitação de desconto criada e aguardando aprovação do supervisor",
+      solicitacaoId: novaSolicitacao.id,
+      status: "pendente",
+      codigoSolicitacao,
+      tipoDesconto,
+      valorDesconto,
+    });
   } catch (error) {
     console.error("[DESCONTO] Erro geral:", error);
     res.status(500).json({ 
       error: "Erro interno",
-      message: "Erro ao aplicar desconto no boleto" 
+      message: "Erro ao criar solicitação de desconto" 
+    });
+  }
+});
+
+// PAM V1.0 Blueprint V2.0 - ENDPOINTS PARA SUPERVISOR
+
+/**
+ * GET /api/cobrancas/solicitacoes
+ * Lista todas as solicitações pendentes de aprovação (apenas SUPERVISOR_COBRANCA e ADMINISTRADOR)
+ */
+router.get("/solicitacoes", jwtAuthMiddleware, async (req: any, res) => {
+  try {
+    const userRole = req.user?.role;
+    const userId = req.user?.id;
+    const { status = "pendente" } = req.query;
+
+    // Apenas SUPERVISOR_COBRANCA e ADMINISTRADOR podem ver solicitações
+    if (!userRole || !["ADMINISTRADOR", "SUPERVISOR_COBRANCA"].includes(userRole)) {
+      console.log(`[SOLICITAÇÕES] Acesso negado - User: ${userId}, Role: ${userRole}`);
+      return res.status(403).json({ 
+        error: "Acesso negado",
+        message: "Apenas supervisores podem visualizar solicitações" 
+      });
+    }
+
+    const solicitacoes = await db
+      .select({
+        id: solicitacoesModificacao.id,
+        propostaId: solicitacoesModificacao.propostaId,
+        codigoSolicitacao: solicitacoesModificacao.codigoSolicitacao,
+        tipoSolicitacao: solicitacoesModificacao.tipoSolicitacao,
+        dadosSolicitacao: solicitacoesModificacao.dadosSolicitacao,
+        status: solicitacoesModificacao.status,
+        solicitadoPorNome: solicitacoesModificacao.solicitadoPorNome,
+        solicitadoPorRole: solicitacoesModificacao.solicitadoPorRole,
+        observacaoSolicitante: solicitacoesModificacao.observacaoSolicitante,
+        createdAt: solicitacoesModificacao.createdAt,
+      })
+      .from(solicitacoesModificacao)
+      .where(eq(solicitacoesModificacao.status, status))
+      .orderBy(desc(solicitacoesModificacao.createdAt));
+
+    res.json(solicitacoes);
+  } catch (error) {
+    console.error("[SOLICITAÇÕES] Erro ao buscar:", error);
+    res.status(500).json({ 
+      error: "Erro interno",
+      message: "Erro ao buscar solicitações" 
+    });
+  }
+});
+
+/**
+ * POST /api/cobrancas/solicitacoes/:id/aprovar
+ * Aprova uma solicitação e executa a ação no Banco Inter
+ */
+router.post("/solicitacoes/:id/aprovar", jwtAuthMiddleware, async (req: any, res) => {
+  try {
+    const { id } = req.params;
+    const { observacao } = req.body;
+    const userRole = req.user?.role;
+    const userId = req.user?.id;
+    const userName = req.user?.fullName || req.user?.email;
+
+    // Apenas SUPERVISOR_COBRANCA e ADMINISTRADOR podem aprovar
+    if (!userRole || !["ADMINISTRADOR", "SUPERVISOR_COBRANCA"].includes(userRole)) {
+      console.log(`[APROVAR] Acesso negado - User: ${userId}, Role: ${userRole}`);
+      return res.status(403).json({ 
+        error: "Acesso negado",
+        message: "Apenas supervisores podem aprovar solicitações" 
+      });
+    }
+
+    // Buscar solicitação
+    const [solicitacao] = await db
+      .select()
+      .from(solicitacoesModificacao)
+      .where(eq(solicitacoesModificacao.id, parseInt(id)))
+      .limit(1);
+
+    if (!solicitacao) {
+      return res.status(404).json({ 
+        error: "Não encontrado",
+        message: "Solicitação não encontrada" 
+      });
+    }
+
+    if (solicitacao.status !== "pendente") {
+      return res.status(400).json({ 
+        error: "Status inválido",
+        message: `Solicitação já foi ${solicitacao.status}` 
+      });
+    }
+
+    // Atualizar para aprovado
+    await db
+      .update(solicitacoesModificacao)
+      .set({
+        status: "aprovado",
+        aprovadoPorId: userId,
+        aprovadoPorNome: userName,
+        observacaoAprovador: observacao,
+        dataAprovacao: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(solicitacoesModificacao.id, parseInt(id)));
+
+    // Executar ação no Banco Inter
+    try {
+      const { interBankService } = await import("../services/interBankService");
+      const dados = solicitacao.dadosSolicitacao as any;
+
+      if (solicitacao.tipoSolicitacao === "prorrogacao") {
+        await interBankService.editarCobranca(solicitacao.codigoSolicitacao!, {
+          dataVencimento: dados.novaDataVencimento,
+        });
+      } else if (solicitacao.tipoSolicitacao === "desconto") {
+        const descontoPayload: any = {
+          codigoDesconto: "DESCONTO1",
+          taxa: dados.tipoDesconto === "PERCENTUAL" ? Number(dados.valorDesconto) : 0,
+          valor: dados.tipoDesconto === "FIXO" ? Number(dados.valorDesconto) : 0,
+        };
+        if (dados.dataLimiteDesconto) {
+          descontoPayload.dataDesconto = dados.dataLimiteDesconto;
+        }
+        await interBankService.editarCobranca(solicitacao.codigoSolicitacao!, {
+          desconto: descontoPayload,
+        });
+      }
+
+      // Marcar como executado
+      await db
+        .update(solicitacoesModificacao)
+        .set({
+          status: "executado",
+          dataExecucao: new Date(),
+        })
+        .where(eq(solicitacoesModificacao.id, parseInt(id)));
+
+      res.json({
+        success: true,
+        message: `Solicitação aprovada e ${solicitacao.tipoSolicitacao} executada com sucesso`,
+        solicitacaoId: id,
+      });
+    } catch (error: any) {
+      // Se falhar ao executar, manter como aprovado mas com erro
+      await db
+        .update(solicitacoesModificacao)
+        .set({
+          erroExecucao: error.message || "Erro ao executar no Banco Inter",
+        })
+        .where(eq(solicitacoesModificacao.id, parseInt(id)));
+
+      console.error(`[APROVAR] Erro ao executar:`, error);
+      res.status(500).json({
+        error: "Erro na execução",
+        message: "Solicitação aprovada mas houve erro ao executar no Banco Inter",
+        detalhes: error.message,
+      });
+    }
+  } catch (error) {
+    console.error("[APROVAR] Erro geral:", error);
+    res.status(500).json({ 
+      error: "Erro interno",
+      message: "Erro ao aprovar solicitação" 
+    });
+  }
+});
+
+/**
+ * POST /api/cobrancas/solicitacoes/:id/rejeitar
+ * Rejeita uma solicitação
+ */
+router.post("/solicitacoes/:id/rejeitar", jwtAuthMiddleware, async (req: any, res) => {
+  try {
+    const { id } = req.params;
+    const { motivo, observacao } = req.body;
+    const userRole = req.user?.role;
+    const userId = req.user?.id;
+    const userName = req.user?.fullName || req.user?.email;
+
+    // Apenas SUPERVISOR_COBRANCA e ADMINISTRADOR podem rejeitar
+    if (!userRole || !["ADMINISTRADOR", "SUPERVISOR_COBRANCA"].includes(userRole)) {
+      console.log(`[REJEITAR] Acesso negado - User: ${userId}, Role: ${userRole}`);
+      return res.status(403).json({ 
+        error: "Acesso negado",
+        message: "Apenas supervisores podem rejeitar solicitações" 
+      });
+    }
+
+    if (!motivo) {
+      return res.status(400).json({ 
+        error: "Dados inválidos",
+        message: "Motivo da rejeição é obrigatório" 
+      });
+    }
+
+    // Buscar solicitação
+    const [solicitacao] = await db
+      .select()
+      .from(solicitacoesModificacao)
+      .where(eq(solicitacoesModificacao.id, parseInt(id)))
+      .limit(1);
+
+    if (!solicitacao) {
+      return res.status(404).json({ 
+        error: "Não encontrado",
+        message: "Solicitação não encontrada" 
+      });
+    }
+
+    if (solicitacao.status !== "pendente") {
+      return res.status(400).json({ 
+        error: "Status inválido",
+        message: `Solicitação já foi ${solicitacao.status}` 
+      });
+    }
+
+    // Atualizar para rejeitado
+    await db
+      .update(solicitacoesModificacao)
+      .set({
+        status: "rejeitado",
+        aprovadoPorId: userId,
+        aprovadoPorNome: userName,
+        motivoRejeicao: motivo,
+        observacaoAprovador: observacao,
+        dataAprovacao: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(solicitacoesModificacao.id, parseInt(id)));
+
+    res.json({
+      success: true,
+      message: "Solicitação rejeitada",
+      solicitacaoId: id,
+      motivo,
+    });
+  } catch (error) {
+    console.error("[REJEITAR] Erro:", error);
+    res.status(500).json({ 
+      error: "Erro interno",
+      message: "Erro ao rejeitar solicitação" 
     });
   }
 });
