@@ -1,0 +1,43 @@
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Realizar a auditoria final e completa da "Tela de Cobranças", validando rigorosamente a implementação atual contra cada um dos princípios definidos no nosso "Blueprint de Negócio V2.0".
+* **Intenção Estratégica (O Porquê):** Concluímos uma série de refatorações massivas. Antes de declararmos a tela pronta para produção, precisamos de uma prova irrefutável de que a soma de todas as partes resultou em um sistema coeso, inteligente e 100% alinhado com a nossa visão estratégica para a Central de Inteligência de Cobranças.
+* **Histórico Relevante (Consulta Obrigatória):** A única fonte da verdade para esta auditoria é o **Blueprint de Negócio V2.0**. Você deve tratar cada item do Blueprint como um requisito a ser verificado. Lembre-se das nossas discussões sobre a regra de entrada, a lógica de status, o workflow de aprovação e a ordenação inteligente.
+* **Modelo Mental (Como se Encaixa):** Sua persona é a de um **Auditor de Qualidade Sênior**. Sua tarefa não é codificar, mas sim inspecionar, testar e reportar, usando o Blueprint como seu guia de auditoria. Para cada ponto, sua resposta deve ser `[CONFORME]` ou `[NÃO CONFORME]`, seguida da evidência de código.
+* **Riscos Antecipados:** **Risco:** Uma auditoria superficial. **Contramedida:** A sua missão exige que você apresente provas de código para cada veredicação.
+
+---
+
+**IMPLEMENTAR:**
+Um relatório de auditoria de conformidade detalhado. **NÃO FAÇA MODIFICAÇÕES.**
+
+**CURRENT STATE:**
+A "Tela de Cobranças" foi refatorada, mas precisamos de uma validação final para garantir que todos os requisitos do Blueprint V2.0 foram implementados corretamente.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um relatório de auditoria que avalie a conformidade do sistema com cada um dos 4 pilares do nosso Blueprint de Negócio V2.0.
+
+**CONSTRAINTS (Roadmap de Auditoria Forense):**
+
+**1. Auditoria da Lógica Core (Regras de Entrada e Saída):**
+    - **Ação:** Inspecione a query principal em `GET /api/cobrancas`.
+    - **Verificação:** A query está a filtrar as propostas usando a combinação de `status` (`BOLETOS_EMITIDOS` e posteriores) e a verificação secundária, conforme o Blueprint? A lógica para remover propostas `QUITADAS` está implementada?
+    - **Relatório:** Apresente a cláusula `WHERE` e seu veredito.
+
+**2. Auditoria da UX (KPIs, Ordenação e Dados da Tabela):**
+    - **Ação:** Inspecione a query de KPIs (`/api/cobrancas/kpis`) e a ordenação na query principal.
+    - **Verificação:** A lógica de ordenação multinível (Inadimplentes > Vence em Breve > Outros, com sub-ordenação por valor) está implementada no `ORDER BY`? Os KPIs calculados correspondem aos definidos no Blueprint? A tabela exibe os dados da **próxima parcela pendente**?
+    - **Relatório:** Apresente a cláusula `ORDER BY` e a lógica dos KPIs, e seu veredito.
+
+**3. Auditoria dos Workflows de Ação (Aprovações):**
+    - **Ação:** Inspecione a lógica de frontend em `CobrancasPage.tsx` e os endpoints de backend relacionados.
+    - **Verificação:** O sistema implementa corretamente o fluxo de aprovação? Um `COBRADOR` apenas "solicita" descontos/prorrogações? Existe uma UI funcional para um `SUPERVISOR_COBRANCA` "aprovar" estas solicitações? A chamada à API externa só ocorre **após** a aprovação?
+    - **Relatório:** Descreva o fluxo de aprovação que você encontrou no código e seu veredito.
+
+**4. Auditoria da Inteligência e Automação:**
+    - **Ação:** Faça uma busca no código por lógicas de alerta e priorização visual.
+    - **Verificação:** Existe alguma implementação, mesmo que básica, para os alertas proativos ou para o destaque visual de propostas críticas na tabela?
+    - **Relatório:** Reporte suas descobertas sobre esta funcionalidade.
+
+**Relatório Final:**
+O critério de sucesso é um relatório de auditoria completo, ponto a ponto, que nos dê uma visão clara do estado de conformidade da "Tela de Cobranças" com a nossa visão estratégica.
