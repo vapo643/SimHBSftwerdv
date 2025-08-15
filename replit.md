@@ -10,6 +10,8 @@ Language: Portuguese, studying software architecture.
 Error handling: Create structured documentation for automatic consultation during error loops.
 **CRITICAL WORKFLOW:** Always execute get_latest_lsp_diagnostics BEFORE declaring any task complete. Never say "pronto" with LSP errors > 0. Follow ESTRATEGIA_ZERO_MICRO_ERROS.md protocol to avoid the 80/20 pattern (80% working, 20% fixing micro errors).
 
+**DATA INTEGRITY PROTECTION:** PAM V1.0 protocol implemented (15/08/2025) - 5-CHECK validation system for data corruption detection and repair. Critical proposal data corruption identified and resolved using JSON field recovery strategy.
+
 ## System Architecture
 
 ### Frontend Architecture
