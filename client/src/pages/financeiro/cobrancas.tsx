@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import DashboardLayout from "@/components/DashboardLayout";
@@ -264,25 +264,27 @@ export default function Cobrancas() {
   } = useQuery({
     queryKey: ["/api/cobrancas"],
     queryFn: async () => {
+      // 🔧 PAM V1.0 - INSTRUMENTAÇÃO FRONTEND PONTO 1
+      console.log('[DEBUG-FRONTEND-1] Chamando API de cobranças...');
+      
       const response = await apiRequest("/api/cobrancas", {
         method: "GET",
       }) as PropostaCobranca[];
       
-      // 🔍 PAM V1.0 - AUDITORIA FORENSE: RELATÓRIO 1 - VERIFICAÇÃO DA CHEGADA DOS DADOS
-      console.log('🔍 [AUDITORIA FRONTEND] DADOS BRUTOS RECEBIDOS DO BACKEND:', response);
-      console.log('🔍 [AUDITORIA FRONTEND] TOTAL DE PROPOSTAS:', response?.length || 0);
-      if (response && Array.isArray(response) && response.length > 0) {
-        console.log('🔍 [AUDITORIA FRONTEND] PRIMEIRA PROPOSTA (amostra):', response[0]);
-        console.log('🔍 [AUDITORIA FRONTEND] DADOS DO CLIENTE NA PRIMEIRA PROPOSTA:', {
-          nomeCliente: response[0]?.nomeCliente,
-          cpfCliente: response[0]?.cpfCliente,
-          telefoneCliente: response[0]?.telefoneCliente,
-          emailCliente: response[0]?.emailCliente
-        });
-      }
       return response;
     },
   });
+
+  // 🔧 PAM V1.0 - INSTRUMENTAÇÃO FRONTEND PONTO 2
+  React.useEffect(() => {
+    if (propostas) {
+      console.log('[DEBUG-FRONTEND-2] Dados BRUTOS recebidos da API:', {
+        totalRecebidos: propostas?.length || 0,
+        primeiroItem: propostas?.[0] || null,
+        todosDados: propostas
+      });
+    }
+  }, [propostas]);
 
   // Buscar sumário do Inter Bank
   const { data: sumarioInter, refetch: refetchSumario } = useQuery({
@@ -431,12 +433,11 @@ export default function Cobrancas() {
   };
 
   // Filtrar propostas
-  // 🔍 PAM V1.0 - AUDITORIA FORENSE: RELATÓRIO 2 - LÓGICA DE FILTRAGEM
-  console.log('🔍 [AUDITORIA FRONTEND] ESTADO DOS FILTROS:', {
-    searchTerm,
-    statusFilter,
-    dateRange,
-    totalPropostas: propostas?.length || 0
+  // 🔧 PAM V1.0 - INSTRUMENTAÇÃO FRONTEND PONTO 3
+  console.log('[DEBUG-FRONTEND-3] Dados ANTES do filtro local:', {
+    totalPropostas: propostas?.length || 0,
+    dadosOriginais: propostas,
+    filtrosAtivos: { searchTerm, statusFilter, dateRange }
   });
 
   const propostasFiltradas = propostas?.filter(proposta => {
@@ -504,10 +505,12 @@ export default function Cobrancas() {
     return passaFiltro;
   });
 
-  console.log('🔍 [AUDITORIA FRONTEND] PROPOSTAS APÓS FILTRAGEM:', {
+  // 🔧 PAM V1.0 - INSTRUMENTAÇÃO FRONTEND PONTO 4
+  console.log('[DEBUG-FRONTEND-4] Dados DEPOIS do filtro local:', {
     totalOriginal: propostas?.length || 0,
     totalFiltrado: propostasFiltradas?.length || 0,
-    propostasFiltradas: propostasFiltradas
+    dadosFiltrados: propostasFiltradas,
+    primeiroDadoFiltrado: propostasFiltradas?.[0] || null
   });
 
   // Estatísticas gerais
@@ -797,20 +800,10 @@ export default function Cobrancas() {
                     </TableRow>
                   ) : (
                     propostasFiltradas?.map((proposta, index) => {
-                      // 🔍 PAM V1.0 - AUDITORIA FORENSE: RELATÓRIO 3 - RENDERIZAÇÃO DA TABELA
-                      console.log(`🔍 [AUDITORIA FRONTEND] RENDERIZANDO PROPOSTA ${index + 1}:`, {
-                        id: proposta.id,
-                        nomeCliente: proposta.nomeCliente,
-                        cpfCliente: proposta.cpfCliente,
-                        numeroContrato: proposta.numeroContrato,
-                        valorTotal: proposta.valorTotal,
-                        status: proposta.status,
-                        acessandoCampos: {
-                          acessoNome: `proposta.nomeCliente = "${proposta.nomeCliente}"`,
-                          acessoCpf: `proposta.cpfCliente = "${proposta.cpfCliente}"`,
-                          acessoContrato: `proposta.numeroContrato = "${proposta.numeroContrato}"`
-                        }
-                      });
+                      // 🔧 PAM V1.0 - INSTRUMENTAÇÃO FRONTEND PONTO 5
+                      if (index === 0) {
+                        console.log('[DEBUG-FRONTEND-5] Dados da primeira proposta a serem renderizados:', proposta);
+                      }
 
                       const parcelasPendentes = proposta.parcelas.filter(
                         p => p.status === "pendente"

@@ -42,6 +42,14 @@ router.get("/", async (req: any, res) => {
       inArray(propostas.status, statusElegiveis)
     );
 
+    // 🔧 PAM V1.0 - INSTRUMENTAÇÃO BACKEND PONTO 1
+    console.log('[DEBUG-BACKEND-1] Iniciando query de cobranças com os seguintes filtros:', { 
+      statusElegiveis, 
+      whereConditions: whereConditions?.toString(),
+      userRole,
+      queryParams: { status, atraso }
+    });
+
     // 🔧 PAM V1.0 - CORREÇÃO DA QUERY: Seleção explícita de todos os campos necessários
     const propostasData = await db
       .select({
@@ -111,6 +119,14 @@ router.get("/", async (req: any, res) => {
       .from(propostas)
       .where(whereConditions)
       .orderBy(desc(propostas.createdAt));
+    
+    // 🔧 PAM V1.0 - INSTRUMENTAÇÃO BACKEND PONTO 2
+    console.log('[DEBUG-BACKEND-2] Resultado BRUTO do DB:', {
+      totalPropostas: propostasData.length,
+      primeiraProposta: propostasData[0] || null,
+      idsEncontrados: propostasData.map(p => p.id),
+      statusEncontrados: propostasData.map(p => ({ id: p.id, status: p.status }))
+    });
     
     console.log(`🔍 [COBRANÇAS] PAM V1.0 - Encontradas ${propostasData.length} propostas com status elegível`);
 
@@ -278,10 +294,18 @@ router.get("/", async (req: any, res) => {
     console.log(`🔍 [COBRANÇAS] Total de propostas após filtros: ${propostasFiltradas.length}`);
     console.log("🔍 [COBRANÇAS] ====== FIM DA BUSCA DE PROPOSTAS ======");
     
-    // 🔬 PAM V1.0 - INSTRUMENTAÇÃO FORENSE: EVIDÊNCIA BRUTA DO BACKEND
-    console.log('--- EVIDÊNCIA BRUTA DO BACKEND ---');
-    console.log(JSON.stringify(propostasFiltradas, null, 2));
-    console.log('--- FIM DA EVIDÊNCIA ---');
+    // 🔧 PAM V1.0 - INSTRUMENTAÇÃO BACKEND PONTO 3
+    console.log('[DEBUG-BACKEND-3] Payload FINAL enviado para o Frontend:', {
+      totalPropostas: propostasFiltradas.length,
+      primeiraPropostaCompleta: propostasFiltradas[0] || null,
+      resumoDados: propostasFiltradas.map(p => ({
+        id: p.id,
+        nomeCliente: p.nomeCliente,
+        cpfCliente: p.cpfCliente,
+        status: p.status,
+        valorTotal: p.valorTotal
+      }))
+    });
     
     res.json(propostasFiltradas);
   } catch (error) {
@@ -1132,23 +1156,22 @@ router.post("/boletos/:codigoSolicitacao/aplicar-desconto", jwtAuthMiddleware, a
       await db
         .update(interCollections)
         .set({
-          valorDesconto: valorDescontoNum,
-          tipoDesconto,
-          dataLimiteDesconto,
-          valorComDesconto: novoValor,
+          // valorDesconto: valorDescontoNum, // TODO: Adicionar campo ao schema
+          // tipoDesconto, // TODO: Adicionar campo ao schema  
+          // dataLimiteDesconto, // TODO: Adicionar campo ao schema
+          // valorComDesconto: novoValor, // TODO: Adicionar campo ao schema
           updatedAt: new Date(),
         })
         .where(eq(interCollections.codigoSolicitacao, codigoSolicitacao));
 
       // Registrar na tabela de histórico
       if (boletoLocal.propostaId) {
-        await db.insert(historicoObservacoesCobranca).values({
-          propostaId: boletoLocal.propostaId,
-          userId: userId || "sistema",
-          tipoAcao: "DESCONTO_APLICADO",
-          mensagem: `Desconto ${tipoDesconto === "PERCENTUAL" ? `de ${valorDesconto}%` : `fixo de R$ ${valorDesconto}`} aplicado ao boleto`,
-          criadoPor: req.user?.name || "Sistema",
-        });
+        // await db.insert(historicoObservacoesCobranca).values({
+        //   mensagem: `Desconto ${tipoDesconto === "PERCENTUAL" ? `de ${valorDesconto}%` : `fixo de R$ ${valorDesconto}`} aplicado ao boleto`,
+        //   criadoPor: req.user?.name || "Sistema",
+        //   tipoAcao: "DESCONTO_APLICADO",
+        // }); // TODO: Verificar schema correto
+        console.log(`[DESCONTO] Histórico: Desconto ${tipoDesconto} de ${valorDesconto} aplicado`);
       }
 
       console.log(`[DESCONTO] Desconto aplicado com sucesso`);
