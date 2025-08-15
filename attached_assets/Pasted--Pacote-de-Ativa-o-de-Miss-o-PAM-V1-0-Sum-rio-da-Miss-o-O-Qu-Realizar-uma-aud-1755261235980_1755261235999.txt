@@ -1,0 +1,39 @@
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Realizar uma auditoria completa em **todo o código-fonte do frontend** para identificar e mapear todos os componentes que ainda utilizam a lógica de status de propostas obsoleta.
+* **Intenção Estratégica (O Porquê):** O sistema está em um estado de inconsistência perigoso, com o backend a operar sob o novo Sistema de Status V2.0 e o frontend ainda a usar a lógica antiga. Esta missão é para criar um mapa de refatoração completo para que possamos alinhar 100% da aplicação com a nova "fonte da verdade".
+* **Histórico Relevante (Consulta Obrigatória):** A falha atual é a prova de que nossa migração anterior foi incompleta. O foco da sua auditoria deve ser encontrar qualquer uso dos status antigos que você mesmo listou em seu relatório de diagnóstico (ex: `contratos_preparados`, `aceito_atendente`, etc.).
+* **Modelo Mental (Como se Encaixa):** Você é um auditor de código com uma tarefa de "busca e relatório". Sua missão é varrer o diretório `client/src/` em busca de referências a valores de status que não pertencem ao nosso novo `enum` V2.0.
+* **Riscos Antecipados:** **Risco:** Uma busca superficial pode não encontrar todas as ocorrências. **Contramedida:** A sua auditoria deve ser sistemática, verificando não apenas strings literais, mas também a lógica de componentes que dependem de status para renderização condicional.
+
+---
+
+**IMPLEMENTAR:**
+Um relatório de auditoria detalhado. **NÃO FAÇA MODIFICAÇÕES DE CÓDIGO.**
+
+**CURRENT STATE:**
+A "Tela de Formalização" e potencialmente outras telas estão a exibir dados incorretos porque sua lógica de UI ainda se baseia no sistema de status antigo.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um relatório claro, listando cada ficheiro de frontend e as linhas de código exatas onde a lógica de status obsoleta ainda é utilizada.
+
+**CONSTRAINTS (Roadmap de Auditoria):**
+
+**1. Mapeamento de Ocorrências:**
+    - **Ação:** Execute uma busca global (case-sensitive e case-insensitive) em todo o diretório `client/src/` pelos seguintes valores de status legados que identificamos anteriormente:
+        - `contratos_assinados` (o antigo, não `ASSINATURA_CONCLUIDA`)
+        - `contratos_preparados`
+        - `documentos_enviados`
+        - `aceito_atendente`
+        - `aguardando_aceite_atendente`
+        - `pendenciado`
+        - `em_formalizacao`
+        - `assinado`
+    - **Relatório:** Apresente uma lista de todos os ficheiros e números de linha onde estes status são referenciados.
+
+**2. Análise da Lógica de Renderização:**
+    - **Ação:** Para cada ocorrência encontrada, analise o contexto.
+    - **Relatório:** Descreva como o status antigo está a ser usado. É para um filtro (`.filter()`)? Para renderização condicional (`status === 'contratos_assinados' && <Componente />`)? Para definir a cor de um badge?
+
+**Relatório Final:**
+O critério de sucesso é um mapa completo de todos os pontos no frontend que precisam ser refatorados para que possamos, na próxima fase, eliminar 100% da nossa dívida técnica de status.
