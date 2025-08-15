@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
@@ -35,7 +35,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import {
   Calendar,
   Search,
@@ -58,6 +58,8 @@ import {
   Building2,
   RefreshCw,
   Barcode,
+  CalendarPlus,
+  Percent,
 } from "lucide-react";
 import {
   format,
@@ -117,6 +119,10 @@ interface PropostaCobranca {
     ccb?: string;
     comprovantes?: string[];
   };
+  // PAM V1.0 - Campos do Banco Inter
+  interCodigoSolicitacao?: string;
+  interSituacao?: string;
+  interDataVencimento?: string;
 }
 
 export default function Cobrancas() {
@@ -133,6 +139,15 @@ export default function Cobrancas() {
   const [selectedPropostaForBoletos, setSelectedPropostaForBoletos] =
     useState<PropostaCobranca | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  
+  // Estados para modais de ação PAM V1.0
+  const [showProrrogarModal, setShowProrrogarModal] = useState(false);
+  const [showDescontoModal, setShowDescontoModal] = useState(false);
+  const [selectedBoleto, setSelectedBoleto] = useState<{ codigoSolicitacao: string; valorNominal: number } | null>(null);
+  const [novaDataVencimento, setNovaDataVencimento] = useState("");
+  const [tipoDesconto, setTipoDesconto] = useState<"PERCENTUAL" | "FIXO">("PERCENTUAL");
+  const [valorDesconto, setValorDesconto] = useState("");
+  const [dataLimiteDesconto, setDataLimiteDesconto] = useState("");
 
   // Função para copiar PIX ou linha digitável
   const copyPaymentCode = (code: string, type: "pix" | "barcode") => {
@@ -169,6 +184,77 @@ export default function Cobrancas() {
     }
     return doc;
   };
+
+  // PAM V1.0 - Mutation para prorrogar vencimento
+  const prorrogarMutation = useMutation({
+    mutationFn: async ({ codigoSolicitacao, novaDataVencimento }: { codigoSolicitacao: string; novaDataVencimento: string }) => {
+      console.log('[PAM V1.0] Enviando prorrogação:', { codigoSolicitacao, novaDataVencimento });
+      return apiRequest(`/api/cobrancas/boletos/${codigoSolicitacao}/prorrogar`, {
+        method: "PATCH",
+        body: JSON.stringify({ novaDataVencimento }),
+      });
+    },
+    onSuccess: (data) => {
+      console.log('[PAM V1.0] Prorrogação bem-sucedida:', data);
+      toast({
+        title: "Vencimento prorrogado",
+        description: "O vencimento do boleto foi prorrogado com sucesso.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/cobrancas"] });
+      setShowProrrogarModal(false);
+      setSelectedBoleto(null);
+      setNovaDataVencimento("");
+    },
+    onError: (error: any) => {
+      console.error('[PAM V1.0] Erro ao prorrogar:', error);
+      toast({
+        title: "Erro ao prorrogar",
+        description: error.response?.data?.message || "Não foi possível prorrogar o vencimento.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // PAM V1.0 - Mutation para aplicar desconto
+  const descontoMutation = useMutation({
+    mutationFn: async ({ 
+      codigoSolicitacao, 
+      tipoDesconto, 
+      valorDesconto,
+      dataLimiteDesconto 
+    }: { 
+      codigoSolicitacao: string; 
+      tipoDesconto: "PERCENTUAL" | "FIXO";
+      valorDesconto: number;
+      dataLimiteDesconto?: string;
+    }) => {
+      console.log('[PAM V1.0] Enviando desconto:', { codigoSolicitacao, tipoDesconto, valorDesconto, dataLimiteDesconto });
+      return apiRequest(`/api/cobrancas/boletos/${codigoSolicitacao}/aplicar-desconto`, {
+        method: "POST",
+        body: JSON.stringify({ tipoDesconto, valorDesconto, dataLimiteDesconto }),
+      });
+    },
+    onSuccess: (data) => {
+      console.log('[PAM V1.0] Desconto aplicado com sucesso:', data);
+      toast({
+        title: "Desconto aplicado",
+        description: `Desconto de ${tipoDesconto === "PERCENTUAL" ? `${valorDesconto}%` : `R$ ${valorDesconto}`} aplicado com sucesso.`,
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/cobrancas"] });
+      setShowDescontoModal(false);
+      setSelectedBoleto(null);
+      setValorDesconto("");
+      setDataLimiteDesconto("");
+    },
+    onError: (error: any) => {
+      console.error('[PAM V1.0] Erro ao aplicar desconto:', error);
+      toast({
+        title: "Erro ao aplicar desconto",
+        description: error.response?.data?.message || "Não foi possível aplicar o desconto.",
+        variant: "destructive",
+      });
+    },
+  });
 
   // Buscar propostas em cobrança
   const {
@@ -795,6 +881,41 @@ export default function Cobrancas() {
                               >
                                 <Barcode className="h-4 w-4" />
                               </Button>
+                              {/* PAM V1.0 - Botões de Ação */}
+                              {proposta.interCodigoSolicitacao && proposta.interSituacao === "A_RECEBER" && (
+                                <>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={e => {
+                                      e.stopPropagation();
+                                      setSelectedBoleto({ 
+                                        codigoSolicitacao: proposta.interCodigoSolicitacao!, 
+                                        valorNominal: proposta.valorTotalPendente 
+                                      });
+                                      setShowProrrogarModal(true);
+                                    }}
+                                    title="Prorrogar Vencimento"
+                                  >
+                                    <CalendarPlus className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={e => {
+                                      e.stopPropagation();
+                                      setSelectedBoleto({ 
+                                        codigoSolicitacao: proposta.interCodigoSolicitacao!, 
+                                        valorNominal: proposta.valorTotalPendente 
+                                      });
+                                      setShowDescontoModal(true);
+                                    }}
+                                    title="Aplicar Desconto"
+                                  >
+                                    <Percent className="h-4 w-4" />
+                                  </Button>
+                                </>
+                              )}
                               <Button
                                 size="sm"
                                 variant="ghost"
@@ -1329,6 +1450,155 @@ export default function Cobrancas() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowBoletosModal(false)}>
                 Fechar
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* PAM V1.0 - Modal de Prorrogar Vencimento */}
+        <Dialog open={showProrrogarModal} onOpenChange={setShowProrrogarModal}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Prorrogar Vencimento</DialogTitle>
+              <DialogDescription>
+                Defina uma nova data de vencimento para o boleto selecionado.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label htmlFor="nova-data">Nova Data de Vencimento</Label>
+                <Input
+                  id="nova-data"
+                  type="date"
+                  value={novaDataVencimento}
+                  onChange={(e) => setNovaDataVencimento(e.target.value)}
+                  min={format(new Date(), "yyyy-MM-dd")}
+                />
+              </div>
+              {selectedBoleto && (
+                <div className="rounded-lg border p-3">
+                  <p className="text-sm text-muted-foreground">Código do Boleto:</p>
+                  <code className="text-xs">{selectedBoleto.codigoSolicitacao}</code>
+                </div>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowProrrogarModal(false)}>
+                Cancelar
+              </Button>
+              <Button
+                onClick={() => {
+                  if (selectedBoleto && novaDataVencimento) {
+                    prorrogarMutation.mutate({
+                      codigoSolicitacao: selectedBoleto.codigoSolicitacao,
+                      novaDataVencimento,
+                    });
+                  }
+                }}
+                disabled={!novaDataVencimento || prorrogarMutation.isPending}
+              >
+                {prorrogarMutation.isPending ? "Prorrogando..." : "Confirmar Prorrogação"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* PAM V1.0 - Modal de Aplicar Desconto */}
+        <Dialog open={showDescontoModal} onOpenChange={setShowDescontoModal}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Aplicar Desconto</DialogTitle>
+              <DialogDescription>
+                Configure o desconto a ser aplicado no boleto selecionado.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label htmlFor="tipo-desconto">Tipo de Desconto</Label>
+                <Select
+                  value={tipoDesconto}
+                  onValueChange={(value: "PERCENTUAL" | "FIXO") => setTipoDesconto(value)}
+                >
+                  <SelectTrigger id="tipo-desconto">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="PERCENTUAL">Percentual (%)</SelectItem>
+                    <SelectItem value="FIXO">Valor Fixo (R$)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="valor-desconto">
+                  {tipoDesconto === "PERCENTUAL" ? "Percentual de Desconto" : "Valor do Desconto"}
+                </Label>
+                <Input
+                  id="valor-desconto"
+                  type="number"
+                  min="0"
+                  max={tipoDesconto === "PERCENTUAL" ? "100" : undefined}
+                  step={tipoDesconto === "PERCENTUAL" ? "0.01" : "0.01"}
+                  value={valorDesconto}
+                  onChange={(e) => setValorDesconto(e.target.value)}
+                  placeholder={tipoDesconto === "PERCENTUAL" ? "Ex: 10" : "Ex: 50.00"}
+                />
+              </div>
+              <div>
+                <Label htmlFor="data-limite">Data Limite do Desconto (Opcional)</Label>
+                <Input
+                  id="data-limite"
+                  type="date"
+                  value={dataLimiteDesconto}
+                  onChange={(e) => setDataLimiteDesconto(e.target.value)}
+                  min={format(new Date(), "yyyy-MM-dd")}
+                />
+              </div>
+              {selectedBoleto && valorDesconto && (
+                <div className="rounded-lg border bg-muted p-3">
+                  <p className="text-sm font-medium">Resumo do Desconto:</p>
+                  <p className="text-sm text-muted-foreground">
+                    Valor Original: {new Intl.NumberFormat("pt-BR", {
+                      style: "currency",
+                      currency: "BRL",
+                    }).format(selectedBoleto.valorNominal)}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Desconto: {tipoDesconto === "PERCENTUAL" ? `${valorDesconto}%` : new Intl.NumberFormat("pt-BR", {
+                      style: "currency",
+                      currency: "BRL",
+                    }).format(Number(valorDesconto))}
+                  </p>
+                  <p className="text-sm font-medium text-green-600">
+                    Valor Final: {new Intl.NumberFormat("pt-BR", {
+                      style: "currency",
+                      currency: "BRL",
+                    }).format(
+                      tipoDesconto === "PERCENTUAL" 
+                        ? selectedBoleto.valorNominal * (1 - Number(valorDesconto) / 100)
+                        : selectedBoleto.valorNominal - Number(valorDesconto)
+                    )}
+                  </p>
+                </div>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDescontoModal(false)}>
+                Cancelar
+              </Button>
+              <Button
+                onClick={() => {
+                  if (selectedBoleto && valorDesconto) {
+                    descontoMutation.mutate({
+                      codigoSolicitacao: selectedBoleto.codigoSolicitacao,
+                      tipoDesconto,
+                      valorDesconto: Number(valorDesconto),
+                      dataLimiteDesconto: dataLimiteDesconto || undefined,
+                    });
+                  }
+                }}
+                disabled={!valorDesconto || descontoMutation.isPending}
+              >
+                {descontoMutation.isPending ? "Aplicando..." : "Confirmar Desconto"}
               </Button>
             </DialogFooter>
           </DialogContent>
