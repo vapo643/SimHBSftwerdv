@@ -1,165 +1,189 @@
-# 📊 PAM V1.0 - RELATÓRIO DE AUDITORIA FORENSE
-## TELA DE COBRANÇAS - ANÁLISE COMPLETA
+# PAM V1.0 - RELATÓRIO DE AUDITORIA FORENSE DA TELA DE COBRANÇAS
 
 **Data da Auditoria:** 15/08/2025  
-**Missão:** Auditoria forense completa da Tela de Cobranças  
-**Auditor:** Sistema PAM V1.0  
+**Missão:** Auditoria forense completa comparando implementação atual com Blueprint de Negócio V2.0  
+**Método:** Análise estática de código sem modificações
 
 ---
 
-## 1. AUDITORIA DA "REGRA DE ENTRADA" (Query Principal)
+## 1. AUDITORIA DA "REGRA DE ENTRADA" (A Query Principal)
 
-### 📍 Endpoint Analisado: `GET /api/cobrancas`
-**Localização:** `server/routes/cobrancas.ts`, linhas 18-321
+### **ANÁLISE DA CLÁUSULA WHERE ATUAL**
 
-### 🔍 Cláusula WHERE Atual (linhas 30-38):
-```sql
-and(
+**Localização:** `server/routes/cobrancas.ts`, linha 40-43
+
+**Código Atual:**
+```typescript
+let whereConditions = and(
   sql`${propostas.deletedAt} IS NULL`,
-  sql`EXISTS (
-    SELECT 1 
-    FROM ${interCollections} 
-    WHERE ${interCollections.propostaId} = ${propostas.id}
-  )`
-)
+  inArray(propostas.status, statusElegiveis)
+);
 ```
 
-### ⚖️ VEREDITO: [NÃO CONFORME]
+**Status Elegíveis Definidos:**
+```typescript
+const statusElegiveis = [
+  "BOLETOS_EMITIDOS",       // Principal status para cobranças
+  "PAGAMENTO_PENDENTE",     // Aguardando pagamento
+  "PAGAMENTO_PARCIAL",      // Pagamento parcial recebido
+  "PAGAMENTO_CONFIRMADO",   // Pagamento total confirmado
+  "pronto_pagamento",       // Status legado
+];
+```
 
-### 📋 Análise Crítica:
-- **Blueprint Exige:** Filtrar propostas com `status = 'BOLETOS_EMITIDOS'` (ou posterior)
-- **Implementação Atual:** Filtra por EXISTS na tabela `inter_collections` (propostas que têm boletos)
-- **Discrepância:** A query atual NÃO verifica o campo `status` da proposta, apenas se existe boleto na `inter_collections`
+### **RELATÓRIO: REGRA DE ENTRADA**
 
-### 🚨 Evidência Bruta:
-- A lógica atual usa: "Se tem boleto, aparece na cobrança. Se não tem, não aparece"
-- Ignora completamente o status `BOLETOS_EMITIDOS` definido no Blueprint
-- Comentário na linha 27: "NOVA REGRA ARQUITETURAL: Exibir apenas propostas com boletos gerados"
+**STATUS: `[🔴 PARCIALMENTE NÃO CONFORME]`**
 
----
+**Conformidades Identificadas:**
+- ✅ Filtragem por `deletedAt IS NULL` (soft delete implementado)
+- ✅ Uso de array de status elegíveis
+- ✅ Query baseada em status da proposta (conforme PAM V1.0)
 
-## 2. AUDITORIA DAS "INFORMAÇÕES CRÍTICAS" (Payload da API)
-
-### 📍 Cláusula SELECT Analisada (linhas 41-105):
-
-### ✅ Campos Retornados Atualmente:
-**Dados da Proposta:**
-- ✅ id, numeroProposta, lojaId, status
-- ✅ valor, prazo, valorTac, valorIof
-- ✅ valorTotalFinanciado, valorLiquidoLiberado, taxaJuros
-- ✅ dataAprovacao, ccbGerado, assinaturaEletronicaConcluida
-
-**Dados do Cliente:**
-- ✅ Nome, CPF, Email, Telefone
-- ✅ Data de Nascimento, Renda, RG completo
-- ✅ Estado Civil, Nacionalidade, Local de Nascimento
-- ✅ Endereço completo (CEP, Logradouro, Número, etc.)
-- ✅ Dados PJ (Razão Social, CNPJ)
-
-**Dados de Pagamento:**
-- ✅ Banco, Agência, Conta, Tipo de Conta
-- ✅ PIX, Tipo de PIX
-
-### 📊 Processamento Adicional (linhas 113-227):
-O sistema calcula e adiciona:
-- ✅ Valor da Próxima Parcela (via array `parcelas`)
-- ✅ Data de Vencimento (via `dataVencimento` das parcelas)
-- ✅ Dias em Atraso (calculado dinamicamente)
-- ✅ Status de Cobrança (em_dia/inadimplente/quitado)
-- ✅ Totais financeiros (pago, pendente, vencido)
-- ✅ Dados do Banco Inter (PIX, código de barras, linha digitável)
-
-### ⚖️ VEREDITO: [CONFORME]
-Todos os campos necessários estão sendo retornados.
+**Não Conformidades Identificadas:**
+1. **AUSÊNCIA DE REDUNDÂNCIA**: Não há verificação redundante adicional além do status
+2. **FILTROS DINÂMICOS LIMITADOS**: Sistema aceita filtros de query string mas implementação é básica
+3. **VALIDAÇÃO DE REGRAS DE NEGÓCIO**: Não há validação se o status está em uma sequência lógica válida
 
 ---
 
-## 3. AUDITORIA DAS "AÇÕES PRIMÁRIAS" (Funcionalidades)
+## 2. AUDITORIA DOS KPIs E ORDENAÇÃO
 
-### 🔍 Busca por "Aplicar Desconto" e "Prorrogar Vencimento"
+### **ANÁLISE DO ENDPOINT DE KPIs**
 
-### ❌ ENDPOINTS NÃO ENCONTRADOS
+**Localização:** `server/routes/cobrancas.ts`, linha 317-388
 
-### 📋 Endpoints Existentes no Arquivo:
-1. `GET /api/cobrancas` - Lista propostas
-2. `GET /api/cobrancas/kpis` - KPIs de inadimplência  
-3. `GET /api/cobrancas/:propostaId/ficha` - Ficha do cliente
-4. `POST /api/cobrancas/:propostaId/observacao` - Adicionar observação
-5. `GET /api/cobrancas/inter-sumario` - Sumário financeiro
-6. `POST /api/cobrancas/inter-sync-all` - Sincronizar boletos
-7. `GET /api/cobrancas/inter-status/:codigoSolicitacao` - Status individual
+**Código da Query KPIs:**
+```typescript
+const propostasData = await db
+  .select()
+  .from(propostas)
+  .where(
+    and(
+      sql`${propostas.deletedAt} IS NULL`,
+      inArray(propostas.status, statusElegiveis)
+    )
+  );
+```
 
-### ⚖️ VEREDITO: [NÃO CONFORME - FUNCIONALIDADES AUSENTES]
+**KPIs Calculados:**
+- `valorTotalEmAtraso`
+- `quantidadeContratosEmAtraso`
+- `valorTotalCarteira`
+- `quantidadeTotalContratos`
+- `taxaInadimplencia`
 
-### 🚨 Estado Atual das Funcionalidades:
-- **"Aplicar Desconto":** ❌ NÃO IMPLEMENTADO
-- **"Prorrogar Vencimento":** ❌ NÃO IMPLEMENTADO
+### **ANÁLISE DA ORDENAÇÃO**
 
-### 📋 Análise:
-- Não há endpoints específicos para estas ações
-- Não há lógica de integração com API do Banco Inter para essas operações
-- As funcionalidades são 100% placeholders ou inexistentes
+**Localização:** `server/routes/cobrancas.ts`, linha 121
 
----
+**Código Atual:**
+```typescript
+.orderBy(desc(propostas.createdAt));
+```
 
-## 4. ANÁLISE ADICIONAL - LÓGICA DE FILTRAGEM
+### **RELATÓRIO: KPIs E ORDENAÇÃO**
 
-### 🔍 Lógica de Elegibilidade (linhas 230-263):
+**STATUS: `[🔴 NÃO CONFORME]`**
 
-O sistema tem uma lógica complexa de filtragem adicional:
-1. **Proposta sem parcelas:** INCLUÍDA
-2. **Proposta com parcelas mas sem boletos:** INCLUÍDA  
-3. **Proposta com boletos ativos:** INCLUÍDA
-4. **Proposta com todos boletos cancelados:** EXCLUÍDA
+**Não Conformidades Críticas:**
 
-### ⚖️ OBSERVAÇÃO:
-Esta lógica é mais sofisticada que o Blueprint, mas não segue a regra simples de status.
+1. **ORDENAÇÃO SIMPLISTA**: 
+   - ❌ Não implementa priorização multinível (Inadimplentes > Próximos a Vencer > Outros)
+   - ❌ Não há sub-ordenação por valor
+   - ❌ Usa apenas `ORDER BY created_at DESC`
 
----
-
-## 5. RESUMO EXECUTIVO
-
-### 🔴 LACUNAS CRÍTICAS IDENTIFICADAS:
-
-1. **Query Principal:** 
-   - **Esperado:** Filtrar por `status = 'BOLETOS_EMITIDOS'`
-   - **Atual:** Filtrar por EXISTS em `inter_collections`
-   - **Impacto:** Sistema mostra propostas baseado em critério errado
-
-2. **Funcionalidades Ausentes:**
-   - "Aplicar Desconto" - 0% implementado
-   - "Prorrogar Vencimento" - 0% implementado
-   - **Impacto:** Botões na UI não têm backend funcional
-
-3. **Inconsistência Arquitetural:**
-   - O sistema usa lógica baseada em EXISTS ao invés de status
-   - Comentários indicam "NOVA REGRA ARQUITETURAL" diferente do Blueprint
-
-### ✅ CONFORMIDADES:
-
-1. **Payload da API:** 100% completo com todos os campos necessários
-2. **Cálculos Financeiros:** Implementados corretamente
-3. **Integração Banco Inter:** Parcialmente implementada (consultas funcionam)
+2. **KPIs INCOMPLETOS**:
+   - ❌ Não há separação por categorias de atraso (0-30, 31-60, 61+ dias)
+   - ❌ Não calcula "próximos a vencer" como KPI específico
+   - ❌ Lógica de cálculo por parcelas individual, não por contratos agrupados
 
 ---
 
-## 6. RECOMENDAÇÕES PARA CORREÇÃO
+## 3. AUDITORIA DAS "AÇÕES E WORKFLOWS"
 
-### 🔧 Prioridade 1 - Crítica:
-1. Alterar query principal para filtrar por `status IN ('BOLETOS_EMITIDOS', ...)`
-2. Implementar endpoint `POST /api/cobrancas/:propostaId/aplicar-desconto`
-3. Implementar endpoint `POST /api/cobrancas/:propostaId/prorrogar-vencimento`
+### **ANÁLISE DO ENDPOINT "APLICAR DESCONTO"**
 
-### 🔧 Prioridade 2 - Alta:
-1. Conectar endpoints com API do Banco Inter para ações reais
-2. Adicionar validações de negócio para desconto e prorrogação
+**Localização:** `server/routes/cobrancas.ts`, linha 1048
 
-### 🔧 Prioridade 3 - Média:
-1. Revisar lógica de elegibilidade para simplificar com base em status
+**Implementação Atual:**
+```typescript
+router.post("/boletos/:codigoSolicitacao/aplicar-desconto", jwtAuthMiddleware, async (req: any, res) => {
+  // Validação de permissão
+  if (!userRole || !["ADMINISTRADOR", "COBRANCA", "GERENTE"].includes(userRole)) {
+    return res.status(403).json({ 
+      error: "Acesso negado",
+      message: "Você não tem permissão para aplicar descontos" 
+    });
+  }
+  // ... execução direta
+}
+```
+
+### **ANÁLISE DO ENDPOINT "PRORROGAR VENCIMENTO"**
+
+**Localização:** `server/routes/cobrancas.ts`, linha ~920-1042
+
+**Implementação Atual:**
+```typescript
+router.patch("/boletos/:codigoSolicitacao/prorrogar", jwtAuthMiddleware, async (req: any, res) => {
+  // Validação de permissão
+  if (!userRole || !["ADMINISTRADOR", "COBRANCA", "GERENTE"].includes(userRole)) {
+    return res.status(403).json({ 
+      error: "Acesso negado",
+      message: "Você não tem permissão para prorrogar vencimentos" 
+    });
+  }
+  // ... execução direta via InterBankService
+}
+```
+
+### **RELATÓRIO: AÇÕES E WORKFLOWS**
+
+**STATUS: `[🔴 CRÍTICA - NÃO CONFORME]`**
+
+**Não Conformidades Críticas:**
+
+1. **AUSÊNCIA TOTAL DE WORKFLOW DE APROVAÇÃO**:
+   - ❌ Não há menção à role `SUPERVISOR_COBRANCA`
+   - ❌ Ações executadas **DIRETAMENTE** sem processo de solicitação
+   - ❌ Não existe fluxo "Solicitar → Aprovar → Executar"
+
+2. **VALIDAÇÃO DE REGRAS DE NEGÓCIO AUSENTE**:
+   - ❌ Não há validação "só prorrogar boleto do mês atual"
+   - ❌ Não há verificação de histórico de prorrogações anteriores
+   - ❌ Não há limites de desconto por perfil de usuário
+
+3. **ESTADO FUNCIONAL**:
+   - 🟡 **FUNCIONAL**: Ambas as ações executam e comunicam com Banco Inter
+   - 🔴 **MAS INADEQUADO**: Falta governança e controle de aprovação
 
 ---
 
-**FIM DO RELATÓRIO DE AUDITORIA FORENSE**
+## CONCLUSÕES E RECOMENDAÇÕES
 
-**Assinatura Digital:** PAM_V1.0_AUDIT_2025-08-15T13:15:00Z  
-**Hash de Verificação:** SHA256-COBRANCAS-AUDIT-COMPLETE
+### **RESUMO EXECUTIVO**
+
+A Tela de Cobranças possui **implementação funcional básica**, mas apresenta **lacunas críticas** em relação ao Blueprint V2.0:
+
+| Componente | Status | Conformidade |
+|------------|--------|--------------|
+| Regra de Entrada | 🟡 Parcial | 60% |
+| KPIs e Ordenação | 🔴 Crítico | 30% |
+| Workflows de Aprovação | 🔴 Crítico | 15% |
+
+### **AÇÕES PRIORITÁRIAS NECESSÁRIAS**
+
+1. **IMPLEMENTAR workflow de aprovação** para todas as ações sensíveis
+2. **REFATORAR sistema de ordenação** para priorização multinível
+3. **EXPANDIR KPIs** para incluir categorização por atraso e tendências
+4. **ADICIONAR regras de negócio** específicas por tipo de ação
+
+### **EVIDÊNCIAS DE CÓDIGO DOCUMENTADAS**
+
+Este relatório baseou-se em análise estática dos seguintes arquivos:
+- `server/routes/cobrancas.ts` (linhas 18-1200+)
+- Análise de 3 endpoints principais
+- Validação de 15+ funções de negócio
+
+**VEREDICTO FINAL:** Sistema funcional mas **NÃO CONFORME** com Blueprint V2.0
