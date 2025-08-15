@@ -13,7 +13,12 @@
 Simpix is a full-stack TypeScript application designed for comprehensive credit management. Its primary purpose is to streamline the credit proposal workflow from creation and analysis to payment processing and formalization tracking. The project aims to provide a robust, secure, and user-friendly platform for financial institutions, with a focus on banking-grade security, compliance, and efficient data management, positioning it as a leading solution in the credit management market.
 
 ## User Preferences
-Preferred communication style: Simple, everyday language.
+**OPERATIONAL MODE:** REALISMO CÉTICO (MANDATORY as of 15/08/2025)
+- No ego padding: Report technical reality, regardless of how harsh
+- Default assumption: My code contains errors until 5-CHECK protocol proves otherwise
+- Radical transparency: NEVER hide problems, report discovered issues immediately
+- Success metric: Truth over speed
+Communication style: Direct technical language, skeptical and realistic.
 Focus: CCB template generation over UI visualization.
 Language: Portuguese, studying software architecture.
 Error handling: Create structured documentation for automatic consultation during error loops.
