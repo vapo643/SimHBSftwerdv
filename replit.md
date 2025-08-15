@@ -1,5 +1,8 @@
 # Simpix Credit Management System
 
+## Recent Changes
+- **15/08/2025**: Sistema de Alertas Proativos - Arquitetura completa projetada incluindo Motor de Regras (backend), schemas de banco de dados, e Central de Notificações (frontend). Sistema híbrido com cron jobs + webhooks para máxima eficiência.
+
 ## Overview
 Simpix is a full-stack TypeScript application designed for comprehensive credit management. Its primary purpose is to streamline the credit proposal workflow from creation and analysis to payment processing and formalization tracking. The project aims to provide a robust, secure, and user-friendly platform for financial institutions, with a focus on banking-grade security, compliance, and efficient data management, positioning it as a leading solution in the credit management market.
 
