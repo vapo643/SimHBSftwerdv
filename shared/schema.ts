@@ -889,3 +889,116 @@ export const updateSolicitacaoModificacaoSchema = createInsertSchema(solicitacoe
 export type InsertSolicitacaoModificacao = z.infer<typeof insertSolicitacaoModificacaoSchema>;
 export type UpdateSolicitacaoModificacao = z.infer<typeof updateSolicitacaoModificacaoSchema>;
 export type SolicitacaoModificacao = typeof solicitacoesModificacao.$inferSelect;
+
+// PAM V1.0 - Sistema de Alertas Proativos (15/08/2025)
+// Tabela principal de notificações
+export const notificacoes = pgTable("notificacoes", {
+  id: serial("id").primaryKey(),
+  
+  // Identificação
+  tipo: varchar("tipo", { length: 100 }).notNull(), // "alto_valor_vencimento_proximo"
+  titulo: varchar("titulo", { length: 255 }).notNull(), // "Proposta de Alto Valor Vencendo"
+  mensagem: text("mensagem").notNull(), // "Proposta #12345 de João Silva..."
+  
+  // Priorização
+  prioridade: varchar("prioridade", { length: 20 }).notNull(), // "BAIXA", "MEDIA", "ALTA", "CRITICA"
+  categoria: varchar("categoria", { length: 50 }).notNull(), // "vencimento", "atraso", "pagamento"
+  
+  // Relacionamento
+  propostaId: varchar("proposta_id", { length: 36 }), // ID da proposta relacionada
+  linkRelacionado: varchar("link_relacionado", { length: 500 }), // "/financeiro/cobrancas?id=..."
+  
+  // Destinatário
+  userId: varchar("user_id", { length: 36 }).notNull(), // A quem é dirigida
+  userRole: varchar("user_role", { length: 50 }), // Role para filtros
+  
+  // Status e Rastreamento
+  status: varchar("status", { length: 20 }).notNull().default("nao_lida"), // "nao_lida", "lida", "arquivada"
+  dataLeitura: timestamp("data_leitura"),
+  dataArquivamento: timestamp("data_arquivamento"),
+  
+  // Metadados
+  dadosAdicionais: jsonb("dados_adicionais"), // Dados específicos do alerta
+  origem: varchar("origem", { length: 50 }).notNull().default("sistema"), // "sistema", "webhook", "manual"
+  
+  // Auditoria
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Tabela de configuração de regras de alertas
+export const regrasAlertas = pgTable("regras_alertas", {
+  id: serial("id").primaryKey(),
+  nome: varchar("nome", { length: 100 }).notNull().unique(),
+  descricao: text("descricao").notNull(),
+  
+  // Configuração
+  ativa: boolean("ativa").notNull().default(true),
+  trigger: varchar("trigger", { length: 20 }).notNull(), // "cron", "webhook"
+  prioridade: varchar("prioridade", { length: 20 }).notNull(),
+  
+  // Query e Lógica
+  querySQL: text("query_sql"),
+  condicoes: jsonb("condicoes"), // Parâmetros configuráveis
+  destinatarios: jsonb("destinatarios"), // Array de roles
+  
+  // Limitadores (evitar spam)
+  limiteExecutacoesDia: integer("limite_execucoes_dia").default(1),
+  intervaloMinimoMinutos: integer("intervalo_minimo_minutos").default(60),
+  
+  // Auditoria
+  criadoPor: varchar("criado_por", { length: 36 }).notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Tabela de histórico de execuções de alertas
+export const historicoExecucoesAlertas = pgTable("historico_execucoes_alertas", {
+  id: serial("id").primaryKey(),
+  regraId: integer("regra_id").notNull().references(() => regrasAlertas.id),
+  
+  // Execução
+  dataExecucao: timestamp("data_execucao").notNull().defaultNow(),
+  duracao: integer("duracao"), // em milissegundos
+  status: varchar("status", { length: 20 }).notNull(), // "sucesso", "erro", "sem_resultados"
+  
+  // Resultados
+  registrosProcessados: integer("registros_processados").default(0),
+  notificacoesCriadas: integer("notificacoes_criadas").default(0),
+  erroDetalhes: text("erro_detalhes"),
+  
+  // Contexto
+  triggerOrigem: varchar("trigger_origem", { length: 50 }), // "cron", "webhook_clicksign"
+  dadosContexto: jsonb("dados_contexto"),
+});
+
+// Schemas de inserção para Alertas Proativos
+export const insertNotificacaoSchema = createInsertSchema(notificacoes)
+  .omit({ 
+    id: true, 
+    createdAt: true,
+    updatedAt: true,
+    dataLeitura: true,
+    dataArquivamento: true
+  });
+
+export const insertRegraAlertaSchema = createInsertSchema(regrasAlertas)
+  .omit({ 
+    id: true, 
+    createdAt: true,
+    updatedAt: true
+  });
+
+export const insertHistoricoExecucaoAlertaSchema = createInsertSchema(historicoExecucoesAlertas)
+  .omit({ 
+    id: true,
+    dataExecucao: true
+  });
+
+// Types para Alertas Proativos
+export type InsertNotificacao = z.infer<typeof insertNotificacaoSchema>;
+export type Notificacao = typeof notificacoes.$inferSelect;
+export type InsertRegraAlerta = z.infer<typeof insertRegraAlertaSchema>;
+export type RegraAlerta = typeof regrasAlertas.$inferSelect;
+export type InsertHistoricoExecucaoAlerta = z.infer<typeof insertHistoricoExecucaoAlertaSchema>;
+export type HistoricoExecucaoAlerta = typeof historicoExecucoesAlertas.$inferSelect;

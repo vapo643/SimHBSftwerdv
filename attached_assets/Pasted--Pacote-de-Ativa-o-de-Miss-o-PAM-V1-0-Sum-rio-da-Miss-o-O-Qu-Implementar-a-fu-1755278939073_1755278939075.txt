@@ -1,0 +1,43 @@
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Implementar a fundação de backend e banco de dados para o novo "Sistema de Alertas Proativos", incluindo os schemas Drizzle para as 3 novas tabelas e a estrutura inicial do serviço de regras.
+* **Intenção Estratégica (O Porquê):** Esta é a primeira fase de implementação do nosso novo sistema de alertas. Construir a fundação de dados e o serviço básico nos permitirá ter a infraestrutura pronta e validada para as camadas subsequentes de UI e lógica de regras.
+* **Histórico Relevante (Consulta Obrigatória):** Esta missão é a execução da **"Fase 1: Fundação"** do seu próprio plano de arquitetura, contido no relatório `PAM_V1.0_ARQUITETURA_ALERTAS_PROATIVOS.md`. Siga o seu próprio blueprint com precisão.
+* **Modelo Mental (Como se Encaixa):** Você atuará como Engenheiro de Backend e DBA. Sua tarefa é traduzir os schemas Drizzle que você projetou em migrações de banco de dados reais e construir a estrutura inicial do serviço que irá interagir com eles.
+* **Riscos Antecipados:** **Risco:** O schema pode ter pequenas falhas. **Contramedida:** A criação da migração Drizzle e a revisão do SQL gerado servirão como uma validação final do design do schema.
+
+---
+
+**IMPLEMENTAR:**
+A fundação de backend da **Fase 1** do seu plano de arquitetura para o Sistema de Alertas Proativos.
+
+**CURRENT STATE:**
+O sistema não possui as tabelas `notificacoes`, `regras_alertas`, ou `historico_execucoes_alertas`, nem o serviço de processamento de alertas.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  As três novas tabelas são criadas com sucesso no banco de dados via migração Drizzle.
+2.  Um novo serviço `alertasProativosService.ts` existe no backend.
+3.  Este serviço contém a estrutura da classe `AlertasProativosService` com os métodos `executarVerificacaoDiaria` e `processarEvento`, prontos para terem a lógica das regras implementada.
+4.  Um novo Job Agendado (Cron Job) está registrado em nosso sistema BullMQ para chamar a função `executarVerificacaoDiaria` diariamente.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+**1. Criação dos Schemas Drizzle (`shared/schema.ts`):**
+    - **Ação:** Primeiro, adicione as definições para as três novas tabelas (`notificacoes`, `regras_alertas`, `historico_execucoes_alertas`) ao seu ficheiro de schema, exatamente como você as projetou em seu relatório de arquitetura.
+
+**2. Migração do Banco de Dados:**
+    - **Ação:** Gere e aplique a migração Drizzle para criar estas tabelas no banco de dados.
+
+**3. Criação do Serviço de Backend (`server/services/alertasProativosService.ts`):**
+    - **Ação:** Crie o novo ficheiro de serviço.
+    - **Implementação:** Implemente a estrutura da classe `AlertasProativosService` com os métodos `executarVerificacaoDiaria`, `processarEvento` e `processarRegra`, conforme o seu design. A lógica interna das regras pode ser um placeholder por enquanto.
+
+**4. Implementação do Job Agendado:**
+    - **Ação:** Usando nosso sistema BullMQ já existente, registre um novo cron job que chame a função `alertasProativosService.executarVerificacaoDiaria` todos os dias às 7h da manhã (fuso horário 'America/Sao_Paulo'), como você planejou.
+
+**PROTOCOLO OBRIGATÓRIO 5-CHECK:**
+1.  Mapear os arquivos envolvidos.
+2.  Garantir que a migração do banco de dados seja o primeiro passo.
+3.  Executar `get_latest_lsp_diagnostics`.
+4.  Realizar um teste funcional criando um endpoint de teste temporário que chame a função `executarVerificacaoDiaria` para garantir que ela não gere erros.
+5.  O critério final de sucesso é a verificação da existência das novas tabelas no Supabase e a confirmação de que o novo cron job está registrado e pronto para ser executado.

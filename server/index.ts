@@ -19,6 +19,34 @@ import { registerRoutes } from "./routes";
   ccbSyncService.startAutoSync(6); // Poll every 6 hours as safety net
   log("🔄 CCB Sync Service initialized - Webhook primary, polling fallback every 6 hours");
 
+  // Initialize Sistema de Alertas Proativos (PAM V1.0)
+  const { alertasProativosService } = await import("./services/alertasProativosService");
+  
+  // Configurar execução diária às 7h da manhã (Brasília)
+  const horaExecucao = 7; // 7h da manhã
+  const agora = new Date();
+  const proximaExecucao = new Date();
+  proximaExecucao.setHours(horaExecucao, 0, 0, 0);
+  
+  // Se já passou das 7h hoje, agendar para amanhã
+  if (proximaExecucao <= agora) {
+    proximaExecucao.setDate(proximaExecucao.getDate() + 1);
+  }
+  
+  const tempoAteProximaExecucao = proximaExecucao.getTime() - agora.getTime();
+  
+  // Agendar primeira execução
+  setTimeout(() => {
+    alertasProativosService.executarVerificacaoDiaria();
+    
+    // Agendar execuções diárias subsequentes
+    setInterval(() => {
+      alertasProativosService.executarVerificacaoDiaria();
+    }, 24 * 60 * 60 * 1000); // 24 horas
+  }, tempoAteProximaExecucao);
+  
+  log(`🔔 Sistema de Alertas Proativos inicializado - Próxima execução: ${proximaExecucao.toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })}`);
+
   // Initialize autonomous security scanners
   const { getSecurityScanner } = await import("./lib/autonomous-security-scanner");
   const { getVulnerabilityDetector } = await import("./lib/vulnerability-detector");

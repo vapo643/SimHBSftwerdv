@@ -5216,6 +5216,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const cobrancasRouter = (await import("./routes/cobrancas.js")).default;
   app.use("/api/cobrancas", cobrancasRouter);
 
+  // Register Alertas Proativos routes (PAM V1.0)
+  const alertasRouter = (await import("./routes/alertas.js")).default;
+  app.use("/api/alertas", alertasRouter);
+
   // Register Monitoring routes (Admin only)
   app.use("/api/monitoring", jwtAuthMiddleware, requireAdmin, monitoringRoutes);
 
