@@ -4822,11 +4822,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // ============== SYSTEM METADATA ROUTES ==============
 
+  // Helper middleware to check for multiple roles
+  const requireRoles = (allowedRoles: string[]) => {
+    return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+      if (!req.user?.role || !allowedRoles.includes(req.user.role)) {
+        return res.status(403).json({
+          message: `Acesso negado. Apenas ${allowedRoles.join(", ")} podem acessar este recurso.`,
+        });
+      }
+      next();
+    };
+  };
+
   // System metadata endpoint for hybrid filtering strategy
+  // Now allows ADMINISTRADOR, DIRETOR, and GERENTE to create users
   app.get(
     "/api/admin/system/metadata",
     jwtAuthMiddleware,
-    requireAdmin,
+    requireRoles(['ADMINISTRADOR', 'DIRETOR', 'GERENTE']),
     async (req: AuthenticatedRequest, res) => {
       try {
         const { db } = await import("../server/lib/supabase");
@@ -4852,7 +4865,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get(
     "/api/admin/parceiros/:parceiroId/lojas",
     jwtAuthMiddleware,
-    requireAdmin,
+    requireRoles(['ADMINISTRADOR', 'DIRETOR', 'GERENTE']),
     async (req: AuthenticatedRequest, res) => {
       try {
         const { db } = await import("../server/lib/supabase");
@@ -4880,7 +4893,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get(
     "/api/admin/lojas",
     jwtAuthMiddleware,
-    requireAdmin,
+    requireRoles(['ADMINISTRADOR', 'DIRETOR', 'GERENTE']),
     async (req: AuthenticatedRequest, res) => {
       try {
         const lojas = await storage.getLojas();

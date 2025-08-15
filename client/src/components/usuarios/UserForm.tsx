@@ -90,12 +90,18 @@ const UserForm: React.FC<UserFormProps> = ({
   const {
     partners,
     isLoading: isFormDataLoading,
+    error: formDataError,
     getStoresByPartner,
     canFilterClientSide,
+    filteringStrategy,
   } = useUserFormData();
 
   // Use server-side store fetching when needed
-  const { data: serverStores = [], isLoading: isServerStoresLoading } = useStoresByPartner(
+  const { 
+    data: serverStores = [], 
+    isLoading: isServerStoresLoading,
+    error: serverStoresError 
+  } = useStoresByPartner(
     selectedParceiroId ? parseInt(selectedParceiroId) : null,
     !canFilterClientSide && !!selectedParceiroId
   );
@@ -157,7 +163,7 @@ const UserForm: React.FC<UserFormProps> = ({
   };
 
   const getLojaName = (lojaId: string) => {
-    const loja = availableStores.find(l => l.id.toString() === lojaId);
+    const loja = availableStores.find((l: any) => l.id.toString() === lojaId);
     return loja ? loja.nomeLoja : "Loja não encontrada";
   };
 
@@ -262,7 +268,7 @@ const UserForm: React.FC<UserFormProps> = ({
                     />
                   </SelectTrigger>
                   <SelectContent>
-                    {partners.map(parceiro => (
+                    {partners.map((parceiro: any) => (
                       <SelectItem key={parceiro.id} value={parceiro.id.toString()}>
                         {parceiro.razaoSocial}
                       </SelectItem>
@@ -311,7 +317,7 @@ const UserForm: React.FC<UserFormProps> = ({
                       />
                     </SelectTrigger>
                     <SelectContent>
-                      {availableStores.map(l => (
+                      {availableStores.map((l: any) => (
                         <SelectItem key={l.id} value={l.id.toString()}>
                           {l.nomeLoja}
                         </SelectItem>
@@ -360,8 +366,8 @@ const UserForm: React.FC<UserFormProps> = ({
                   </SelectTrigger>
                   <SelectContent>
                     {availableStores
-                      .filter(l => !selectedLojas.includes(l.id.toString()))
-                      .map(l => (
+                      .filter((l: any) => !selectedLojas.includes(l.id.toString()))
+                      .map((l: any) => (
                         <SelectItem key={l.id} value={l.id.toString()}>
                           {l.nomeLoja}
                         </SelectItem>
