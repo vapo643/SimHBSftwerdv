@@ -1,0 +1,47 @@
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Refatorar o sistema de notificações, removendo a página dedicada "Central de Notificações" (`/notificacoes`) e implementando novas ações diretamente no dropdown do header (navegação por item e limpeza do histórico).
+* **Intenção Estratégica (O Porquê):** A experiência do usuário da página dedicada de notificações foi considerada confusa e desnecessária pelo Arquiteto. A nova estratégia é manter todas as interações dentro do dropdown do header, tornando o fluxo de trabalho mais rápido, direto e integrado.
+* **Histórico Relevante (Consulta Obrigatória):** Esta missão anula e reverte a implementação da missão `IMPLEMENTACAO-PAGINA-NOTIFICACOES-01`. Vamos deletar a página `/notificacoes` que foi criada e aprimorar o componente `<NotificationDropdown />`.
+* **Modelo Mental (Como se Encaixa):** O `<NotificationDropdown />` se tornará o único centro de interação com as notificações. Ele não será mais apenas uma prévia, mas a ferramenta completa para visualizar, navegar e gerir os alertas.
+* **Riscos Antecipados:** **Risco:** A deleção de rotas ou componentes pode quebrar a aplicação se houver referências esquecidas. **Contramedida:** A remoção deve ser o primeiro passo, seguida de uma verificação de `LSP` para garantir que não há importações quebradas.
+
+---
+
+**IMPLEMENTAR:**
+Refatoração completa da funcionalidade de notificações.
+
+**CURRENT STATE:**
+O sistema possui um dropdown de notificações com um link "Ver todas" que leva a uma página `/notificacoes` dedicada, que agora é considerada obsoleta e indesejada.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  A página `/notificacoes` é **completamente removida** do sistema. Acessá-la diretamente deve resultar em um erro 404.
+2.  No dropdown, cada **item de notificação individual** é agora um **link clicável** que navega o usuário para o `link_relacionado` daquela notificação (ex: a página da proposta em cobrança).
+3.  O antigo link "Ver todas" no rodapé do dropdown é substituído por um novo botão ou link com o texto **"Limpar Histórico"**.
+4.  Clicar em "Limpar Histórico" aciona uma chamada a um novo endpoint de backend que marca todas as notificações do usuário como lidas ou as apaga, e a lista no dropdown é esvaziada em tempo real.
+
+**CONSTRAINTS (Roadmap de Refatoração):**
+
+**FASE 1: Remoção da Página Obsoleta (Frontend):**
+    - **Ação:** Primeiro, delete o ficheiro do componente da página (ex: `client/src/pages/notificacoes.tsx`).
+    - **Ação:** Em seguida, remova a rota `/notificacoes` do nosso router principal (`App.tsx`).
+
+**FASE 2: Criação do Endpoint de Limpeza (Backend):**
+    - **Ação:** Crie um novo endpoint `DELETE /api/notificacoes/all`.
+    - **Implementação:** A lógica deste endpoint deve marcar todas as notificações do usuário logado como "lida" ou "arquivada" (a sua escolha, mas seja consistente), ou deletá-las. Retorne uma resposta de sucesso.
+
+**FASE 3: Refatoração do Dropdown de Notificações (Frontend):**
+    - **Ação:** Modifique o componente `<NotificationDropdown />`.
+    - **Implementação:**
+        a. Transforme cada item da lista em um componente de link (ex: usando `Link` do `wouter` ou `react-router-dom`) que use o `link_relacionado` da notificação como seu destino (`to`).
+        b. Substitua o link do rodapé pelo novo botão "Limpar Histórico".
+        c. Conecte o novo botão para que ele chame o endpoint `DELETE /api/notificacoes/all` e, em caso de sucesso, limpe a lista de notificações na UI e zere o contador do badge no sino.
+
+**PROTOCOLO OBRIGATÓRIO 5-CHECK:**
+1.  Mapear todos os arquivos envolvidos.
+2.  Garantir que a deleção da rota e do componente seja o primeiro passo.
+3.  Executar `get_latest_lsp_diagnostics`.
+4.  Realizar um teste funcional completo:
+    a. Clique em uma notificação individual e valide se a navegação ocorre.
+    b. Clique no botão "Limpar Histórico" e valide se o dropdown e o badge são limpos.
+5.  O critério final de sucesso é um sistema de notificações 100% funcional e contido no dropdown do header, sem a existência da página `/notificacoes`.

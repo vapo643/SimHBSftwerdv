@@ -1,13 +1,13 @@
 # Simpix Credit Management System
 
 ## Recent Changes
-- **15/08/2025**: Sistema de Alertas Proativos PAM V1.0 - ✅ IMPLEMENTAÇÃO COMPLETA
-  - Backend: Motor de regras com 3 alertas iniciais funcionando
-  - Frontend: Sino + dropdown de notificações no header integrado
-  - API: Endpoints com mapeamento Supabase Auth → tabela local users
-  - Banco: 3 tabelas (notificacoes, regras_alertas, historico_execucoes_alertas)
-  - Cron: Execução diária às 7h configurada
-  - Status: 100% Blueprint V2.0 conformance alcançado
+- **15/08/2025**: Sistema de Alertas Proativos PAM V1.0 - ✅ REFATORAÇÃO COMPLETA
+  - Removida página dedicada `/notificacoes` (estratégia simplificada)
+  - Centralizado tudo no dropdown do header para fluxo mais direto
+  - Adicionado endpoint `DELETE /api/alertas/notificacoes/all` para limpar histórico
+  - Botão "Ver todas" substituído por "Limpar Histórico" no dropdown
+  - Items individuais navegam para `linkRelacionado` quando clicados
+  - Sistema 100% funcional e contido no dropdown do header
 
 ## Overview
 Simpix is a full-stack TypeScript application designed for comprehensive credit management. Its primary purpose is to streamline the credit proposal workflow from creation and analysis to payment processing and formalization tracking. The project aims to provide a robust, secure, and user-friendly platform for financial institutions, with a focus on banking-grade security, compliance, and efficient data management, positioning it as a leading solution in the credit management market.

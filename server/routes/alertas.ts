@@ -259,6 +259,63 @@ router.post("/notificacoes/marcar-todas-lidas", jwtAuthMiddleware, async (req: a
 });
 
 /**
+ * DELETE /api/alertas/notificacoes/all
+ * Limpar histórico de notificações (arquivar todas)
+ */
+router.delete("/notificacoes/all", jwtAuthMiddleware, async (req: any, res) => {
+  try {
+    const userEmail = req.user?.email;
+
+    if (!userEmail) {
+      return res.status(401).json({
+        error: "Usuário não autenticado",
+        message: "Email do usuário não encontrado"
+      });
+    }
+
+    // Buscar o ID do usuário local
+    const [localUser] = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, userEmail))
+      .limit(1);
+
+    if (!localUser) {
+      return res.status(404).json({
+        error: "Usuário não encontrado",
+        message: "Usuário não existe na tabela local"
+      });
+    }
+
+    const localUserId = localUser.id.toString();
+
+    // Marcar todas as notificações como arquivadas
+    const resultado = await db
+      .update(notificacoes)
+      .set({
+        status: "arquivada",
+        dataLeitura: new Date(),
+        updatedAt: new Date()
+      })
+      .where(eq(notificacoes.userId, localUserId))
+      .returning({ id: notificacoes.id });
+
+    console.log(`[ALERTAS] Histórico limpo - ${resultado.length} notificações arquivadas para usuário ${userEmail}`);
+    res.json({ 
+      success: true, 
+      message: "Histórico de notificações limpo com sucesso",
+      notificacoesArquivadas: resultado.length
+    });
+  } catch (error) {
+    console.error("[ALERTAS LIMPAR HISTÓRICO] Erro:", error);
+    res.status(500).json({
+      error: "Erro interno",
+      message: "Erro ao limpar histórico de notificações"
+    });
+  }
+});
+
+/**
  * GET /api/alertas/regras
  * Listar regras de alertas (apenas ADMINISTRADOR)
  */

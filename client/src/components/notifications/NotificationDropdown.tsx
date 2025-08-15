@@ -36,6 +36,7 @@ interface NotificationDropdownProps {
   isLoading: boolean;
   onMarcarComoLida: (id: number) => void;
   onMarcarTodasComoLidas: () => void;
+  onLimparHistorico: () => void;
   onClose: () => void;
 }
 
@@ -44,6 +45,7 @@ export function NotificationDropdown({
   isLoading,
   onMarcarComoLida,
   onMarcarTodasComoLidas,
+  onLimparHistorico,
   onClose,
 }: NotificationDropdownProps) {
   // Ícone baseado na prioridade
@@ -197,13 +199,13 @@ export function NotificationDropdown({
         <div className="p-3 border-t bg-gray-50">
           <button
             onClick={() => {
-              window.location.href = "/notificacoes";
+              onLimparHistorico();
               onClose();
             }}
-            className="text-sm text-blue-600 hover:text-blue-700 font-medium text-center block w-full"
-            data-testid="link-all-notifications"
+            className="text-sm text-red-600 hover:text-red-700 font-medium text-center block w-full"
+            data-testid="button-clear-history"
           >
-            Ver todas as notificações
+            Limpar Histórico
           </button>
         </div>
       )}

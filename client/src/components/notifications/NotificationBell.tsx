@@ -75,6 +75,25 @@ export function NotificationBell() {
     }
   };
 
+  // Limpar histórico (arquivar todas)
+  const limparHistorico = async () => {
+    try {
+      const response = await fetch("/api/alertas/notificacoes/all", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        queryClient.invalidateQueries({ queryKey: ["/api/alertas/notificacoes"] });
+      }
+    } catch (error) {
+      console.error("Erro ao limpar histórico:", error);
+    }
+  };
+
   return (
     <div className="relative">
       {/* Sino com Badge */}
@@ -112,6 +131,7 @@ export function NotificationBell() {
             isLoading={isLoading}
             onMarcarComoLida={marcarComoLida}
             onMarcarTodasComoLidas={marcarTodasComoLidas}
+            onLimparHistorico={limparHistorico}
             onClose={() => setIsDropdownOpen(false)}
           />
         </>
