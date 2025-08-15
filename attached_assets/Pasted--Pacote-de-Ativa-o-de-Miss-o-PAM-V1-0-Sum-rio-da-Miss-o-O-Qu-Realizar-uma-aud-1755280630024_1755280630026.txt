@@ -1,0 +1,33 @@
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Realizar uma auditoria forense no banco de dados para verificar a existência das 3 notificações de teste que deveriam ter sido criadas para o usuário `admin@simpix.com`.
+* **Intenção Estratégica (O Porquê):** A validação da UI de notificações falhou porque nenhum dado está a ser exibido. Antes de depurar o código do frontend ou do backend, precisamos verificar a premissa mais básica: os dados existem na fonte da verdade (o banco de dados)?
+* **Histórico Relevante (Consulta Obrigatória):** Em sua última missão, você reportou ter criado 3 notificações de teste para o usuário `admin@simpix.com`. O Arquiteto não as vê na UI. Esta missão é para verificar se o seu relatório anterior foi preciso.
+* **Modelo Mental (Como se Encaixa):** Você atuará como um Administrador de Banco de Dados (DBA). Sua única tarefa é executar uma query `SELECT` precisa e reportar os resultados brutos.
+* **Riscos Antecipados:** Nenhum. Esta é uma operação de apenas leitura.
+
+---
+
+**IMPLEMENTAR:**
+Uma auditoria de dados. **NÃO FAÇA MODIFICAÇÕES.**
+
+**CURRENT STATE:**
+O ícone de sino de notificações aparece na UI, mas sem o badge de contagem "3" e sem notificações na lista.
+
+**EXPECTED (Estado Final de Sucesso):**
+O resultado bruto e não editado da query SQL especificada abaixo.
+
+**CONSTRAINTS (Roadmap de Auditoria):**
+
+**1. Auditoria do Banco de Dados (A Prova Definitiva):**
+    - **Ação:** Execute a seguinte query SQL diretamente no Editor SQL do Supabase. Esta query foi projetada para encontrar o `id` do usuário `admin@simpix.com` na tabela de autenticação e usar esse `id` para buscar todas as suas notificações na nossa tabela `notificacoes`.
+    - **Query a ser executada:**
+      ```sql
+      SELECT * FROM public.notificacoes 
+      WHERE user_id = (SELECT id::text FROM auth.users WHERE email = 'admin@simpix.com');
+      ```
+
+**Relatório Final:**
+O critério de sucesso é a apresentação do **resultado bruto e completo** desta query.
+* Se a query retornar 3 linhas, o problema está na nossa API ou no frontend.
+* Se a query retornar **0 linhas**, o problema está confirmado: os dados de teste nunca foram criados.
