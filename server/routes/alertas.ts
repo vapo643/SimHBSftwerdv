@@ -6,7 +6,7 @@
 import { Router } from "express";
 import { alertasProativosService } from "../services/alertasProativosService";
 import { db } from "../lib/supabase";
-import { notificacoes, regrasAlertas, historicoExecucoesAlertas } from "@shared/schema";
+import { notificacoes, regrasAlertas, historicoExecucoesAlertas, users } from "@shared/schema";
 import { eq, and, desc, inArray, sql } from "drizzle-orm";
 import { jwtAuthMiddleware } from "../lib/jwt-auth-middleware";
 
@@ -71,10 +71,35 @@ router.post("/executar", jwtAuthMiddleware, async (req: any, res) => {
  */
 router.get("/notificacoes", jwtAuthMiddleware, async (req: any, res) => {
   try {
-    const userId = req.user?.id;
+    const userEmail = req.user?.email;
     const { status, limite = 50 } = req.query;
 
-    let whereConditions: any = eq(notificacoes.userId, userId);
+    if (!userEmail) {
+      return res.status(401).json({
+        error: "Usuário não autenticado",
+        message: "Email do usuário não encontrado"
+      });
+    }
+
+    // CORREÇÃO CRÍTICA: Buscar o ID do usuário local pela tabela users
+    const [localUser] = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, userEmail))
+      .limit(1);
+
+    if (!localUser) {
+      console.error(`[ALERTAS] Usuário local não encontrado para email: ${userEmail}`);
+      return res.status(404).json({
+        error: "Usuário não encontrado",
+        message: "Usuário não existe na tabela local"
+      });
+    }
+
+    const localUserId = localUser.id.toString();
+    console.log(`[ALERTAS] Mapeamento: ${userEmail} -> Local ID: ${localUserId}`);
+
+    let whereConditions: any = eq(notificacoes.userId, localUserId);
 
     if (status) {
       whereConditions = and(
@@ -96,10 +121,12 @@ router.get("/notificacoes", jwtAuthMiddleware, async (req: any, res) => {
       .from(notificacoes)
       .where(
         and(
-          eq(notificacoes.userId, userId),
+          eq(notificacoes.userId, localUserId),
           eq(notificacoes.status, "nao_lida")
         )
       );
+
+    console.log(`[ALERTAS] Encontradas ${listaNotificacoes.length} notificações, ${naoLidas || 0} não lidas`);
 
     res.json({
       notificacoes: listaNotificacoes,
@@ -121,7 +148,30 @@ router.get("/notificacoes", jwtAuthMiddleware, async (req: any, res) => {
 router.post("/notificacoes/:id/marcar-lida", jwtAuthMiddleware, async (req: any, res) => {
   try {
     const { id } = req.params;
-    const userId = req.user?.id;
+    const userEmail = req.user?.email;
+
+    if (!userEmail) {
+      return res.status(401).json({
+        error: "Usuário não autenticado",
+        message: "Email do usuário não encontrado"
+      });
+    }
+
+    // CORREÇÃO CRÍTICA: Buscar o ID do usuário local
+    const [localUser] = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, userEmail))
+      .limit(1);
+
+    if (!localUser) {
+      return res.status(404).json({
+        error: "Usuário não encontrado",
+        message: "Usuário não existe na tabela local"
+      });
+    }
+
+    const localUserId = localUser.id.toString();
 
     await db
       .update(notificacoes)
@@ -133,10 +183,11 @@ router.post("/notificacoes/:id/marcar-lida", jwtAuthMiddleware, async (req: any,
       .where(
         and(
           eq(notificacoes.id, parseInt(id)),
-          eq(notificacoes.userId, userId)
+          eq(notificacoes.userId, localUserId)
         )
       );
 
+    console.log(`[ALERTAS] Notificação ${id} marcada como lida para usuário ${userEmail}`);
     res.json({ success: true });
   } catch (error) {
     console.error("[ALERTAS MARCAR LIDA] Erro:", error);
@@ -153,7 +204,30 @@ router.post("/notificacoes/:id/marcar-lida", jwtAuthMiddleware, async (req: any,
  */
 router.post("/notificacoes/marcar-todas-lidas", jwtAuthMiddleware, async (req: any, res) => {
   try {
-    const userId = req.user?.id;
+    const userEmail = req.user?.email;
+
+    if (!userEmail) {
+      return res.status(401).json({
+        error: "Usuário não autenticado",
+        message: "Email do usuário não encontrado"
+      });
+    }
+
+    // CORREÇÃO CRÍTICA: Buscar o ID do usuário local
+    const [localUser] = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, userEmail))
+      .limit(1);
+
+    if (!localUser) {
+      return res.status(404).json({
+        error: "Usuário não encontrado",
+        message: "Usuário não existe na tabela local"
+      });
+    }
+
+    const localUserId = localUser.id.toString();
 
     const resultado = await db
       .update(notificacoes)
@@ -164,12 +238,13 @@ router.post("/notificacoes/marcar-todas-lidas", jwtAuthMiddleware, async (req: a
       })
       .where(
         and(
-          eq(notificacoes.userId, userId),
+          eq(notificacoes.userId, localUserId),
           eq(notificacoes.status, "nao_lida")
         )
       )
       .returning({ id: notificacoes.id });
 
+    console.log(`[ALERTAS] ${resultado.length} notificações marcadas como lidas para usuário ${userEmail}`);
     res.json({ 
       success: true,
       count: resultado.length 
