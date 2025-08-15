@@ -1,0 +1,45 @@
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Implementar a página dedicada "Central de Notificações" (`/notificacoes`) para completar o Sistema de Alertas Proativos, resolvendo o erro `404` atual.
+* **Intenção Estratégica (O Porquê):** O dropdown de notificações oferece uma visão rápida, mas a equipe precisa de uma página completa para buscar, filtrar e gerenciar todo o histórico de notificações de forma eficiente. A ausência desta página quebra a experiência do usuário e deixa a funcionalidade incompleta.
+* **Histórico Relevante (Consulta Obrigatória):** Sua missão anterior implementou com sucesso as Camadas 1 e 2 do nosso design de notificações. Esta missão é para implementar a **Camada 3**, conforme o plano de arquitetura original (`PAM_V1.0_ARQUITETURA_ALERTAS_PROATIVOS.md`).
+* **Modelo Mental (Como se Encaixa):** Você atuará como Engenheiro de Frontend. Sua tarefa é criar uma nova rota/página no React que consumirá a API de notificações já existente, mas com funcionalidades de UI mais avançadas (filtros, busca, paginação).
+* **Riscos Antecipados:** **Risco:** A nova página pode ter um design inconsistente. **Contramedida:** A implementação deve reutilizar intensivamente os componentes de UI existentes (Tabelas, Botões, Filtros) para garantir a consistência.
+
+---
+
+**IMPLEMENTAR:**
+A página completa da "Central de Notificações" na rota `/notificacoes`.
+
+**BUG/CURRENT STATE:**
+O link/botão "Ver todas as notificações" no dropdown de notificações está a levar a um erro `404 Page Not Found` porque a rota e o componente da página não foram criados.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  Uma nova página é criada e acessível na rota `/notificacoes`.
+2.  A página exibe uma lista completa e paginada de **todas** as notificações do usuário.
+3.  A página inclui controles de UI para **filtrar** (por tipo, prioridade, status) e **buscar** (por texto) as notificações.
+4.  O usuário pode executar ações em massa, como "Marcar todas como lidas".
+5.  O erro `404` é eliminado.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+**1. Criação da Rota e Componente:**
+    - **Ação:** Crie um novo ficheiro de página (ex: `client/src/pages/notificacoes.tsx`).
+    - **Ação:** Adicione a rota `/notificacoes` ao nosso router principal (`App.tsx`), garantindo que ela esteja protegida pela autenticação.
+
+**2. Lógica de Busca de Dados:**
+    - **Ação:** Reutilize o hook `useQuery` para chamar o endpoint `GET /api/notificacoes`.
+    - **Implementação:** Adapte a chamada para que ela envie os parâmetros de filtro e paginação selecionados pelo usuário na UI para o backend.
+
+**3. Construção da UI:**
+    - **Ação:** Construa a interface da página usando nossos componentes reutilizáveis (`<Table>`, `<Input>`, `<Select>`, `<Button>`, `<Pagination>`) para criar a lista de notificações e os controles de filtro.
+
+**4. Conexão da Ação:**
+    - **Ação:** Conecte o link "Ver todas" no componente `<NotificationDropdown />` para que ele agora aponte corretamente para a nova rota `/notificacoes`.
+
+**PROTOCOLO OBRIGATÓRIO 5-CHECK:**
+1.  Mapear os arquivos envolvidos.
+2.  Garantir que a nova rota esteja protegida por autenticação.
+3.  Executar `get_latest_lsp_diagnostics`.
+4.  Realizar um teste funcional: clique no link "Ver todas" no dropdown e valide que a nova página carrega sem erros `404`.
+5.  O critério final de sucesso é uma "Central de Notificações" funcional, onde é possível visualizar, filtrar e interagir com todas as notificações do usuário.

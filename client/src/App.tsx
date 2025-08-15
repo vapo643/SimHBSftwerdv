@@ -30,6 +30,7 @@ import Configuracoes from "@/pages/configuracoes";
 import AceiteAtendente from "@/pages/aceite-atendente";
 import GestaoContratos from "@/pages/GestaoContratos";
 import NotFound from "@/pages/not-found";
+import NotificacoesPage from "@/pages/notificacoes";
 
 function Router() {
   return (
@@ -153,6 +154,11 @@ function Router() {
       <Route path="/admin/security/dashboard">
         <ProtectedRoute>
           <MonitoramentoAvancadoPage />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/notificacoes">
+        <ProtectedRoute>
+          <NotificacoesPage />
         </ProtectedRoute>
       </Route>
       <Route path="/">

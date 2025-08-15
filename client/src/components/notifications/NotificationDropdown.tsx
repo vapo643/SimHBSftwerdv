@@ -195,15 +195,16 @@ export function NotificationDropdown({
       {/* Footer */}
       {notificacoesVisiveis.length > 0 && (
         <div className="p-3 border-t bg-gray-50">
-          <Link href="/notificacoes">
-            <a 
-              className="text-sm text-blue-600 hover:text-blue-700 font-medium text-center block"
-              onClick={onClose}
-              data-testid="link-all-notifications"
-            >
-              Ver todas as notificações
-            </a>
-          </Link>
+          <button
+            onClick={() => {
+              window.location.href = "/notificacoes";
+              onClose();
+            }}
+            className="text-sm text-blue-600 hover:text-blue-700 font-medium text-center block w-full"
+            data-testid="link-all-notifications"
+          >
+            Ver todas as notificações
+          </button>
         </div>
       )}
     </div>
