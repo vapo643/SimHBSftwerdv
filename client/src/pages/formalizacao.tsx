@@ -246,6 +246,15 @@ function FormalizacaoList() {
 
   // Backend already handles all permission filtering
   const formalizacaoPropostas = propostas || [];
+  
+  // 🔍 PAM V1.0 - LOG DE DIAGNÓSTICO #1: Dados recebidos
+  console.log("🔍 [PAM V1.0 DIAGNÓSTICO] FormalizacaoList - Estado atual:", {
+    isLoading,
+    hasError: !!error,
+    totalPropostas: formalizacaoPropostas.length,
+    propostas: formalizacaoPropostas,
+    primeiraPropostaStatus: formalizacaoPropostas[0]?.status || 'NENHUMA'
+  });
 
   if (isLoading) {
     return (
@@ -331,7 +340,17 @@ function FormalizacaoList() {
 
         {/* Propostas List */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {formalizacaoPropostas.map(proposta => (
+          {formalizacaoPropostas.map(proposta => {
+            // 🔍 PAM V1.0 - LOG DE DIAGNÓSTICO #2: Renderização de cada proposta
+            console.log("🔍 [PAM V1.0 DIAGNÓSTICO] Renderizando proposta:", {
+              id: proposta.id,
+              status: proposta.status,
+              statusColor: getStatusColor(proposta.status),
+              statusText: getStatusText(proposta.status),
+              clienteData: proposta.cliente_data,
+              userRole: user?.role
+            });
+            return (
             <Card
               key={proposta.id}
               className="cursor-pointer border-gray-200 bg-white transition-shadow hover:shadow-lg dark:border-gray-700 dark:bg-gray-800"
@@ -392,7 +411,8 @@ function FormalizacaoList() {
                 </div>
               </CardContent>
             </Card>
-          ))}
+            );
+          })}
         </div>
 
         {formalizacaoPropostas.length === 0 && (
