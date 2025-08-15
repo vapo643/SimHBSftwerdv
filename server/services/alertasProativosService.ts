@@ -68,9 +68,9 @@ export class AlertasProativosService {
           .innerJoin(parcelas, eq(parcelas.propostaId, propostas.id))
           .where(
             and(
-              sql`${propostas.valorTotalFinanciado}::numeric >= 10000`, // Valor mínimo R$ 10.000
+              sql`${propostas.valorTotalFinanciado}::numeric >= 500`, // Valor mínimo R$ 500 (ajustado para dados reais)
               ne(parcelas.status, "pago"),
-              sql`${parcelas.dataVencimento} BETWEEN CURRENT_DATE + INTERVAL '1 day' AND CURRENT_DATE + INTERVAL '3 days'`,
+              sql`${parcelas.dataVencimento} BETWEEN CURRENT_DATE + INTERVAL '15 days' AND CURRENT_DATE + INTERVAL '30 days'`,
               inArray(propostas.status, ["BOLETOS_EMITIDOS", "PAGAMENTO_PENDENTE"])
             )
           );
@@ -78,7 +78,7 @@ export class AlertasProativosService {
         return resultado.map((r: any) => ({
           tipo: "alto_valor_vencimento_proximo",
           titulo: "Proposta de Alto Valor Vencendo",
-          mensagem: `Proposta ${r.propostaId.slice(0, 8)} de ${r.clienteNome} - Valor Total: R$ ${r.valorTotal.toFixed(2)} - Parcela ${r.numeroParcela} vence em ${format(new Date(r.dataVencimento), "dd/MM/yyyy")}`,
+          mensagem: `Proposta ${r.propostaId.slice(0, 8)} de ${r.clienteNome} - Valor Total: R$ ${parseFloat(r.valorTotal || 0).toFixed(2)} - Parcela ${r.numeroParcela} vence em ${format(new Date(r.dataVencimento), "dd/MM/yyyy")}`,
           prioridade: "ALTA",
           categoria: "vencimento",
           propostaId: r.propostaId,
@@ -182,14 +182,17 @@ export class AlertasProativosService {
         console.log(`[ALERTAS PROATIVOS] Processando regra: ${nomeRegra}`);
         
         const resultados = await processador.processar();
+        console.log(`[ALERTAS PROATIVOS] Regra ${nomeRegra} encontrou ${resultados.length} registros`);
         totalRegistrosProcessados += resultados.length;
 
         // Buscar usuários com roles apropriadas
         const rolesDestino = this.obterRolesDestino(nomeRegra);
+        console.log(`[ALERTAS PROATIVOS] Buscando usuários com roles: ${rolesDestino.join(', ')}`);
         const usuariosDestino = await db
           .select()
           .from(users)
           .where(inArray(users.role, rolesDestino));
+        console.log(`[ALERTAS PROATIVOS] Encontrados ${usuariosDestino.length} usuários para notificar`);
 
         // Criar notificações para cada resultado e cada usuário
         for (const resultado of resultados) {
@@ -272,13 +275,13 @@ export class AlertasProativosService {
   private obterRolesDestino(nomeRegra: string): string[] {
     switch (nomeRegra) {
       case "alto_valor_vencimento_proximo":
-        return ["COBRANCA", "SUPERVISOR_COBRANCA", "FINANCEIRO"];
+        return ["ADMINISTRADOR", "COBRANCA", "SUPERVISOR_COBRANCA", "FINANCEIRO"];
       case "atraso_longo_30_dias":
-        return ["SUPERVISOR_COBRANCA", "FINANCEIRO"];
+        return ["ADMINISTRADOR", "SUPERVISOR_COBRANCA", "FINANCEIRO"];
       case "boleto_visualizado_nao_pago":
-        return ["COBRANCA"];
+        return ["ADMINISTRADOR", "COBRANCA"];
       default:
-        return ["SUPERVISOR_COBRANCA"];
+        return ["ADMINISTRADOR", "SUPERVISOR_COBRANCA"];
     }
   }
 
