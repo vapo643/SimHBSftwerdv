@@ -8,7 +8,7 @@ import {
   interCollections,
   profiles,
 } from "@shared/schema";
-import { eq, and, sql, desc, gte, lte, inArray, or } from "drizzle-orm";
+import { eq, and, sql, desc, gte, lte, inArray, or, not } from "drizzle-orm";
 import { format, parseISO, differenceInDays, isAfter } from "date-fns";
 import { jwtAuthMiddleware } from "../lib/jwt-auth-middleware";
 
@@ -23,18 +23,23 @@ router.get("/", async (req: any, res) => {
     console.log("🔍 [COBRANÇAS] ====== INÍCIO DA BUSCA DE PROPOSTAS ======");
     console.log("🔍 [COBRANÇAS] Filtros aplicados:", { status, atraso });
 
-    // NOVA REGRA ARQUITETURAL: Exibir apenas propostas com boletos gerados na inter_collections
-    console.log("🔍 [COBRANÇAS] PAM V1.0 - Buscando propostas que possuem boletos...");
+    // PAM V1.0 REFATORADO: Usar STATUS como fonte da verdade (Blueprint de Negócio V1.0)
+    console.log("🔍 [COBRANÇAS] PAM V1.0 - Filtrando propostas por STATUS conforme Blueprint...");
     
-    // REGRA ABSOLUTA: Se tem boleto, aparece na cobrança. Se não tem, não aparece.
+    // REGRA CORRIGIDA: Filtrar por STATUS da proposta, não por EXISTS em inter_collections
+    // Status elegíveis para cobrança (após boletos emitidos)
+    const statusElegiveis = [
+      "BOLETOS_EMITIDOS",       // Principal status para cobranças
+      "PAGAMENTO_PENDENTE",     // Aguardando pagamento
+      "PAGAMENTO_PARCIAL",      // Pagamento parcial recebido
+      "PAGAMENTO_CONFIRMADO",   // Pagamento total confirmado
+      // Status legados para compatibilidade
+      "pronto_pagamento",       // Antigo BOLETOS_EMITIDOS
+    ];
+    
     let whereConditions = and(
       sql`${propostas.deletedAt} IS NULL`,
-      // EXISTS subquery: propostas que têm pelo menos 1 boleto na inter_collections
-      sql`EXISTS (
-        SELECT 1 
-        FROM ${interCollections} 
-        WHERE ${interCollections.propostaId} = ${propostas.id}
-      )`
+      inArray(propostas.status, statusElegiveis)
     );
 
     // 🔧 PAM V1.0 - CORREÇÃO DA QUERY: Seleção explícita de todos os campos necessários
@@ -107,7 +112,7 @@ router.get("/", async (req: any, res) => {
       .where(whereConditions)
       .orderBy(desc(propostas.createdAt));
     
-    console.log(`🔍 [COBRANÇAS] PAM V1.0 - Encontradas ${propostasData.length} propostas com boletos gerados`);
+    console.log(`🔍 [COBRANÇAS] PAM V1.0 - Encontradas ${propostasData.length} propostas com status elegível`);
 
     // Para cada proposta, buscar suas parcelas e calcular status de cobrança
     const propostasComCobranca = await Promise.all(
@@ -227,43 +232,9 @@ router.get("/", async (req: any, res) => {
       })
     );
 
-    // NOVA LÓGICA: Filtrar propostas elegíveis para cobrança
-    const propostasElegiveis = propostasComCobranca.filter(p => {
-      // REGRA 1: Se NÃO tem parcelas, incluir (proposta aprovada sem parcelas criadas)
-      if (p.parcelas.length === 0) {
-        console.log(`🔍 [COBRANÇAS] Proposta ${p.id.slice(0, 8)} (${p.nomeCliente || 'Sem nome'}) INCLUÍDA - aprovada sem parcelas criadas`);
-        return true;
-      }
-      
-      // Contar boletos do Inter nas parcelas
-      const boletosInter = p.parcelas.filter(parcela => 
-        parcela.interPixCopiaECola || parcela.interLinhaDigitavel || parcela.interCodigoBarras
-      );
-      
-      // REGRA 2: Se tem parcelas mas NÃO tem boletos do Inter, incluir (pronta para gerar boletos)
-      if (boletosInter.length === 0) {
-        console.log(`🔍 [COBRANÇAS] Proposta ${p.id.slice(0, 8)} (${p.nomeCliente || 'Sem nome'}) INCLUÍDA - tem parcelas, pronta para gerar boletos`);
-        return true;
-      }
-      
-      // Contar boletos ATIVOS no Inter
-      const boletosAtivos = boletosInter.filter(parcela => 
-        parcela.interSituacao !== 'CANCELADO' && parcela.interSituacao !== 'EXPIRADO'
-      );
-      
-      // REGRA 3: Se TEM boletos do Inter, incluir apenas se há pelo menos 1 ativo
-      if (boletosAtivos.length > 0) {
-        console.log(`🔍 [COBRANÇAS] Proposta ${p.id.slice(0, 8)} (${p.nomeCliente || 'Sem nome'}) INCLUÍDA - ${boletosAtivos.length} boletos ativos de ${boletosInter.length} total`);
-        return true;
-      }
-      
-      // REGRA 4: Se tem boletos mas TODOS cancelados, excluir
-      console.log(`🔍 [COBRANÇAS] Proposta ${p.id.slice(0, 8)} (${p.nomeCliente || 'Sem nome'}) EXCLUÍDA - todos os ${boletosInter.length} boletos cancelados`);
-      return false;
-    });
-
-    // Aplicar filtros
-    let propostasFiltradas = propostasElegiveis;
+    // PAM V1.0 REFATORADO: Todas as propostas já foram filtradas por STATUS na query principal
+    // Não precisamos mais da lógica de elegibilidade baseada em EXISTS
+    let propostasFiltradas = propostasComCobranca;
 
     // FILTRO AUTOMÁTICO PARA USUÁRIOS DE COBRANÇA
     // Usuários com role "COBRANÇA" veem apenas: inadimplentes, em atraso ou que vencem em 3 dias
@@ -272,14 +243,14 @@ router.get("/", async (req: any, res) => {
       const em3Dias = new Date();
       em3Dias.setDate(hoje.getDate() + 3);
 
-      propostasFiltradas = propostasElegiveis.filter(p => {
+      propostasFiltradas = propostasFiltradas.filter((p: any) => {
         // Inadimplentes ou em atraso
         if (p.status === "inadimplente" || p.diasAtraso > 0) {
           return true;
         }
 
         // Parcelas que vencem nos próximos 3 dias
-        const temParcelaVencendoEm3Dias = p.parcelas.some(parcela => {
+        const temParcelaVencendoEm3Dias = p.parcelas.some((parcela: any) => {
           if (parcela.status === "pago") return false;
           const dataVencimento = parseISO(parcela.dataVencimento);
           return dataVencimento <= em3Dias && dataVencimento >= hoje;
@@ -304,7 +275,6 @@ router.get("/", async (req: any, res) => {
       propostasFiltradas = propostasFiltradas.filter(p => p.diasAtraso > 30);
     }
 
-    console.log(`🔍 [COBRANÇAS] Total de propostas elegíveis: ${propostasElegiveis.length}`);
     console.log(`🔍 [COBRANÇAS] Total de propostas após filtros: ${propostasFiltradas.length}`);
     console.log("🔍 [COBRANÇAS] ====== FIM DA BUSCA DE PROPOSTAS ======");
     
@@ -323,19 +293,22 @@ router.get("/", async (req: any, res) => {
 // GET /api/cobrancas/kpis - Retorna KPIs de inadimplência
 router.get("/kpis", async (req, res) => {
   try {
-    // PAM V1.0: Buscar apenas propostas com boletos (regra consistente)
+    // PAM V1.0 REFATORADO: Usar STATUS para KPIs também
+    const statusElegiveis = [
+      "BOLETOS_EMITIDOS",
+      "PAGAMENTO_PENDENTE", 
+      "PAGAMENTO_PARCIAL",
+      "PAGAMENTO_CONFIRMADO",
+      "pronto_pagamento",
+    ];
+    
     const propostasData = await db
       .select()
       .from(propostas)
       .where(
         and(
           sql`${propostas.deletedAt} IS NULL`,
-          // EXISTS: apenas propostas que têm boletos na inter_collections
-          sql`EXISTS (
-            SELECT 1 
-            FROM ${interCollections} 
-            WHERE ${interCollections.propostaId} = ${propostas.id}
-          )`
+          inArray(propostas.status, statusElegiveis)
         )
       );
 
@@ -901,6 +874,314 @@ router.get("/exportar/inadimplentes", async (req, res) => {
   } catch (error) {
     console.error("Erro ao exportar inadimplentes:", error);
     res.status(500).json({ message: "Erro ao exportar inadimplentes" });
+  }
+});
+
+// PAM V1.0 - NOVOS ENDPOINTS DE AÇÃO PRIMÁRIA
+
+/**
+ * PATCH /api/cobrancas/boletos/:codigoSolicitacao/prorrogar
+ * Prorroga o vencimento de um boleto no Banco Inter
+ */
+router.patch("/boletos/:codigoSolicitacao/prorrogar", jwtAuthMiddleware, async (req: any, res) => {
+  try {
+    const { codigoSolicitacao } = req.params;
+    const { novaDataVencimento } = req.body;
+    const userRole = req.user?.role;
+    const userId = req.user?.id;
+
+    // VALIDAÇÃO DE PERMISSÃO - Primeira etapa conforme protocolo
+    if (!userRole || !["ADMINISTRADOR", "COBRANCA", "GERENTE"].includes(userRole)) {
+      console.log(`[PRORROGAR] Acesso negado - User: ${userId}, Role: ${userRole}`);
+      return res.status(403).json({ 
+        error: "Acesso negado",
+        message: "Você não tem permissão para prorrogar vencimentos" 
+      });
+    }
+
+    // Validação de dados
+    if (!codigoSolicitacao || !novaDataVencimento) {
+      return res.status(400).json({ 
+        error: "Dados inválidos",
+        message: "Código da solicitação e nova data de vencimento são obrigatórios" 
+      });
+    }
+
+    // Validar formato da data
+    const dataVencimento = new Date(novaDataVencimento);
+    if (isNaN(dataVencimento.getTime())) {
+      return res.status(400).json({ 
+        error: "Data inválida",
+        message: "Formato de data inválido" 
+      });
+    }
+
+    // Data não pode ser no passado
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+    if (dataVencimento < hoje) {
+      return res.status(400).json({ 
+        error: "Data inválida",
+        message: "A nova data de vencimento não pode ser no passado" 
+      });
+    }
+
+    console.log(`[PRORROGAR] Iniciando prorrogação - Código: ${codigoSolicitacao}, Nova data: ${novaDataVencimento}`);
+
+    // Buscar boleto no banco local
+    const [boletoLocal] = await db
+      .select()
+      .from(interCollections)
+      .where(eq(interCollections.codigoSolicitacao, codigoSolicitacao))
+      .limit(1);
+
+    if (!boletoLocal) {
+      return res.status(404).json({ 
+        error: "Boleto não encontrado",
+        message: "Boleto não encontrado no sistema" 
+      });
+    }
+
+    // Verificar se o boleto pode ser prorrogado
+    if (["RECEBIDO", "CANCELADO", "EXPIRADO"].includes(boletoLocal.situacao || "")) {
+      return res.status(400).json({ 
+        error: "Operação inválida",
+        message: `Boleto não pode ser prorrogado. Status atual: ${boletoLocal.situacao}` 
+      });
+    }
+
+    // Chamar serviço do Banco Inter
+    const { interBankService } = await import("../services/interBankService");
+    
+    try {
+      // Editar cobrança no Banco Inter
+      const resultado = await interBankService.editarCobranca(codigoSolicitacao, {
+        dataVencimento: novaDataVencimento,
+      });
+
+      console.log(`[PRORROGAR] Resposta do Inter:`, resultado);
+
+      // Atualizar banco local
+      await db
+        .update(interCollections)
+        .set({
+          dataVencimento: novaDataVencimento,
+          updatedAt: new Date(),
+        })
+        .where(eq(interCollections.codigoSolicitacao, codigoSolicitacao));
+
+      // Atualizar parcela correspondente se houver
+      if (boletoLocal.numeroParcela && boletoLocal.propostaId) {
+        await db
+          .update(parcelas)
+          .set({
+            dataVencimento: novaDataVencimento,
+            updatedAt: new Date(),
+          })
+          .where(
+            and(
+              eq(parcelas.propostaId, boletoLocal.propostaId),
+              eq(parcelas.numeroParcela, boletoLocal.numeroParcela)
+            )
+          );
+      }
+
+      console.log(`[PRORROGAR] Vencimento prorrogado com sucesso`);
+
+      res.json({
+        success: true,
+        message: "Vencimento prorrogado com sucesso",
+        codigoSolicitacao,
+        novaDataVencimento,
+      });
+    } catch (interError: any) {
+      console.error(`[PRORROGAR] Erro na API do Inter:`, interError);
+      
+      // Tratar erro específico do Inter
+      if (interError.response?.status === 400) {
+        return res.status(400).json({ 
+          error: "Erro ao prorrogar",
+          message: "O Banco Inter rejeitou a solicitação. Verifique os dados e tente novamente.",
+          detalhes: interError.response?.data
+        });
+      }
+      
+      throw interError;
+    }
+  } catch (error) {
+    console.error("[PRORROGAR] Erro geral:", error);
+    res.status(500).json({ 
+      error: "Erro interno",
+      message: "Erro ao prorrogar vencimento do boleto" 
+    });
+  }
+});
+
+/**
+ * POST /api/cobrancas/boletos/:codigoSolicitacao/aplicar-desconto
+ * Aplica desconto em um boleto no Banco Inter
+ */
+router.post("/boletos/:codigoSolicitacao/aplicar-desconto", jwtAuthMiddleware, async (req: any, res) => {
+  try {
+    const { codigoSolicitacao } = req.params;
+    const { tipoDesconto, valorDesconto, dataLimiteDesconto } = req.body;
+    const userRole = req.user?.role;
+    const userId = req.user?.id;
+
+    // VALIDAÇÃO DE PERMISSÃO - Primeira etapa conforme protocolo
+    if (!userRole || !["ADMINISTRADOR", "COBRANCA", "GERENTE"].includes(userRole)) {
+      console.log(`[DESCONTO] Acesso negado - User: ${userId}, Role: ${userRole}`);
+      return res.status(403).json({ 
+        error: "Acesso negado",
+        message: "Você não tem permissão para aplicar descontos" 
+      });
+    }
+
+    // Validação de dados
+    if (!codigoSolicitacao || !tipoDesconto || !valorDesconto) {
+      return res.status(400).json({ 
+        error: "Dados inválidos",
+        message: "Código da solicitação, tipo e valor do desconto são obrigatórios" 
+      });
+    }
+
+    // Validar tipo de desconto
+    if (!["PERCENTUAL", "FIXO"].includes(tipoDesconto)) {
+      return res.status(400).json({ 
+        error: "Tipo inválido",
+        message: "Tipo de desconto deve ser PERCENTUAL ou FIXO" 
+      });
+    }
+
+    // Validar valor do desconto
+    const valorDescontoNum = Number(valorDesconto);
+    if (isNaN(valorDescontoNum) || valorDescontoNum <= 0) {
+      return res.status(400).json({ 
+        error: "Valor inválido",
+        message: "Valor do desconto deve ser um número positivo" 
+      });
+    }
+
+    // Se percentual, não pode ser maior que 100%
+    if (tipoDesconto === "PERCENTUAL" && valorDescontoNum > 100) {
+      return res.status(400).json({ 
+        error: "Valor inválido",
+        message: "Desconto percentual não pode ser maior que 100%" 
+      });
+    }
+
+    console.log(`[DESCONTO] Iniciando aplicação - Código: ${codigoSolicitacao}, Tipo: ${tipoDesconto}, Valor: ${valorDesconto}`);
+
+    // Buscar boleto no banco local
+    const [boletoLocal] = await db
+      .select()
+      .from(interCollections)
+      .where(eq(interCollections.codigoSolicitacao, codigoSolicitacao))
+      .limit(1);
+
+    if (!boletoLocal) {
+      return res.status(404).json({ 
+        error: "Boleto não encontrado",
+        message: "Boleto não encontrado no sistema" 
+      });
+    }
+
+    // Verificar se o boleto pode receber desconto
+    if (["RECEBIDO", "CANCELADO", "EXPIRADO"].includes(boletoLocal.situacao || "")) {
+      return res.status(400).json({ 
+        error: "Operação inválida",
+        message: `Boleto não pode receber desconto. Status atual: ${boletoLocal.situacao}` 
+      });
+    }
+
+    // Preparar payload para o Inter
+    const descontoPayload: any = {
+      codigoDesconto: "DESCONTO1", // Código do desconto
+      taxa: tipoDesconto === "PERCENTUAL" ? valorDescontoNum : 0,
+      valor: tipoDesconto === "FIXO" ? valorDescontoNum : 0,
+    };
+
+    // Adicionar data limite se fornecida
+    if (dataLimiteDesconto) {
+      const dataLimite = new Date(dataLimiteDesconto);
+      if (!isNaN(dataLimite.getTime())) {
+        descontoPayload.dataDesconto = dataLimiteDesconto;
+      }
+    }
+
+    // Chamar serviço do Banco Inter
+    const { interBankService } = await import("../services/interBankService");
+    
+    try {
+      // Editar cobrança no Banco Inter com desconto
+      const resultado = await interBankService.editarCobranca(codigoSolicitacao, {
+        desconto: descontoPayload,
+      });
+
+      console.log(`[DESCONTO] Resposta do Inter:`, resultado);
+
+      // Calcular novo valor se desconto fixo
+      let novoValor = Number(boletoLocal.valorNominal || 0);
+      if (tipoDesconto === "FIXO") {
+        novoValor = Math.max(0, novoValor - valorDescontoNum);
+      } else {
+        novoValor = novoValor * (1 - valorDescontoNum / 100);
+      }
+
+      // Atualizar banco local
+      await db
+        .update(interCollections)
+        .set({
+          valorDesconto: valorDescontoNum,
+          tipoDesconto,
+          dataLimiteDesconto,
+          valorComDesconto: novoValor,
+          updatedAt: new Date(),
+        })
+        .where(eq(interCollections.codigoSolicitacao, codigoSolicitacao));
+
+      // Registrar na tabela de histórico
+      if (boletoLocal.propostaId) {
+        await db.insert(historicoObservacoesCobranca).values({
+          propostaId: boletoLocal.propostaId,
+          userId: userId || "sistema",
+          tipoAcao: "DESCONTO_APLICADO",
+          mensagem: `Desconto ${tipoDesconto === "PERCENTUAL" ? `de ${valorDesconto}%` : `fixo de R$ ${valorDesconto}`} aplicado ao boleto`,
+          criadoPor: req.user?.name || "Sistema",
+        });
+      }
+
+      console.log(`[DESCONTO] Desconto aplicado com sucesso`);
+
+      res.json({
+        success: true,
+        message: "Desconto aplicado com sucesso",
+        codigoSolicitacao,
+        tipoDesconto,
+        valorDesconto,
+        valorOriginal: boletoLocal.valorNominal,
+        valorComDesconto: novoValor,
+      });
+    } catch (interError: any) {
+      console.error(`[DESCONTO] Erro na API do Inter:`, interError);
+      
+      // Tratar erro específico do Inter
+      if (interError.response?.status === 400) {
+        return res.status(400).json({ 
+          error: "Erro ao aplicar desconto",
+          message: "O Banco Inter rejeitou a solicitação. Verifique os dados e tente novamente.",
+          detalhes: interError.response?.data
+        });
+      }
+      
+      throw interError;
+    }
+  } catch (error) {
+    console.error("[DESCONTO] Erro geral:", error);
+    res.status(500).json({ 
+      error: "Erro interno",
+      message: "Erro ao aplicar desconto no boleto" 
+    });
   }
 });
 
