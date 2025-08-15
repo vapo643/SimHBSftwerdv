@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import OfflineIndicator from "./OfflineIndicator";
 import { ThemeSelector } from "./ThemeSelector";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 import {
   LayoutDashboard,
   PlusCircle,
@@ -452,6 +453,8 @@ export default function DashboardLayout({ children, title, actions }: DashboardL
           {/* Pilar 12 - Progressive Enhancement: Offline indicator in header */}
           <OfflineIndicator variant="icon-only" />
           <ThemeSelector />
+          {/* PAM V1.0 - Sistema de Alertas Proativos */}
+          <NotificationBell />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="icon">
