@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
+import { useAuth } from "@/contexts/AuthContext";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -60,6 +61,9 @@ import {
   Barcode,
   CalendarPlus,
   Percent,
+  CheckSquare,
+  XCircle,
+  Bell,
 } from "lucide-react";
 import {
   format,
@@ -128,6 +132,9 @@ interface PropostaCobranca {
 export default function Cobrancas() {
   const [location, setLocation] = useLocation();
   const { toast } = useToast();
+  const { user } = useAuth();
+  const userRole = user?.role || "";
+  
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("todos");
   const [selectedProposta, setSelectedProposta] = useState<PropostaCobranca | null>(null);
@@ -148,6 +155,16 @@ export default function Cobrancas() {
   const [tipoDesconto, setTipoDesconto] = useState<"PERCENTUAL" | "FIXO">("PERCENTUAL");
   const [valorDesconto, setValorDesconto] = useState("");
   const [dataLimiteDesconto, setDataLimiteDesconto] = useState("");
+  
+  // PAM V1.0 Blueprint V2.0 - Estados para observações
+  const [observacaoProrrogacao, setObservacaoProrrogacao] = useState("");
+  const [observacaoDesconto, setObservacaoDesconto] = useState("");
+  
+  // PAM V1.0 Blueprint V2.0 - Estados para supervisor
+  const [showSolicitacoesModal, setShowSolicitacoesModal] = useState(false);
+  const [selectedSolicitacao, setSelectedSolicitacao] = useState<any>(null);
+  const [motivoRejeicao, setMotivoRejeicao] = useState("");
+  const [observacaoSupervisor, setObservacaoSupervisor] = useState("");
 
   // Função para copiar PIX ou linha digitável
   const copyPaymentCode = (code: string, type: "pix" | "barcode") => {
@@ -185,72 +202,174 @@ export default function Cobrancas() {
     return doc;
   };
 
-  // PAM V1.0 - Mutation para prorrogar vencimento
+  // PAM V1.0 Blueprint V2.0 - Mutation para SOLICITAR prorrogação
   const prorrogarMutation = useMutation({
-    mutationFn: async ({ codigoSolicitacao, novaDataVencimento }: { codigoSolicitacao: string; novaDataVencimento: string }) => {
-      console.log('[PAM V1.0] Enviando prorrogação:', { codigoSolicitacao, novaDataVencimento });
-      return apiRequest(`/api/cobrancas/boletos/${codigoSolicitacao}/prorrogar`, {
-        method: "PATCH",
-        body: JSON.stringify({ novaDataVencimento }),
+    mutationFn: async ({ 
+      codigoSolicitacao, 
+      novaDataVencimento,
+      observacao 
+    }: { 
+      codigoSolicitacao: string; 
+      novaDataVencimento: string;
+      observacao?: string;
+    }) => {
+      console.log('[PAM V1.0 Blueprint V2.0] Solicitando prorrogação:', { codigoSolicitacao, novaDataVencimento, observacao });
+      return apiRequest(`/api/cobrancas/boletos/${codigoSolicitacao}/solicitar-prorrogacao`, {
+        method: "POST",
+        body: JSON.stringify({ novaDataVencimento, observacao }),
       });
     },
-    onSuccess: (data) => {
-      console.log('[PAM V1.0] Prorrogação bem-sucedida:', data);
+    onSuccess: (data: any) => {
+      console.log('[PAM V1.0 Blueprint V2.0] Solicitação de prorrogação enviada:', data);
+      const isAutoApproved = data.autoApproved;
       toast({
-        title: "Vencimento prorrogado",
-        description: "O vencimento do boleto foi prorrogado com sucesso.",
+        title: isAutoApproved ? "Prorrogação executada" : "Solicitação enviada",
+        description: isAutoApproved 
+          ? "O vencimento foi prorrogado com sucesso."
+          : "Sua solicitação foi enviada para aprovação do supervisor.",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/cobrancas"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/cobrancas/solicitacoes"] });
       setShowProrrogarModal(false);
       setSelectedBoleto(null);
       setNovaDataVencimento("");
+      setObservacaoProrrogacao("");
     },
     onError: (error: any) => {
-      console.error('[PAM V1.0] Erro ao prorrogar:', error);
+      console.error('[PAM V1.0 Blueprint V2.0] Erro ao solicitar prorrogação:', error);
       toast({
-        title: "Erro ao prorrogar",
-        description: error.response?.data?.message || "Não foi possível prorrogar o vencimento.",
+        title: "Erro ao solicitar prorrogação",
+        description: error.response?.data?.message || "Não foi possível enviar a solicitação.",
         variant: "destructive",
       });
     },
   });
 
-  // PAM V1.0 - Mutation para aplicar desconto
+  // PAM V1.0 Blueprint V2.0 - Mutation para SOLICITAR desconto
   const descontoMutation = useMutation({
     mutationFn: async ({ 
       codigoSolicitacao, 
       tipoDesconto, 
       valorDesconto,
-      dataLimiteDesconto 
+      dataLimiteDesconto,
+      observacao 
     }: { 
       codigoSolicitacao: string; 
       tipoDesconto: "PERCENTUAL" | "FIXO";
       valorDesconto: number;
       dataLimiteDesconto?: string;
+      observacao?: string;
     }) => {
-      console.log('[PAM V1.0] Enviando desconto:', { codigoSolicitacao, tipoDesconto, valorDesconto, dataLimiteDesconto });
-      return apiRequest(`/api/cobrancas/boletos/${codigoSolicitacao}/aplicar-desconto`, {
+      console.log('[PAM V1.0 Blueprint V2.0] Solicitando desconto:', { codigoSolicitacao, tipoDesconto, valorDesconto, dataLimiteDesconto, observacao });
+      return apiRequest(`/api/cobrancas/boletos/${codigoSolicitacao}/solicitar-desconto`, {
         method: "POST",
-        body: JSON.stringify({ tipoDesconto, valorDesconto, dataLimiteDesconto }),
+        body: JSON.stringify({ tipoDesconto, valorDesconto, dataLimiteDesconto, observacao }),
       });
     },
-    onSuccess: (data) => {
-      console.log('[PAM V1.0] Desconto aplicado com sucesso:', data);
+    onSuccess: (data: any) => {
+      console.log('[PAM V1.0 Blueprint V2.0] Solicitação de desconto enviada:', data);
+      const isAutoApproved = data.autoApproved;
       toast({
-        title: "Desconto aplicado",
-        description: `Desconto de ${tipoDesconto === "PERCENTUAL" ? `${valorDesconto}%` : `R$ ${valorDesconto}`} aplicado com sucesso.`,
+        title: isAutoApproved ? "Desconto aplicado" : "Solicitação enviada",
+        description: isAutoApproved 
+          ? `Desconto de ${tipoDesconto === "PERCENTUAL" ? `${valorDesconto}%` : `R$ ${valorDesconto}`} aplicado com sucesso.`
+          : "Sua solicitação foi enviada para aprovação do supervisor.",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/cobrancas"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/cobrancas/solicitacoes"] });
       setShowDescontoModal(false);
       setSelectedBoleto(null);
       setValorDesconto("");
       setDataLimiteDesconto("");
+      setObservacaoDesconto("");
     },
     onError: (error: any) => {
-      console.error('[PAM V1.0] Erro ao aplicar desconto:', error);
+      console.error('[PAM V1.0 Blueprint V2.0] Erro ao solicitar desconto:', error);
       toast({
-        title: "Erro ao aplicar desconto",
-        description: error.response?.data?.message || "Não foi possível aplicar o desconto.",
+        title: "Erro ao solicitar desconto",
+        description: error.response?.data?.message || "Não foi possível enviar a solicitação.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // PAM V1.0 Blueprint V2.0 - Query para buscar solicitações pendentes (supervisor)
+  const { data: solicitacoesPendentes, refetch: refetchSolicitacoes } = useQuery({
+    queryKey: ["/api/cobrancas/solicitacoes"],
+    enabled: ["ADMINISTRADOR", "SUPERVISOR_COBRANCA"].includes(userRole),
+    queryFn: async () => {
+      const response = await apiRequest("/api/cobrancas/solicitacoes?status=pendente", {
+        method: "GET",
+      }) as any[];
+      return response;
+    },
+  });
+
+  // PAM V1.0 Blueprint V2.0 - Mutation para aprovar solicitação
+  const aprovarSolicitacaoMutation = useMutation({
+    mutationFn: async ({ 
+      id, 
+      observacao 
+    }: { 
+      id: number; 
+      observacao?: string;
+    }) => {
+      return apiRequest(`/api/cobrancas/solicitacoes/${id}/aprovar`, {
+        method: "POST",
+        body: JSON.stringify({ observacao }),
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Solicitação aprovada",
+        description: "A solicitação foi aprovada e executada com sucesso.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/cobrancas/solicitacoes"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/cobrancas"] });
+      setShowSolicitacoesModal(false);
+      setSelectedSolicitacao(null);
+      setObservacaoSupervisor("");
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro ao aprovar",
+        description: error.response?.data?.message || "Não foi possível aprovar a solicitação.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // PAM V1.0 Blueprint V2.0 - Mutation para rejeitar solicitação
+  const rejeitarSolicitacaoMutation = useMutation({
+    mutationFn: async ({ 
+      id, 
+      motivo,
+      observacao 
+    }: { 
+      id: number; 
+      motivo: string;
+      observacao?: string;
+    }) => {
+      return apiRequest(`/api/cobrancas/solicitacoes/${id}/rejeitar`, {
+        method: "POST",
+        body: JSON.stringify({ motivo, observacao }),
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Solicitação rejeitada",
+        description: "A solicitação foi rejeitada.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/cobrancas/solicitacoes"] });
+      setShowSolicitacoesModal(false);
+      setSelectedSolicitacao(null);
+      setMotivoRejeicao("");
+      setObservacaoSupervisor("");
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro ao rejeitar",
+        description: error.response?.data?.message || "Não foi possível rejeitar a solicitação.",
         variant: "destructive",
       });
     },
@@ -558,6 +677,29 @@ export default function Cobrancas() {
   return (
     <DashboardLayout title="Cobranças">
       <div className="space-y-6">
+        {/* PAM V1.0 Blueprint V2.0 - Badge para supervisores */}
+        {["ADMINISTRADOR", "SUPERVISOR_COBRANCA"].includes(userRole) && solicitacoesPendentes && solicitacoesPendentes.length > 0 && (
+          <Card className="mb-4 border-orange-500 bg-orange-50 dark:bg-orange-900/20">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Bell className="h-5 w-5 text-orange-600" />
+                  <CardTitle className="text-lg">Aprovações Pendentes</CardTitle>
+                </div>
+                <Badge variant="default" className="bg-orange-600">
+                  {solicitacoesPendentes.length} {solicitacoesPendentes.length === 1 ? "solicitação" : "solicitações"}
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <Button onClick={() => setShowSolicitacoesModal(true)} className="w-full">
+                <CheckSquare className="mr-2 h-4 w-4" />
+                Revisar Solicitações
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Estatísticas */}
         <div className="grid gap-4 md:grid-cols-4">
           <Card>
@@ -954,7 +1096,7 @@ export default function Cobrancas() {
                                       });
                                       setShowProrrogarModal(true);
                                     }}
-                                    title="Prorrogar Vencimento"
+                                    title={["ADMINISTRADOR", "SUPERVISOR_COBRANCA"].includes(userRole) ? "Prorrogar Vencimento" : "Solicitar Prorrogação"}
                                   >
                                     <CalendarPlus className="h-4 w-4" />
                                   </Button>
@@ -969,7 +1111,7 @@ export default function Cobrancas() {
                                       });
                                       setShowDescontoModal(true);
                                     }}
-                                    title="Aplicar Desconto"
+                                    title={["ADMINISTRADOR", "SUPERVISOR_COBRANCA"].includes(userRole) ? "Aplicar Desconto" : "Solicitar Desconto"}
                                   >
                                     <Percent className="h-4 w-4" />
                                   </Button>
@@ -1534,6 +1676,19 @@ export default function Cobrancas() {
                   min={format(new Date(), "yyyy-MM-dd")}
                 />
               </div>
+              {!["ADMINISTRADOR", "SUPERVISOR_COBRANCA"].includes(userRole) && (
+                <div>
+                  <Label htmlFor="observacao-prorrogacao">Observação <span className="text-red-500">*</span></Label>
+                  <Textarea
+                    id="observacao-prorrogacao"
+                    value={observacaoProrrogacao}
+                    onChange={(e) => setObservacaoProrrogacao(e.target.value)}
+                    placeholder="Informe o motivo da solicitação de prorrogação"
+                    rows={3}
+                    required
+                  />
+                </div>
+              )}
               {selectedBoleto && (
                 <div className="rounded-lg border p-3">
                   <p className="text-sm text-muted-foreground">Código do Boleto:</p>
@@ -1548,27 +1703,43 @@ export default function Cobrancas() {
               <Button
                 onClick={() => {
                   if (selectedBoleto && novaDataVencimento) {
+                    const needsObservation = !["ADMINISTRADOR", "SUPERVISOR_COBRANCA"].includes(userRole);
+                    if (needsObservation && !observacaoProrrogacao.trim()) {
+                      toast({
+                        title: "Observação obrigatória",
+                        description: "Por favor, informe o motivo da solicitação.",
+                        variant: "destructive",
+                      });
+                      return;
+                    }
                     prorrogarMutation.mutate({
                       codigoSolicitacao: selectedBoleto.codigoSolicitacao,
                       novaDataVencimento,
+                      observacao: observacaoProrrogacao || undefined,
                     });
                   }
                 }}
                 disabled={!novaDataVencimento || prorrogarMutation.isPending}
               >
-                {prorrogarMutation.isPending ? "Prorrogando..." : "Confirmar Prorrogação"}
+                {prorrogarMutation.isPending 
+                  ? "Processando..." 
+                  : ["ADMINISTRADOR", "SUPERVISOR_COBRANCA"].includes(userRole) 
+                    ? "Confirmar Prorrogação" 
+                    : "Enviar Solicitação"}
               </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
 
-        {/* PAM V1.0 - Modal de Aplicar Desconto */}
+        {/* PAM V1.0 Blueprint V2.0 - Modal de Aplicar Desconto */}
         <Dialog open={showDescontoModal} onOpenChange={setShowDescontoModal}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Aplicar Desconto</DialogTitle>
+              <DialogTitle>{["ADMINISTRADOR", "SUPERVISOR_COBRANCA"].includes(userRole) ? "Aplicar Desconto" : "Solicitar Desconto"}</DialogTitle>
               <DialogDescription>
-                Configure o desconto a ser aplicado no boleto selecionado.
+                {["ADMINISTRADOR", "SUPERVISOR_COBRANCA"].includes(userRole) 
+                  ? "Configure o desconto a ser aplicado no boleto."
+                  : "Configure e solicite a aplicação de desconto ao supervisor."}
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
@@ -1612,6 +1783,19 @@ export default function Cobrancas() {
                   min={format(new Date(), "yyyy-MM-dd")}
                 />
               </div>
+              {!["ADMINISTRADOR", "SUPERVISOR_COBRANCA"].includes(userRole) && (
+                <div>
+                  <Label htmlFor="observacao-desconto">Observação <span className="text-red-500">*</span></Label>
+                  <Textarea
+                    id="observacao-desconto"
+                    value={observacaoDesconto}
+                    onChange={(e) => setObservacaoDesconto(e.target.value)}
+                    placeholder="Informe o motivo da solicitação de desconto"
+                    rows={3}
+                    required
+                  />
+                </div>
+              )}
               {selectedBoleto && valorDesconto && (
                 <div className="rounded-lg border bg-muted p-3">
                   <p className="text-sm font-medium">Resumo do Desconto:</p>
@@ -1647,21 +1831,181 @@ export default function Cobrancas() {
               <Button
                 onClick={() => {
                   if (selectedBoleto && valorDesconto) {
+                    const needsObservation = !["ADMINISTRADOR", "SUPERVISOR_COBRANCA"].includes(userRole);
+                    if (needsObservation && !observacaoDesconto.trim()) {
+                      toast({
+                        title: "Observação obrigatória",
+                        description: "Por favor, informe o motivo da solicitação.",
+                        variant: "destructive",
+                      });
+                      return;
+                    }
                     descontoMutation.mutate({
                       codigoSolicitacao: selectedBoleto.codigoSolicitacao,
                       tipoDesconto,
                       valorDesconto: Number(valorDesconto),
                       dataLimiteDesconto: dataLimiteDesconto || undefined,
+                      observacao: observacaoDesconto || undefined,
                     });
                   }
                 }}
                 disabled={!valorDesconto || descontoMutation.isPending}
               >
-                {descontoMutation.isPending ? "Aplicando..." : "Confirmar Desconto"}
+                {descontoMutation.isPending 
+                  ? "Processando..." 
+                  : ["ADMINISTRADOR", "SUPERVISOR_COBRANCA"].includes(userRole) 
+                    ? "Confirmar Desconto" 
+                    : "Enviar Solicitação"}
               </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* PAM V1.0 Blueprint V2.0 - Modal de Solicitações Pendentes (Supervisor) */}
+        {["ADMINISTRADOR", "SUPERVISOR_COBRANCA"].includes(userRole) && (
+          <Dialog open={showSolicitacoesModal} onOpenChange={setShowSolicitacoesModal}>
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Solicitações Pendentes de Aprovação</DialogTitle>
+                <DialogDescription>
+                  Revise e aprove ou rejeite as solicitações de prorrogação e desconto.
+                </DialogDescription>
+              </DialogHeader>
+              
+              <div className="space-y-4 py-4">
+                {solicitacoesPendentes && solicitacoesPendentes.length > 0 ? (
+                  solicitacoesPendentes.map((solicitacao: any) => (
+                    <Card key={solicitacao.id} className="p-4">
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <Badge className={solicitacao.tipo === "PRORROGACAO" ? "bg-blue-500" : "bg-green-500"}>
+                              {solicitacao.tipo === "PRORROGACAO" ? "Prorrogação" : "Desconto"}
+                            </Badge>
+                            <p className="text-sm text-muted-foreground mt-1">
+                              Solicitado por: {solicitacao.solicitadoPor}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              Data: {format(new Date(solicitacao.dataSolicitacao), "dd/MM/yyyy HH:mm")}
+                            </p>
+                          </div>
+                          <Badge variant="outline">#{solicitacao.id}</Badge>
+                        </div>
+                        
+                        <div className="border-t pt-3">
+                          <p className="text-sm font-medium">Detalhes da Solicitação:</p>
+                          {solicitacao.tipo === "PRORROGACAO" ? (
+                            <div className="text-sm text-muted-foreground">
+                              <p>Nova Data: {format(new Date(solicitacao.dadosSolicitacao.novaDataVencimento), "dd/MM/yyyy")}</p>
+                              <p>Código do Boleto: {solicitacao.codigoSolicitacao}</p>
+                            </div>
+                          ) : (
+                            <div className="text-sm text-muted-foreground">
+                              <p>Tipo: {solicitacao.dadosSolicitacao.tipoDesconto}</p>
+                              <p>Valor: {solicitacao.dadosSolicitacao.tipoDesconto === "PERCENTUAL" 
+                                ? `${solicitacao.dadosSolicitacao.valorDesconto}%` 
+                                : `R$ ${solicitacao.dadosSolicitacao.valorDesconto}`}</p>
+                              {solicitacao.dadosSolicitacao.dataLimiteDesconto && (
+                                <p>Válido até: {format(new Date(solicitacao.dadosSolicitacao.dataLimiteDesconto), "dd/MM/yyyy")}</p>
+                              )}
+                              <p>Código do Boleto: {solicitacao.codigoSolicitacao}</p>
+                            </div>
+                          )}
+                        </div>
+                        
+                        {solicitacao.observacao && (
+                          <div className="border-t pt-3">
+                            <p className="text-sm font-medium">Observação do Solicitante:</p>
+                            <p className="text-sm text-muted-foreground">{solicitacao.observacao}</p>
+                          </div>
+                        )}
+                        
+                        {selectedSolicitacao?.id === solicitacao.id ? (
+                          <div className="border-t pt-3 space-y-3">
+                            <div>
+                              <Label htmlFor={`obs-supervisor-${solicitacao.id}`}>Observação do Supervisor (Opcional)</Label>
+                              <Textarea
+                                id={`obs-supervisor-${solicitacao.id}`}
+                                value={observacaoSupervisor}
+                                onChange={(e) => setObservacaoSupervisor(e.target.value)}
+                                placeholder="Adicione uma observação sobre a decisão"
+                                rows={2}
+                              />
+                            </div>
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                onClick={() => {
+                                  aprovarSolicitacaoMutation.mutate({
+                                    id: solicitacao.id,
+                                    observacao: observacaoSupervisor || undefined,
+                                  });
+                                }}
+                                disabled={aprovarSolicitacaoMutation.isPending}
+                              >
+                                <CheckSquare className="mr-2 h-4 w-4" />
+                                {aprovarSolicitacaoMutation.isPending ? "Aprovando..." : "Aprovar"}
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => {
+                                  const motivo = prompt("Motivo da rejeição:");
+                                  if (motivo) {
+                                    rejeitarSolicitacaoMutation.mutate({
+                                      id: solicitacao.id,
+                                      motivo,
+                                      observacao: observacaoSupervisor || undefined,
+                                    });
+                                  }
+                                }}
+                                disabled={rejeitarSolicitacaoMutation.isPending}
+                              >
+                                <XCircle className="mr-2 h-4 w-4" />
+                                {rejeitarSolicitacaoMutation.isPending ? "Rejeitando..." : "Rejeitar"}
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  setSelectedSolicitacao(null);
+                                  setObservacaoSupervisor("");
+                                }}
+                              >
+                                Cancelar
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex justify-end">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setSelectedSolicitacao(solicitacao)}
+                            >
+                              Revisar
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </Card>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <CheckCircle2 className="h-12 w-12 mx-auto mb-3 text-green-500" />
+                    <p>Nenhuma solicitação pendente</p>
+                  </div>
+                )}
+              </div>
+              
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setShowSolicitacoesModal(false)}>
+                  Fechar
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
     </DashboardLayout>
   );
