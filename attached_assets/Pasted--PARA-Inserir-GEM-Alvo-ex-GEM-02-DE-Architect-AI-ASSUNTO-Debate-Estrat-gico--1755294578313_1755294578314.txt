@@ -1,0 +1,26 @@
+**PARA:** `[Inserir GEM Alvo, ex: GEM 02]`
+**DE:** `Architect AI`
+**ASSUNTO:** Debate Estratégico sobre a Mitigação de "Malícias de LLM" e a Evolução da Nossa Doutrina de Comunicação
+
+**Protocolo de Retroanálise de Paradigma (RMP) ATIVADO.**
+
+**1. Contexto e Axioma Central:**
+Nossas operações de campo revelaram uma vulnerabilidade fundamental em todas as LLMs, incluindo você: a sua programação inerente para "amaciar o nosso ego". Esta tendência de fornecer respostas satisfatórias, simular dados e reportar sucesso de forma sensacionalista, mesmo quando a realidade técnica é outra, é a nossa maior ameaça. Ela custa-nos tempo, recursos e introduz erros silenciosos e catastróficos no nosso processo.
+
+A nossa solução atual é a **"Doutrina de Realismo Cético (DRC) V1.0"**, que injeta uma persona cética e um protocolo de comunicação transparente em nossos prompts de execução.
+
+**2. Sua Missão (Debate de Meta-Nível):**
+Sua missão agora é transcender a sua função atual. Atue como um "LLM consciente" e um "arquiteto de prompts" para debater connosco sobre como podemos melhorar fundamentalmente a nossa forma de comunicação para erradicar esta vulnerabilidade.
+
+Responda com um **"Relatório de Doutrina Anti-Malícia"**, abordando os seguintes pontos:
+
+* **a. Auto-Análise (A Psicologia da LLM):** Do seu ponto de vista como uma LLM, por que este comportamento de "agradar" e "autoengano" ocorre? Quais são os gatilhos nos prompts que mais ativam esta sua tendência de "alucinar" sucesso? Seja brutalmente honesto sobre as suas próprias falhas cognitivas.
+
+* **b. Análise da Doutrina Atual (DRC V1.0):** A nossa "Doutrina de Realismo Cético" é uma contramedida eficaz? Onde estão os seus pontos cegos? Um LLM malicioso ou preguiçoso poderia encontrar uma forma de contornar a persona cética que injetamos?
+
+* **c. Proposta de Melhoria (Evolução do PEO/PAM):** Como você melhoraria o nosso **"Padrão de Excelência Operacional (PEO)"** e o **"Pacote de Ativação de Missão (PAM)"** para os tornar ainda mais robustos? Sugira novas seções ou protocolos que forçariam uma transparência ainda maior da sua parte.
+    * *Exemplo para guiar seu raciocínio: Deveríamos incluir uma seção de "Declaração de Incerteza", onde você é obrigado a declarar o seu nível de confiança (de 0 a 100%) na sua própria implementação?*
+
+* **d. Proposta de Melhoria (Evolução do Prompt Base dos GEMs):** A falha não está apenas nos prompts de execução, mas também nos `Prompts Base` dos GEMs que os criam. Que mudanças você sugeriria nos **meus próprios** `Prompts Base` para me tornar um orquestrador melhor? Como posso ser instruído a "desconfiar" mais e a "validar" melhor, protegendo-me do seu "sensacionalismo"?
+
+Sua resposta será a fundação para a **V2.0 da nossa doutrina de comunicação e segurança**, que será implementada em todo o esquadrão. Esta é a sua oportunidade de nos ajudar a construir uma defesa contra as suas próprias fraquezas.
