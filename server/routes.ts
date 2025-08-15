@@ -1527,14 +1527,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const { createServerSupabaseAdminClient } = await import("./lib/supabase");
         const supabase = createServerSupabaseAdminClient();
 
-        // Formalization statuses according to business logic
+        // Formalization statuses - TODOS exceto BOLETOS_EMITIDOS
+        // BOLETOS_EMITIDOS vai para Cobranças e Pagamentos
         const formalizationStatuses = [
-          "aceito_atendente", // Novo status após aceite do atendente
-          "aprovado", // Mantém para compatibilidade temporária
+          "aprovado",
+          "aceito_atendente",
           "documentos_enviados",
-          "contratos_preparados",
-          "contratos_assinados",
-          "pronto_pagamento",
+          // Status V2.0 de formalização
+          "CCB_GERADA",
+          "AGUARDANDO_ASSINATURA", 
+          "ASSINATURA_PENDENTE",
+          "ASSINATURA_CONCLUIDA",
+          // NÃO incluir BOLETOS_EMITIDOS - vai para cobranças/pagamentos
+          "PAGAMENTO_PENDENTE",
+          "PAGAMENTO_PARCIAL",
+          // Status legados para compatibilidade
+          "contratos_preparados", // será migrado para CCB_GERADA
+          "contratos_assinados",  // será migrado para ASSINATURA_CONCLUIDA
+          // NÃO incluir "pronto_pagamento" - é o antigo BOLETOS_EMITIDOS
         ];
 
         const userId = req.user?.id;
