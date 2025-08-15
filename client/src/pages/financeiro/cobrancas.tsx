@@ -266,8 +266,21 @@ export default function Cobrancas() {
     queryFn: async () => {
       const response = await apiRequest("/api/cobrancas", {
         method: "GET",
-      });
-      return response as PropostaCobranca[];
+      }) as PropostaCobranca[];
+      
+      // 🔍 PAM V1.0 - AUDITORIA FORENSE: RELATÓRIO 1 - VERIFICAÇÃO DA CHEGADA DOS DADOS
+      console.log('🔍 [AUDITORIA FRONTEND] DADOS BRUTOS RECEBIDOS DO BACKEND:', response);
+      console.log('🔍 [AUDITORIA FRONTEND] TOTAL DE PROPOSTAS:', response?.length || 0);
+      if (response && Array.isArray(response) && response.length > 0) {
+        console.log('🔍 [AUDITORIA FRONTEND] PRIMEIRA PROPOSTA (amostra):', response[0]);
+        console.log('🔍 [AUDITORIA FRONTEND] DADOS DO CLIENTE NA PRIMEIRA PROPOSTA:', {
+          nomeCliente: response[0]?.nomeCliente,
+          cpfCliente: response[0]?.cpfCliente,
+          telefoneCliente: response[0]?.telefoneCliente,
+          emailCliente: response[0]?.emailCliente
+        });
+      }
+      return response;
     },
   });
 
@@ -279,7 +292,7 @@ export default function Cobrancas() {
     queryFn: async () => {
       const response = await apiRequest("/api/cobrancas/inter-sumario", {
         method: "GET",
-      });
+      }) as any;
       return response;
     },
   });
@@ -318,10 +331,7 @@ export default function Cobrancas() {
             const response = await apiRequest("/api/cobrancas/inter-sync-all", {
               method: "POST",
               body: JSON.stringify({ propostaId: proposta.id }),
-              headers: {
-                "Content-Type": "application/json",
-              },
-            });
+            }) as any;
 
             if (response.atualizados) {
               totalAtualizados += response.atualizados;
@@ -421,12 +431,38 @@ export default function Cobrancas() {
   };
 
   // Filtrar propostas
+  // 🔍 PAM V1.0 - AUDITORIA FORENSE: RELATÓRIO 2 - LÓGICA DE FILTRAGEM
+  console.log('🔍 [AUDITORIA FRONTEND] ESTADO DOS FILTROS:', {
+    searchTerm,
+    statusFilter,
+    dateRange,
+    totalPropostas: propostas?.length || 0
+  });
+
   const propostasFiltradas = propostas?.filter(proposta => {
+    // 🔍 AUDITORIA: Verificar se o campo nomeCliente existe antes de filtrar
+    const nomeCliente = proposta.nomeCliente || "";
+    const numeroContrato = proposta.numeroContrato || "";
+    const cpfCliente = proposta.cpfCliente || "";
+    const id = proposta.id || "";
+
+    console.log('🔍 [AUDITORIA FRONTEND] CAMPOS DA PROPOSTA:', {
+      id: proposta.id,
+      nomeCliente: proposta.nomeCliente,
+      cpfCliente: proposta.cpfCliente,
+      status: proposta.status,
+      camposVazios: {
+        nomeVazio: !proposta.nomeCliente,
+        cpfVazio: !proposta.cpfCliente,
+        contratoVazio: !proposta.numeroContrato
+      }
+    });
+
     const matchesSearch =
-      proposta.nomeCliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      proposta.numeroContrato.includes(searchTerm) ||
-      proposta.cpfCliente.includes(searchTerm) ||
-      proposta.id.includes(searchTerm);
+      nomeCliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      numeroContrato.includes(searchTerm) ||
+      cpfCliente.includes(searchTerm) ||
+      id.includes(searchTerm);
 
     let matchesStatus = true;
     if (statusFilter === "adimplente") {
@@ -456,7 +492,22 @@ export default function Cobrancas() {
       }
     }
 
-    return matchesSearch && matchesStatus && matchesDate;
+    const passaFiltro = matchesSearch && matchesStatus && matchesDate;
+    console.log('🔍 [AUDITORIA FRONTEND] FILTRO RESULTADO:', {
+      propostaId: proposta.id,
+      matchesSearch,
+      matchesStatus,
+      matchesDate,
+      passaFiltro
+    });
+
+    return passaFiltro;
+  });
+
+  console.log('🔍 [AUDITORIA FRONTEND] PROPOSTAS APÓS FILTRAGEM:', {
+    totalOriginal: propostas?.length || 0,
+    totalFiltrado: propostasFiltradas?.length || 0,
+    propostasFiltradas: propostasFiltradas
   });
 
   // Estatísticas gerais
@@ -745,7 +796,22 @@ export default function Cobrancas() {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    propostasFiltradas?.map(proposta => {
+                    propostasFiltradas?.map((proposta, index) => {
+                      // 🔍 PAM V1.0 - AUDITORIA FORENSE: RELATÓRIO 3 - RENDERIZAÇÃO DA TABELA
+                      console.log(`🔍 [AUDITORIA FRONTEND] RENDERIZANDO PROPOSTA ${index + 1}:`, {
+                        id: proposta.id,
+                        nomeCliente: proposta.nomeCliente,
+                        cpfCliente: proposta.cpfCliente,
+                        numeroContrato: proposta.numeroContrato,
+                        valorTotal: proposta.valorTotal,
+                        status: proposta.status,
+                        acessandoCampos: {
+                          acessoNome: `proposta.nomeCliente = "${proposta.nomeCliente}"`,
+                          acessoCpf: `proposta.cpfCliente = "${proposta.cpfCliente}"`,
+                          acessoContrato: `proposta.numeroContrato = "${proposta.numeroContrato}"`
+                        }
+                      });
+
                       const parcelasPendentes = proposta.parcelas.filter(
                         p => p.status === "pendente"
                       ).length;

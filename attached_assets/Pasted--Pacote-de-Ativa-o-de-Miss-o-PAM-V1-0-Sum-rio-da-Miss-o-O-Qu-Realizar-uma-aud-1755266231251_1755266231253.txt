@@ -1,0 +1,38 @@
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Realizar uma auditoria forense no código do frontend (`CobrancasPage.tsx`) para identificar a lógica que está a impedir que os dados completos da proposta sejam renderizados na tabela.
+* **Intenção Estratégica (O Porquê):** Seu diagnóstico anterior provou que o backend está a enviar os dados corretamente. A falha agora está isolada no frontend. Precisamos encontrar a lógica de filtragem, mapeamento ou renderização que está a causar a perda de dados visual.
+* **Histórico Relevante (Consulta Obrigatória):** Sua missão `DEBATE-MAXIMO-DIAGNOSTICO-COBRANCAS-01` limpou o backend como suspeito. Agora, aplique o mesmo rigor investigativo ao `CobrancasPage.tsx`. Lembre-se de que já corrigimos um bug de filtro local neste arquivo antes; verifique se há regressões ou outros filtros ocultos.
+* **Modelo Mental (Como se Encaixa):** Você é um detetive de frontend. O "suspeito" é o componente `CobrancasPage.tsx`. Sua tarefa é inspecionar o código em busca de três possíveis "crimes": dados que não chegam, dados que são filtrados incorretamente, ou dados que são renderizados de forma errada.
+* **Riscos Antecipados:** **Risco:** O problema pode ser uma interação complexa entre estado e renderização. **Contramedida:** A sua análise deve ser sistemática: verifique a chegada dos dados, depois a filtragem, e por último a renderização.
+
+---
+
+**IMPLEMENTAR:**
+Um relatório de auditoria do frontend. **NÃO FAÇA MODIFICAÇÕES.**
+
+**CURRENT STATE:**
+O backend envia um array de propostas com dados completos, mas a tabela na UI exibe essas mesmas propostas como "vazias".
+
+**EXPECTED (Estado Final de Sucesso):**
+Um relatório de diagnóstico que aponte a linha de código exata e a lógica no frontend que está a causar a perda visual dos dados.
+
+**CONSTRAINTS (Roadmap de Auditoria Forense):**
+
+**1. Verificação da Chegada dos Dados (Ponto de Entrada):**
+    - **Ação:** No ficheiro `client/src/pages/financeiro/CobrancasPage.tsx`, localize a chamada `useQuery` para o endpoint `/api/cobrancas`.
+    - **Implementação:** Adicione um `console.log` dentro do callback `onSuccess` ou logo no início do componente para exibir o `data` bruto que é retornado pela query.
+    - **Relatório 1:** Execute a aplicação, acesse a tela e apresente o resultado deste `console.log`. Confirme se o array de propostas que chega ao componente contém os dados completos do cliente (`nomeCliente`, `cpfCliente`, etc.).
+
+**2. Auditoria da Lógica de Filtragem (O Suspeito Principal):**
+    - **Ação:** Re-examine a lógica de `propostasFiltradas` que já refatoramos.
+    - **Análise Crítica:** Há alguma condição nesta lógica que, sob alguma circunstância (talvez com um `searchTerm` específico ou um estado de filtro inesperado), poderia resultar em um array vazio ou em objetos sem os dados do cliente?
+    - **Relatório 2:** Apresente novamente a lógica de `propostasFiltradas` e declare com alta confiança se ela é ou não a causa do problema.
+
+**3. Auditoria da Renderização da Tabela (A Cena do Crime):**
+    - **Ação:** Inspecione o código JSX que mapeia (`.map()`) o array `propostasFiltradas` para renderizar as linhas (`<TableRow>`) e células (`<TableCell>`) da tabela.
+    - **Análise Crítica:** A lógica de renderização está a aceder corretamente aos campos? (ex: `proposta.nomeCliente`, `proposta.cpfCliente`). Existe alguma renderização condicional que possa estar a esconder estes campos?
+    - **Relatório 3:** Apresente o trecho de código do `.map()` que renderiza as linhas da tabela.
+
+**Relatório Final:**
+Com base nas evidências coletadas nos 3 relatórios acima, formule sua hipótese final e aponte a causa raiz exata do problema no frontend.
