@@ -82,91 +82,31 @@ import { format, parseISO, differenceInDays, isToday, isFuture, addDays } from "
 import { ptBR } from "date-fns/locale";
 import { useAuth } from "@/contexts/AuthContext";
 
-interface FichaCliente {
-  cliente: {
-    nome: string;
-    cpf: string;
-    email: string;
-    telefone: string;
-    dataNascimento: string;
-    endereco: string;
-    cep: string;
-    ocupacao: string;
-  };
-  dadosBancarios: {
-    banco: string;
-    agencia: string;
-    conta: string;
-    tipoConta: string;
-    pix: string;
-    tipoPix: string;
-    titular: string;
-  };
-  referencias: Array<{
-    id: number;
-    nomeCompleto: string;
-    grauParentesco: string;
-    telefone: string;
-  }>;
-  contrato: {
-    numeroContrato: string;
-    dataContrato: string;
-    valorTotal: number;
-    valorFinanciado: number;
-    prazo: number;
-    taxaJuros: number;
-    ccbAssinada: boolean;
-    status: string;
-  };
-  parcelas: Array<{
-    id: number;
-    numeroParcela: number;
-    valorParcela: number;
-    dataVencimento: string;
-    dataPagamento?: string;
-    status: string;
-    diasAtraso: number;
-    vencida: boolean;
-    interPixCopiaECola?: string;
-    interLinhaDigitavel?: string;
-    interCodigoBarras?: string;
-    interSituacao?: string;
-  }>;
-  observacoes: Array<{
-    id: number;
-    userName: string;
-    observacao: string;
-    tipoContato?: string;
-    statusPromessa?: string;
-    dataPromessaPagamento?: string;
-    createdAt: string;
-  }>;
-  resumoFinanceiro: {
-    totalParcelas: number;
-    parcelasPagas: number;
-    parcelasVencidas: number;
-    parcelasPendentes: number;
-    valorTotalPago: number;
-    valorTotalVencido: number;
-    valorTotalPendente: number;
-  };
-}
+// Importar todas as interfaces necessárias
+import type {
+  FichaCliente,
+  PropostaCobranca,
+  KPIsCobranca,
+  ObservacaoCobranca,
+  DebtInfo,
+  ExportacaoInadimplentes,
+  ProrrogacaoData,
+  DescontoQuitacaoData,
+  MutationResponse,
+  StatusVencimento,
+  StatusFilter,
+  AtrasoFilter,
+  StatusObservacao,
+} from "@shared/types/cobrancas";
 
-interface Observacao {
-  id: string;
-  mensagem: string;
-  tipo_acao: string;
-  criado_por: string;
-  created_at: string;
-  dados_acao?: any;
-}
+// Interfaces removidas - usando as importadas de @shared/types/cobrancas
 
 export default function CobrancasPage() {
   const { toast } = useToast();
   const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("todos");
-  const [atrasoFilter, setAtrasoFilter] = useState<string>("todos");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("todos");
+  const [atrasoFilter, setAtrasoFilter] = useState<AtrasoFilter>("todos");
   const [showCpf, setShowCpf] = useState(false);
   const [selectedPropostaId, setSelectedPropostaId] = useState<string | null>(null);
   const [showFichaModal, setShowFichaModal] = useState(false);
@@ -178,14 +118,14 @@ export default function CobrancasPage() {
   // Estados para modais de modificação de boletos
   const [showProrrogarModal, setShowProrrogarModal] = useState(false);
   const [showDescontoModal, setShowDescontoModal] = useState(false);
-  const [selectedBoleto, setSelectedBoleto] = useState<any>(null);
+  const [selectedBoleto, setSelectedBoleto] = useState<PropostaCobranca | null>(null);
   const [novaDataVencimento, setNovaDataVencimento] = useState("");
   const [valorDesconto, setValorDesconto] = useState("");
   const [dataLimiteDesconto, setDataLimiteDesconto] = useState("");
 
   // Estados para Desconto de Quitação (multi-etapas)
   const [etapaDesconto, setEtapaDesconto] = useState(1);
-  const [debtInfo, setDebtInfo] = useState<any>(null);
+  const [debtInfo, setDebtInfo] = useState<DebtInfo | null>(null);
   const [novoValorQuitacao, setNovoValorQuitacao] = useState(0);
   const [quantidadeParcelas, setQuantidadeParcelas] = useState(1);
   const [novasParcelas, setNovasParcelas] = useState<
@@ -194,13 +134,13 @@ export default function CobrancasPage() {
 
   // Estados para Prorrogar Vencimento (seleção múltipla)
   const [boletosParaProrrogar, setBoletosParaProrrogar] = useState<string[]>([]);
-  const [todosBoletosAtivos, setTodosBoletosAtivos] = useState<any[]>([]);
+  const [todosBoletosAtivos, setTodosBoletosAtivos] = useState<PropostaCobranca[]>([]);
 
   // Estados para Histórico de Observações
-  const [observacoes, setObservacoes] = useState<Observacao[]>([]);
+  const [observacoes, setObservacoes] = useState<ObservacaoCobranca[]>([]);
   const [loadingObservacoes, setLoadingObservacoes] = useState(false);
   const [salvandoObservacao, setSalvandoObservacao] = useState(false);
-  const [statusObservacao, setStatusObservacao] = useState("Outros");
+  const [statusObservacao, setStatusObservacao] = useState<StatusObservacao>("Outros");
 
   // Verificar se o usuário tem role de cobrança
   const isCobrancaUser = user?.role === "COBRANÇA";
@@ -213,23 +153,23 @@ export default function CobrancasPage() {
     data: debtData,
     isLoading: loadingDebt,
     refetch: refetchDebt,
-  } = useQuery({
+  } = useQuery<DebtInfo>({
     queryKey: ["/api/inter/collections/proposal", selectedPropostaId],
     enabled: !!selectedPropostaId && showDescontoModal,
     queryFn: async () => {
-      return apiRequest(`/api/inter/collections/proposal/${selectedPropostaId}`);
+      return apiRequest(`/api/inter/collections/proposal/${selectedPropostaId}`) as Promise<DebtInfo>;
     },
   });
 
   // Mutation para prorrogar vencimento em lote
-  const prorrogarMutation = useMutation({
-    mutationFn: async (data: { codigosSolicitacao: string[]; novaDataVencimento: string }) => {
+  const prorrogarMutation = useMutation<MutationResponse, Error, ProrrogacaoData>({
+    mutationFn: async (data: ProrrogacaoData) => {
       return apiRequest("/api/inter/collections/batch-extend", {
         method: "PATCH",
         body: JSON.stringify(data),
-      });
+      }) as Promise<MutationResponse>;
     },
-    onSuccess: result => {
+    onSuccess: (result: MutationResponse) => {
       toast({
         title: "Sucesso",
         description: result.message || "Vencimento(s) prorrogado(s) com sucesso",
@@ -238,7 +178,7 @@ export default function CobrancasPage() {
       setBoletosParaProrrogar([]);
       refetch();
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
         title: "Erro",
         description: error.message || "Falha ao prorrogar vencimento",
@@ -248,18 +188,14 @@ export default function CobrancasPage() {
   });
 
   // Mutation para aplicar desconto de quitação
-  const descontoQuitacaoMutation = useMutation({
-    mutationFn: async (data: {
-      propostaId: string;
-      desconto: number;
-      novasParcelas: Array<{ valor: number; dataVencimento: string }>;
-    }) => {
+  const descontoQuitacaoMutation = useMutation<MutationResponse, Error, DescontoQuitacaoData>({
+    mutationFn: async (data: DescontoQuitacaoData) => {
       return apiRequest("/api/inter/collections/settlement-discount", {
         method: "POST",
         body: JSON.stringify(data),
-      });
+      }) as Promise<MutationResponse>;
     },
-    onSuccess: result => {
+    onSuccess: (result: MutationResponse) => {
       toast({
         title: "Sucesso",
         description: result.message || "Desconto de quitação aplicado com sucesso",
@@ -269,7 +205,7 @@ export default function CobrancasPage() {
       setNovasParcelas([]);
       refetch();
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
         title: "Erro",
         description: error.message || "Falha ao aplicar desconto de quitação",
@@ -283,14 +219,14 @@ export default function CobrancasPage() {
     data: propostas,
     isLoading,
     refetch,
-  } = useQuery({
+  } = useQuery<PropostaCobranca[]>({
     queryKey: ["/api/cobrancas", statusFilter, atrasoFilter],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (statusFilter !== "todos") params.append("status", statusFilter);
       if (atrasoFilter !== "todos") params.append("atraso", atrasoFilter);
 
-      return apiRequest(`/api/cobrancas?${params.toString()}`);
+      return apiRequest(`/api/cobrancas?${params.toString()}`) as Promise<PropostaCobranca[]>;
     },
   });
 
@@ -301,9 +237,9 @@ export default function CobrancasPage() {
   };
 
   // Buscar KPIs
-  const { data: kpis } = useQuery({
+  const { data: kpis } = useQuery<KPIsCobranca>({
     queryKey: ["/api/cobrancas/kpis"],
-    queryFn: () => apiRequest("/api/cobrancas/kpis"),
+    queryFn: () => apiRequest("/api/cobrancas/kpis") as Promise<KPIsCobranca>,
   });
 
   // 🔄 REALTIME: Escutar mudanças nas tabelas propostas e inter_collections
@@ -414,7 +350,7 @@ export default function CobrancasPage() {
   // Buscar ficha do cliente
   const { data: fichaCliente, isLoading: loadingFicha } = useQuery<FichaCliente>({
     queryKey: ["/api/cobrancas/ficha", selectedPropostaId],
-    queryFn: () => apiRequest(`/api/cobrancas/${selectedPropostaId}/ficha`),
+    queryFn: () => apiRequest(`/api/cobrancas/${selectedPropostaId}/ficha`) as Promise<FichaCliente>,
     enabled: !!selectedPropostaId && showFichaModal,
   });
 
@@ -510,7 +446,16 @@ export default function CobrancasPage() {
   // Função para exportar inadimplentes
   const exportarInadimplentes = async () => {
     try {
-      const data = await apiRequest("/api/cobrancas/exportar/inadimplentes");
+      const data = await apiRequest("/api/cobrancas/exportar/inadimplentes") as ExportacaoInadimplentes;
+
+      // Verificar se há dados
+      if (!data || !data.inadimplentes || data.inadimplentes.length === 0) {
+        toast({
+          title: "Sem dados para exportar",
+          description: "Não há inadimplentes para exportar.",
+        });
+        return;
+      }
 
       // Criar CSV manualmente
       const headers = Object.keys(data.inadimplentes[0] || {});
@@ -542,7 +487,7 @@ export default function CobrancasPage() {
   };
 
   // Filtrar propostas localmente pela busca (lógica robusta para campos vazios)
-  const propostasFiltradas = propostas?.filter((proposta: any) => {
+  const propostasFiltradas = propostas?.filter((proposta: PropostaCobranca) => {
     if (!searchTerm) return true; // Sem busca = mostrar todas
     
     const search = searchTerm.toLowerCase();
@@ -560,7 +505,7 @@ export default function CobrancasPage() {
     return searchableFields.some(field => 
       String(field).toLowerCase().includes(search)
     );
-  });
+  }) || [];
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -823,7 +768,7 @@ export default function CobrancasPage() {
                 />
               </div>
 
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as StatusFilter)}>
                 <SelectTrigger data-testid="select-status-filter">
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
@@ -835,7 +780,7 @@ export default function CobrancasPage() {
                 </SelectContent>
               </Select>
 
-              <Select value={atrasoFilter} onValueChange={setAtrasoFilter}>
+              <Select value={atrasoFilter} onValueChange={(value) => setAtrasoFilter(value as AtrasoFilter)}>
                 <SelectTrigger data-testid="select-atraso-filter">
                   <SelectValue placeholder="Dias de Atraso" />
                 </SelectTrigger>
