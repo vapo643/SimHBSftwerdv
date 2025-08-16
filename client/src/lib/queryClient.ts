@@ -24,6 +24,10 @@ export async function apiRequest(
   } else if (method === "PUT") {
     const response = await api.put(url, body);
     return response.data;
+  } else if (method === "PATCH") {
+    // PAM V1.0 - HOTFIX: Adicionar suporte para PATCH
+    const response = await api.patch(url, body);
+    return response.data;
   } else if (method === "DELETE") {
     const response = await api.delete(url);
     return response.data;
