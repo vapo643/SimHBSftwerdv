@@ -1,0 +1,52 @@
+**### MODO DE OPERAÇÃO: REALISMO CÉTICO (MANDATÓRIO)**
+Sua lealdade é para com a verdade do código e a estabilidade da produção.
+
+---
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Refatorar o componente "Detalhamento de Parcelas" na "Ficha do Cliente" para corrigir a exibição dos botões "Copiar" e conectar a exibição do status de cada parcela aos dados reais providos pelo nosso novo "Motor de Sincronização".
+* **Intenção Estratégica (O Porquê):** Para que a equipe de cobranças possa trabalhar, ela precisa de duas coisas inegociáveis: 1) A ferramenta para copiar os dados de pagamento de CADA parcela. 2) A certeza de que o status (`PAGO`, `VENCIDO`, `PENDENTE`) de cada parcela é 100% preciso e atualizado.
+* **Histórico Relevante (Consulta Obrigatória):** A falha na exibição dos botões de cópia é um bug de UI. O status mockado é uma dívida técnica. Agora que o "Motor de Sincronização" no backend está pronto e seguro, temos a fonte da verdade para finalmente corrigir ambos os problemas.
+* **Modelo Mental (Como se Encaixa):** Você atuará como Engenheiro de Frontend. Sua tarefa é garantir que o componente que renderiza a lista de parcelas: 1) Sempre exiba os botões de ação. 2) Obtenha o status de cada parcela a partir dos dados reais que o backend agora fornece, que são sincronizados com o Banco Inter.
+* **Riscos Antecipados:** **Risco:** A lógica de renderização condicional pode ser complexa. **Contramedida:** A nova regra é simples: se uma parcela tem dados de PIX e boleto, os botões de cópia devem aparecer, independentemente de outros fatores.
+
+---
+
+**IMPLEMENTAR:**
+A correção da UI no "Detalhamento de Parcelas" dentro do modal "Ficha do Cliente".
+
+**CURRENT STATE:**
+1.  O status das parcelas é mockado, não refletindo a realidade.
+2.  Os botões "Copiar PIX" e "Copiar Boleto" aparecem apenas para algumas parcelas, de forma inconsistente.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  O status de cada parcela exibido na lista é o status **REAL**, lido da coluna `situacao` da tabela `inter_collections` (que é atualizada pelo nosso novo motor de sincronização).
+2.  **TODA** parcela na lista exibe os botões funcionais de "Copiar PIX" e "Copiar Linha Digitável".
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+**1. Conexão com o Status Real:**
+    - **Ação:** Inspecione a query que busca os dados para a "Ficha do Cliente" (`/api/cobrancas/:propostaId/ficha`).
+    - **Implementação:** Garanta que, para cada parcela, o `status` real da tabela `inter_collections` seja retornado no payload. No frontend, conecte a exibição do status (o badge de cor) a este dado.
+
+**2. Correção da Lógica de Renderização dos Botões:**
+    - **Ação:** No componente React que renderiza a lista de parcelas.
+    - **Implementação:** Remova qualquer lógica condicional defeituosa que esteja a esconder os botões "Copiar". A regra deve ser simples: se o objeto da parcela contém as propriedades `pixCopiaECola` e `linhaDigitavel`, os botões devem ser renderizados.
+
+---
+**PROTOCOLO OBRIGATÓrio 7-CHECK EXPANDIDO:**
+1. Mapear ficheiros e funções exatas afetadas.
+2. Garantir importações e tipos corretos.
+3. Executar `get_latest_lsp_diagnostics` e corrigir TODOS os erros.
+4. **Declarar Nível de Confiança (0-100%)**.
+5. **Categorizar Riscos Descobertos**.
+6. **Teste Funcional Obrigatório:** Abra a "Ficha do Cliente" de uma proposta com múltiplas parcelas.
+7. **Documentar Decisões Técnicas**.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher]
+* **RISCOS IDENTIFICADOS:** [Preencher]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Preencher]
+* **VALIDAÇÃO PENDENTE:** [Valide visualmente que os status agora refletem a realidade do banco de dados e que TODOS os botões de copiar estão visíveis e funcionais.]
+---

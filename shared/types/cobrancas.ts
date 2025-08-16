@@ -120,6 +120,7 @@ export interface FichaCliente {
     // Dados do Banco Inter
     nossoNumero?: string;
     situacao?: string;
+    interSituacao?: string; // Status real do Banco Inter
     codigoSolicitacao?: string;
     linhaDigitavel?: string;
     codigoBarras?: string;

@@ -1814,10 +1814,50 @@ export default function CobrancasPage() {
                   {/* Parcelas com Boletos */}
                   <Card>
                     <CardHeader>
-                      <CardTitle className="flex items-center text-base">
-                        <Receipt className="mr-2 h-4 w-4" />
-                        Detalhamento de Parcelas
-                      </CardTitle>
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="flex items-center text-base">
+                          <Receipt className="mr-2 h-4 w-4" />
+                          Detalhamento de Parcelas
+                        </CardTitle>
+                        {/* Botão de Sincronização Manual */}
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={async () => {
+                            try {
+                              toast({
+                                title: "Sincronizando...",
+                                description: "Atualizando status das parcelas com o Banco Inter",
+                              });
+                              
+                              const response = await apiRequest(
+                                `/api/cobrancas/sincronizar/${selectedPropostaId}`,
+                                { method: "POST" }
+                              ) as { updated: number; message: string };
+                              
+                              toast({
+                                title: "Sincronização concluída",
+                                description: `${response.updated || 0} parcelas atualizadas`,
+                              });
+                              
+                              // Invalidar a query para forçar recarregar a ficha do cliente
+                              queryClient.invalidateQueries({ 
+                                queryKey: ["/api/cobrancas/ficha", selectedPropostaId] 
+                              });
+                            } catch (error) {
+                              toast({
+                                title: "Erro na sincronização",
+                                description: "Não foi possível sincronizar com o Banco Inter",
+                                variant: "destructive",
+                              });
+                            }
+                          }}
+                          title="Sincronizar status das parcelas com o Banco Inter"
+                        >
+                          <RefreshCw className="mr-2 h-3 w-3" />
+                          Sincronizar Status
+                        </Button>
+                      </div>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-2">
@@ -1825,7 +1865,7 @@ export default function CobrancasPage() {
                           <div
                             key={parcela.id}
                             className={`rounded border p-3 ${
-                              parcela.vencida
+                              (parcela as any).vencida
                                 ? "border-red-300 bg-red-50"
                                 : parcela.status === "pago"
                                   ? "border-green-300 bg-green-50"
@@ -1844,7 +1884,7 @@ export default function CobrancasPage() {
                                 <p className="text-sm text-muted-foreground">
                                   Vencimento:{" "}
                                   {format(parseISO(parcela.dataVencimento), "dd/MM/yyyy")}
-                                  {parcela.diasAtraso > 0 && (
+                                  {parcela.diasAtraso && parcela.diasAtraso > 0 && (
                                     <span className="ml-2 font-semibold text-red-600">
                                       ({parcela.diasAtraso} dias de atraso)
                                     </span>
@@ -1852,55 +1892,95 @@ export default function CobrancasPage() {
                                 </p>
                               </div>
                               <div className="flex items-center gap-2">
-                                {parcela.interPixCopiaECola && (
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() =>
-                                      copyToClipboard(parcela.interPixCopiaECola!, "PIX")
+                                {/* Botão Copiar PIX - Sempre visível */}
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  disabled={!parcela.pixCopiaECola}
+                                  onClick={() => {
+                                    if (parcela.pixCopiaECola) {
+                                      copyToClipboard(parcela.pixCopiaECola, "PIX");
+                                    } else {
+                                      toast({
+                                        title: "PIX não disponível",
+                                        description: "Código PIX ainda não foi gerado para esta parcela",
+                                        variant: "destructive",
+                                      });
                                     }
-                                  >
-                                    <QrCode className="mr-2 h-3 w-3" />
-                                    PIX
-                                  </Button>
-                                )}
-                                {parcela.interLinhaDigitavel && (
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() =>
-                                      copyToClipboard(
-                                        parcela.interLinhaDigitavel!,
-                                        "Linha Digitável"
-                                      )
+                                  }}
+                                  title={
+                                    parcela.pixCopiaECola
+                                      ? "Copiar código PIX"
+                                      : "PIX não disponível - aguardando geração"
+                                  }
+                                >
+                                  <QrCode className="mr-2 h-3 w-3" />
+                                  Copiar PIX
+                                </Button>
+                                
+                                {/* Botão Copiar Boleto - Sempre visível */}
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  disabled={!parcela.linhaDigitavel}
+                                  onClick={() => {
+                                    if (parcela.linhaDigitavel) {
+                                      copyToClipboard(parcela.linhaDigitavel, "Linha Digitável");
+                                    } else {
+                                      toast({
+                                        title: "Boleto não disponível",
+                                        description: "Linha digitável ainda não foi gerada para esta parcela",
+                                        variant: "destructive",
+                                      });
                                     }
-                                  >
-                                    <Barcode className="mr-2 h-3 w-3" />
-                                    Boleto
-                                  </Button>
-                                )}
-                                {/* Botão de Download do PDF do Boleto */}
-                                {parcela.interCodigoSolicitacao && (
-                                  <a
-                                    href={`/api/inter/collections/${parcela.interCodigoSolicitacao}/pdf`}
-                                    download
-                                    className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                                    data-testid={`button-download-pdf-${parcela.id}`}
-                                    title="Baixar PDF do boleto"
-                                  >
-                                    <Download className="mr-1.5 h-3 w-3" />
-                                    PDF
-                                  </a>
-                                )}
+                                  }}
+                                  title={
+                                    parcela.linhaDigitavel
+                                      ? "Copiar linha digitável do boleto"
+                                      : "Boleto não disponível - aguardando geração"
+                                  }
+                                >
+                                  <Barcode className="mr-2 h-3 w-3" />
+                                  Copiar Boleto
+                                </Button>
+                                
+                                {/* Botão de Download do PDF do Boleto - Sempre visível */}
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  disabled={!parcela.codigoSolicitacao}
+                                  onClick={() => {
+                                    if (parcela.codigoSolicitacao) {
+                                      window.open(`/api/inter/collections/${parcela.codigoSolicitacao}/pdf`, '_blank');
+                                    } else {
+                                      toast({
+                                        title: "PDF não disponível",
+                                        description: "PDF do boleto ainda não foi gerado",
+                                        variant: "destructive",
+                                      });
+                                    }
+                                  }}
+                                  title={
+                                    parcela.codigoSolicitacao
+                                      ? "Baixar PDF do boleto"
+                                      : "PDF não disponível - aguardando geração"
+                                  }
+                                >
+                                  <Download className="mr-1.5 h-3 w-3" />
+                                  PDF
+                                </Button>
+                                
+                                {/* Badge de Status - Usando status REAL do Inter */}
                                 <Badge
                                   className={getInterBankStatusColor(
                                     parcela.interSituacao || parcela.status
                                   )}
+                                  title={`Status no Banco Inter: ${parcela.interSituacao || 'Não sincronizado'}`}
                                 >
                                   {getInterBankStatusLabel(
                                     parcela.interSituacao,
                                     parcela.status,
-                                    parcela.vencida
+                                    (parcela as any).vencida
                                   )}
                                 </Badge>
                               </div>
