@@ -8,6 +8,7 @@ import {
   interCollections,
   profiles,
   solicitacoesModificacao,
+  propostaLogs,
 } from "@shared/schema";
 import { eq, and, sql, desc, gte, lte, inArray, or, not } from "drizzle-orm";
 import { format, parseISO, differenceInDays, isAfter } from "date-fns";
@@ -469,25 +470,56 @@ router.get("/:propostaId/ficha", async (req, res) => {
       .from(interCollections)
       .where(eq(interCollections.propostaId, propostaId));
 
+    // PAM V1.0 - FASE 2: Sincronização em tempo real com API do Inter
+    const { interBankService } = await import("../services/interBankService");
+    
     // Calcular estatísticas
     const hoje = new Date();
-    const parcelasDetalhadas = parcelasData.map(parcela => {
-      const dataVencimento = parseISO(parcela.dataVencimento);
-      const vencida = isAfter(hoje, dataVencimento) && parcela.status !== "pago";
-      const diasAtraso = vencida ? differenceInDays(hoje, dataVencimento) : 0;
+    const parcelasDetalhadas = await Promise.all(
+      parcelasData.map(async (parcela) => {
+        const dataVencimento = parseISO(parcela.dataVencimento);
+        const vencida = isAfter(hoje, dataVencimento) && parcela.status !== "pago";
+        const diasAtraso = vencida ? differenceInDays(hoje, dataVencimento) : 0;
 
-      const boletoInter = boletosInter.find(b => b.numeroParcela === parcela.numeroParcela);
+        const boletoInter = boletosInter.find(b => b.numeroParcela === parcela.numeroParcela);
+        
+        // PAM V1.0 - FASE 2: Buscar status em tempo real se tiver codigoSolicitacao
+        let situacaoRealTime = boletoInter?.situacao;
+        if (boletoInter?.codigoSolicitacao) {
+          try {
+            console.log(`[FICHA] Buscando status em tempo real para parcela ${parcela.numeroParcela}`);
+            const cobrancaAtualizada = await interBankService.recuperarCobranca(
+              boletoInter.codigoSolicitacao
+            );
+            if (cobrancaAtualizada?.situacao) {
+              situacaoRealTime = cobrancaAtualizada.situacao;
+              // Atualizar status local para cache
+              await db
+                .update(interCollections)
+                .set({ situacao: situacaoRealTime })
+                .where(eq(interCollections.codigoSolicitacao, boletoInter.codigoSolicitacao));
+            }
+          } catch (error) {
+            console.error(`[FICHA] Erro ao buscar status em tempo real:`, error);
+            // Usar status local como fallback
+          }
+        }
 
-      return {
-        ...parcela,
-        diasAtraso,
-        vencida,
-        interPixCopiaECola: boletoInter?.pixCopiaECola,
-        interLinhaDigitavel: boletoInter?.linhaDigitavel,
-        interCodigoBarras: boletoInter?.codigoBarras,
-        interSituacao: boletoInter?.situacao,
-      };
-    });
+        // PAM V1.0 - FASE 1: Correção do mapeamento de campos
+        return {
+          ...parcela,
+          diasAtraso,
+          vencida,
+          // Campos corrigidos para match com frontend
+          pixCopiaECola: boletoInter?.pixCopiaECola,
+          linhaDigitavel: boletoInter?.linhaDigitavel,
+          codigoBarras: boletoInter?.codigoBarras,
+          codigoSolicitacao: boletoInter?.codigoSolicitacao, // NOVO CAMPO
+          // Status em tempo real
+          interSituacao: situacaoRealTime,
+        };
+      })
+    );
 
     const ficha = {
       // Dados do cliente
@@ -550,6 +582,76 @@ router.get("/:propostaId/ficha", async (req, res) => {
   } catch (error) {
     console.error("Erro ao buscar ficha do cliente:", error);
     res.status(500).json({ message: "Erro ao buscar ficha do cliente" });
+  }
+});
+
+// PAM V1.0 - FASE 3: Endpoint para marcar parcela como paga manualmente
+router.patch("/parcelas/:codigoSolicitacao/marcar-pago", jwtAuthMiddleware, async (req: any, res) => {
+  try {
+    const { codigoSolicitacao } = req.params;
+    const userId = req.user?.id;
+    const userRole = req.user?.role;
+    const userName = req.user?.name || "Sistema";
+
+    // Verificar permissões - apenas ADMINISTRADOR, FINANCEIRO ou COBRADOR
+    if (!["ADMINISTRADOR", "FINANCEIRO", "COBRADOR"].includes(userRole || "")) {
+      return res.status(403).json({ 
+        error: "Sem permissão para marcar parcelas como pagas" 
+      });
+    }
+
+    // Buscar a parcela
+    const [boletoInter] = await db
+      .select()
+      .from(interCollections)
+      .where(eq(interCollections.codigoSolicitacao, codigoSolicitacao))
+      .limit(1);
+
+    if (!boletoInter) {
+      return res.status(404).json({ error: "Parcela não encontrada" });
+    }
+
+    // Atualizar status para PAGO
+    await db
+      .update(interCollections)
+      .set({ 
+        situacao: "PAGO",
+        updatedAt: new Date()
+      })
+      .where(eq(interCollections.codigoSolicitacao, codigoSolicitacao));
+
+    // Atualizar status da parcela na tabela parcelas
+    await db
+      .update(parcelas)
+      .set({ 
+        status: "pago",
+        dataPagamento: new Date()
+      })
+      .where(and(
+        eq(parcelas.propostaId, boletoInter.propostaId),
+        eq(parcelas.numeroParcela, boletoInter.numeroParcela)
+      ));
+
+    // Registrar log de auditoria
+    await db.insert(propostaLogs).values({
+      propostaId: boletoInter.propostaId,
+      autorId: userId || "00000000-0000-0000-0000-000000000000",
+      statusAnterior: boletoInter.situacao,
+      statusNovo: "PAGO",
+      observacao: `Parcela ${boletoInter.numeroParcela} marcada como paga manualmente por ${userName}`,
+    });
+
+    console.log(`[COBRANCAS] Parcela ${codigoSolicitacao} marcada como paga por ${userName}`);
+
+    res.json({ 
+      success: true, 
+      message: "Parcela marcada como paga com sucesso",
+      codigoSolicitacao,
+      numeroParcela: boletoInter.numeroParcela
+    });
+  } catch (error) {
+    console.error("[COBRANCAS] Erro ao marcar parcela como paga:", error);
+    res.status(500).json({ error: "Erro ao processar solicitação" });
   }
 });
 

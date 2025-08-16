@@ -73,6 +73,7 @@ import {
   AlertTriangle,
   X,
   MoreVertical,
+  CheckCircle,
   CalendarPlus,
   Percent,
   CheckSquare,
@@ -1861,25 +1862,7 @@ export default function CobrancasPage() {
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-2">
-                        {fichaCliente.parcelas?.map(parcela => {
-                          // 🔍 AUDITORIA FORENSE - Log dos dados da parcela
-                          console.log("🔍 [AUDITORIA] Dados da parcela recebidos:", {
-                            id: parcela.id,
-                            numeroParcela: parcela.numeroParcela,
-                            // Campos que o frontend ESPERA
-                            pixCopiaECola: parcela.pixCopiaECola,
-                            linhaDigitavel: parcela.linhaDigitavel,
-                            codigoSolicitacao: parcela.codigoSolicitacao,
-                            // Campos que o backend ENVIA (se existirem)
-                            interPixCopiaECola: (parcela as any).interPixCopiaECola,
-                            interLinhaDigitavel: (parcela as any).interLinhaDigitavel,
-                            interCodigoSolicitacao: (parcela as any).interCodigoSolicitacao,
-                            interSituacao: parcela.interSituacao,
-                            // Todos os campos disponíveis
-                            allFields: Object.keys(parcela)
-                          });
-                          
-                          return (
+                        {fichaCliente.parcelas?.map(parcela => (
                           <div
                             key={parcela.id}
                             className={`rounded border p-3 ${
@@ -2001,11 +1984,49 @@ export default function CobrancasPage() {
                                     (parcela as any).vencida
                                   )}
                                 </Badge>
+                                
+                                {/* PAM V1.0 - FASE 3: Botão Marcar como Pago */}
+                                {parcela.interSituacao !== "PAGO" && parcela.codigoSolicitacao && (
+                                  <Button
+                                    size="sm"
+                                    variant="secondary"
+                                    onClick={async () => {
+                                      try {
+                                        const response = await apiRequest(
+                                          `/api/cobrancas/parcelas/${parcela.codigoSolicitacao}/marcar-pago`,
+                                          { method: "PATCH" }
+                                        );
+                                        
+                                        if (response.success) {
+                                          toast({
+                                            title: "Parcela marcada como paga",
+                                            description: `Parcela ${parcela.numeroParcela} foi marcada como paga com sucesso`,
+                                          });
+                                          
+                                          // Recarregar ficha
+                                          queryClient.invalidateQueries({ 
+                                            queryKey: ["/api/cobrancas/ficha", selectedPropostaId] 
+                                          });
+                                        }
+                                      } catch (error) {
+                                        console.error("Erro ao marcar como pago:", error);
+                                        toast({
+                                          title: "Erro",
+                                          description: "Não foi possível marcar a parcela como paga",
+                                          variant: "destructive",
+                                        });
+                                      }
+                                    }}
+                                    title="Marcar esta parcela como paga manualmente"
+                                  >
+                                    <CheckCircle className="mr-1.5 h-3 w-3" />
+                                    Marcar Pago
+                                  </Button>
+                                )}
                               </div>
                             </div>
                           </div>
-                          );
-                        })}
+                        ))}
                       </div>
                     </CardContent>
                   </Card>
