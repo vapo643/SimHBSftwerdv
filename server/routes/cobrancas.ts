@@ -625,11 +625,11 @@ router.patch("/parcelas/:codigoSolicitacao/marcar-pago", jwtAuthMiddleware, asyn
       .update(parcelas)
       .set({ 
         status: "pago",
-        dataPagamento: new Date()
+        dataPagamento: new Date().toISOString()
       })
       .where(and(
         eq(parcelas.propostaId, boletoInter.propostaId),
-        eq(parcelas.numeroParcela, boletoInter.numeroParcela)
+        eq(parcelas.numeroParcela, Number(boletoInter.numeroParcela))
       ));
 
     // Registrar log de auditoria

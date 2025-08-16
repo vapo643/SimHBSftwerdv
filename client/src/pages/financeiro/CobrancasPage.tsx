@@ -1954,19 +1954,15 @@ export default function CobrancasPage() {
                                   onClick={async () => {
                                     if (parcela.codigoSolicitacao) {
                                       try {
-                                        // PAM V1.0 - FASE 2: Usar apiRequest com autenticação JWT
-                                        const response = await fetch(`/api/inter/collections/${parcela.codigoSolicitacao}/pdf`, {
-                                          method: 'GET',
-                                          headers: {
-                                            'Authorization': `Bearer ${(await getSupabase().auth.getSession()).data.session?.access_token}`,
-                                          },
-                                        });
+                                        // PAM V1.0 - FASE 2: Usar apiRequest com autenticação JWT correta
+                                        const blob = await apiRequest(
+                                          `/api/inter/collections/${parcela.codigoSolicitacao}/pdf`,
+                                          { 
+                                            method: "GET",
+                                            responseType: "blob" 
+                                          }
+                                        ) as Blob;
                                         
-                                        if (!response.ok) {
-                                          throw new Error('Erro ao baixar PDF');
-                                        }
-                                        
-                                        const blob = await response.blob();
                                         const url = URL.createObjectURL(blob);
                                         window.open(url, '_blank');
                                         
