@@ -1091,7 +1091,7 @@ router.get(
     try {
       const { codigoSolicitacao } = req.params;
 
-      console.log(`[INTER] Getting PDF for collection: ${codigoSolicitacao}`);
+      console.log(`[INTER] [PDF DOWNLOAD] Getting PDF for collection: ${codigoSolicitacao}`);
 
       const pdfBuffer = await interBankService.obterPdfCobranca(codigoSolicitacao);
 
@@ -1102,7 +1102,21 @@ router.get(
       );
       res.send(pdfBuffer);
     } catch (error) {
-      console.error("[INTER] Failed to get PDF:", error);
+      console.error("[INTER] [PDF DOWNLOAD] Failed to get PDF:", error);
+      
+      // PAM V1.0 - Tratamento específico para Circuit Breaker
+      if (error instanceof Error && error.message.includes("circuit breaker is OPEN")) {
+        console.log(`[INTER] [PDF DOWNLOAD] Circuit breaker OPEN - retrying with alternative approach for ${codigoSolicitacao}`);
+        return res.status(503).json({
+          success: false,
+          error: "PDF_SERVICE_TEMPORARILY_UNAVAILABLE",
+          message: "O serviço de download de boletos está temporariamente indisponível. Tente novamente em alguns minutos.",
+          details: "Circuit breaker ativo - API Inter Bank protegida",
+          retryAfter: 300 // 5 minutos
+        });
+      }
+
+      // Outros erros
       res.status(500).json({
         success: false,
         error: "Failed to get collection PDF",

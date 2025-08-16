@@ -1954,6 +1954,8 @@ export default function CobrancasPage() {
                                   onClick={async () => {
                                     if (parcela.codigoSolicitacao) {
                                       try {
+                                        console.log(`[PDF DOWNLOAD] Iniciando download para código: ${parcela.codigoSolicitacao}`);
+                                        
                                         // PAM V1.0 - FASE 2: Usar apiRequest com autenticação JWT correta
                                         const blob = await apiRequest(
                                           `/api/inter/collections/${parcela.codigoSolicitacao}/pdf`,
@@ -1963,18 +1965,30 @@ export default function CobrancasPage() {
                                           }
                                         ) as Blob;
                                         
+                                        console.log(`[PDF DOWNLOAD] Blob recebido, tamanho: ${blob.size} bytes`);
+                                        
                                         const url = URL.createObjectURL(blob);
                                         window.open(url, '_blank');
                                         
                                         // Limpar URL após uso
                                         setTimeout(() => URL.revokeObjectURL(url), 100);
-                                      } catch (error) {
-                                        console.error("Erro ao baixar boleto:", error);
-                                        toast({
-                                          title: "Erro ao baixar boleto",
-                                          description: "Não foi possível baixar o PDF do boleto",
-                                          variant: "destructive",
-                                        });
+                                      } catch (error: any) {
+                                        console.error("[PDF DOWNLOAD] Erro ao baixar boleto:", error);
+                                        
+                                        // PAM V1.0 - Tratamento específico para Circuit Breaker
+                                        if (error?.message?.includes("503") || error?.message?.includes("PDF_SERVICE_TEMPORARILY_UNAVAILABLE")) {
+                                          toast({
+                                            title: "Serviço temporariamente indisponível",
+                                            description: "O download de boletos está temporariamente indisponível. Tente novamente em alguns minutos.",
+                                            variant: "destructive",
+                                          });
+                                        } else {
+                                          toast({
+                                            title: "Erro ao baixar boleto",
+                                            description: "Não foi possível baixar o PDF do boleto",
+                                            variant: "destructive",
+                                          });
+                                        }
                                       }
                                     } else {
                                       toast({
