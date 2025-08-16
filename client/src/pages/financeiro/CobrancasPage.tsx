@@ -1888,44 +1888,108 @@ export default function CobrancasPage() {
                           <Receipt className="mr-2 h-4 w-4" />
                           Detalhamento de Parcelas
                         </CardTitle>
-                        {/* Botão de Sincronização Manual */}
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={async () => {
-                            try {
-                              toast({
-                                title: "Sincronizando...",
-                                description: "Atualizando status das parcelas com o Banco Inter",
-                              });
-                              
-                              const response = await apiRequest(
-                                `/api/cobrancas/sincronizar/${selectedPropostaId}`,
-                                { method: "POST" }
-                              ) as { updated: number; message: string };
-                              
-                              toast({
-                                title: "Sincronização concluída",
-                                description: `${response.updated || 0} parcelas atualizadas`,
-                              });
-                              
-                              // Invalidar a query para forçar recarregar a ficha do cliente
-                              queryClient.invalidateQueries({ 
-                                queryKey: ["/api/cobrancas/ficha", selectedPropostaId] 
-                              });
-                            } catch (error) {
-                              toast({
-                                title: "Erro na sincronização",
-                                description: "Não foi possível sincronizar com o Banco Inter",
-                                variant: "destructive",
-                              });
-                            }
-                          }}
-                          title="Sincronizar status das parcelas com o Banco Inter"
-                        >
-                          <RefreshCw className="mr-2 h-3 w-3" />
-                          Sincronizar Status
-                        </Button>
+                        <div className="flex gap-2">
+                          {/* PAM V1.0 - Botão para Sincronizar Boletos (Baixar PDFs) */}
+                          <Button
+                            size="sm"
+                            variant="default"
+                            onClick={async () => {
+                              try {
+                                toast({
+                                  title: "Baixando boletos...",
+                                  description: "Sincronizando PDFs do Banco Inter para o Storage",
+                                });
+                                
+                                // Chamar endpoint de sincronização de boletos
+                                const response = await apiRequest(
+                                  `/api/propostas/${selectedPropostaId}/sincronizar-boletos`,
+                                  { method: "POST" }
+                                ) as { 
+                                  success: boolean; 
+                                  jobId?: string;
+                                  boletosProcessados?: number;
+                                  message?: string; 
+                                };
+                                
+                                if (response.success) {
+                                  toast({
+                                    title: "Sincronização iniciada",
+                                    description: response.jobId 
+                                      ? "Os boletos estão sendo baixados em background. Aguarde alguns segundos."
+                                      : `${response.boletosProcessados || 0} boletos sincronizados`,
+                                  });
+                                  
+                                  // Iniciar polling para verificar status
+                                  setSyncStatus('em_andamento');
+                                  setIsPolling(true);
+                                  setPollCount(0);
+                                } else {
+                                  toast({
+                                    title: "Erro na sincronização",
+                                    description: response.message || "Falha ao sincronizar boletos",
+                                    variant: "destructive",
+                                  });
+                                }
+                                
+                                // Recarregar ficha após alguns segundos
+                                setTimeout(() => {
+                                  queryClient.invalidateQueries({ 
+                                    queryKey: ["/api/cobrancas/ficha", selectedPropostaId] 
+                                  });
+                                }, 3000);
+                              } catch (error) {
+                                toast({
+                                  title: "Erro ao baixar boletos",
+                                  description: "Não foi possível conectar com o Banco Inter",
+                                  variant: "destructive",
+                                });
+                              }
+                            }}
+                            title="Baixar todos os PDFs de boletos do Banco Inter"
+                          >
+                            <Download className="mr-2 h-3 w-3" />
+                            Baixar Boletos
+                          </Button>
+                          
+                          {/* Botão de Atualização de Status */}
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={async () => {
+                              try {
+                                toast({
+                                  title: "Sincronizando...",
+                                  description: "Atualizando status das parcelas com o Banco Inter",
+                                });
+                                
+                                const response = await apiRequest(
+                                  `/api/cobrancas/sincronizar/${selectedPropostaId}`,
+                                  { method: "POST" }
+                                ) as { updated: number; message: string };
+                                
+                                toast({
+                                  title: "Sincronização concluída",
+                                  description: `${response.updated || 0} parcelas atualizadas`,
+                                });
+                                
+                                // Invalidar a query para forçar recarregar a ficha do cliente
+                                queryClient.invalidateQueries({ 
+                                  queryKey: ["/api/cobrancas/ficha", selectedPropostaId] 
+                                });
+                              } catch (error) {
+                                toast({
+                                  title: "Erro na sincronização",
+                                  description: "Não foi possível sincronizar com o Banco Inter",
+                                  variant: "destructive",
+                                });
+                              }
+                            }}
+                            title="Sincronizar status das parcelas com o Banco Inter"
+                          >
+                            <RefreshCw className="mr-2 h-3 w-3" />
+                            Atualizar Status
+                          </Button>
+                        </div>
                       </div>
                     </CardHeader>
                     <CardContent>

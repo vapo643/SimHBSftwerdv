@@ -53,6 +53,7 @@ import propostasCarneStatusRoutes from "./routes/propostas-carne-status";
 import propostasCarneCheckRoutes from "./routes/propostas-carne-check";
 import propostasStorageStatusRoutes from "./routes/propostas-storage-status";
 import propostasCorrigirSincronizacaoRoutes from "./routes/propostas-corrigir-sincronizacao";
+import propostasSincronizarBoletosRoutes from "./routes/propostas-sincronizar-boletos";
 import jobStatusRoutes from "./routes/job-status";
 import testQueueRoutes from "./routes/test-queue";
 import testRetryRoutes from "./routes/test-retry";
@@ -5250,6 +5251,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use(propostasCarneCheckRoutes);
   app.use("/api/propostas", propostasStorageStatusRoutes);
   app.use("/api/propostas", propostasCorrigirSincronizacaoRoutes);
+  app.use("/api/propostas", propostasSincronizarBoletosRoutes);
   
   // Job Status routes (para consultar status de jobs assíncronos)
   app.use("/api/jobs", jobStatusRoutes);
