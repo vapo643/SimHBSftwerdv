@@ -1861,7 +1861,25 @@ export default function CobrancasPage() {
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-2">
-                        {fichaCliente.parcelas?.map(parcela => (
+                        {fichaCliente.parcelas?.map(parcela => {
+                          // 🔍 AUDITORIA FORENSE - Log dos dados da parcela
+                          console.log("🔍 [AUDITORIA] Dados da parcela recebidos:", {
+                            id: parcela.id,
+                            numeroParcela: parcela.numeroParcela,
+                            // Campos que o frontend ESPERA
+                            pixCopiaECola: parcela.pixCopiaECola,
+                            linhaDigitavel: parcela.linhaDigitavel,
+                            codigoSolicitacao: parcela.codigoSolicitacao,
+                            // Campos que o backend ENVIA (se existirem)
+                            interPixCopiaECola: (parcela as any).interPixCopiaECola,
+                            interLinhaDigitavel: (parcela as any).interLinhaDigitavel,
+                            interCodigoSolicitacao: (parcela as any).interCodigoSolicitacao,
+                            interSituacao: parcela.interSituacao,
+                            // Todos os campos disponíveis
+                            allFields: Object.keys(parcela)
+                          });
+                          
+                          return (
                           <div
                             key={parcela.id}
                             className={`rounded border p-3 ${
@@ -1986,7 +2004,8 @@ export default function CobrancasPage() {
                               </div>
                             </div>
                           </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </CardContent>
                   </Card>
