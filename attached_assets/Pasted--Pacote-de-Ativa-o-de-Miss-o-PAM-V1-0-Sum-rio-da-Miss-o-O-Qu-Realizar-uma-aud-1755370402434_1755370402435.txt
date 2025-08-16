@@ -1,0 +1,37 @@
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Realizar uma auditoria forense completa do ciclo de vida dos artefatos de boleto (PDFs e dados de PIX) para identificar as inconsistências no armazenamento, recuperação e exibição.
+* **Intenção Estratégica (O Porquê):** O sistema está a falhar em localizar PDFs que existem e a esconder funcionalidades (botão de copiar PIX) de forma inconsistente. Precisamos de um diagnóstico preciso da causa raiz para criar uma arquitetura de dados e de UI que seja 100% confiável e escalável.
+* **Histórico Relevante (Consulta Obrigatória):** A diretriz do Arquiteto (Blueprint V5.0) é nossa nova fonte da verdade. Sua missão é comparar o código atual com estas novas regras e identificar todas as discrepâncias.
+* **Modelo Mental (Como se Encaixa):** Você é um auditor de integridade de dados. Sua tarefa é seguir o rastro do "caminho do PDF" e dos "dados do PIX" desde o backend até o frontend e encontrar os pontos de quebra ou inconsistência.
+* **Riscos Antecipados:** **Risco:** Uma análise superficial. **Contramedida:** Sua missão não é resolver, mas sim **PROVAR**, com evidências de código, onde o sistema falha.
+
+---
+
+**IMPLEMENTAR:**
+Um relatório de auditoria detalhado. **NÃO FAÇA MODIFICAÇÕES.**
+
+**CURRENT STATE:**
+O download de alguns PDFs falha com erro de "não encontrado". O botão "Copiar PIX" não aparece para todas as parcelas.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um relatório de auditoria que responda a todas as questões abaixo.
+
+**CONSTRAINTS (Roadmap de Auditoria Forense):**
+
+**1. Auditoria do Caminho do Storage (A Causa do PDF Não Encontrado):**
+    - **Ação:** Inspecione o serviço que **salva** os boletos no Storage (provavelmente `boletoStorageService.ts`) e o endpoint que **lê/gera a URL** para o download do boleto.
+    - **Relatório 1 (A Evidência Crítica):** Apresente o código de **ambos** os locais que constroem o caminho do ficheiro. Eles são idênticos? Existe uma função centralizada e compartilhada para gerar este caminho? Se não, aponte a discrepância como a causa raiz da falha.
+
+**2. Auditoria dos Dados do PIX (A Causa do Botão Ausente):**
+    - **Ação:** Analise o endpoint que busca os dados para a "Ficha do Cliente" (`GET /api/cobrancas/:id/ficha`).
+    - **Relatório 2:** A query que busca as parcelas está consistentemente fazendo o `JOIN` e selecionando o campo `pixCopiaECola` da tabela `inter_collections` para **TODAS** as parcelas? Apresente o `select` da query como prova.
+    - **Ação:** Inspecione o componente de frontend `CobrancasPage.tsx`.
+    - **Relatório 3:** Apresente a lógica de renderização condicional que está a causar a exibição inconsistente do botão "Copiar PIX".
+
+**3. Auditoria da UI (O Botão a ser Removido):**
+    - **Ação:** Inspecione `CobrancasPage.tsx`.
+    - **Relatório 4:** Confirme a existência do botão "Copiar Boleto" (linha digitável) e apresente o trecho de código que o renderiza.
+
+**Relatório Final:**
+O critério de sucesso é um relatório que nos dê um mapa claro de todas as inconsistências e do código que precisa ser refatorado para alinhar o sistema com o nosso novo Blueprint.
