@@ -1,6 +1,12 @@
 # Simpix Credit Management System
 
 ## Recent Changes
+- **16/08/2025**: Motor de Sincronização de Status de Boletos PAM V1.0
+  - Criado serviço centralizado `boletoStatusService.ts` para sincronização de status
+  - Refatorado webhook do Banco Inter para usar serviço centralizado
+  - Adicionado endpoint `POST /api/cobrancas/sincronizar/:propostaId` para sincronização manual
+  - Implementado processamento assíncrono com delay para evitar rate limit
+  - VULNERABILIDADE IDENTIFICADA: Webhook sem validação HMAC (TODO prioritário)
 - **15/08/2025**: Sistema de Alertas Proativos PAM V1.0 - ✅ REFATORAÇÃO COMPLETA
   - Removida página dedicada `/notificacoes` (estratégia simplificada)
   - Centralizado tudo no dropdown do header para fluxo mais direto

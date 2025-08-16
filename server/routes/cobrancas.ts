@@ -860,6 +860,44 @@ router.get("/inter-status/:codigoSolicitacao", async (req: any, res) => {
   }
 });
 
+// POST /api/cobrancas/sincronizar/:propostaId - Sincronizar status de todos os boletos de uma proposta
+router.post("/sincronizar/:propostaId", jwtAuthMiddleware, async (req: any, res) => {
+  try {
+    const { propostaId } = req.params;
+    const userRole = req.user?.role;
+
+    // Verificar permissão
+    if (!userRole || !["ADMINISTRADOR", "COBRANCA"].includes(userRole)) {
+      console.log("[SYNC] Acesso negado - Role:", userRole);
+      return res.status(403).json({ message: "Acesso negado" });
+    }
+
+    console.log(`[SYNC] Iniciando sincronização para proposta ${propostaId}`);
+    
+    // Importar serviço de sincronização
+    const { boletoStatusService } = await import("../services/boletoStatusService");
+    
+    // Executar sincronização
+    const result = await boletoStatusService.sincronizarStatusParcelas(propostaId);
+    
+    console.log(`[SYNC] Resultado:`, result);
+    
+    res.json({
+      success: result.success,
+      message: result.message,
+      atualizacoes: result.updatedCount,
+      erros: result.errors
+    });
+    
+  } catch (error) {
+    console.error("[SYNC] Erro ao sincronizar:", error);
+    res.status(500).json({ 
+      success: false,
+      message: "Erro ao sincronizar status dos boletos" 
+    });
+  }
+});
+
 // GET /api/cobrancas/exportar/inadimplentes - Exportar lista de inadimplentes para Excel
 router.get("/exportar/inadimplentes", async (req, res) => {
   try {

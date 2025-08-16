@@ -1,0 +1,44 @@
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Arquitetar e implementar um "Motor de Sincronização de Status" no backend, que servirá como o intermediário inteligente entre a API/Webhooks do Banco Inter e o nosso banco de dados.
+* **Intenção Estratégica (O Porquê):** A confiança da equipe de cobranças depende de dados de status de parcelas 100% precisos e em tempo real. Um status incorreto pode levar a cobrar um cliente que já pagou ou a não cobrar um inadimplente. Este motor é a fundação da nossa integridade de dados de cobrança.
+* **Histórico Relevante (Consulta Obrigatória):** Nossas implementações de webhook anteriores confirmaram que podemos receber eventos. Esta missão expande essa capacidade, criando um serviço centralizado para gerenciar todas as atualizações de estado das parcelas, seja por um evento `push` (webhook) ou `pull` (requisição de API).
+* **Modelo Mental (Como se Encaixa):** Você vai criar/refatorar um serviço (ex: `boletoStatusService.ts`) que terá duas responsabilidades principais: 1) Um método para processar os payloads dos webhooks do Banco Inter (`cobranca.paga`, `cobranca.vencida`, etc.). 2) Um método para buscar ativamente o status de todos os boletos de uma proposta na API do Inter. Ambos os métodos, ao final, devem atualizar a coluna `situacao` na nossa tabela `inter_collections`.
+* **Riscos Antecipados:** **Risco:** Conflitos de atualização (um webhook chega enquanto uma busca manual está em andamento). **Contramedida:** As atualizações no banco de dados devem ser atômicas e baseadas no `codigoSolicitacao`, garantindo que a informação mais recente, baseada em timestamps, sempre prevaleça.
+
+---
+
+**IMPLEMENTAR:**
+O "Motor Inteligente" de sincronização de status de boletos no backend.
+
+**CURRENT STATE:**
+O status das parcelas na UI é mockado ou estático. Não há um mecanismo centralizado e confiável para atualizar os status em nosso banco de dados com base nos eventos do Banco Inter.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um novo serviço de backend que:
+1.  Processa webhooks do Banco Inter (ex: `cobranca.paga`, `cobranca.vencida`) e atualiza o `situacao` do boleto correspondente na tabela `inter_collections`.
+2.  Expõe um novo endpoint de API (ex: `POST /api/cobrancas/propostas/:id/sincronizar-status`) que, quando chamado, busca o status de todos os boletos daquela proposta no Inter e atualiza nosso banco de dados.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+**1. Refatoração do Endpoint de Webhook:**
+    - **Ação:** Revise nosso endpoint de webhook do Inter (`/api/webhooks/inter`).
+    - **Implementação:** Garanta que ele esteja a processar todos os eventos de mudança de status relevantes (pagamento, vencimento, cancelamento). A lógica de processamento deve chamar o novo serviço centralizado para atualizar a coluna `situacao` na tabela `inter_collections`.
+
+**2. Criação do Serviço de Sincronização Ativa:**
+    - **Ação:** Crie um novo método em um serviço apropriado (ex: `interBankService.ts`) chamado `sincronizarStatusParcelas(propostaId)`.
+    - **Implementação:** Este método deve:
+        a. Buscar todos os `codigoSolicitacao` da proposta no nosso DB.
+        b. Em um **loop sequencial** (para respeitar o rate limit), chamar a API do Inter para obter o status atual de cada boleto (`recuperarCobranca`).
+        c. Comparar o status retornado com o status em nosso DB. Se for diferente, atualizar a coluna `situacao` na nossa tabela `inter_collections`.
+
+**3. Criação do Endpoint de API para Sincronização Manual:**
+    - **Ação:** Crie o novo endpoint `POST /api/cobrancas/propostas/:id/sincronizar-status`.
+    - **Implementação:** Este endpoint deve ser protegido por autenticação e simplesmente chamar a função `sincronizarStatusParcelas` que você criou no passo anterior.
+
+**PROTOCOLO OBRIGATÓRIO 5-CHECK:**
+1.  Mapear todos os arquivos de backend envolvidos.
+2.  Garantir que a lógica seja modular e centralizada no novo serviço.
+3.  Executar `get_latest_lsp_diagnostics`.
+4.  Realizar testes de API para o novo endpoint de sincronização e simular o recebimento de um webhook.
+5.  O critério final de sucesso é a verificação direta no banco de dados: o campo `situacao` na tabela `inter_collections` deve ser atualizado corretamente em ambos os cenários de teste (webhook e chamada de API).
