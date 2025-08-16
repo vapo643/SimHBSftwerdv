@@ -470,40 +470,19 @@ router.get("/:propostaId/ficha", async (req, res) => {
       .from(interCollections)
       .where(eq(interCollections.propostaId, propostaId));
 
-    // PAM V1.0 - FASE 2: Sincronização em tempo real com API do Inter
-    const { interBankService } = await import("../services/interBankService");
+    // **PAM V1.0 - FASE 3 REFATORADO:** Removida sincronização em tempo real - usar dados do banco
     
     // Calcular estatísticas
     const hoje = new Date();
-    const parcelasDetalhadas = await Promise.all(
-      parcelasData.map(async (parcela) => {
+    const parcelasDetalhadas = parcelasData.map((parcela) => {
         const dataVencimento = parseISO(parcela.dataVencimento);
         const vencida = isAfter(hoje, dataVencimento) && parcela.status !== "pago";
         const diasAtraso = vencida ? differenceInDays(hoje, dataVencimento) : 0;
 
         const boletoInter = boletosInter.find(b => b.numeroParcela === parcela.numeroParcela);
         
-        // PAM V1.0 - FASE 2: Buscar status em tempo real se tiver codigoSolicitacao
-        let situacaoRealTime = boletoInter?.situacao;
-        if (boletoInter?.codigoSolicitacao) {
-          try {
-            console.log(`[FICHA] Buscando status em tempo real para parcela ${parcela.numeroParcela}`);
-            const cobrancaAtualizada = await interBankService.recuperarCobranca(
-              boletoInter.codigoSolicitacao
-            );
-            if (cobrancaAtualizada?.situacao) {
-              situacaoRealTime = cobrancaAtualizada.situacao;
-              // Atualizar status local para cache
-              await db
-                .update(interCollections)
-                .set({ situacao: situacaoRealTime })
-                .where(eq(interCollections.codigoSolicitacao, boletoInter.codigoSolicitacao));
-            }
-          } catch (error) {
-            console.error(`[FICHA] Erro ao buscar status em tempo real:`, error);
-            // Usar status local como fallback
-          }
-        }
+        // **PAM V1.0 - FASE 3 REFATORADO:** Usar exclusivamente dados do banco (sem chamadas em tempo real)
+        const situacaoRealTime = boletoInter?.situacao || "EM_PROCESSAMENTO";
 
         // PAM V1.0 - FASE 1: Correção do mapeamento de campos
         return {
@@ -518,8 +497,7 @@ router.get("/:propostaId/ficha", async (req, res) => {
           // Status em tempo real
           interSituacao: situacaoRealTime,
         };
-      })
-    );
+      });
 
     const ficha = {
       // Dados do cliente

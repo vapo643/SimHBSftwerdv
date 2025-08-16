@@ -178,7 +178,7 @@ class InterBankService {
     
     if (!this.apiBreaker) {
       this.apiBreaker = createCircuitBreaker(
-        async (endpoint: string, method: string, data?: any, headers?: any) => {
+        async (endpoint: string, method: "GET" | "POST" | "PATCH" | "DELETE" | "PUT" = "GET", data?: any, headers?: any) => {
           return this.makeRequestDirect(endpoint, method, data, headers);
         },
         { ...INTER_BREAKER_OPTIONS, name: 'interApiBreaker' }
@@ -1089,43 +1089,23 @@ class InterBankService {
   async debugPdfResponse(codigoSolicitacao: string): Promise<any> {
     console.log(`[INTER] 🔍 DEBUG MODE: Analisando resposta completa da API`);
     
-    const token = await this.getAccessToken();
-    const url = `${this.apiUrl}/cobranca/v3/cobrancas/${codigoSolicitacao}/pdf`;
-    
-    const headers = {
-      'Authorization': `Bearer ${token}`,
-      'Accept': 'application/json',
-      'x-conta-corrente': this.contaCorrente
-    };
-    
-    const httpsAgent = new https.Agent({
-      cert: formatCertificate(this.certificate),
-      key: formatPrivateKey(this.privateKey),
-      rejectUnauthorized: true
-    });
-    
     try {
-      const response = await axios.get(url, {
-        headers,
-        httpsAgent,
-        timeout: 30000
-      });
+      const response = await this.makeRequest(`/cobranca/v3/cobrancas/${codigoSolicitacao}/pdf`);
       
       console.log('[INTER] 🔍 RESPOSTA COMPLETA DA API:');
-      console.log('Status:', response.status);
-      console.log('Headers:', response.headers);
-      console.log('Data type:', typeof response.data);
-      console.log('Data length:', JSON.stringify(response.data).length);
+      console.log('Data type:', typeof response);
       
-      // Se for objeto, mostrar estrutura
-      if (typeof response.data === 'object') {
-        console.log('Object keys:', Object.keys(response.data));
+      if (response instanceof Buffer) {
+        console.log('Buffer size:', response.length);
+        console.log('Is PDF:', response.slice(0, 5).toString("utf8").startsWith("%PDF"));
+      } else if (typeof response === 'object') {
+        console.log('Object keys:', Object.keys(response));
         console.log('Sample (first 1000 chars):');
-        console.log(JSON.stringify(response.data, null, 2).substring(0, 1000));
+        console.log(JSON.stringify(response, null, 2).substring(0, 1000));
         
         // Verificar cada campo
-        for (const key in response.data) {
-          const value = response.data[key];
+        for (const key in response) {
+          const value = response[key];
           console.log(`Field '${key}':`, {
             type: typeof value,
             length: typeof value === 'string' ? value.length : 'N/A',
@@ -1134,7 +1114,7 @@ class InterBankService {
         }
       }
       
-      return response.data;
+      return response;
     } catch (error: any) {
       console.error('[INTER] ❌ Debug failed:', error.message);
       throw error;

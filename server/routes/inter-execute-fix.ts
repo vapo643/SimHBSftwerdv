@@ -105,16 +105,60 @@ router.post("/execute-fix/:propostaId", async (req, res) => {
 
         console.log(`✅ [EXECUTE FIX] UUID válido gerado: ${codigoSolicitacaoValido}`);
 
-        // Inserir novo boleto no banco
+        // **PAM V1.0 CORREÇÃO**: Seguir padrão correto do ClickSign webhook
+        // 1. Criar boleto no Banco Inter
+        const boletoData = {
+          seuNumero,
+          valorNominal: parcela.valor,
+          dataVencimento: parcela.vencimento,
+          numDiasAgenda: 60,
+          pagador: {
+            cpfCnpj: proposta.clienteCpf?.replace(/\D/g, "") || "",
+            tipoPessoa: "FISICA" as const,
+            nome: proposta.clienteNome || "",
+            email: proposta.clienteEmail || "",
+            ddd: proposta.clienteTelefone ? proposta.clienteTelefone.replace(/\D/g, "").slice(0, 2) : "",
+            telefone: proposta.clienteTelefone ? proposta.clienteTelefone.replace(/\D/g, "").slice(2) : "",
+            endereco: proposta.clienteEndereco || "",
+            numero: proposta.clienteNumero || "",
+            complemento: proposta.clienteComplemento || "",
+            bairro: proposta.clienteBairro || "",
+            cidade: proposta.clienteCidade || "",
+            uf: proposta.clienteUf || "",
+            cep: proposta.clienteCep?.replace(/\D/g, "") || "",
+          },
+          mensagem: {
+            linha1: `Parcela ${parcela.numero}/${parcelas.length} - Empréstimo`,
+            linha2: `Proposta: ${propostaId}`,
+            linha3: `SIMPIX - Soluções Financeiras`,
+            linha4: `Valor da parcela: R$ ${parcela.valor.toFixed(2)}`,
+            linha5: `Vencimento: ${parcela.vencimento}`,
+          },
+        };
+
+        console.log(`[PAM V1.0 FIX] Criando boleto real no Banco Inter - Parcela ${parcela.numero}`);
+        const createResponse = await interBankService.emitirCobranca(boletoData);
+
+        // 2. Buscar dados completos (incluindo PIX)
+        const interCollection = await interBankService.recuperarCobranca(createResponse.codigoSolicitacao);
+
+        // 3. Salvar dados completos no banco (incluindo PIX)
         const [novoBoleto] = await db
           .insert(interCollections)
           .values({
             propostaId,
-            codigoSolicitacao: codigoSolicitacaoValido,
+            codigoSolicitacao: createResponse.codigoSolicitacao,
             seuNumero,
             valorNominal: parcela.valor.toString(),
             dataVencimento: parcela.vencimento,
-            situacao: "EM_PROCESSAMENTO",
+            situacao: interCollection.cobranca.situacao,
+            dataSituacao: interCollection.cobranca.dataSituacao,
+            nossoNumero: interCollection.boleto?.nossoNumero || "",
+            codigoBarras: interCollection.boleto?.codigoBarras || "",
+            linhaDigitavel: interCollection.boleto?.linhaDigitavel || "",
+            pixTxid: interCollection.pix?.txid || "",
+            pixCopiaECola: interCollection.pix?.pixCopiaECola || "", // **PIX AGORA PERSISTIDO**
+            dataEmissao: interCollection.cobranca.dataEmissao || new Date().toISOString().split("T")[0],
             numeroParcela: parcela.numero,
             totalParcelas: parcelas.length,
             isActive: true,

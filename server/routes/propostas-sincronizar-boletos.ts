@@ -2,11 +2,10 @@ import { Router } from "express";
 import { db } from "../lib/supabase";
 import { propostas, interCollections } from "@shared/schema";
 import { eq, and } from "drizzle-orm";
-import { jwtAuthMiddleware } from "../middleware/auth";
-import { requireAnyRole } from "../middleware/rbac";
+import { jwtAuthMiddleware, type AuthenticatedRequest } from "../lib/jwt-auth-middleware";
+
 import { interBankService } from "../services/interBankService";
 import { boletoStorageService } from "../services/boletoStorageService";
-import type { AuthenticatedRequest } from "../middleware/auth";
 
 const router = Router();
 
@@ -17,7 +16,6 @@ const router = Router();
 router.post(
   "/:id/sincronizar-boletos",
   jwtAuthMiddleware,
-  requireAnyRole,
   async (req: AuthenticatedRequest, res) => {
     try {
       const { id: propostaId } = req.params;
