@@ -63,7 +63,6 @@ import {
   Copy,
   Building2,
   RefreshCw,
-  Barcode,
   User,
   Mail,
   MapPin,
@@ -123,6 +122,11 @@ export default function CobrancasPage() {
   const [novaDataVencimento, setNovaDataVencimento] = useState("");
   const [valorDesconto, setValorDesconto] = useState("");
   const [dataLimiteDesconto, setDataLimiteDesconto] = useState("");
+  
+  // PAM V1.0 - Estados para polling inteligente de sincronização
+  const [syncStatus, setSyncStatus] = useState<'nao_iniciado' | 'em_andamento' | 'concluido' | 'falhou' | null>(null);
+  const [isPolling, setIsPolling] = useState(false);
+  const [pollCount, setPollCount] = useState(0);
 
   // Estados para Desconto de Quitação (multi-etapas)
   const [etapaDesconto, setEtapaDesconto] = useState(1);
@@ -354,6 +358,69 @@ export default function CobrancasPage() {
     queryFn: () => apiRequest(`/api/cobrancas/${selectedPropostaId}/ficha`) as Promise<FichaCliente>,
     enabled: !!selectedPropostaId && showFichaModal,
   });
+  
+  // PAM V1.0 - Polling inteligente para status de sincronização
+  useEffect(() => {
+    if (!showFichaModal || !selectedPropostaId) {
+      setSyncStatus(null);
+      setIsPolling(false);
+      setPollCount(0);
+      return;
+    }
+    
+    const checkSyncStatus = async () => {
+      try {
+        console.log(`[PAM V1.0 POLLING] Verificando status de sincronização para proposta ${selectedPropostaId}`);
+        const response = await apiRequest(
+          `/api/propostas/${selectedPropostaId}/sync-status`,
+          { method: "GET" }
+        ) as {
+          success: boolean;
+          syncStatus: 'nao_iniciado' | 'em_andamento' | 'concluido' | 'falhou';
+          totalBoletos: number;
+          boletosSincronizados: number;
+        };
+        
+        if (response.success) {
+          setSyncStatus(response.syncStatus);
+          console.log(`[PAM V1.0 POLLING] Status: ${response.syncStatus} (${response.boletosSincronizados}/${response.totalBoletos})`);
+          
+          // Se está em andamento e não atingiu limite, continuar polling
+          if (response.syncStatus === 'em_andamento' && pollCount < 20) {
+            setIsPolling(true);
+            setPollCount(prev => prev + 1);
+          } else {
+            setIsPolling(false);
+            if (pollCount >= 20) {
+              console.log(`[PAM V1.0 POLLING] Limite de tentativas atingido (20)`);
+              toast({
+                title: "Sincronização demorada",
+                description: "A sincronização está demorando mais que o esperado. Tente novamente em alguns instantes.",
+                variant: "destructive",
+              });
+            }
+          }
+        }
+      } catch (error) {
+        console.error("[PAM V1.0 POLLING] Erro ao verificar status:", error);
+        setSyncStatus('falhou');
+        setIsPolling(false);
+      }
+    };
+    
+    // Verificar imediatamente ao abrir
+    checkSyncStatus();
+    
+    // Configurar polling se necessário
+    let intervalId: NodeJS.Timeout | null = null;
+    if (isPolling) {
+      intervalId = setInterval(checkSyncStatus, 3000); // 3 segundos
+    }
+    
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [showFichaModal, selectedPropostaId, isPolling, pollCount, toast]);
 
   // As observações agora vêm diretamente da ficha do cliente
 
@@ -1894,7 +1961,7 @@ export default function CobrancasPage() {
                                 </p>
                               </div>
                               <div className="flex items-center gap-2">
-                                {/* Botão Copiar PIX - Sempre visível */}
+                                {/* PAM V1.0 - Botão Copiar PIX com Tooltip Informativo */}
                                 <Button
                                   size="sm"
                                   variant="outline"
@@ -1905,7 +1972,7 @@ export default function CobrancasPage() {
                                     } else {
                                       toast({
                                         title: "PIX não disponível",
-                                        description: "Código PIX ainda não foi gerado para esta parcela",
+                                        description: "PIX não fornecido pelo banco para esta parcela",
                                         variant: "destructive",
                                       });
                                     }
@@ -1913,44 +1980,18 @@ export default function CobrancasPage() {
                                   title={
                                     parcela.pixCopiaECola
                                       ? "Copiar código PIX"
-                                      : "PIX não disponível - aguardando geração"
+                                      : "PIX não fornecido pelo banco para esta parcela"
                                   }
                                 >
                                   <QrCode className="mr-2 h-3 w-3" />
                                   Copiar PIX
                                 </Button>
                                 
-                                {/* Botão Copiar Boleto - Sempre visível */}
+                                {/* PAM V1.0 - Botão Download PDF com Consciência de Estado */}
                                 <Button
                                   size="sm"
                                   variant="outline"
-                                  disabled={!parcela.linhaDigitavel}
-                                  onClick={() => {
-                                    if (parcela.linhaDigitavel) {
-                                      copyToClipboard(parcela.linhaDigitavel, "Linha Digitável");
-                                    } else {
-                                      toast({
-                                        title: "Boleto não disponível",
-                                        description: "Linha digitável ainda não foi gerada para esta parcela",
-                                        variant: "destructive",
-                                      });
-                                    }
-                                  }}
-                                  title={
-                                    parcela.linhaDigitavel
-                                      ? "Copiar linha digitável do boleto"
-                                      : "Boleto não disponível - aguardando geração"
-                                  }
-                                >
-                                  <Barcode className="mr-2 h-3 w-3" />
-                                  Copiar Boleto
-                                </Button>
-                                
-                                {/* Botão de Download do PDF do Boleto - Sempre visível */}
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  disabled={!parcela.codigoSolicitacao}
+                                  disabled={!parcela.codigoSolicitacao || syncStatus === 'em_andamento'}
                                   onClick={async () => {
                                     if (parcela.codigoSolicitacao) {
                                       try {
@@ -2008,12 +2049,18 @@ export default function CobrancasPage() {
                                     }
                                   }}
                                   title={
-                                    parcela.codigoSolicitacao
-                                      ? "Baixar PDF do boleto"
-                                      : "PDF não disponível - aguardando geração"
+                                    syncStatus === 'em_andamento'
+                                      ? "Sincronização em andamento, aguarde..."
+                                      : parcela.codigoSolicitacao
+                                        ? "Baixar PDF do boleto"
+                                        : "PDF não disponível - aguardando geração"
                                   }
                                 >
-                                  <Download className="mr-1.5 h-3 w-3" />
+                                  {syncStatus === 'em_andamento' ? (
+                                    <Loader2 className="mr-1.5 h-3 w-3 animate-spin" />
+                                  ) : (
+                                    <Download className="mr-1.5 h-3 w-3" />
+                                  )}
                                   PDF
                                 </Button>
                                 
