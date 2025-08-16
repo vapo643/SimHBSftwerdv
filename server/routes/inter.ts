@@ -10,6 +10,7 @@ import { jwtAuthMiddleware, type AuthenticatedRequest } from "../lib/jwt-auth-mi
 import { getBrasiliaTimestamp } from "../lib/timezone.js";
 import { z } from "zod";
 import { db } from "../lib/supabase.js";
+import { supabaseAdmin } from "../lib/supabase-admin.js"; // PAM V1.0 - Import para Storage
 import { interCollections, propostas, historicoObservacoesCobranca } from "@shared/schema";
 import { eq, and } from "drizzle-orm";
 
@@ -1081,8 +1082,11 @@ router.get("/collections", jwtAuthMiddleware, async (req: AuthenticatedRequest, 
 });
 
 /**
- * Get collection PDF
+ * Get collection PDF from Supabase Storage (PAM V1.0 - ANTIFRÁGIL)
  * GET /api/inter/collections/:codigoSolicitacao/pdf
+ * 
+ * REFATORAÇÃO CRÍTICA: Elimina chamadas à API externa do Banco Inter
+ * Utiliza o PDF já armazenado em nosso Supabase Storage
  */
 router.get(
   "/collections/:codigoSolicitacao/pdf",
@@ -1091,35 +1095,61 @@ router.get(
     try {
       const { codigoSolicitacao } = req.params;
 
-      console.log(`[INTER] [PDF DOWNLOAD] Getting PDF for collection: ${codigoSolicitacao}`);
+      console.log(`[STORAGE PDF] 🚀 PAM V1.0 - Buscando PDF no Storage para: ${codigoSolicitacao}`);
+      console.log(`[STORAGE PDF] ⚡ REFATORAÇÃO ANTIFRÁGIL: Eliminando chamada à API externa`);
 
-      const pdfBuffer = await interBankService.obterPdfCobranca(codigoSolicitacao);
-
-      res.setHeader("Content-Type", "application/pdf");
-      res.setHeader(
-        "Content-Disposition",
-        `attachment; filename="boleto-${codigoSolicitacao}.pdf"`
-      );
-      res.send(pdfBuffer);
-    } catch (error) {
-      console.error("[INTER] [PDF DOWNLOAD] Failed to get PDF:", error);
+      // 1. Buscar propostaId associada ao codigoSolicitacao
+      const collection = await storage.getInterCollectionByCodigoSolicitacao(codigoSolicitacao);
       
-      // PAM V1.0 - Tratamento específico para Circuit Breaker
-      if (error instanceof Error && error.message.includes("circuit breaker is OPEN")) {
-        console.log(`[INTER] [PDF DOWNLOAD] Circuit breaker OPEN - retrying with alternative approach for ${codigoSolicitacao}`);
-        return res.status(503).json({
+      if (!collection) {
+        console.log(`[STORAGE PDF] ❌ Boleto não encontrado: ${codigoSolicitacao}`);
+        return res.status(404).json({
           success: false,
-          error: "PDF_SERVICE_TEMPORARILY_UNAVAILABLE",
-          message: "O serviço de download de boletos está temporariamente indisponível. Tente novamente em alguns minutos.",
-          details: "Circuit breaker ativo - API Inter Bank protegida",
-          retryAfter: 300 // 5 minutos
+          error: "BOLETO_NOT_FOUND",
+          message: "Boleto não encontrado no sistema",
         });
       }
 
-      // Outros erros
+      const { propostaId } = collection;
+      console.log(`[STORAGE PDF] 📋 Mapeamento encontrado: ${codigoSolicitacao} → ${propostaId}`);
+
+      // 2. Construir caminho do arquivo no Storage
+      const storagePath = `propostas/${propostaId}/boletos/emitidos_pendentes/${codigoSolicitacao}.pdf`;
+      console.log(`[STORAGE PDF] 📁 Caminho no Storage: ${storagePath}`);
+
+      // 3. Gerar URL assinada do Supabase Storage
+      const { data: signedUrlData, error: urlError } = await supabaseAdmin.storage
+        .from('documents')
+        .createSignedUrl(storagePath, 300); // 5 minutos de validade
+
+      if (urlError || !signedUrlData?.signedUrl) {
+        console.error(`[STORAGE PDF] ❌ Erro ao gerar URL assinada:`, urlError);
+        return res.status(404).json({
+          success: false,
+          error: "PDF_NOT_AVAILABLE",
+          message: "PDF não disponível no momento. Sincronização pode estar pendente.",
+          details: urlError?.message
+        });
+      }
+
+      console.log(`[STORAGE PDF] ✅ URL assinada gerada com sucesso`);
+      console.log(`[STORAGE PDF] 🎯 SUCESSO ANTIFRÁGIL: Nenhuma chamada externa realizada`);
+
+      // 4. Retornar URL assinada para o frontend
+      res.json({
+        success: true,
+        signedUrl: signedUrlData.signedUrl,
+        filename: `boleto-${codigoSolicitacao}.pdf`,
+        message: "PDF disponível via Storage interno"
+      });
+
+    } catch (error) {
+      console.error("[STORAGE PDF] ❌ Erro na busca do PDF no Storage:", error);
+      
       res.status(500).json({
         success: false,
-        error: "Failed to get collection PDF",
+        error: "STORAGE_ERROR",
+        message: "Erro interno ao buscar o PDF",
         details: error instanceof Error ? error.message : "Unknown error",
       });
     }

@@ -1954,38 +1954,47 @@ export default function CobrancasPage() {
                                   onClick={async () => {
                                     if (parcela.codigoSolicitacao) {
                                       try {
-                                        console.log(`[PDF DOWNLOAD] Iniciando download para código: ${parcela.codigoSolicitacao}`);
+                                        console.log(`[STORAGE PDF] 🚀 PAM V1.0 - Iniciando download via Storage para código: ${parcela.codigoSolicitacao}`);
+                                        console.log(`[STORAGE PDF] ⚡ ANTIFRÁGIL: Usando Storage interno, eliminando API externa`);
                                         
-                                        // PAM V1.0 - FASE 2: Usar apiRequest com autenticação JWT correta
-                                        const blob = await apiRequest(
+                                        // PAM V1.0 - REFATORAÇÃO ANTIFRÁGIL: Buscar URL do Storage
+                                        const response = await apiRequest(
                                           `/api/inter/collections/${parcela.codigoSolicitacao}/pdf`,
                                           { 
                                             method: "GET",
-                                            responseType: "blob" 
+                                            responseType: "json" 
                                           }
-                                        ) as Blob;
+                                        ) as { success: boolean; signedUrl?: string; message?: string; error?: string };
                                         
-                                        console.log(`[PDF DOWNLOAD] Blob recebido, tamanho: ${blob.size} bytes`);
-                                        
-                                        const url = URL.createObjectURL(blob);
-                                        window.open(url, '_blank');
-                                        
-                                        // Limpar URL após uso
-                                        setTimeout(() => URL.revokeObjectURL(url), 100);
+                                        if (response.success && response.signedUrl) {
+                                          console.log(`[STORAGE PDF] ✅ URL assinada recebida do Storage`);
+                                          console.log(`[STORAGE PDF] 🎯 SUCESSO ANTIFRÁGIL: Nenhuma chamada à API externa`);
+                                          
+                                          // Abrir PDF via URL assinada do Storage
+                                          window.open(response.signedUrl, '_blank');
+                                        } else {
+                                          throw new Error(response.message || 'PDF não disponível no Storage');
+                                        }
                                       } catch (error: any) {
-                                        console.error("[PDF DOWNLOAD] Erro ao baixar boleto:", error);
+                                        console.error("[STORAGE PDF] ❌ Erro ao buscar PDF no Storage:", error);
                                         
-                                        // PAM V1.0 - Tratamento específico para Circuit Breaker
-                                        if (error?.message?.includes("503") || error?.message?.includes("PDF_SERVICE_TEMPORARILY_UNAVAILABLE")) {
+                                        // Tratamento de erros específicos
+                                        if (error?.message?.includes("PDF_NOT_AVAILABLE")) {
                                           toast({
-                                            title: "Serviço temporariamente indisponível",
-                                            description: "O download de boletos está temporariamente indisponível. Tente novamente em alguns minutos.",
+                                            title: "PDF não sincronizado",
+                                            description: "O PDF ainda não foi sincronizado para o Storage. Tente novamente em instantes.",
+                                            variant: "destructive",
+                                          });
+                                        } else if (error?.message?.includes("BOLETO_NOT_FOUND")) {
+                                          toast({
+                                            title: "Boleto não encontrado",
+                                            description: "Boleto não encontrado no sistema.",
                                             variant: "destructive",
                                           });
                                         } else {
                                           toast({
-                                            title: "Erro ao baixar boleto",
-                                            description: "Não foi possível baixar o PDF do boleto",
+                                            title: "Erro ao acessar PDF",
+                                            description: "Não foi possível acessar o PDF do boleto via Storage",
                                             variant: "destructive",
                                           });
                                         }

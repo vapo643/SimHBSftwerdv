@@ -1,0 +1,59 @@
+**### MODO DE OPERAÇÃO: REALISMO CÉTICO (MANDATÓRIO)**
+Sua lealdade é para com a verdade do código e a estabilidade da produção.
+
+---
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Refatorar a funcionalidade de download de boletos para que ela utilize os PDFs já baixados e armazenados em nosso Supabase Storage, em vez de fazer uma nova requisição desnecessária à API do Banco Inter.
+* **Intenção Estratégica (O Porquê):** Fazer chamadas repetidas à API externa para um ficheiro que já possuímos é ineficiente, lento para o usuário e frágil (dependente da disponibilidade do Inter). A correção alinhará a implementação com nossa arquitetura "Antifrágil", melhorando a performance, a resiliência e reduzindo os custos de API.
+* **Histórico Relevante (Consulta Obrigatória):** Lembre-se da nossa "Operação Antifrágil". A premissa central era desacoplar nossas operações das APIs externas. A implementação atual do botão de download viola este princípio. O sistema já possui um serviço (`boletoStorageService`) que salva os boletos no Storage; sua missão é fazer com que a funcionalidade de download **leia** a partir deste mesmo Storage.
+* **Modelo Mental (Como se Encaixa):** Você é um Engenheiro de Performance e Arquitetura. Sua tarefa é otimizar o fluxo de download, substituindo uma chamada de rede externa lenta por uma chamada interna rápida ao nosso próprio cache (o Supabase Storage).
+* **Riscos Antecipados:** **Risco:** O ficheiro pode ainda não ter sido sincronizado para o nosso Storage quando o usuário clica para baixar. **Contramedida:** A UI deve ter uma lógica condicional. O botão de download só deve ser habilitado se o ficheiro já estiver disponível em nosso Storage.
+
+---
+
+**IMPLEMENTAR:**
+Refatoração do fluxo de download de boletos para utilizar o Supabase Storage como fonte primária e única.
+
+**BUG/CURRENT STATE:**
+O botão de download de boletos na "Ficha do Cliente" está a acionar uma nova e desnecessária requisição à API do Banco Inter a cada clique.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  Ao clicar no botão de download de um boleto, o sistema **NÃO** faz mais nenhuma chamada para a API do Banco Inter.
+2.  Em vez disso, ele chama um endpoint em nosso backend que busca a URL do PDF correspondente **diretamente do nosso Supabase Storage**.
+3.  O download para o usuário é iniciado a partir da URL do nosso Storage, resultando em uma experiência muito mais rápida e confiável.
+
+**CONSTRAINTS (Roadmap de Refatoração):**
+
+**1. Backend - Refatoração do Endpoint de Download:**
+    - **Ação:** Modifique o endpoint existente (ex: `/api/inter/collections/:codigoSolicitacao/pdf`). Remova completamente a chamada ao `interBankService.obterPdfCobranca()`.
+    - **Implementação:** A nova lógica deste endpoint deve ser:
+        a. Receber o `codigoSolicitacao` do boleto.
+        b. Buscar no nosso banco de dados (tabela `inter_collections`) o `propostaId` associado a este boleto.
+        c. Construir o caminho do ficheiro no Supabase Storage (ex: `propostas/{propostaId}/boletos/emitidos_pendentes/{codigoSolicitacao}.pdf`).
+        d. Usar o cliente do Supabase para gerar uma URL assinada (`signedUrl`) para este ficheiro.
+        e. Retornar um JSON contendo esta `signedUrl`.
+
+**2. Frontend - Refatoração da Lógica de Download:**
+    - **Ação:** No `CobrancasPage.tsx`, modifique a lógica `onClick` do botão de download.
+    - **Implementação:** A função agora deve:
+        a. Chamar o nosso endpoint de backend refatorado.
+        b. Receber a `signedUrl` na resposta.
+        c. Usar `window.open(signedUrl, '_blank')` para iniciar o download/visualização.
+
+---
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1. Mapear os arquivos de backend e frontend envolvidos.
+2. Garantir a remoção completa da chamada direta ao `interBankService` do endpoint de download.
+3. Executar `get_latest_lsp_diagnostics` e corrigir TODOS os erros.
+4. **Declarar Nível de Confiança (0-100%)**.
+5. **Categorizar Riscos Descobertos**.
+6. **Teste Funcional Obrigatório:** Após a refatoração, clique no botão de download. Valide que o PDF é baixado corretamente. Inspecione os logs do servidor para **PROVAR** que nenhuma chamada foi feita à API do Banco Inter durante esta operação.
+7. **Documentar Decisões Técnicas**.
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher]
+* **RISCOS IDENTIFICADOS:** [Preencher]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Preencher]
+* **VALIDAÇÃO PENDENTE:** [Valide que o download é mais rápido e que os logs confirmam a ausência de chamadas externas.]
+---
