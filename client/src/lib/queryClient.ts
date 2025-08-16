@@ -10,11 +10,22 @@ async function _throwIfResNotOk(res: Response) {
 
 export async function apiRequest(
   url: string,
-  options: { method: string; body?: unknown } = { method: "GET" }
+  options: { method: string; body?: unknown; responseType?: "json" | "blob" | "text" } = { method: "GET" }
 ): Promise<unknown> {
-  const { method, body } = options;
+  const { method, body, responseType = "json" } = options;
 
-  // Use the new api client methods
+  // PAM V1.0 - FASE 1: Suporte a blob responses para downloads de PDF
+  if (responseType === "blob") {
+    // Para blob responses, usar apiClient com responseType blob
+    if (method === "GET") {
+      const blob = await api.get(url, { responseType: "blob" }) as Blob;
+      return blob;
+    } else {
+      throw new Error(`Blob responseType not supported for method: ${method}`);
+    }
+  }
+
+  // Use the new api client methods for JSON responses
   if (method === "GET") {
     const response = await api.get(url);
     return response.data;
