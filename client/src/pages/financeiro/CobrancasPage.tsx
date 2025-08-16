@@ -573,6 +573,7 @@ export default function CobrancasPage() {
       switch (interSituacao.toUpperCase()) {
         case "RECEBIDO":
         case "MARCADO_RECEBIDO":
+        case "PAGO":  // PAM V1.0 - FASE 1: Reconhecer "PAGO" como status válido
           return "Pago";
         case "CANCELADO":
         case "EXPIRADO":
@@ -1950,9 +1951,35 @@ export default function CobrancasPage() {
                                   size="sm"
                                   variant="outline"
                                   disabled={!parcela.codigoSolicitacao}
-                                  onClick={() => {
+                                  onClick={async () => {
                                     if (parcela.codigoSolicitacao) {
-                                      window.open(`/api/inter/collections/${parcela.codigoSolicitacao}/pdf`, '_blank');
+                                      try {
+                                        // PAM V1.0 - FASE 2: Usar apiRequest com autenticação JWT
+                                        const response = await fetch(`/api/inter/collections/${parcela.codigoSolicitacao}/pdf`, {
+                                          method: 'GET',
+                                          headers: {
+                                            'Authorization': `Bearer ${(await getSupabase().auth.getSession()).data.session?.access_token}`,
+                                          },
+                                        });
+                                        
+                                        if (!response.ok) {
+                                          throw new Error('Erro ao baixar PDF');
+                                        }
+                                        
+                                        const blob = await response.blob();
+                                        const url = URL.createObjectURL(blob);
+                                        window.open(url, '_blank');
+                                        
+                                        // Limpar URL após uso
+                                        setTimeout(() => URL.revokeObjectURL(url), 100);
+                                      } catch (error) {
+                                        console.error("Erro ao baixar boleto:", error);
+                                        toast({
+                                          title: "Erro ao baixar boleto",
+                                          description: "Não foi possível baixar o PDF do boleto",
+                                          variant: "destructive",
+                                        });
+                                      }
                                     } else {
                                       toast({
                                         title: "PDF não disponível",
@@ -1992,10 +2019,11 @@ export default function CobrancasPage() {
                                     variant="secondary"
                                     onClick={async () => {
                                       try {
+                                        // PAM V1.0 - FASE 3: Tipagem correta da resposta
                                         const response = await apiRequest(
                                           `/api/cobrancas/parcelas/${parcela.codigoSolicitacao}/marcar-pago`,
                                           { method: "PATCH" }
-                                        );
+                                        ) as { success: boolean; message: string; codigoSolicitacao: string; numeroParcela: number };
                                         
                                         if (response.success) {
                                           toast({
