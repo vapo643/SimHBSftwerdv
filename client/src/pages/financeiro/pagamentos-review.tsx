@@ -129,6 +129,18 @@ export default function PaymentReviewModal({
     return null;
   }
 
+  // AUDITORIA FORENSE: Instrumentação para debug da condição do botão CCB
+  console.log("🔍 [AUDITORIA FORENSE] Dados da proposta para CCB:", {
+    assinatura_eletronica_concluida: proposta.assinatura_eletronica_concluida,
+    assinaturaEletronicaConcluida: proposta.assinaturaEletronicaConcluida,
+    condicaoRenderizacao: !!(proposta.assinatura_eletronica_concluida || proposta.assinaturaEletronicaConcluida),
+    caminhoCcbAssinado: proposta.caminhoCcbAssinado,
+    ccb_documento_url: proposta.ccb_documento_url,
+    clicksign_document_key: proposta.clicksign_document_key,
+    status: proposta.status,
+    propostaCompleta: proposta
+  });
+
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
