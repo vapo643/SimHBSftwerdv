@@ -631,7 +631,7 @@ export default function Pagamentos() {
                       <TableRow key={pagamento.id} className="hover:bg-muted/50 cursor-pointer">
                         <TableCell className="font-medium">
                           <div className="space-y-1">
-                            <div>#{pagamento.numeroProposta || pagamento.numeroContrato}</div>
+                            <div>#{pagamento.numeroContrato}</div>
                             <div className="text-xs text-muted-foreground">{pagamento.produto}</div>
                           </div>
                         </TableCell>
@@ -694,8 +694,8 @@ export default function Pagamentos() {
                             >
                               <Eye className="h-4 w-4" />
                             </Button>
-                            {/* FASE 2: Alinhamento Frontend/Backend - Botão só para status pronto_pagamento */}
-                            {pagamento.status === "pronto_pagamento" &&
+                            {/* FASE 2: Alinhamento Frontend/Backend - Botão para status em_processamento (BOLETOS_EMITIDOS) */}
+                            {(pagamento.status === "em_processamento") &&
                               userHasApprovalPermission() && (
                                 <Button
                                   size="sm"
@@ -711,7 +711,7 @@ export default function Pagamentos() {
                                   Confirmar Veracidade
                                 </Button>
                               )}
-                            {pagamento.status === "pagamento_autorizado" &&
+                            {pagamento.status === "aprovado" &&
                               userHasApprovalPermission() && (
                                 <Button
                                   size="sm"

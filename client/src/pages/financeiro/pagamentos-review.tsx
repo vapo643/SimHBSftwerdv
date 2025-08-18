@@ -61,7 +61,7 @@ export default function PaymentReviewModal({
       console.log("✅ [REVIEW MODAL] Veracidade confirmada com sucesso:", data);
       
       // Verificar se foi uma resposta idempotente
-      if (data.idempotent) {
+      if ((data as any).idempotent) {
         toast({
           title: "Pagamento já autorizado",
           description: "Este pagamento já foi autorizado anteriormente.",
@@ -258,7 +258,7 @@ export default function PaymentReviewModal({
                 )}
 
                 {/* Observações (opcional) */}
-                {!pixKeyVisible && proposta.status === "pronto_pagamento" && (
+                {!pixKeyVisible && (proposta.status === "pronto_pagamento" || proposta.status === "em_processamento") && (
                   <div>
                     <Label>Observações (opcional)</Label>
                     <Textarea
@@ -275,7 +275,7 @@ export default function PaymentReviewModal({
           </div>
 
           <DialogFooter>
-            {!pixKeyVisible && proposta.status === "pronto_pagamento" ? (
+            {!pixKeyVisible && (proposta.status === "pronto_pagamento" || proposta.status === "em_processamento") ? (
               <>
                 <Button variant="outline" onClick={onClose}>
                   Cancelar
