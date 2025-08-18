@@ -1,6 +1,12 @@
 # Simpix Credit Management System
 
 ## Recent Changes
+- **18/08/2025**: Correção Crítica de 3 Bugs na Ficha do Cliente - PAM V1.0 FASE 4
+  - ✅ **Bug Status Corrigido:** Fonte da verdade alterada de `inter_collections` para `parcelas.status`
+  - ✅ **Bug Download Corrigido:** Removido `responseType: 'blob'` que interferia com JWT
+  - ✅ **Bug Marcar Pago Corrigido:** Endpoint alinhado de `/api/pagamentos/` para `/api/cobrancas/parcelas/`
+  - ✅ **0 erros LSP:** Implementação livre de conflitos
+  - ✅ **Evidência Forense:** 3 bugs documentados com linhas de código específicas
 - **18/08/2025**: Refatoração Completa da Tela de Pagamentos - Migração para Status System V2.0
   - ✅ **Endpoint legado removido:** `/api/propostas/pagamento` eliminado do backend
   - ✅ **Nova estrutura de dados:** Interface `Pagamento` criada para corresponder ao novo endpoint

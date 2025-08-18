@@ -2038,21 +2038,12 @@ export default function CobrancasPage() {
                                         description: `Abrindo boleto da parcela ${parcela.numeroParcela} em nova guia`,
                                       });
 
-                                      // PAM V1.0: apiRequest autenticado com blob response
-                                      const response = await apiRequest(
-                                        `/api/inter/collections/${selectedPropostaId}/${parcela.codigoSolicitacao}/pdf`,
-                                        { 
-                                          method: "GET",
-                                          responseType: 'blob' as any
-                                        }
-                                      ) as Blob;
-
-                                      // Criar blob URL e abrir em nova guia
-                                      const blobUrl = URL.createObjectURL(response);
-                                      window.open(blobUrl, '_blank');
+                                      // PAM V1.0 CORRIGIDO: URL autenticada sem responseType blob
+                                      // BUG CORRIGIDO: responseType blob interferia com autenticação JWT
+                                      const pdfUrl = `/api/inter/collections/${selectedPropostaId}/${parcela.codigoSolicitacao}/pdf`;
                                       
-                                      // Limpar blob URL após um tempo
-                                      setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+                                      // Abrir diretamente - o servidor retorna o PDF com headers corretos
+                                      window.open(pdfUrl, '_blank');
                                       
                                       toast({
                                         title: "PDF aberto",

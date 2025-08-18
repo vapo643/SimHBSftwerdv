@@ -481,8 +481,13 @@ router.get("/:propostaId/ficha", async (req, res) => {
 
         const boletoInter = boletosInter.find(b => b.numeroParcela === parcela.numeroParcela);
         
-        // **PAM V1.0 - FASE 3 REFATORADO:** Usar exclusivamente dados do banco (sem chamadas em tempo real)
-        const situacaoRealTime = boletoInter?.situacao || "EM_PROCESSAMENTO";
+        // **PAM V1.0 - FASE 4 CORRIGIDO:** Usar parcela.status como fonte da verdade primária
+        // BUG CORRIGIDO: Priorizar status da tabela parcelas sobre inter_collections
+        const statusParcela = parcela.status; // Fonte da verdade primária
+        const situacaoInter = boletoInter?.situacao || "EM_PROCESSAMENTO";
+        
+        // Mapear status da parcela para exibição consistente
+        const statusExibicao = statusParcela === "pago" ? "PAGO" : situacaoInter;
 
         // PAM V1.0 - FASE 1: Correção do mapeamento de campos
         return {
@@ -494,8 +499,8 @@ router.get("/:propostaId/ficha", async (req, res) => {
           linhaDigitavel: boletoInter?.linhaDigitavel,
           codigoBarras: boletoInter?.codigoBarras,
           codigoSolicitacao: boletoInter?.codigoSolicitacao, // NOVO CAMPO
-          // Status em tempo real
-          interSituacao: situacaoRealTime,
+          // Status corrigido: usar parcela.status como fonte da verdade
+          interSituacao: statusExibicao,
         };
       });
 

@@ -50,6 +50,15 @@ export default function MarcarPagoModal({
   // Mutation para marcar como pago
   const marcarPagoMutation = useMutation({
     mutationFn: async () => {
+      // BUG CORRIGIDO: Usar endpoint e parâmetros corretos do backend
+      // Backend espera: PATCH /api/cobrancas/parcelas/:codigoSolicitacao/marcar-pago
+      // Buscar codigoSolicitacao da primeira parcela não paga
+      const parcelaNaoPaga = proposta.parcelas?.find((p: any) => p.status !== "pago");
+      
+      if (!parcelaNaoPaga?.codigoSolicitacao) {
+        throw new Error("Nenhuma parcela elegível encontrada para marcação como paga");
+      }
+
       const formData = new FormData();
       formData.append("observacoes", observacoes);
 
@@ -57,8 +66,8 @@ export default function MarcarPagoModal({
         formData.append("comprovante", arquivo);
       }
 
-      const response = await fetch(`/api/pagamentos/${proposta.id}/marcar-pago`, {
-        method: "POST",
+      const response = await fetch(`/api/cobrancas/parcelas/${parcelaNaoPaga.codigoSolicitacao}/marcar-pago`, {
+        method: "PATCH",
         credentials: "include",
         body: formData,
       });
