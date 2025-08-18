@@ -1,0 +1,39 @@
+**### MODO DE OPERAÇÃO: REALISMO CÉTICO (MANDATÓRIO)**
+Sua lealdade é para com a verdade do código e a estabilidade da produção.
+
+---
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Realizar uma auditoria forense completa do ciclo de vida dos documentos CCB, desde a geração do PDF inicial até o processamento do webhook de assinatura, para planejar a implementação do novo sistema de download e armazenamento de CCBs geradas e assinadas.
+* **Intenção Estratégica (O Porquê):** Para criar um sistema de gestão de documentos auditável e robusto, precisamos primeiro mapear o fluxo atual e depois implementar a nova arquitetura de armazenamento que separa claramente os documentos gerados dos assinados.
+* **Histórico Relevante (Consulta Obrigatória):** Em auditorias anteriores, descobrimos que nosso webhook da ClickSign apenas atualizava o status, mas não baixava o documento assinado. Esta missão visa corrigir essa lacuna fundamental e organizar todo o ciclo de vida do documento.
+* **Modelo Mental (Como se Encaixa):** Você é um auditor de sistemas. Sua tarefa é seguir o rastro do documento CCB: Onde ele é criado? Como é enviado? O que o webhook faz hoje? Onde o documento assinado *deveria* ser salvo?
+* **Riscos Antecipados:** **Risco:** Uma análise superficial levará a uma correção incompleta. **Contramedida:** Sua missão não é corrigir. É **PROVAR**, com evidências de código, como o sistema funciona hoje.
+
+---
+
+**IMPLEMENTAR:**
+Um relatório de auditoria detalhado. **NÃO FAÇA MODIFICAÇÕES.**
+
+**CURRENT STATE:**
+A CCB é gerada, mas não é salva em uma pasta dedicada (`ccb/geradas`). O documento assinado não é baixado nem armazenado automaticamente na pasta `ccb/assinadas`. Não há um botão de download manual para administradores.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um relatório de auditoria que mapeie os pontos de código exatos que precisam ser refatorados para implementar a nova arquitetura de armazenamento e download.
+
+**CONSTRAINTS (Roadmap de Auditoria Forense):**
+
+**1. Auditoria da Geração de CCB (O Documento Original):**
+    - **Ação:** Localize o serviço (provavelmente `ccbGenerationService.ts` ou `pdfGeneratorService.ts`) que gera a CCB inicial (não assinada).
+    - **Relatório:** Como este ficheiro PDF é manuseado após a geração? Ele é salvo em algum lugar no Storage atualmente? Se sim, qual é o caminho? Se não, ele existe apenas em memória antes de ser enviado para a ClickSign?
+
+**2. Auditoria do Webhook de Assinatura (O Ponto de Falha Atual):**
+    - **Ação:** Inspecione o `clickSignWebhookService.ts`.
+    - **Relatório:** Confirme que o handler do evento `document.signed` (ou `auto_close`) atualmente **NÃO** contém a lógica para baixar o documento assinado da API da ClickSign.
+
+**3. Auditoria da UI (A Tela de Ação Manual):**
+    - **Ação:** Inspecione o componente da "Tela de Formalização" (`formalizacao.tsx`).
+    - **Relatório:** Existe algum botão de download de CCB atualmente? Se sim, para qual `role` de usuário ele é visível e o que ele faz? Confirme a ausência de um botão específico para "Baixar CCB Assinada" para a role `ADMINISTRADOR`.
+
+**Relatório Final:**
+O critério de sucesso é um relatório forense completo que nos dê um mapa claro de todas as implementações e refatorações necessárias para construir o novo ciclo de vida de documentos CCB.
