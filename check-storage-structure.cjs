@@ -51,27 +51,13 @@ async function checkStorageStructure() {
     if (assinadasError) {
       console.error('❌ Erro ao listar ccb/assinadas/:', assinadasError);
     } else {
-      console.log('Pastas por proposta:', assinadasFiles?.map(f => f.name) || []);
+      console.log('Arquivos CCB assinadas:', assinadasFiles?.map(f => ({
+        name: f.name,
+        size: f.metadata?.size || 'N/A',
+        created: f.created_at
+      })) || []);
       
-      // 4. Se há pastas, verificar conteúdo de uma
-      if (assinadasFiles && assinadasFiles.length > 0) {
-        const firstFolder = assinadasFiles[0].name;
-        console.log(`\n📄 [STORAGE] Arquivos dentro de ccb/assinadas/${firstFolder}:`);
-        
-        const { data: proposalFiles, error: proposalError } = await supabase.storage
-          .from('documents')
-          .list(`ccb/assinadas/${firstFolder}`, { limit: 100 });
-
-        if (proposalError) {
-          console.error('❌ Erro ao listar arquivos da proposta:', proposalError);
-        } else {
-          console.log('Arquivos CCB assinadas:', proposalFiles?.map(f => ({
-            name: f.name,
-            size: f.metadata?.size,
-            created: f.created_at
-          })) || []);
-        }
-      }
+      console.log(`\n📊 [ESTATÍSTICAS] Total de CCBs assinadas organizadas: ${assinadasFiles?.length || 0}`);
     }
 
     // 5. Verificar se há propostas com CCB assinada no banco

@@ -1,71 +1,7 @@
 # Simpix Credit Management System
 
-## Recent Changes
-- **18/08/2025**: Correção Crítica do Filtro de Segurança de Pagamentos - PAM V1.0 FASE 5
-  - ✅ **Filtro V2.0 Corrigido:** Mapeamento de status `BOLETOS_EMITIDOS` → `em_processamento`
-  - ✅ **Tela de Pagamentos Restaurada:** Status System V2.0 integrado com frontend legado
-  - ✅ **Root Cause Fix:** Query encontrava dados corretos, mas mapeamento de status bloqueava exibição
-  - ✅ **Compatibilidade Mantida:** Status V1.0 legados preservados para transição suave
-- **18/08/2025**: Correção Crítica de 3 Bugs na Ficha do Cliente - PAM V1.0 FASE 4
-  - ✅ **Bug Status Corrigido:** Fonte da verdade alterada de `inter_collections` para `parcelas.status`
-  - ✅ **Bug Download Corrigido:** Removido `responseType: 'blob'` que interferia com JWT
-  - ✅ **Bug Marcar Pago Corrigido:** Endpoint alinhado de `/api/pagamentos/` para `/api/cobrancas/parcelas/`
-  - ✅ **0 erros LSP:** Implementação livre de conflitos
-  - ✅ **Evidência Forense:** 3 bugs documentados com linhas de código específicas
-- **18/08/2025**: Refatoração Completa da Tela de Pagamentos - Migração para Status System V2.0
-  - ✅ **Endpoint legado removido:** `/api/propostas/pagamento` eliminado do backend
-  - ✅ **Nova estrutura de dados:** Interface `Pagamento` criada para corresponder ao novo endpoint
-  - ✅ **Status V2.0 integrado:** Suporte completo para BOLETOS_EMITIDOS, PAGAMENTO_PENDENTE, etc.
-  - ✅ **0 erros LSP:** Código 100% tipado e sem conflitos de interface
-  - ✅ **Filtros atualizados:** UI agora mostra os status corretos do Sistema V2.0
-- **18/08/2025**: Reconciliação Crítica PAM V1.0 - Sincronização inter_collections ↔ parcelas
-  - ✅ **Problema resolvido:** Tabela `parcelas` não era atualizada quando pagamentos chegavam via webhook
-  - ✅ **Solução implementada:** Webhook do Banco Inter agora sincroniza ambas as tabelas automaticamente
-  - ✅ **Impacto:** Contagem de "parcelas pagas" agora 100% precisa na Tela de Cobranças
-  - ✅ **UI limpa:** Botão "Boleto" removido da tabela principal conforme solicitado
-- **18/08/2025**: Protocolo PEAF atualizado de V1.3 para V1.4 - Ceticismo Sênior Mandatório
-  - ✅ **Validação Cética Sênior:** Sempre validar comandos contra código fonte REAL antes de executar
-  - ✅ **Análise de realidade:** Verificar se informações do prompt correspondem ao estado atual do sistema
-  - ✅ **34 erros LSP corrigidos:** Demonstração prática do protocolo com correção completa
-  - ✅ **Download de PDFs:** Autenticação JWT corrigida - apiRequest substituiu window.open()
-- **18/08/2025**: Estado Inicial Forçado em boletos - Bug crítico erradicado
-  - ✅ **Problema:** Sistema confiava cegamente no status da API do Banco Inter
-  - ✅ **Solução:** Todos boletos criados com status 'A_RECEBER' independente da API
-  - ✅ **Impacto:** Parcelas não são mais marcadas incorretamente como "Pagas"
-## Recent Changes
-- **18/08/2025**: Reorganização da Documentação de Arquitetura ✅ CONCLUÍDA
-  - ✅ **Pasta Architecture:** Criada `/architecture/` para documentação técnica
-  - ✅ **9 documentos movidos:** Todos os .md de arquitetura organizados
-  - ✅ **README dedicado:** Explicação completa da estrutura arquitetural
-  - ✅ **Separação clara:** Arquitetura vs Auditorias vs Relatórios
-- **18/08/2025**: Arquitetura Escalável PAM V1.0 FASE 1 - ✅ IMPLEMENTADA
-  - ✅ **Job Queue Assíncrono:** Elimina timeouts com resposta 202 imediata
-  - ✅ **Rate Limiting Inteligente:** Backoff exponencial previne throttling (5 req/s)
-  - ✅ **Fallback de PDFs:** Sincronização automática em background via queue
-  - ✅ **Performance 10x:** Suporta 200+ usuários simultâneos (antes: 20)
-  - ✅ **Serviço criado:** `rateLimitService.ts` com retry automático
-  - 📊 **Métricas:** Tempo resposta 60x mais rápido, taxa de falha <1%
-- **16/08/2025**: Validação HMAC implementada no Webhook Banco Inter PAM V1.0
-  - ✅ SEGURANÇA: Implementada validação de assinatura HMAC-SHA256
-  - Timing-safe comparison para prevenir timing attacks
-  - Suporte a múltiplos headers de assinatura
-  - Auditoria de tentativas falhas de autenticação
-  - Testes unitários 5/5 passando
-- **16/08/2025**: Motor de Sincronização de Status de Boletos PAM V1.0
-  - Criado serviço centralizado `boletoStatusService.ts` para sincronização de status
-  - Refatorado webhook do Banco Inter para usar serviço centralizado
-  - Adicionado endpoint `POST /api/cobrancas/sincronizar/:propostaId` para sincronização manual
-  - Implementado processamento assíncrono com delay para evitar rate limit
-- **15/08/2025**: Sistema de Alertas Proativos PAM V1.0 - ✅ REFATORAÇÃO COMPLETA
-  - Removida página dedicada `/notificacoes` (estratégia simplificada)
-  - Centralizado tudo no dropdown do header para fluxo mais direto
-  - Adicionado endpoint `DELETE /api/alertas/notificacoes/all` para limpar histórico
-  - Botão "Ver todas" substituído por "Limpar Histórico" no dropdown
-  - Items individuais navegam para `linkRelacionado` quando clicados
-  - Sistema 100% funcional e contido no dropdown do header
-
 ## Overview
-Simpix is a full-stack TypeScript application designed for comprehensive credit management. Its primary purpose is to streamline the credit proposal workflow from creation and analysis to payment processing and formalization tracking. The project aims to provide a robust, secure, and user-friendly platform for financial institutions, with a focus on banking-grade security, compliance, and efficient data management, positioning it as a leading solution in the credit management market.
+Simpix is a full-stack TypeScript application for comprehensive credit management, streamlining the credit proposal workflow from creation and analysis to payment processing and formalization tracking. It aims to be a robust, secure, and user-friendly platform for financial institutions, emphasizing banking-grade security, compliance, and efficient data management to be a leading solution in the credit management market.
 
 ## User Preferences
 
@@ -155,24 +91,24 @@ Error handling: Create structured documentation for automatic consultation durin
 - **API Pattern**: RESTful API
 - **Database**: PostgreSQL with Drizzle ORM
 - **Authentication**: Supabase Auth integration with JWT middleware and custom RBAC
-- **File Storage**: Supabase Storage for document uploads
-- **Job Queue Architecture**: BullMQ-based async worker system with Redis for production and a mock queue for development. Supports parallel operations, automatic retry, and specialized workers for PDF, boleto, document, and notification processing.
-- **Server-Side Time Management**: Centralized timezone utilities for Brasília timezone consistency.
+- **File Storage**: Supabase Storage
+- **Job Queue Architecture**: BullMQ-based async worker system with Redis for production (mock queue for development), supporting parallel operations, retry, and specialized workers (PDF, boleto, document, notification).
+- **Time Management**: Centralized timezone utilities for Brasília timezone consistency.
 - **Security**: Comprehensive architecture including Helmet, two-tier rate limiting, input sanitization, timing attack protection, magic number validation, cryptographically secure UUIDs, soft delete, Row Level Security (RLS), and anti-fragile RBAC.
 - **Credit Simulation**: Production-ready API with real database integration, dynamic rate lookup hierarchy, comprehensive financial calculations (IOF, TAC, CET using Newton-Raphson), full payment schedule generation, and audit logging.
-- **Document Management**: Secure private bucket for document storage with signed URLs, organized folder structure, multi-format support, admin client authentication, and automatic fallback.
-- **PDF Generation**: Template-based CCB generation using `pdf-lib` for precise field filling, coordinate mapping, dynamic adjustment, and payment data integration.
+- **Document Management**: Secure private bucket with signed URLs, organized folder structure, multi-format support, admin client authentication, and automatic fallback.
+- **PDF Generation**: Template-based CCB generation using `pdf-lib` for precise field filling, dynamic adjustment, and payment data integration.
 - **Payment Workflow**: Complete payment queue system with batch processing, multiple payment methods (bank account and PIX), formalization tracking, and dual-storage strategy.
 - **Commercial Tables**: N:N relationship between products and commercial tables, supporting personalized and general rate structures with hierarchical fallback logic.
 
 ### Database Schema
 - PostgreSQL with Drizzle ORM.
 - Key tables: `users`, `propostas`, `parceiros`, `lojas`, `produtos`, `tabelas_comerciais`, `produto_tabela_comercial`, `comunicacao_logs`, `proposta_logs`, `parcelas`, `audit_delete_log`, `inter_collections`, `inter_webhooks`, `inter_callbacks`, `status_transitions`.
-- `propostas` table includes detailed client data, loan conditions, formalization tracking, and expanded status enum with 24 distinct states.
-- `status_transitions` table tracks all status changes with full audit trail including trigger source, metadata, and timestamps.
+- `propostas` table includes detailed client data, loan conditions, formalization tracking, and an expanded status enum with 24 distinct states.
+- `status_transitions` table tracks all status changes with full audit trail.
 - Soft deletes implemented using `deleted_at` columns.
 - Sequential numeric IDs for `propostas.id` starting at 300001.
-- Status V2.0 system implemented (14/08/2025): Event-driven status transitions with complete audit trail.
+- Status V2.0 system: Event-driven status transitions with complete audit trail.
 
 ## External Dependencies
 - **Supabase**: Authentication, PostgreSQL Database, File Storage.
