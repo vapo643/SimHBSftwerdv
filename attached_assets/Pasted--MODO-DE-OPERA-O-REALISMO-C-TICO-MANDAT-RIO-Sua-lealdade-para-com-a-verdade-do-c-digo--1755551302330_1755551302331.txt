@@ -1,0 +1,38 @@
+**### MODO DE OPERAÇÃO: REALISMO CÉTICO (MANDATÓRIO)**
+Sua lealdade é para com a verdade do código e a estabilidade da produção.
+
+---
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Realizar uma auditoria forense completa do fluxo de finalização de pagamento no modal "Confirmar Veracidade", investigando a causa raiz da falha no botão "ESTÁ PAGO" e verificando a lógica de armazenamento do "Comprovante de Pagamento".
+* **Intenção Estratégica (O Porquê):** Para garantir que a etapa final e mais crítica do nosso fluxo financeiro — a confirmação do pagamento ao cliente — seja 100% funcional, segura e auditável, eliminando o bug que atualmente impede a conclusão do processo.
+* **Histórico Relevante (Consulta Obrigatória):** As etapas anteriores do modal ("Confirmar Veracidade" e "Fazer Pagamento") foram corrigidas com sucesso. A falha agora está isolada no último passo do workflow, o que sugere um problema específico no endpoint de finalização ou na sua interação com o frontend.
+* **Modelo Mental (Como se Encaixa):** Você é um auditor de sistemas full-stack. Sua tarefa é rastrear os eventos `onClick` do frontend e a lógica dos endpoints de backend correspondentes para encontrar as falhas.
+
+---
+
+**IMPLEMENTAR:**
+Um relatório de auditoria detalhado. **NÃO FAÇA MODIFICAÇÕES.**
+
+**CURRENT STATE:**
+O botão "ESTÁ PAGO" no modal de pagamento falha ao ser clicado. A funcionalidade de upload de comprovante precisa de verificação.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um relatório de auditoria que identifique a causa raiz da falha do botão "ESTÁ PAGO" e mapeie o fluxo de armazenamento do comprovante.
+
+**CONSTRAINTS (Roadmap de Auditoria Forense):**
+
+**1. Auditoria da Falha do Botão "ESTÁ PAGO":**
+    - **Ação (Frontend):** Inspecione a lógica `onClick` do botão "ESTÁ PAGO" no modal de pagamento.
+    - **Relatório 1:** Qual endpoint da API ele chama? (ex: `POST /api/pagamentos/:id/finalizar`).
+    - **Ação (Backend):** Inspecione o endpoint identificado acima.
+    - **Relatório 2 (A Evidência Crítica):** Apresente a lógica completa deste endpoint. Por que ele está a falhar? É um erro de permissão? Um erro de tipagem? Uma falha na lógica de negócio ao tentar atualizar o status final da proposta para `PAGO`?
+
+**2. Auditoria do Armazenamento do Comprovante:**
+    - **Ação (Frontend):** Inspecione a lógica do componente de upload de ficheiros no mesmo modal.
+    - **Relatório 3:** Qual endpoint ele chama para fazer o upload do comprovante?
+    - **Ação (Backend):** Inspecione o endpoint de upload.
+    - **Relatório 4:** Qual é o caminho (`path`) exato no Supabase Storage para onde o comprovante está a ser salvo? A estrutura segue um padrão lógico e seguro (ex: `propostas/{propostaId}/comprovantes_pagamento/`)?
+
+**Relatório Final:**
+O critério de sucesso é um relatório forense completo que nos dê um mapa claro das correções necessárias para finalizar a "Operação Cofre-Forte".

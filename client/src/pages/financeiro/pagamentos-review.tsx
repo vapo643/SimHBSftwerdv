@@ -109,21 +109,16 @@ export default function PaymentReviewModal({
         formData.append("comprovante", comprovante);
       }
       
-      const response = await fetch(`/api/pagamentos/${proposta?.id}/marcar-pago`, {
+      console.log("[MARCAR PAGO] Iniciando requisição para:", `${proposta?.id}`);
+      
+      // Usar apiRequest para garantir token válido
+      const response = await apiRequest(`/api/pagamentos/${proposta?.id}/marcar-pago`, {
         method: "POST",
-        credentials: "include",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
         body: formData,
+        isFormData: true
       });
       
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Erro ao marcar como pago");
-      }
-      
-      return response.json();
+      return response;
     },
     onSuccess: () => {
       toast({
