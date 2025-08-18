@@ -99,21 +99,35 @@ export default function PaymentReviewModal({
     });
   };
 
-  // Função para visualizar CCB em nova aba
-  const handleViewCCB = () => {
-    const ccbPath = proposta.caminhoCcbAssinado || proposta.ccb_documento_url;
-    
-    if (ccbPath) {
-      // Abrir endpoint que faz redirecionamento para URL assinada
-      const ccbUrl = `/api/documentos/download?path=${encodeURIComponent(ccbPath)}`;
-      window.open(ccbUrl, "_blank");
-    } else if (proposta.clicksign_document_key) {
-      // Fallback para ClickSign
-      window.open(`https://app.clicksign.com/documents/${proposta.clicksign_document_key}`, "_blank");
-    } else {
+  // Função para visualizar CCB em nova aba com JWT
+  const handleViewCCB = async () => {
+    try {
+      const ccbPath = proposta.caminhoCcbAssinado || proposta.ccb_documento_url;
+      
+      if (ccbPath) {
+        // Usar apiRequest para obter URL assinada com autenticação JWT
+        const response = await apiRequest(
+          `/api/documentos/download?path=${encodeURIComponent(ccbPath)}`,
+          { method: "GET" }
+        ) as { url: string };
+        
+        // Abrir URL assinada em nova aba
+        window.open(response.url, "_blank");
+      } else if (proposta.clicksign_document_key) {
+        // Fallback para ClickSign
+        window.open(`https://app.clicksign.com/documents/${proposta.clicksign_document_key}`, "_blank");
+      } else {
+        toast({
+          title: "CCB não disponível",
+          description: "Documento ainda não foi gerado.",
+          variant: "destructive",
+        });
+      }
+    } catch (error: any) {
+      console.error("❌ [CCB VIEW] Erro:", error);
       toast({
-        title: "CCB não disponível",
-        description: "Documento ainda não foi gerado.",
+        title: "Erro ao abrir CCB",
+        description: error.message || "Não foi possível abrir o documento.",
         variant: "destructive",
       });
     }

@@ -47,8 +47,21 @@ router.get("/download", jwtAuthMiddleware, requireAnyRole, async (req: Authentic
 
     console.log(`[DOCUMENTOS] ✅ URL assinada gerada para: ${path}`);
 
-    // Redirecionar para URL assinada do Supabase
-    res.redirect(signedUrl.signedUrl);
+    // Verificar se é request para JSON ou redirect
+    const acceptHeader = req.headers.accept || '';
+    const isJsonRequest = acceptHeader.includes('application/json');
+
+    if (isJsonRequest) {
+      // Retornar URL como JSON para requisições com Authorization header
+      return res.json({
+        url: signedUrl.signedUrl,
+        filename: `documento-${path.split('/').pop()}`,
+        contentType: "application/pdf",
+      });
+    } else {
+      // Redirecionar para URL assinada (legacy behavior)
+      res.redirect(signedUrl.signedUrl);
+    }
   } catch (error) {
     console.error("❌ [DOCUMENTOS] Erro interno:", error);
     res.status(500).json({
