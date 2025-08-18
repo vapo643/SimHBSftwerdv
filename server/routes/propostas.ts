@@ -98,8 +98,9 @@ export const togglePropostaStatus = async (req: AuthenticatedRequest, res: Respo
 };
 
 /**
- * Buscar CCB assinada da proposta (integração com ClickSign)
+ * Buscar CCB assinada da proposta 
  * GET /api/propostas/:id/ccb
+ * CORRIGIDO: Agora usa o campo caminho_ccb_assinado do banco
  */
 export const getCcbAssinada = async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -108,6 +109,8 @@ export const getCcbAssinada = async (req: AuthenticatedRequest, res: Response) =
     if (!propostaId) {
       return res.status(400).json({ message: "ID da proposta é obrigatório" });
     }
+
+    console.log(`[CCB] Buscando CCB para proposta: ${propostaId}`);
 
     // Buscar proposta com dados do ClickSign
     const [proposta] = await db
@@ -120,37 +123,61 @@ export const getCcbAssinada = async (req: AuthenticatedRequest, res: Response) =
       return res.status(404).json({ message: "Proposta não encontrada" });
     }
 
-    // Verificar se CCB foi gerada e assinada
-    if (!proposta.ccbGerado || !proposta.assinaturaEletronicaConcluida) {
-      return res.status(404).json({
-        message: "CCB não foi gerada ou ainda não foi assinada",
-      });
-    }
+    console.log(`[CCB] Proposta encontrada. Caminho CCB: ${proposta.caminhoCcbAssinado}`);
 
-    // Primeiro tentar buscar no Supabase Storage (onde salvo os PDFs assinados)
     const supabase = createServerSupabaseAdminClient();
 
+    // PRIORIDADE 1: Usar caminho_ccb_assinado se disponível
+    if (proposta.caminhoCcbAssinado) {
+      try {
+        console.log(`[CCB] Tentando gerar URL para caminho: ${proposta.caminhoCcbAssinado}`);
+        
+        const { data: urlData, error: signError } = await supabase.storage
+          .from("documents")
+          .createSignedUrl(proposta.caminhoCcbAssinado, 3600); // 1 hora
+
+        if (signError) {
+          console.error(`[CCB] Erro ao gerar URL assinada:`, signError);
+        } else if (urlData?.signedUrl) {
+          console.log(`[CCB] ✅ URL assinada gerada com sucesso`);
+          return res.json({
+            url: urlData.signedUrl,
+            nome: `CCB_${proposta.clienteNome}_${propostaId}.pdf`,
+            status: "assinado",
+            dataAssinatura: proposta.dataAprovacao,
+            fonte: "storage",
+            caminho: proposta.caminhoCcbAssinado,
+          });
+        }
+      } catch (storageError) {
+        console.error("[CCB] Erro ao buscar CCB pelo caminho salvo:", storageError);
+      }
+    }
+
+    // PRIORIDADE 2: Tentar caminho legado para compatibilidade
     try {
-      // Tentar buscar CCB no storage primeiro
+      console.log(`[CCB] Tentando caminho legado: proposta-${propostaId}/ccb-assinada.pdf`);
       const { data: urlData } = await supabase.storage
         .from("documents")
-        .createSignedUrl(`proposta-${propostaId}/ccb-assinada.pdf`, 3600); // 1 hora
+        .createSignedUrl(`proposta-${propostaId}/ccb-assinada.pdf`, 3600);
 
       if (urlData?.signedUrl) {
+        console.log(`[CCB] ✅ URL legada gerada com sucesso`);
         return res.json({
           url: urlData.signedUrl,
           nome: `CCB_${proposta.clienteNome}_${propostaId}.pdf`,
           status: "assinado",
           dataAssinatura: proposta.dataAprovacao,
-          fonte: "storage",
+          fonte: "storage_legado",
         });
       }
     } catch (storageError) {
-      console.error("Erro ao buscar no Storage:", storageError);
+      console.error("[CCB] Erro ao buscar no Storage legado:", storageError);
     }
 
-    // Se temos documento ID do ClickSign, retornar informações para visualização
+    // PRIORIDADE 3: ClickSign como fallback
     if (proposta.clicksignDocumentKey) {
+      console.log(`[CCB] Usando ClickSign como fallback: ${proposta.clicksignDocumentKey}`);
       return res.json({
         clicksignDocumentId: proposta.clicksignDocumentKey,
         nome: `CCB_${proposta.clienteNome}_${propostaId}.pdf`,
@@ -162,9 +189,16 @@ export const getCcbAssinada = async (req: AuthenticatedRequest, res: Response) =
     }
 
     // Se chegou até aqui, CCB não foi encontrada
+    console.log(`[CCB] ❌ CCB não encontrada para proposta ${propostaId}`);
     return res.status(404).json({
-      message:
-        "CCB assinada não encontrada. Verifique se o documento foi assinado corretamente no ClickSign.",
+      message: "CCB assinada não encontrada. Verifique se o documento foi processado corretamente.",
+      debug: {
+        propostaId,
+        caminhosSalvos: proposta.caminhoCcbAssinado,
+        clicksignKey: proposta.clicksignDocumentKey,
+        ccbGerado: proposta.ccbGerado,
+        assinaturaConcluida: proposta.assinaturaEletronicaConcluida
+      }
     });
   } catch (error) {
     console.error("Erro ao buscar CCB:", error);
