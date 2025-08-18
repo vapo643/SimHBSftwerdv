@@ -1,0 +1,58 @@
+**### MODO DE OPERAÇÃO: REALISMO CÉTICO (MANDATÓRIO)**
+Sua lealdade é para com a verdade do código e a estabilidade da produção.
+
+---
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Realizar a refatoração final da "Ficha do Cliente", unificando o download de boletos para o "carnê" consolidado, garantindo a consistência sistêmica da ação "Marcar como Pago" e removendo seções de UI obsoletas.
+* **Intenção Estratégica (O Porquê):** Para transformar a Ficha do Cliente em uma ferramenta de trabalho finalizada, intuitiva e 100% alinhada com nossa arquitetura de backend, eliminando a confusão do usuário e garantindo a integridade total dos dados.
+* **Histórico Relevante (Consulta Obrigatória):** Já construímos com sucesso o serviço de backend que gera o carnê consolidado e o salva no Supabase Storage. Esta missão é para garantir que a UI utilize **exclusivamente** esta funcionalidade superior.
+* **Modelo Mental (Como se Encaixa):** Você atuará como Engenheiro Full-Stack Sênior. A missão envolve a remoção de código antigo, a refatoração de chamadas de API no frontend e a blindagem da lógica de atualização de estado no backend.
+* **Riscos Antecipados:** **Risco:** A remoção de componentes pode quebrar a UI. **Contramedida:** A refatoração deve ser feita de forma cirúrgica, seguida por testes rigorosos de cada funcionalidade modificada.
+
+---
+
+**IMPLEMENTAR:**
+A refatoração final e completa da "Ficha do Cliente".
+
+**CURRENT STATE:**
+A ficha ainda possui um botão de "Baixar Boleto" individual, a ação "Marcar como Pago" pode não estar a invalidar todos os caches de dados relevantes, e a seção "Dados Bancários" do cliente está obsoleta.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  O botão de download de boletos individuais **desaparece**. Em seu lugar, a ficha agora possui um único e proeminente botão **"Baixar Carnê"**, que busca o ficheiro consolidado do nosso Supabase Storage.
+2.  A ação de **"Marcar como Pago"** manual é blindada. Ao ser executada, ela deve forçar uma revalidação (refetch) de **todas as telas** que dependem do status da proposta (ex: a própria Ficha, a Tabela de Cobranças, os KPIs), garantindo consistência universal.
+3.  A seção "Dados Bancários" é **completamente removida** da UI da Ficha do Cliente.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+**FASE 1: Refatoração do Download:**
+    - **Ação:** No ficheiro `client/src/pages/financeiro/CobrancasPage.tsx`, remova a lógica e o botão de download de boletos individuais.
+    - **Implementação:** Adicione um único botão "Baixar Carnê" no local mais apropriado do modal. Este botão deve chamar o endpoint `POST /api/propostas/:id/gerar-carne` que já implementamos, que por sua vez orquestra a geração e retorna a URL do carnê a partir do Supabase Storage.
+
+**FASE 2: Blindagem da Ação "Marcar como Pago":**
+    - **Ação:** Inspecione a `mutation` do TanStack Query para a ação "Marcar como Pago".
+    - **Implementação:** No callback `onSuccess` da `mutation`, garanta que você está a invalidar **todas as `queryKeys` relevantes** com `queryClient.invalidateQueries`. Isso deve incluir no mínimo:
+        - A query da própria "Ficha do Cliente" (`['/api/cobrancas/ficha', ...]`).
+        - A query da tabela principal de "Cobranças" (`['/api/cobrancas']`).
+        - A query dos KPIs (`['/api/cobrancas/kpis']`).
+
+**FASE 3: Limpeza da UI:**
+    - **Ação:** No JSX do componente da "Ficha do Cliente".
+    - **Implementação:** Localize e delete completamente a seção que renderiza os "Dados Bancários" do cliente.
+
+---
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1. Mapear os arquivos e funções exatas afetadas.
+2. Garantir que a remoção de código seja completa e não deixe referências quebradas.
+3. Executar `get_latest_lsp_diagnostics` e corrigir TODOS os erros.
+4. **Declarar Nível de Confiança (0-100%)**.
+5. **Categorizar Riscos Descobertos**.
+6. **Teste Funcional Obrigatório:** Execute um teste ponta-a-ponta validando as 3 mudanças: o novo botão de carnê, a atualização sistêmica do status "pago" e a ausência da seção de dados bancários.
+7. **Documentar Decisões Técnicas**.
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher]
+* **RISCOS IDENTIFICADOS:** [Preencher]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Preencher]
+* **VALIDAÇÃO PENDENTE:** [Valide visualmente que a Ficha do Cliente agora se comporta exatamente como especificado.]
+---

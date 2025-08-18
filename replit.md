@@ -1,6 +1,11 @@
 # Simpix Credit Management System
 
 ## Recent Changes
+- **18/08/2025**: Reorganização da Documentação de Arquitetura ✅ CONCLUÍDA
+  - ✅ **Pasta Architecture:** Criada `/architecture/` para documentação técnica
+  - ✅ **9 documentos movidos:** Todos os .md de arquitetura organizados
+  - ✅ **README dedicado:** Explicação completa da estrutura arquitetural
+  - ✅ **Separação clara:** Arquitetura vs Auditorias vs Relatórios
 - **18/08/2025**: Arquitetura Escalável PAM V1.0 FASE 1 - ✅ IMPLEMENTADA
   - ✅ **Job Queue Assíncrono:** Elimina timeouts com resposta 202 imediata
   - ✅ **Rate Limiting Inteligente:** Backoff exponencial previne throttling (5 req/s)
