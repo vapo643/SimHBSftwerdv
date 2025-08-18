@@ -4,7 +4,7 @@ import { requireAnyRole } from "../lib/role-guards";
 import { interBankService } from "../services/interBankService";
 import { db } from "../lib/supabase";
 import { interCollections, propostas } from "@shared/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, not, like } from "drizzle-orm";
 import { getBrasiliaTimestamp } from "../lib/timezone";
 
 const router = Router();
@@ -110,7 +110,7 @@ router.get(
 
       console.log(`[PDF STORAGE] Buscando PDF no storage para: ${codigoSolicitacao}`);
 
-      // Verificar se collection pertence à proposta
+      // STEP 1: Verificar se collection pertence à proposta
       const collection = await db
         .select()
         .from(interCollections)
@@ -124,20 +124,52 @@ router.get(
         return res.status(404).json({ error: "Boleto não encontrado" });
       }
 
-      // PRIORIDADE 1: Buscar PDF no Supabase Storage (onde os PDFs foram sincronizados)
+      console.log(`[PDF STORAGE] Dados do boleto:`, {
+        codigoSolicitacaoRecebido: codigoSolicitacao,
+        numeroParcela: collection[0]?.numeroParcela,
+        propostaId: propostaId
+      });
+
+      // STEP 2: Identificar UUID real para busca no storage
+      let realCodigoSolicitacao = codigoSolicitacao;
+      
+      // Se o código é customizado (CORRETO-), buscar UUID real correspondente
+      if (codigoSolicitacao.startsWith('CORRETO-')) {
+        console.log(`[PDF STORAGE] Código customizado detectado: ${codigoSolicitacao}`);
+        
+        // Buscar boleto com UUID real para a mesma parcela
+        const realCollection = await db
+          .select()
+          .from(interCollections)
+          .where(and(
+            eq(interCollections.propostaId, propostaId),
+            eq(interCollections.numeroParcela, collection[0].numeroParcela),
+            not(like(interCollections.codigoSolicitacao, 'CORRETO-%'))
+          ))
+          .limit(1);
+
+        if (realCollection.length > 0) {
+          realCodigoSolicitacao = realCollection[0].codigoSolicitacao;
+          console.log(`[PDF STORAGE] UUID real encontrado: ${realCodigoSolicitacao}`);
+        } else {
+          console.log(`[PDF STORAGE] ⚠️ UUID real não encontrado para parcela ${collection[0].numeroParcela}`);
+        }
+      }
+
+      // STEP 3: Buscar PDF no Supabase Storage com UUID real
       const { createServerSupabaseAdminClient } = await import("../lib/supabase");
       const supabaseAdmin = createServerSupabaseAdminClient();
       
-      // Caminho do PDF no storage conforme boletoStorageService.ts
-      const storagePath = `propostas/${propostaId}/boletos/emitidos_pendentes/${codigoSolicitacao}.pdf`;
+      // Caminho do PDF no storage usando UUID real
+      const storagePath = `propostas/${propostaId}/boletos/emitidos_pendentes/${realCodigoSolicitacao}.pdf`;
       
-      console.log(`[PDF STORAGE] Verificando arquivo: ${storagePath}`);
+      console.log(`[PDF STORAGE] Verificando arquivo com UUID real: ${storagePath}`);
       
       // Verificar se arquivo existe no storage
       const { data: fileExists, error: listError } = await supabaseAdmin.storage
         .from('documents')
         .list(`propostas/${propostaId}/boletos/emitidos_pendentes`, {
-          search: `${codigoSolicitacao}.pdf`
+          search: `${realCodigoSolicitacao}.pdf`
         });
 
       if (!listError && fileExists && fileExists.length > 0) {
@@ -157,15 +189,16 @@ router.get(
           console.error(`[PDF STORAGE] ❌ Erro ao gerar URL assinada:`, signedUrlError);
         }
       } else {
-        console.log(`[PDF STORAGE] ⚠️ PDF não encontrado no storage, listError:`, listError);
+        console.log(`[PDF STORAGE] ⚠️ PDF não encontrado no storage para UUID real: ${realCodigoSolicitacao}`);
+        console.log(`[PDF STORAGE] ⚠️ ListError:`, listError);
       }
 
       // FALLBACK: Se não encontrar no storage, tentar API (só se circuit breaker permitir)
-      console.log(`[PDF STORAGE] Tentando fallback para API do Banco Inter...`);
+      console.log(`[PDF STORAGE] Tentando fallback para API do Banco Inter com UUID real...`);
       
       try {
         const interService = interBankService;
-        const pdfBuffer = await interService.obterPdfCobranca(codigoSolicitacao);
+        const pdfBuffer = await interService.obterPdfCobranca(realCodigoSolicitacao);
 
         if (!pdfBuffer || pdfBuffer.length === 0) {
           return res.status(404).json({
