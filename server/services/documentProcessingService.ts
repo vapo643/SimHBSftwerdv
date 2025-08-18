@@ -99,9 +99,9 @@ export class DocumentProcessingService {
         throw new Error("Failed to download document from ClickSign");
       }
 
-      // 4. Salvar no Supabase Storage
-      const fileName = `ccb_assinada_${Date.now()}.pdf`;
-      const storagePath = `ccb/assinadas/${proposalId}/${fileName}`;
+      // 4. Salvar no Supabase Storage - PAM V1.0 CORREÇÃO: Usar padrão real do sistema
+      const fileName = `ccb-${proposalId}-${Date.now()}.pdf`;
+      const storagePath = `ccb/${fileName}`;
 
       console.log(`💾 [DOCUMENT PROCESSING] Saving to Storage: ${storagePath}`);
       const { error: uploadError } = await supabase.storage
