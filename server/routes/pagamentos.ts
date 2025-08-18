@@ -1101,8 +1101,10 @@ router.post(
       console.log(`[PAGAMENTOS] Confirmando veracidade da proposta: ${id} por usuário: ${userId}`);
       console.log(`[PAGAMENTOS] Observações recebidas:`, observacoes || "Nenhuma observação fornecida");
 
+      console.log(`[PAGAMENTOS] 🔍 STEP 1: Iniciando busca da proposta no banco...`);
       // Buscar proposta
       const [proposta] = await db.select().from(propostas).where(eq(propostas.id, id)).limit(1);
+      console.log(`[PAGAMENTOS] 🔍 STEP 2: Query executada com sucesso`);
 
       if (!proposta) {
         console.log(`[PAGAMENTOS] ❌ Proposta não encontrada: ${id}`);
@@ -1110,6 +1112,7 @@ router.post(
       }
 
       console.log(`[PAGAMENTOS] 🔍 Proposta encontrada: ${id} | Status atual: ${proposta.status} | CCB Assinada: ${proposta.assinaturaEletronicaConcluida}`);
+      console.log(`[PAGAMENTOS] 🔍 Tipo do status: ${typeof proposta.status} | Valor exato: "${proposta.status}"`);
 
       // FASE 1: VERIFICAÇÃO DE IDEMPOTÊNCIA - Prevenir execução duplicada
       if (proposta.status === "pagamento_autorizado") {
@@ -1132,11 +1135,13 @@ router.post(
       }
 
       // Verificar se está no status correto para nova autorização
-      if (proposta.status !== "pronto_pagamento") {
+      const statusValidos = ["pronto_pagamento", "BOLETOS_EMITIDOS", "em_processamento"];
+      if (!statusValidos.includes(proposta.status)) {
+        console.log(`[PAGAMENTOS] ⚠️ Status inválido para pagamento: ${proposta.status}`);
         return res.status(400).json({
           error: "Proposta não está pronta para pagamento",
           statusAtual: proposta.status,
-          statusEsperado: "pronto_pagamento",
+          statusEsperados: statusValidos,
         });
       }
 
@@ -1182,7 +1187,7 @@ router.post(
           autorId: userId,
           nomeAutor: user?.fullName,
           role: userRole,
-          statusAnterior: "pronto_pagamento",
+          statusAnterior: proposta.status,
           statusNovo: "pagamento_autorizado",
           timestamp: new Date().toISOString(),
           ip: req.ip,
@@ -1214,8 +1219,9 @@ router.post(
         },
       });
     } catch (error) {
-      console.error("[PAGAMENTOS] Erro ao confirmar veracidade:", error);
-      res.status(500).json({ error: "Erro ao confirmar veracidade" });
+      console.error("[PAGAMENTOS] ❌ ERRO CRÍTICO ao confirmar veracidade:", error);
+      console.error("[PAGAMENTOS] ❌ Stack trace:", error.stack);
+      res.status(500).json({ error: "Erro ao confirmar veracidade", details: error.message });
     }
   }
 );
