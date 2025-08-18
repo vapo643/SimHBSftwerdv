@@ -1094,11 +1094,32 @@ router.post(
         return res.status(404).json({ error: "Proposta não encontrada" });
       }
 
-      // Verificar se está no status correto
+      // FASE 1: VERIFICAÇÃO DE IDEMPOTÊNCIA - Prevenir execução duplicada
+      if (proposta.status === "pagamento_autorizado") {
+        console.log(`[PAGAMENTOS] ✅ Proposta ${id} já foi autorizada anteriormente. Retornando sucesso idempotente.`);
+        
+        // Retornar sucesso sem re-executar a lógica
+        return res.json({
+          success: true,
+          message: "Pagamento já foi autorizado anteriormente",
+          status: "pagamento_autorizado",
+          idempotent: true,
+          dadosPagamento: {
+            pix: proposta.dadosPagamentoPix,
+            banco: proposta.dadosPagamentoBanco,
+            agencia: proposta.dadosPagamentoAgencia,
+            conta: proposta.dadosPagamentoConta,
+            titular: proposta.clienteNome,
+          },
+        });
+      }
+
+      // Verificar se está no status correto para nova autorização
       if (proposta.status !== "pronto_pagamento") {
         return res.status(400).json({
           error: "Proposta não está pronta para pagamento",
           statusAtual: proposta.status,
+          statusEsperado: "pronto_pagamento",
         });
       }
 

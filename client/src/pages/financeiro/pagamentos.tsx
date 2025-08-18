@@ -694,8 +694,8 @@ export default function Pagamentos() {
                             >
                               <Eye className="h-4 w-4" />
                             </Button>
-                            {(pagamento.status === "em_processamento" ||
-                              pagamento.status === "pronto_pagamento") &&
+                            {/* FASE 2: Alinhamento Frontend/Backend - Botão só para status pronto_pagamento */}
+                            {pagamento.status === "pronto_pagamento" &&
                               userHasApprovalPermission() && (
                                 <Button
                                   size="sm"
