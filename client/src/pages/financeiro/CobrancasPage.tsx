@@ -1850,10 +1850,10 @@ export default function CobrancasPage() {
                           Detalhamento de Parcelas
                         </CardTitle>
                         <div className="flex gap-2">
-                          {/* PAM V1.0 FASE 1 - Botão Único "Baixar Carnê" */}
+                          {/* PAM V1.0 RESTAURAÇÃO - Carnê movido para posição secundária */}
                           <Button
                             size="sm"
-                            variant="default"
+                            variant="outline"
                             onClick={async () => {
                               try {
                                 toast({
@@ -1894,10 +1894,10 @@ export default function CobrancasPage() {
                                 });
                               }
                             }}
-                            title="Gerar e baixar carnê consolidado de todos os boletos"
+                            title="Gerar e baixar carnê consolidado de todos os boletos (ação secundária)"
                           >
-                            <Download className="mr-2 h-3 w-3" />
-                            Baixar Carnê
+                            <FileText className="mr-2 h-3 w-3" />
+                            Carnê Consolidado
                           </Button>
                           
                           {/* Botão de Atualização de Status */}
@@ -2008,7 +2008,81 @@ export default function CobrancasPage() {
                                   </Tooltip>
                                 </TooltipProvider>
                                 
-{/* PAM V1.0 FASE 1 - Downloads individuais removidos: Use "Baixar Carnê" para consolidado */}
+                                {/* PAM V1.0 RESTAURAÇÃO - Botão Download PDF Individual */}
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  disabled={!parcela.codigoSolicitacao}
+                                  onClick={async () => {
+                                    if (!parcela.codigoSolicitacao) {
+                                      toast({
+                                        title: "PDF não disponível",
+                                        description: "Código de solicitação não encontrado para esta parcela",
+                                        variant: "destructive",
+                                      });
+                                      return;
+                                    }
+
+                                    try {
+                                      toast({
+                                        title: "Baixando PDF...",
+                                        description: `Baixando boleto da parcela ${parcela.numeroParcela}`,
+                                      });
+
+                                      // PAM V1.0 - Usar apiRequest com responseType blob para autenticação JWT
+                                      const response = await apiRequest(
+                                        `/api/inter/collections/${parcela.codigoSolicitacao}/pdf`,
+                                        { 
+                                          method: "GET",
+                                          responseType: 'blob'
+                                        }
+                                      ) as Blob;
+
+                                      // Criar blob e iniciar download
+                                      const blob = new Blob([response], { type: 'application/pdf' });
+                                      const url = URL.createObjectURL(blob);
+                                      
+                                      const a = document.createElement('a');
+                                      a.href = url;
+                                      a.download = `boleto-parcela-${parcela.numeroParcela}-${selectedPropostaId}.pdf`;
+                                      document.body.appendChild(a);
+                                      a.click();
+                                      document.body.removeChild(a);
+                                      URL.revokeObjectURL(url);
+
+                                      toast({
+                                        title: "PDF baixado",
+                                        description: `Boleto da parcela ${parcela.numeroParcela} baixado com sucesso`,
+                                      });
+                                    } catch (error: any) {
+                                      console.error("[PDF DOWNLOAD] Erro ao baixar PDF individual:", error);
+                                      
+                                      if (error?.message?.includes("PDF_NOT_AVAILABLE")) {
+                                        toast({
+                                          title: "PDF não sincronizado",
+                                          description: "O PDF ainda não foi sincronizado. Tente 'Atualizar Status' primeiro.",
+                                          variant: "destructive",
+                                        });
+                                      } else if (error?.message?.includes("BOLETO_NOT_FOUND")) {
+                                        toast({
+                                          title: "Boleto não encontrado",
+                                          description: "Boleto não encontrado no sistema do banco.",
+                                          variant: "destructive",
+                                        });
+                                      } else {
+                                        toast({
+                                          title: "Erro ao baixar PDF",
+                                          description: "Não foi possível baixar o PDF do boleto.",
+                                          variant: "destructive",
+                                        });
+                                      }
+                                    }
+                                  }}
+                                  title={`Baixar PDF do boleto da parcela ${parcela.numeroParcela}`}
+                                >
+                                  <Download className="mr-1.5 h-3 w-3" />
+                                  PDF
+                                </Button>
                                 
                                 {/* Badge de Status - Usando status REAL do Inter */}
                                 <Badge
