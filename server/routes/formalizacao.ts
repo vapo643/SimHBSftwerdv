@@ -292,18 +292,22 @@ router.get("/:proposalId/timeline", jwtAuthMiddleware, async (req, res) => {
 
 /**
  * GET /api/formalizacao/:proposalId/ccb-assinada
- * Retorna URL do CCB ASSINADO para visualização (apenas ADMINISTRADOR)
- * PAM V1.0 - Novo endpoint para documento processado pelo webhook
+ * Retorna URL do CCB ASSINADO para visualização
+ * PAM V1.0 - Todos os roles autorizados podem VISUALIZAR
+ * Restrição de DOWNLOAD é feita no frontend
  */
 router.get("/:proposalId/ccb-assinada", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const { proposalId } = req.params;
     
-    // Verificação de role - apenas ADMINISTRADOR pode acessar CCB assinada
-    if (req.user?.role !== "ADMINISTRADOR") {
+    // PAM V1.0 CORREÇÃO: Todos os roles autorizados podem VER CCB assinada
+    // Roles permitidos: ATENDENTE, FINANCEIRO, GERENTE, DIRETOR, ADMINISTRADOR
+    const allowedRoles = ["ATENDENTE", "FINANCEIRO", "GERENTE", "DIRETOR", "ADMINISTRADOR"];
+    
+    if (!req.user?.role || !allowedRoles.includes(req.user.role)) {
       return res.status(403).json({
         error: "Acesso negado",
-        message: "Apenas administradores podem visualizar CCB assinada"
+        message: "Você não tem permissão para visualizar este documento"
       });
     }
 
@@ -348,7 +352,7 @@ router.get("/:proposalId/ccb-assinada", jwtAuthMiddleware, async (req: Authentic
       });
     }
 
-    console.log(`✅ [FORMALIZACAO] CCB assinada acessada por ADMINISTRADOR para proposta ${proposalId}`);
+    console.log(`✅ [FORMALIZACAO] CCB assinada acessada por ${req.user?.role} para proposta ${proposalId}`);
 
     res.json({
       success: true,

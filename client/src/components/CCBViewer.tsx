@@ -257,8 +257,8 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
                   Ver CCB Original
                 </Button>
                 
-                {/* PAM V1.0: Botão condicional - aparece se: 1) existe CCB assinada E 2) usuário é ADMINISTRADOR */}
-                {proposalData?.caminhoCcbAssinado && user?.role === "ADMINISTRADOR" && (
+                {/* PAM V1.0 CORREÇÃO: Todos os roles autorizados podem VER CCB assinada */}
+                {proposalData?.caminhoCcbAssinado && (
                   <Button
                     variant="outline"
                     size="sm"
@@ -281,6 +281,37 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
                   <Download className="h-4 w-4" />
                   Baixar PDF Original
                 </Button>
+                
+                {/* PAM V1.0: Botão de download CCB assinada - EXCLUSIVO para ADMINISTRADOR */}
+                {proposalData?.caminhoCcbAssinado && user?.role === "ADMINISTRADOR" && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={async () => {
+                      try {
+                        const response = await apiRequest(`/api/formalizacao/${proposalId}/ccb-assinada`) as {publicUrl?: string};
+                        if (response.publicUrl) {
+                          // Forçar download ao invés de abrir em nova aba
+                          const link = document.createElement('a');
+                          link.href = response.publicUrl;
+                          link.download = `CCB_Assinada_${proposalId}.pdf`;
+                          link.click();
+                        }
+                      } catch (error) {
+                        toast({
+                          title: "Erro ao baixar",
+                          description: "Erro ao baixar CCB assinada",
+                          variant: "destructive",
+                        });
+                      }
+                    }}
+                    className="flex items-center gap-2 border-purple-600 text-purple-600 hover:bg-purple-50"
+                    data-testid="button-download-ccb-assinada"
+                  >
+                    <Download className="h-4 w-4" />
+                    Baixar CCB Assinada
+                  </Button>
+                )}
 
                 <Button
                   variant="outline"
