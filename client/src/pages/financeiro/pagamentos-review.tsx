@@ -108,9 +108,7 @@ export default function PaymentReviewModal({
         // Usar apiRequest com blob para incluir JWT token
         const blob = await apiRequest(
           `/api/documentos/download?path=${encodeURIComponent(ccbPath)}`,
-          "GET",
-          undefined,
-          "blob"
+          { method: "GET", responseType: "blob" }
         ) as Blob;
         
         // Criar URL temporária e fazer download
