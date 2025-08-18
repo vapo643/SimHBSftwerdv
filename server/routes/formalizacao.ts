@@ -4,7 +4,7 @@
  */
 
 import express from "express";
-import { jwtAuthMiddleware } from "../lib/jwt-auth-middleware";
+import { jwtAuthMiddleware, AuthenticatedRequest } from "../lib/jwt-auth-middleware";
 import { ccbGenerationService } from "../services/ccbGenerationService";
 import { supabase } from "../lib/supabase";
 import { db } from "../lib/supabase";
@@ -132,7 +132,7 @@ router.post("/generate-ccb", jwtAuthMiddleware, async (req, res) => {
 
 /**
  * GET /api/formalizacao/:proposalId/ccb
- * Retorna URL do CCB para visualização
+ * Retorna URL do CCB ORIGINAL para visualização
  */
 router.get("/:proposalId/ccb", jwtAuthMiddleware, async (req, res) => {
   try {
@@ -286,6 +286,81 @@ router.get("/:proposalId/timeline", jwtAuthMiddleware, async (req, res) => {
     console.error("❌ [FORMALIZACAO] Erro ao buscar timeline:", error);
     res.status(500).json({
       error: "Erro ao buscar timeline",
+    });
+  }
+});
+
+/**
+ * GET /api/formalizacao/:proposalId/ccb-assinada
+ * Retorna URL do CCB ASSINADO para visualização (apenas ADMINISTRADOR)
+ * PAM V1.0 - Novo endpoint para documento processado pelo webhook
+ */
+router.get("/:proposalId/ccb-assinada", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+  try {
+    const { proposalId } = req.params;
+    
+    // Verificação de role - apenas ADMINISTRADOR pode acessar CCB assinada
+    if (req.user?.role !== "ADMINISTRADOR") {
+      return res.status(403).json({
+        error: "Acesso negado",
+        message: "Apenas administradores podem visualizar CCB assinada"
+      });
+    }
+
+    const result = await db.execute(sql`
+      SELECT 
+        caminho_ccb_assinado,
+        data_assinatura,
+        assinatura_eletronica_concluida
+      FROM propostas
+      WHERE id = ${proposalId}
+    `);
+
+    if (!result || result.length === 0) {
+      return res.status(404).json({
+        error: "Proposta não encontrada",
+      });
+    }
+
+    const proposal = result[0];
+
+    if (!proposal.caminho_ccb_assinado) {
+      return res.status(200).json({
+        ccb_assinado: false,
+        message: "CCB assinada ainda não está disponível para esta proposta",
+        status: "pendente",
+      });
+    }
+
+    // Usar admin client para gerar URL assinada
+    const { createServerSupabaseAdminClient } = await import("../lib/supabase");
+    const adminSupabase = createServerSupabaseAdminClient();
+
+    const { data: signedUrl, error } = await adminSupabase.storage
+      .from("documents")
+      .createSignedUrl(proposal.caminho_ccb_assinado as string, 3600);
+
+    if (error) {
+      console.error("❌ [FORMALIZACAO] Erro ao gerar URL assinada para CCB assinada:", error);
+      return res.status(500).json({
+        error: "Erro ao gerar URL de acesso para CCB assinada",
+        details: error.message,
+      });
+    }
+
+    console.log(`✅ [FORMALIZACAO] CCB assinada acessada por ADMINISTRADOR para proposta ${proposalId}`);
+
+    res.json({
+      success: true,
+      ccbAssinadoPath: proposal.caminho_ccb_assinado,
+      publicUrl: signedUrl?.signedUrl,
+      dataAssinatura: proposal.data_assinatura,
+      status: "assinado"
+    });
+  } catch (error) {
+    console.error("❌ [FORMALIZACAO] Erro ao buscar CCB assinada:", error);
+    res.status(500).json({
+      error: "Erro interno ao buscar CCB assinada"
     });
   }
 });

@@ -1,9 +1,10 @@
 /**
  * Componente para visualização e gerenciamento de CCB
+ * PAM V1.0 - Refatorado com dois botões distintos: CCB Original e CCB Assinada
  */
 
 import { useState } from "react";
-import { FileText, Download, RefreshCw, Eye, CheckCircle } from "lucide-react";
+import { FileText, Download, RefreshCw, Eye, CheckCircle, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -13,6 +14,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface CCBViewerProps {
   proposalId: string;
@@ -28,6 +30,7 @@ interface CCBStatus {
 export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const queryClient = useQueryClient();
+  const { user } = useAuth(); // PAM V1.0: Obter informações do usuário para verificar role
 
   // Query para buscar status do CCB
   const {
@@ -37,6 +40,15 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
   } = useQuery<CCBStatus>({
     queryKey: [`/api/formalizacao/${proposalId}/ccb`],
     refetchInterval: isGenerating ? 2000 : false, // Poll enquanto gera
+  });
+  
+  // PAM V1.0: Query para buscar dados da proposta (verificar se tem CCB assinada)
+  const { data: proposalData } = useQuery({
+    queryKey: [`/api/propostas/${proposalId}`],
+    select: (data: any) => ({
+      caminhoCcbAssinado: data?.caminhoCcbAssinado || data?.caminho_ccb_assinado,
+      dataAssinatura: data?.dataAssinatura || data?.data_assinatura,
+    }),
   });
 
   // Mutation para gerar CCB
@@ -139,6 +151,30 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
       window.open(urlWithTimestamp, "_blank");
     }
   };
+  
+  // PAM V1.0: Nova função para visualizar CCB Assinada (apenas ADMINISTRADOR)
+  const handleViewCCBAssinada = async () => {
+    try {
+      const response = await apiRequest(`/api/formalizacao/${proposalId}/ccb-assinada`) as {publicUrl?: string; message?: string};
+      
+      if (response.publicUrl) {
+        window.open(response.publicUrl, "_blank");
+      } else {
+        toast({
+          title: "CCB Assinada não disponível",
+          description: response.message || "O documento assinado ainda não está disponível",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Erro ao visualizar CCB assinada:", error);
+      toast({
+        title: "Erro",
+        description: "Erro ao visualizar CCB assinada. Tente novamente.",
+        variant: "destructive",
+      });
+    }
+  };
 
   if (isLoading) {
     return (
@@ -208,18 +244,32 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
                 Documento disponível para visualização e download
               </p>
 
-              {/* Ações do documento */}
+              {/* Ações do documento - PAM V1.0: Dois botões distintos */}
               <div className="flex flex-wrap gap-2">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={handleView}
                   className="flex items-center gap-2"
-                  data-testid="button-view-ccb"
+                  data-testid="button-view-ccb-original"
                 >
                   <Eye className="h-4 w-4" />
-                  Visualizar
+                  Ver CCB Original
                 </Button>
+                
+                {/* PAM V1.0: Botão condicional - aparece se: 1) existe CCB assinada E 2) usuário é ADMINISTRADOR */}
+                {proposalData?.caminhoCcbAssinado && user?.role === "ADMINISTRADOR" && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleViewCCBAssinada}
+                    className="flex items-center gap-2 border-green-600 text-green-600 hover:bg-green-50"
+                    data-testid="button-view-ccb-assinada"
+                  >
+                    <Shield className="h-4 w-4" />
+                    Ver CCB Assinada
+                  </Button>
+                )}
 
                 <Button
                   variant="outline"
@@ -229,7 +279,7 @@ export function CCBViewer({ proposalId, onCCBGenerated }: CCBViewerProps) {
                   data-testid="button-download-ccb"
                 >
                   <Download className="h-4 w-4" />
-                  Baixar PDF
+                  Baixar PDF Original
                 </Button>
 
                 <Button
