@@ -1909,16 +1909,35 @@ export default function CobrancasPage() {
                                   success: boolean; 
                                   message?: string; 
                                   signedUrl?: string;
+                                  existingFile?: boolean;
+                                  jobId?: string;
+                                  status?: string;
                                 };
                                 
-                                if (response.success && response.signedUrl) {
-                                  toast({
-                                    title: "Carnê gerado",
-                                    description: "Abrindo carnê consolidado para visualização",
-                                  });
-                                  
-                                  // Abrir carnê via URL assinada
-                                  window.open(response.signedUrl, '_blank');
+                                // PAM V1.0: Lógica inteligente de dois estágios
+                                if (response.success) {
+                                  if (response.existingFile && response.signedUrl) {
+                                    // CENÁRIO 1: O carnê já existe. Iniciar download imediato.
+                                    console.log('[CARNE] Carnê já existente encontrado. Iniciando download...');
+                                    window.open(response.signedUrl, '_blank');
+                                    toast({ 
+                                      title: "Download iniciado", 
+                                      description: "O carnê já estava pronto." 
+                                    });
+                                  } else if (response.jobId) {
+                                    // CENÁRIO 2: Novo carnê está a ser gerado. Iniciar polling.
+                                    console.log('[CARNE] Geração de novo carnê iniciada. Job ID:', response.jobId);
+                                    toast({
+                                      title: "Carnê em processamento",
+                                      description: "Gerando carnê consolidado... Aguarde a conclusão.",
+                                    });
+                                    
+                                    // TODO: Implementar polling para aguardar conclusão
+                                    // (Polling será implementado em iteração futura conforme necessário)
+                                  } else {
+                                    // CENÁRIO DE ERRO: Resposta inesperada
+                                    throw new Error('Resposta da API inválida - sem signedUrl nem jobId.');
+                                  }
                                 } else {
                                   toast({
                                     title: "Erro na geração",
