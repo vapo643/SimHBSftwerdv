@@ -464,6 +464,16 @@ export class DatabaseStorage implements IStorage {
         cliente_email: proposta.clienteEmail || clienteData.email,
         cliente_telefone: proposta.clienteTelefone || clienteData.telefone,
         
+        // 🔥 PAM V1.0 FIX CRÍTICO - DADOS FINANCEIROS AUSENTES
+        // Corrigindo a CAUSA RAIZ identificada na auditoria forense
+        valor: proposta.valorTotalFinanciado || proposta.valor || condicoesData.valor,
+        prazo: proposta.prazo || condicoesData.prazo,
+        valor_tac: proposta.valorTac || condicoesData.valorTac,
+        valor_iof: proposta.valorIof || condicoesData.valorIof,
+        valor_total_financiado: proposta.valorTotalFinanciado || proposta.valor || condicoesData.valorTotalFinanciado || condicoesData.valor,
+        finalidade: proposta.finalidade || condicoesData.finalidade,
+        garantia: proposta.garantia || condicoesData.garantia,
+
         // Dados de pagamento também nas colunas dedicadas
         metodo_pagamento: proposta.metodo_pagamento,
         dados_pagamento_banco: proposta.dados_pagamento_banco,
@@ -488,14 +498,18 @@ export class DatabaseStorage implements IStorage {
     }
 
     console.log(`[DEBUG] Proposta ${data.id} criada com sucesso`);
-    console.log(`✅ [PAM V1.0] DUPLA ESCRITA EXECUTADA:`, {
+    console.log(`✅ [PAM V1.0] CORREÇÃO CRÍTICA EXECUTADA - DADOS FINANCEIROS PERSISTIDOS:`, {
       id: data.id,
       cliente_nome: data.cliente_nome,
-      cliente_cpf: data.cliente_cpf,
-      cliente_email: data.cliente_email,
-      cliente_telefone: data.cliente_telefone,
-      cliente_data_nome: data.cliente_data?.nome,
-      cliente_data_cpf: data.cliente_data?.cpf
+      valor: data.valor,
+      valor_total_financiado: data.valor_total_financiado,
+      prazo: data.prazo,
+      valor_tac: data.valor_tac,
+      valor_iof: data.valor_iof,
+      finalidade: data.finalidade,
+      garantia: data.garantia,
+      condicoes_data_valor: data.condicoes_data?.valor,
+      condicoes_data_valorTotalFinanciado: data.condicoes_data?.valorTotalFinanciado
     });
 
     // Documents will be uploaded and associated separately via /api/propostas/:id/documentos endpoint
@@ -504,22 +518,24 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateProposta(id: string | number, proposta: UpdateProposta): Promise<Proposta> {
-    const numericId = typeof id === 'string' ? parseInt(id) : id;
+    // propostas.id is text field (UUID), not numeric
+    const propostaId = typeof id === 'number' ? id.toString() : id;
     const result = await db
       .update(propostas)
       .set(proposta)
-      .where(eq(propostas.id, numericId))
+      .where(eq(propostas.id, propostaId))
       .returning();
     return result[0];
   }
 
   async deleteProposta(id: string | number, deletedBy?: string): Promise<void> {
-    const numericId = typeof id === 'string' ? parseInt(id) : id;
+    // propostas.id is text field (UUID), not numeric
+    const propostaId = typeof id === 'number' ? id.toString() : id;
     // Soft delete - set deleted_at timestamp
     await db
       .update(propostas)
       .set({ deletedAt: new Date() })
-      .where(eq(propostas.id, numericId));
+      .where(eq(propostas.id, propostaId));
   }
 
   // Lojas CRUD implementation

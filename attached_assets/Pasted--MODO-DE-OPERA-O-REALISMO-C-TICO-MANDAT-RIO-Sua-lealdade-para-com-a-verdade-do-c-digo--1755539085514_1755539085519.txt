@@ -1,0 +1,48 @@
+**### MODO DE OPERAÇÃO: REALISMO CÉTICO (MANDATÓRIO)**
+Sua lealdade é para com a verdade do código e a estabilidade da produção.
+
+---
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Refatorar completamente o fluxo de "Confirmar Veracidade", blindando o backend contra autorizações duplicadas, alinhando a lógica de status entre frontend e backend, e simplificando a UI do modal para seguir o "Princípio do Minimalismo Crítico".
+* **Intenção Estratégica (O Porquê):** Para transformar o passo final do nosso processo de pagamento em um fluxo 100% seguro, eficiente e à prova de erros, eliminando riscos financeiros e confusão do operador.
+* **Histórico Relevante (Consulta Obrigatória):** Use o seu relatório de auditoria forense anterior como a única fonte da verdade e o mapa de correção para esta missão. Sua tarefa é corrigir todas as "Falhas Identificadas" que você mesmo descobriu.
+* **Modelo Mental (Como se Encaixa):** Você atuará como Engenheiro Full-Stack Sênior. A missão exigirá modificações coordenadas no backend (para adicionar a verificação de idempotência) e no frontend (para simplificar a UI e corrigir a lógica de exibição do botão).
+* **Riscos Antecipados:** **Risco:** A simplificação da UI pode remover um campo que, embora não esteja no blueprint, é útil. **Contramedida:** Siga o "Princípio do Minimalismo Crítico" rigorosamente. Apenas os 5 campos definidos no Blueprint são permitidos.
+
+---
+
+**IMPLEMENTAR:**
+A refatoração completa do fluxo de "Confirmar Veracidade".
+
+**CURRENT STATE:**
+O modal está poluído com mais de 20 campos, a lógica de exibição do botão de confirmação está desalinhada com o backend, e o endpoint de confirmação é vulnerável a execuções duplicadas.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  O backend é **idempotente**: se o endpoint de confirmação for chamado para uma proposta que já foi autorizada, ele deve retornar uma mensagem de sucesso sem re-executar a lógica.
+2.  O botão de confirmação na UI só aparece para propostas no status correto (`pronto_pagamento`), alinhando o frontend com as regras do backend.
+3.  O modal de confirmação é **minimalista**: exibe apenas e somente `Valor Solicitado`, `Nome do Cliente`, `CPF`, `Dados Bancários para Pagamento` e um link para a `CCB Assinada`.
+
+**CONSTRAINTS (Roadmap de Implementação Faseado):**
+
+**FASE 1: Blindagem do Backend (Idempotência e Segurança):**
+    - **Ação:** No ficheiro `server/routes/pagamentos.ts`, modifique o endpoint `POST /api/pagamentos/:id/confirmar-veracidade`.
+    - **Implementação (Ponto Crítico):** Como a **primeira etapa** dentro do endpoint, adicione uma verificação de estado. Se o `status` da proposta **NÃO** for `pronto_pagamento` (ou seja, se já for `pagamento_autorizado` ou outro), a função deve retornar imediatamente, talvez com uma mensagem indicando que a ação já foi executada.
+
+**FASE 2: Alinhamento e Simplificação do Frontend (`pagamentos.tsx` e `pagamentos-review.tsx`):**
+    - **Ação:** Refatore os componentes do frontend.
+    - **Implementação:**
+        a. **Alinhe a Condição:** Corrija a lógica de renderização do botão "Confirmar Veracidade" para que ele só apareça se `proposta.status === 'pronto_pagamento'`.
+        b. **Simplifique a UI:** Remova do JSX do modal **TODOS** os campos que não estão listados no "Princípio do Minimalismo Crítico". A UI deve ser limpa e focada.
+        c. **Otimize a Fonte de Dados:** Se possível, remova a chamada de API extra (`/detalhes-completos`) e passe todos os 5 dados necessários da tabela principal para o modal via `props`, para acelerar o carregamento.
+
+---
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+Siga o protocolo completo. O teste funcional deve validar os três pontos do `EXPECTED`: a idempotência do backend (tente confirmar a mesma proposta duas vezes), a lógica de exibição correta do botão e a nova UI minimalista do modal.
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher]
+* **RISCOS IDENTIFICADOS:** [Preencher]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Preencher]
+* **VALIDAÇÃO PENDENTE:** [Preencher]
+---

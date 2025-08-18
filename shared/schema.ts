@@ -636,6 +636,18 @@ export const createPropostaValidationSchema = z.object({
     .positive("Prazo deve ser positivo")
     .min(1, "Prazo mínimo é 1 mês")
     .max(120, "Prazo máximo é 120 meses"),
+    
+  // 🔥 PAM V1.0 FIX CRÍTICO - VALOR TOTAL FINANCIADO OBRIGATÓRIO
+  // Corrigindo a SEGUNDA FALHA identificada na auditoria forense
+  valorTotalFinanciado: z.number()
+    .positive("Valor total financiado deve ser positivo")
+    .min(100, "Valor total financiado mínimo é R$ 100,00")
+    .max(1000000, "Valor total financiado máximo é R$ 1.000.000,00")
+    .optional(), // Opcional pois pode ser calculado automaticamente
+    
+  // Valores calculados opcionais mas validados quando presentes
+  valorTac: z.number().min(0, "TAC não pode ser negativo").optional(),
+  valorIof: z.number().min(0, "IOF não pode ser negativo").optional(),
   
   // Campos opcionais mas com validação quando presentes
   clienteDataNascimento: z.string().optional(),
@@ -664,8 +676,8 @@ export const createPropostaValidationSchema = z.object({
   clienteCnpj: z.string().optional(),
   
   // Dados do empréstimo
-  finalidade: z.string().optional(),
-  garantia: z.string().optional(),
+  finalidade: z.string().min(1, "Finalidade é obrigatória"),
+  garantia: z.string().min(1, "Garantia é obrigatória"),
   
   // IDs relacionais opcionais
   produtoId: z.number().int().positive().optional(),
