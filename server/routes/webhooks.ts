@@ -447,7 +447,6 @@ async function processInterWebhookEvent(codigoSolicitacao: string, webhookData: 
         SET 
           status = 'pago',
           data_pagamento = ${dataPagamento || "NOW()"},
-          valor_pago = ${valorPago || null},
           updated_at = NOW()
         WHERE proposta_id = ${proposta_id}
         AND numero_parcela = ${numero_parcela}
