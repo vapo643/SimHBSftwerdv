@@ -972,60 +972,6 @@ export default function CobrancasPage() {
                               Ficha
                             </Button>
 
-                            {/* PAM V1.0 - Download autenticado do Boleto */}
-                            {proposta.interCodigoSolicitacao && (
-                              <Button
-                                size="sm"
-                                className="bg-blue-600 text-white hover:bg-blue-700"
-                                data-testid={`button-download-boleto-${proposta.id}`}
-                                title="Baixar boleto em PDF"
-                                onClick={async () => {
-                                  try {
-                                    toast({
-                                      title: "Baixando PDF...",
-                                      description: `Preparando download do boleto`
-                                    });
-
-                                    // PAM V1.0: apiRequest autenticado com blob response
-                                    const response = await apiRequest(
-                                      `/api/inter/collections/${proposta.interCodigoSolicitacao}/pdf`,
-                                      { 
-                                        method: "GET",
-                                        responseType: 'blob' as any
-                                      }
-                                    ) as Blob;
-
-                                    // Criar URL temporária e download automático
-                                    const blobUrl = URL.createObjectURL(response);
-                                    const downloadLink = document.createElement('a');
-                                    downloadLink.href = blobUrl;
-                                    downloadLink.download = `boleto-${proposta.interCodigoSolicitacao}.pdf`;
-                                    document.body.appendChild(downloadLink);
-                                    downloadLink.click();
-                                    document.body.removeChild(downloadLink);
-                                    
-                                    // Limpar URL do objeto
-                                    URL.revokeObjectURL(blobUrl);
-                                    
-                                    toast({
-                                      title: "Download concluído",
-                                      description: "Boleto baixado com sucesso"
-                                    });
-                                  } catch (error) {
-                                    console.error("[PDF DOWNLOAD] Erro:", error);
-                                    toast({
-                                      title: "Erro no download",
-                                      description: "Não foi possível baixar o boleto",
-                                      variant: "destructive"
-                                    });
-                                  }
-                                }}
-                              >
-                                <Download className="mr-1.5 h-3.5 w-3.5" />
-                                Boleto
-                              </Button>
-                            )}
-
                             {/* Menu de Ações - Apenas para boletos com status modificável */}
                             {proposta.interCodigoSolicitacao && (
                               <DropdownMenu>

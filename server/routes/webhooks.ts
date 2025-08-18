@@ -437,6 +437,29 @@ async function processInterWebhookEvent(codigoSolicitacao: string, webhookData: 
 
     // Se foi pago, verificar se todas as parcelas foram pagas
     if (situacao === "PAGO" || situacao === "RECEBIDO") {
+      // PAM V1.0 - RECONCILIAÇÃO CRÍTICA: Sincronizar status entre inter_collections e parcelas
+      // Esta é a ponte que falta para unificar nossa fonte da verdade
+      console.log(`🔄 [RECONCILIAÇÃO PAM V1.0] Sincronizando pagamento para parcela ${numero_parcela} da proposta ${proposta_id}`);
+      
+      // Atualizar o status da parcela correspondente para 'pago'
+      const updateParcelaResult = await db.execute(sql`
+        UPDATE parcelas 
+        SET 
+          status = 'pago',
+          data_pagamento = ${dataPagamento || "NOW()"},
+          valor_pago = ${valorPago || null},
+          updated_at = NOW()
+        WHERE proposta_id = ${proposta_id}
+        AND numero_parcela = ${numero_parcela}
+        RETURNING id
+      `);
+      
+      if (updateParcelaResult.length > 0) {
+        console.log(`✅ [RECONCILIAÇÃO PAM V1.0] Parcela ${numero_parcela} da proposta ${proposta_id} marcada como PAGA na tabela parcelas`);
+      } else {
+        console.error(`❌ [RECONCILIAÇÃO PAM V1.0] ERRO CRÍTICO: Não foi possível atualizar parcela ${numero_parcela} da proposta ${proposta_id}`);
+      }
+      
       const allPaid = await db.execute(sql`
         SELECT COUNT(*) as total_paid
         FROM inter_collections 

@@ -1,6 +1,11 @@
 # Simpix Credit Management System
 
 ## Recent Changes
+- **18/08/2025**: Reconciliação Crítica PAM V1.0 - Sincronização inter_collections ↔ parcelas
+  - ✅ **Problema resolvido:** Tabela `parcelas` não era atualizada quando pagamentos chegavam via webhook
+  - ✅ **Solução implementada:** Webhook do Banco Inter agora sincroniza ambas as tabelas automaticamente
+  - ✅ **Impacto:** Contagem de "parcelas pagas" agora 100% precisa na Tela de Cobranças
+  - ✅ **UI limpa:** Botão "Boleto" removido da tabela principal conforme solicitado
 - **18/08/2025**: Protocolo PEAF atualizado de V1.3 para V1.4 - Ceticismo Sênior Mandatório
   - ✅ **Validação Cética Sênior:** Sempre validar comandos contra código fonte REAL antes de executar
   - ✅ **Análise de realidade:** Verificar se informações do prompt correspondem ao estado atual do sistema
