@@ -972,18 +972,58 @@ export default function CobrancasPage() {
                               Ficha
                             </Button>
 
-                            {/* Botão de Download do Boleto */}
+                            {/* PAM V1.0 - Download autenticado do Boleto */}
                             {proposta.interCodigoSolicitacao && (
-                              <a
-                                href={`/api/inter/collections/${proposta.interCodigoSolicitacao}/pdf`}
-                                download
-                                className="inline-flex items-center justify-center rounded-md bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                              <Button
+                                size="sm"
+                                className="bg-blue-600 text-white hover:bg-blue-700"
                                 data-testid={`button-download-boleto-${proposta.id}`}
                                 title="Baixar boleto em PDF"
+                                onClick={async () => {
+                                  try {
+                                    toast({
+                                      title: "Baixando PDF...",
+                                      description: `Preparando download do boleto`
+                                    });
+
+                                    // PAM V1.0: apiRequest autenticado com blob response
+                                    const response = await apiRequest(
+                                      `/api/inter/collections/${proposta.interCodigoSolicitacao}/pdf`,
+                                      { 
+                                        method: "GET",
+                                        responseType: 'blob' as any
+                                      }
+                                    ) as Blob;
+
+                                    // Criar URL temporária e download automático
+                                    const blobUrl = URL.createObjectURL(response);
+                                    const downloadLink = document.createElement('a');
+                                    downloadLink.href = blobUrl;
+                                    downloadLink.download = `boleto-${proposta.interCodigoSolicitacao}.pdf`;
+                                    document.body.appendChild(downloadLink);
+                                    downloadLink.click();
+                                    document.body.removeChild(downloadLink);
+                                    
+                                    // Limpar URL do objeto
+                                    URL.revokeObjectURL(blobUrl);
+                                    
+                                    toast({
+                                      title: "Download concluído",
+                                      description: "Boleto baixado com sucesso"
+                                    });
+                                  } catch (error) {
+                                    console.error("[PDF DOWNLOAD] Erro:", error);
+                                    toast({
+                                      title: "Erro no download",
+                                      description: "Não foi possível baixar o boleto",
+                                      variant: "destructive"
+                                    });
+                                  }
+                                }}
                               >
                                 <Download className="mr-1.5 h-3.5 w-3.5" />
                                 Boleto
-                              </a>
+                              </Button>
                             )}
 
                             {/* Menu de Ações - Apenas para boletos com status modificável */}
@@ -2029,42 +2069,26 @@ export default function CobrancasPage() {
                                         description: `Abrindo boleto da parcela ${parcela.numeroParcela} em nova guia`,
                                       });
 
-                                      // PAM V1.0 RESTAURAÇÃO - Abrir PDF em nova guia para visualização web
-                                      const pdfUrl = `/api/inter/collections/${selectedPropostaId}/${parcela.codigoSolicitacao}/pdf`;
-                                      
-                                      // Obter token JWT para autenticação
-                                      const supabase = getSupabase();
-                                      const session = await supabase.auth.getSession();
-                                      
-                                      if (session?.data?.session?.access_token) {
-                                        // Construir URL com token JWT nos headers via window.open com fetch blob primeiro para autenticação
-                                        const response = await fetch(pdfUrl, {
-                                          method: 'GET',
-                                          headers: {
-                                            'Authorization': `Bearer ${session.data.session.access_token}`,
-                                            'Content-Type': 'application/pdf'
-                                          }
-                                        });
-
-                                        if (response.ok) {
-                                          // Criar blob URL e abrir em nova guia
-                                          const pdfBlob = await response.blob();
-                                          const blobUrl = URL.createObjectURL(pdfBlob);
-                                          window.open(blobUrl, '_blank');
-                                          
-                                          // Limpar blob URL após um tempo
-                                          setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
-                                          
-                                          toast({
-                                            title: "PDF aberto",
-                                            description: `Boleto da parcela ${parcela.numeroParcela} aberto em nova guia`,
-                                          });
-                                        } else {
-                                          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                                      // PAM V1.0: apiRequest autenticado com blob response
+                                      const response = await apiRequest(
+                                        `/api/inter/collections/${selectedPropostaId}/${parcela.codigoSolicitacao}/pdf`,
+                                        { 
+                                          method: "GET",
+                                          responseType: 'blob' as any
                                         }
-                                      } else {
-                                        throw new Error("Token de autenticação não encontrado");
-                                      }
+                                      ) as Blob;
+
+                                      // Criar blob URL e abrir em nova guia
+                                      const blobUrl = URL.createObjectURL(response);
+                                      window.open(blobUrl, '_blank');
+                                      
+                                      // Limpar blob URL após um tempo
+                                      setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+                                      
+                                      toast({
+                                        title: "PDF aberto",
+                                        description: `Boleto da parcela ${parcela.numeroParcela} aberto em nova guia`,
+                                      });
                                     } catch (error: any) {
                                       console.error("[PDF VIEW] Erro ao abrir PDF individual:", error);
                                       
