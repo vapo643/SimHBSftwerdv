@@ -25,6 +25,7 @@ import {
   Copy,
   ExternalLink,
   Key,
+  Loader2,
 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -46,6 +47,13 @@ export default function PaymentReviewModal({
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [observacoes, setObservacoes] = useState("");
   const [pixKeyVisible, setPixKeyVisible] = useState(false);
+  
+  // NOVO: Estados para o fluxo multi-etapas de pagamento
+  const [veracidadeConfirmada, setVeracidadeConfirmada] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [paymentConfirmed, setPaymentConfirmed] = useState(false);
+  const [comprovante, setComprovante] = useState<File | null>(null);
+  const [paymentObservation, setPaymentObservation] = useState("");
 
   // Confirmar veracidade
   const confirmarVeracidadeMutation = useMutation({
@@ -67,24 +75,78 @@ export default function PaymentReviewModal({
           description: "Este pagamento já foi autorizado anteriormente.",
           className: "bg-blue-50 border-blue-200",
         });
+        setVeracidadeConfirmada(true);
       } else {
         toast({
           title: "✅ Veracidade Confirmada",
-          description: "Pagamento autorizado com sucesso. Chave PIX liberada.",
+          description: "Pagamento autorizado. Agora você pode proceder com o pagamento.",
           className: "bg-green-50 border-green-200",
         });
       }
       
       setPixKeyVisible(true);
+      setVeracidadeConfirmada(true); // NOVO: Marcar veracidade como confirmada
       setShowConfirmDialog(false);
       queryClient.invalidateQueries({ queryKey: ["/api/pagamentos"] });
-      onConfirm();
     },
     onError: (error: any) => {
       console.error("❌ [REVIEW MODAL] Erro ao confirmar veracidade:", error);
       toast({
         title: "Erro ao confirmar veracidade",
         description: error.message || "Não foi possível confirmar a veracidade.",
+        variant: "destructive",
+      });
+    },
+  });
+  
+  // NOVO: Mutation para marcar como pago
+  const marcarPagoMutation = useMutation({
+    mutationFn: async () => {
+      const formData = new FormData();
+      formData.append("observacoes", paymentObservation);
+      
+      if (comprovante) {
+        formData.append("comprovante", comprovante);
+      }
+      
+      const response = await fetch(`/api/pagamentos/${proposta?.id}/marcar-pago`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Erro ao marcar como pago");
+      }
+      
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "✅ Pagamento Confirmado",
+        description: "A proposta foi marcada como paga com sucesso.",
+        className: "bg-green-50 border-green-200",
+      });
+      
+      // Resetar todos os estados
+      setShowPaymentModal(false);
+      setPaymentConfirmed(false);
+      setComprovante(null);
+      setPaymentObservation("");
+      
+      // Invalidar caches e fechar modal principal
+      queryClient.invalidateQueries({ queryKey: ["/api/pagamentos"] });
+      onConfirm();
+      onClose();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro ao marcar como pago",
+        description: error.message || "Não foi possível marcar a proposta como paga.",
         variant: "destructive",
       });
     },
@@ -299,7 +361,7 @@ export default function PaymentReviewModal({
           </div>
 
           <DialogFooter>
-            {!pixKeyVisible && (proposta.status === "pronto_pagamento" || proposta.status === "em_processamento") ? (
+            {!veracidadeConfirmada && (proposta.status === "pronto_pagamento" || proposta.status === "em_processamento") ? (
               <>
                 <Button variant="outline" onClick={onClose}>
                   Cancelar
@@ -310,6 +372,19 @@ export default function PaymentReviewModal({
                 >
                   <Shield className="mr-2 h-4 w-4" />
                   Confirmar Veracidade
+                </Button>
+              </>
+            ) : veracidadeConfirmada ? (
+              <>
+                <Button variant="outline" onClick={onClose}>
+                  Fechar
+                </Button>
+                <Button
+                  onClick={() => setShowPaymentModal(true)}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  <CreditCard className="mr-2 h-4 w-4" />
+                  Fazer Pagamento
                 </Button>
               </>
             ) : (
@@ -359,6 +434,172 @@ export default function PaymentReviewModal({
                   Autorizar Pagamento
                 </>
               )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* NOVO: Modal de Pagamento */}
+      <Dialog open={showPaymentModal} onOpenChange={setShowPaymentModal}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CreditCard className="h-5 w-5 text-green-600" />
+              Execução do Pagamento
+            </DialogTitle>
+            <DialogDescription>
+              Confirme o pagamento e anexe o comprovante (opcional)
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 mt-4">
+            {/* Informações do Pagamento */}
+            <Card>
+              <CardContent className="pt-6 space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">Cliente:</span>
+                  <span className="font-medium">{proposta.cliente_nome || proposta.clienteNome}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">CPF:</span>
+                  <span className="font-medium">{formatCPF(proposta.cliente_cpf || proposta.clienteCpf)}</span>
+                </div>
+                <Separator />
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">Valor a Pagar:</span>
+                  <span className="text-xl font-bold text-green-600">
+                    {formatCurrency(Number(proposta.valor || 0))}
+                  </span>
+                </div>
+                <Separator />
+                
+                {/* Dados para Pagamento */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Dados para Pagamento:</Label>
+                  <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg space-y-1">
+                    {proposta.dados_pagamento_pix || proposta.dadosPagamentoPix ? (
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">
+                          <strong>PIX:</strong> {proposta.dados_pagamento_pix || proposta.dadosPagamentoPix}
+                        </span>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => copyToClipboard(proposta.dados_pagamento_pix || proposta.dadosPagamentoPix)}
+                        >
+                          <Copy className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <>
+                        <p className="text-sm">
+                          <strong>Banco:</strong> {proposta.dados_pagamento_banco || proposta.dadosPagamentoBanco}
+                        </p>
+                        <p className="text-sm">
+                          <strong>Agência:</strong> {proposta.dados_pagamento_agencia || proposta.dadosPagamentoAgencia}
+                        </p>
+                        <p className="text-sm">
+                          <strong>Conta:</strong> {proposta.dados_pagamento_conta || proposta.dadosPagamentoConta}
+                        </p>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            {/* Botão de Confirmar Pagamento */}
+            {!paymentConfirmed ? (
+              <Button
+                className="w-full"
+                onClick={() => {
+                  setPaymentConfirmed(true);
+                  toast({
+                    title: "Pagamento Confirmado",
+                    description: "Agora você pode anexar o comprovante (opcional).",
+                  });
+                }}
+              >
+                <CheckCircle className="mr-2 h-4 w-4" />
+                Confirmar Pagamento
+              </Button>
+            ) : (
+              <>
+                {/* Upload de Comprovante (Opcional) */}
+                <div className="space-y-2">
+                  <Label>Anexar Comprovante (Opcional)</Label>
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+                    <input
+                      type="file"
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setComprovante(file);
+                          toast({
+                            title: "Arquivo selecionado",
+                            description: file.name,
+                          });
+                        }
+                      }}
+                      className="w-full"
+                    />
+                    {comprovante && (
+                      <p className="text-sm text-green-600 mt-2">
+                        ✓ {comprovante.name}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                
+                {/* Observações */}
+                <div className="space-y-2">
+                  <Label>Observações (Opcional)</Label>
+                  <Textarea
+                    placeholder="Adicione observações sobre o pagamento..."
+                    value={paymentObservation}
+                    onChange={(e) => setPaymentObservation(e.target.value)}
+                    rows={3}
+                  />
+                </div>
+                
+                {/* Botão ESTÁ PAGO */}
+                <Alert className="border-orange-200 bg-orange-50">
+                  <AlertTriangle className="h-4 w-4 text-orange-600" />
+                  <AlertDescription className="text-orange-800">
+                    Ao clicar em "ESTÁ PAGO", a proposta será marcada como paga definitivamente.
+                  </AlertDescription>
+                </Alert>
+                
+                <Button
+                  className="w-full bg-green-600 hover:bg-green-700"
+                  onClick={() => marcarPagoMutation.mutate()}
+                  disabled={marcarPagoMutation.isPending}
+                >
+                  {marcarPagoMutation.isPending ? (
+                    "Processando..."
+                  ) : (
+                    <>
+                      <CheckCircle className="mr-2 h-4 w-4" />
+                      ESTÁ PAGO
+                    </>
+                  )}
+                </Button>
+              </>
+            )}
+          </div>
+          
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setShowPaymentModal(false);
+                setPaymentConfirmed(false);
+                setComprovante(null);
+                setPaymentObservation("");
+              }}
+            >
+              Cancelar
             </Button>
           </DialogFooter>
         </DialogContent>
