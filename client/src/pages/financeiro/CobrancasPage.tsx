@@ -1908,18 +1908,22 @@ export default function CobrancasPage() {
                                 ) as { 
                                   success: boolean; 
                                   message?: string; 
-                                  signedUrl?: string;
                                   existingFile?: boolean;
                                   jobId?: string;
                                   status?: string;
+                                  data?: {
+                                    url?: string;
+                                    fileName?: string;
+                                    propostaId?: string;
+                                  };
                                 };
                                 
                                 // PAM V1.0: Lógica inteligente de dois estágios
                                 if (response.success) {
-                                  if (response.existingFile && response.signedUrl) {
+                                  if (response.existingFile && response.data?.url) {
                                     // CENÁRIO 1: O carnê já existe. Iniciar download imediato.
                                     console.log('[CARNE] Carnê já existente encontrado. Iniciando download...');
-                                    window.open(response.signedUrl, '_blank');
+                                    window.open(response.data.url, '_blank');
                                     toast({ 
                                       title: "Download iniciado", 
                                       description: "O carnê já estava pronto." 
@@ -1936,7 +1940,7 @@ export default function CobrancasPage() {
                                     // (Polling será implementado em iteração futura conforme necessário)
                                   } else {
                                     // CENÁRIO DE ERRO: Resposta inesperada
-                                    throw new Error('Resposta da API inválida - sem signedUrl nem jobId.');
+                                    throw new Error('Resposta da API inválida - sem data.url nem jobId.');
                                   }
                                 } else {
                                   toast({
