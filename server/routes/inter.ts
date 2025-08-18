@@ -11,6 +11,7 @@ import { getBrasiliaTimestamp } from "../lib/timezone.js";
 import { z } from "zod";
 import { db } from "../lib/supabase.js";
 import { supabaseAdmin } from "../lib/supabase-admin.js"; // PAM V1.0 - Import para Storage
+import { getQueue } from "../lib/mock-queue.js"; // PAM V1.0 - Sistema de Job Queue
 import { interCollections, propostas, historicoObservacoesCobranca } from "@shared/schema";
 import { eq, and } from "drizzle-orm";
 
@@ -1133,21 +1134,31 @@ router.get(
             // SOLUÇÃO ESCALÁVEL: Enfileirar sincronização assíncrona em vez de bloquear resposta
             console.log(`[STORAGE PDF] 🔄 ESCALABILIDADE V2: Enfileirando sincronização assíncrona`);
             
-            // NOTA: Sistema de filas ainda não implementado - fallback temporário
-            console.log(`[STORAGE PDF] ⚠️ Sistema de filas assíncronas requer implementação`);
+            // Usar o sistema de mock-queue que já está configurado
+            const queue = getQueue('boleto-sync');
             
-            // TODO: Implementar sistema de filas BullMQ para processamento assíncrono
-            // Por enquanto, manter comportamento atual mas documentar necessidade
-            console.log(`[STORAGE PDF] 🚧 ARQUITETURA: Sistema de filas necessário para escalabilidade`);
+            // Enfileirar job de sincronização com alta prioridade
+            const job = await queue.add('SYNC_PROPOSAL_BOLETOS', {
+              type: 'SYNC_PROPOSAL_BOLETOS',
+              propostaId,
+              priority: 'high',
+              reason: 'pdf_access_fallback',
+              requestedPdf: codigoSolicitacao,
+              timestamp: new Date().toISOString()
+            });
             
-            // Retornar resposta imediata informando sobre processamento assíncrono
+            console.log(`[STORAGE PDF] ✅ ESCALÁVEL: Job ${job.id} enfileirado para sincronização assíncrona`);
+            console.log(`[STORAGE PDF] 📊 Estimativa: 30-60 segundos para processar proposta ${propostaId}`);
+            
+            // Retornar resposta imediata com status 202 (Accepted)
             return res.status(202).json({
               success: false,
               error: "PDF_SYNC_IN_PROGRESS",
               message: "PDF não encontrado. Sincronização iniciada em background. Tente novamente em 30-60 segundos.",
               details: "Sistema está processando boletos de forma assíncrona para evitar timeout",
               syncStatus: "async_processing",
-              estimatedTime: "30-60 segundos"
+              estimatedTime: "30-60 segundos",
+              jobId: job.id
             });
             
           } catch (syncError: any) {

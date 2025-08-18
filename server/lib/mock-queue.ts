@@ -218,6 +218,7 @@ class MockQueue extends EventEmitter {
     try {
       switch (job.data.type) {
         case 'SYNC_BOLETOS':
+        case 'SYNC_PROPOSAL_BOLETOS': // PAM V1.0 - Suporte para fallback assíncrono de PDFs
           console.log(`[WORKER:BOLETO] 📥 Syncing boletos for proposal ${job.data.propostaId}`);
           
           await job.updateProgress(10);
@@ -232,6 +233,11 @@ class MockQueue extends EventEmitter {
           const syncDuration = Date.now() - startTime;
           console.log(`[WORKER:BOLETO] ✅ Synced ${result.boletosProcessados}/${result.totalBoletos} boletos in ${syncDuration}ms`);
           
+          // Se foi um fallback de PDF específico, log adicional
+          if (job.data.requestedPdf) {
+            console.log(`[WORKER:BOLETO] 🎯 Fallback para PDF ${job.data.requestedPdf} processado com sucesso`);
+          }
+          
           return {
             success: result.success,
             propostaId: result.propostaId,
@@ -240,6 +246,7 @@ class MockQueue extends EventEmitter {
             boletosComErro: result.boletosComErro,
             erros: result.erros,
             processingTime: syncDuration,
+            requestedPdf: job.data.requestedPdf // Incluir PDF solicitado se foi fallback
           };
 
         case 'GENERATE_AND_SYNC_CARNE':
@@ -385,6 +392,22 @@ export const queues = {
   document: documentQueue,
   notification: notificationQueue,
 };
+
+// PAM V1.0 - Helper function to get queue by name
+export function getQueue(queueName: string): MockQueue {
+  switch (queueName) {
+    case 'pdf-processing':
+      return pdfProcessingQueue;
+    case 'boleto-sync':
+      return boletoSyncQueue;
+    case 'document-processing':
+      return documentQueue;
+    case 'notifications':
+      return notificationQueue;
+    default:
+      throw new Error(`Queue ${queueName} not found`);
+  }
+}
 
 // Health check function
 export async function checkQueuesHealth() {

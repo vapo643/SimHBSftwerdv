@@ -17,6 +17,7 @@
 import https from "https";
 import { Agent as UndiciAgent } from "undici";
 import { createCircuitBreaker, INTER_BREAKER_OPTIONS, isCircuitBreakerOpen, formatCircuitBreakerError } from "../lib/circuit-breaker";
+import { rateLimitService } from "./rateLimitService.js"; // PAM V1.0 - Rate Limiting inteligente
 
 interface InterBankConfig {
   apiUrl: string;
@@ -708,7 +709,7 @@ class InterBankService {
   }
 
   /**
-   * Create a new collection (boleto/PIX)
+   * Create a new collection (boleto/PIX) with Rate Limiting
    */
   async emitirCobranca(cobrancaData: CobrancaRequest): Promise<CobrancaResponse> {
     try {
@@ -717,7 +718,17 @@ class InterBankService {
       // Log COMPLETE request data for debugging
       console.log("[INTER] 📋 COMPLETE Request data:", JSON.stringify(cobrancaData, null, 2));
 
-      const response = await this.makeRequest("/cobranca/v3/cobrancas", "POST", cobrancaData);
+      // PAM V1.0 - Execute with intelligent rate limiting
+      const response = await rateLimitService.executeWithRateLimit(
+        'inter-api-cobranca',
+        async () => this.makeRequest("/cobranca/v3/cobrancas", "POST", cobrancaData),
+        {
+          maxRequestsPerSecond: 5,
+          maxRetries: 3,
+          baseDelayMs: 1000,
+          maxDelayMs: 30000
+        }
+      );
 
       console.log(`[INTER] ✅ Collection created successfully: ${response.codigoSolicitacao}`);
       return response;

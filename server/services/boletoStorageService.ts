@@ -19,6 +19,8 @@ import { supabaseAdmin } from '../lib/supabase-admin';
 import { PDFDocument } from 'pdf-lib';
 // STATUS V2.0: Import do serviço de auditoria
 import { logStatusTransition } from './auditService';
+// PAM V1.0: Import do rate limiting para escalabilidade
+import { rateLimitService } from './rateLimitService';
 
 // Configuração do tamanho do lote para processamento paralelo
 const BATCH_SIZE = 5;
@@ -101,7 +103,17 @@ class BoletoStorageService {
               
               let pdfBuffer;
               try {
-                pdfBuffer = await interBankService.obterPdfCobranca(codigoSolicitacao);
+                // PAM V1.0 - Rate limiting inteligente para evitar throttling
+                pdfBuffer = await rateLimitService.executeWithRateLimit(
+                  'inter-pdf-download',
+                  async () => interBankService.obterPdfCobranca(codigoSolicitacao),
+                  {
+                    maxRequestsPerSecond: 5, // Limite observado do Banco Inter
+                    maxRetries: 3,
+                    baseDelayMs: 200, // 200ms entre requests em lote
+                    maxDelayMs: 5000
+                  }
+                );
               } catch (downloadError: any) {
                 console.error(`[SYNC-FAILURE] Falha ao baixar PDF para o codigoSolicitacao ${codigoSolicitacao}: ${downloadError.message}`);
                 throw new Error(`Download failed: ${downloadError.message}`);
