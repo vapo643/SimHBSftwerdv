@@ -1723,7 +1723,7 @@ export default function CobrancasPage() {
                             {new Intl.NumberFormat("pt-BR", {
                               style: "currency",
                               currency: "BRL",
-                            }).format(fichaCliente.resumoFinanceiro.valorTotalPago)}
+                            }).format(fichaCliente.resumoFinanceiro.totalPago || 0)}
                           </p>
                           <p className="text-sm text-muted-foreground">Total Pago</p>
                         </div>
@@ -1732,7 +1732,7 @@ export default function CobrancasPage() {
                             {new Intl.NumberFormat("pt-BR", {
                               style: "currency",
                               currency: "BRL",
-                            }).format(fichaCliente.resumoFinanceiro.valorTotalVencido)}
+                            }).format(fichaCliente.resumoFinanceiro.totalVencido || 0)}
                           </p>
                           <p className="text-sm text-muted-foreground">Total Vencido</p>
                         </div>
@@ -1741,7 +1741,7 @@ export default function CobrancasPage() {
                             {new Intl.NumberFormat("pt-BR", {
                               style: "currency",
                               currency: "BRL",
-                            }).format(fichaCliente.resumoFinanceiro.valorTotalPendente)}
+                            }).format(fichaCliente.resumoFinanceiro.totalPendente || 0)}
                           </p>
                           <p className="text-sm text-muted-foreground">Total Pendente</p>
                         </div>
@@ -1750,19 +1750,19 @@ export default function CobrancasPage() {
                       <div className="mt-4 grid grid-cols-3 gap-4">
                         <div className="rounded bg-muted p-2 text-center">
                           <p className="text-lg font-semibold">
-                            {fichaCliente.resumoFinanceiro.parcelasPagas}
+                            {(fichaCliente.parcelas?.filter((p: any) => p.status === 'pago').length || 0)}
                           </p>
                           <p className="text-xs text-muted-foreground">Parcelas Pagas</p>
                         </div>
                         <div className="rounded bg-muted p-2 text-center">
                           <p className="text-lg font-semibold">
-                            {fichaCliente.resumoFinanceiro.parcelasVencidas}
+                            {(fichaCliente.parcelas?.filter((p: any) => p.vencida).length || 0)}
                           </p>
                           <p className="text-xs text-muted-foreground">Parcelas Vencidas</p>
                         </div>
                         <div className="rounded bg-muted p-2 text-center">
                           <p className="text-lg font-semibold">
-                            {fichaCliente.resumoFinanceiro.parcelasPendentes}
+                            {(fichaCliente.parcelas?.filter((p: any) => p.status === 'pendente' && !p.vencida).length || 0)}
                           </p>
                           <p className="text-xs text-muted-foreground">Parcelas Pendentes</p>
                         </div>

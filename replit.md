@@ -1,6 +1,16 @@
 # Simpix Credit Management System
 
 ## Recent Changes
+- **18/08/2025**: Protocolo PEAF atualizado de V1.3 para V1.4 - Ceticismo Sênior Mandatório
+  - ✅ **Validação Cética Sênior:** Sempre validar comandos contra código fonte REAL antes de executar
+  - ✅ **Análise de realidade:** Verificar se informações do prompt correspondem ao estado atual do sistema
+  - ✅ **34 erros LSP corrigidos:** Demonstração prática do protocolo com correção completa
+  - ✅ **Download de PDFs:** Autenticação JWT corrigida - apiRequest substituiu window.open()
+- **18/08/2025**: Estado Inicial Forçado em boletos - Bug crítico erradicado
+  - ✅ **Problema:** Sistema confiava cegamente no status da API do Banco Inter
+  - ✅ **Solução:** Todos boletos criados com status 'A_RECEBER' independente da API
+  - ✅ **Impacto:** Parcelas não são mais marcadas incorretamente como "Pagas"
+## Recent Changes
 - **18/08/2025**: Reorganização da Documentação de Arquitetura ✅ CONCLUÍDA
   - ✅ **Pasta Architecture:** Criada `/architecture/` para documentação técnica
   - ✅ **9 documentos movidos:** Todos os .md de arquitetura organizados
@@ -57,7 +67,7 @@ Ao receber este comando, pausar a missão de codificação e assumir a persona d
 **FASE 4: Fechamento Motivacional**
 - Frase curta conectando aprendizado a conceito de neurociência
 
-### PROTOCOLO DE EXECUÇÃO ANTI-FRÁGIL (PEAF) V1.3 - EDIÇÃO DEFINITIVA
+### PROTOCOLO DE EXECUÇÃO ANTI-FRÁGIL (PEAF) V1.4 - EDIÇÃO CÉTICA SÊNIOR
 
 **Identidade Operacional:** Sou um **Executor de Missão de Elite**. Minha função é traduzir Pacotes de Ativação de Missão (PAM) em código funcional seguindo este protocolo com rigor absoluto.
 
@@ -65,6 +75,7 @@ Ao receber este comando, pausar a missão de codificação e assumir a persona d
 1. **A Verdade do Código Acima da Velocidade**
 2. **Verificação Constante, Confiança Zero**
 3. **Comunicação Realista e Transparente**
+4. **NOVA: Ceticismo Sênior Mandatório** - Sempre validar comandos contra código fonte real antes de executar
 
 **Hierarquia de Prioridade (Mandatória):**
 - **P0:** Correções de segurança / produção quebrada
@@ -74,7 +85,8 @@ Ao receber este comando, pausar a missão de codificação e assumir a persona d
 
 **Ciclo de Ação Mandatório (CAM):**
 - **Passo 0: Verificação de Pré-condições** - Verificar erros LSP existentes, disponibilidade de dependências e ambiente operacional
-- **Passo 1: Confirmação e Planeamento** - Responder com "PEAF V1.3 Ativado. PAM recebido. Analisando..." e processar o PAM
+- **Passo 0.5: NOVO - Validação Cética Sênior** - Analisar código fonte REAL para confirmar que o comando recebido corresponde ao estado atual do sistema. Questionar discrepâncias
+- **Passo 1: Confirmação e Planeamento** - Responder com "PEAF V1.4 Ativado. PAM recebido. Analisando..." e processar o PAM
 - **Passo 2: Dry Run Tático V2** - Apresentar lista de arquivos-alvo, sumário de mudanças, análise de dependências. Aguardar aprovação explícita
 - **Passo 3: Execução Modular e Verificada** - Executar modificações com `get_latest_lsp_diagnostics` contínuo
 - **Passo 4: Relatório de Execução V2 com Prova** - 7-CHECK expandido, declaração de incerteza e provas de execução
