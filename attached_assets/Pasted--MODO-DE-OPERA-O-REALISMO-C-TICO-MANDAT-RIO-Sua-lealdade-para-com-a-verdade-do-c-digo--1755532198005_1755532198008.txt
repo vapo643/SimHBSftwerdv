@@ -1,0 +1,38 @@
+**### MODO DE OPERAÇÃO: REALISMO CÉTICO (MANDATÓRIO)**
+Sua lealdade é para com a verdade do código e a estabilidade da produção.
+
+---
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Realizar uma auditoria forense completa do backend e do frontend para verificar a fonte, a lógica de cálculo e a exibição dos KPIs da "Tela de Cobranças" (`Valor em Atraso`, `Taxa de Inadimplência`, `Valor Total da Carteira`).
+* **Intenção Estratégica (O Porquê):** Para garantir que os indicadores estratégicos que guiam a nossa operação de cobranças sejam 100% precisos, confiáveis e baseados em dados reais, eliminando qualquer `mock data` ou lógica de cálculo defeituosa.
+* **Histórico Relevante (Consulta Obrigatória):** Em auditorias anteriores, identificamos e corrigimos a fonte da verdade para os dados das propostas e parcelas. Esta missão é para garantir que a camada de agregação (os KPIs) utilize esta nova fonte da verdade de forma correta.
+* **Modelo Mental (Como se Encaixa):** Você é um Auditor de Dados e de Sistemas. Sua tarefa é rastrear o fluxo de cada KPI, desde a query SQL/Drizzle de agregação no backend até o componente React que o exibe na tela.
+* **Riscos Antecipados:** **Risco:** Cálculos de agregação podem mascarar erros sutis. **Contramedida:** Sua análise não deve ser superficial. Para cada KPI, você deve apresentar o trecho de código exato que executa o cálculo.
+
+---
+
+**IMPLEMENTAR:**
+Um relatório de auditoria detalhado. **NÃO FAÇA MODIFICAÇÕES.**
+
+**CURRENT STATE:**
+A "Tela de Cobranças" exibe três KPIs principais, mas não temos certeza se eles são calculados com base em dados reais e com a lógica de negócio correta.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um relatório de auditoria que, para cada um dos três KPIs, responda a todas as questões abaixo com evidências de código.
+
+**CONSTRAINTS (Roadmap de Auditoria Forense):**
+
+**1. Auditoria do Backend (O "Motor de Cálculo"):**
+    - **Ação:** Localize o endpoint de backend responsável por calcular os KPIs (provavelmente `GET /api/cobrancas/kpis`).
+    - **Relatório 1 (Valor Total em Atraso):** Apresente o trecho de código exato que calcula este valor. Ele está a somar (`SUM`) corretamente o valor das parcelas com status `VENCIDO` ou `ATRASADO` da nossa fonte da verdade (`parcelas` ou `inter_collections`)?
+    - **Relatório 2 (Taxa de Inadimplência):** Apresente o código que calcula esta taxa. A fórmula utilizada está correta (ex: `(contratos com parcelas vencidas / total de contratos ativos) * 100`)?
+    - **Relatório 3 (Valor Total da Carteira):** Apresente o código que calcula este valor. Ele está a somar corretamente o `valorRestante` a ser pago de todas as propostas ativas em cobrança?
+
+**2. Auditoria do Frontend (A "Camada de Apresentação"):**
+    - **Ação:** Inspecione o ficheiro `client/src/pages/financeiro/CobrancasPage.tsx`.
+    - **Relatório 4:** Confirme que os componentes de KPI estão a buscar seus dados do endpoint `GET /api/cobrancas/kpis` através de uma chamada `useQuery`.
+    - **Relatório 5:** Confirme que os valores recebidos da API estão a ser exibidos nos componentes corretos sem nenhuma modificação ou cálculo adicional no frontend.
+
+**Relatório Final:**
+O critério de sucesso é um relatório forense completo que nos dê um "sim" ou "não" definitivo para a seguinte pergunta: **A implementação atual dos KPIs está 100% alinhada com a realidade dos dados no nosso banco de dados?**
