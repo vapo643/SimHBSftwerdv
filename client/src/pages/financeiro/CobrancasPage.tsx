@@ -1666,52 +1666,7 @@ export default function CobrancasPage() {
                     </Card>
                   )}
 
-                  {/* Dados Bancários */}
-                  {fichaCliente.dadosBancarios?.banco && (
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="flex items-center text-base">
-                          <CreditCard className="mr-2 h-4 w-4" />
-                          Dados Bancários
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent className="grid grid-cols-2 gap-4 text-sm">
-                        <div>
-                          <Label className="text-muted-foreground">Banco</Label>
-                          <p className="font-medium">{fichaCliente.dadosBancarios.banco}</p>
-                        </div>
-                        <div>
-                          <Label className="text-muted-foreground">Agência</Label>
-                          <p className="font-medium">{fichaCliente.dadosBancarios.agencia}</p>
-                        </div>
-                        <div>
-                          <Label className="text-muted-foreground">Conta</Label>
-                          <p className="font-medium">{fichaCliente.dadosBancarios.conta}</p>
-                        </div>
-                        <div>
-                          <Label className="text-muted-foreground">Tipo</Label>
-                          <p className="font-medium">{fichaCliente.dadosBancarios.tipoConta}</p>
-                        </div>
-                        {fichaCliente.dadosBancarios.pix && (
-                          <div className="col-span-2">
-                            <Label className="text-muted-foreground">Chave PIX</Label>
-                            <p className="flex items-center gap-2 font-medium">
-                              {fichaCliente.dadosBancarios.pix}
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() =>
-                                  copyToClipboard(fichaCliente.dadosBancarios.pix, "PIX")
-                                }
-                              >
-                                <Copy className="h-3 w-3" />
-                              </Button>
-                            </p>
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  )}
+{/* PAM V1.0 FASE 3 - Seção "Dados Bancários" removida conforme especificação */}
 
                   {/* Resumo Financeiro */}
                   <Card>
@@ -1895,66 +1850,54 @@ export default function CobrancasPage() {
                           Detalhamento de Parcelas
                         </CardTitle>
                         <div className="flex gap-2">
-                          {/* PAM V1.0 - Botão para Sincronizar Boletos (Baixar PDFs) */}
+                          {/* PAM V1.0 FASE 1 - Botão Único "Baixar Carnê" */}
                           <Button
                             size="sm"
                             variant="default"
                             onClick={async () => {
                               try {
                                 toast({
-                                  title: "Baixando boletos...",
-                                  description: "Sincronizando PDFs do Banco Inter para o Storage",
+                                  title: "Gerando carnê...",
+                                  description: "Compilando carnê consolidado de boletos",
                                 });
                                 
-                                // Chamar endpoint de sincronização de boletos
+                                // Chamar endpoint de geração de carnê consolidado
                                 const response = await apiRequest(
-                                  `/api/propostas/${selectedPropostaId}/sincronizar-boletos`,
+                                  `/api/propostas/${selectedPropostaId}/gerar-carne`,
                                   { method: "POST" }
                                 ) as { 
                                   success: boolean; 
-                                  jobId?: string;
-                                  boletosProcessados?: number;
                                   message?: string; 
+                                  signedUrl?: string;
                                 };
                                 
-                                if (response.success) {
+                                if (response.success && response.signedUrl) {
                                   toast({
-                                    title: "Sincronização iniciada",
-                                    description: response.jobId 
-                                      ? "Os boletos estão sendo baixados em background. Aguarde alguns segundos."
-                                      : `${response.boletosProcessados || 0} boletos sincronizados`,
+                                    title: "Carnê gerado",
+                                    description: "Abrindo carnê consolidado para visualização",
                                   });
                                   
-                                  // Iniciar polling para verificar status
-                                  setSyncStatus('em_andamento');
-                                  setIsPolling(true);
-                                  setPollCount(0);
+                                  // Abrir carnê via URL assinada
+                                  window.open(response.signedUrl, '_blank');
                                 } else {
                                   toast({
-                                    title: "Erro na sincronização",
-                                    description: response.message || "Falha ao sincronizar boletos",
+                                    title: "Erro na geração",
+                                    description: response.message || "Falha ao gerar carnê consolidado",
                                     variant: "destructive",
                                   });
                                 }
-                                
-                                // Recarregar ficha após alguns segundos
-                                setTimeout(() => {
-                                  queryClient.invalidateQueries({ 
-                                    queryKey: ["/api/cobrancas/ficha", selectedPropostaId] 
-                                  });
-                                }, 3000);
                               } catch (error) {
                                 toast({
-                                  title: "Erro ao baixar boletos",
-                                  description: "Não foi possível conectar com o Banco Inter",
+                                  title: "Erro ao gerar carnê",
+                                  description: "Não foi possível gerar o carnê consolidado",
                                   variant: "destructive",
                                 });
                               }
                             }}
-                            title="Baixar todos os PDFs de boletos do Banco Inter"
+                            title="Gerar e baixar carnê consolidado de todos os boletos"
                           >
                             <Download className="mr-2 h-3 w-3" />
-                            Baixar Boletos
+                            Baixar Carnê
                           </Button>
                           
                           {/* Botão de Atualização de Status */}
@@ -2065,97 +2008,7 @@ export default function CobrancasPage() {
                                   </Tooltip>
                                 </TooltipProvider>
                                 
-                                {/* PAM V1.0 - Botão Download PDF com Consciência de Estado */}
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  disabled={!parcela.codigoSolicitacao || syncStatus === 'em_andamento'}
-                                  onClick={async () => {
-                                    if (parcela.codigoSolicitacao) {
-                                      try {
-                                        console.log(`[STORAGE PDF] 🚀 PAM V1.0 - Iniciando download via Storage para código: ${parcela.codigoSolicitacao}`);
-                                        console.log(`[STORAGE PDF] ⚡ ANTIFRÁGIL: Usando Storage interno, eliminando API externa`);
-                                        
-                                        // PAM V1.0 - REFATORAÇÃO ANTIFRÁGIL: Buscar URL do Storage
-                                        const response = await apiRequest(
-                                          `/api/inter/collections/${parcela.codigoSolicitacao}/pdf`,
-                                          { 
-                                            method: "GET",
-                                            responseType: "json" 
-                                          }
-                                        ) as { success: boolean; signedUrl?: string; message?: string; error?: string };
-                                        
-                                        if (response.success && response.signedUrl) {
-                                          console.log(`[STORAGE PDF] ✅ URL assinada recebida do Storage`);
-                                          console.log(`[STORAGE PDF] 🎯 SUCESSO ANTIFRÁGIL: Nenhuma chamada à API externa`);
-                                          
-                                          // Abrir PDF via URL assinada do Storage
-                                          window.open(response.signedUrl, '_blank');
-                                        } else {
-                                          throw new Error(response.message || 'PDF não disponível no Storage');
-                                        }
-                                      } catch (error: any) {
-                                        console.error("[STORAGE PDF] ❌ Erro ao buscar PDF no Storage:", error);
-                                        
-                                        // PAM V1.0 - Tratamento escalável para sincronização assíncrona
-                                        if (error?.message?.includes("PDF_NOT_AVAILABLE") || error?.message?.includes("PDF_SYNC_IN_PROGRESS")) {
-                                          // ESCALABILIDADE V2: Detectar processamento assíncrono
-                                          if (error?.status === 202 && error?.data?.syncStatus === 'async_processing') {
-                                            toast({
-                                              title: "Processando boletos...",
-                                              description: `Sistema está sincronizando boletos em background. Tempo estimado: ${error?.data?.estimatedTime || '30-60 segundos'}. Tente novamente em breve.`,
-                                              variant: "default",
-                                            });
-                                          } else if (error?.status === 404 && error?.data?.syncStatus === 'sync_required') {
-                                            toast({
-                                              title: "Sincronizando boletos...",
-                                              description: "Sistema detectou boletos não sincronizados e está processando automaticamente. Aguarde alguns segundos e tente novamente.",
-                                              variant: "default",
-                                            });
-                                          } else {
-                                            toast({
-                                              title: "PDF não sincronizado",
-                                              description: "O PDF ainda não foi sincronizado para o Storage. Tente novamente em instantes.",
-                                              variant: "destructive",
-                                            });
-                                          }
-                                        } else if (error?.message?.includes("BOLETO_NOT_FOUND")) {
-                                          toast({
-                                            title: "Boleto não encontrado",
-                                            description: "Boleto não encontrado no sistema.",
-                                            variant: "destructive",
-                                          });
-                                        } else {
-                                          toast({
-                                            title: "Erro ao acessar PDF",
-                                            description: "Não foi possível acessar o PDF do boleto via Storage",
-                                            variant: "destructive",
-                                          });
-                                        }
-                                      }
-                                    } else {
-                                      toast({
-                                        title: "PDF não disponível",
-                                        description: "PDF do boleto ainda não foi gerado",
-                                        variant: "destructive",
-                                      });
-                                    }
-                                  }}
-                                  title={
-                                    syncStatus === 'em_andamento'
-                                      ? "Sincronização em andamento, aguarde..."
-                                      : parcela.codigoSolicitacao
-                                        ? "Baixar PDF do boleto"
-                                        : "PDF não disponível - aguardando geração"
-                                  }
-                                >
-                                  {syncStatus === 'em_andamento' ? (
-                                    <Loader2 className="mr-1.5 h-3 w-3 animate-spin" />
-                                  ) : (
-                                    <Download className="mr-1.5 h-3 w-3" />
-                                  )}
-                                  PDF
-                                </Button>
+{/* PAM V1.0 FASE 1 - Downloads individuais removidos: Use "Baixar Carnê" para consolidado */}
                                 
                                 {/* Badge de Status - Usando status REAL do Inter */}
                                 <Badge
@@ -2190,9 +2043,15 @@ export default function CobrancasPage() {
                                             description: `Parcela ${parcela.numeroParcela} foi marcada como paga com sucesso`,
                                           });
                                           
-                                          // Recarregar ficha
+                                          // PAM V1.0 FASE 2: Blindagem total - invalidar todos os caches relevantes
                                           queryClient.invalidateQueries({ 
                                             queryKey: ["/api/cobrancas/ficha", selectedPropostaId] 
+                                          });
+                                          queryClient.invalidateQueries({ 
+                                            queryKey: ["/api/cobrancas"] 
+                                          });
+                                          queryClient.invalidateQueries({ 
+                                            queryKey: ["/api/cobrancas/kpis"] 
                                           });
                                         }
                                       } catch (error) {

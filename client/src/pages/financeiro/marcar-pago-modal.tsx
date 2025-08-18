@@ -82,8 +82,10 @@ export default function MarcarPagoModal({
       setArquivo(null);
       setShowConfirmDialog(false);
 
-      // Invalidar cache e chamar callback
+      // PAM V1.0 FASE 2: Blindagem total - invalidar todos os caches relevantes
       queryClient.invalidateQueries({ queryKey: ["/api/pagamentos"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/cobrancas"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/cobrancas/kpis"] });
       onConfirm();
     },
     onError: (error: any) => {
