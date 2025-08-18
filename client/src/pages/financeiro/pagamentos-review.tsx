@@ -99,47 +99,21 @@ export default function PaymentReviewModal({
     });
   };
 
-  // Função para visualizar CCB com autenticação JWT
-  const handleViewCCB = async () => {
-    try {
-      const ccbPath = proposta.caminhoCcbAssinado || proposta.ccb_documento_url;
-      
-      if (ccbPath) {
-        // Usar apiRequest com blob para incluir JWT token
-        const blob = await apiRequest(
-          `/api/documentos/download?path=${encodeURIComponent(ccbPath)}`,
-          { method: "GET", responseType: "blob" }
-        ) as Blob;
-        
-        // Criar URL temporária e fazer download
-        const downloadUrl = window.URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = downloadUrl;
-        link.download = `CCB-${proposta.id}.pdf`;
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        window.URL.revokeObjectURL(downloadUrl);
-        
-        toast({
-          title: "CCB baixada com sucesso",
-          description: "O documento foi salvo no seu computador.",
-        });
-      } else if (proposta.clicksign_document_key) {
-        // Fallback para ClickSign (não precisa de JWT)
-        window.open(`https://app.clicksign.com/documents/${proposta.clicksign_document_key}`, "_blank");
-      } else {
-        toast({
-          title: "CCB não disponível",
-          description: "Documento ainda não foi gerado.",
-          variant: "destructive",
-        });
-      }
-    } catch (error: any) {
-      console.error("❌ [CCB DOWNLOAD] Erro:", error);
+  // Função para visualizar CCB em nova aba
+  const handleViewCCB = () => {
+    const ccbPath = proposta.caminhoCcbAssinado || proposta.ccb_documento_url;
+    
+    if (ccbPath) {
+      // Abrir endpoint que faz redirecionamento para URL assinada
+      const ccbUrl = `/api/documentos/download?path=${encodeURIComponent(ccbPath)}`;
+      window.open(ccbUrl, "_blank");
+    } else if (proposta.clicksign_document_key) {
+      // Fallback para ClickSign
+      window.open(`https://app.clicksign.com/documents/${proposta.clicksign_document_key}`, "_blank");
+    } else {
       toast({
-        title: "Erro ao baixar CCB",
-        description: error.message || "Não foi possível baixar o documento.",
+        title: "CCB não disponível",
+        description: "Documento ainda não foi gerado.",
         variant: "destructive",
       });
     }
