@@ -235,11 +235,11 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
       console.log(`[PAGAMENTOS DEBUG] ========================================`);
     }
 
-    // REGRA CRÍTICA DE SEGURANÇA: Uma proposta só pode aparecer para pagamento se:
-    // 1. CCB foi assinada (ccb_gerado = true AND assinatura_eletronica_concluida = true)
+    // REGRA CRÍTICA DE SEGURANÇA - STATUS SYSTEM V2.0: Uma proposta só pode aparecer para pagamento se:
+    // 1. CCB foi gerado e assinado (ccb_gerado = true)
     // 2. Boletos foram gerados no Inter Bank
-    // 3. Status está como pronto_pagamento ou aguardando_desembolso
-    console.log(`[PAGAMENTOS SECURITY] Aplicando filtros críticos de segurança para pagamentos`);
+    // 3. Status V2.0: BOLETOS_EMITIDOS, PAGAMENTO_PENDENTE ou QUITADO (para histórico)
+    console.log(`[PAGAMENTOS SECURITY] Aplicando filtros críticos de segurança para pagamentos - Status System V2.0`);
 
     // Query mais simples: buscar propostas elegíveis e verificar boletos depois
     const propostasElegiveis = await db
@@ -258,11 +258,10 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
         and(
           // Não pode estar deletada
           sql`${propostas.deletedAt} IS NULL`,
-          // OBRIGATÓRIO: CCB deve estar assinada
+          // OBRIGATÓRIO: CCB deve estar gerado (assinatura não obrigatória para BOLETOS_EMITIDOS)
           eq(propostas.ccbGerado, true),
-          eq(propostas.assinaturaEletronicaConcluida, true),
-          // Status deve ser contratos_assinados, pronto_pagamento OU pago (para histórico)
-          inArray(propostas.status, ["contratos_assinados", "pronto_pagamento", "pago"])
+          // Status V2.0: BOLETOS_EMITIDOS (pronto para pagamento), PAGAMENTO_PENDENTE ou QUITADO (histórico)
+          inArray(propostas.status, ["BOLETOS_EMITIDOS", "PAGAMENTO_PENDENTE", "QUITADO"])
         )
       )
       .orderBy(desc(propostas.dataAprovacao));
