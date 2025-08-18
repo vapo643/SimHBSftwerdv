@@ -41,7 +41,7 @@ function ProposalForm() {
   // Handle context data
   React.useEffect(() => {
     if (contextData) {
-      setContext(contextData);
+      setContext(contextData as any); // Fix LSP error
       setLoading(false);
     }
   }, [contextData, setContext, setLoading]);
@@ -164,7 +164,7 @@ function ProposalForm() {
         body: proposalData,
       });
 
-      const propostaId = propostaResponse.id;
+      const propostaId = (propostaResponse as any).id;
       console.log(`[DEBUG] Proposta criada com ID: ${propostaId}`);
 
       // 2. SEGUNDO: Upload dos documentos com ID real da proposta
@@ -223,7 +223,7 @@ function ProposalForm() {
     onSuccess: data => {
       toast({
         title: "Proposta criada com sucesso!",
-        description: `Proposta ${data.id} foi encaminhada para análise com ${state.documents.length} documento(s) anexado(s).`,
+        description: `Proposta ${(data as any).id} foi encaminhada para análise com ${state.documents.length} documento(s) anexado(s).`,
       });
 
       // Limpar documentos após sucesso
