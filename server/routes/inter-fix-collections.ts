@@ -87,7 +87,7 @@ router.post(
           console.log(`📄 [FIX COLLECTIONS] Criando boleto ${i + 1}/${parcelas.length} - Parcela ${parcela.numero}`);
 
           // Criar cobrança na API Inter
-          const collectionData = await interBankService.criarCobranca({
+          const collectionData = await interBankService.emitirCobranca({
             seuNumero,
             valorNominal: parcela.valor,
             dataVencimento: parcela.vencimento,
@@ -108,7 +108,7 @@ router.post(
               seuNumero,
               valorNominal: parcela.valor.toString(),
               dataVencimento: parcela.vencimento,
-              situacao: collectionData.situacao || "EM_PROCESSAMENTO",
+              situacao: 'A_RECEBER', // PAM V1.0: Estado Inicial Forçado - nunca confiar na API
               numeroParcela: parcela.numero,
               totalParcelas: parcelas.length,
               isActive: true,
@@ -128,7 +128,6 @@ router.post(
         .set({
           interBoletoGerado: true,
           interBoletoGeradoEm: new Date(),
-          atualizadoEm: new Date(),
         })
         .where(eq(propostas.id, propostaId));
 

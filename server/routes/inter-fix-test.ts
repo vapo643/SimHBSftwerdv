@@ -107,7 +107,7 @@ router.get("/test-fix-collections/:propostaId", async (req, res) => {
             seuNumero,
             valorNominal: parcela.valor.toString(),
             dataVencimento: parcela.vencimento,
-            situacao: mockApiResponse.situacao,
+            situacao: 'A_RECEBER', // PAM V1.0: Estado Inicial Forçado - nunca confiar na API
             numeroParcela: parcela.numero,
             totalParcelas: parcelas.length,
             isActive: true,
