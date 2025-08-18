@@ -2097,10 +2097,16 @@ export default function CobrancasPage() {
                                       } catch (error: any) {
                                         console.error("[STORAGE PDF] ❌ Erro ao buscar PDF no Storage:", error);
                                         
-                                        // PAM V1.0 - Tratamento inteligente de erros com sincronização automática
-                                        if (error?.message?.includes("PDF_NOT_AVAILABLE")) {
-                                          // Verificar se houve tentativa de sincronização automática
-                                          if (error?.status === 404 && error?.data?.syncStatus === 'sync_required') {
+                                        // PAM V1.0 - Tratamento escalável para sincronização assíncrona
+                                        if (error?.message?.includes("PDF_NOT_AVAILABLE") || error?.message?.includes("PDF_SYNC_IN_PROGRESS")) {
+                                          // ESCALABILIDADE V2: Detectar processamento assíncrono
+                                          if (error?.status === 202 && error?.data?.syncStatus === 'async_processing') {
+                                            toast({
+                                              title: "Processando boletos...",
+                                              description: `Sistema está sincronizando boletos em background. Tempo estimado: ${error?.data?.estimatedTime || '30-60 segundos'}. Tente novamente em breve.`,
+                                              variant: "default",
+                                            });
+                                          } else if (error?.status === 404 && error?.data?.syncStatus === 'sync_required') {
                                             toast({
                                               title: "Sincronizando boletos...",
                                               description: "Sistema detectou boletos não sincronizados e está processando automaticamente. Aguarde alguns segundos e tente novamente.",

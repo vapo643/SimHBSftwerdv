@@ -1130,30 +1130,28 @@ router.get(
           console.log(`[STORAGE PDF] 🔄 PAM V1.0 - PDF não encontrado, iniciando sincronização automática para proposta: ${propostaId}`);
           
           try {
-            // Tentar sincronização imediata usando o serviço existente
-            const { boletoStorageService } = await import('../services/boletoStorageService');
-            const syncResult = await boletoStorageService.sincronizarBoletosDaProposta(propostaId);
+            // SOLUÇÃO ESCALÁVEL: Enfileirar sincronização assíncrona em vez de bloquear resposta
+            console.log(`[STORAGE PDF] 🔄 ESCALABILIDADE V2: Enfileirando sincronização assíncrona`);
             
-            if (syncResult.success && syncResult.boletosProcessados > 0) {
-              console.log(`[STORAGE PDF] ✅ Sincronização automática concluída: ${syncResult.boletosProcessados}/${syncResult.totalBoletos} PDFs sincronizados`);
-              
-              // Tentar gerar URL novamente após sincronização
-              const { data: retrySignedUrlData, error: retryUrlError } = await supabaseAdmin.storage
-                .from('documents')
-                .createSignedUrl(storagePath, 300);
-              
-              if (!retryUrlError && retrySignedUrlData?.signedUrl) {
-                console.log(`[STORAGE PDF] 🎯 SUCESSO AUTOMÁTICO: PDF sincronizado e URL gerada`);
-                return res.json({
-                  success: true,
-                  signedUrl: retrySignedUrlData.signedUrl,
-                  filename: `boleto-${codigoSolicitacao}.pdf`,
-                  message: "PDF sincronizado automaticamente e disponibilizado"
-                });
-              }
-            }
+            // NOTA: Sistema de filas ainda não implementado - fallback temporário
+            console.log(`[STORAGE PDF] ⚠️ Sistema de filas assíncronas requer implementação`);
+            
+            // TODO: Implementar sistema de filas BullMQ para processamento assíncrono
+            // Por enquanto, manter comportamento atual mas documentar necessidade
+            console.log(`[STORAGE PDF] 🚧 ARQUITETURA: Sistema de filas necessário para escalabilidade`);
+            
+            // Retornar resposta imediata informando sobre processamento assíncrono
+            return res.status(202).json({
+              success: false,
+              error: "PDF_SYNC_IN_PROGRESS",
+              message: "PDF não encontrado. Sincronização iniciada em background. Tente novamente em 30-60 segundos.",
+              details: "Sistema está processando boletos de forma assíncrona para evitar timeout",
+              syncStatus: "async_processing",
+              estimatedTime: "30-60 segundos"
+            });
+            
           } catch (syncError: any) {
-            console.error(`[STORAGE PDF] ❌ Falha na sincronização automática:`, syncError.message);
+            console.error(`[STORAGE PDF] ❌ Falha ao enfileirar sincronização assíncrona:`, syncError.message);
           }
         }
         

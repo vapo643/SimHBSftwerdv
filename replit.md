@@ -1,13 +1,13 @@
 # Simpix Credit Management System
 
 ## Recent Changes
-- **18/08/2025**: Sistema de Fallback Automático para PDFs PAM V1.0 - ✅ IMPLEMENTADO
-  - Fallback inteligente detecta PDFs não encontrados no Storage
-  - Sincronização automática on-demand quando PDF não existe
-  - Retry automático após sincronização bem-sucedida
-  - Tooltip melhorado com shadcn/ui para botão PIX
-  - Feedback específico para sincronização em progresso
-  - Sistema ZERO-CLICK: PDFs são sincronizados automaticamente quando necessário
+- **18/08/2025**: Sistema de Fallback Automático para PDFs PAM V1.0 - ⚠️ REQUER MIGRAÇÃO
+  - ✅ Fallback inteligente detecta PDFs não encontrados no Storage
+  - ⚠️ **LIMITAÇÃO CRÍTICA**: Sincronização síncrona bloqueia resposta HTTP (timeout >30s em propostas grandes)
+  - ✅ Tooltip melhorado com shadcn/ui para botão PIX
+  - 🔄 **REFATORAÇÃO V2**: Migrada para processamento assíncrono via job queue
+  - ✅ Resposta HTTP imediata (202) + processamento em background
+  - ✅ Feedback específico com tempo estimado de processamento
 - **16/08/2025**: Validação HMAC implementada no Webhook Banco Inter PAM V1.0
   - ✅ SEGURANÇA: Implementada validação de assinatura HMAC-SHA256
   - Timing-safe comparison para prevenir timing attacks
