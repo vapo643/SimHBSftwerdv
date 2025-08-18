@@ -35,6 +35,7 @@ import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { api } from "@/lib/apiClient";
@@ -135,6 +136,7 @@ export default function Pagamentos() {
   const [verificationData, setVerificationData] = useState<any>(null);
   const [paymentPassword, setPaymentPassword] = useState("");
   const [paymentObservation, setPaymentObservation] = useState("");
+  const [mostrarPagos, setMostrarPagos] = useState(false);
 
   // Buscar pagamentos
   const {
@@ -143,13 +145,14 @@ export default function Pagamentos() {
     error,
     refetch,
   } = useQuery({
-    queryKey: ["/api/pagamentos", { status: statusFilter, periodo: periodoFilter }],
+    queryKey: ["/api/pagamentos", { status: statusFilter, periodo: periodoFilter, mostrarPagos }],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (statusFilter !== "todos") params.append("status", statusFilter);
       if (periodoFilter !== "todos") params.append("periodo", periodoFilter);
+      if (mostrarPagos) params.append("incluir_pagos", "true");
 
-      console.log("[PAGAMENTOS] Buscando pagamentos com filtros:", { statusFilter, periodoFilter });
+      console.log("[PAGAMENTOS] Buscando pagamentos com filtros:", { statusFilter, periodoFilter, mostrarPagos });
 
       try {
         const response = await apiRequest(`/api/pagamentos?${params.toString()}`, {
@@ -551,6 +554,16 @@ export default function Pagamentos() {
                   <SelectItem value="mes">Este Mês</SelectItem>
                 </SelectContent>
               </Select>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="mostrar-pagos"
+                  checked={mostrarPagos}
+                  onCheckedChange={setMostrarPagos}
+                />
+                <Label htmlFor="mostrar-pagos" className="text-sm">
+                  📋 Mostrar Pagos (Auditoria)
+                </Label>
+              </div>
               <Button variant="outline" onClick={() => refetch()}>
                 <RefreshCw className="mr-2 h-4 w-4" />
                 Atualizar
@@ -565,6 +578,11 @@ export default function Pagamentos() {
             <CardTitle>Solicitações de Pagamento</CardTitle>
             <CardDescription>
               Gestão de liberação de crédito para propostas aprovadas
+              {mostrarPagos && (
+                <span className="ml-2 inline-flex items-center rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700">
+                  📋 Incluindo propostas pagas para auditoria
+                </span>
+              )}
             </CardDescription>
           </CardHeader>
           <CardContent>

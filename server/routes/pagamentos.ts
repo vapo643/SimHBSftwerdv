@@ -67,7 +67,7 @@ const pagamentoSchema = z.object({
 // Buscar pagamentos
 router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
-    const { status, periodo } = req.query;
+    const { status, periodo, incluir_pagos } = req.query;
     const userId = req.user?.id;
     const userRole = req.user?.role;
 
@@ -260,8 +260,15 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
           sql`${propostas.deletedAt} IS NULL`,
           // OBRIGATÓRIO: CCB deve estar gerado (assinatura não obrigatória para BOLETOS_EMITIDOS)
           eq(propostas.ccbGerado, true),
-          // Status V2.0: BOLETOS_EMITIDOS (pronto para pagamento), PAGAMENTO_PENDENTE ou QUITADO (histórico)
-          inArray(propostas.status, ["BOLETOS_EMITIDOS", "PAGAMENTO_PENDENTE", "QUITADO"])
+          // Status V2.0: BOLETOS_EMITIDOS + PAGOS (incluir histórico para auditoria)
+          inArray(propostas.status, [
+            "BOLETOS_EMITIDOS", 
+            "PAGAMENTO_PENDENTE", 
+            "QUITADO", 
+            "pago", 
+            "pagamento_autorizado",
+            "pronto_pagamento"
+          ])
         )
       )
       .orderBy(desc(propostas.dataAprovacao));
@@ -421,7 +428,19 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     let pagamentosFiltrados = pagamentosFormatados;
 
     console.log(`[PAGAMENTOS DEBUG] Pagamentos antes dos filtros: ${pagamentosFormatados.length}`);
-    console.log(`[PAGAMENTOS DEBUG] Filtros recebidos - status: ${status}, periodo: ${periodo}`);
+    console.log(`[PAGAMENTOS DEBUG] Filtros recebidos - status: ${status}, periodo: ${periodo}, incluir_pagos: ${incluir_pagos}`);
+
+    // 🔒 AUDITORIA: Por padrão, ocultar pagamentos já processados (mas manter para consulta)
+    if (incluir_pagos !== "true") {
+      console.log(`[PAGAMENTOS DEBUG] Ocultando propostas pagas (auditoria preservada)`);
+      const antesPagos = pagamentosFiltrados.length;
+      pagamentosFiltrados = pagamentosFiltrados.filter(p => 
+        !["pago", "QUITADO", "PAGAMENTO_CONFIRMADO"].includes(p.status)
+      );
+      console.log(
+        `[PAGAMENTOS DEBUG] Após ocultar pagos: ${antesPagos} -> ${pagamentosFiltrados.length}`
+      );
+    }
 
     // Filtrar por status
     if (status && status !== "todos") {
