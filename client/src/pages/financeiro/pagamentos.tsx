@@ -702,16 +702,6 @@ export default function Pagamentos() {
                                   variant="default"
                                   className="gap-2"
                                   onClick={() => {
-                                    // AUDITORIA FORENSE: Debug dos dados passados ao modal
-                                    console.log("🔍 [AUDITORIA MODAL] Dados do pagamento selecionado:", {
-                                      id: pagamento.id,
-                                      assinaturaEletronicaConcluida: pagamento.assinaturaEletronicaConcluida,
-                                      assinatura_eletronica_concluida: (pagamento as any).assinatura_eletronica_concluida,
-                                      caminhoCcbAssinado: (pagamento as any).caminhoCcbAssinado,
-                                      ccb_documento_url: (pagamento as any).ccb_documento_url,
-                                      clicksign_document_key: (pagamento as any).clicksign_document_key,
-                                      objetoCompleto: pagamento
-                                    });
                                     setSelectedPropostaForReview(pagamento);
                                     setShowReviewModal(true);
                                   }}

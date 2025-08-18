@@ -70,6 +70,7 @@ import { securityLogger, SecurityEventType, getClientIP } from "./lib/security-l
 import { passwordSchema, validatePassword } from "./lib/password-validator";
 import { timingNormalizerMiddleware } from "./middleware/timing-normalizer";
 import timingSecurityRoutes from "./routes/timing-security";
+import documentosRoutes from "./routes/documentos";
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -5212,6 +5213,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Cliente routes para buscar dados existentes e CEP
   app.use("/api", clienteRoutes);
+
+  // Register Documentos download routes (CCB, contratos, etc)
+  app.use("/api/documentos", documentosRoutes);
 
   // Register Observações routes
   const observacoesRouter = (await import("./routes/observacoes.js")).default;
