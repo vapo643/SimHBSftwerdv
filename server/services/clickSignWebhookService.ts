@@ -15,6 +15,8 @@ import { interBankService } from "./interBankService.js";
 import { getBrasiliaTimestamp } from "../lib/timezone.js";
 // STATUS V2.0: Import do serviço de auditoria
 import { logStatusTransition } from "./auditService.js";
+// PAM V1.0: Import do serviço de processamento de documentos
+import { documentProcessingService, ProcessingSource } from "./documentProcessingService.js";
 
 interface WebhookEvent {
   event: string;
@@ -235,6 +237,39 @@ class ClickSignWebhookService {
 
     console.log(`[CLICKSIGN V2.0] Status atualizado para ASSINATURA_CONCLUIDA`);
 
+    // PAM V1.0: Processar documento assinado automaticamente
+    try {
+      console.log(`[CLICKSIGN → STORAGE] 📥 Iniciando processamento automático do documento assinado`);
+      const processingResult = await documentProcessingService.processSignedDocument(
+        proposta.id,
+        ProcessingSource.WEBHOOK,
+        data.document?.key || data.list?.key
+      );
+      
+      if (processingResult.success) {
+        console.log(`[CLICKSIGN → STORAGE] ✅ Documento processado e armazenado com sucesso para proposta ${proposta.id}`);
+        await storage.createPropostaLog({
+          propostaId: proposta.id,
+          autorId: "clicksign-webhook",
+          statusAnterior: proposta.status,
+          statusNovo: "ASSINATURA_CONCLUIDA",
+          observacao: `📄 CCB assinado baixado e armazenado no Storage: ${processingResult.details?.storagePath || 'caminho disponível'}`,
+        });
+      } else {
+        console.error(`[WEBHOOK-ERROR] Falha ao processar documento assinado para proposta ${proposta.id}: ${processingResult.message}`);
+      }
+    } catch (error) {
+      console.error(`[WEBHOOK-ERROR] Erro crítico ao processar documento assinado para proposta ${proposta.id}:`, error);
+      // Não interrompe o fluxo principal - apenas registra o erro
+      await storage.createPropostaLog({
+        propostaId: proposta.id,
+        autorId: "clicksign-webhook",
+        statusAnterior: proposta.status,
+        statusNovo: "ASSINATURA_CONCLUIDA",
+        observacao: `⚠️ Erro ao baixar CCB assinado automaticamente. Necessário processamento manual. Erro: ${error instanceof Error ? error.message : 'Erro desconhecido'}`,
+      });
+    }
+
     // CRITICAL: Trigger automatic boleto generation
     console.log(`[CLICKSIGN → INTER] 🚀 Triggering automatic boleto generation`);
     await this.triggerBoletoGeneration(proposta);
@@ -345,6 +380,30 @@ class ClickSignWebhookService {
     console.log(
       `[CLICKSIGN WEBHOOK] ✅ Updated proposal ${proposta.id} - assinatura_eletronica_concluida = true`
     );
+
+    // PAM V1.0: Processar documento assinado automaticamente (evento de assinatura individual)
+    try {
+      console.log(`[CLICKSIGN → STORAGE] 📥 Processando documento após assinatura individual`);
+      const processingResult = await documentProcessingService.processSignedDocument(
+        proposta.id,
+        ProcessingSource.WEBHOOK,
+        data.document?.key
+      );
+      
+      if (processingResult.success) {
+        console.log(`[CLICKSIGN → STORAGE] ✅ Documento processado após assinatura para proposta ${proposta.id}`);
+        await storage.createPropostaLog({
+          propostaId: proposta.id,
+          autorId: "clicksign-webhook",
+          statusAnterior: proposta.status,
+          statusNovo: proposta.status,
+          observacao: `📄 CCB processado e armazenado após assinatura${signerInfo}`,
+        });
+      }
+    } catch (error) {
+      console.error(`[WEBHOOK-ERROR] Erro ao processar documento após assinatura para proposta ${proposta.id}:`, error);
+      // Erro não bloqueia o webhook - será processado posteriormente
+    }
 
     return { processed: true, proposalId: proposta.id, documentKey: data.document?.key };
   }

@@ -93,7 +93,7 @@ export class DocumentProcessingService {
 
       // 3. Baixar documento do ClickSign
       console.log(`📥 [DOCUMENT PROCESSING] Downloading document ${clickSignDocId} from ClickSign`);
-      const pdfBuffer = await this.clickSignService.downloadSignedDocument(clickSignDocId);
+      const pdfBuffer = await this.clickSignService.downloadSignedDocument(clickSignDocId as string);
 
       if (!pdfBuffer) {
         throw new Error("Failed to download document from ClickSign");
