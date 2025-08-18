@@ -102,24 +102,27 @@ export default function PaymentReviewModal({
   // Função para visualizar CCB em nova aba com JWT
   const handleViewCCB = async () => {
     try {
-      const ccbPath = proposta.caminhoCcbAssinado || proposta.ccb_documento_url;
+      console.log("🔍 [CCB VIEW] Iniciando visualização da CCB para proposta:", proposta.id);
       
-      if (ccbPath) {
-        // Usar apiRequest para obter URL assinada com autenticação JWT
-        const response = await apiRequest(
-          `/api/documentos/download?path=${encodeURIComponent(ccbPath)}`,
-          { method: "GET" }
-        ) as { url: string };
-        
+      // Usar o endpoint correto implementado
+      const response = await apiRequest(
+        `/api/propostas/${proposta.id}/ccb`,
+        { method: "GET" }
+      ) as { url: string; nome: string; status: string; fonte: string };
+      
+      console.log("✅ [CCB VIEW] Resposta recebida:", response);
+      
+      if (response.url) {
         // Abrir URL assinada em nova aba
         window.open(response.url, "_blank");
-      } else if (proposta.clicksign_document_key) {
-        // Fallback para ClickSign
-        window.open(`https://app.clicksign.com/documents/${proposta.clicksign_document_key}`, "_blank");
+        toast({
+          title: "CCB aberta",
+          description: `Documento ${response.nome} aberto em nova aba.`,
+        });
       } else {
         toast({
           title: "CCB não disponível",
-          description: "Documento ainda não foi gerado.",
+          description: "URL do documento não foi encontrada.",
           variant: "destructive",
         });
       }
