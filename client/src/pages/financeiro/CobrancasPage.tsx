@@ -2025,39 +2025,50 @@ export default function CobrancasPage() {
 
                                     try {
                                       toast({
-                                        title: "Baixando PDF...",
-                                        description: `Baixando boleto da parcela ${parcela.numeroParcela}`,
+                                        title: "Abrindo PDF...",
+                                        description: `Abrindo boleto da parcela ${parcela.numeroParcela} em nova guia`,
                                       });
 
-                                      // PAM V1.0 - Usar apiRequest com responseType blob para autenticação JWT
-                                      const response = await apiRequest(
-                                        `/api/inter/collections/${parcela.codigoSolicitacao}/pdf`,
-                                        { 
-                                          method: "GET",
-                                          responseType: 'blob'
+                                      // PAM V1.0 RESTAURAÇÃO - Abrir PDF em nova guia para visualização web
+                                      const pdfUrl = `/api/inter/collections/${selectedPropostaId}/${parcela.codigoSolicitacao}/pdf`;
+                                      
+                                      // Obter token JWT para autenticação
+                                      const supabase = getSupabase();
+                                      const session = await supabase.auth.getSession();
+                                      
+                                      if (session?.data?.session?.access_token) {
+                                        // Construir URL com token JWT nos headers via window.open com fetch blob primeiro para autenticação
+                                        const response = await fetch(pdfUrl, {
+                                          method: 'GET',
+                                          headers: {
+                                            'Authorization': `Bearer ${session.data.session.access_token}`,
+                                            'Content-Type': 'application/pdf'
+                                          }
+                                        });
+
+                                        if (response.ok) {
+                                          // Criar blob URL e abrir em nova guia
+                                          const pdfBlob = await response.blob();
+                                          const blobUrl = URL.createObjectURL(pdfBlob);
+                                          window.open(blobUrl, '_blank');
+                                          
+                                          // Limpar blob URL após um tempo
+                                          setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+                                          
+                                          toast({
+                                            title: "PDF aberto",
+                                            description: `Boleto da parcela ${parcela.numeroParcela} aberto em nova guia`,
+                                          });
+                                        } else {
+                                          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                                         }
-                                      ) as Blob;
-
-                                      // Criar blob e iniciar download
-                                      const blob = new Blob([response], { type: 'application/pdf' });
-                                      const url = URL.createObjectURL(blob);
-                                      
-                                      const a = document.createElement('a');
-                                      a.href = url;
-                                      a.download = `boleto-parcela-${parcela.numeroParcela}-${selectedPropostaId}.pdf`;
-                                      document.body.appendChild(a);
-                                      a.click();
-                                      document.body.removeChild(a);
-                                      URL.revokeObjectURL(url);
-
-                                      toast({
-                                        title: "PDF baixado",
-                                        description: `Boleto da parcela ${parcela.numeroParcela} baixado com sucesso`,
-                                      });
+                                      } else {
+                                        throw new Error("Token de autenticação não encontrado");
+                                      }
                                     } catch (error: any) {
-                                      console.error("[PDF DOWNLOAD] Erro ao baixar PDF individual:", error);
+                                      console.error("[PDF VIEW] Erro ao abrir PDF individual:", error);
                                       
-                                      if (error?.message?.includes("PDF_NOT_AVAILABLE")) {
+                                      if (error?.message?.includes("PDF_NOT_AVAILABLE") || error?.message?.includes("404")) {
                                         toast({
                                           title: "PDF não sincronizado",
                                           description: "O PDF ainda não foi sincronizado. Tente 'Atualizar Status' primeiro.",
@@ -2069,19 +2080,25 @@ export default function CobrancasPage() {
                                           description: "Boleto não encontrado no sistema do banco.",
                                           variant: "destructive",
                                         });
+                                      } else if (error?.message?.includes("401") || error?.message?.includes("Token")) {
+                                        toast({
+                                          title: "Erro de autenticação",
+                                          description: "Sessão expirada. Faça login novamente.",
+                                          variant: "destructive",
+                                        });
                                       } else {
                                         toast({
-                                          title: "Erro ao baixar PDF",
-                                          description: "Não foi possível baixar o PDF do boleto.",
+                                          title: "Erro ao abrir PDF",
+                                          description: "Não foi possível abrir o PDF do boleto.",
                                           variant: "destructive",
                                         });
                                       }
                                     }
                                   }}
-                                  title={`Baixar PDF do boleto da parcela ${parcela.numeroParcela}`}
+                                  title={`Visualizar PDF do boleto da parcela ${parcela.numeroParcela} em nova guia`}
                                 >
-                                  <Download className="mr-1.5 h-3 w-3" />
-                                  PDF
+                                  <Eye className="mr-1.5 h-3 w-3" />
+                                  Visualizar PDF
                                 </Button>
                                 
                                 {/* Badge de Status - Usando status REAL do Inter */}
