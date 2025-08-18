@@ -1124,11 +1124,45 @@ router.get(
 
       if (urlError || !signedUrlData?.signedUrl) {
         console.error(`[STORAGE PDF] ❌ Erro ao gerar URL assinada:`, urlError);
+        
+        // PAM V1.0 - FALLBACK INTELIGENTE: Se PDF não existe no Storage, tentar sincronização automática
+        if (urlError?.message?.includes("Object not found")) {
+          console.log(`[STORAGE PDF] 🔄 PAM V1.0 - PDF não encontrado, iniciando sincronização automática para proposta: ${propostaId}`);
+          
+          try {
+            // Tentar sincronização imediata usando o serviço existente
+            const { boletoStorageService } = await import('../services/boletoStorageService');
+            const syncResult = await boletoStorageService.sincronizarBoletosDaProposta(propostaId);
+            
+            if (syncResult.success && syncResult.boletosProcessados > 0) {
+              console.log(`[STORAGE PDF] ✅ Sincronização automática concluída: ${syncResult.boletosProcessados}/${syncResult.totalBoletos} PDFs sincronizados`);
+              
+              // Tentar gerar URL novamente após sincronização
+              const { data: retrySignedUrlData, error: retryUrlError } = await supabaseAdmin.storage
+                .from('documents')
+                .createSignedUrl(storagePath, 300);
+              
+              if (!retryUrlError && retrySignedUrlData?.signedUrl) {
+                console.log(`[STORAGE PDF] 🎯 SUCESSO AUTOMÁTICO: PDF sincronizado e URL gerada`);
+                return res.json({
+                  success: true,
+                  signedUrl: retrySignedUrlData.signedUrl,
+                  filename: `boleto-${codigoSolicitacao}.pdf`,
+                  message: "PDF sincronizado automaticamente e disponibilizado"
+                });
+              }
+            }
+          } catch (syncError: any) {
+            console.error(`[STORAGE PDF] ❌ Falha na sincronização automática:`, syncError.message);
+          }
+        }
+        
         return res.status(404).json({
           success: false,
           error: "PDF_NOT_AVAILABLE",
           message: "PDF não disponível no momento. Sincronização pode estar pendente.",
-          details: urlError?.message
+          details: urlError?.message,
+          syncStatus: "sync_required"
         });
       }
 

@@ -2097,13 +2097,22 @@ export default function CobrancasPage() {
                                       } catch (error: any) {
                                         console.error("[STORAGE PDF] ❌ Erro ao buscar PDF no Storage:", error);
                                         
-                                        // Tratamento de erros específicos
+                                        // PAM V1.0 - Tratamento inteligente de erros com sincronização automática
                                         if (error?.message?.includes("PDF_NOT_AVAILABLE")) {
-                                          toast({
-                                            title: "PDF não sincronizado",
-                                            description: "O PDF ainda não foi sincronizado para o Storage. Tente novamente em instantes.",
-                                            variant: "destructive",
-                                          });
+                                          // Verificar se houve tentativa de sincronização automática
+                                          if (error?.status === 404 && error?.data?.syncStatus === 'sync_required') {
+                                            toast({
+                                              title: "Sincronizando boletos...",
+                                              description: "Sistema detectou boletos não sincronizados e está processando automaticamente. Aguarde alguns segundos e tente novamente.",
+                                              variant: "default",
+                                            });
+                                          } else {
+                                            toast({
+                                              title: "PDF não sincronizado",
+                                              description: "O PDF ainda não foi sincronizado para o Storage. Tente novamente em instantes.",
+                                              variant: "destructive",
+                                            });
+                                          }
                                         } else if (error?.message?.includes("BOLETO_NOT_FOUND")) {
                                           toast({
                                             title: "Boleto não encontrado",
