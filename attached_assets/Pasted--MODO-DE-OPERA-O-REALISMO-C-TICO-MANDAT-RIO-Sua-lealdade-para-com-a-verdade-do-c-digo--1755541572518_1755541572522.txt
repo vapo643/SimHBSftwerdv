@@ -1,0 +1,54 @@
+**### MODO DE OPERAÇÃO: REALISMO CÉTICO (MANDATÓRIO)**
+Sua lealdade é para com a verdade do código e a estabilidade da produção.
+
+---
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Corrigir o endpoint `POST /api/pagamentos/:id/confirmar-veracidade` para que ele salve corretamente as observações customizadas inseridas pelo usuário no `historicoObservacoesCobranca`, em vez de uma mensagem padrão.
+* **Intenção Estratégica (O Porquê):** A capacidade de registrar observações detalhadas durante a confirmação de um pagamento é crucial para a auditoria e o histórico de decisões financeiras. A lógica atual que descarta a entrada do usuário é uma falha de integridade de dados que precisa ser erradicada.
+* **Histórico Relevante (Consulta Obrigatória):** Sua auditoria forense foi perfeita. Ela identificou que o frontend envia as `observacoes` corretamente, mas o backend as ignora. Sua missão é conectar esses dois pontos no backend.
+* **Modelo Mental (Como se Encaixa):** Você atuará como Engenheiro de Backend. A tarefa é uma modificação cirúrgica em um único endpoint para garantir que um campo recebido no `req.body` seja corretamente persistido no banco de dados.
+* **Riscos Antecipados:** **Risco:** BAIXO. Esta é uma alteração de baixo risco e focada em um único ficheiro.
+
+---
+
+**IMPLEMENTAR:**
+A correção do salvamento de observações no fluxo de "Confirmar Veracidade".
+
+**BUG/CURRENT STATE:**
+O endpoint `POST /api/pagamentos/:id/confirmar-veracidade` recebe o campo `observacoes` do frontend, mas o ignora e salva uma mensagem genérica e hardcoded na tabela `historicoObservacoesCobranca`.
+
+**EXPECTED (Estado Final de Sucesso):**
+O endpoint `POST /api/pagamentos/:id/confirmar-veracidade` agora pega o texto do campo `observacoes` enviado pelo frontend e o salva na coluna `mensagem` da tabela `historicoObservacoesCobranca`, garantindo que o registro de auditoria seja preciso e completo.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+**1. Localização e Refatoração:**
+    - **Ação:** No ficheiro `server/routes/pagamentos.ts`, localize o endpoint `POST /api/pagamentos/:id/confirmar-veracidade`.
+    - **Implementação:**
+        a. Garanta que você está a extrair o campo `observacoes` do corpo da requisição (`req.body`).
+        b. Localize a chamada que insere o registro no `historicoObservacoesCobranca`.
+        c. Modifique o campo `mensagem` para que ele use o valor do `observacoes` recebido do frontend. Para manter a informação de auditoria, você pode prefixá-lo com a informação de autorização.
+
+    - **Lógica de Exemplo para a Correção:**
+      ```typescript
+      // ANTES (Problemático)
+      // mensagem: `Veracidade dos documentos confirmada. Pagamento autorizado por ${userRole}.`
+
+      // DEPOIS (Corrigido)
+      const { observacoes } = req.body;
+      // ...
+      const mensagemDeAuditoria = `Pagamento autorizado por ${userRole}. Observação: ${observacoes || 'Nenhuma observação fornecida.'}`;
+      // ...
+      // use 'mensagemDeAuditoria' no seu comando de insert.
+      ```
+
+---
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+Siga o protocolo completo. O teste funcional deve ser:
+1.  Chamar o endpoint com uma observação customizada.
+2.  Executar uma query `SELECT` na tabela `historicoObservacoesCobranca` para **PROVAR** que o texto customizado foi salvo corretamente.
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+Preencha a declaração completa ao final da sua implementação.
+---

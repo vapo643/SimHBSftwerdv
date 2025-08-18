@@ -1089,6 +1089,7 @@ router.post(
   async (req: AuthenticatedRequest, res) => {
     try {
       const { id } = req.params;
+      const { observacoes } = req.body; // PAM V1.0: Extrair observações do frontend
       const userId = req.user?.id;
       const userRole = req.user?.role;
 
@@ -1098,6 +1099,7 @@ router.post(
       }
 
       console.log(`[PAGAMENTOS] Confirmando veracidade da proposta: ${id} por usuário: ${userId}`);
+      console.log(`[PAGAMENTOS] Observações recebidas:`, observacoes || "Nenhuma observação fornecida");
 
       // Buscar proposta
       const [proposta] = await db.select().from(propostas).where(eq(propostas.id, id)).limit(1);
@@ -1161,11 +1163,16 @@ router.post(
         .where(eq(profiles.id, userId!))
         .limit(1);
 
+      // PAM V1.0: Montar mensagem com observações customizadas do usuário
+      const mensagemCompleta = observacoes 
+        ? `Pagamento autorizado por ${userRole}. Observação: ${observacoes}`
+        : `Pagamento autorizado por ${userRole}. Nenhuma observação fornecida.`;
+
       // Registrar na tabela de histórico de observações
       const { historicoObservacoesCobranca } = await import("@shared/schema");
       await db.insert(historicoObservacoesCobranca).values({
         propostaId: id,
-        mensagem: `Veracidade dos documentos confirmada. Pagamento autorizado por ${userRole}.`,
+        mensagem: mensagemCompleta, // PAM V1.0: Usar observações reais do usuário
         criadoPor: user?.fullName || userId || "sistema",
         tipoAcao: "CONFIRMACAO_VERACIDADE",
         dadosAcao: {
