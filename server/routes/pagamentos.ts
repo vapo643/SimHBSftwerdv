@@ -1105,8 +1105,11 @@ router.post(
       const [proposta] = await db.select().from(propostas).where(eq(propostas.id, id)).limit(1);
 
       if (!proposta) {
+        console.log(`[PAGAMENTOS] ❌ Proposta não encontrada: ${id}`);
         return res.status(404).json({ error: "Proposta não encontrada" });
       }
+
+      console.log(`[PAGAMENTOS] 🔍 Proposta encontrada: ${id} | Status atual: ${proposta.status} | CCB Assinada: ${proposta.assinaturaEletronicaConcluida}`);
 
       // FASE 1: VERIFICAÇÃO DE IDEMPOTÊNCIA - Prevenir execução duplicada
       if (proposta.status === "pagamento_autorizado") {
