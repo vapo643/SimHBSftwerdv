@@ -2476,8 +2476,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           garantia: dataWithId.garantia,
           valorTac: dataWithId.valorTac,
           valorIof: dataWithId.valorIof,
-          valorTotalFinanciado: dataWithId.valorTotalFinanciado,
+          valorTotalFinanciado: dataWithId.valorTotalFinanciado || dataWithId.valor, // ✅ PAM V1.0 FIX: Fallback para valor
         },
+        
+        // ⚡ PAM V1.0 CORREÇÃO CRÍTICA - VALOR TOTAL FINANCIADO
+        // Mapeamento direto para campo dedicado no banco
+        valorTotalFinanciado: dataWithId.valorTotalFinanciado || dataWithId.valor,
 
         // Dados de pagamento (separados para melhor controle)
         metodo_pagamento: dataWithId.metodoPagamento, // 'conta_bancaria' ou 'pix'

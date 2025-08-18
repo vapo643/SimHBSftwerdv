@@ -49,8 +49,8 @@ const clienteSchema = z.object({
 });
 
 const emprestimoSchema = z.object({
-  valor: z.string().min(1, "Valor é obrigatório"),
-  prazo: z.string().min(1, "Prazo é obrigatório"),
+  valor: z.string().min(1, "Valor é obrigatório").transform(val => parseFloat(val.replace(/[^\d.,]/g, '').replace(',', '.'))),
+  prazo: z.string().min(1, "Prazo é obrigatório").transform(val => parseInt(val)),
   finalidade: z.string().min(1, "Finalidade é obrigatória"),
   garantia: z.string().min(1, "Garantia é obrigatória"),
   // Dados bancários para pagamento
