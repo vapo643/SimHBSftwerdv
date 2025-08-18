@@ -1,6 +1,12 @@
 # Simpix Credit Management System
 
 ## Recent Changes
+- **18/08/2025**: Refatoração Completa da Tela de Pagamentos - Migração para Status System V2.0
+  - ✅ **Endpoint legado removido:** `/api/propostas/pagamento` eliminado do backend
+  - ✅ **Nova estrutura de dados:** Interface `Pagamento` criada para corresponder ao novo endpoint
+  - ✅ **Status V2.0 integrado:** Suporte completo para BOLETOS_EMITIDOS, PAGAMENTO_PENDENTE, etc.
+  - ✅ **0 erros LSP:** Código 100% tipado e sem conflitos de interface
+  - ✅ **Filtros atualizados:** UI agora mostra os status corretos do Sistema V2.0
 - **18/08/2025**: Reconciliação Crítica PAM V1.0 - Sincronização inter_collections ↔ parcelas
   - ✅ **Problema resolvido:** Tabela `parcelas` não era atualizada quando pagamentos chegavam via webhook
   - ✅ **Solução implementada:** Webhook do Banco Inter agora sincroniza ambas as tabelas automaticamente

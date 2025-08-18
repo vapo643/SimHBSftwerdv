@@ -21,7 +21,6 @@ const ROUTE_PERMISSIONS: Record<string, string[]> = {
   "/api/propostas/formalizacao": ["ATENDENTE", "GERENTE", "ADMINISTRADOR"],
 
   // Fila de Pagamento - FINANCEIRO, ADMIN
-  "/api/propostas/pagamento": ["FINANCEIRO", "ADMINISTRADOR"],
   "/api/pagamentos": ["FINANCEIRO", "ADMINISTRADOR"],
 
   // Configurações Admin - GERENTE, ADMIN

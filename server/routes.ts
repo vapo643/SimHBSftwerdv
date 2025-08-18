@@ -3409,31 +3409,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Payment queue endpoint (T-05) - for FINANCEIRO team
-  app.get("/api/propostas/pagamento", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
-    try {
-      const { db } = await import("../server/lib/supabase");
-      const { propostas } = await import("../shared/schema");
-      const { eq, desc } = await import("drizzle-orm");
-
-      // Payment queue logic: only proposals ready for payment
-      const pagamentoPropostas = await db
-        .select()
-        .from(propostas)
-        .where(eq(propostas.status, "pronto_pagamento"))
-        .orderBy(desc(propostas.createdAt));
-
-      console.log(
-        `[${getBrasiliaTimestamp()}] Retornando ${pagamentoPropostas.length} propostas prontas para pagamento`
-      );
-      res.json(pagamentoPropostas);
-    } catch (error) {
-      console.error("Erro ao buscar propostas para pagamento:", error);
-      res.status(500).json({
-        message: "Erro ao buscar propostas para pagamento",
-      });
-    }
-  });
+  // [REMOVED: Legacy payment endpoint - Replaced by /api/pagamentos with V2.0 status system]
 
   // Endpoint for formalization data - Using Supabase direct to avoid Drizzle orderSelectedFields error
   app.get(

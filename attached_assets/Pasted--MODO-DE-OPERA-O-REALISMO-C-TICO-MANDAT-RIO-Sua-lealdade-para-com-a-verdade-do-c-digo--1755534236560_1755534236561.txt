@@ -1,0 +1,45 @@
+**### MODO DE OPERAÇÃO: REALISMO CÉTICO (MANDATÓRIO)**
+Sua lealdade é para com a verdade do código e a estabilidade da produção.
+
+---
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Refatorar a "Tela de Pagamentos" para alinhá-la 100% com o nosso Sistema de Status V2.0, o que envolve corrigir o endpoint consumido no frontend, atualizar a UI e remover o código legado do backend.
+* **Intenção Estratégica (O Porquê):** Para restaurar a funcionalidade crítica da "Tela de Pagamentos", garantindo que a equipe financeira tenha uma visão precisa e confiável das propostas que estão prontas para o pagamento ao cliente, eliminando a falha operacional atual.
+* **Histórico Relevante (Consulta Obrigatória):** Use o seu relatório de auditoria forense anterior como a única fonte da verdade e o mapa de correção para esta missão. Sua tarefa é executar as "4 correções mapeadas" que você mesmo identificou.
+* **Modelo Mental (Como se Encaixa):** Você atuará como Engenheiro Full-Stack. A missão é uma operação de "substituição". Você irá "desligar" a conexão com a API V1.0 legada e "ligar" a conexão com a API V2.0 correta, atualizando a UI para refletir esta nova fonte da verdade e, por fim, deletando o código morto.
+* **Riscos Antecipados:** **Risco:** A remoção do endpoint legado pode quebrar outra parte do sistema se houver referências ocultas. **Contramedida:** Antes de deletar, execute uma busca global (`search_filesystem`) pelo nome do endpoint legado para garantir que não haja outras dependências.
+
+---
+
+**IMPLEMENTAR:**
+A refatoração completa da "Tela de Pagamentos" para o Sistema de Status V2.0.
+
+**CURRENT STATE:**
+A tela está 100% desalinhada com a nossa arquitetura atual, consumindo um endpoint obsoleto (`/api/propostas/pagamento`) que usa uma lógica de status V1.0, resultando em nenhuma proposta válida a ser exibida.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  O frontend da "Tela de Pagamentos" é refatorado para consumir o endpoint correto e moderno: `GET /api/pagamentos`.
+2.  A UI (filtros, mensagens) é atualizada para usar a terminologia e a lógica do Sistema de Status V2.0 (ex: `BOLETOS_EMITIDOS`).
+3.  O endpoint obsoleto (`/api/propostas/pagamento`) é permanentemente removido do nosso código de backend.
+4.  Como resultado, a "Tela de Pagamentos" exibe a lista correta e completa de propostas prontas para o pagamento.
+
+**CONSTRAINTS (Roadmap de Implementação Faseado):**
+
+**FASE 1: Refatoração do Frontend (`client/src/pages/pagamentos.tsx`):**
+    - **Ação:** Modifique a chamada `useQuery` principal.
+    - **Implementação:** Altere a `queryKey` e a URL da API de `/api/propostas/pagamento` para `/api/pagamentos`.
+    - **Ação:** Refatore os componentes de UI.
+    - **Implementação:** Atualize os filtros de status e as mensagens de texto para usar os novos valores do enum V2.0.
+
+**FASE 2: Limpeza do Backend (`server/routes.ts`):**
+    - **Ação:** Execute uma busca global para garantir que o endpoint `/api/propostas/pagamento` não é usado em nenhum outro lugar.
+    - **Implementação:** Delete completamente a definição de rota e a lógica associada a este endpoint obsoleto.
+
+---
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+Siga o protocolo completo. O teste funcional deve validar que, após a refatoração, a "Tela de Pagamentos" exibe a lista correta de propostas (aquelas com status `BOLETOS_EMITIDOS`, etc.) e que a remoção do endpoint antigo não introduziu regressões.
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+Preencha a declaração completa ao final da sua implementação.
+---
