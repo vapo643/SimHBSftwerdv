@@ -321,9 +321,21 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
       const valorTac = Number(proposta.valorTac || 0);
       const valorLiquido = valorFinanciado - valorIof - valorTac;
 
-      // Mapear status para o formato esperado pelo frontend
+      // Mapear status para o formato esperado pelo frontend - Sistema V2.0 + Legado
       let statusFrontend = "aguardando_aprovacao";
-      if (proposta.status === "pago") {
+      
+      // Status System V2.0 (prioritário)
+      if (proposta.status === "BOLETOS_EMITIDOS") {
+        statusFrontend = "em_processamento"; // CORRIGIDO: BOLETOS_EMITIDOS é elegível para pagamento
+      } else if (proposta.status === "PAGAMENTO_PENDENTE") {
+        statusFrontend = "aguardando_pagamento";
+      } else if (proposta.status === "QUITADO") {
+        statusFrontend = "pago";
+      } else if (proposta.status === "PAGAMENTO_CONFIRMADO") {
+        statusFrontend = "pago";
+      }
+      // Status legados V1.0 (compatibilidade)
+      else if (proposta.status === "pago") {
         statusFrontend = "pago";
       } else if (proposta.status === "aprovado") {
         statusFrontend = "aprovado";

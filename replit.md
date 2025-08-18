@@ -1,6 +1,11 @@
 # Simpix Credit Management System
 
 ## Recent Changes
+- **18/08/2025**: Correção Crítica do Filtro de Segurança de Pagamentos - PAM V1.0 FASE 5
+  - ✅ **Filtro V2.0 Corrigido:** Mapeamento de status `BOLETOS_EMITIDOS` → `em_processamento`
+  - ✅ **Tela de Pagamentos Restaurada:** Status System V2.0 integrado com frontend legado
+  - ✅ **Root Cause Fix:** Query encontrava dados corretos, mas mapeamento de status bloqueava exibição
+  - ✅ **Compatibilidade Mantida:** Status V1.0 legados preservados para transição suave
 - **18/08/2025**: Correção Crítica de 3 Bugs na Ficha do Cliente - PAM V1.0 FASE 4
   - ✅ **Bug Status Corrigido:** Fonte da verdade alterada de `inter_collections` para `parcelas.status`
   - ✅ **Bug Download Corrigido:** Removido `responseType: 'blob'` que interferia com JWT
