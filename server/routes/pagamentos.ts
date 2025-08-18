@@ -360,13 +360,19 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
         id: proposta.id,
         propostaId: proposta.id,
         numeroContrato: `CONT-${proposta.id.slice(0, 8).toUpperCase()}`,
-        nomeCliente: proposta.clienteNome || "Cliente não informado",
-        cpfCliente: proposta.clienteCpf || "CPF não informado",
+        // CORREÇÃO PAM V1.0: Nomes de campos alinhados com frontend
+        clienteNome: proposta.clienteNome || "Cliente não informado", // CORRIGIDO: nomeCliente → clienteNome
+        clienteCpf: proposta.clienteCpf || "CPF não informado", // CORRIGIDO: cpfCliente → clienteCpf
         valorFinanciado: valorFinanciado,
         valorLiquido: valorLiquido,
         valorIOF: valorIof,
         valorTAC: valorTac,
-        contaBancaria: contaBancaria,
+        // CORREÇÃO PAM V1.0: Dados bancários achatados para compatibilidade com modal
+        dadosPagamentoBanco: proposta.dadosPagamentoBanco || "N/A", // CORRIGIDO: contaBancaria.banco → dadosPagamentoBanco
+        dadosPagamentoAgencia: proposta.dadosPagamentoAgencia || "N/A", // CORRIGIDO: contaBancaria.agencia → dadosPagamentoAgencia
+        dadosPagamentoConta: proposta.dadosPagamentoConta || "N/A", // CORRIGIDO: contaBancaria.conta → dadosPagamentoConta
+        dadosPagamentoPix: proposta.dadosPagamentoPix, // ADICIONADO: Suporte PIX direto
+        contaBancaria: contaBancaria, // MANTIDO: Para compatibilidade com outras partes
         status: statusFrontend,
         dataRequisicao: proposta.dataAprovacao || new Date().toISOString(),
         dataAprovacao: proposta.dataAprovacao,
@@ -390,12 +396,18 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
         formaPagamento: proposta.dadosPagamentoPix ? ("pix" as const) : ("ted" as const),
         loja: loja?.nomeLoja || "Loja não informada",
         produto: produto?.nomeProduto || "Produto não informado",
+        // ADICIONADOS: Campos para compatibilidade total com modal
+        assinaturaEletronicaConcluida: proposta.assinaturaEletronicaConcluida,
+        ccbGerado: proposta.ccbGerado,
+        caminhoCcbAssinado: proposta.caminhoCcbAssinado,
+        valor: proposta.valorTotalFinanciado || proposta.valor, // Para modal usar em formatCurrency
       };
 
       console.log(`[PAGAMENTOS DEBUG] Pagamento formatado para ${proposta.id}:`, {
         numeroContrato: pagamentoFormatado.numeroContrato,
-        nomeCliente: pagamentoFormatado.nomeCliente,
-        cpfCliente: pagamentoFormatado.cpfCliente,
+        clienteNome: pagamentoFormatado.clienteNome, // CORRIGIDO: Debug alinhado
+        clienteCpf: pagamentoFormatado.clienteCpf, // CORRIGIDO: Debug alinhado
+        dadosPagamentoBanco: pagamentoFormatado.dadosPagamentoBanco, // ADICIONADO: Debug dados bancários
         valorFinanciado: pagamentoFormatado.valorFinanciado,
         valorLiquido: pagamentoFormatado.valorLiquido,
         produto: pagamentoFormatado.produto,
@@ -448,7 +460,7 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
     if (pagamentosFiltrados.length > 0) {
       console.log(`[PAGAMENTOS DEBUG] Primeiro pagamento:`, {
         id: pagamentosFiltrados[0].id,
-        nomeCliente: pagamentosFiltrados[0].nomeCliente,
+        clienteNome: pagamentosFiltrados[0].clienteNome, // CORRIGIDO: nomeCliente → clienteNome
         status: pagamentosFiltrados[0].status,
       });
     }
