@@ -108,9 +108,9 @@ router.get(
     try {
       const { propostaId, codigoSolicitacao } = req.params;
 
-      console.log(`[INTER COLLECTIONS] Downloading PDF for collection: ${codigoSolicitacao}`);
+      console.log(`[PDF STORAGE] Buscando PDF no storage para: ${codigoSolicitacao}`);
 
-      // Verificar se collection pertence à proposta (correção da query)
+      // Verificar se collection pertence à proposta
       const collection = await db
         .select()
         .from(interCollections)
@@ -124,90 +124,95 @@ router.get(
         return res.status(404).json({ error: "Boleto não encontrado" });
       }
 
-      // Buscar PDF na API do Inter
-      const interService = interBankService;
+      // PRIORIDADE 1: Buscar PDF no Supabase Storage (onde os PDFs foram sincronizados)
+      const { createServerSupabaseAdminClient } = await import("../lib/supabase");
+      const supabaseAdmin = createServerSupabaseAdminClient();
+      
+      // Caminho do PDF no storage conforme boletoStorageService.ts
+      const storagePath = `propostas/${propostaId}/boletos/emitidos_pendentes/${codigoSolicitacao}.pdf`;
+      
+      console.log(`[PDF STORAGE] Verificando arquivo: ${storagePath}`);
+      
+      // Verificar se arquivo existe no storage
+      const { data: fileExists, error: listError } = await supabaseAdmin.storage
+        .from('documents')
+        .list(`propostas/${propostaId}/boletos/emitidos_pendentes`, {
+          search: `${codigoSolicitacao}.pdf`
+        });
 
-      console.log(`[INTER COLLECTIONS] Getting PDF for: ${codigoSolicitacao}`);
+      if (!listError && fileExists && fileExists.length > 0) {
+        console.log(`[PDF STORAGE] ✅ PDF encontrado no storage: ${storagePath}`);
+        
+        // Gerar URL assinada para visualização
+        const { data: signedUrlData, error: signedUrlError } = await supabaseAdmin.storage
+          .from('documents')
+          .createSignedUrl(storagePath, 3600); // 1 hora
+        
+        if (!signedUrlError && signedUrlData?.signedUrl) {
+          console.log(`[PDF STORAGE] ✅ URL assinada gerada com sucesso`);
+          
+          // Redirecionar para URL assinada para visualização inline
+          return res.redirect(signedUrlData.signedUrl);
+        } else {
+          console.error(`[PDF STORAGE] ❌ Erro ao gerar URL assinada:`, signedUrlError);
+        }
+      } else {
+        console.log(`[PDF STORAGE] ⚠️ PDF não encontrado no storage, listError:`, listError);
+      }
 
-      // Usar o método obterPdfCobranca que agora busca o PDF nos dados da cobrança
-      const pdfBuffer = await interService.obterPdfCobranca(codigoSolicitacao);
+      // FALLBACK: Se não encontrar no storage, tentar API (só se circuit breaker permitir)
+      console.log(`[PDF STORAGE] Tentando fallback para API do Banco Inter...`);
+      
+      try {
+        const interService = interBankService;
+        const pdfBuffer = await interService.obterPdfCobranca(codigoSolicitacao);
 
-      // CRITICAL: Validar que é realmente um PDF antes de enviar
-      if (!pdfBuffer || pdfBuffer.length === 0) {
-        console.error(`[INTER COLLECTIONS] PDF buffer is empty`);
+        if (!pdfBuffer || pdfBuffer.length === 0) {
+          return res.status(404).json({
+            error: "PDF não sincronizado",
+            message: "PDF ainda não foi sincronizado. Tente usar 'Atualizar Status' primeiro.",
+          });
+        }
+
+        // Validar PDF
+        const pdfMagic = pdfBuffer.slice(0, 5).toString("utf8");
+        if (!pdfMagic.startsWith("%PDF")) {
+          return res.status(422).json({
+            error: "PDF inválido",
+            message: "Arquivo retornado não é um PDF válido.",
+          });
+        }
+
+        // Headers para visualização inline
+        res.setHeader("Content-Type", "application/pdf");
+        res.setHeader("Content-Disposition", `inline; filename="boleto-${codigoSolicitacao}.pdf"`);
+        res.setHeader("Content-Length", pdfBuffer.length.toString());
+        res.setHeader("X-Frame-Options", "SAMEORIGIN");
+        res.setHeader("Cache-Control", "private, max-age=300");
+        
+        console.log(`[PDF STORAGE] ✅ Retornando PDF da API (${pdfBuffer.length} bytes)`);
+        res.send(pdfBuffer);
+        
+      } catch (apiError: any) {
+        console.error(`[PDF STORAGE] ❌ Fallback API também falhou:`, apiError.message);
+        
+        if (apiError.message?.includes("circuit breaker")) {
+          return res.status(503).json({
+            error: "Sistema temporariamente indisponível",
+            message: "A API do banco está temporariamente indisponível. Tente novamente em alguns minutos.",
+          });
+        }
+        
         return res.status(404).json({
           error: "PDF não disponível",
-          message:
-            "O banco Inter não disponibiliza PDF para download direto. Use o código de barras ou QR Code para pagamento.",
+          message: "PDF não encontrado no storage nem na API. Use 'Atualizar Status' para sincronizar.",
         });
       }
-
-      // Verificar magic bytes do PDF (%PDF)
-      const pdfMagic = pdfBuffer.slice(0, 5).toString("utf8");
-      if (!pdfMagic.startsWith("%PDF")) {
-        console.error(
-          `[INTER COLLECTIONS] Buffer is not a valid PDF. Magic bytes: ${pdfMagic.replace(/[^\x20-\x7E]/g, ".")}`
-        );
-        return res.status(422).json({
-          error: "PDF inválido",
-          message:
-            "O arquivo retornado pelo banco não é um PDF válido. Use o código de barras ou QR Code disponível na tela.",
-        });
-      }
-
-      console.log(
-        `[INTER COLLECTIONS] PDF validated successfully, size: ${pdfBuffer.length} bytes`
-      );
-
-      // ✅ Headers específicos para evitar falso positivo de vírus
-      res.setHeader("Content-Type", "application/pdf");
       
-      // Nome de arquivo mais limpo e seguro
-      const dataAtual = new Date().toISOString().slice(0, 10);
-      res.setHeader(
-        "Content-Disposition",
-        `inline; filename="boleto_inter_${dataAtual}.pdf"`
-      );
-      
-      res.setHeader("Content-Length", pdfBuffer.length.toString());
-      
-      // Headers de segurança específicos para PDFs
-      res.setHeader("X-Content-Type-Options", "nosniff");
-      res.setHeader("X-Download-Options", "noopen");
-      res.setHeader("X-Frame-Options", "SAMEORIGIN"); // Permite visualizar no navegador
-      res.setHeader("X-PDF-Source", "BancoInter"); // Identificar fonte
-      res.setHeader("X-File-Type", "BankStatement"); // Tipo de arquivo
-      
-      // Cache mais permissivo para PDFs legítimos
-      res.setHeader("Cache-Control", "private, max-age=300"); // 5 minutos
-      res.setHeader("Pragma", "no-cache");
-      
-      // Headers para indicar que é conteúdo legítimo
-      res.setHeader("X-Content-Origin", "Banking-API");
-      res.setHeader("X-PDF-Version", "1.4"); // Versão PDF padrão
-
-      res.send(pdfBuffer);
     } catch (error: any) {
-      console.error("[INTER COLLECTIONS] Error downloading PDF:", error);
-
-      // Retornar erro específico ao invés de arquivo corrompido
-      if (error.message?.includes("400")) {
-        return res.status(400).json({
-          error:
-            "Boleto não está disponível para download. Verifique se o boleto foi gerado corretamente.",
-          details: "O banco retornou erro 400 - requisição inválida",
-        });
-      }
-
-      if (error.message?.includes("PDF vazio")) {
-        return res.status(502).json({
-          error: "PDF não foi gerado pelo banco. Tente novamente em alguns instantes.",
-          details: "O banco retornou um arquivo vazio",
-        });
-      }
-
+      console.error("[PDF STORAGE] Erro geral:", error);
       res.status(500).json({
-        error: "Erro ao baixar PDF do boleto",
+        error: "Erro interno",
         details: error.message || "Erro desconhecido",
       });
     }
