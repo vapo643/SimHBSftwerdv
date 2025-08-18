@@ -1102,8 +1102,20 @@ router.post(
       console.log(`[PAGAMENTOS] Observações recebidas:`, observacoes || "Nenhuma observação fornecida");
 
       console.log(`[PAGAMENTOS] 🔍 STEP 1: Iniciando busca da proposta no banco...`);
-      // Buscar proposta
-      const [proposta] = await db.select().from(propostas).where(eq(propostas.id, id)).limit(1);
+      // Buscar proposta usando SQL direto para evitar problemas de schema
+      const result = await db.execute(sql`
+        SELECT 
+          id, status, cliente_nome as "clienteNome", 
+          assinatura_eletronica_concluida as "assinaturaEletronicaConcluida",
+          dados_pagamento_pix as "dadosPagamentoPix",
+          dados_pagamento_banco as "dadosPagamentoBanco",
+          dados_pagamento_agencia as "dadosPagamentoAgencia", 
+          dados_pagamento_conta as "dadosPagamentoConta"
+        FROM propostas 
+        WHERE id = ${id} 
+        LIMIT 1
+      `);
+      const proposta = result[0];
       console.log(`[PAGAMENTOS] 🔍 STEP 2: Query executada com sucesso`);
 
       if (!proposta) {
@@ -1152,48 +1164,53 @@ router.post(
         });
       }
 
-      // Atualizar status para pagamento_autorizado
-      await db
-        .update(propostas)
-        .set({
-          status: "pagamento_autorizado",
-        })
-        .where(eq(propostas.id, id));
+      // Atualizar status para pagamento_autorizado usando SQL direto
+      console.log(`[PAGAMENTOS] 🔍 STEP 3: Atualizando status para pagamento_autorizado...`);
+      await db.execute(sql`
+        UPDATE propostas 
+        SET status = 'pagamento_autorizado'
+        WHERE id = ${id}
+      `);
+      console.log(`[PAGAMENTOS] 🔍 STEP 4: Status atualizado com sucesso`);
 
-      // Buscar informações do usuário para o log
-      const { profiles } = await import("@shared/schema");
-      const [user] = await db
-        .select({
-          fullName: profiles.fullName,
-          role: profiles.role,
-        })
-        .from(profiles)
-        .where(eq(profiles.id, userId!))
-        .limit(1);
+      // Buscar informações do usuário para o log usando SQL direto
+      const userResult = await db.execute(sql`
+        SELECT full_name as "fullName", role 
+        FROM profiles 
+        WHERE id = ${userId} 
+        LIMIT 1
+      `);
+      const user = userResult[0];
 
       // PAM V1.0: Montar mensagem com observações customizadas do usuário
       const mensagemCompleta = observacoes 
         ? `Pagamento autorizado por ${userRole}. Observação: ${observacoes}`
         : `Pagamento autorizado por ${userRole}. Nenhuma observação fornecida.`;
 
-      // Registrar na tabela de histórico de observações
-      const { historicoObservacoesCobranca } = await import("@shared/schema");
-      await db.insert(historicoObservacoesCobranca).values({
-        propostaId: id,
-        mensagem: mensagemCompleta, // PAM V1.0: Usar observações reais do usuário
-        criadoPor: user?.fullName || userId || "sistema",
-        tipoAcao: "CONFIRMACAO_VERACIDADE",
-        dadosAcao: {
-          autorId: userId,
-          nomeAutor: user?.fullName,
-          role: userRole,
-          statusAnterior: proposta.status,
-          statusNovo: "pagamento_autorizado",
-          timestamp: new Date().toISOString(),
-          ip: req.ip,
-          userAgent: req.headers["user-agent"],
-        },
-      });
+      // Registrar na tabela de histórico de observações usando SQL direto
+      console.log(`[PAGAMENTOS] 🔍 STEP 5: Registrando histórico...`);
+      await db.execute(sql`
+        INSERT INTO historico_observacoes_cobranca (
+          proposta_id, mensagem, criado_por, tipo_acao, dados_acao, created_at
+        ) VALUES (
+          ${id}, 
+          ${mensagemCompleta}, 
+          ${user?.fullName || userId || "sistema"},
+          ${"CONFIRMACAO_VERACIDADE"},
+          ${JSON.stringify({
+            autorId: userId,
+            nomeAutor: user?.fullName,
+            role: userRole,
+            statusAnterior: proposta.status,
+            statusNovo: "pagamento_autorizado",
+            timestamp: new Date().toISOString(),
+            ip: req.ip,
+            userAgent: req.headers["user-agent"],
+          })},
+          ${new Date().toISOString()}
+        )
+      `);
+      console.log(`[PAGAMENTOS] 🔍 STEP 6: Histórico registrado com sucesso`);
 
       console.log(
         `[PAGAMENTOS] ✅ Veracidade confirmada e pagamento autorizado para proposta: ${id}`
