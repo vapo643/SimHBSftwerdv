@@ -32,6 +32,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -2025,31 +2031,39 @@ export default function CobrancasPage() {
                                 </p>
                               </div>
                               <div className="flex items-center gap-2">
-                                {/* PAM V1.0 - Botão Copiar PIX com Tooltip Informativo */}
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  disabled={!parcela.pixCopiaECola}
-                                  onClick={() => {
-                                    if (parcela.pixCopiaECola) {
-                                      copyToClipboard(parcela.pixCopiaECola, "PIX");
-                                    } else {
-                                      toast({
-                                        title: "PIX não disponível",
-                                        description: "PIX não fornecido pelo banco para esta parcela",
-                                        variant: "destructive",
-                                      });
-                                    }
-                                  }}
-                                  title={
-                                    parcela.pixCopiaECola
-                                      ? "Copiar código PIX"
-                                      : "PIX não fornecido pelo banco para esta parcela"
-                                  }
-                                >
-                                  <QrCode className="mr-2 h-3 w-3" />
-                                  Copiar PIX
-                                </Button>
+                                {/* PAM V1.0 FASE 2 - Botão Copiar PIX com Tooltip Melhorado */}
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        disabled={!parcela.pixCopiaECola}
+                                        onClick={() => {
+                                          if (parcela.pixCopiaECola) {
+                                            copyToClipboard(parcela.pixCopiaECola, "PIX");
+                                          } else {
+                                            toast({
+                                              title: "PIX não disponível",
+                                              description: "PIX não fornecido pelo banco para esta parcela",
+                                              variant: "destructive",
+                                            });
+                                          }
+                                        }}
+                                      >
+                                        <QrCode className="mr-2 h-3 w-3" />
+                                        Copiar PIX
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>
+                                        {parcela.pixCopiaECola
+                                          ? "Copiar código PIX para pagamento"
+                                          : "PIX não fornecido pelo banco para esta parcela"}
+                                      </p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
                                 
                                 {/* PAM V1.0 - Botão Download PDF com Consciência de Estado */}
                                 <Button

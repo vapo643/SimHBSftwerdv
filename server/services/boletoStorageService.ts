@@ -94,11 +94,21 @@ class BoletoStorageService {
             const { codigoSolicitacao, numeroParcela } = collection;
             
             try {
-              // 2.1. Baixar PDF do Banco Inter
+              // **PAM V1.0 FASE 1:** Blindagem da sincronização com logging robusto
+              
+              // 2.1. Baixar PDF do Banco Inter - COM BLINDAGEM
               console.log(`[BOLETO STORAGE] ⬇️ [Parcela ${numeroParcela}] Baixando PDF - Código: ${codigoSolicitacao}`);
-              const pdfBuffer = await interBankService.obterPdfCobranca(codigoSolicitacao);
+              
+              let pdfBuffer;
+              try {
+                pdfBuffer = await interBankService.obterPdfCobranca(codigoSolicitacao);
+              } catch (downloadError: any) {
+                console.error(`[SYNC-FAILURE] Falha ao baixar PDF para o codigoSolicitacao ${codigoSolicitacao}: ${downloadError.message}`);
+                throw new Error(`Download failed: ${downloadError.message}`);
+              }
               
               if (!pdfBuffer || pdfBuffer.length === 0) {
+                console.error(`[SYNC-FAILURE] PDF vazio ou inválido para o codigoSolicitacao ${codigoSolicitacao}: Buffer vazio recebido do Banco Inter`);
                 throw new Error('PDF vazio ou inválido recebido do Banco Inter');
               }
               
@@ -107,20 +117,31 @@ class BoletoStorageService {
               // 2.2. Definir caminho no Storage
               const caminhoArquivo = `propostas/${propostaId}/boletos/emitidos_pendentes/${codigoSolicitacao}.pdf`;
               
-              // 2.3. Upload para Supabase Storage
+              // 2.3. Upload para Supabase Storage - COM BLINDAGEM
               console.log(`[BOLETO STORAGE] 📤 [Parcela ${numeroParcela}] Fazendo upload...`);
               
-              const { data: uploadData, error: uploadError } = await this.supabase.storage
-                .from('documents')
-                .upload(caminhoArquivo, pdfBuffer, {
-                  contentType: 'application/pdf',
-                  upsert: true // Sobrescrever se já existir
-                });
+              let uploadData, uploadError;
+              try {
+                const uploadResult = await this.supabase.storage
+                  .from('documents')
+                  .upload(caminhoArquivo, pdfBuffer, {
+                    contentType: 'application/pdf',
+                    upsert: true // Sobrescrever se já existir
+                  });
+                uploadData = uploadResult.data;
+                uploadError = uploadResult.error;
+              } catch (storageError: any) {
+                console.error(`[SYNC-FAILURE] Falha ao salvar PDF para o codigoSolicitacao ${codigoSolicitacao}: ${storageError.message}`);
+                throw new Error(`Storage upload failed: ${storageError.message}`);
+              }
               
               if (uploadError) {
+                console.error(`[SYNC-FAILURE] Falha ao salvar PDF para o codigoSolicitacao ${codigoSolicitacao}: ${uploadError.message}`);
                 throw new Error(`Erro no upload: ${uploadError.message}`);
               }
               
+              // **PAM V1.0 SUCESSO CRÍTICO:** Log de sucesso detalhado
+              console.log(`[SYNC-SUCCESS] PDF para o codigoSolicitacao ${codigoSolicitacao} salvo com sucesso em ${caminhoArquivo}`);
               console.log(`[BOLETO STORAGE] ✅ [Parcela ${numeroParcela}] Upload concluído`);
               
               return {
