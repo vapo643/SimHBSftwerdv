@@ -13,17 +13,16 @@ import { db } from "../../server/lib/supabase";
 import { 
   propostas, 
   propostaLogs, 
-  statusContextuais, 
-  parcelas,
-  interCollections,
-  interWebhooks,
-  interCallbacks,
-  statusTransitions,
-  solicitacoesModificacao,
-  propostaDocumentos
+  statusContextuais,
+  parceiros,
+  lojas,
+  produtos,
+  tabelasComerciais,
+  users
 } from "@shared/schema";
 import { eq, and, desc } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
+import { cleanTestDatabase, verifyCleanDatabase } from "../lib/db-helper";
 import { 
   ProposalStatus, 
   InvalidTransitionError,
@@ -44,45 +43,86 @@ describe("Sistema de Status FSM - Testes de Integração", () => {
    * Setup: Limpa banco e cria proposta de teste
    */
   beforeEach(async () => {
-    console.log("[TEST SETUP] 🧹 Limpando banco de dados de teste...");
+    console.log("[TEST SETUP] 🧹 Iniciando setup do teste...");
     
-    // Limpar tabelas relacionadas em ordem correta (respeitar foreign keys)
-    // Primeiro limpar tabelas dependentes
-    await db.delete(parcelas);
-    await db.delete(interCollections);
-    await db.delete(interWebhooks);
-    await db.delete(interCallbacks);
-    await db.delete(statusTransitions);
-    await db.delete(solicitacoesModificacao);
-    await db.delete(propostaDocumentos);
-    await db.delete(statusContextuais);
-    await db.delete(propostaLogs);
-    await db.delete(propostas);
+    // Usar o helper robusto de limpeza
+    await cleanTestDatabase();
     
-    // Criar proposta de teste com status inicial
-    testProposalId = uuidv4(); // Gerar UUID para a proposta
-    const [newProposal] = await db.insert(propostas)
-      .values({
-        id: testProposalId,
-        numeroProposta: 999999, // Número sequencial de teste
-        status: ProposalStatus.RASCUNHO,
-        valor: "10000.00",
-        prazo: 12,
-        taxaJuros: "1.99",
-        clienteNome: "Cliente Teste",
-        clienteCpf: "12345678901",
-        clienteTelefone: "11999999999",
-        clienteEmail: "teste@teste.com",
-        produtoId: 1,
-        tabelaComercialId: 1,
-        lojaId: 1,
-        finalidade: "Teste",
-        garantia: "Nenhuma",
-      })
-      .returning({ id: propostas.id });
+    // Verificar que o banco está limpo
+    const isClean = await verifyCleanDatabase();
+    if (!isClean) {
+      console.warn("[TEST SETUP] ⚠️ Banco pode não estar completamente limpo");
+    }
     
-    // testProposalId já foi definido antes do insert
-    console.log(`[TEST SETUP] ✅ Proposta de teste criada: ${testProposalId}`);
+    try {
+      // Criar dados de referência necessários primeiro
+      console.log("[TEST SETUP] 📦 Criando dados de referência...");
+      
+      // Criar parceiro
+      const [parceiro] = await db.insert(parceiros)
+        .values({
+          id: 999,
+          razaoSocial: "Parceiro Teste",
+          cnpj: "12345678000199",
+        })
+        .returning({ id: parceiros.id });
+      
+      // Criar loja associada ao parceiro
+      const [loja] = await db.insert(lojas)
+        .values({
+          id: 999,
+          nomeLoja: "Loja Teste",
+          parceiroId: parceiro.id,
+        })
+        .returning({ id: lojas.id });
+      
+      // Criar produto
+      const [produto] = await db.insert(produtos)
+        .values({
+          id: 999,
+          nomeProduto: "Produto Teste",
+          isActive: true,
+        })
+        .returning({ id: produtos.id });
+      
+      // Criar tabela comercial
+      const [tabelaComercial] = await db.insert(tabelasComerciais)
+        .values({
+          id: 999,
+          nomeTabela: "Tabela Teste",
+          taxaJuros: "1.99",
+          prazos: [12, 24, 36],
+          comissao: "5.00",
+        })
+        .returning({ id: tabelasComerciais.id });
+      
+      // Criar proposta de teste com status inicial
+      testProposalId = uuidv4(); // Gerar UUID para a proposta
+      const [newProposal] = await db.insert(propostas)
+        .values({
+          id: testProposalId,
+          numeroProposta: 999999, // Número sequencial de teste
+          status: ProposalStatus.RASCUNHO,
+          valor: "10000.00",
+          prazo: 12,
+          taxaJuros: "1.99",
+          clienteNome: "Cliente Teste",
+          clienteCpf: "12345678901",
+          clienteTelefone: "11999999999",
+          clienteEmail: "teste@teste.com",
+          produtoId: produto.id,
+          tabelaComercialId: tabelaComercial.id,
+          lojaId: loja.id,
+          finalidade: "Teste",
+          garantia: "Nenhuma",
+        })
+        .returning({ id: propostas.id });
+      
+      console.log(`[TEST SETUP] ✅ Proposta de teste criada: ${testProposalId}`);
+    } catch (error) {
+      console.error("[TEST SETUP] ❌ Erro ao criar dados de teste:", error);
+      throw error;
+    }
   });
   
   /**
@@ -91,17 +131,8 @@ describe("Sistema de Status FSM - Testes de Integração", () => {
   afterEach(async () => {
     console.log("[TEST TEARDOWN] 🧹 Limpando banco após teste...");
     
-    // Limpar em ordem correta para respeitar foreign keys
-    await db.delete(parcelas);
-    await db.delete(interCollections);
-    await db.delete(interWebhooks);
-    await db.delete(interCallbacks);
-    await db.delete(statusTransitions);
-    await db.delete(solicitacoesModificacao);
-    await db.delete(propostaDocumentos);
-    await db.delete(statusContextuais);
-    await db.delete(propostaLogs);
-    await db.delete(propostas);
+    // Usar o helper robusto de limpeza
+    await cleanTestDatabase();
     
     console.log("[TEST TEARDOWN] ✅ Banco limpo");
   });
