@@ -10,6 +10,7 @@ import {
   users,
   produtoTabelaComercial,
 } from "@shared/schema";
+import { getFromCache, setToCache } from "../services/cacheService";
 
 const router = Router();
 
@@ -139,6 +140,31 @@ router.get("/context", jwtAuthMiddleware, async (req: AuthenticatedRequest, res)
     // 3. For each product, fetch available commercial tables
     const produtosComTabelas = await Promise.all(
       produtosAtivos.map(async produto => {
+        // Gerar chave de cache única e determinística
+        const cacheKey = `tabelas-comerciais:produtoId:${produto.id}:parceiroId:${parceiroId}`;
+        
+        // Tentar buscar do cache primeiro
+        const cachedTabelas = await getFromCache<Array<{
+          id: number;
+          nomeTabela: string;
+          taxaJuros: string;
+          prazos: number[];
+          comissao: string;
+          tipo: "personalizada" | "geral";
+        }>>(cacheKey);
+        
+        if (cachedTabelas) {
+          // Cache hit - retornar dados do cache
+          return {
+            id: produto.id,
+            nome: produto.nomeProduto,
+            tacValor: produto.tacValor || "0",
+            tacTipo: produto.tacTipo || "fixo",
+            tabelasDisponiveis: cachedTabelas,
+          };
+        }
+        
+        // Cache miss - buscar do banco de dados
         // First, fetch personalized tables for this partner using N:N relationship
         const tabelasPersonalizadas = await db
           .select({
@@ -207,6 +233,9 @@ router.get("/context", jwtAuthMiddleware, async (req: AuthenticatedRequest, res)
             tipo: "geral" as "personalizada" | "geral",
           }));
         }
+
+        // Armazenar no cache com TTL de 1 hora (3600 segundos)
+        await setToCache(cacheKey, tabelasDisponiveis, 3600);
 
         return {
           id: produto.id,

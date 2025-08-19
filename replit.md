@@ -95,6 +95,7 @@ Error handling: Create structured documentation for automatic consultation durin
 - **Authentication**: Supabase Auth integration with JWT middleware and custom RBAC
 - **File Storage**: Supabase Storage
 - **Job Queue Architecture**: BullMQ-based async worker system with Redis for production (mock queue for development), supporting parallel operations, retry, and specialized workers (PDF, boleto, document, notification).
+- **Cache Layer L2** (19/08/2025): Redis-based caching (in-memory for dev) for commercial tables queries with 1-hour TTL, using cache-aside pattern to reduce database load.
 - **Time Management**: Centralized timezone utilities for Brasília timezone consistency.
 - **Modular Architecture** (19/08/2025): Monolith progressively decomposed into domain modules. Propostas routes extracted to `/routes/propostas/`, integration routes organized in `/routes/integracao/`.
 - **Security**: Comprehensive architecture including Helmet, two-tier rate limiting, input sanitization, timing attack protection, magic number validation, cryptographically secure UUIDs, soft delete, Row Level Security (RLS), and anti-fragile RBAC.
