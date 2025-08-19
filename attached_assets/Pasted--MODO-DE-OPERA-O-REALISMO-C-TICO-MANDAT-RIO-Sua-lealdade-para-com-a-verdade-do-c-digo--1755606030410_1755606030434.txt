@@ -1,0 +1,42 @@
+**### MODO DE OPERAÇÃO: REALISMO CÉTICO (MANDATÓRIO)**
+Sua lealdade é para com a verdade do código e a estabilidade da produção.
+
+---
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Realizar uma auditoria forense completa do nosso sistema de status, comparando a implementação atual com a nova "Arquitetura de Status Híbrida" (Blueprint V4.0) definida pelo Arquiteto.
+* **Intenção Estratégica (O Porquê):** Para identificar todas as lacunas de código e de lógica que nos impedem de ter um sistema de status 100% confiável, separado por contexto (Pagamentos vs. Cobranças) e atualizado por eventos.
+* **Histórico Relevante (Consulta Obrigatória):** A diretriz do Arquiteto (Blueprint V4.0) anula todas as premissas anteriores. Sua missão é avaliar o código estritamente contra estas novas regras, especialmente a separação de domínios.
+* **Modelo Mental (Como se Encaixa):** Você é um auditor de sistemas. O Blueprint V4.0 é o seu checklist. Sua tarefa é ler, analisar e relatar as discrepâncias.
+
+---
+
+**IMPLEMENTAR:**
+Um relatório de auditoria detalhado. **NÃO FAÇA MODIFICAÇÕES.**
+
+**CURRENT STATE:**
+O sistema possui um sistema de status único e confuso, que mistura os conceitos de "pagamento do empréstimo" e "pagamento de boletos", causando o bug de regressão de status.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um relatório de auditoria que responda a todas as questões abaixo.
+
+**CONSTRAINTS (Roadmap de Auditoria Forense):**
+
+**1. Auditoria da Arquitetura de Dados:**
+    - **Ação:** Inspecione nosso schema de banco de dados (`shared/schema.ts`).
+    - **Relatório 1:** Confirme a ausência de uma tabela como `status_contextuais` e de colunas de status separadas (ex: `status_cobranca`, `status_pagamento`) na tabela `propostas`.
+
+**2. Auditoria dos Gatilhos de Status:**
+    - **Ação:** Analise o endpoint de finalização de pagamento (`POST /api/pagamentos/:id/finalizar`) e o endpoint de webhook do Banco Inter.
+    - **Relatório 2 (A Evidência Crítica):** Apresente os trechos de código de ambos os locais que atualizam o `status` da proposta. Confirme se ambos estão a modificar a **mesma e única coluna `status`**, o que prova a colisão de contextos que o Arquiteto diagnosticou.
+
+**3. Auditoria da Lógica da Tela de Cobranças:**
+    - **Ação:** Analise a query principal da "Tela de Cobranças" (`GET /api/cobrancas`).
+    - **Relatório 3:** A lógica de cálculo do "Status Geral da Dívida" implementa a hierarquia completa definida no Blueprint V4.0 (`INADIMPLENTE` > `VENCE EM BREVE` > `EM DIA` > `QUITADO`)? Apresente o código que faz este cálculo.
+
+**4. Auditoria do Fluxo de Contingência:**
+    - **Ação:** Inspecione a funcionalidade "Marcar como Pago" na "Ficha do Cliente".
+    - **Relatório 4:** A visibilidade e a funcionalidade deste botão estão restritas à role `SUPERVISOR_COBRANCA`?
+
+**Relatório Final:**
+O critério de sucesso é um relatório forense completo que nos dê um mapa claro de todas as correções necessárias.
