@@ -1,4 +1,4 @@
-import type { Express } from "express";
+import type { Express, NextFunction, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { createServerSupabaseClient } from "../client/src/lib/supabase";
@@ -150,6 +150,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Import and mount propostas core routes
   const propostasCoreRouter = (await import("./routes/propostas/core.js")).default;
   app.use("/api/propostas", propostasCoreRouter);
+  
+  // Import and mount integration test routes
+  const interIntegrationRouter = (await import("./routes/integracao/inter.js")).default;
+  const clicksignIntegrationRouter = (await import("./routes/integracao/clicksign.js")).default;
+  const circuitBreakerTestRouter = (await import("./routes/integracao/circuit-breaker-test.js")).default;
+  
+  app.use("/api/integracao/inter", interIntegrationRouter);
+  app.use("/api/integracao/clicksign", clicksignIntegrationRouter);
+  app.use("/api/test/circuit-breaker", circuitBreakerTestRouter);
 
   // Health check endpoint para testar security headers
   app.get("/api/health", (req, res) => {
@@ -161,100 +170,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
-  // =============================================
-  // CIRCUIT BREAKER TEST ENDPOINTS - PAM V1.0
-  // =============================================
-  
-  // Endpoint que sempre falha (para testar abertura do circuit breaker)
-  app.get("/api/test/circuit-breaker/fail", async (req, res) => {
-    console.log("[CIRCUIT TEST] 🔴 Simulating API failure");
-    res.status(500).json({ 
-      error: "Simulated API failure", 
-      message: "This endpoint always fails to test circuit breaker opening"
-    });
-  });
-
-  // Endpoint que sempre funciona (para testar recuperação)
-  app.get("/api/test/circuit-breaker/success", async (req, res) => {
-    console.log("[CIRCUIT TEST] ✅ Simulating API success");
-    res.json({ 
-      success: true, 
-      message: "This endpoint always succeeds to test circuit breaker recovery"
-    });
-  });
-
-  // Endpoint que testa o circuit breaker real do InterBankService
-  app.get("/api/test/circuit-breaker/inter", async (req, res) => {
-    try {
-      const { interBankService } = await import("./services/interBankService");
-      
-      // Tentar uma conexão de teste
-      const result = await interBankService.testConnection();
-      
-      res.json({ 
-        success: true, 
-        serviceStatus: result ? "operational" : "unavailable",
-        circuitBreakerStatus: "closed"
-      });
-    } catch (error: any) {
-      if (error.message?.includes("circuit breaker is OPEN")) {
-        console.log("[CIRCUIT TEST] ⚡ Inter Bank circuit breaker is OPEN");
-        res.status(503).json({ 
-          error: "Inter Bank API temporarily unavailable - circuit breaker is OPEN",
-          circuitBreakerStatus: "open"
-        });
-      } else {
-        res.status(500).json({ 
-          error: error.message,
-          circuitBreakerStatus: "unknown"
-        });
-      }
-    }
-  });
-
-  // Endpoint que testa o circuit breaker real do ClickSignService
-  app.get("/api/test/circuit-breaker/clicksign", async (req, res) => {
-    try {
-      const { clickSignService } = await import("./services/clickSignService");
-      
-      // Tentar uma conexão de teste
-      const result = await clickSignService.testConnection();
-      
-      res.json({ 
-        success: true, 
-        serviceStatus: result ? "operational" : "unavailable",
-        circuitBreakerStatus: "closed"
-      });
-    } catch (error: any) {
-      if (error.message?.includes("circuit breaker is OPEN")) {
-        console.log("[CIRCUIT TEST] ⚡ ClickSign circuit breaker is OPEN");
-        res.status(503).json({ 
-          error: "ClickSign API temporarily unavailable - circuit breaker is OPEN",
-          circuitBreakerStatus: "open"
-        });
-      } else {
-        res.status(500).json({ 
-          error: error.message,
-          circuitBreakerStatus: "unknown"
-        });
-      }
-    }
-  });
-
-  // Endpoint genérico para testar qualquer comportamento
-  app.get("/api/test/circuit-breaker/any", async (req, res) => {
-    const random = Math.random();
-    
-    if (random < 0.5) {
-      // 50% de chance de falhar
-      console.log("[CIRCUIT TEST] ❌ Random failure");
-      res.status(500).json({ error: "Random failure for testing" });
-    } else {
-      // 50% de chance de sucesso
-      console.log("[CIRCUIT TEST] ✅ Random success");
-      res.json({ success: true, value: random });
-    }
-  });
+  // MOVED TO server/routes/integracao/ - Circuit breaker test endpoints
 
   // RELATÓRIO FINAL - AUDITORIA DO PLANO DE TESTE END-TO-END
   app.get("/api/relatorio-final-ccb", async (req, res) => {
