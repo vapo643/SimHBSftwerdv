@@ -9,6 +9,7 @@ import {
   profiles,
   solicitacoesModificacao,
   propostaLogs,
+  statusContextuais, // PAM V1.0 - Importar tabela de status contextuais
 } from "@shared/schema";
 import { eq, and, sql, desc, gte, lte, inArray, or, not } from "drizzle-orm";
 import { format, parseISO, differenceInDays, isAfter } from "date-fns";
@@ -52,14 +53,16 @@ router.get("/", async (req: any, res) => {
       queryParams: { status, atraso }
     });
 
-    // 🔧 PAM V1.0 - CORREÇÃO DA QUERY: Seleção explícita de todos os campos necessários
+    // 🔧 PAM V1.0 - REFATORAÇÃO: Query com JOIN para status contextuais
     const propostasData = await db
       .select({
         // Campos essenciais da proposta
         id: propostas.id,
         numeroProposta: propostas.numeroProposta,
         lojaId: propostas.lojaId,
-        status: propostas.status,
+        status: propostas.status, // Status legado mantido para fallback
+        // PAM V1.0 - Campo de status contextual da nova tabela
+        statusContextual: statusContextuais.status,
         
         // 🎯 DADOS DO CLIENTE - SELEÇÃO EXPLÍCITA OBRIGATÓRIA
         clienteNome: propostas.clienteNome,
@@ -119,6 +122,14 @@ router.get("/", async (req: any, res) => {
         deletedAt: propostas.deletedAt,
       })
       .from(propostas)
+      // PAM V1.0 - LEFT JOIN com status_contextuais para contexto de cobranças
+      .leftJoin(
+        statusContextuais,
+        and(
+          eq(propostas.id, statusContextuais.propostaId),
+          eq(statusContextuais.contexto, 'cobrancas')
+        )
+      )
       .where(whereConditions)
       // PAM V1.0 Blueprint V2.0 - Ordenação Inteligente Multinível
       // Priorização: 1. Inadimplentes > 2. Próximos a Vencer > 3. Outros
@@ -159,7 +170,11 @@ router.get("/", async (req: any, res) => {
       totalPropostas: propostasData.length,
       primeiraProposta: propostasData[0] || null,
       idsEncontrados: propostasData.map(p => p.id),
-      statusEncontrados: propostasData.map(p => ({ id: p.id, status: p.status }))
+      statusEncontrados: propostasData.map(p => ({ 
+        id: p.id, 
+        statusLegado: p.status,
+        statusContextual: p.statusContextual || 'sem_status_contextual'
+      }))
     });
     
     console.log(`🔍 [COBRANÇAS] PAM V1.0 - Encontradas ${propostasData.length} propostas com status elegível`);
@@ -426,12 +441,27 @@ router.get("/:propostaId/ficha", async (req, res) => {
   try {
     const { propostaId } = req.params;
 
-    // Buscar dados da proposta
-    const [proposta] = await db
-      .select()
+    // Buscar dados da proposta com status contextual
+    const result = await db
+      .select({
+        // Todos os campos da proposta
+        ...propostas,
+        // PAM V1.0 - Campo de status contextual
+        statusContextual: statusContextuais.status,
+      })
       .from(propostas)
+      // PAM V1.0 - LEFT JOIN com status_contextuais para contexto de cobranças
+      .leftJoin(
+        statusContextuais,
+        and(
+          eq(propostas.id, statusContextuais.propostaId),
+          eq(statusContextuais.contexto, 'cobrancas')
+        )
+      )
       .where(eq(propostas.id, propostaId))
       .limit(1);
+    
+    const [proposta] = result;
 
     if (!proposta) {
       return res.status(404).json({ message: "Proposta não encontrada" });
@@ -537,7 +567,7 @@ router.get("/:propostaId/ficha", async (req, res) => {
         prazo: proposta.prazo,
         taxaJuros: Number(proposta.taxaJuros),
         ccbAssinada: proposta.ccbGerado && proposta.assinaturaEletronicaConcluida,
-        status: proposta.status,
+        status: proposta.statusContextual || proposta.status, // PAM V1.0 - Usar status contextual com fallback
       },
       // Parcelas
       parcelas: parcelasDetalhadas,
