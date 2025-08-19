@@ -1,0 +1,45 @@
+### Pacote de Ativação de Missão (PAM) V1.0
+
+* **Sumário da Missão (O Quê):** Corrigir todos os erros de TypeScript (LSP diagnostics) reportados no arquivo `server/routes.ts`.
+* **Intenção Estratégica (O Porquê):** Eliminar o débito técnico de tipo para melhorar a confiabilidade do código, prevenir bugs em tempo de execução e desbloquear a refatoração segura do arquivo. Um código-base com zero erros de tipo é um pré-requisito não-negociável para a excelência operacional.
+* **Histórico Relevante (Consulta Obrigatória):** A auditoria inicial (Missão 1.2) identificou `server/routes.ts` como um "God File" com 5400+ linhas e 26 erros de LSP. A missão é focar exclusivamente nesses erros.
+* **Modelo Mental (Como se Encaixa):** Esta é uma missão de "higiene de código". O Agente deve agir como um desenvolvedor sênior corrigindo tipos, e não como um arquiteto redesenhando a lógica. O objetivo é a estabilização, não a reestruturação.
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco:** As correções de tipo podem introduzir regressões lógicas se não forem feitas com cuidado.
+    * **Contramedida:** O prompt proíbe explicitamente a alteração da lógica de negócio. A missão é focada em conformidade de tipos.
+
+---
+
+**IMPLEMENTAR:**
+Correção de Erros de Tipo em `server/routes.ts`
+
+**CURRENT STATE:**
+O arquivo `server/routes.ts` apresenta 26 erros de diagnóstico do Language Server Protocol (LSP), indicando problemas de tipo, propriedades ausentes em objetos e outras inconsistências de TypeScript que comprometem a estabilidade do código.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  O arquivo `server/routes.ts` é modificado.
+2.  Ao final da missão, a execução da função `get_latest_lsp_diagnostics` para o arquivo `server/routes.ts` deve retornar uma lista vazia (0 erros).
+3.  A funcionalidade existente das rotas definidas no arquivo não deve ser alterada (sem regressões de comportamento).
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  **Foco Cirúrgico:** Sua missão é **exclusivamente** corrigir os erros de tipo existentes. **NÃO** adicione novas funcionalidades. **NÃO** refatore a estrutura do arquivo ou mova funções. A decomposição do arquivo será feita em uma missão futura (Passo 2.2).
+2.  **Diagnóstico Inicial:** Seu primeiro passo deve ser executar a função `get_latest_lsp_diagnostics` para obter a lista completa e exata dos 26 erros a serem corrigidos no arquivo `server/routes.ts`.
+3.  **Correção Iterativa:** Aborde os erros de forma metódica, um por um ou em pequenos grupos lógicos. Valide seu progresso executando `get_latest_lsp_diagnostics` frequentemente para garantir que o número de erros está diminuindo.
+4.  **Preservação da Lógica:** As correções devem ser primariamente relacionadas a tipos (ex: adicionar propriedades que faltam em definições de tipo, corrigir o tipo de uma variável, garantir a passagem correta de argumentos para funções) sem alterar a lógica de negócio ou o fluxo de execução das rotas.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATório):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO e descrever riscos, como a possibilidade de uma correção de tipo mascarar um erro lógico]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que a correção dos erros de tipo não requer a instalação de novas dependências."]
+* **VALIDAÇÃO PENDENTE:** [Ex: "Testes de regressão manuais nos endpoints afetados são recomendados para garantir que nenhuma funcionalidade foi quebrada."]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear ficheiros e funções exatas afetadas (`server/routes.ts`).
+2.  Garantir importações e tipos corretos.
+3.  Executar `get_latest_lsp_diagnostics` antes, durante e principalmente ao final, garantindo 0 erros.
+4.  **Declarar Nível de Confiança (0-100%)** na correção.
+5.  **Categorizar Riscos Descobertos**.
+6.  Realizar um teste funcional (neste caso, uma revisão lógica das alterações para garantir que não houve mudança de comportamento).
+7.  **Documentar Decisões Técnicas** sobre como os erros de tipo mais complexos foram resolvidos.
