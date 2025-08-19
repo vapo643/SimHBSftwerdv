@@ -520,6 +520,56 @@ export class DatabaseStorage implements IStorage {
   async updateProposta(id: string | number, proposta: UpdateProposta): Promise<Proposta> {
     // propostas.id is text field (UUID), not numeric
     const propostaId = typeof id === 'number' ? id.toString() : id;
+    
+    // PAM V1.0 - Se houver mudança de status, usar dupla escrita
+    if (proposta.status) {
+      const { updateStatusWithContext } = await import("./lib/status-context-helper");
+      
+      // Determinar contexto baseado no status
+      let contexto: 'pagamentos' | 'cobrancas' | 'formalizacao' | 'geral' = 'geral';
+      if (['pago', 'pagamento_autorizado', 'PAGAMENTO_CONFIRMADO'].includes(proposta.status)) {
+        contexto = 'pagamentos';
+      } else if (['QUITADO', 'INADIMPLENTE', 'EM_DIA', 'VENCIDO'].includes(proposta.status)) {
+        contexto = 'cobrancas';
+      } else if (['CCB_GERADA', 'CCB_ASSINADA', 'ASSINATURA_PENDENTE'].includes(proposta.status)) {
+        contexto = 'formalizacao';
+      }
+      
+      const result = await updateStatusWithContext({
+        propostaId,
+        novoStatus: proposta.status,
+        contexto,
+        userId: 'storage-service',
+        observacoes: 'Atualização via storage.updateProposta',
+        metadata: { origem: 'storage-service' }
+      });
+      
+      if (!result.success) {
+        throw new Error(`Falha na dupla escrita: ${result.error}`);
+      }
+      
+      // Atualizar outros campos se necessário
+      const otherFields = { ...proposta };
+      delete otherFields.status;
+      
+      if (Object.keys(otherFields).length > 0) {
+        const updateResult = await db
+          .update(propostas)
+          .set(otherFields)
+          .where(eq(propostas.id, propostaId))
+          .returning();
+        return updateResult[0];
+      }
+      
+      // Retornar proposta atualizada
+      const [updated] = await db
+        .select()
+        .from(propostas)
+        .where(eq(propostas.id, propostaId));
+      return updated;
+    }
+    
+    // Se não houver mudança de status, fazer update normal
     const result = await db
       .update(propostas)
       .set(proposta)

@@ -55,22 +55,30 @@ export const togglePropostaStatus = async (req: AuthenticatedRequest, res: Respo
       novoStatus = "suspensa";
     }
 
-    // 5. Atualizar o status
-    const { error: updateError } = await supabase
-      .from("propostas")
-      .update({
-        status: novoStatus,
-      })
-      .eq("id", propostaId);
+    // 5. PAM V1.0 - Usar dupla escrita transacional para mudança de status
+    const { updateStatusWithContext } = await import("../lib/status-context-helper");
+    const statusResult = await updateStatusWithContext({
+      propostaId,
+      novoStatus,
+      contexto: "geral",
+      userId: req.user?.id || "sistema",
+      observacoes: `Status ${novoStatus === "suspensa" ? "suspenso" : "reativado"} pelo usuário`,
+      metadata: {
+        tipoAcao: novoStatus === "suspensa" ? "SUSPENDER_PROPOSTA" : "REATIVAR_PROPOSTA",
+        statusAnterior: proposta.status,
+        usuarioRole: req.user?.role || "desconhecido",
+        motivoSuspensao: novoStatus === "suspensa" ? "Ação manual do usuário" : null
+      }
+    });
 
-    if (updateError) {
-      console.error("Erro ao atualizar status:", updateError);
+    if (!statusResult.success) {
+      console.error("Erro ao atualizar status:", statusResult.error);
       return res.status(500).json({
-        message: `Erro ao atualizar status: ${updateError.message}`,
+        message: `Erro ao atualizar status: ${statusResult.error}`,
       });
     }
 
-    // 6. Criar log de comunicação
+    // 6. Criar log de comunicação adicional (mantido para compatibilidade)
     await supabase.from("comunicacao_logs").insert({
       proposta_id: propostaId,
       usuario_id: req.user?.id,

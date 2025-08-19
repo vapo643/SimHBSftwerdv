@@ -262,14 +262,26 @@ export class BoletoStatusService {
     if (todasPagas && todasCobrancas.length > 0) {
       console.log(`[STATUS SERVICE] 🎉 Proposta ${propostaId} totalmente quitada`);
       
-      // Atualizar status da proposta
-      await db
-        .update(propostas)
-        .set({
-          status: "pago",
-          updatedAt: new Date()
-        })
-        .where(eq(propostas.id, propostaId));
+      // PAM V1.0 - Usar dupla escrita transacional
+      const { updateStatusWithContext } = await import("../lib/status-context-helper");
+      const result = await updateStatusWithContext({
+        propostaId,
+        novoStatus: "QUITADO",
+        contexto: "cobrancas",
+        userId: "boleto-status-service",
+        observacoes: `Todos os ${todasCobrancas.length} boletos foram pagos`,
+        metadata: {
+          tipoAcao: "QUITACAO_COMPLETA",
+          quantidadeBoletos: todasCobrancas.length,
+          valorTotal: todasCobrancas.reduce((sum, c) => sum + Number(c.valor || 0), 0),
+          dataQuitacao: new Date().toISOString()
+        }
+      });
+
+      if (!result.success) {
+        console.error(`[STATUS SERVICE] ❌ Falha na dupla escrita: ${result.error}`);
+        throw new Error(result.error || "Falha ao atualizar status de quitação");
+      }
     }
   }
 

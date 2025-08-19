@@ -609,11 +609,29 @@ router.post("/:id/processar", jwtAuthMiddleware, async (req: AuthenticatedReques
       return res.status(404).json({ error: "Proposta não encontrada" });
     }
 
-    // Atualizar status para pago
+    // PAM V1.0 - Usar dupla escrita transacional para mudança de status
+    const { updateStatusWithContext } = await import("../lib/status-context-helper");
+    const statusResult = await updateStatusWithContext({
+      propostaId: id,
+      novoStatus: "pago",
+      contexto: "pagamentos",
+      userId: userId,
+      observacoes: "[PAGAMENTO PROCESSADO] Empréstimo pago ao cliente",
+      metadata: {
+        tipoAcao: "PAGAMENTO_PROCESSADO",
+        dataPagamento: new Date().toISOString(),
+        comprovante: comprovante || null
+      }
+    });
+
+    if (!statusResult.success) {
+      throw new Error(`Falha na dupla escrita: ${statusResult.error}`);
+    }
+
+    // Atualizar campos adicionais
     await db
       .update(propostas)
       .set({
-        status: "pago",
         dataPagamento: new Date(),
         observacoes: `${proposta.observacoes || ""}\n\n[PAGAMENTO PROCESSADO] Empréstimo pago ao cliente`,
       })
@@ -734,11 +752,35 @@ router.post(
         return res.status(400).json({ error: "Boletos não gerados. Desembolso bloqueado." });
       }
 
-      // Atualizar para DESEMBOLSADO
+      // PAM V1.0 - Usar dupla escrita transacional para mudança de status
+      const { updateStatusWithContext } = await import("../lib/status-context-helper");
+      const statusResult = await updateStatusWithContext({
+        propostaId: id,
+        novoStatus: "pago",
+        contexto: "pagamentos",
+        userId: userId,
+        observacoes: `[DESEMBOLSO CONFIRMADO] ${observacoes || "Pagamento realizado ao cliente"}`,
+        metadata: {
+          tipoAcao: "DESEMBOLSO_CONFIRMADO",
+          userRole,
+          valorDesembolsado: proposta.valorTotalFinanciado,
+          dataPagamento: new Date().toISOString(),
+          destino: {
+            tipo: proposta.dadosPagamentoPix ? "PIX" : "TED",
+            dados: proposta.dadosPagamentoPix || 
+              `${proposta.dadosPagamentoBanco} AG:${proposta.dadosPagamentoAgencia} CC:${proposta.dadosPagamentoConta}`
+          }
+        }
+      });
+
+      if (!statusResult.success) {
+        throw new Error(`Falha na dupla escrita: ${statusResult.error}`);
+      }
+
+      // Atualizar campos adicionais
       await db
         .update(propostas)
         .set({
-          status: "pago",
           dataPagamento: new Date(),
           observacoes: `${proposta.observacoes || ""}\n\n[DESEMBOLSO CONFIRMADO] ${observacoes || "Pagamento realizado ao cliente"}`,
         })

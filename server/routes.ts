@@ -4346,13 +4346,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
           updatedProposta.assinaturaEletronicaConcluida &&
           updatedProposta.biometriaConcluida
         ) {
-          // Update status to ready for payment if all steps are complete
-          await db
-            .update(propostas)
-            .set({
-              status: "pronto_pagamento",
-            })
-            .where(eq(propostas.id, id));
+          // PAM V1.0 - Usar dupla escrita transacional para mudança de status
+          const { updateStatusWithContext } = await import("./lib/status-context-helper");
+          const statusResult = await updateStatusWithContext({
+            propostaId: id,
+            novoStatus: "pronto_pagamento",
+            contexto: "formalizacao",
+            userId: req.user?.id || "sistema",
+            observacoes: "Todas as etapas de formalização concluídas (CCB, assinatura, biometria)",
+            metadata: {
+              tipoAcao: "FORMALIZACAO_COMPLETA",
+              ccbGerado: true,
+              assinaturaEletronica: true,
+              biometria: true,
+              usuarioRole: req.user?.role || "desconhecido"
+            }
+          });
+
+          if (!statusResult.success) {
+            console.error(`[${getBrasiliaTimestamp()}] Falha na dupla escrita: ${statusResult.error}`);
+          }
 
           console.log(`[${getBrasiliaTimestamp()}] Proposta ${id} pronta para pagamento`);
         }
@@ -4406,11 +4419,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
             throw new Error("Proposta não encontrada");
           }
 
-          // Step 2: Update proposal status
+          // PAM V1.0 - Usar dupla escrita transacional dentro da transação
+          const { updateStatusWithContext } = await import("./lib/status-context-helper");
+          
+          // Determinar contexto baseado no status
+          let contexto: 'pagamentos' | 'cobrancas' | 'formalizacao' | 'geral' = 'geral';
+          if (['aprovado', 'reprovado', 'cancelado'].includes(status)) {
+            contexto = 'geral';
+          }
+          
+          const statusResult = await updateStatusWithContext({
+            propostaId: id,
+            novoStatus: status,
+            contexto,
+            userId: req.user?.id || "sistema",
+            observacoes: observacao || `Status alterado para ${status}`,
+            metadata: {
+              tipoAcao: "STATUS_UPDATE_MANUAL",
+              usuarioRole: req.user?.role || "desconhecido",
+              statusAnterior: currentProposta.status
+            }
+          });
+
+          if (!statusResult.success) {
+            throw new Error(`Falha na dupla escrita: ${statusResult.error}`);
+          }
+
+          // Atualizar campos adicionais se necessário
           const [updatedProposta] = await tx
             .update(propostas)
             .set({
-              status: status as any,
               dataAprovacao: status === "aprovado" ? getBrasiliaDate() : undefined,
             })
             .where(eq(propostas.id, id))
