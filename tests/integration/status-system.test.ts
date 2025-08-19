@@ -22,7 +22,7 @@ import {
 } from "@shared/schema";
 import { eq, and, desc } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
-import { cleanTestDatabase, verifyCleanDatabase } from "../lib/db-helper";
+import { cleanTestDatabase, verifyCleanDatabase, setupTestEnvironment } from "../lib/db-helper";
 import { 
   ProposalStatus, 
   InvalidTransitionError,
@@ -37,7 +37,10 @@ import {
 
 describe("Sistema de Status FSM - Testes de Integração", () => {
   let testProposalId: string;
-  const testUserId = "test-user-123";
+  let testUserId: string;
+  let testStoreId: number;
+  let testProductId: number;
+  let testCommercialTableId: number;
   
   /**
    * Setup: Limpa banco e cria proposta de teste
@@ -45,7 +48,7 @@ describe("Sistema de Status FSM - Testes de Integração", () => {
   beforeEach(async () => {
     console.log("[TEST SETUP] 🧹 Iniciando setup do teste...");
     
-    // Usar o helper robusto de limpeza
+    // Limpar banco primeiro
     await cleanTestDatabase();
     
     // Verificar que o banco está limpo
@@ -55,53 +58,21 @@ describe("Sistema de Status FSM - Testes de Integração", () => {
     }
     
     try {
-      // Criar dados de referência necessários primeiro
-      console.log("[TEST SETUP] 📦 Criando dados de referência...");
+      // Usar o novo helper com Admin Client para criar dados de teste
+      const testData = await setupTestEnvironment();
       
-      // Criar parceiro
-      const [parceiro] = await db.insert(parceiros)
-        .values({
-          id: 999,
-          razaoSocial: "Parceiro Teste",
-          cnpj: "12345678000199",
-        })
-        .returning({ id: parceiros.id });
+      // Atribuir valores para uso nos testes
+      testUserId = testData.testUserId;
+      testStoreId = testData.testStoreId;
+      testProductId = testData.testProductId;
+      testCommercialTableId = testData.testCommercialTableId;
       
-      // Criar loja associada ao parceiro
-      const [loja] = await db.insert(lojas)
-        .values({
-          id: 999,
-          nomeLoja: "Loja Teste",
-          parceiroId: parceiro.id,
-        })
-        .returning({ id: lojas.id });
-      
-      // Criar produto
-      const [produto] = await db.insert(produtos)
-        .values({
-          id: 999,
-          nomeProduto: "Produto Teste",
-          isActive: true,
-        })
-        .returning({ id: produtos.id });
-      
-      // Criar tabela comercial
-      const [tabelaComercial] = await db.insert(tabelasComerciais)
-        .values({
-          id: 999,
-          nomeTabela: "Tabela Teste",
-          taxaJuros: "1.99",
-          prazos: [12, 24, 36],
-          comissao: "5.00",
-        })
-        .returning({ id: tabelasComerciais.id });
-      
-      // Criar proposta de teste com status inicial
-      testProposalId = uuidv4(); // Gerar UUID para a proposta
+      // Criar proposta de teste com os dados criados
+      testProposalId = uuidv4();
       const [newProposal] = await db.insert(propostas)
         .values({
           id: testProposalId,
-          numeroProposta: 999999, // Número sequencial de teste
+          numeroProposta: 999999,
           status: ProposalStatus.RASCUNHO,
           valor: "10000.00",
           prazo: 12,
@@ -110,9 +81,10 @@ describe("Sistema de Status FSM - Testes de Integração", () => {
           clienteCpf: "12345678901",
           clienteTelefone: "11999999999",
           clienteEmail: "teste@teste.com",
-          produtoId: produto.id,
-          tabelaComercialId: tabelaComercial.id,
-          lojaId: loja.id,
+          produtoId: testProductId,
+          tabelaComercialId: testCommercialTableId,
+          lojaId: testStoreId,
+          userId: testUserId, // Usar o userId criado pelo Admin Client
           finalidade: "Teste",
           garantia: "Nenhuma",
         })

@@ -8,7 +8,10 @@
  */
 
 import { db } from "../../server/lib/supabase";
+import { createServerSupabaseAdminClient } from "../../server/lib/supabase";
 import { sql } from "drizzle-orm";
+import { parceiros, lojas, produtos, tabelasComerciais, users } from "@shared/schema";
+import { v4 as uuidv4 } from "uuid";
 
 /**
  * Cleans the test database by truncating all tables with CASCADE
@@ -136,17 +139,114 @@ export async function cleanTestDatabase(): Promise<void> {
 }
 
 /**
- * Creates a clean test environment by:
- * 1. Cleaning the database
- * 2. Optionally seeding with base data
+ * Creates a clean test environment with all necessary reference data
+ * Uses Supabase Admin Client to bypass RLS policies
+ * 
+ * @returns Object containing all created test entities
  */
-export async function setupTestEnvironment(seedData: boolean = false): Promise<void> {
-  await cleanTestDatabase();
+export async function setupTestEnvironment(): Promise<{
+  testUserId: string;
+  testPartnerId: number;
+  testStoreId: number;
+  testProductId: number;
+  testCommercialTableId: number;
+}> {
+  const startTime = Date.now();
+  console.log("[TEST DB] 🔧 Setting up test environment with Admin Client...");
   
-  if (seedData) {
-    console.log("[TEST DB] 🌱 Seeding test data...");
-    // Add seed data logic here if needed in the future
-    console.log("[TEST DB] ✅ Test data seeded");
+  try {
+    // Create Admin Client that bypasses RLS
+    const adminClient = createServerSupabaseAdminClient();
+    
+    // 1. Create test user in auth.users using Admin API
+    const testUserId = uuidv4();
+    const testEmail = `test-${Date.now()}@test.com`;
+    
+    console.log("[TEST DB] 👤 Creating test user...");
+    const { data: authUser, error: authError } = await adminClient.auth.admin.createUser({
+      email: testEmail,
+      password: "TestPassword123!",
+      email_confirm: true,
+      user_metadata: {
+        name: "Test User",
+        role: "ATENDENTE"
+      }
+    });
+    
+    if (authError) {
+      console.error("[TEST DB] ❌ Error creating auth user:", authError);
+      // If we can't create auth user, use a dummy UUID
+      console.log("[TEST DB] ⚠️ Falling back to dummy user ID");
+    }
+    
+    const finalUserId = authUser?.id || testUserId;
+    
+    // 2. Create test user in public.users table  
+    // Note: users table might have different fields - only insert what exists
+    try {
+      await db.insert(users).values({
+        name: "Test User",
+        email: testEmail,
+        password: "hashed_password", // Required field
+        role: "ATENDENTE"
+      }).onConflictDoNothing();
+    } catch (e) {
+      console.log("[TEST DB] ⚠️ User insert skipped (may already exist)");
+    }
+    
+    // 3. Create test partner
+    console.log("[TEST DB] 🏢 Creating test partner...");
+    const [partner] = await db.insert(parceiros)
+      .values({
+        razaoSocial: "Test Partner Company",
+        cnpj: "12345678000199"
+      })
+      .returning({ id: parceiros.id });
+    
+    // 4. Create test store associated with partner  
+    console.log("[TEST DB] 🏪 Creating test store...");
+    const [store] = await db.insert(lojas)
+      .values({
+        nomeLoja: "Test Store",
+        parceiroId: partner.id,
+        endereco: "Test Address"
+      })
+      .returning({ id: lojas.id });
+    
+    // 5. Create test product
+    console.log("[TEST DB] 📦 Creating test product...");
+    const [product] = await db.insert(produtos)
+      .values({
+        nomeProduto: "Test Product",
+        isActive: true
+      })
+      .returning({ id: produtos.id });
+    
+    // 6. Create test commercial table
+    console.log("[TEST DB] 📊 Creating test commercial table...");
+    const [commercialTable] = await db.insert(tabelasComerciais)
+      .values({
+        nomeTabela: "Test Commercial Table",
+        taxaJuros: "1.99",
+        prazos: [12, 24, 36],
+        comissao: "5.00"
+      })
+      .returning({ id: tabelasComerciais.id });
+    
+    const duration = Date.now() - startTime;
+    console.log(`[TEST DB] ✅ Test environment setup complete in ${duration}ms`);
+    
+    return {
+      testUserId: finalUserId,
+      testPartnerId: partner.id,
+      testStoreId: store.id,
+      testProductId: product.id,
+      testCommercialTableId: commercialTable.id
+    };
+    
+  } catch (error) {
+    console.error("[TEST DB] ❌ Error setting up test environment:", error);
+    throw error;
   }
 }
 
