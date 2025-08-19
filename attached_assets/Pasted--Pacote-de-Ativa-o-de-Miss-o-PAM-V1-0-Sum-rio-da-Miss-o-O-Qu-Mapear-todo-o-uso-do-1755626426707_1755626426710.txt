@@ -1,0 +1,50 @@
+### Pacote de Ativação de Missão (PAM) V1.0
+
+* **Sumário da Missão (O Quê):** Mapear todo o uso do `statusEnum` no código-fonte para encontrar a lógica de negócio e as transições de estado existentes.
+* **Intenção Estratégica (O Porquê):** Antes de projetar a nova Máquina de Estados Finitos (FSM), precisamos entender completamente como o sistema *atualmente* gerencia as transições de estado. Isso evitará quebrar lógicas de negócio ocultas e nos informará se já existe alguma máquina de estados parcial que possamos refatorar.
+* **Histórico Relevante (Consulta Obrigatória):** A missão anterior (Passo 1.1) identificou 28 status no `statusEnum`, dos quais 19 são legados. Esta missão focará em como os 9 status ativos são utilizados.
+* **Modelo Mental (Como se Encaixa):** Esta é uma missão de reconhecimento de código (code reconnaissance). O Agente deve agir como um analista, buscando, identificando e relatando padrões de código, sem realizar nenhuma modificação.
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco:** A lógica de status pode estar espalhada por muitos arquivos, tornando o mapeamento incompleto.
+    * **Contramedida:** O prompt exige uma busca sistemática por padrões de escrita e leitura, seguida de uma síntese final para garantir a abrangência da análise.
+
+---
+
+**IMPLEMENTAR:**
+Relatório de Mapeamento da Lógica de Status
+
+**CURRENT STATE:**
+Temos uma lista de 28 status, mas não sabemos onde ou como as regras de negócio que os alteram estão implementadas no código. A lógica está dispersa e implícita.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um relatório detalhado em formato Markdown, dividido em três seções:
+
+1.  **Pontos de Modificação de Status:** Uma lista de CADA arquivo e função que **escreve ou atualiza** o campo `propostas.status`. Para cada item, forneça um pequeno trecho de código (`snippet`) mostrando a linha exata da modificação.
+
+2.  **Pontos de Leitura Condicional de Status:** Uma lista de CADA arquivo e função que **lê** o campo `propostas.status` dentro de um bloco de lógica condicional (ex: `if (status === ...)` ou `switch (status)`). Para cada item, forneça um `snippet` mostrando a condição.
+
+3.  **Síntese de Arquitetura de Status:** Com base em toda a análise anterior, responda de forma conclusiva à seguinte pergunta: "Existe algum serviço, classe ou função centralizada que se assemelhe a um 'motor de transição de status', ou a lógica está completamente descentralizada e espalhada pelos controllers e serviços?"
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  Realize uma busca global em todo o projeto pela string `statusEnum`.
+2.  Realize buscas adicionais por padrões como `.status =`, `.status ===`, `status:` para encontrar todos os pontos de leitura e escrita.
+3.  Para cada `snippet` de código, inclua o caminho completo do arquivo e o número da linha.
+4.  Compile os resultados nas três seções especificadas em `EXPECTED`.
+5.  A seção 3 (Síntese) deve ser uma análise conclusiva, não apenas uma repetição dos achados.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100% de confiança na COMPLETUDE do relatório]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO e descrever o risco de não ter encontrado algum ponto de uso]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Listar suposições, ex: "Assumi que toda a lógica de status usa o 'statusEnum' ou strings correspondentes"]
+* **VALIDAÇÃO PENDENTE:** [Listar ações que o Orquestrador (GEM 02) deve validar]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear ficheiros e funções exatas afetadas (neste caso, analisadas).
+2.  Garantir que os snippets de código estão corretos e contextuais.
+3.  Executar `get_latest_lsp_diagnostics` para garantir que o ambiente está estável.
+4.  **Declarar Nível de Confiança (0-100%)** na completude da análise.
+5.  **Categorizar Riscos Descobertos** na análise.
+6.  Realizar uma revisão funcional completa do relatório gerado para garantir precisão.
+7.  **Documentar Decisões Técnicas** assumidas durante a busca.
