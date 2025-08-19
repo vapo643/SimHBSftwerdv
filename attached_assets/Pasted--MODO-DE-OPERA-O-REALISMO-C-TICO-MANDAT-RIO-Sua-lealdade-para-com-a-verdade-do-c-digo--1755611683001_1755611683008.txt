@@ -1,0 +1,42 @@
+**### MODO DE OPERAÇÃO: REALISMO CÉTICO (MANDATÓRIO)**
+Sua lealdade é para com a verdade do código e a estabilidade da produção.
+
+---
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Refatorar a "Tela de Pagamentos" (backend e frontend) para que ela passe a ler e exibir o status da proposta a partir da nova tabela `status_contextuais`.
+* **Intenção Estratégica (O Porquê):** Continuar a migração gradual do nosso sistema para a nova arquitetura de status, garantindo que a Tela de Pagamentos também opere com dados contextuais e precisos, alinhando-a com a "Tela de Cobranças".
+* **Histórico Relevante (Consulta Obrigatória):** A migração da "Tela de Cobranças" foi um sucesso. Esta missão é para aplicar o mesmo padrão de refatoração (`LEFT JOIN` com fallback) à "Tela de Pagamentos".
+* **Modelo Mental (Como se Encaixa):** Você é um Engenheiro de Backend. A tarefa é modificar a query de `JOIN` no endpoint `GET /api/pagamentos` para buscar o novo dado contextual.
+* **Riscos Antecipados:** **Risco:** BAIXO. O padrão de implementação já foi provado na missão anterior.
+
+---
+
+**IMPLEMENTAR:**
+A refatoração do fluxo de leitura de dados da "Tela de Pagamentos".
+
+**CURRENT STATE:**
+A "Tela de Pagamentos" ainda lê o status da coluna `status` legada na tabela `propostas`.
+
+**EXPECTED (Estado Final de Sucesso):**
+A "Tela de Pagamentos" agora busca e exibe o `status` mais recente da tabela `status_contextuais`, onde o `contexto` é `'pagamentos'`.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+**1. Refatoração do Backend (`GET /api/pagamentos`):**
+    - **Ação:** Modifique a query Drizzle principal neste endpoint.
+    - **Implementação:**
+        a. Adicione um `LEFT JOIN` da tabela `propostas` para a tabela `status_contextuais`, com a condição `ON propostas.id = status_contextuais.proposta_id AND status_contextuais.contexto = 'pagamentos'`.
+        b. Modifique a cláusula `.select()` para que o campo de status retornado para a UI venha da tabela `status_contextuais`, com um fallback para o status da tabela `propostas`.
+
+**2. Refatoração do Frontend (`pagamentos.tsx`):**
+    - **Ação:** Ajuste a UI para consumir o novo campo de status.
+    - **Implementação:** Garanta que os componentes que exibem o status estejam a usar o novo campo de status contextual retornado pela API.
+
+---
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+Siga o protocolo completo. O teste funcional consistirá em modificar manualmente um status na nova tabela `status_contextuais` com o contexto `'pagamentos'` e validar que a "Tela de Pagamentos" reflete esta mudança.
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+Preencha a declaração completa ao final da sua implementação.
+---

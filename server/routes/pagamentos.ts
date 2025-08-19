@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { jwtAuthMiddleware, type AuthenticatedRequest } from "../lib/jwt-auth-middleware.js";
 import { db, supabase } from "../lib/supabase.js";
-import { propostas, users, profiles, lojas, produtos, interCollections } from "@shared/schema";
+import { propostas, users, profiles, lojas, produtos, interCollections, statusContextuais } from "@shared/schema";
 import { eq, and, or, desc, sql, gte, lte, inArray } from "drizzle-orm";
 import { z } from "zod";
 import {
@@ -246,12 +246,22 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
       .select({
         // Dados da proposta
         proposta: propostas,
+        // PAM V1.0 - Campo de status contextual
+        statusContextual: statusContextuais.status,
         // Dados da loja
         loja: lojas,
         // Dados do produto
         produto: produtos,
       })
       .from(propostas)
+      // PAM V1.0 - LEFT JOIN com status_contextuais para contexto de pagamentos
+      .leftJoin(
+        statusContextuais,
+        and(
+          eq(propostas.id, statusContextuais.propostaId),
+          eq(statusContextuais.contexto, 'pagamentos')
+        )
+      )
       .leftJoin(lojas, eq(propostas.lojaId, lojas.id))
       .leftJoin(produtos, eq(propostas.produtoId, produtos.id))
       .where(
@@ -312,12 +322,18 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
 
     // Processar os resultados para o formato esperado pelo frontend
     const pagamentosFormatados = result.map((row: any) => {
-      const { proposta, loja, produto } = row;
+      const { proposta, statusContextual, loja, produto } = row;
+      
+      // PAM V1.0 - Usar status contextual com fallback para status legado
+      const statusAtual = statusContextual || proposta.status;
 
       console.log(`[PAGAMENTOS DEBUG] Processando proposta ${proposta.id}:`, {
         clienteNome: proposta.clienteNome,
         clienteCpf: proposta.clienteCpf,
         valorTotalFinanciado: proposta.valorTotalFinanciado,
+        statusLegado: proposta.status,
+        statusContextual: statusContextual,
+        statusUsado: statusAtual,
         lojaNome: loja?.nomeLoja,
         produtoNome: produto?.nomeProduto,
       });
@@ -331,26 +347,27 @@ router.get("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
       // Mapear status para o formato esperado pelo frontend - Sistema V2.0 + Legado
       let statusFrontend = "aguardando_aprovacao";
       
+      // PAM V1.0 - Usar status contextual para mapeamento
       // Status System V2.0 (prioritário)
-      if (proposta.status === "BOLETOS_EMITIDOS") {
+      if (statusAtual === "BOLETOS_EMITIDOS") {
         statusFrontend = "em_processamento"; // CORRIGIDO: BOLETOS_EMITIDOS é elegível para pagamento
-      } else if (proposta.status === "PAGAMENTO_PENDENTE") {
+      } else if (statusAtual === "PAGAMENTO_PENDENTE") {
         statusFrontend = "aguardando_pagamento";
-      } else if (proposta.status === "QUITADO") {
+      } else if (statusAtual === "QUITADO") {
         statusFrontend = "pago";
-      } else if (proposta.status === "PAGAMENTO_CONFIRMADO") {
+      } else if (statusAtual === "PAGAMENTO_CONFIRMADO") {
         statusFrontend = "pago";
       }
       // Status legados V1.0 (compatibilidade)
-      else if (proposta.status === "pago") {
+      else if (statusAtual === "pago") {
         statusFrontend = "pago";
-      } else if (proposta.status === "aprovado") {
+      } else if (statusAtual === "aprovado") {
         statusFrontend = "aprovado";
-      } else if (proposta.status === "pronto_pagamento") {
+      } else if (statusAtual === "pronto_pagamento") {
         statusFrontend = "em_processamento";
-      } else if (proposta.status === "rejeitado") {
+      } else if (statusAtual === "rejeitado") {
         statusFrontend = "rejeitado";
-      } else if (proposta.status === "cancelado") {
+      } else if (statusAtual === "cancelado") {
         statusFrontend = "cancelado";
       }
 
