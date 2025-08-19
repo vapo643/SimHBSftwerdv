@@ -1,0 +1,66 @@
+### Pacote de Ativação de Missão (PAM) V1.0
+
+* **Sumário da Missão (O Quê):** Criar o serviço da Máquina de Estados Finitos (FSM) em TypeScript para governar as transições de status das propostas, com base no motor emergente `updateStatusWithContext`.
+* **Intenção Estratégica (O Porquê):** Centralizar toda a lógica de transição de estado em um único local. Isso eliminará a lógica dispersa e garantirá que apenas transições de negócio válidas possam ocorrer, tornando o sistema mais robusto, previsível e testável.
+* **Histórico Relevante (Consulta Obrigatória):** A Missão 1.2 identificou `updateStatusWithContext` como o motor de escrita centralizado. Esta nova FSM deve ser construída como uma camada de validação **em torno** dessa função, não a substituindo.
+* **Modelo Mental (Como se Encaixa):** Este novo serviço (`statusFsmService.ts`) atuará como um "gatekeeper". Nenhum outro lugar no código deve modificar o status de uma proposta diretamente. Todos deverão passar por este serviço, que primeiro valida a transição e depois delega a escrita para o `updateStatusWithContext`.
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco:** A lógica de transição pode ser complexa e propensa a erros.
+    * **Contramedida:** As regras de transição serão explicitamente fornecidas no prompt, eliminando a ambiguidade. O serviço deve lançar um erro customizado para transições inválidas.
+
+---
+
+**IMPLEMENTAR:**
+Serviço de Máquina de Estados Finitos de Propostas
+
+**CURRENT STATE:**
+A função `updateStatusWithContext` centraliza a escrita do status, mas não contém nenhuma lógica de validação para as transições. Qualquer status pode ser alterado para qualquer outro, o que é um risco para a integridade do negócio.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  Um novo arquivo é criado em `server/services/statusFsmService.ts`.
+2.  O arquivo define e exporta uma classe de erro customizada chamada `InvalidTransitionError`.
+3.  O arquivo define a estrutura de dados (`graph`) para as regras de transição, conforme especificado abaixo.
+4.  O arquivo exporta uma função principal: `async function transitionTo(propostaId: string, novoStatus: Status, userId: string, contexto: string, observacoes: string): Promise<void>`.
+5.  A função `transitionTo` deve:
+    a. Buscar o estado atual da proposta no banco de dados.
+    b. Consultar o `graph` de transições para verificar se a mudança do estado `atual` para o `novoStatus` é permitida.
+    c. Se a transição for **inválida**, deve lançar uma `new InvalidTransitionError('Mensagem de erro clara')`.
+    d. Se a transição for **válida**, deve chamar a função `updateStatusWithContext` existente, passando todos os parâmetros necessários para ela.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  **Crie o arquivo** `server/services/statusFsmService.ts`.
+2.  **Importe** as dependências necessárias, incluindo `updateStatusWithContext` de `../lib/status-context-helper` e o `db` de `../lib/supabase`.
+3.  **Defina o Enum de Status Ativos:** Use apenas os 9 status ativos identificados na auditoria: `ANALISE_REPROVADA`, `CCB_GERADA`, `AGUARDANDO_ASSINATURA`, `ASSINATURA_CONCLUIDA`, `PAGO_AO_CLIENTE`, `REPROVADO`, `DOCUMENTOS_PENDENTES`, `PENDENTE_CORRECAO_DADOS`, `APROVADO`.
+4.  **Defina a Classe de Erro Customizada:** `export class InvalidTransitionError extends Error { ... }`.
+5.  **Implemente o Grafo de Transições:** Crie uma constante `transitionGraph` com a seguinte estrutura e regras:
+    ```typescript
+    const transitionGraph: Record<Status, Status[]> = {
+      DOCUMENTOS_PENDENTES: ['PENDENTE_CORRECAO_DADOS', 'ANALISE_REPROVADA', 'APROVADO'],
+      PENDENTE_CORRECAO_DADOS: ['DOCUMENTOS_PENDENTES', 'ANALISE_REPROVADA', 'APROVADO'],
+      APROVADO: ['CCB_GERADA', 'REPROVADO'],
+      ANALISE_REPROVADA: [], // Estado final
+      REPROVADO: [], // Estado final
+      CCB_GERADA: ['AGUARDANDO_ASSINATURA', 'REPROVADO'],
+      AGUARDANDO_ASSINATURA: ['ASSINATURA_CONCLUIDA', 'REPROVADO'],
+      ASSINATURA_CONCLUIDA: ['PAGO_AO_CLIENTE', 'REPROVADO'],
+      PAGO_AO_CLIENTE: [], // Estado final
+    };
+    ```
+6.  **Implemente a função `transitionTo`** seguindo a lógica descrita em `EXPECTED`. A função deve ser robusta e tratar o caso de a proposta não ser encontrada.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO e descrever riscos, como o impacto de centralizar a lógica de transição]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que `updateStatusWithContext` é a única função que deve realizar a escrita no banco de dados."]
+* **VALIDAÇÃO PENDENTE:** [Ex: "O novo serviço `statusFsmService` precisa ser integrado no lugar das chamadas diretas a `updateStatusWithContext` nos controllers."]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear ficheiros e funções exatas afetadas (criação de `statusFsmService.ts`, leitura de `status-context-helper.ts`).
+2.  Garantir importações e tipos corretos, especialmente o `enum` dos 9 status ativos.
+3.  Executar `get_latest_lsp_diagnostics` e corrigir TODOS os erros no novo arquivo.
+4.  **Declarar Nível de Confiança (0-100%)** na implementação da FSM.
+5.  **Categorizar Riscos Descobertos**.
+6.  Realizar um teste funcional (neste caso, uma revisão lógica completa do código gerado).
+7.  **Documentar Decinsões Técnicas** como a estrutura do grafo de transição.

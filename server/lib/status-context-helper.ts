@@ -8,7 +8,7 @@
  * e a nova tabela de contextos (status_contextuais)
  */
 
-import { db } from "../db";
+import { db } from "./supabase";
 import { propostas, statusContextuais, propostaLogs } from "@shared/schema";
 import { eq, and, sql } from "drizzle-orm";
 
