@@ -33,6 +33,7 @@ import {
 } from "@shared/schema";
 import { db } from "./lib/supabase";
 import { eq, desc, and, or, not, isNull } from "drizzle-orm";
+import { transitionTo, InvalidTransitionError } from "./services/statusFsmService";
 
 export interface IStorage {
   // Users
@@ -521,10 +522,8 @@ export class DatabaseStorage implements IStorage {
     // propostas.id is text field (UUID), not numeric
     const propostaId = typeof id === 'number' ? id.toString() : id;
     
-    // PAM V1.0 - Se houver mudança de status, usar dupla escrita
+    // PAM V1.0 - Se houver mudança de status, usar FSM para validação
     if (proposta.status) {
-      const { updateStatusWithContext } = await import("./lib/status-context-helper");
-      
       // Determinar contexto baseado no status
       let contexto: 'pagamentos' | 'cobrancas' | 'formalizacao' | 'geral' = 'geral';
       if (['pago', 'pagamento_autorizado', 'PAGAMENTO_CONFIRMADO'].includes(proposta.status)) {
@@ -535,17 +534,21 @@ export class DatabaseStorage implements IStorage {
         contexto = 'formalizacao';
       }
       
-      const result = await updateStatusWithContext({
-        propostaId,
-        novoStatus: proposta.status,
-        contexto,
-        userId: 'storage-service',
-        observacoes: 'Atualização via storage.updateProposta',
-        metadata: { origem: 'storage-service' }
-      });
-      
-      if (!result.success) {
-        throw new Error(`Falha na dupla escrita: ${result.error}`);
+      try {
+        await transitionTo({
+          propostaId,
+          novoStatus: proposta.status,
+          userId: 'storage-service',
+          contexto,
+          observacoes: 'Atualização via storage.updateProposta',
+          metadata: { origem: 'storage-service' }
+        });
+      } catch (error) {
+        if (error instanceof InvalidTransitionError) {
+          // Re-lançar com mensagem mais clara para storage
+          throw new Error(`Transição de status inválida: ${error.message}`);
+        }
+        throw error;
       }
       
       // Atualizar outros campos se necessário

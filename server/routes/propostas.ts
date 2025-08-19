@@ -4,6 +4,7 @@ import { createServerSupabaseAdminClient } from "../lib/supabase";
 import { db } from "../lib/supabase.js";
 import { propostas, statusContextuais } from "@shared/schema";
 import { eq, and } from "drizzle-orm";
+import { transitionTo, InvalidTransitionError } from "../services/statusFsmService";
 
 /**
  * Alterar status da proposta entre ativa e suspensa
@@ -55,26 +56,31 @@ export const togglePropostaStatus = async (req: AuthenticatedRequest, res: Respo
       novoStatus = "suspensa";
     }
 
-    // 5. PAM V1.0 - Usar dupla escrita transacional para mudança de status
-    const { updateStatusWithContext } = await import("../lib/status-context-helper");
-    const statusResult = await updateStatusWithContext({
-      propostaId,
-      novoStatus,
-      contexto: "geral",
-      userId: req.user?.id || "sistema",
-      observacoes: `Status ${novoStatus === "suspensa" ? "suspenso" : "reativado"} pelo usuário`,
-      metadata: {
-        tipoAcao: novoStatus === "suspensa" ? "SUSPENDER_PROPOSTA" : "REATIVAR_PROPOSTA",
-        statusAnterior: proposta.status,
-        usuarioRole: req.user?.role || "desconhecido",
-        motivoSuspensao: novoStatus === "suspensa" ? "Ação manual do usuário" : null
+    // 5. PAM V1.0 - Usar FSM para validação de transição de status
+    try {
+      await transitionTo({
+        propostaId,
+        novoStatus,
+        userId: req.user?.id || "sistema",
+        contexto: "geral",
+        observacoes: `Status ${novoStatus === "suspensa" ? "suspenso" : "reativado"} pelo usuário`,
+        metadata: {
+          tipoAcao: novoStatus === "suspensa" ? "SUSPENDER_PROPOSTA" : "REATIVAR_PROPOSTA",
+          statusAnterior: proposta.status,
+          usuarioRole: req.user?.role || "desconhecido",
+          motivoSuspensao: novoStatus === "suspensa" ? "Ação manual do usuário" : null
+        }
+      });
+    } catch (error) {
+      if (error instanceof InvalidTransitionError) {
+        return res.status(409).json({
+          message: error.message,
+          error: "INVALID_TRANSITION"
+        });
       }
-    });
-
-    if (!statusResult.success) {
-      console.error("Erro ao atualizar status:", statusResult.error);
+      console.error("Erro ao atualizar status:", error);
       return res.status(500).json({
-        message: `Erro ao atualizar status: ${statusResult.error}`,
+        message: "Erro ao atualizar status da proposta"
       });
     }
 

@@ -17,6 +17,7 @@ import {
   requireFinanceiro,
   filterProposalsByRole,
 } from "./lib/role-based-access";
+import { transitionTo, InvalidTransitionError } from "./services/statusFsmService";
 import {
   insertPropostaSchema,
   updatePropostaSchema,
@@ -4356,25 +4357,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
           updatedProposta.assinaturaEletronicaConcluida &&
           updatedProposta.biometriaConcluida
         ) {
-          // PAM V1.0 - Usar dupla escrita transacional para mudança de status
-          const { updateStatusWithContext } = await import("./lib/status-context-helper");
-          const statusResult = await updateStatusWithContext({
-            propostaId: id,
-            novoStatus: "pronto_pagamento",
-            contexto: "formalizacao",
-            userId: req.user?.id || "sistema",
-            observacoes: "Todas as etapas de formalização concluídas (CCB, assinatura, biometria)",
-            metadata: {
-              tipoAcao: "FORMALIZACAO_COMPLETA",
-              ccbGerado: true,
-              assinaturaEletronica: true,
-              biometria: true,
-              usuarioRole: req.user?.role || "desconhecido"
+          // PAM V1.0 - Usar FSM para validação de transição de status
+          try {
+            await transitionTo({
+              propostaId: id,
+              novoStatus: "pronto_pagamento",
+              userId: req.user?.id || "sistema",
+              contexto: "formalizacao",
+              observacoes: "Todas as etapas de formalização concluídas (CCB, assinatura, biometria)",
+              metadata: {
+                tipoAcao: "FORMALIZACAO_COMPLETA",
+                ccbGerado: true,
+                assinaturaEletronica: true,
+                biometria: true,
+                usuarioRole: req.user?.role || "desconhecido"
+              }
+            });
+            console.log(`[${getBrasiliaTimestamp()}] Transição de status validada e executada com sucesso`);
+          } catch (error) {
+            if (error instanceof InvalidTransitionError) {
+              console.error(`[${getBrasiliaTimestamp()}] Transição de status inválida: ${error.message}`);
+              // Não retornamos erro 409 aqui pois é uma operação interna após conclusão de etapas
+              // O sistema deveria estar em um estado válido para esta transição
+            } else {
+              console.error(`[${getBrasiliaTimestamp()}] Erro ao executar transição: ${error}`);
             }
-          });
-
-          if (!statusResult.success) {
-            console.error(`[${getBrasiliaTimestamp()}] Falha na dupla escrita: ${statusResult.error}`);
           }
 
           console.log(`[${getBrasiliaTimestamp()}] Proposta ${id} pronta para pagamento`);
@@ -4429,30 +4436,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
             throw new Error("Proposta não encontrada");
           }
 
-          // PAM V1.0 - Usar dupla escrita transacional dentro da transação
-          const { updateStatusWithContext } = await import("./lib/status-context-helper");
-          
+          // PAM V1.0 - Usar FSM para validação de transição de status
           // Determinar contexto baseado no status
           let contexto: 'pagamentos' | 'cobrancas' | 'formalizacao' | 'geral' = 'geral';
           if (['aprovado', 'reprovado', 'cancelado'].includes(status)) {
             contexto = 'geral';
           }
           
-          const statusResult = await updateStatusWithContext({
-            propostaId: id,
-            novoStatus: status,
-            contexto,
-            userId: req.user?.id || "sistema",
-            observacoes: observacao || `Status alterado para ${status}`,
-            metadata: {
-              tipoAcao: "STATUS_UPDATE_MANUAL",
-              usuarioRole: req.user?.role || "desconhecido",
-              statusAnterior: currentProposta.status
+          try {
+            await transitionTo({
+              propostaId: id,
+              novoStatus: status,
+              userId: req.user?.id || "sistema",
+              contexto,
+              observacoes: observacao || `Status alterado para ${status}`,
+              metadata: {
+                tipoAcao: "STATUS_UPDATE_MANUAL",
+                usuarioRole: req.user?.role || "desconhecido",
+                statusAnterior: currentProposta.status
+              }
+            });
+          } catch (error) {
+            if (error instanceof InvalidTransitionError) {
+              // Retornar 409 Conflict para transições inválidas
+              throw { statusCode: 409, message: error.message };
             }
-          });
-
-          if (!statusResult.success) {
-            throw new Error(`Falha na dupla escrita: ${statusResult.error}`);
+            throw error;
           }
 
           // Atualizar campos adicionais se necessário
@@ -4474,10 +4483,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
           `[${getBrasiliaTimestamp()}] Status da proposta ${id} atualizado de ${result.status} para ${status}`
         );
         res.json(result);
-      } catch (error) {
+      } catch (error: any) {
         console.error("Update status error:", error);
         if (error instanceof Error && error.message === "Proposta não encontrada") {
           return res.status(404).json({ message: error.message });
+        }
+        // Tratar erro 409 de transição inválida
+        if (error?.statusCode === 409) {
+          return res.status(409).json({ 
+            message: error.message,
+            error: "INVALID_TRANSITION"
+          });
         }
         res.status(500).json({ message: "Erro ao atualizar status" });
       }

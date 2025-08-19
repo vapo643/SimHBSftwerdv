@@ -4,6 +4,7 @@ import { db, supabase } from "../lib/supabase.js";
 import { propostas, users, profiles, lojas, produtos, interCollections, statusContextuais } from "@shared/schema";
 import { eq, and, or, desc, sql, gte, lte, inArray } from "drizzle-orm";
 import { z } from "zod";
+import { transitionTo, InvalidTransitionError } from "../services/statusFsmService";
 import {
   isToday,
   isThisWeek,
@@ -532,24 +533,29 @@ router.post("/:id/aprovar", jwtAuthMiddleware, async (req: AuthenticatedRequest,
       return res.status(404).json({ error: "Proposta não encontrada" });
     }
 
-    // PAM V1.0 - Usar dupla escrita transacional
-    const { updateStatusWithContext } = await import("../lib/status-context-helper");
-    const result = await updateStatusWithContext({
-      propostaId: id,
-      novoStatus: "pago",
-      contexto: "pagamentos",
-      userId,
-      observacoes: `Pagamento aprovado. ${observacao || ''}`,
-      metadata: {
-        tipoAcao: "APROVAR_PAGAMENTO",
-        aprovadoPor: userId,
-        role: userRole,
-        dataAprovacao: new Date().toISOString()
+    // PAM V1.0 - Usar FSM para validação de transição
+    try {
+      await transitionTo({
+        propostaId: id,
+        novoStatus: "pago",
+        userId,
+        contexto: "pagamentos",
+        observacoes: `Pagamento aprovado. ${observacao || ''}`,
+        metadata: {
+          tipoAcao: "APROVAR_PAGAMENTO",
+          aprovadoPor: userId,
+          role: userRole,
+          dataAprovacao: new Date().toISOString()
+        }
+      });
+    } catch (error) {
+      if (error instanceof InvalidTransitionError) {
+        return res.status(409).json({ 
+          error: "Transição de status inválida",
+          message: error.message 
+        });
       }
-    });
-
-    if (!result.success) {
-      throw new Error(result.error || "Falha na dupla escrita");
+      throw error;
     }
 
     res.json({ message: "Pagamento aprovado com sucesso" });
@@ -580,25 +586,30 @@ router.post("/:id/rejeitar", jwtAuthMiddleware, async (req: AuthenticatedRequest
       return res.status(400).json({ error: "Motivo da rejeição é obrigatório" });
     }
 
-    // PAM V1.0 - Usar dupla escrita transacional
-    const { updateStatusWithContext } = await import("../lib/status-context-helper");
-    const result = await updateStatusWithContext({
-      propostaId: id,
-      novoStatus: "rejeitado",
-      contexto: "pagamentos",
-      userId,
-      observacoes: `Pagamento rejeitado. Motivo: ${motivo}`,
-      metadata: {
-        tipoAcao: "REJEITAR_PAGAMENTO",
-        rejeitadoPor: userId,
-        role: userRole,
-        motivoRejeicao: motivo,
-        dataRejeicao: new Date().toISOString()
+    // PAM V1.0 - Usar FSM para validação de transição
+    try {
+      await transitionTo({
+        propostaId: id,
+        novoStatus: "rejeitado",
+        userId,
+        contexto: "pagamentos",
+        observacoes: `Pagamento rejeitado. Motivo: ${motivo}`,
+        metadata: {
+          tipoAcao: "REJEITAR_PAGAMENTO",
+          rejeitadoPor: userId,
+          role: userRole,
+          motivoRejeicao: motivo,
+          dataRejeicao: new Date().toISOString()
+        }
+      });
+    } catch (error) {
+      if (error instanceof InvalidTransitionError) {
+        return res.status(409).json({ 
+          error: "Transição de status inválida",
+          message: error.message 
+        });
       }
-    });
-
-    if (!result.success) {
-      throw new Error(result.error || "Falha na dupla escrita");
+      throw error;
     }
 
     res.json({ message: "Pagamento rejeitado com sucesso" });
@@ -626,23 +637,28 @@ router.post("/:id/processar", jwtAuthMiddleware, async (req: AuthenticatedReques
       return res.status(404).json({ error: "Proposta não encontrada" });
     }
 
-    // PAM V1.0 - Usar dupla escrita transacional para mudança de status
-    const { updateStatusWithContext } = await import("../lib/status-context-helper");
-    const statusResult = await updateStatusWithContext({
-      propostaId: id,
-      novoStatus: "pago",
-      contexto: "pagamentos",
-      userId: userId,
-      observacoes: "[PAGAMENTO PROCESSADO] Empréstimo pago ao cliente",
-      metadata: {
-        tipoAcao: "PAGAMENTO_PROCESSADO",
-        dataPagamento: new Date().toISOString(),
-        comprovante: comprovante || null
+    // PAM V1.0 - Usar FSM para validação de transição
+    try {
+      await transitionTo({
+        propostaId: id,
+        novoStatus: "pago",
+        userId: userId,
+        contexto: "pagamentos",
+        observacoes: "[PAGAMENTO PROCESSADO] Empréstimo pago ao cliente",
+        metadata: {
+          tipoAcao: "PAGAMENTO_PROCESSADO",
+          dataPagamento: new Date().toISOString(),
+          comprovante: comprovante || null
+        }
+      });
+    } catch (error) {
+      if (error instanceof InvalidTransitionError) {
+        return res.status(409).json({ 
+          error: "Transição de status inválida",
+          message: error.message 
+        });
       }
-    });
-
-    if (!statusResult.success) {
-      throw new Error(`Falha na dupla escrita: ${statusResult.error}`);
+      throw error;
     }
 
     // Atualizar campos adicionais
@@ -769,29 +785,34 @@ router.post(
         return res.status(400).json({ error: "Boletos não gerados. Desembolso bloqueado." });
       }
 
-      // PAM V1.0 - Usar dupla escrita transacional para mudança de status
-      const { updateStatusWithContext } = await import("../lib/status-context-helper");
-      const statusResult = await updateStatusWithContext({
-        propostaId: id,
-        novoStatus: "pago",
-        contexto: "pagamentos",
-        userId: userId,
-        observacoes: `[DESEMBOLSO CONFIRMADO] ${observacoes || "Pagamento realizado ao cliente"}`,
-        metadata: {
-          tipoAcao: "DESEMBOLSO_CONFIRMADO",
-          userRole,
-          valorDesembolsado: proposta.valorTotalFinanciado,
-          dataPagamento: new Date().toISOString(),
-          destino: {
-            tipo: proposta.dadosPagamentoPix ? "PIX" : "TED",
-            dados: proposta.dadosPagamentoPix || 
-              `${proposta.dadosPagamentoBanco} AG:${proposta.dadosPagamentoAgencia} CC:${proposta.dadosPagamentoConta}`
+      // PAM V1.0 - Usar FSM para validação de transição
+      try {
+        await transitionTo({
+          propostaId: id,
+          novoStatus: "pago",
+          userId: userId,
+          contexto: "pagamentos",
+          observacoes: `[DESEMBOLSO CONFIRMADO] ${observacoes || "Pagamento realizado ao cliente"}`,
+          metadata: {
+            tipoAcao: "DESEMBOLSO_CONFIRMADO",
+            userRole,
+            valorDesembolsado: proposta.valorTotalFinanciado,
+            dataPagamento: new Date().toISOString(),
+            destino: {
+              tipo: proposta.dadosPagamentoPix ? "PIX" : "TED",
+              dados: proposta.dadosPagamentoPix || 
+                `${proposta.dadosPagamentoBanco} AG:${proposta.dadosPagamentoAgencia} CC:${proposta.dadosPagamentoConta}`
+            }
           }
+        });
+      } catch (error) {
+        if (error instanceof InvalidTransitionError) {
+          return res.status(409).json({ 
+            error: "Transição de status inválida",
+            message: error.message 
+          });
         }
-      });
-
-      if (!statusResult.success) {
-        throw new Error(`Falha na dupla escrita: ${statusResult.error}`);
+        throw error;
       }
 
       // Atualizar campos adicionais
@@ -1450,26 +1471,31 @@ router.post(
         }
       }
 
-      // PAM V1.0 - Usar dupla escrita transacional para marcar como pago
-      const { updateStatusWithContext } = await import("../lib/status-context-helper");
-      const resultStatus = await updateStatusWithContext({
-        propostaId: id,
-        novoStatus: "pago",
-        contexto: "pagamentos",
-        userId,
-        observacoes: `Pagamento marcado como pago manualmente. ${observacoes || ''}`,
-        metadata: {
-          tipoAcao: "MARCAR_COMO_PAGO",
-          marcadoPor: userId,
-          role: userRole,
-          comprovanteAnexado: !!comprovanteUrl,
-          comprovanteUrl: comprovanteUrl || null,
-          dataMarcacao: new Date().toISOString()
+      // PAM V1.0 - Usar FSM para validação de transição
+      try {
+        await transitionTo({
+          propostaId: id,
+          novoStatus: "pago",
+          userId,
+          contexto: "pagamentos",
+          observacoes: `Pagamento marcado como pago manualmente. ${observacoes || ''}`,
+          metadata: {
+            tipoAcao: "MARCAR_COMO_PAGO",
+            marcadoPor: userId,
+            role: userRole,
+            comprovanteAnexado: !!comprovanteUrl,
+            comprovanteUrl: comprovanteUrl || null,
+            dataMarcacao: new Date().toISOString()
+          }
+        });
+      } catch (error) {
+        if (error instanceof InvalidTransitionError) {
+          return res.status(409).json({ 
+            error: "Transição de status inválida",
+            message: error.message 
+          });
         }
-      });
-
-      if (!resultStatus.success) {
-        throw new Error(resultStatus.error || "Falha na dupla escrita");
+        throw error;
       }
 
       // Atualizar URL do comprovante se fornecido
