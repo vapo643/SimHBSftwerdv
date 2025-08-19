@@ -1,0 +1,47 @@
+### Pacote de Ativação de Missão (PAM) V1.0
+
+* **Sumário da Missão (O Quê):** Refatorar a função helper `setupTestEnvironment` para usar uma conexão de banco de dados direta através do driver `postgres`, bypassando a camada Supabase, para inserir os dados de teste e finalmente desbloquear nossa suíte de integração.
+* **Intenção Estratégica (O Porquê):** Resolver o bloqueador final e crítico do nosso ambiente de teste. Uma suíte de testes de integração funcional é a nossa maior garantia de segurança contra regressões e a fundação para toda a FASE 4 de refinamento.
+* **Histórico Relevante (Consulta Obrigatória):** A missão anterior (4.1.2) provou que usar o Supabase Admin Client é insuficiente para criar dados de teste devido a uma política de segurança no nível do banco (provavelmente um Trigger) que impede a operação. A estratégia agora é contornar a camada de aplicação do Supabase durante o setup.
+* **Modelo Mental (Como se Encaixa):** Estamos realizando uma "operação especial" para o setup dos testes. Enquanto a aplicação em si usa o Drizzle/Supabase Client, nossos testes, para a fase de *preparação*, usarão uma conexão direta e de baixo nível para inserir os dados necessários sem acionar as restrições que nos bloqueiam.
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco:** Escrever SQL bruto pode levar a erros de digitação ou inconsistências com o schema do Drizzle.
+    * **Contramedida:** O Agente deve usar os tipos de schema do Drizzle para garantir a consistência dos dados inseridos, mesmo que a inserção seja feita com o driver `postgres`.
+
+---
+
+**IMPLEMENTAR:**
+Helper de Setup de Teste com Conexão Direta ao Banco de Dados
+
+**CURRENT STATE:**
+A função `setupTestEnvironment` utiliza o `supabaseAdmin` client e falha ao tentar inserir dados devido a uma restrição de banco de dados que retorna o erro "User does not belong to the specified store".
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  A função `setupTestEnvironment` no arquivo `tests/lib/db-helper.ts` é refatorada.
+2.  Ela agora deve importar e instanciar um cliente `postgres` direto, usando a variável de ambiente `DATABASE_URL`.
+3.  Ela deve usar este cliente `postgres` para realizar inserções SQL diretas (`sql`...`) nas tabelas `users`, `stores`, `partners`, etc., para criar o ambiente de teste necessário.
+4.  A função de limpeza `cleanTestDatabase` (com `TRUNCATE CASCADE`) deve ser mantida e chamada antes do setup.
+5.  **O critério de sucesso final e não negociável:** A execução do comando `npx vitest run tests/integration/status-system.test.ts` resulta em **TODOS os testes passando com sucesso**.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  **Use o Driver `postgres`:** A implementação DEVE usar o driver `postgres`, que já é uma dependência do projeto. Não use o Drizzle ou o Supabase Client para a *inserção de dados de setup*.
+2.  **Refatore o Helper de Setup:** Modifique apenas a função `setupTestEnvironment`. A função `cleanTestDatabase` já está funcional e deve ser preservada.
+3.  **Dados de Teste:** Crie os dados de teste (usuário, loja, parceiro) com dados consistentes para satisfazer as constraints de chave estrangeira.
+4.  **Prova de Sucesso:** A missão só é considerada bem-sucedida quando a suíte de testes `tests/integration/status-system.test.ts` estiver 100% verde. O output final do `vitest` que mostra todos os testes passando deve ser incluído em seu relatório final.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que a conexão direta via `postgres` driver irá de fato contornar os Triggers ou a lógica de aplicação que está bloqueando o Supabase Admin Client."]
+* **VALIDAÇÃO PENDENTE:** [Nenhuma. O sucesso é definido pela passagem de 100% dos testes na suíte.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear ficheiros e funções exatas afetadas.
+2.  Garantir importações e tipos corretos para o driver `postgres`.
+3.  Executar `get__latest_lsp_diagnostics` para garantir 0 erros novos.
+4.  **Declarar Nível de Confiança (100%)** na correção do ambiente de teste.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (executar a suíte de testes e garantir que todos passem).
+7.  **Documentar Decisões Técnicas** confirmando o sucesso da estratégia de conexão direta.

@@ -8,9 +8,8 @@
  */
 
 import { db } from "../../server/lib/supabase";
-import { createServerSupabaseAdminClient } from "../../server/lib/supabase";
 import { sql } from "drizzle-orm";
-import { parceiros, lojas, produtos, tabelasComerciais, users } from "@shared/schema";
+import postgres from "postgres";
 import { v4 as uuidv4 } from "uuid";
 
 /**
@@ -140,7 +139,7 @@ export async function cleanTestDatabase(): Promise<void> {
 
 /**
  * Creates a clean test environment with all necessary reference data
- * Uses Supabase Admin Client to bypass RLS policies
+ * Uses direct postgres connection to bypass ALL Supabase restrictions
  * 
  * @returns Object containing all created test entities
  */
@@ -152,101 +151,175 @@ export async function setupTestEnvironment(): Promise<{
   testCommercialTableId: number;
 }> {
   const startTime = Date.now();
-  console.log("[TEST DB] 🔧 Setting up test environment with Admin Client...");
+  console.log("[TEST DB] 🔧 Setting up test environment with direct postgres connection...");
+  
+  let directDb: postgres.Sql;
   
   try {
-    // Create Admin Client that bypasses RLS
-    const adminClient = createServerSupabaseAdminClient();
+    // Create direct postgres connection - bypasses ALL application layer restrictions
+    const databaseUrl = process.env.DATABASE_URL;
+    if (!databaseUrl) {
+      throw new Error("DATABASE_URL not found in environment variables");
+    }
     
-    // 1. Create test user in auth.users using Admin API
+    // Connect with the same configuration as server/lib/supabase.ts
+    let correctedUrl = databaseUrl;
+    if (!correctedUrl.includes("sslmode=")) {
+      correctedUrl += correctedUrl.includes("?") ? "&sslmode=require" : "?sslmode=require";
+    }
+    if (correctedUrl.includes(":5432")) {
+      correctedUrl = correctedUrl.replace(":5432", ":6543");
+    }
+    
+    directDb = postgres(correctedUrl, {
+      ssl: "require",
+      max: 1, // Single connection for tests
+      transform: postgres.camel
+    });
+    
+    console.log("[TEST DB] 🔌 Direct postgres connection established");
+    
+    // Generate test IDs
     const testUserId = uuidv4();
     const testEmail = `test-${Date.now()}@test.com`;
     
-    console.log("[TEST DB] 👤 Creating test user...");
-    const { data: authUser, error: authError } = await adminClient.auth.admin.createUser({
-      email: testEmail,
-      password: "TestPassword123!",
-      email_confirm: true,
-      user_metadata: {
-        name: "Test User",
-        role: "ATENDENTE"
-      }
-    });
+    // 1. Create auth.users entry first (required for profiles)
+    console.log("[TEST DB] 🔐 Creating auth.users entry...");
+    await directDb`
+      INSERT INTO auth.users (
+        id, email, encrypted_password, email_confirmed_at, 
+        created_at, updated_at, raw_app_meta_data, raw_user_meta_data
+      )
+      VALUES (
+        ${testUserId},
+        ${testEmail},
+        '$2a$10$example.hash.for.test.password.only',
+        NOW(),
+        NOW(),
+        NOW(),
+        '{"provider":"email","providers":["email"]}',
+        '{"name":"Test User","role":"ATENDENTE"}'
+      )
+      ON CONFLICT (id) DO UPDATE SET
+        email = EXCLUDED.email,
+        updated_at = NOW()
+    `;
     
-    if (authError) {
-      console.error("[TEST DB] ❌ Error creating auth user:", authError);
-      // If we can't create auth user, use a dummy UUID
-      console.log("[TEST DB] ⚠️ Falling back to dummy user ID");
-    }
+    // 2. Create test user in public.users table using raw SQL
+    console.log("[TEST DB] 👤 Creating public.users entry...");
+    const userResult = await directDb`
+      INSERT INTO users (name, email, password, role)
+      VALUES (
+        'Test User',
+        ${testEmail},
+        'hashed_password_test',
+        'ATENDENTE'
+      )
+      ON CONFLICT (email) DO UPDATE SET
+        name = EXCLUDED.name
+      RETURNING id
+    `;
+    const dbUserId = userResult[0].id;
     
-    const finalUserId = authUser?.id || testUserId;
-    
-    // 2. Create test user in public.users table  
-    // Note: users table might have different fields - only insert what exists
-    try {
-      await db.insert(users).values({
-        name: "Test User",
-        email: testEmail,
-        password: "hashed_password", // Required field
-        role: "ATENDENTE"
-      }).onConflictDoNothing();
-    } catch (e) {
-      console.log("[TEST DB] ⚠️ User insert skipped (may already exist)");
-    }
-    
-    // 3. Create test partner
+    // 2. Create test partner using raw SQL
     console.log("[TEST DB] 🏢 Creating test partner...");
-    const [partner] = await db.insert(parceiros)
-      .values({
-        razaoSocial: "Test Partner Company",
-        cnpj: "12345678000199"
-      })
-      .returning({ id: parceiros.id });
+    const partnerResult = await directDb`
+      INSERT INTO parceiros (razao_social, cnpj)
+      VALUES (
+        'Test Partner Company',
+        '12345678000199'
+      )
+      ON CONFLICT (cnpj) DO UPDATE SET
+        razao_social = EXCLUDED.razao_social
+      RETURNING id
+    `;
+    const testPartnerId = partnerResult[0].id;
     
-    // 4. Create test store associated with partner  
+    // 3. Create test store using raw SQL
     console.log("[TEST DB] 🏪 Creating test store...");
-    const [store] = await db.insert(lojas)
-      .values({
-        nomeLoja: "Test Store",
-        parceiroId: partner.id,
-        endereco: "Test Address"
-      })
-      .returning({ id: lojas.id });
+    const storeResult = await directDb`
+      INSERT INTO lojas (nome_loja, parceiro_id, endereco)
+      VALUES (
+        'Test Store',
+        ${testPartnerId},
+        'Test Address'
+      )
+      RETURNING id
+    `;
+    const testStoreId = storeResult[0].id;
     
-    // 5. Create test product
+    // 4. Create test product using raw SQL
     console.log("[TEST DB] 📦 Creating test product...");
-    const [product] = await db.insert(produtos)
-      .values({
-        nomeProduto: "Test Product",
-        isActive: true
-      })
-      .returning({ id: produtos.id });
+    const productResult = await directDb`
+      INSERT INTO produtos (nome_produto, is_active)
+      VALUES (
+        'Test Product',
+        true
+      )
+      RETURNING id
+    `;
+    const testProductId = productResult[0].id;
     
-    // 6. Create test commercial table
+    // 5. Create test commercial table using raw SQL
     console.log("[TEST DB] 📊 Creating test commercial table...");
-    const [commercialTable] = await db.insert(tabelasComerciais)
-      .values({
-        nomeTabela: "Test Commercial Table",
-        taxaJuros: "1.99",
-        prazos: [12, 24, 36],
-        comissao: "5.00"
-      })
-      .returning({ id: tabelasComerciais.id });
+    const commercialTableResult = await directDb`
+      INSERT INTO tabelas_comerciais (nome_tabela, taxa_juros, prazos, comissao)
+      VALUES (
+        'Test Commercial Table',
+        '1.99',
+        ARRAY[12, 24, 36],
+        '5.00'
+      )
+      RETURNING id
+    `;
+    const testCommercialTableId = commercialTableResult[0].id;
+    
+    // 6. Create profile linking auth.users to store
+    console.log("[TEST DB] 👤 Creating user profile...");
+    await directDb`
+      INSERT INTO profiles (id, role, loja_id, full_name)
+      VALUES (
+        ${testUserId},
+        'ATENDENTE',
+        ${testStoreId},
+        'Test User'
+      )
+      ON CONFLICT (id) DO UPDATE SET
+        loja_id = EXCLUDED.loja_id,
+        full_name = EXCLUDED.full_name
+    `;
+    
+    // 7. Create gerente_lojas association for RLS
+    console.log("[TEST DB] 🔗 Creating store manager association...");
+    await directDb`
+      INSERT INTO gerente_lojas (gerente_id, loja_id)
+      VALUES (
+        ${testUserId},
+        ${testStoreId}
+      )
+      ON CONFLICT (gerente_id, loja_id) DO NOTHING
+    `;
     
     const duration = Date.now() - startTime;
     console.log(`[TEST DB] ✅ Test environment setup complete in ${duration}ms`);
     
     return {
-      testUserId: finalUserId,
-      testPartnerId: partner.id,
-      testStoreId: store.id,
-      testProductId: product.id,
-      testCommercialTableId: commercialTable.id
+      testUserId,
+      testPartnerId,
+      testStoreId,
+      testProductId,
+      testCommercialTableId
     };
     
   } catch (error) {
     console.error("[TEST DB] ❌ Error setting up test environment:", error);
     throw error;
+  } finally {
+    // Always close the direct connection
+    if (directDb!) {
+      await directDb.end();
+      console.log("[TEST DB] 🔌 Direct postgres connection closed");
+    }
   }
 }
 
