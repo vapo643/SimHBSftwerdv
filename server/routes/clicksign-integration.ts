@@ -233,7 +233,7 @@ router.post(
         birthday: clienteData.dataNascimento,
       });
 
-      // Atualizar proposta no banco
+      // PAM V1.0 - Atualizar dados ClickSign (sem mudança de status principal)
       await db
         .update(propostas)
         .set({
@@ -425,7 +425,7 @@ router.post(
 
       console.log(`[CLICKSIGN] ✅ Sucesso! Documento criado: ${result.documentKey}`);
 
-      // Atualizar proposta no banco
+      // PAM V1.0 - Atualizar dados ClickSign (sem mudança de status principal)
       await db
         .update(propostas)
         .set({
