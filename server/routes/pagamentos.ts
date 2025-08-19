@@ -999,7 +999,14 @@ router.get("/:id/ccb-storage-status", jwtAuthMiddleware, async (req: Authenticat
       WHERE id = ${id} 
       LIMIT 1
     `);
-    const proposta = result[0];
+    const proposta = result[0] as {
+      id: string;
+      ccbGerado: boolean;
+      assinaturaEletronicaConcluida: boolean;
+      caminhoCcbAssinado: string | null;
+      clicksignDocumentKey: string | null;
+      ccbDocumentoUrl: string | null;
+    } | undefined;
 
     if (!proposta) {
       return res.status(404).json({ error: "Proposta não encontrada" });
@@ -1010,9 +1017,11 @@ router.get("/:id/ccb-storage-status", jwtAuthMiddleware, async (req: Authenticat
     let storageUrl = null;
 
     if (proposta.caminhoCcbAssinado) {
+      const pathParts = proposta.caminhoCcbAssinado.split("/");
+      const folderPath = pathParts.slice(0, -1).join("/");
       const { data: files } = await supabase.storage
         .from("documents")
-        .list(proposta.caminhoCcbAssinado.split("/").slice(0, -1).join("/"));
+        .list(folderPath);
 
       existsInStorage = files
         ? files.some(f => proposta.caminhoCcbAssinado?.includes(f.name))
@@ -1185,15 +1194,15 @@ router.get("/:id/detalhes-completos", jwtAuthMiddleware, async (req: Authenticat
 
     console.log(`[PAGAMENTOS] ✅ Detalhes completos retornados para proposta: ${id}`);
     console.log(`[PAGAMENTOS DEBUG] Resposta enviada ao frontend - campos principais:`, {
-      hasClienteEmail: !!respostaCompleta.clienteEmail,
-      hasClienteTelefone: !!respostaCompleta.clienteTelefone,
-      hasClienteDataNascimento: !!respostaCompleta.clienteDataNascimento,
-      hasClienteRenda: !!respostaCompleta.clienteRenda,
-      hasPrazo: !!respostaCompleta.prazo,
-      hasTaxaJuros: !!respostaCompleta.taxaJuros,
-      hasFinalidade: !!respostaCompleta.finalidade,
-      hasCcbGerado: !!respostaCompleta.ccbGerado,
-      hasCaminhoCcbAssinado: !!respostaCompleta.caminhoCcbAssinado,
+      hasClienteEmail: !!(respostaCompleta as any).clienteEmail,
+      hasClienteTelefone: !!(respostaCompleta as any).clienteTelefone,
+      hasClienteDataNascimento: !!(respostaCompleta as any).clienteDataNascimento,
+      hasClienteRenda: !!(respostaCompleta as any).clienteRenda,
+      hasPrazo: !!(respostaCompleta as any).prazo,
+      hasTaxaJuros: !!(respostaCompleta as any).taxaJuros,
+      hasFinalidade: !!(respostaCompleta as any).finalidade,
+      hasCcbGerado: !!(respostaCompleta as any).ccbGerado,
+      hasCaminhoCcbAssinado: !!(respostaCompleta as any).caminhoCcbAssinado,
     });
     res.json(respostaCompleta);
   } catch (error) {
@@ -1268,11 +1277,12 @@ router.post(
 
       // Verificar se está no status correto para nova autorização
       const statusValidos = ["pronto_pagamento", "BOLETOS_EMITIDOS", "em_processamento"];
-      if (!statusValidos.includes(proposta.status)) {
-        console.log(`[PAGAMENTOS] ⚠️ Status inválido para pagamento: ${proposta.status}`);
+      const statusString = String(proposta.status);
+      if (!statusValidos.includes(statusString)) {
+        console.log(`[PAGAMENTOS] ⚠️ Status inválido para pagamento: ${statusString}`);
         return res.status(400).json({
           error: "Proposta não está pronta para pagamento",
-          statusAtual: proposta.status,
+          statusAtual: statusString,
           statusEsperados: statusValidos,
         });
       }
@@ -1357,8 +1367,8 @@ router.post(
       });
     } catch (error) {
       console.error("[PAGAMENTOS] ❌ ERRO CRÍTICO ao confirmar veracidade:", error);
-      console.error("[PAGAMENTOS] ❌ Stack trace:", error.stack);
-      res.status(500).json({ error: "Erro ao confirmar veracidade", details: error.message });
+      console.error("[PAGAMENTOS] ❌ Stack trace:", (error as any).stack);
+      res.status(500).json({ error: "Erro ao confirmar veracidade", details: (error as any).message });
     }
   }
 );
@@ -1476,7 +1486,7 @@ router.post(
         await transitionTo({
           propostaId: id,
           novoStatus: "pago",
-          userId,
+          userId: userId || "system",
           contexto: "pagamentos",
           observacoes: `Pagamento marcado como pago manualmente. ${observacoes || ''}`,
           metadata: {
@@ -1584,7 +1594,13 @@ router.get("/:id/ccb-url", jwtAuthMiddleware, async (req: AuthenticatedRequest, 
       WHERE id = ${id} 
       LIMIT 1
     `);
-    const proposta = result[0];
+    const proposta = result[0] as {
+      id: string;
+      caminhoCcbAssinado: string | null;
+      clicksignDocumentKey: string | null;
+      assinaturaEletronicaConcluida: boolean;
+      clienteNome: string;
+    } | undefined;
 
     if (!proposta) {
       console.log(`[PAGAMENTOS CCB-URL] ❌ Proposta ${id} não encontrada`);
@@ -1634,7 +1650,7 @@ router.get("/:id/ccb-url", jwtAuthMiddleware, async (req: AuthenticatedRequest, 
         // Baixar documento do ClickSign
         console.log(`[PAGAMENTOS CCB-URL] 📥 Baixando documento: ${proposta.clicksignDocumentKey}`);
         const pdfBuffer = await clickSignService.downloadSignedDocument(
-          proposta.clicksignDocumentKey
+          proposta.clicksignDocumentKey as string
         );
 
         if (!pdfBuffer || pdfBuffer.length === 0) {
