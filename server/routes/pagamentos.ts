@@ -515,16 +515,25 @@ router.post("/:id/aprovar", jwtAuthMiddleware, async (req: AuthenticatedRequest,
       return res.status(404).json({ error: "Proposta não encontrada" });
     }
 
-    // Atualizar status para pago
-    await db
-      .update(propostas)
-      .set({
-        status: "pago",
-        analistaId: userId,
-        dataPagamento: new Date(),
-        observacoes: observacao || proposta[0].observacoes,
-      })
-      .where(eq(propostas.id, id));
+    // PAM V1.0 - Usar dupla escrita transacional
+    const { updateStatusWithContext } = await import("../lib/status-context-helper");
+    const result = await updateStatusWithContext({
+      propostaId: id,
+      novoStatus: "pago",
+      contexto: "pagamentos",
+      userId,
+      observacoes: `Pagamento aprovado. ${observacao || ''}`,
+      metadata: {
+        tipoAcao: "APROVAR_PAGAMENTO",
+        aprovadoPor: userId,
+        role: userRole,
+        dataAprovacao: new Date().toISOString()
+      }
+    });
+
+    if (!result.success) {
+      throw new Error(result.error || "Falha na dupla escrita");
+    }
 
     res.json({ message: "Pagamento aprovado com sucesso" });
   } catch (error) {
@@ -554,14 +563,26 @@ router.post("/:id/rejeitar", jwtAuthMiddleware, async (req: AuthenticatedRequest
       return res.status(400).json({ error: "Motivo da rejeição é obrigatório" });
     }
 
-    // Atualizar status para rejeitado
-    await db
-      .update(propostas)
-      .set({
-        status: "rejeitado",
-        analistaId: userId,
-      })
-      .where(eq(propostas.id, id));
+    // PAM V1.0 - Usar dupla escrita transacional
+    const { updateStatusWithContext } = await import("../lib/status-context-helper");
+    const result = await updateStatusWithContext({
+      propostaId: id,
+      novoStatus: "rejeitado",
+      contexto: "pagamentos",
+      userId,
+      observacoes: `Pagamento rejeitado. Motivo: ${motivo}`,
+      metadata: {
+        tipoAcao: "REJEITAR_PAGAMENTO",
+        rejeitadoPor: userId,
+        role: userRole,
+        motivoRejeicao: motivo,
+        dataRejeicao: new Date().toISOString()
+      }
+    });
+
+    if (!result.success) {
+      throw new Error(result.error || "Falha na dupla escrita");
+    }
 
     res.json({ message: "Pagamento rejeitado com sucesso" });
   } catch (error) {
@@ -1370,17 +1391,34 @@ router.post(
         }
       }
 
-      // Atualizar status para pago e salvar URL do comprovante
-      const updateData: any = {
-        status: "pago",
-        dataPagamento: new Date(),
-      };
+      // PAM V1.0 - Usar dupla escrita transacional para marcar como pago
+      const { updateStatusWithContext } = await import("../lib/status-context-helper");
+      const resultStatus = await updateStatusWithContext({
+        propostaId: id,
+        novoStatus: "pago",
+        contexto: "pagamentos",
+        userId,
+        observacoes: `Pagamento marcado como pago manualmente. ${observacoes || ''}`,
+        metadata: {
+          tipoAcao: "MARCAR_COMO_PAGO",
+          marcadoPor: userId,
+          role: userRole,
+          comprovanteAnexado: !!comprovanteUrl,
+          comprovanteUrl: comprovanteUrl || null,
+          dataMarcacao: new Date().toISOString()
+        }
+      });
 
-      if (comprovanteUrl) {
-        updateData.urlComprovantePagamento = comprovanteUrl;
+      if (!resultStatus.success) {
+        throw new Error(resultStatus.error || "Falha na dupla escrita");
       }
 
-      await db.update(propostas).set(updateData).where(eq(propostas.id, id));
+      // Atualizar URL do comprovante se fornecido
+      if (comprovanteUrl) {
+        await db.update(propostas)
+          .set({ urlComprovantePagamento: comprovanteUrl })
+          .where(eq(propostas.id, id));
+      }
 
       console.log(`[PAGAMENTOS] ✅ [AUDIT] Status atualizado para 'pago' - Proposta: ${id}`);
 

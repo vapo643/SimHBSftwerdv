@@ -369,6 +369,24 @@ export const propostaDocumentos = pgTable("proposta_documentos", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// PAM V1.0 - Nova tabela de status contextuais (Fase 1: Fundação)
+// Implementada em 19/08/2025 para resolver colisão de contextos
+export const statusContextuais = pgTable("status_contextuais", {
+  id: serial("id").primaryKey(),
+  propostaId: text("proposta_id")
+    .references(() => propostas.id, { onDelete: "cascade" })
+    .notNull(),
+  contexto: text("contexto").notNull(), // 'pagamentos', 'cobrancas', 'formalizacao'
+  status: text("status").notNull(),
+  statusAnterior: text("status_anterior"), // Para auditoria
+  atualizadoEm: timestamp("atualizado_em").defaultNow().notNull(),
+  atualizadoPor: text("atualizado_por"), // UUID do usuário
+  observacoes: text("observacoes"), // Notas sobre a mudança
+  metadata: jsonb("metadata"), // Dados adicionais do contexto
+});
+
+
+
 // Audit Delete Log Table (Financial Compliance)
 export const auditDeleteLog = pgTable("audit_delete_log", {
   id: uuid("id").primaryKey().defaultRandom(),
