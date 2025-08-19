@@ -1,0 +1,50 @@
+### Pacote de Ativação de Missão (PAM) V1.0 (REVISADO - AUDITORIA DE ROTAS)
+
+* **Sumário da Missão (O Quê):** Realizar uma auditoria comparativa entre os arquivos de rotas monolíticos (`server/routes.ts`, `server/routes/pagamentos.ts`) e a estrutura de diretórios de domínio existente (`server/routes/[domain]/`).
+* **Intenção Estratégica (O Porquê):** Para planejar a migração e decomposição, precisamos saber exatamente: 1) Quais rotas ainda vivem nos arquivos monolíticos? 2) Os diretórios de domínio já contêm alguma lógica de rota ou estão vazios? 3) Qual é o escopo total do trabalho de migração?
+* **Histórico Relevante (Consulta Obrigatória):** A missão anterior (Passo 2.1) limpou os erros de tipo, mas confirmou que a lógica de negócio ainda está massivamente concentrada nos arquivos monolíticos.
+* **Modelo Mental (Como se Encaixa):** Esta é uma missão de reconhecimento puro. O Agente deve atuar como um analista de sistemas, mapeando o território para que possamos traçar as rotas de migração. Nenhuma modificação de código é permitida.
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco:** O Agente pode fornecer uma lista incompleta de endpoints.
+    * **Contramedida:** O prompt exige uma contagem explícita e uma análise estruturada para garantir a completude do relatório.
+
+---
+
+**IMPLEMENTAR:**
+Relatório de Auditoria e Mapeamento de Rotas
+
+**CURRENT STATE:**
+A lógica de rotas está espalhada entre arquivos monolíticos e uma estrutura de diretórios de domínio recém-descoberta, mas o conteúdo e a sobreposição são desconhecidos.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um relatório detalhado em formato Markdown, dividido em duas seções principais:
+
+**Seção 1: Análise dos Arquivos Monolíticos**
+   * **`server/routes.ts`:**
+     * Liste **TODOS** os endpoints (método HTTP + path) definidos neste arquivo.
+     * Forneça uma contagem total de endpoints.
+   * **`server/routes/pagamentos.ts`:**
+     * Liste **TODOS** os endpoints (método HTTP + path) definidos neste arquivo.
+     * Forneça uma contagem total de endpoints.
+
+**Seção 2: Análise dos Diretórios de Domínio**
+   * Para cada diretório de domínio (`admin/`, `auth/`, `integracao/`, `propostas/`, etc.) dentro de `server/routes/`:
+     * Liste todos os arquivos `.ts` que ele contém.
+     * Para cada arquivo, resuma seu propósito em uma única frase. Se o diretório estiver vazio, declare "Diretório Vazio".
+
+---
+**DECLARAÇÃO DE INCERTERZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100% de confiança na COMPLETUDE do mapeamento]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que todos os arquivos de rota terminam em .ts"]
+* **VALIDAÇÃO PENDENTE:** [Ex: "O mapa de rotas gerado será a base para o planejamento da migração."]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear ficheiros e funções exatas afetadas (apenas leitura).
+2.  Garantir que a listagem de endpoints está completa e correta.
+3.  Executar `get_latest_lsp_diagnostics` para garantir que o ambiente está estável.
+4.  **Declarar Nível de Confiança (0-100%)** na completude da auditoria.
+5.  **Categorizar Riscos Descobertos**.
+6.  Realizar um teste funcional (revisão do relatório gerado para precisão).
+7.  **Documentar Decisões Técnicas** assumidas durante a análise.
