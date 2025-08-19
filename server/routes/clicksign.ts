@@ -13,6 +13,10 @@ import { jwtAuthMiddleware, type AuthenticatedRequest } from "../lib/jwt-auth-mi
 import { getBrasiliaTimestamp } from "../lib/timezone.js";
 // STATUS V2.0: Import do serviço de auditoria
 import { logStatusTransition } from "../services/auditService.js";
+// PAM V1.0: Import para status contextual
+import { db } from "../lib/supabase.js";
+import { statusContextuais } from "@shared/schema";
+import { eq, and } from "drizzle-orm";
 
 const router = express.Router();
 

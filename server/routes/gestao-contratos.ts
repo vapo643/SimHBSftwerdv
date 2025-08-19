@@ -11,7 +11,7 @@ import { jwtAuthMiddleware, type AuthenticatedRequest } from "../lib/jwt-auth-mi
 import { requireRoles } from "../lib/role-guards";
 import { storage } from "../storage";
 import { db } from "../lib/supabase";
-import { propostas, parceiros, lojas, produtos, propostaLogs } from "@shared/schema";
+import { propostas, parceiros, lojas, produtos, propostaLogs, statusContextuais } from "@shared/schema";
 import { gte, lte } from "drizzle-orm";
 import { eq, and, isNotNull, isNull, desc } from "drizzle-orm";
 import { createServerSupabaseAdminClient } from "../lib/supabase";
@@ -89,6 +89,8 @@ router.get(
 
           // Status e datas
           status: propostas.status,
+          // PAM V1.0 - Status contextual
+          statusContextual: statusContextuais.status,
           createdAt: propostas.createdAt,
           dataAprovacao: propostas.dataAprovacao,
           dataAssinatura: propostas.dataAssinatura,
@@ -122,6 +124,14 @@ router.get(
           produtoNome: produtos.nomeProduto,
         })
         .from(propostas)
+        // PAM V1.0 - LEFT JOIN com status contextual para contratos
+        .leftJoin(
+          statusContextuais,
+          and(
+            eq(propostas.id, statusContextuais.propostaId),
+            eq(statusContextuais.contexto, 'contratos')
+          )
+        )
         .leftJoin(lojas, eq(propostas.lojaId, lojas.id))
         .leftJoin(parceiros, eq(lojas.parceiroId, parceiros.id))
         .leftJoin(produtos, eq(propostas.produtoId, produtos.id))

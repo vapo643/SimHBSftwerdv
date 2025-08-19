@@ -12,7 +12,7 @@ import { z } from "zod";
 import { db } from "../lib/supabase.js";
 import { supabaseAdmin } from "../lib/supabase-admin.js"; // PAM V1.0 - Import para Storage
 import { getQueue } from "../lib/mock-queue.js"; // PAM V1.0 - Sistema de Job Queue
-import { interCollections, propostas, historicoObservacoesCobranca } from "@shared/schema";
+import { interCollections, propostas, historicoObservacoesCobranca, statusContextuais } from "@shared/schema";
 import { eq, and } from "drizzle-orm";
 
 const router = express.Router();

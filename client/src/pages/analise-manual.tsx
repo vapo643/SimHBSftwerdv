@@ -333,16 +333,16 @@ export default function AnaliseManual() {
           </Button>
 
           <div className="flex items-center gap-2">
-            <Badge variant={proposta.status === "aguardando_analise" ? "secondary" : "default"}>
-              {proposta.status === "aguardando_analise"
+            <Badge variant={(proposta.statusContextual || proposta.status) === "aguardando_analise" ? "secondary" : "default"}>
+              {(proposta.statusContextual || proposta.status) === "aguardando_analise"
                 ? "Aguardando Análise"
-                : proposta.status === "em_analise"
+                : (proposta.statusContextual || proposta.status) === "em_analise"
                   ? "Em Análise"
-                  : proposta.status === "aprovado"
+                  : (proposta.statusContextual || proposta.status) === "aprovado"
                     ? "Aprovado"
-                    : proposta.status === "rejeitado"
+                    : (proposta.statusContextual || proposta.status) === "rejeitado"
                       ? "Rejeitado"
-                      : proposta.status}
+                      : (proposta.statusContextual || proposta.status)}
             </Badge>
             <Button
               onClick={startAnalysis}

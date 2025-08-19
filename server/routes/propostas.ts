@@ -2,8 +2,8 @@ import { Request, Response } from "express";
 import { AuthenticatedRequest } from "../lib/jwt-auth-middleware";
 import { createServerSupabaseAdminClient } from "../lib/supabase";
 import { db } from "../lib/supabase.js";
-import { propostas } from "@shared/schema";
-import { eq } from "drizzle-orm";
+import { propostas, statusContextuais } from "@shared/schema";
+import { eq, and } from "drizzle-orm";
 
 /**
  * Alterar status da proposta entre ativa e suspensa

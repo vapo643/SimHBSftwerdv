@@ -191,7 +191,9 @@ const Dashboard: React.FC = () => {
         proposta.id.includes(searchTerm) ||
         proposta.cpfCliente?.includes(searchTerm);
 
-      const matchesStatus = statusFilter === "todos" || proposta.status === statusFilter;
+      // PAM V1.0 - Usar status contextual com fallback
+      const statusFinal = proposta.statusContextual || proposta.status;
+      const matchesStatus = statusFilter === "todos" || statusFinal === statusFilter;
 
       const matchesParceiro =
         parceiroFilter === "todos" || proposta.parceiro?.razaoSocial === parceiroFilter;
@@ -495,8 +497,8 @@ const Dashboard: React.FC = () => {
                           <h3 className="text-lg font-semibold">
                             {proposta.nomeCliente || "Cliente não informado"}
                           </h3>
-                          <Badge className={`${getStatusColor(proposta.status)} border`}>
-                            {getStatusText(proposta.status)}
+                          <Badge className={`${getStatusColor(proposta.statusContextual || proposta.status)} border`}>
+                            {getStatusText(proposta.statusContextual || proposta.status)}
                           </Badge>
                           {proposta.status === "pendenciado" && (
                             <Badge

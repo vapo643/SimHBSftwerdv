@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { jwtAuthMiddleware, AuthenticatedRequest } from "../lib/jwt-auth-middleware.js";
 import { db } from "../lib/supabase.js";
-import { users, propostas } from "../../shared/schema.js";
+import { users, propostas, statusContextuais } from "../../shared/schema.js";
 import { eq, gte, and, count, desc, sql } from "drizzle-orm";
 import { getBrasiliaTimestamp } from "../lib/timezone.js";
 

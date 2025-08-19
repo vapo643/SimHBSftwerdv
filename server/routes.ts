@@ -1132,7 +1132,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Import database dependencies
       const { db } = await import("../server/lib/supabase");
-      const { propostas, lojas, parceiros } = await import("../shared/schema");
+      const { propostas, lojas, parceiros, statusContextuais } = await import("../shared/schema");
       const { inArray, desc, eq, and } = await import("drizzle-orm");
 
       // Build query with conditional where clause
@@ -1141,6 +1141,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           id: propostas.id,
           numeroProposta: propostas.numeroProposta, // PAM V1.0 - Sequential number for UI
           status: propostas.status,
+          // PAM V1.0 - Status contextual para dashboard
+          statusContextual: statusContextuais.status,
           clienteData: propostas.clienteData,
           condicoesData: propostas.condicoesData,
           userId: propostas.userId,
@@ -1155,6 +1157,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           },
         })
         .from(propostas)
+        // PAM V1.0 - LEFT JOIN com status contextual
+        .leftJoin(
+          statusContextuais,
+          and(
+            eq(propostas.id, statusContextuais.propostaId),
+            eq(statusContextuais.contexto, 'dashboard')
+          )
+        )
         .leftJoin(lojas, eq(propostas.lojaId, lojas.id))
         .leftJoin(parceiros, eq(lojas.parceiroId, parceiros.id));
 

@@ -27,10 +27,12 @@ import {
 
 interface Proposta {
   id: number;
+  numeroProposta?: number;
   clienteNome: string;
   valor: string;
   prazo: number;
   status: string;
+  statusContextual?: string; // PAM V1.0 - Status contextual
   createdAt: string;
 }
 
@@ -81,7 +83,9 @@ export default function FilaAnalise() {
 
   const filteredPropostas = propostas
     ?.filter(proposta => {
-      const matchesStatus = !statusFilter || proposta.status === statusFilter;
+      // PAM V1.0 - Usar status contextual com fallback
+      const statusFinal = proposta.statusContextual || proposta.status;
+      const matchesStatus = !statusFilter || statusFinal === statusFilter;
       const matchesBusca =
         !busca || proposta.clienteNome.toLowerCase().includes(busca.toLowerCase());
 
@@ -420,7 +424,11 @@ export default function FilaAnalise() {
                             {proposta.prazo} meses
                           </td>
                           <td className="whitespace-nowrap px-6 py-4">
-                            <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>
+                            {(() => {
+                              const statusFinal = proposta.statusContextual || proposta.status;
+                              const statusInfo = getStatusBadge(statusFinal);
+                              return <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>;
+                            })()}
                           </td>
                           <td className="whitespace-nowrap px-6 py-4">
                             <Badge variant={priorityInfo.variant}>{priorityInfo.label}</Badge>
