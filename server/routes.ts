@@ -5286,7 +5286,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use("/api", observacoesRouter);
 
   // Register Pagamentos routes
-  const pagamentosRouter = (await import("./routes/pagamentos.js")).default;
+  const pagamentosRouter = (await import("./routes/pagamentos/index.js")).default;
   app.use("/api/pagamentos", pagamentosRouter);
 
   // Register Formalização routes
@@ -5610,7 +5610,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use("/api/cobrancas", cobrancasRoutes);
 
   // Pagamentos routes
-  const pagamentosRoutes = (await import("./routes/pagamentos.js")).default;
+  const pagamentosRoutes = (await import("./routes/pagamentos/index.js")).default;
   app.use("/api/financeiro/pagamentos", pagamentosRoutes);
 
   // ClickSign Integration routes

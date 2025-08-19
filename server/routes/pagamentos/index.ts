@@ -1,10 +1,10 @@
 import { Router } from "express";
-import { jwtAuthMiddleware, type AuthenticatedRequest } from "../lib/jwt-auth-middleware.js";
-import { db, supabase } from "../lib/supabase.js";
+import { jwtAuthMiddleware, type AuthenticatedRequest } from "../../lib/jwt-auth-middleware.js";
+import { db, supabase } from "../../lib/supabase.js";
 import { propostas, users, profiles, lojas, produtos, interCollections, statusContextuais } from "@shared/schema";
 import { eq, and, or, desc, sql, gte, lte, inArray } from "drizzle-orm";
 import { z } from "zod";
-import { transitionTo, InvalidTransitionError } from "../services/statusFsmService";
+import { transitionTo, InvalidTransitionError } from "../../services/statusFsmService";
 import {
   isToday,
   isThisWeek,
@@ -918,7 +918,7 @@ router.get("/:id/ccb-assinada", jwtAuthMiddleware, async (req: AuthenticatedRequ
     }
 
     // Importar o serviço ClickSign
-    const { clickSignService } = await import("../services/clickSignService.js");
+    const { clickSignService } = await import("../../services/clickSignService.js");
 
     try {
       // Baixar o documento assinado da ClickSign
@@ -1446,7 +1446,7 @@ router.post(
 
         try {
           // Upload para Supabase Storage
-          const { supabase } = await import("../lib/supabase.js");
+          const { supabase } = await import("../../lib/supabase.js");
           const fileName = `comprovante_${Date.now()}_${req.file.originalname}`;
           const filePath = `comprovantes/${id}/${fileName}`;
 
@@ -1645,7 +1645,7 @@ router.get("/:id/ccb-url", jwtAuthMiddleware, async (req: AuthenticatedRequest, 
 
       try {
         // Importar serviço ClickSign
-        const { clickSignService } = await import("../services/clickSignService.js");
+        const { clickSignService } = await import("../../services/clickSignService.js");
 
         // Baixar documento do ClickSign
         console.log(`[PAGAMENTOS CCB-URL] 📥 Baixando documento: ${proposta.clicksignDocumentKey}`);
