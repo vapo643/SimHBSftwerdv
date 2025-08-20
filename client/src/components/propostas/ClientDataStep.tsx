@@ -27,7 +27,7 @@ import {
   Save,
 } from "lucide-react";
 import CurrencyInput from "@/components/ui/CurrencyInput";
-import InputMask from "react-input-mask";
+import { MaskedInput } from "@/components/ui/MaskedInput";
 import { cpf as cpfValidator, cnpj as cnpjValidator } from "cpf-cnpj-validator";
 import { commonBanks, brazilianBanks } from "@/utils/brazilianBanks";
 import { apiRequest } from "@/lib/queryClient";
@@ -402,30 +402,21 @@ export function ClientDataStep() {
               <div>
                 <Label htmlFor="cnpj">CNPJ *</Label>
                 <div className="relative">
-                  <InputMask
+                  <MaskedInput
                     mask="99.999.999/9999-99"
                     value={clientData.cnpj || ""}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      handleCNPJChange(e.target.value)
-                    }
-                  >
-                    {(inputProps: any) => (
-                      <Input
-                        {...inputProps}
-                        id="cnpj"
-                        type="text"
-                        placeholder="00.000.000/0000-00"
-                        className={`${
-                          errors.cnpj
-                            ? "border-destructive focus:border-destructive"
-                            : cnpjValidation.isValid && clientData.cnpj
-                              ? "border-green-500 focus:border-green-500"
-                              : ""
-                        } pr-10`}
-                        data-testid="input-cnpj"
-                      />
-                    )}
-                  </InputMask>
+                    onChange={(value) => handleCNPJChange(value)}
+                    id="cnpj"
+                    placeholder="00.000.000/0000-00"
+                    className={`${
+                      errors.cnpj
+                        ? "border-destructive focus:border-destructive"
+                        : cnpjValidation.isValid && clientData.cnpj
+                          ? "border-green-500 focus:border-green-500"
+                          : ""
+                    } pr-10`}
+                    data-testid="input-cnpj"
+                  />
                   {clientData.cnpj && cnpjValidation.message === null && (
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 transform">
                       {cnpjValidation.isValid ? (
@@ -474,30 +465,21 @@ export function ClientDataStep() {
               <div>
                 <Label htmlFor="cpf">CPF *</Label>
                 <div className="relative">
-                  <InputMask
+                  <MaskedInput
                     mask="999.999.999-99"
                     value={clientData.cpf}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      handleCPFChange(e.target.value)
-                    }
-                  >
-                    {(inputProps: any) => (
-                      <Input
-                        {...inputProps}
-                        id="cpf"
-                        type="text"
-                        placeholder="000.000.000-00"
-                        className={`${
-                          errors.cpf
-                            ? "border-destructive focus:border-destructive"
-                            : cpfValidation.isValid && clientData.cpf
-                              ? "border-green-500 focus:border-green-500"
-                              : ""
-                        } pr-10`}
-                        data-testid="input-cpf"
-                      />
-                    )}
-                  </InputMask>
+                    onChange={(value) => handleCPFChange(value)}
+                    id="cpf"
+                    placeholder="000.000.000-00"
+                    className={`${
+                      errors.cpf
+                        ? "border-destructive focus:border-destructive"
+                        : cpfValidation.isValid && clientData.cpf
+                          ? "border-green-500 focus:border-green-500"
+                          : ""
+                    } pr-10`}
+                    data-testid="input-cpf"
+                  />
                   {clientData.cpf && cpfValidation.message === null && (
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 transform">
                       {cpfValidation.isValid ? (
@@ -703,24 +685,16 @@ export function ClientDataStep() {
         <CardContent className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
             <Label htmlFor="telefone">Telefone/WhatsApp *</Label>
-            <InputMask
+            <MaskedInput
               mask="(99) 99999-9999"
               value={clientData.telefone}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                handlePhoneChange(e.target.value)
-              }
-            >
-              {(inputProps: any) => (
-                <Input
-                  {...inputProps}
-                  id="telefone"
-                  type="tel"
-                  placeholder="(11) 98765-4321"
-                  className={errors.telefone ? "border-destructive focus:border-destructive" : ""}
-                  data-testid="input-telefone"
-                />
-              )}
-            </InputMask>
+              onChange={(value) => handlePhoneChange(value)}
+              id="telefone"
+              type="tel"
+              placeholder="(11) 98765-4321"
+              className={errors.telefone ? "border-destructive focus:border-destructive" : ""}
+              data-testid="input-telefone"
+            />
             {errors.telefone && <p className="mt-1 text-sm text-destructive">{errors.telefone}</p>}
           </div>
 
@@ -774,30 +748,21 @@ export function ClientDataStep() {
           <div>
             <Label htmlFor="cep">CEP</Label>
             <div className="relative">
-              <InputMask
+              <MaskedInput
                 mask="99999-999"
                 value={clientData.cep}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  handleCEPChange(e.target.value)
-                }
-              >
-                {(inputProps: any) => (
-                  <Input
-                    {...inputProps}
-                    id="cep"
-                    type="text"
-                    placeholder="00000-000"
-                    className={`${
-                      errors.cep
-                        ? "border-destructive focus:border-destructive"
-                        : clientData.logradouro && !loadingCep
-                          ? "border-green-500 focus:border-green-500"
-                          : ""
-                    } pr-10`}
-                    data-testid="input-cep"
-                  />
-                )}
-              </InputMask>
+                onChange={(value) => handleCEPChange(value)}
+                id="cep"
+                placeholder="00000-000"
+                className={`${
+                  errors.cep
+                    ? "border-destructive focus:border-destructive"
+                    : clientData.logradouro && !loadingCep
+                      ? "border-green-500 focus:border-green-500"
+                      : ""
+                } pr-10`}
+                data-testid="input-cep"
+              />
               {loadingCep && (
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 transform">
                   <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
@@ -967,26 +932,18 @@ export function ClientDataStep() {
 
           <div className="md:col-span-2">
             <Label htmlFor="telefoneEmpresa">Telefone da Empresa</Label>
-            <InputMask
+            <MaskedInput
               mask="(99) 9999-9999"
               value={clientData.telefoneEmpresa}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                updateClient({ telefoneEmpresa: e.target.value });
-              }}
-            >
-              {(inputProps: any) => (
-                <Input
-                  {...inputProps}
-                  id="telefoneEmpresa"
-                  type="tel"
-                  placeholder="(11) 3456-7890"
-                  className={
-                    errors.telefoneEmpresa ? "border-destructive focus:border-destructive" : ""
-                  }
-                  data-testid="input-telefone-empresa"
-                />
-              )}
-            </InputMask>
+              onChange={(value) => updateClient({ telefoneEmpresa: value })}
+              id="telefoneEmpresa"
+              type="tel"
+              placeholder="(11) 3456-7890"
+              className={
+                errors.telefoneEmpresa ? "border-destructive focus:border-destructive" : ""
+              }
+              data-testid="input-telefone-empresa"
+            />
             {errors.telefoneEmpresa && (
               <p className="mt-1 text-sm text-destructive">{errors.telefoneEmpresa}</p>
             )}
@@ -1187,7 +1144,7 @@ export function ClientDataStep() {
 
                 <div className="md:col-span-2">
                   <Label htmlFor="pixCpfTitular">CPF/CNPJ do Titular</Label>
-                  <InputMask
+                  <MaskedInput
                     mask={
                       clientData.dadosPagamentoPixCpfTitular &&
                       clientData.dadosPagamentoPixCpfTitular.length > 14
@@ -1195,20 +1152,13 @@ export function ClientDataStep() {
                         : "999.999.999-99"
                     }
                     value={clientData.dadosPagamentoPixCpfTitular || ""}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      updateClient({ dadosPagamentoPixCpfTitular: e.target.value })
+                    onChange={(value) =>
+                      updateClient({ dadosPagamentoPixCpfTitular: value })
                     }
-                  >
-                    {(inputProps: any) => (
-                      <Input
-                        {...inputProps}
-                        id="pixCpfTitular"
-                        type="text"
-                        placeholder="CPF ou CNPJ do titular"
-                        data-testid="input-pix-cpf-titular"
-                      />
-                    )}
-                  </InputMask>
+                    id="pixCpfTitular"
+                    placeholder="CPF ou CNPJ do titular"
+                    data-testid="input-pix-cpf-titular"
+                  />
                 </div>
               </div>
             </TabsContent>
