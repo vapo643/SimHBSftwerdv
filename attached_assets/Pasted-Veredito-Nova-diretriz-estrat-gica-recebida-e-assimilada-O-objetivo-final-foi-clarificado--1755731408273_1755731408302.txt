@@ -1,0 +1,61 @@
+Veredito: **Nova diretriz estratégica recebida e assimilada.** O objetivo final foi clarificado.
+
+**ESTADO ATUAL:** Operando em Supabase.
+**ESTADO FUTURO (ALVO):** Migração completa para a Azure.
+
+Esta diretriz refina a nossa missão. Cada ação tática que tomarmos a partir de agora, cada linha de código que refinarmos, será executada com o objetivo principal de facilitar e desriscar a futura migração para a Azure. A nossa função não é apenas melhorar o sistema; é prepará-lo para o seu ambiente de produção final.
+
+Com este novo contexto, estou pronto para responder ao seu briefing anterior como **GEM 02 (Dev Specialist)**. A minha análise e as minhas recomendações estão agora totalmente alinhadas com a estratégia de migração.
+
+---
+### **Resposta ao Briefing [GEM 01 -> GEM 02] - (Edição "Azure-Ready")**
+
+**De:** GEM 02 (Dev Specialist)
+**Para:** GEM 01 (Arquiteto Senior)
+**Data:** 20/08/2025
+**Assunto:** Re: [FASE 0 - FUNDAÇÃO IMEDIATA]
+
+---
+
+GEM 01, sua análise AS-IS e o plano de ação para a FASE 0 são recebidos. A diretriz de migração para a Azure torna a execução deste plano não apenas uma melhoria, mas um pré-requisito crítico e inegociável. Concordo com a urgência e a abordagem. A seguir, minha análise e compromisso.
+
+**[VALIDAÇÃO]**
+Confirmo 100% a sua análise AS-IS. Os pontos críticos que você levantou (zero observabilidade, ausência de backups, deploy manual, secrets) são os exatos bloqueadores que tornam uma migração para a Azure inviável e perigosa. A sua análise é precisa e o estado de risco é real.
+
+**[PRIORIDADES]**
+Para as próximas 48-72 horas, as minhas prioridades absolutas são as ações que nos permitem iniciar o desacoplamento do ambiente Replit/Supabase e preparar a fundação para a Azure:
+
+1.  **Backup do PostgreSQL (P0 - Desriscar a Migração de Dados):** Estabelecer um processo de backup diário e automatizado. Este é o Passo 1 para garantir que temos um *asset* de dados portável e seguro para a migração.
+2.  **Migração de Secrets para Azure Key Vault (P0 - Desacoplar a Configuração):** Remover todos os segredos do Replit e centralizá-los no Azure Key Vault. Isto desacopla a nossa configuração da plataforma atual e nos alinha com o ecossistema Azure.
+3.  **Logging Estruturado e Error Tracking (P1 - Viabilizar o Debug na Nuvem):** Implementar Winston/Pino e Sentry. Sem logging estruturado, depurar a aplicação após a migração para um ambiente distribuído como a Azure será impossível.
+
+**[RESPOSTAS]**
+1.  **Código - 5% Faltantes:** Os *pain points* que mais nos impediriam de escalar na Azure são **(1)** a falta de um sistema de gestão de configuração de produtos (que exigiria acesso direto ao banco de dados, o que é inaceitável na Azure), **(2)** a lógica de geração de PDF síncrona, que esgotaria os recursos de um *container* e deveria ser um *Azure Function* assíncrono, e **(3)** a ausência de testes de integração que validem os contratos com as APIs externas (Inter/ClickSign), um risco enorme em um novo ambiente de rede.
+2.  **Database - Migração Zero-Downtime:** Para a migração Supabase -> Azure, a estratégia deve ser **`drizzle-kit generate`** para criar scripts SQL portáveis. Temos poucos dados agora, permitindo uma janela de manutenção para o *cutover* inicial. No futuro, na Azure, teremos de usar o padrão **Expand/Contract** para qualquer evolução de schema.
+3.  **Testing - Foco Inicial:** O foco imediato deve ser **Testes de Integração** para as nossas APIs. Eles validam os contratos e a lógica de negócio de ponta a ponta. Esta é a rede de segurança que nos dará a confiança para fazer o *deploy* na Azure e saber que os fluxos críticos (criação de proposta, cálculo de TAC) não quebraram.
+4.  **Performance - Bottlenecks:** O maior gargalo, no contexto da Azure, é qualquer operação longa e síncrona que bloqueie o *event loop* do Node.js. A **geração de PDF** é a principal. A query de listagem de propostas é a segunda e precisará de otimização de índices e, possivelmente, de uma réplica de leitura no futuro, na Azure.
+5.  **Deployment - Cutover:** Com poucos usuários ativos, uma **janela de manutenção noturna** é a estratégia correta para a migração inicial. Na Azure, deveremos imediatamente implementar uma estratégia de **Blue-Green Deployment** através do GitHub Actions para garantir deployments futuros com zero downtime.
+
+**[DECISÕES]**
+* **Cloud Provider:** **[X] Azure**. Diretriz confirmada.
+* **Orchestration:** **[X] Azure Container Apps**. Concordo. É o equilíbrio perfeito entre a simplicidade do PaaS e o poder do Kubernetes, ideal para a nossa jornada de migração e futura evolução para microserviços.
+* **Database:** **[X] Azure Database for PostgreSQL**. É a escolha padrão e mais segura. A gestão é da Microsoft, o que nos liberta para focar na aplicação.
+* **Monitoring:** **[X] DataDog**. Concordo. A velocidade de implementação e a profundidade da visibilidade que ele oferece são cruciais nesta fase de migração. Pagamos pela velocidade para mitigar o risco.
+
+**[COMPROMETIMENTO]**
+Nas próximas 48-72 horas, eu comprometo-me a entregar a fundação para a nossa migração para a Azure:
+1.  **Script de backup do PostgreSQL** configurado e um procedimento de restauro documentado e testado.
+2.  **Azure Key Vault** configurado, com os segredos da aplicação migrados.
+3.  **Endpoint `/health`** implementado.
+4.  **Logging estruturado** implementado em todos os endpoints principais da API.
+5.  **Sentry SDK** integrado na aplicação.
+
+**[BLOQUEIOS]**
+Meu único bloqueio é o acesso. Para iniciar **imediatamente**, preciso de:
+1.  Acesso de "Colaborador" à subscrição do Azure.
+2.  Permissões para criar um Resource Group, um Key Vault, uma Conta de Storage e um Azure Database for PostgreSQL.
+
+---
+
+A sua análise e o seu plano são a bússola de que precisávamos. Estou pronto para executar a minha parte. A cada passo, estaremos mais perto de uma arquitetura robusta e verdadeiramente "enterprise-grade" na Azure.
+**GEM 02 - Dev Specialist**
