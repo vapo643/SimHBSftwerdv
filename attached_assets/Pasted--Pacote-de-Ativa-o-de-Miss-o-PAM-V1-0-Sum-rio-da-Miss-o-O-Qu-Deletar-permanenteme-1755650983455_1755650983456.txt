@@ -1,0 +1,44 @@
+### Pacote de Ativação de Missão (PAM) V1.0
+
+* **Sumário da Missão (O Quê):** Deletar permanentemente o diretório `_legacy_diagnostics/` e todos os seus 791 arquivos em quarentena.
+* **Intenção Estratégica (O Porquê):** Concluir o ciclo de limpeza do projeto, removendo permanentemente o código obsoleto. Isso reduz o "ruído" e a complexidade da base de código, previne o uso acidental de scripts legados e finaliza a refatoração estrutural.
+* **Histórico Relevante (Consulta Obrigatória):** A missão anterior colocou 791 arquivos identificados como obsoletos no diretório `_legacy_diagnostics/`. O sistema permaneceu estável, confirmando que estes arquivos não são necessários para a operação.
+* **Modelo Mental (Como se Encaixa):** Esta é uma operação de filesystem destrutiva e irreversível. O Agente deve agir com precisão cirúrgúrgica, validando o alvo antes e confirmando a eliminação depois.
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco (ALTO):** A deleção acidental de um diretório incorreto (`rm -rf /`) causaria dano catastrófico e irrecuperável.
+    * **Contramedida:** O prompt especifica o caminho exato e proíbe qualquer outra modificação de filesystem. A validação pré e pós-deleção é mandatória para garantir que apenas o alvo correto foi eliminado.
+
+---
+
+**IMPLEMENTAR:**
+Deleção Final de Arquivos em Quarentena
+
+**CURRENT STATE:**
+O diretório `_legacy_diagnostics/` existe na raiz do projeto e contém 791 arquivos de teste e diagnóstico que foram confirmados como obsoletos.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  O diretório `_legacy_diagnostics/` e todo o seu conteúdo são permanentemente removidos do filesystem.
+2.  A execução de `ls _legacy_diagnostics/` após a missão resulta em um erro de "No such file or directory".
+3.  Nenhum outro arquivo ou diretório no projeto é afetado.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  **Validação Pré-Deleção:** Antes de qualquer ação de escrita, execute o comando `ls _legacy_diagnostics/ | wc -l` para confirmar o número exato de arquivos no diretório e reporte este número.
+2.  **Comando de Deleção:** Execute um único e preciso comando para a deleção: `rm -rf _legacy_diagnostics/`. Não use wildcards ou caminhos relativos complexos.
+3.  **Validação Pós-Deleção Mandatória:** Como prova final do sucesso da missão, execute o comando `ls _legacy_diagnostics/` e inclua o output de erro "No such file or directory" em seu relatório final.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria **ALTO** devido à natureza irreversível da operação `rm -rf`]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que a análise de estabilidade pós-quarentena foi suficiente para garantir que nenhum arquivo no diretório é necessário."]
+* **VALIDAÇÃO PENDENTE:** [Nenhuma. O sucesso é definido pela remoção confirmada do diretório.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear ficheiros e funções exatas afetadas (o diretório `_legacy_diagnostics/`).
+2.  Garantir que o comando de deleção está sintaticamente correto e aponta para o alvo exato.
+3.  Executar `get_latest_lsp_diagnostics` para confirmar 0 erros de código.
+4.  **Declarar Nível de Confiança (0 a 100%)**.
+5.  **Categorizar Riscos Descobertos** (ALTO).
+6.  **Realizar teste funcional completo** (executar os comandos de validação pré e pós-deleção).
+7.  **Documentar Decisões Técnicas** confirmando a execução bem-sucedida.
