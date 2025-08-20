@@ -1,0 +1,28 @@
+### Pacote de Ativação de Missão (PAM) V1.0 (Debate de Planejamento - Interação 2)
+
+* **Sumário da Missão (O Quê):** Refinar e detalhar tecnicamente as modificações propostas para o schema do banco de dados, focando em nulidade, tipos de dados, constraints e estratégia de migração.
+* **Intenção Estratégica (O Porquê):** Garantir que as mudanças no banco de dados sejam retrocompatíveis, seguras e sigam as melhores práticas para produção, prevenindo problemas de dados com propostas antigas e garantindo a integridade do schema.
+* **Histórico Relevante (Consulta Obrigatória):** A sua proposta de roadmap (Interação 1) definiu as tabelas e campos a serem criados/alterados. Agora precisamos detalhar a implementação técnica.
+
+---
+
+**TASK (Sua Tarefa):**
+Responda às seguintes perguntas de arquitetura de dados para refinar a FASE 1 do seu roadmap. Seja preciso e técnico em suas respostas.
+
+**1. Estratégia de Retrocompatibilidade (Nulidade e Padrões):**
+   * Para os novos campos a serem adicionados na tabela `propostas` (`clienteEmpresaNome`, `clienteDividasExistentes`, etc.), qual deve ser a estratégia de `nullability` (nulidade)?
+   * Eles devem ser criados como `NOT NULL` ou permitindo valores `NULL`?
+   * Qual deve ser o valor `DEFAULT` para cada um?
+   * **Justifique sua resposta** considerando o impacto em milhares de propostas já existentes no banco que não possuem esses dados.
+
+**2. Precisão dos Tipos de Dados:**
+   * Você sugeriu `DECIMAL(5, 2)` para o campo `clienteComprometimentoRenda`. Este tipo suporta um valor máximo de `999.99`. Confirme se esta precisão é suficiente para representar uma percentagem (ex: `25.00%`) ou se deveríamos considerar um valor máximo de `100.00`, talvez com um tipo diferente ou uma `CHECK constraint`.
+
+**3. Constraints da Nova Tabela (`referencias_profissionais`):**
+   * Detalhe o Drizzle schema completo para a nova tabela `referencias_profissionais`.
+   * Como podemos garantir, no nível do banco de dados, que uma proposta só pode ter **uma** referência profissional? Uma `UNIQUE constraint` composta por `(propostaId, tipo_referencia)` na tabela de referências seria a abordagem correta?
+
+**4. Estratégia de Migração (Desenvolvimento vs. Produção):**
+   * Você sugeriu `npm run db:push` (`drizzle-kit push:pg`) para aplicar as mudanças. Este comando aplica as mudanças diretamente e é ideal para desenvolvimento.
+   * Para um ambiente de **produção**, não seria mais seguro e controlado usar o sistema de migrações versionadas com `drizzle-kit generate:pg` para criar um script SQL explícito que pode ser revisado, versionado e executado de forma controlada?
+   * **Qual estratégia você recomenda para produção e por quê?**
