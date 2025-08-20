@@ -22,12 +22,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ArrowLeft, ArrowRight, Upload, Search } from "lucide-react";
+import { MaskedInput } from "@/components/ui/MaskedInput";
 
 const clienteSchema = z.object({
-  clienteNome: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
-  clienteCpf: z.string().min(11, "CPF deve ter 11 dígitos"),
-  clienteEmail: z.string().email("Email inválido"),
-  clienteTelefone: z.string().min(10, "Telefone inválido"),
+  clienteNome: z.string().min(1, "Nome é obrigatório").max(200, "Nome não pode exceder 200 caracteres"),
+  clienteCpf: z.string()
+    .min(11, "CPF deve ter pelo menos 11 dígitos")
+    .regex(/^\d{3}\.?\d{3}\.?\d{3}-?\d{2}$/, "CPF deve estar em formato válido (000.000.000-00)"),
+  clienteEmail: z.string()
+    .min(1, "Email é obrigatório")
+    .email("Email deve ter formato válido")
+    .max(255, "Email não pode exceder 255 caracteres"),
+  clienteTelefone: z.string().min(10, "Telefone deve ter pelo menos 10 dígitos").max(20, "Telefone não pode exceder 20 caracteres"),
   clienteDataNascimento: z.string().min(1, "Data de nascimento é obrigatória"),
   clienteRenda: z.string().min(1, "Renda é obrigatória"),
   // Campos de documentação - ADICIONADOS PARA CORREÇÃO CCB
@@ -49,8 +55,22 @@ const clienteSchema = z.object({
 });
 
 const emprestimoSchema = z.object({
-  valor: z.string().min(1, "Valor é obrigatório").transform(val => parseFloat(val.replace(/[^\d.,]/g, '').replace(',', '.'))),
-  prazo: z.string().min(1, "Prazo é obrigatório").transform(val => parseInt(val)),
+  valor: z.string()
+    .min(1, "Valor é obrigatório")
+    .transform(val => {
+      const num = parseFloat(val.replace(/[^\d.,]/g, '').replace(',', '.'));
+      if (isNaN(num) || num < 100) throw new Error("Valor mínimo é R$ 100,00");
+      if (num > 1000000) throw new Error("Valor máximo é R$ 1.000.000,00");
+      return num;
+    }),
+  prazo: z.string()
+    .min(1, "Prazo é obrigatório")
+    .transform(val => {
+      const num = parseInt(val);
+      if (isNaN(num) || num < 1) throw new Error("Prazo mínimo é 1 mês");
+      if (num > 120) throw new Error("Prazo máximo é 120 meses");
+      return num;
+    }),
   finalidade: z.string().min(1, "Finalidade é obrigatória"),
   garantia: z.string().min(1, "Garantia é obrigatória"),
   // Dados bancários para pagamento
@@ -85,10 +105,13 @@ export default function NovaProposta() {
     setValue,
     getValues,
     reset,
+    setError,
+    clearErrors,
   } = useForm<PropostaForm>({
     resolver: zodResolver(fullSchema),
     defaultValues: {
       documentos: [],
+      clienteNacionalidade: "Brasileira",
     },
   });
 
@@ -211,39 +234,49 @@ export default function NovaProposta() {
 
   const createProposta = useMutation({
     mutationFn: async (data: PropostaForm) => {
-      // Map frontend data to backend schema format
+      // Clear previous errors
+      clearErrors();
+      
+      // Map frontend data to backend schema format - STRICT MAPPING
       const backendData = {
-        clienteNome: data.clienteNome,
-        clienteCpf: data.clienteCpf,
-        clienteEmail: data.clienteEmail,
-        clienteTelefone: data.clienteTelefone,
-        clienteDataNascimento: data.clienteDataNascimento,
-        clienteRenda: data.clienteRenda,
-        clienteRg: data.clienteRg,
-        clienteOrgaoEmissor: data.clienteOrgaoEmissor,
-        clienteRgDataEmissao: data.clienteRgDataEmissao,
-        clienteRgUf: data.clienteRgUf,
-        clienteLocalNascimento: data.clienteLocalNascimento,
-        clienteEstadoCivil: data.clienteEstadoCivil,
-        clienteNacionalidade: data.clienteNacionalidade || "Brasileira",
-        clienteCep: data.clienteCep || "",
-        clienteLogradouro: data.clienteLogradouro || "",
-        clienteNumero: data.clienteNumero || "",
-        clienteComplemento: data.clienteComplemento || "",
-        clienteBairro: data.clienteBairro || "",
-        clienteCidade: data.clienteCidade || "",
-        clienteUf: data.clienteUf || "",
-        valor: data.valor,
-        prazo: data.prazo,
-        finalidade: data.finalidade,
-        garantia: data.garantia,
-        dadosPagamentoTipo: data.dadosPagamentoTipo,
-        dadosPagamentoPix: data.dadosPagamentoPix,
-        dadosPagamentoBanco: data.dadosPagamentoBanco,
-        dadosPagamentoAgencia: data.dadosPagamentoAgencia,
-        dadosPagamentoConta: data.dadosPagamentoConta,
-        dadosPagamentoDigito: data.dadosPagamentoDigito,
-        documentos: data.documentos || [],
+        // Required fields from createPropostaValidationSchema
+        lojaId: Number(JSON.parse(localStorage.getItem('user_context') || '{}').lojaId) || 1,
+        clienteNome: data.clienteNome?.trim() || "",
+        clienteCpf: data.clienteCpf?.replace(/\D/g, '') || "", // Clean CPF
+        clienteEmail: data.clienteEmail?.trim() || "",
+        clienteTelefone: data.clienteTelefone?.replace(/\D/g, '') || "", // Clean phone
+        valor: Number(data.valor) || 0,
+        prazo: Number(data.prazo) || 0,
+        finalidade: data.finalidade || "",
+        garantia: data.garantia || "",
+        
+        // Optional fields - only include if not empty
+        ...(data.clienteDataNascimento && { clienteDataNascimento: data.clienteDataNascimento }),
+        ...(data.clienteRenda && { clienteRenda: data.clienteRenda }),
+        ...(data.clienteRg && { clienteRg: data.clienteRg }),
+        ...(data.clienteOrgaoEmissor && { clienteOrgaoEmissor: data.clienteOrgaoEmissor }),
+        ...(data.clienteRgDataEmissao && { clienteRgDataEmissao: data.clienteRgDataEmissao }),
+        ...(data.clienteRgUf && { clienteRgUf: data.clienteRgUf }),
+        ...(data.clienteLocalNascimento && { clienteLocalNascimento: data.clienteLocalNascimento }),
+        ...(data.clienteEstadoCivil && { clienteEstadoCivil: data.clienteEstadoCivil }),
+        ...(data.clienteCep && { clienteCep: data.clienteCep }),
+        ...(data.clienteLogradouro && { clienteLogradouro: data.clienteLogradouro }),
+        ...(data.clienteNumero && { clienteNumero: data.clienteNumero }),
+        ...(data.clienteComplemento && { clienteComplemento: data.clienteComplemento }),
+        ...(data.clienteBairro && { clienteBairro: data.clienteBairro }),
+        ...(data.clienteCidade && { clienteCidade: data.clienteCidade }),
+        ...(data.clienteUf && { clienteUf: data.clienteUf }),
+        
+        // Payment data - only if provided
+        ...(data.dadosPagamentoTipo && { metodoPagamento: data.dadosPagamentoTipo }),
+        ...(data.dadosPagamentoPix && { dadosPagamentoPix: data.dadosPagamentoPix }),
+        ...(data.dadosPagamentoBanco && { dadosPagamentoBanco: data.dadosPagamentoBanco }),
+        ...(data.dadosPagamentoAgencia && { dadosPagamentoAgencia: data.dadosPagamentoAgencia }),
+        ...(data.dadosPagamentoConta && { dadosPagamentoConta: data.dadosPagamentoConta }),
+        ...(data.dadosPagamentoDigito && { dadosPagamentoDigito: data.dadosPagamentoDigito }),
+        
+        // Default values
+        clienteNacionalidade: "Brasileira",
         status: "aguardando_analise",
       };
       
@@ -316,11 +349,43 @@ export default function NovaProposta() {
       }, 1500);
     },
     onError: (error: any) => {
-      toast({
-        title: "Erro ao criar proposta",
-        description: error.message || "Tente novamente em alguns instantes.",
-        variant: "destructive",
-      });
+      console.error("[VALIDATION ERROR]", error);
+      
+      // Se houver erros de validação específicos, destacar os campos
+      if (error.response?.data?.errors && Array.isArray(error.response.data.errors)) {
+        const validationErrors = error.response.data.errors;
+        
+        validationErrors.forEach((err: any) => {
+          if (err.path && err.path.length > 0) {
+            const fieldName = err.path[0];
+            console.log(`[FIELD ERROR] ${fieldName}: ${err.message}`);
+            
+            // Mapear para os campos do formulário e definir erro específico
+            setError(fieldName as any, {
+              type: "server",
+              message: err.message || `${fieldName} é inválido`
+            });
+          }
+        });
+        
+        toast({
+          title: "Dados inválidos",
+          description: "Verifique os campos destacados em vermelho abaixo.",
+          variant: "destructive",
+        });
+      } else if (error.response?.data?.message) {
+        toast({
+          title: "Erro na validação",
+          description: error.response.data.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Erro ao criar proposta",
+          description: error.message || "Tente novamente em alguns instantes.",
+          variant: "destructive",
+        });
+      }
     },
   });
 
@@ -433,6 +498,8 @@ export default function NovaProposta() {
                         id="clienteNome"
                         placeholder="Digite o nome completo"
                         {...register("clienteNome")}
+                        className={errors.clienteNome ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""}
+                        data-testid="input-cliente-nome"
                       />
                       {errors.clienteNome && (
                         <p className="text-sm text-red-600">{errors.clienteNome.message}</p>
@@ -442,11 +509,19 @@ export default function NovaProposta() {
                     <div>
                       <Label htmlFor="clienteCpf">CPF</Label>
                       <div className="relative">
-                        <Input
-                          id="clienteCpf"
+                        <MaskedInput
+                          mask="999.999.999-99"
+                          value={watch("clienteCpf") || ""}
+                          onChange={(value) => {
+                            setValue("clienteCpf", value);
+                            // Buscar dados quando CPF estiver completo
+                            if (value.replace(/\D/g, '').length === 11) {
+                              buscarDadosPorCpf(value);
+                            }
+                          }}
                           placeholder="000.000.000-00"
-                          {...register("clienteCpf")}
-                          onBlur={(e) => buscarDadosPorCpf(e.target.value)}
+                          className={errors.clienteCpf ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""}
+                          data-testid="input-cliente-cpf"
                         />
                         {isSearchingCpf && (
                           <Search className="absolute right-3 top-3 h-4 w-4 animate-pulse text-gray-400" />
@@ -467,6 +542,8 @@ export default function NovaProposta() {
                         type="email"
                         placeholder="email@exemplo.com"
                         {...register("clienteEmail")}
+                        className={errors.clienteEmail ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""}
+                        data-testid="input-cliente-email"
                       />
                       {errors.clienteEmail && (
                         <p className="text-sm text-red-600">{errors.clienteEmail.message}</p>
@@ -475,10 +552,13 @@ export default function NovaProposta() {
 
                     <div>
                       <Label htmlFor="clienteTelefone">Telefone</Label>
-                      <Input
-                        id="clienteTelefone"
+                      <MaskedInput
+                        mask="(99) 99999-9999"
+                        value={watch("clienteTelefone") || ""}
+                        onChange={(value) => setValue("clienteTelefone", value)}
                         placeholder="(11) 99999-9999"
-                        {...register("clienteTelefone")}
+                        className={errors.clienteTelefone ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""}
+                        data-testid="input-cliente-telefone"
                       />
                       {errors.clienteTelefone && (
                         <p className="text-sm text-red-600">{errors.clienteTelefone.message}</p>
@@ -491,6 +571,8 @@ export default function NovaProposta() {
                         id="clienteDataNascimento"
                         type="date"
                         {...register("clienteDataNascimento")}
+                        className={errors.clienteDataNascimento ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""}
+                        data-testid="input-cliente-data-nascimento"
                       />
                       {errors.clienteDataNascimento && (
                         <p className="text-sm text-red-600">
@@ -505,6 +587,8 @@ export default function NovaProposta() {
                         id="clienteRenda"
                         placeholder="R$ 5.000,00"
                         {...register("clienteRenda")}
+                        className={errors.clienteRenda ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""}
+                        data-testid="input-cliente-renda"
                       />
                       {errors.clienteRenda && (
                         <p className="text-sm text-red-600">{errors.clienteRenda.message}</p>
@@ -724,9 +808,10 @@ export default function NovaProposta() {
                       <Label htmlFor="valor">Valor Solicitado</Label>
                       <Input
                         id="valor"
-                        
                         placeholder="R$ 50.000,00"
                         {...register("valor")}
+                        className={errors.valor ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""}
+                        data-testid="input-valor"
                       />
                       {errors.valor && (
                         <p className="text-sm text-red-600">{errors.valor.message}</p>
@@ -738,7 +823,7 @@ export default function NovaProposta() {
                       {/* Hidden input for progressive enhancement */}
                       <input type="hidden"  value={watch("prazo") || ""} />
                       <Select onValueChange={value => setValue("prazo", parseInt(value))}>
-                        <SelectTrigger>
+                        <SelectTrigger className={errors.prazo ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""}>
                           <SelectValue placeholder="Selecione o prazo" />
                         </SelectTrigger>
                         <SelectContent>
@@ -759,7 +844,7 @@ export default function NovaProposta() {
                       {/* Hidden input for progressive enhancement */}
                       <input type="hidden"  value={watch("finalidade") || ""} />
                       <Select onValueChange={value => setValue("finalidade", value)}>
-                        <SelectTrigger>
+                        <SelectTrigger className={errors.finalidade ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""}>
                           <SelectValue placeholder="Selecione a finalidade" />
                         </SelectTrigger>
                         <SelectContent>
@@ -780,7 +865,7 @@ export default function NovaProposta() {
                       {/* Hidden input for progressive enhancement */}
                       <input type="hidden"  value={watch("garantia") || ""} />
                       <Select onValueChange={value => setValue("garantia", value)}>
-                        <SelectTrigger>
+                        <SelectTrigger className={errors.garantia ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""}>
                           <SelectValue placeholder="Selecione a garantia" />
                         </SelectTrigger>
                         <SelectContent>
