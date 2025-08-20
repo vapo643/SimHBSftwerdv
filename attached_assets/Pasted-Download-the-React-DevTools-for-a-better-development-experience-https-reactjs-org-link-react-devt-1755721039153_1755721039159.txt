@@ -1,0 +1,34 @@
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+content-script.js:22 Document already loaded, running initialization immediately
+content-script.js:4 Attempting to initialize AdUnit
+content-script.js:6 AdUnit initialized successfully
+webcomponents-ce.js:33 Uncaught Error: A custom element with name 'mce-autosize-textarea' has already been defined.
+    at Aa (webcomponents-ce.js:33:363)
+    at m.define (webcomponents-ce.js:33:133)
+    at overlay_bundle.js:148:5559
+    at D (overlay_bundle.js:44:680)
+    at overlay_bundle.js:159:392
+Aa @ webcomponents-ce.js:33
+m.define @ webcomponents-ce.js:33
+(anonymous) @ overlay_bundle.js:148
+D @ overlay_bundle.js:44
+(anonymous) @ overlay_bundle.js:159Understand this error
+content.js:208 {}
+AuthContext.tsx:170 🔐 [AUTH EVENT] SIGNED_IN {hasSession: true, tokenLength: 767}
+dashboard.tsx:215 DEBUG - First 3 proposals values: []
+dashboard.tsx:215 DEBUG - First 3 proposals values: []
+AuthContext.tsx:170 🔐 [AUTH EVENT] INITIAL_SESSION {hasSession: true, tokenLength: 767}
+dashboard.tsx:215 DEBUG - First 3 proposals values: []
+apiClient.ts:166 🔐 [TOKEN MANAGER] Fresh token obtained, length: 767
+apiClient.ts:343 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.KHRt0ZLVIGvHB6KDdVqbDHr2ZfzqSqyIxABaTggcibk', hasToken: true, isFormData: false}
+apiClient.ts:343 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…7is3g.janeway.replit.dev/api/alertas/notificacoes', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.KHRt0ZLVIGvHB6KDdVqbDHr2ZfzqSqyIxABaTggcibk', hasToken: true, isFormData: false}
+apiClient.ts:343 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.KHRt0ZLVIGvHB6KDdVqbDHr2ZfzqSqyIxABaTggcibk', hasToken: true, isFormData: false}
+apiClient.ts:343 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.KHRt0ZLVIGvHB6KDdVqbDHr2ZfzqSqyIxABaTggcibk', hasToken: true, isFormData: false}
+dashboard.tsx:215 DEBUG - First 3 proposals values: (3) [{…}, {…}, {…}]
+chunk-276SZO74.js?v=12ad4af1:18625 [Violation] 'setTimeout' handler took 136ms
+2AuthContext.tsx:102 🔐 [AUTH RESTORED] User profile loaded with valid token
+dashboard:1 Unchecked runtime.lastError: The message port closed before a response was received.Understand this error
+dashboard:1 Unchecked runtime.lastError: The message port closed before a response was received.Understand this error
+useIdleTimer.ts:108 🔍 [IDLE TIMER] Tab became hidden, timer continues
+AuthContext.tsx:170 🔐 [AUTH EVENT] SIGNED_IN {hasSession: true, tokenLength: 767}
+apiClient.ts:343 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.KHRt0ZLVIGvHB6KDdVqbDHr2ZfzqSqyIxABaTggcibk', hasToken: true, isFormData: false}

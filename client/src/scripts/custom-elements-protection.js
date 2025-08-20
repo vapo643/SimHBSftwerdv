@@ -1,6 +1,12 @@
 // Advanced protection against custom element redefinition errors
 // Execute immediately to prevent conflicts
 (function() {
+  // Check if already protected
+  if (window._customElementsProtected) {
+    return;
+  }
+  window._customElementsProtected = true;
+  
   // Store the original define method
   const originalDefine = window.customElements.define;
   const originalGet = window.customElements.get;
