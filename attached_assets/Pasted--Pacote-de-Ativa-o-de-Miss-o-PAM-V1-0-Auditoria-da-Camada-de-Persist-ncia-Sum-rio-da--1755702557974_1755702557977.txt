@@ -1,0 +1,45 @@
+### Pacote de Ativação de Missão (PAM) V1.0 (Auditoria da Camada de Persistência)
+
+* **Sumário da Missão (O Quê):** Rastrear cada campo do "Manifesto de Dados da UI" através do payload da API até a sua coluna e tabela correspondente no Drizzle schema, validando a consistência do mapeamento de ponta a ponta.
+* **Intenção Estratégica (O Porquê):** Garantir que não há perda ou corrupção de dados durante a transição entre o frontend, o backend e o banco de dados. Esta auditoria validará que cada peça de informação capturada do usuário é persistida de forma correta e organizada na nossa base de dados.
+* **Histórico Relevante (Consulta Obrigatória):** A FASE 1 nos forneceu um "Manifesto de Dados da UI" completo, incluindo o mapeamento `Estado React -> Backend Payload`. Esta missão irá completar o rastreamento, mapeando `Backend Payload -> Database Schema`.
+* **Modelo Mental (Como se Encaixa):** Esta é uma missão de análise de código estático e rastreamento de dados. O Agente deve agir como um detetive de dados, seguindo o rastro de cada propriedade do payload da API até a sua "casa" final no Drizzle schema.
+
+---
+
+**IMPLEMENTAR:**
+Relatório de Auditoria de Persistência de Dados
+
+**CURRENT STATE:**
+Temos um mapa completo de como a UI preenche o payload da API. No entanto, não temos uma verificação documentada que confirme que cada propriedade desse payload é corretamente mapeada e salva na coluna correta do banco de dados.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um relatório de auditoria detalhado em formato de tabela Markdown, expandindo o manifesto da FASE 1. A tabela deve conter quatro colunas:
+
+1.  **Campo da UI (Rótulo Visível):** O rótulo do campo que o usuário vê na tela (copiado do manifesto anterior).
+2.  **Propriedade de Estado (React):** O caminho da propriedade no estado do React (copiado do manifesto anterior).
+3.  **Propriedade do Payload (Backend):** A chave correspondente no objeto `proposalData` que é enviado para a API (copiado do manifesto anterior).
+4.  **Mapeamento do Banco de Dados (Tabela.Coluna):** O mapeamento final para a tabela e coluna no Drizzle schema (ex: `propostas.cliente_nome`, `clientes.cpf`, `referencias_pessoais.nome_completo`).
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  **Use o Manifesto como Base:** Utilize a tabela e o `snippet` de "Transformação de Dados para API" do relatório da FASE 1 como sua fonte de dados inicial.
+2.  **Rastreie Cada Propriedade:** Para cada propriedade no objeto `proposalData` (o payload da API), inspecione o código do backend (principalmente o endpoint `POST /api/propostas` em `server/routes/propostas/core.ts`) para ver como e onde ela é inserida no banco de dados.
+3.  **Inspecione o Schema Drizzle:** Consulte o arquivo `shared/schema.ts` para confirmar os nomes exatos das tabelas e colunas.
+4.  **Preencha a Nova Coluna:** Adicione a quarta coluna ("Mapeamento do Banco de Dados") à tabela do manifesto, preenchendo-a com o mapeamento `tabela.coluna` para cada campo. Se um campo não for persistido diretamente (ex: `finalidade`, `garantia` que podem ser fixos), anote isso.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100% de confiança na COMPLETUDE do mapeamento]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO. Ex: Risco de que algumas propriedades do payload sejam transformadas ou renomeadas no backend antes de serem salvas.]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que o endpoint `POST /api/propostas` é o principal responsável pela persistência inicial dos dados."]
+* **VALIDAÇÃO PENDENTE:** [O mapeamento de ponta a ponta será a base para a FASE 3 da auditoria.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear os arquivos-chave (`nova.tsx`, `ProposalContext.tsx`, `core.ts`, `schema.ts`).
+2.  Garantir que a nova tabela de mapeamento de 4 colunas está completa e precisa.
+3.  Executar `get_latest_lsp_diagnostics` para garantir que o ambiente está estável.
+4.  **Declarar Nível de Confiança (0 a 100%)** na completude da auditoria.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (revisão do relatório gerado para precisão).
+7.  **Documentar Decisões Técnicas** e os critérios usados no rastreamento.
