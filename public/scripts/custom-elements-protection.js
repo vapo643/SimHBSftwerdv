@@ -1,0 +1,64 @@
+// Advanced protection against custom element redefinition errors
+// Execute immediately to prevent conflicts
+(function() {
+  // Check if already protected
+  if (window._customElementsProtected) {
+    return;
+  }
+  window._customElementsProtected = true;
+  
+  // Store the original define method
+  const originalDefine = window.customElements.define;
+  const originalGet = window.customElements.get;
+  const definedElements = new Set();
+  
+  // Override customElements.define with comprehensive protection
+  window.customElements.define = function(name, constructor, options) {
+    try {
+      // Check if element is already defined
+      if (definedElements.has(name) || originalGet.call(this, name)) {
+        console.warn(`Custom element '${name}' already defined, skipping redefinition`);
+        return;
+      }
+      
+      // Mark as defined before calling original method
+      definedElements.add(name);
+      originalDefine.call(this, name, constructor, options);
+    } catch (error) {
+      // Silently handle specific redefinition errors
+      if (error.message && error.message.includes('already been defined')) {
+        console.warn(`Custom element '${name}' redefinition prevented:`, error.message);
+        return;
+      }
+      // Re-throw unexpected errors
+      throw error;
+    }
+  };
+
+  // Patch console.error to suppress specific custom element errors
+  const originalConsoleError = console.error;
+  console.error = function(...args) {
+    const message = args.join(' ');
+    const suppressedErrors = [
+      'mce-autosize-textarea',
+      'custom element with name',
+      'already been defined'
+    ];
+    
+    if (suppressedErrors.some(err => message.includes(err))) {
+      console.warn('Suppressed custom element error:', message);
+      return;
+    }
+    
+    return originalConsoleError.apply(this, args);
+  };
+
+  // Global error handler for uncaught custom element errors
+  window.addEventListener('error', function(event) {
+    if (event.message && event.message.includes('mce-autosize-textarea')) {
+      console.warn('Suppressed custom element error:', event.message);
+      event.preventDefault();
+      return false;
+    }
+  });
+})();
