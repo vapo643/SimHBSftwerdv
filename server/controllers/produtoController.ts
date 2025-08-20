@@ -10,12 +10,19 @@ export const buscarTodosProdutos = async () => {
   });
 };
 
-export const criarProduto = async (data: { nome: string; status: "Ativo" | "Inativo" }) => {
+export const criarProduto = async (data: { 
+  nome: string; 
+  status: "Ativo" | "Inativo";
+  tacValor?: number;
+  tacTipo?: "fixo" | "percentual";
+}) => {
   const [novoProduto] = await db
     .insert(produtos)
     .values({
       nomeProduto: data.nome,
       isActive: data.status === "Ativo",
+      tacValor: data.tacValor !== undefined ? data.tacValor.toString() : "0",
+      tacTipo: data.tacTipo || "fixo",
     })
     .returning();
   return novoProduto;
@@ -23,13 +30,20 @@ export const criarProduto = async (data: { nome: string; status: "Ativo" | "Inat
 
 export const atualizarProduto = async (
   id: string,
-  data: { nome: string; status: "Ativo" | "Inativo" }
+  data: { 
+    nome: string; 
+    status: "Ativo" | "Inativo";
+    tacValor?: number;
+    tacTipo?: "fixo" | "percentual";
+  }
 ) => {
   const [produtoAtualizado] = await db
     .update(produtos)
     .set({
       nomeProduto: data.nome,
       isActive: data.status === "Ativo",
+      tacValor: data.tacValor !== undefined ? data.tacValor.toString() : "0",
+      tacTipo: data.tacTipo || "fixo",
     })
     .where(eq(produtos.id, parseInt(id)))
     .returning();

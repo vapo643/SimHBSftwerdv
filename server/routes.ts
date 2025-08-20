@@ -2443,13 +2443,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/produtos", async (req, res) => {
     try {
-      const { nome, status } = req.body;
+      const { nome, status, tacValor, tacTipo } = req.body;
+      
+      console.log("[PRODUTOS API] Criando produto com dados:", { nome, status, tacValor, tacTipo });
 
       if (!nome || !status) {
         return res.status(400).json({ message: "Nome e status são obrigatórios" });
       }
 
-      const novoProduto = await criarProduto({ nome, status });
+      // Validação opcional dos campos TAC
+      if (tacValor !== undefined && tacValor < 0) {
+        return res.status(400).json({ message: "Valor da TAC não pode ser negativo" });
+      }
+      
+      if (tacTipo !== undefined && !["fixo", "percentual"].includes(tacTipo)) {
+        return res.status(400).json({ message: "Tipo de TAC deve ser 'fixo' ou 'percentual'" });
+      }
+
+      const dadosProduto = { 
+        nome, 
+        status,
+        tacValor: tacValor ?? 0,
+        tacTipo: tacTipo ?? "fixo"
+      };
+      
+      console.log("[PRODUTOS API] Enviando para controller:", dadosProduto);
+      
+      const novoProduto = await criarProduto(dadosProduto);
+      
+      console.log("[PRODUTOS API] Produto criado:", novoProduto);
+      
       res.status(201).json(novoProduto);
     } catch (error) {
       console.error("Erro ao criar produto:", error);
@@ -2460,13 +2483,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/produtos/:id", async (req, res) => {
     try {
       const { id } = req.params;
-      const { nome, status } = req.body;
+      const { nome, status, tacValor, tacTipo } = req.body;
 
       if (!nome || !status) {
         return res.status(400).json({ message: "Nome e status são obrigatórios" });
       }
 
-      const produtoAtualizado = await atualizarProduto(id, { nome, status });
+      // Validação opcional dos campos TAC
+      if (tacValor !== undefined && tacValor < 0) {
+        return res.status(400).json({ message: "Valor da TAC não pode ser negativo" });
+      }
+      
+      if (tacTipo !== undefined && !["fixo", "percentual"].includes(tacTipo)) {
+        return res.status(400).json({ message: "Tipo de TAC deve ser 'fixo' ou 'percentual'" });
+      }
+
+      const produtoAtualizado = await atualizarProduto(id, { 
+        nome, 
+        status,
+        tacValor: tacValor ?? 0,
+        tacTipo: tacTipo ?? "fixo"
+      });
       res.json(produtoAtualizado);
     } catch (error) {
       console.error("Erro ao atualizar produto:", error);

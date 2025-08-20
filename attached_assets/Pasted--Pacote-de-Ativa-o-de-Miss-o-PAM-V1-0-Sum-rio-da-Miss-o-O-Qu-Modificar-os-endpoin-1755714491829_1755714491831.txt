@@ -1,0 +1,45 @@
+### Pacote de Ativação de Missão (PAM) V1.0
+
+* **Sumário da Missão (O Quê):** Modificar os endpoints da API de Produtos (`POST /api/produtos` e `PUT /api/produtos/:id`) para que eles validem, processem e persistam os novos campos `tacValor` e `tacTipo`.
+* **Intenção Estratégica (O Porquê):** Completar o fluxo de dados de ponta a ponta para a nova funcionalidade de configuração de TAC. Esta é a etapa final que conecta a nova UI do administrador à lógica de negócio no banco de dados, tornando a funcionalidade totalmente operacional.
+* **Histórico Relevante (Consulta Obrigatória):** A FASE 0 (Passo 0.2) atualizou o `insertProdutoSchema` em `shared/schema.ts` com as validações Zod necessárias. A missão anterior (Passo 2.1) atualizou o frontend para enviar estes dados.
+* **Modelo Mental (Como se Encaixa):** Esta é uma missão de refatoração de `controller` de API no backend. O Agente irá modificar os handlers das rotas para que eles reconheçam e salvem os novos campos enviados pelo frontend.
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco:** A API pode não usar o schema Zod atualizado, permitindo a entrada de dados inválidos, ou a lógica de persistência pode não ser atualizada, ignorando os novos campos.
+    * **Contramedida:** O prompt exige explicitamente a aplicação do schema Zod compartilhado na validação do `body` e a modificação da chamada de persistência do Drizzle.
+
+---
+
+**IMPLEMENTAR:**
+Atualização da API de Produtos para Suporte a Campos de TAC
+
+**CURRENT STATE:**
+O frontend agora envia os campos `tacValor` e `tacTipo` nas `mutations` de criar e atualizar produtos. No entanto, os endpoints do backend (`POST /api/produtos`, `PUT /api/produtos/:id`) podem não estar a utilizar o schema Zod atualizado para validar ou a incluir estes novos campos na operação de escrita no banco de dados.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  O arquivo de rotas que lida com os produtos (provavelmente um módulo como `server/routes/produtos.ts`) é modificado.
+2.  O handler para a rota `POST /api/produtos` (criação) utiliza o `insertProdutoSchema` (de `shared/schema.ts`) para validar o corpo da requisição, incluindo os campos `tacValor` e `tacTipo`.
+3.  A lógica de persistência (`db.insert(produtos)...`) é atualizada para incluir `tacValor` e `tacTipo` nos dados a serem salvos.
+4.  O handler para a rota `PUT /api/produtos/:id` (atualização) também é modificado de forma semelhante para validar e persistir os novos campos.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  **Localize os Endpoints:** Identifique o arquivo e as funções de handler para as rotas `POST` e `PUT` que gerenciam os produtos.
+2.  **Aplique o Schema Zod Compartilhado:** Garanta que a validação do corpo da requisição (`req.body`) utilize o `insertProdutoSchema` importado de `shared/schema.ts`, que já contém as regras para `tacValor` e `tacTipo`.
+3.  **Atualize a Persistência Drizzle:** Modifique a chamada do Drizzle (`.values({...})` para `insert` e `.set({...})` para `update`) para incluir os campos `tacValor` e `tacTipo` na operação de escrita no banco de dados.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que as rotas de criação e edição de produtos estão no mesmo arquivo e seguem um padrão semelhante."]
+* **VALIDAÇÃO PENDENTE:** [A FASE 3 de testes validará o fluxo completo de ponta a ponta, desde a UI até o banco de dados.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear os ficheiros e handlers de rota exatos a serem modificados.
+2.  Garantir que o `insertProdutoSchema` compartilhado está a ser utilizado para validação.
+3.  Executar `get_latest_lsp_diagnostics` para garantir 0 erros novos.
+4.  **Declarar Nível de Confiança (0 a 100%)**.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (revisão lógica do código para confirmar que os novos campos são validados e persistidos).
+7.  **Documentar Decisões Técnicas**.
