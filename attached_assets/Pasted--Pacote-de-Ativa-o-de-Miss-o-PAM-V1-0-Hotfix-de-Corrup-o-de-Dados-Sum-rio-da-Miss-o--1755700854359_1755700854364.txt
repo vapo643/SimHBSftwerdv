@@ -1,0 +1,41 @@
+### Pacote de Ativação de Missão (PAM) V1.0 (Hotfix de Corrupção de Dados)
+
+* **Sumário da Missão (O Quê):** Corrigir o bug crítico no `preApprovalService` que está a multiplicar por 100 todos os valores monetários que são lidos como strings (ex: "10000.00" torna-se 1000000).
+* **Intenção Estratégica (O Porquê):** Eliminar um bug de corrupção de dados de alta severidade, garantindo a integridade de todos os cálculos financeiros e a precisão dos dados armazenados e exibidos pelo sistema. A confiabilidade dos dados financeiros é inegociável.
+* **Histórico Relevante (Consulta Obrigatória):** A sua missão anterior descobriu este bug ao criar os testes unitários em `tests/unit/pre-approval-service.test.ts`. O teste teve de ser ajustado para compensar o bug. Agora, vamos corrigir o bug e, em seguida, corrigir o teste para que ele espere o comportamento correto.
+* **Modelo Mental (Como se Encaixa):** Esta é uma missão de correção de bug cirúrgica. O Agente deve localizar a função de parsing defeituosa, corrigi-la e, em seguida, usar os testes unitários existentes como prova de que a correção foi bem-sucedida.
+
+---
+
+**IMPLEMENTAR:**
+Correção do Bug de Parsing de Valores Monetários
+
+**CURRENT STATE:**
+O `preApprovalService` contém uma função de parsing de números (provavelmente `parseNumber`) que converte incorretamente strings monetárias formatadas (ex: "10,000.00") para números, resultando em valores 100x maiores que o esperado. Os testes unitários em `tests/unit/pre-approval-service.test.ts` estão atualmente ajustados para esperar estes valores incorretos.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  A função de parsing de números dentro de `server/services/preApprovalService.ts` é corrigida. Após a correção, a conversão da string "10000.00" deve resultar no número `10000`.
+2.  O arquivo de teste `tests/unit/pre-approval-service.test.ts` é modificado. As asserções (`expect`) que foram ajustadas para o bug devem ser corrigidas para esperar os valores monetários verdadeiros e corretos.
+3.  **O critério de sucesso final e não negociável:** A execução do comando `npx vitest run tests/unit/pre-approval-service.test.ts` resulta em **TODOS os 5 testes passando com sucesso**, agora a validar a lógica correta.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  **Corrija o Serviço Primeiro:** Localize a função de parsing defeituosa em `server/services/preApprovalService.ts` e corrija a sua lógica de conversão.
+2.  **Corrija o Teste:** Em seguida, abra `tests/unit/pre-approval-service.test.ts`. Altere os valores esperados nas asserções (`expect`) para que correspondam aos valores monetários corretos, e não aos valores multiplicados por 100.
+3.  **Validação Final Mandatória:** Execute a suíte de testes unitários (`npx vitest run tests/unit/pre-approval-service.test.ts`). Inclua o output bem-sucedido que mostra os 5 testes a passar no seu relatório final como prova de que o bug foi corrigido e a lógica está validada.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que a correção do parsing não terá efeitos colaterais em outras partes do serviço, o que será validado pelos testes."]
+* **VALIDAÇÃO PENDENTE:** [Nenhuma. O sucesso é definido pela passagem de 100% dos testes unitários.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear ficheiros e funções exatas afetadas.
+2.  Garantir que a nova lógica de parsing e as asserções de teste estão corretas.
+3.  Executar `get_latest_lsp_diagnostics` para garantir 0 erros novos.
+4.  **Declarar Nível de Confiança (0 a 100%)**.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (executar a suíte de testes e garantir que todos passem).
+7.  **Documentar Decisões Técnicas**.

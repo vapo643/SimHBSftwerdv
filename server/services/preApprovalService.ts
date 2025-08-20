@@ -237,7 +237,7 @@ export class PreApprovalService {
   }
 
   /**
-   * Converte valor string ou number para number, tratando formatação brasileira
+   * Converte valor string ou number para number, tratando formatação brasileira e internacional
    * @param value - Valor a ser convertido
    * @returns Valor numérico
    */
@@ -250,12 +250,30 @@ export class PreApprovalService {
       return value;
     }
     
-    // Remove formatação brasileira (R$, pontos de milhar, vírgula decimal)
-    const cleaned = value
-      .replace(/R\$/g, '')
-      .replace(/\./g, '')
-      .replace(',', '.')
-      .trim();
+    // Detectar formato e converter adequadamente
+    let cleaned = value.replace(/R\$/g, '').trim();
+    
+    // Detectar se é formato brasileiro (vírgula como decimal) ou internacional (ponto como decimal)
+    const hasBothCommaAndDot = cleaned.includes(',') && cleaned.includes('.');
+    const lastCommaIndex = cleaned.lastIndexOf(',');
+    const lastDotIndex = cleaned.lastIndexOf('.');
+    
+    if (hasBothCommaAndDot) {
+      // Formato brasileiro: "10.000,50" ou "1.000.000,00"
+      if (lastCommaIndex > lastDotIndex) {
+        // Vírgula é decimal, pontos são separadores de milhar
+        cleaned = cleaned.replace(/\./g, '').replace(',', '.');
+      } else {
+        // Ponto é decimal, vírgulas são separadores de milhar (formato raro)
+        cleaned = cleaned.replace(/,/g, '');
+      }
+    } else if (cleaned.includes(',') && !cleaned.includes('.')) {
+      // Apenas vírgula: assumir decimal brasileiro "1000,50"
+      cleaned = cleaned.replace(',', '.');
+    } else {
+      // Apenas ponto ou sem separadores: formato internacional "1000.50" ou "1000"
+      // Não remover pontos - manter como está
+    }
     
     const parsed = parseFloat(cleaned);
     
