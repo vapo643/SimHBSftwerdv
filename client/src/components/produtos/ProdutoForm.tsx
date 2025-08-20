@@ -18,6 +18,10 @@ const produtoSchema = z.object({
   status: z.enum(["Ativo", "Inativo"], {
     errorMap: () => ({ message: "Status é obrigatório." }),
   }),
+  tacValor: z.number().min(0, "Valor da TAC deve ser maior ou igual a zero").default(0),
+  tacTipo: z.enum(["fixo", "percentual"], {
+    errorMap: () => ({ message: "Tipo de TAC é obrigatório." }),
+  }).default("fixo"),
 });
 
 type ProdutoFormData = z.infer<typeof produtoSchema>;
@@ -36,7 +40,11 @@ const ProdutoForm: React.FC<ProdutoFormProps> = ({ onSubmit, onCancel, initialDa
     formState: { errors },
   } = useForm<ProdutoFormData>({
     resolver: zodResolver(produtoSchema),
-    defaultValues: initialData || { status: "Ativo" },
+    defaultValues: initialData || { 
+      status: "Ativo",
+      tacValor: 0,
+      tacTipo: "fixo"
+    },
   });
 
   return (
@@ -65,6 +73,39 @@ const ProdutoForm: React.FC<ProdutoFormProps> = ({ onSubmit, onCancel, initialDa
           )}
         />
         {errors.status && <p className="mt-1 text-sm text-red-500">{errors.status.message}</p>}
+      </div>
+
+      <div>
+        <Label htmlFor="tacValor">Valor da TAC (R$)</Label>
+        <Input 
+          id="tacValor" 
+          type="number"
+          step="0.01"
+          min="0"
+          placeholder="0.00"
+          {...register("tacValor", { valueAsNumber: true })} 
+        />
+        {errors.tacValor && <p className="mt-1 text-sm text-red-500">{errors.tacValor.message}</p>}
+      </div>
+
+      <div>
+        <Label htmlFor="tacTipo">Tipo de TAC</Label>
+        <Controller
+          name="tacTipo"
+          control={control}
+          render={({ field }) => (
+            <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <SelectTrigger id="tacTipo">
+                <SelectValue placeholder="Selecione o Tipo de TAC" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="fixo">Valor Fixo (R$)</SelectItem>
+                <SelectItem value="percentual">Percentual (%)</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
+        />
+        {errors.tacTipo && <p className="mt-1 text-sm text-red-500">{errors.tacTipo.message}</p>}
       </div>
 
       <div className="flex justify-end gap-2 pt-4">

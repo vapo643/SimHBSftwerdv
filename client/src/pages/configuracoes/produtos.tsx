@@ -40,11 +40,15 @@ interface Produto {
   id: number;
   nomeProduto: string;
   isActive: boolean;
+  tacValor?: number;
+  tacTipo?: "fixo" | "percentual";
 }
 
 interface ProdutoFormData {
   nome: string;
   status: "Ativo" | "Inativo";
+  tacValor: number;
+  tacTipo: "fixo" | "percentual";
 }
 
 export default function GestãoProdutos() {
@@ -53,6 +57,8 @@ export default function GestãoProdutos() {
   const [formData, setFormData] = useState<ProdutoFormData>({
     nome: "",
     status: "Ativo",
+    tacValor: 0,
+    tacTipo: "fixo",
   });
 
   const { toast } = useToast();
@@ -74,6 +80,8 @@ export default function GestãoProdutos() {
       const response = await api.post<Produto>("/api/produtos", {
         nome: data.nome,
         status: data.status,
+        tacValor: data.tacValor,
+        tacTipo: data.tacTipo,
       });
       return response.data;
     },
@@ -93,6 +101,8 @@ export default function GestãoProdutos() {
       const response = await api.put<Produto>(`/api/produtos/${id}`, {
         nome: data.nome,
         status: data.status,
+        tacValor: data.tacValor,
+        tacTipo: data.tacTipo,
       });
       return response.data;
     },
@@ -137,6 +147,8 @@ export default function GestãoProdutos() {
     setFormData({
       nome: produto.nomeProduto,
       status: produto.isActive ? "Ativo" : "Inativo",
+      tacValor: produto.tacValor || 0,
+      tacTipo: produto.tacTipo || "fixo",
     });
     setIsDialogOpen(true);
   };
@@ -150,12 +162,12 @@ export default function GestãoProdutos() {
   const handleCloseDialog = () => {
     setIsDialogOpen(false);
     setEditingProduct(null);
-    setFormData({ nome: "", status: "Ativo" });
+    setFormData({ nome: "", status: "Ativo", tacValor: 0, tacTipo: "fixo" });
   };
 
   const handleOpenDialog = () => {
     setEditingProduct(null);
-    setFormData({ nome: "", status: "Ativo" });
+    setFormData({ nome: "", status: "Ativo", tacValor: 0, tacTipo: "fixo" });
     setIsDialogOpen(true);
   };
 
