@@ -1,0 +1,44 @@
+### Pacote de Ativação de Missão (PAM) V1.0 (Verificação Funcional de UI)
+
+* **Sumário da Missão (O Quê):** Validar a nova funcionalidade de referências flexíveis na interface do usuário, confirmando que os campos dinâmicos e o seletor de tipo funcionam corretamente.
+* **Intenção Estratégica (O Porquê):** Garantir que a implementação da refatoração de referências está 100% funcional do ponto de vista do usuário final antes de considerarmos a tarefa concluída.
+* **Histórico Relevante (Consulta Obrigatória):** A missão anterior (3.2b) implementou uma UI dinâmica onde a segunda referência pode ter seu tipo alterado por um seletor, e os campos do formulário devem se adaptar a essa escolha.
+* **Modelo Mental (Como se Encaixa):** Aja como um Engenheiro de QA. Sua tarefa é interagir com a aplicação, testar os diferentes estados da nova funcionalidade e fornecer um relatório com evidências visuais.
+
+---
+
+**IMPLEMENTAR:**
+Relatório de Validação Funcional - Referências Flexíveis
+
+**CURRENT STATE:**
+O componente `PersonalReferencesStep.tsx` foi refatorado para incluir um seletor de tipo para a segunda referência, que deve alterar dinamicamente os campos exibidos.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um relatório de verificação conciso contendo as seguintes provas:
+1.  **Confirmação do Seletor:** Confirme que a UI para a "Segunda Referência" exibe corretamente um seletor (`Select`) com as opções "Pessoal" e "Profissional".
+2.  **Confirmação do Comportamento Dinâmico:**
+    * Confirme que, ao selecionar "Pessoal", o campo de formulário exibido é "Grau de Parentesco".
+    * Confirme que, ao selecionar "Profissional", o campo de formulário exibido é "Relação Profissional".
+3.  **Prova Visual Mandatória:** Forneça uma única captura de tela da interface do usuário mostrando o formulário com a **primeira referência (Pessoal)** e a **segunda referência configurada como "Profissional"**, demonstrando que os campos dinâmicos estão a funcionar corretamente.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  **Interaja com a UI:** Utilize a janela de "preview" da aplicação para interagir diretamente com o formulário de "Nova Proposta".
+2.  **Teste Ambos os Estados:** Alterne as opções no novo seletor da segunda referência para verificar se a mudança de campos ocorre como esperado.
+3.  **Capture a Evidência:** Tire a captura de tela solicitada como prova final de sucesso.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100% de confiança na sua verificação]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que a lógica de estado do formulário está a limpar corretamente os dados do campo anterior ao alternar o tipo de referência."]
+* **VALIDAÇÃO PENDENTE:** [Nenhuma. Esta missão é a própria validação.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear os componentes e estados da UI a serem verificados.
+2.  Garantir que a verificação cobre os dois estados do seletor ("Pessoal" e "Profissional").
+3.  Executar `get_latest_lsp_diagnostics` para garantir 0 erros.
+4.  **Declarar Nível de Confiança (0 a 100%)**.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (interagir com a UI e capturar a prova visual).
+7.  **Documentar Decisões Técnicas** e os resultados da verificação funcional.

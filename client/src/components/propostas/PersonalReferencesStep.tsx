@@ -102,7 +102,7 @@ export function PersonalReferencesStep() {
           <CardDescription>Informações de contato de uma referência pessoal (obrigatório)</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {referencePessoal && indexPessoal !== -1 && (
+          {referencePessoal && (
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="md:col-span-2">
                 <Label htmlFor="nomeCompleto_pessoal">Nome Completo *</Label>
