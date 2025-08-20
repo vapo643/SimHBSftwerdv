@@ -198,18 +198,25 @@ export async function jwtAuthMiddleware(
     const userId = data.user.id;
     const userEmail = data.user.email || "";
 
-    // Step c: Query profiles table for complete user profile
-    const supabaseAdmin = createServerSupabaseAdminClient();
+    // Step c: Query profiles table using direct DB connection (bypasses RLS)
+    const { db } = await import("./supabase");
+    const { profiles } = await import("@shared/schema");
+    const { eq } = await import("drizzle-orm");
 
-    const { data: profile, error: profileError } = await supabaseAdmin
-      .from("profiles")
-      .select("id, full_name, role, loja_id")
-      .eq("id", userId)
-      .single();
+    const profileResult = await db
+      .select({
+        id: profiles.id,
+        fullName: profiles.fullName,
+        role: profiles.role,
+        lojaId: profiles.lojaId,
+      })
+      .from(profiles)
+      .where(eq(profiles.id, userId))
+      .limit(1);
 
     // Step d: Security fallback - Block orphaned users (no profile)
-    if (profileError || !profile) {
-      console.error("Profile query failed:", profileError);
+    if (!profileResult.length) {
+      console.error("Profile query failed: No profile found for user", userId);
       securityLogger.logEvent({
         type: SecurityEventType.ACCESS_DENIED,
         severity: "HIGH",
@@ -219,13 +226,15 @@ export async function jwtAuthMiddleware(
         userAgent: req.headers["user-agent"],
         endpoint: req.originalUrl,
         success: false,
-        details: { reason: "Orphaned user - no profile found", error: profileError?.message },
+        details: { reason: "Orphaned user - no profile found" },
       });
       return res.status(403).json({
         message: "Acesso negado. Perfil de usuário não encontrado.",
         code: "ORPHANED_USER",
       });
     }
+
+    const profile = profileResult[0];
 
     // Track the current token for this user (for token rotation)
     trackUserToken(userId, token);
@@ -235,12 +244,9 @@ export async function jwtAuthMiddleware(
       id: userId,
       email: userEmail,
       role: profile.role,
-      full_name: profile.full_name || null,
-      loja_id: profile.loja_id || null,
+      full_name: profile.fullName || null,
+      loja_id: profile.lojaId || null,
     };
-
-    // Track this token for potential invalidation
-    trackUserToken(userId, token);
 
     next();
   } catch (error) {

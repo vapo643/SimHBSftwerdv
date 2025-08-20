@@ -1,0 +1,186 @@
+requests.js:1  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/alertas/notificacoes 403 (Forbidden)
+(anonymous) @ requests.js:1
+(anonymous) @ traffic.js:1
+fetch @ traffic.js:1
+fetchWithTimeout @ apiClient.ts:263
+apiClient @ apiClient.ts:371
+await in apiClient
+get @ apiClient.ts:532
+(anonymous) @ queryClient.ts:57
+fetchFn @ @tanstack_react-query.js?v=9b0d0ee4:840
+run @ @tanstack_react-query.js?v=9b0d0ee4:494
+start @ @tanstack_react-query.js?v=9b0d0ee4:536
+fetch @ @tanstack_react-query.js?v=9b0d0ee4:926
+executeFetch_fn @ @tanstack_react-query.js?v=9b0d0ee4:2211
+onSubscribe @ @tanstack_react-query.js?v=9b0d0ee4:1898
+subscribe @ @tanstack_react-query.js?v=9b0d0ee4:24
+(anonymous) @ @tanstack_react-query.js?v=9b0d0ee4:3022
+subscribeToStore @ chunk-276SZO74.js?v=9b0d0ee4:11984
+commitHookEffectListMount @ chunk-276SZO74.js?v=9b0d0ee4:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=9b0d0ee4:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=9b0d0ee4:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=9b0d0ee4:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=9b0d0ee4:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=9b0d0ee4:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=9b0d0ee4:19447
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=9b0d0ee4:18868
+flushSyncCallbacks @ chunk-276SZO74.js?v=9b0d0ee4:9119
+commitRootImpl @ chunk-276SZO74.js?v=9b0d0ee4:19432
+commitRoot @ chunk-276SZO74.js?v=9b0d0ee4:19277
+finishConcurrentRender @ chunk-276SZO74.js?v=9b0d0ee4:18805
+performConcurrentWorkOnRoot @ chunk-276SZO74.js?v=9b0d0ee4:18718
+workLoop @ chunk-276SZO74.js?v=9b0d0ee4:197
+flushWork @ chunk-276SZO74.js?v=9b0d0ee4:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=9b0d0ee4:384Understand this error
+requests.js:1  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/origination/context 403 (Forbidden)
+(anonymous) @ requests.js:1
+(anonymous) @ traffic.js:1
+fetch @ traffic.js:1
+fetchWithTimeout @ apiClient.ts:263
+apiClient @ apiClient.ts:371
+await in apiClient
+get @ apiClient.ts:532
+apiRequest @ queryClient.ts:30
+queryFn @ nova.tsx:34
+fetchFn @ @tanstack_react-query.js?v=9b0d0ee4:840
+run @ @tanstack_react-query.js?v=9b0d0ee4:494
+start @ @tanstack_react-query.js?v=9b0d0ee4:536
+fetch @ @tanstack_react-query.js?v=9b0d0ee4:926
+executeFetch_fn @ @tanstack_react-query.js?v=9b0d0ee4:2211
+onSubscribe @ @tanstack_react-query.js?v=9b0d0ee4:1898
+subscribe @ @tanstack_react-query.js?v=9b0d0ee4:24
+(anonymous) @ @tanstack_react-query.js?v=9b0d0ee4:3022
+subscribeToStore @ chunk-276SZO74.js?v=9b0d0ee4:11984
+commitHookEffectListMount @ chunk-276SZO74.js?v=9b0d0ee4:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=9b0d0ee4:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=9b0d0ee4:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=9b0d0ee4:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=9b0d0ee4:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=9b0d0ee4:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=9b0d0ee4:19447
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=9b0d0ee4:18868
+flushSyncCallbacks @ chunk-276SZO74.js?v=9b0d0ee4:9119
+commitRootImpl @ chunk-276SZO74.js?v=9b0d0ee4:19432
+commitRoot @ chunk-276SZO74.js?v=9b0d0ee4:19277
+finishConcurrentRender @ chunk-276SZO74.js?v=9b0d0ee4:18805
+performConcurrentWorkOnRoot @ chunk-276SZO74.js?v=9b0d0ee4:18718
+workLoop @ chunk-276SZO74.js?v=9b0d0ee4:197
+flushWork @ chunk-276SZO74.js?v=9b0d0ee4:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=9b0d0ee4:384Understand this error
+nova:179 Erro ao carregar contexto: ApiError: Acesso negado. Perfil de usuário não encontrado.
+    at apiClient (apiClient.ts:467:13)
+    at async apiRequest (queryClient.ts:30:22)
+    at async queryFn (nova.tsx:34:24)
+console.error @ nova:179
+(anonymous) @ nova.tsx:52
+commitHookEffectListMount @ chunk-276SZO74.js?v=9b0d0ee4:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=9b0d0ee4:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=9b0d0ee4:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=9b0d0ee4:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=9b0d0ee4:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=9b0d0ee4:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=9b0d0ee4:19447
+commitRootImpl @ chunk-276SZO74.js?v=9b0d0ee4:19416
+commitRoot @ chunk-276SZO74.js?v=9b0d0ee4:19277
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=9b0d0ee4:18895
+flushSyncCallbacks @ chunk-276SZO74.js?v=9b0d0ee4:9119
+(anonymous) @ chunk-276SZO74.js?v=9b0d0ee4:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=9b0d0ee4:555
+flush @ @tanstack_react-query.js?v=9b0d0ee4:569
+batch @ @tanstack_react-query.js?v=9b0d0ee4:587
+dispatch_fn @ @tanstack_react-query.js?v=9b0d0ee4:996
+onError @ @tanstack_react-query.js?v=9b0d0ee4:861
+reject @ @tanstack_react-query.js?v=9b0d0ee4:465
+(anonymous) @ @tanstack_react-query.js?v=9b0d0ee4:508
+Promise.catch
+run @ @tanstack_react-query.js?v=9b0d0ee4:498
+start @ @tanstack_react-query.js?v=9b0d0ee4:536
+fetch @ @tanstack_react-query.js?v=9b0d0ee4:926
+executeFetch_fn @ @tanstack_react-query.js?v=9b0d0ee4:2211
+onSubscribe @ @tanstack_react-query.js?v=9b0d0ee4:1898
+subscribe @ @tanstack_react-query.js?v=9b0d0ee4:24
+(anonymous) @ @tanstack_react-query.js?v=9b0d0ee4:3022
+subscribeToStore @ chunk-276SZO74.js?v=9b0d0ee4:11984
+commitHookEffectListMount @ chunk-276SZO74.js?v=9b0d0ee4:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=9b0d0ee4:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=9b0d0ee4:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=9b0d0ee4:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=9b0d0ee4:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=9b0d0ee4:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=9b0d0ee4:19447
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=9b0d0ee4:18868
+flushSyncCallbacks @ chunk-276SZO74.js?v=9b0d0ee4:9119
+commitRootImpl @ chunk-276SZO74.js?v=9b0d0ee4:19432
+commitRoot @ chunk-276SZO74.js?v=9b0d0ee4:19277
+finishConcurrentRender @ chunk-276SZO74.js?v=9b0d0ee4:18805
+performConcurrentWorkOnRoot @ chunk-276SZO74.js?v=9b0d0ee4:18718
+workLoop @ chunk-276SZO74.js?v=9b0d0ee4:197
+flushWork @ chunk-276SZO74.js?v=9b0d0ee4:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=9b0d0ee4:384Understand this error
+requests.js:1  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me 403 (Forbidden)
+(anonymous) @ requests.js:1
+(anonymous) @ traffic.js:1
+fetch @ traffic.js:1
+fetchWithTimeout @ apiClient.ts:263
+apiClient @ apiClient.ts:371
+await in apiClient
+get @ apiClient.ts:532
+fetchUserProfile @ AuthContext.tsx:95
+(anonymous) @ AuthContext.tsx:179
+(anonymous) @ @supabase_supabase-js.js?v=9b0d0ee4:6688
+_notifyAllSubscribers @ @supabase_supabase-js.js?v=9b0d0ee4:6686
+_recoverAndRefresh @ @supabase_supabase-js.js?v=9b0d0ee4:6629
+await in _recoverAndRefresh
+_initialize @ @supabase_supabase-js.js?v=9b0d0ee4:5300
+await in _initialize
+(anonymous) @ @supabase_supabase-js.js?v=9b0d0ee4:5254
+(anonymous) @ @supabase_supabase-js.js?v=9b0d0ee4:5932
+(anonymous) @ @supabase_supabase-js.js?v=9b0d0ee4:5049Understand this error
+nova:179 Error fetching profile data: ApiError: Acesso negado. Perfil de usuário não encontrado.
+    at apiClient (apiClient.ts:467:13)
+    at async fetchUserProfile (AuthContext.tsx:95:28)
+console.error @ nova:179
+fetchUserProfile @ AuthContext.tsx:109
+await in fetchUserProfile
+(anonymous) @ AuthContext.tsx:179
+(anonymous) @ @supabase_supabase-js.js?v=9b0d0ee4:6688
+_notifyAllSubscribers @ @supabase_supabase-js.js?v=9b0d0ee4:6686
+_recoverAndRefresh @ @supabase_supabase-js.js?v=9b0d0ee4:6629
+await in _recoverAndRefresh
+_initialize @ @supabase_supabase-js.js?v=9b0d0ee4:5300
+await in _initialize
+(anonymous) @ @supabase_supabase-js.js?v=9b0d0ee4:5254
+(anonymous) @ @supabase_supabase-js.js?v=9b0d0ee4:5932
+(anonymous) @ @supabase_supabase-js.js?v=9b0d0ee4:5049Understand this error
+requests.js:1  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me 403 (Forbidden)
+(anonymous) @ requests.js:1
+(anonymous) @ traffic.js:1
+fetch @ traffic.js:1
+fetchWithTimeout @ apiClient.ts:263
+apiClient @ apiClient.ts:371
+await in apiClient
+get @ apiClient.ts:532
+fetchUserProfile @ AuthContext.tsx:95
+(anonymous) @ AuthContext.tsx:162
+Promise.then
+(anonymous) @ AuthContext.tsx:159
+commitHookEffectListMount @ chunk-276SZO74.js?v=9b0d0ee4:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=9b0d0ee4:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=9b0d0ee4:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=9b0d0ee4:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=9b0d0ee4:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=9b0d0ee4:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=9b0d0ee4:19447
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=9b0d0ee4:18868
+flushSyncCallbacks @ chunk-276SZO74.js?v=9b0d0ee4:9119
+commitRootImpl @ chunk-276SZO74.js?v=9b0d0ee4:19432
+commitRoot @ chunk-276SZO74.js?v=9b0d0ee4:19277
+finishConcurrentRender @ chunk-276SZO74.js?v=9b0d0ee4:18805
+performConcurrentWorkOnRoot @ chunk-276SZO74.js?v=9b0d0ee4:18718
+workLoop @ chunk-276SZO74.js?v=9b0d0ee4:197
+flushWork @ chunk-276SZO74.js?v=9b0d0ee4:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=9b0d0ee4:384Understand this error
+nova:179 Error fetching profile data: ApiError: Acesso negado. Perfil de usuário não encontrado.
+    at apiClient (apiClient.ts:467:13)
+    at async fetchUserProfile (AuthContext.tsx:95:28)
