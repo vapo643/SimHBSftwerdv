@@ -1,0 +1,45 @@
+Unchecked runtime.lastError: The message port closed before a response was received.Understand this error
+content-script.js:2 safeParseJson "undefined" is not valid JSON
+client:536 WebSocket connection to 'wss://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/?token=0GB4oQLEncnJ' failed: 
+setupWebSocket @ client:536Understand this error
+client:536 Uncaught (in promise) SyntaxError: Failed to construct 'WebSocket': The URL 'wss://localhost:undefined/?token=0GB4oQLEncnJ' is invalid.
+    at setupWebSocket (client:536:19)
+    at fallback (client:509:16)
+    at WebSocket.<anonymous> (client:555:7)Understand this error
+chunk-276SZO74.js?v=df08af2b:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+content-script.js:22 Document already loaded, running initialization immediately
+content-script.js:4 Attempting to initialize AdUnit
+content-script.js:6 AdUnit initialized successfully
+webcomponents-ce.js:33 Uncaught Error: A custom element with name 'mce-autosize-textarea' has already been defined.
+    at Aa (webcomponents-ce.js:33:363)
+    at m.define (webcomponents-ce.js:33:133)
+    at overlay_bundle.js:148:5559
+    at D (overlay_bundle.js:44:680)
+    at overlay_bundle.js:159:392Understand this error
+dashboard:1 Unchecked runtime.lastError: The message port closed before a response was received.Understand this error
+content.js:208 Object
+AuthContext.tsx:170 🔐 [AUTH EVENT] SIGNED_IN Object
+dashboard.tsx:215 DEBUG - First 3 proposals values: Array(0)
+dashboard.tsx:215 DEBUG - First 3 proposals values: Array(0)
+AuthContext.tsx:170 🔐 [AUTH EVENT] INITIAL_SESSION Object
+dashboard.tsx:215 DEBUG - First 3 proposals values: Array(0)
+apiClient.ts:166 🔐 [TOKEN MANAGER] Fresh token obtained, length: 767
+apiClient.ts:343 [PASSO 3 - ENVIO] Object
+apiClient.ts:343 [PASSO 3 - ENVIO] Object
+apiClient.ts:343 [PASSO 3 - ENVIO] Object
+apiClient.ts:343 [PASSO 3 - ENVIO] Object
+api/debug/me:1  Failed to load resource: the server responded with a status of 403 (Forbidden)Understand this error
+AuthContext.tsx:109 Error fetching profile data: ApiError: Acesso negado. Perfil de usuário não encontrado.
+    at apiClient (apiClient.ts:467:13)
+    at async fetchUserProfile (AuthContext.tsx:95:28)
+fetchUserProfile @ AuthContext.tsx:109Understand this error
+dashboard.tsx:215 DEBUG - First 3 proposals values: Array(0)
+api/propostas:1  Failed to load resource: the server responded with a status of 403 (Forbidden)Understand this error
+dashboard.tsx:215 DEBUG - First 3 proposals values: Array(0)
+api/alertas/notificacoes:1  Failed to load resource: the server responded with a status of 403 (Forbidden)Understand this error
+api/debug/me:1  Failed to load resource: the server responded with a status of 403 (Forbidden)Understand this error
+AuthContext.tsx:109 Error fetching profile data: ApiError: Acesso negado. Perfil de usuário não encontrado.
+    at apiClient (apiClient.ts:467:13)
+    at async fetchUserProfile (AuthContext.tsx:95:28)
+fetchUserProfile @ AuthContext.tsx:109Understand this error
+dashboard.tsx:215 DEBUG - First 3 proposals values: Array(0)
