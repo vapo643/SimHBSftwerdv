@@ -293,9 +293,9 @@ export class CCBGenerationService {
       // PÁGINA 1 - DADOS PRINCIPAIS
       // ========================================
 
-      // IDENTIFICAÇÃO DA CCB - SOMENTE O NÚMERO (SEM "PROP-")
+      // IDENTIFICAÇÃO DA CCB - SOMENTE O NÚMERO SEQUENCIAL (300001, 300002, etc.)
       if (USER_CCB_COORDINATES.numeroCedula) {
-        const numeroCCB = String(proposalData.id); // Apenas o número: 300001, 300002, etc.
+        const numeroCCB = String(proposalData.numero_proposta); // Número sequencial: 300001, 300002, etc.
         firstPage.drawText(numeroCCB, {
           x: USER_CCB_COORDINATES.numeroCedula.x,
           y: USER_CCB_COORDINATES.numeroCedula.y,
@@ -1072,6 +1072,7 @@ export class CCBGenerationService {
       const result = await db.execute(sql`
         SELECT 
           p.id,
+          p.numero_proposta,
           p.cliente_data,
           p.condicoes_data,
           p.valor_aprovado,
@@ -1131,7 +1132,8 @@ export class CCBGenerationService {
 
       // AUDITORIA COMPLETA DOS DADOS
       console.log("📊 [CCB] ========== AUDITORIA COMPLETA DE DADOS ==========");
-      console.log("📊 [CCB] ID da Proposta:", proposta.id);
+      console.log("📊 [CCB] ID da Proposta (UUID):", proposta.id);
+      console.log("📊 [CCB] Número da Proposta (Sequencial):", proposta.numero_proposta);
       console.log("📊 [CCB] Cliente Nome (direto):", proposta.cliente_nome);
       console.log("📊 [CCB] Cliente CPF (direto):", proposta.cliente_cpf);
       console.log("📊 [CCB] Cliente RG (direto):", proposta.cliente_rg);
