@@ -1,0 +1,46 @@
+### Pacote de Ativação de Missão (PAM) V1.0
+
+* **Sumário da Missão (O Quê):** Habilitar a funcionalidade de upload de documentos na interface do usuário para usuários com a `role` 'ANALISTA'.
+* **Intenção Estratégica (O Porquê):** Concluir a implementação do requisito de negócio que expande as permissões de upload, garantindo que a mudança de permissão feita no backend (Passo 2.3) seja refletida na interface do usuário, tornando a funcionalidade acessível para os usuários corretos.
+* **Histórico Relevante (Consulta Obrigatória):** O backend já foi modificado para permitir que a `role` 'ANALISTA' envie documentos. A auditoria inicial identificou o componente `DocumentsStep.tsx` como o responsável pela UI de upload.
+* **Modelo Mental (Como se Encaixa):** Esta é uma missão de renderização condicional. O Agente irá modificar um componente React para ler a `role` do usuário a partir de um contexto e mostrar/ocultar a funcionalidade de upload com base nessa `role`.
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco:** A lógica condicional pode ser implementada incorretamente, mostrando o componente para as `roles` erradas.
+    * **Contramedida:** O prompt especifica as `roles` exatas que devem ter acesso, e a validação será uma revisão de código dessa lógica condicional.
+
+---
+
+**IMPLEMENTAR:**
+Habilitação da UI de Upload para Analistas
+
+**CURRENT STATE:**
+A interface de upload de documentos, localizada no componente `DocumentsStep.tsx`, não verifica a `role` do usuário e pode estar oculta ou desabilitada para a `role` 'ANALISTA'.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  O componente `client/src/components/propostas/DocumentsStep.tsx` é modificado.
+2.  A lógica de renderização da área de upload agora é condicional.
+3.  O componente verifica a `role` do usuário logado (disponível através do `useAuth` hook).
+4.  A funcionalidade de upload (a área de "arraste e solte" e o input de arquivo) está visível e ativa **apenas se** a `role` do usuário for `'ADMINISTRADOR'` **OU** `'ANALISTA'`.
+5.  Para todas as outras `roles`, a funcionalidade de upload deve estar completamente oculta ou visualmente desabilitada.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  **Use o Contexto de Autenticação:** No componente `DocumentsStep.tsx`, importe e utilize o hook `useAuth` para obter os dados do perfil do usuário logado, incluindo sua `role`.
+2.  **Implemente a Renderização Condicional:** Envolva o JSX correspondente à funcionalidade de upload em uma verificação condicional. A lógica deve ser: `(user.role === 'ADMINISTRADOR' || user.role === 'ANALISTA')`.
+3.  **Validação:** A prova de sucesso será o `snippet` de código do componente modificado, mostrando claramente a nova lógica de renderização condicional.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que o `useAuth` hook expõe de forma confiável a `role` do usuário atual."]
+* **VALIDAÇÃO PENDENTE:** [Teste funcional da UI com diferentes `roles` de usuário para garantir que a visibilidade está a funcionar como esperado.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear ficheiros e funções exatas afetadas (`DocumentsStep.tsx`).
+2.  Garantir que o `useAuth` hook é importado e utilizado corretamente.
+3.  Executar `get_latest_lsp_diagnostics` para garantir 0 erros novos.
+4.  **Declarar Nível de Confiança (0 a 100%)**.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (revisão do código para confirmar a implementação da lógica condicional).
+7.  **Documentar Decisões Técnicas**.

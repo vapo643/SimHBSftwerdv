@@ -1,14 +1,19 @@
 import React, { useRef } from "react";
 import { useProposal, useProposalActions } from "@/contexts/ProposalContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Upload, FileText, X, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Upload, FileText, X, AlertCircle, CheckCircle2, Lock } from "lucide-react";
 
 export function DocumentsStep() {
+  const { user } = useAuth();
   const { state } = useProposal();
   const { addDocument, removeDocument } = useProposalActions();
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Check if user has permission to upload documents
+  const canUpload = user?.role === 'ADMINISTRADOR' || user?.role === 'ANALISTA';
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -73,26 +78,38 @@ export function DocumentsStep() {
           </Alert>
 
           <div className="space-y-4">
-            <div
-              className="hover:border-border/70 bg-muted/30 hover:bg-muted/50 cursor-pointer rounded-lg border-2 border-dashed border-border p-8 text-center transition-colors"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <Upload className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
-              <p className="mb-2 text-lg font-medium text-foreground">Clique para fazer upload</p>
-              <p className="text-sm text-muted-foreground">ou arraste e solte os arquivos aqui</p>
-              <p className="mt-2 text-xs text-muted-foreground">
-                Formatos aceitos: PDF, JPG, PNG (máx. 10MB por arquivo)
-              </p>
-            </div>
+            {canUpload ? (
+              <>
+                <div
+                  className="hover:border-border/70 bg-muted/30 hover:bg-muted/50 cursor-pointer rounded-lg border-2 border-dashed border-border p-8 text-center transition-colors"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <Upload className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+                  <p className="mb-2 text-lg font-medium text-foreground">Clique para fazer upload</p>
+                  <p className="text-sm text-muted-foreground">ou arraste e solte os arquivos aqui</p>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    Formatos aceitos: PDF, JPG, PNG (máx. 10MB por arquivo)
+                  </p>
+                </div>
 
-            <input
-              ref={fileInputRef}
-              type="file"
-              className="hidden"
-              multiple
-              accept=".pdf,.jpg,.jpeg,.png"
-              onChange={handleFileChange}
-            />
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  className="hidden"
+                  multiple
+                  accept=".pdf,.jpg,.jpeg,.png"
+                  onChange={handleFileChange}
+                />
+              </>
+            ) : (
+              <div className="rounded-lg border-2 border-dashed border-border/50 bg-muted/20 p-8 text-center opacity-60">
+                <Lock className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+                <p className="mb-2 text-lg font-medium text-muted-foreground">Upload não disponível</p>
+                <p className="text-sm text-muted-foreground">
+                  Apenas usuários com perfil de Administrador ou Analista podem fazer upload de documentos
+                </p>
+              </div>
+            )}
           </div>
 
           {state.documents.length > 0 && (
