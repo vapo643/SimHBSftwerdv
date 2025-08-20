@@ -1,0 +1,51 @@
+### Pacote de Ativação de Missão (PAM) V1.0 (Auditoria de Emergência - Dados Ausentes)
+
+* **Sumário da Missão (O Quê):** Realizar uma auditoria forense de ponta a ponta para diagnosticar por que os dados das tabelas `tabelas_comerciais`, `parceiros`, `produtos` e `propostas` não estão a ser exibidos na interface do usuário.
+* **Intenção Estratégica (O Porquê):** Identificar a causa-raiz de uma falha crítica (P0) que impede a visualização de dados essenciais do negócio. A análise precisa é um pré-requisito para uma correção cirúrgica e segura, evitando a introdução de novos erros.
+* **Histórico Relevante (Consulta Obrigatória):** O sistema passou por uma refatoração massiva onde as rotas do backend foram extraídas de um arquivo monolítico para uma estrutura modular por domínio. A principal hipótese é que a camada de frontend não foi atualizada para consumir os dados a partir das novas localizações das rotas.
+* **Modelo Mental (Como se Encaixa):** Aja como um Engenheiro de Diagnóstico Full-Stack. Sua tarefa é seguir o "rastro do dado" de trás para a frente: comece por confirmar que os dados existem no banco, verifique se a API os serve corretamente e, finalmente, diagnostique por que o frontend não os está a buscar ou renderizar.
+
+---
+
+**IMPLEMENTAR:**
+Relatório de Diagnóstico de Falha na Exibição de Dados
+
+**CURRENT STATE:**
+Usuários reportam que as telas que deveriam exibir tabelas comerciais, parceiros, produtos e propostas estão a aparecer vazias. Suspeita-se de uma regressão causada pela recente refatoração da arquitetura de rotas.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um relatório de diagnóstico detalhado em formato Markdown, contendo uma análise de causa-raiz para CADA UMA das quatro entidades de dados ausentes (`tabelas_comerciais`, `parceiros`, `produtos`, `propostas`).
+
+Para cada entidade, o seu relatório deve seguir esta estrutura de 3 pontos:
+1.  **Verificação da API (Backend):**
+    * Identifique o endpoint da API que serve os dados para esta entidade (ex: `GET /api/propostas`).
+    * Verifique se este endpoint está a funcionar corretamente. (Você pode precisar criar um script de teste rápido ou usar uma ferramenta como `curl` para fazer uma chamada de teste).
+    * **Conclusão:** A API está a retornar os dados corretamente, retornando um erro, ou retornando uma lista vazia?
+2.  **Verificação do Consumidor (Frontend):**
+    * Identifique o componente React e o hook `useQuery` (ou similar) que é responsável por buscar os dados desta entidade no frontend.
+    * Apresente o `snippet` de código do hook `useQuery`, mostrando a `queryKey` (que geralmente é a URL da API) que ele está a tentar buscar.
+3.  **Análise de Causa Raiz (Veredito Final):**
+    * Com base nas verificações acima, forneça o seu diagnóstico preciso da falha. (Ex: "Veredito: Falha de Rastreamento. O componente do frontend `ListaPropostas.tsx` está a tentar buscar dados da URL `/api/propostas`, mas após a refatoração, o endpoint correto é `/api/propostas/core`. A `queryKey` no `useQuery` precisa de ser atualizada.").
+
+**CONSTRAINTS (Roadmap de Auditoria):**
+1.  **Foco Sequencial:** Realize a análise completa para uma entidade (ex: `propostas`) antes de passar para a próxima.
+2.  **Priorize Provas:** Baseie suas conclusões em evidências de código (`snippets`) e resultados de testes de API.
+3.  **Não Corrigir:** Esta é uma missão de **diagnóstico**. Você está estritamente proibido de implementar qualquer correção. O seu único entregável é o relatório de análise de causa raiz.
+
+---
+
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100% de confiança na precisão do seu diagnóstico]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que a causa mais provável é uma incompatibilidade de URL entre o frontend e o backend refatorado."]
+* **VALIDAÇÃO PENDENTE:** [O relatório de diagnóstico será a base para a missão de hotfix.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear os arquivos-chave para cada uma das 4 entidades de dados.
+2.  Garantir que a análise de cada entidade cobre os 3 pontos (API, Consumidor, Veredito).
+3.  Executar `get_latest_lsp_diagnostics` para garantir que o ambiente está estável.
+4.  **Declarar Nível de Confiança (0 a 100%)** na completude da auditoria.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (revisão do relatório gerado para precisão).
+7.  **Documentar Decisões Técnicas** e a análise de causa raiz.
