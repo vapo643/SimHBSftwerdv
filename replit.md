@@ -84,6 +84,13 @@ Error handling: Create structured documentation for automatic consultation durin
 - ✅ Consistência frontend via colunas dedicadas
 - ✅ Confiança técnica: 96% - Pronto para migração Azure
 
+**EMERGÊNCIA CRÍTICA RESOLVIDA (20 Jan 2025):** Sistema de autenticação completamente restaurado após falha total:
+- ✅ Tabela profiles reconstruída com 20 usuários reais
+- ✅ Middleware JWT corrigido para contornar bloqueios RLS
+- ✅ Acesso restaurado para todos os perfis (ANALISTA, ATENDENTE, ADMINISTRADOR)
+- ✅ Bug documentado em docs/bugs-solved/ para prevenção futura
+- ✅ Zero downtime permanente - sistema operacional
+
 **MANDATORY BUG DOCUMENTATION POLICY:** Every bug resolved must be documented in `docs/bugs-solved/[category]/YYYY-MM-DD-descriptive-name.md` with complete technical analysis, root cause, solution implemented, and validation evidence. No exceptions - this creates institutional knowledge and prevents regression.
 
 ## System Architecture
