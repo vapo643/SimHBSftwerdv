@@ -1,0 +1,54 @@
+### Pacote de Ativação de Missão (PAM) V1.0 (Auditoria do Ciclo de Vida dos Dados)
+
+* **Sumário da Missão (O Quê):** Auditar a consistência dos pontos de dados críticos através das principais transições de estado do ciclo de vida da proposta, desde a análise até o pagamento e a cobrança.
+* **Intenção Estratégica (O Porquê):** Garantir a integridade dos dados em movimento ("data in motion"). Esta é a validação final e mais importante, que nos dará 100% de confiança de que o sistema não apenas salva os dados corretamente, mas também os mantém consistentes e confiáveis ao longo de todo o seu ciclo de vida.
+* **Histórico Relevante (Consulta Obrigatória):** A FASE 0 nos deu o "Mapa de Modificação de Dados" (Jobs, Webhooks, FSM). A FASE 2 nos deu o "Manifesto de Persistência". Esta missão utiliza ambos os artefatos para investigar como os modificadores assíncronos afetam os dados persistidos.
+* **Modelo Mental (Como se Encaixa):** Aja como um Auditor de Sistemas Sênior. Sua tarefa é criar cenários de negócio e, em seguida, inspecionar o código-fonte para verificar se a lógica implementada garante a consistência dos dados nesses cenários.
+
+---
+
+**IMPLEMENTAR:**
+Relatório de Auditoria de Consistência do Ciclo de Vida dos Dados
+
+**CURRENT STATE:**
+Sabemos que os dados são capturados e persistidos corretamente. No entanto, não temos uma verificação documentada de que esses dados permanecem consistentes após serem modificados por transições de status, jobs assíncronos e webhooks.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um relatório de auditoria detalhado em formato de tabela Markdown, focado em cenários de negócio. A tabela deve ter quatro colunas:
+
+1.  **Cenário de Negócio / Transição de Estado:** O evento de negócio que está a ser auditado (ex: "Aprovação da Análise", "Geração de CCB", "Assinatura via ClickSign", "Confirmação de Pagamento via Webhook Inter").
+2.  **Pontos de Dados Críticos Afetados:** Os campos do banco de dados que são modificados por este evento.
+3.  **Lógica de Consistência no Código:** Um `snippet` de código da fonte (seja do `statusFsmService`, de um `worker` ou de um `webhook handler`) que prova como a consistência é mantida.
+4.  **Veredito da Auditoria (✅ Consistente / ⚠️ Risco Identificado):** A sua conclusão profissional sobre se a implementação atual garante a consistência dos dados neste cenário.
+
+**CONSTRAINTS (Roadmap de Auditoria):**
+Sua auditoria deve, no mínimo, cobrir os seguintes 4 cenários críticos:
+
+1.  **Cenário 1: Geração de CCB:**
+    * **Verificação:** Quando uma proposta passa para o status `CCB_GERADA`, a lógica no `status-context-helper` (ou em um `worker`) atualiza **atomicamente** tanto o campo `status` quanto os campos `ccbGerado` e `caminho_ccb_assinado`?
+
+2.  **Cenário 2: Assinatura via Webhook ClickSign:**
+    * **Verificação:** Quando o webhook do ClickSign é recebido para um documento assinado, o `webhook handler` atualiza o `status` da proposta para `ASSINATURA_CONCLUIDA` e também preenche corretamente o campo `caminho_ccb_assinado`? A operação é atômica?
+
+3.  **Cenário 3: Confirmação de Pagamento via Webhook Inter:**
+    * **Verificação:** Quando o webhook do Banco Inter informa que uma parcela foi paga, a lógica no `webhook handler` atualiza o status na tabela `parcelas` e, se for a última parcela, também atualiza o status principal na tabela `propostas` para `PAGO_TOTAL`? A sua auditoria anterior identificou a falta de uma transação aqui; confirme se isso ainda é um risco.
+
+4.  **Cenário 4: Exibição de Dados em Telas de Cobrança/Gestão:**
+    * **Verificação:** Inspecione o código-fonte das telas de `Cobranças` e `Gestão de Contratos`. Elas leem os dados das colunas dedicadas (ex: `propostas.cliente_nome`) ou do campo JSONB (`propostas.cliente_data`)? Há algum risco de que os dados exibidos nestas telas não reflitam o estado mais atualizado se a "Dual Storage Strategy" não for perfeitamente sincronizada?
+
+---
+**DECLARAção DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100% de confiança na COMPLETUDE da auditoria do ciclo de vida]
+* **RISCOS IDENTIFICADOS:** [Liste os riscos mais significativos à consistência dos dados que você encontrar.]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que as principais transições de estado são orquestradas pelo `statusFsmService`."]
+* **VALIDAÇÃO PENDENTE:** [Este relatório final irá determinar se são necessárias missões de correção para garantir a consistência dos dados.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear os arquivos-chave para cada um dos 4 cenários.
+2.  Garantir que a análise de cada cenário está completa e que o veredito é bem fundamentado.
+3.  Executar `get_latest_lsp_diagnostics` para garantir que o ambiente está estável.
+4.  **Declarar Nível de Confiança (0 a 100%)** na completude da auditoria.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (revisão do relatório gerado para precisão).
+7.  **Documentar Decisões Técnicas** e os vereditos de consistência.
