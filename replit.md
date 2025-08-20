@@ -108,6 +108,13 @@ Error handling: Create structured documentation for automatic consultation durin
 - ✅ Bug documentado em docs/bugs-solved/ para prevenção futura
 - ✅ Zero downtime permanente - sistema operacional
 
+**AUDITORIA FORENSE COMPLETA (Aug 2025):** Causa-raiz de perda de dados em massa identificada:
+- 🚨 Culpado: Função `cleanTestDatabase()` executando TRUNCATE CASCADE em produção
+- ✅ Vetor confirmado: DATABASE_URL compartilhado entre teste e produção
+- ✅ Comando destrutivo: TRUNCATE de 20+ tabelas incluindo propostas, produtos, parceiros
+- ⚠️ CORREÇÃO URGENTE: Isolamento de ambiente de teste obrigatório
+- ✅ Investigação completa documentada em PAM_V1.0_AUDITORIA_FORENSE_PERDA_DADOS_COMPLETA.md
+
 **MANDATORY BUG DOCUMENTATION POLICY:** Every bug resolved must be documented in `docs/bugs-solved/[category]/YYYY-MM-DD-descriptive-name.md` with complete technical analysis, root cause, solution implemented, and validation evidence. No exceptions - this creates institutional knowledge and prevents regression.
 
 ## System Architecture
