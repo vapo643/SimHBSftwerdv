@@ -1,0 +1,49 @@
+### Pacote de Ativação de Missão (PAM) V1.0
+
+* **Sumário da Missão (O Quê):** Adicionar os campos "Nome da Empresa", "Data de Admissão" e "Valor de Dívidas Existentes" ao formulário de dados do cliente na tela de "Nova Proposta".
+* **Intenção Estratégica (O Porquê):** Iniciar a implementação da nova interface de usuário, garantindo que os dados necessários para as novas regras de negócio (especialmente a de negação automática) possam ser capturados do usuário.
+* **Histórico Relevante (Consulta Obrigatória):** A FASE 1 preparou o banco de dados para receber estes novos campos. A FASE 2 preparou o backend para processá-los. Esta é a etapa final para expor a funcionalidade ao usuário.
+* **Modelo Mental (Como se Encaixa):** Esta é uma missão de desenvolvimento de UI. O Agente irá modificar um componente React existente, adicionando novos campos de formulário, atualizando o estado do formulário (React Hook Form) e a lógica de validação (Zod).
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco:** Os novos campos podem quebrar o layout ou a lógica de validação existente.
+    * **Contramedida:** O prompt exige o uso de componentes `shadcn/ui` existentes para manter a consistência visual e a integração da validação ao schema Zod existente de forma incremental.
+
+---
+
+**IMPLEMENTAR:**
+Atualização do Formulário de Dados do Empregador e Renda
+
+**CURRENT STATE:**
+A auditoria confirmou que o formulário de "Nova Proprosta" não possui campos para capturar o "Nome da Empresa", a "Data de Admissão" ou o "Valor de Dívidas Existentes" do cliente.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  O componente React que renderiza a seção de dados do cliente (provavelmente `ClientDataStep.tsx` ou similar) é modificado.
+2.  Três novos campos são adicionados ao formulário:
+    * Um campo de texto `Input` para "Nome da Empresa".
+    * Um seletor de data `DatePicker` para "Data de Admissão".
+    * Um campo numérico `Input` para "Valor de Dívidas Existentes".
+3.  O schema de validação Zod associado a este passo do formulário é atualizado para incluir os novos campos, com validações apropriadas (ex: `z.string().min(1)`, `z.date()`, `z.number().min(0)`).
+4.  O estado do formulário (gerenciado por `react-hook-form`) é atualizado para registrar os valores destes novos campos.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  **Componente Alvo:** Localize o componente React correto dentro do fluxo de "Nova Proposta" que é responsável por renderizar os dados pessoais/financeiros do cliente.
+2.  **UI Consistente:** Utilize os componentes pré-existentes da biblioteca `shadcn/ui` (`Input`, `DatePicker`, `FormField`, `FormLabel`, etc.) para construir os novos campos, garantindo a consistência visual.
+3.  **Validação Integrada:** A validação para os novos campos deve ser adicionada ao schema Zod existente que já é utilizado pelo `zodResolver` no `react-hook-form`.
+4.  **Validação:** A prova de sucesso será uma captura de tela mostrando os novos campos renderizados corretamente no formulário e o `snippet` de código do schema Zod atualizado.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que o componente `DatePicker` de `shadcn/ui` já está disponível no projeto."]
+* **VALIDAÇÃO PENDENTE:** [A funcionalidade de submissão do formulário com os novos dados deve ser testada de ponta a ponta.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear ficheiros e funções exatas afetadas.
+2.  Garantir que os novos campos e validações Zod estão sintaticamente corretos.
+3.  Executar `get_latest_lsp_diagnostics` para garantir 0 erros novos.
+4.  **Declarar Nível de Confiança (0 a 100%)**.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (revisão visual do formulário e do código Zod).
+7.  **Documentar Decisões Técnicas**.
