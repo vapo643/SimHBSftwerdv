@@ -1,6 +1,5 @@
 /// <reference types="vitest" />
 import { defineConfig } from "vitest/config";
-import react from "@vitejs/plugin-react";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -8,7 +7,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export default defineConfig({
-  plugins: [react()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "client", "src"),
@@ -21,11 +19,19 @@ export default defineConfig({
   // ====================================
   test: {
     globals: true,
-    environment: "jsdom",
+    // CORREÇÃO CRÍTICA: Node environment para testes backend/integração
+    environment: "node", 
     setupFiles: ["./tests/setup.ts"],
     include: ["./tests/**/*.{test,spec}.{js,ts,tsx}"],
+    // Configurações específicas para corrigir esbuild/TextEncoder
+    pool: "forks",
+    poolOptions: {
+      forks: {
+        singleFork: true,
+      }
+    },
     coverage: {
-      provider: "v8",
+      provider: "v8", 
       reporter: ["text", "json", "html"],
       exclude: ["node_modules/", "dist/", "tests/setup.ts", "**/*.d.ts", "**/*.config.*"],
     },

@@ -1,0 +1,42 @@
+### Pacote de Ativação de Missão (PAM) V1.0 (Remediação do Ambiente de Testes de Integração)
+
+* **Sumário da Missão (O Quê):** Diagnosticar e corrigir a causa-raiz do erro de ambiente que impede a execução de testes de integração que utilizam `supertest` para inicializar a aplicação Express (o erro de `esbuild` com `TextEncoder`).
+* **Intenção Estratégica (O Porquê):** Restaurar a funcionalidade da nossa infraestrutura de testes de integração padrão. Testes de ponta a ponta que simulam requisições HTTP reais são a nossa forma mais robusta de garantir a qualidade do sistema e a sua ausência é um risco inaceitável.
+* **Histórico Relevante (Consulta Obrigatória):** A sua missão anterior (Passo 3.2) falhou ao tentar executar um teste de integração padrão (`propostas-tac.test.ts`), mas teve sucesso ao executar testes unitários (`tacCalculationService.test.ts`) e testes de integração simplificados que não inicializam o servidor Express completo.
+* **Modelo Mental (Como se Encaixa):** Aja como um Engenheiro de DevOps/Infraestrutura. Sua tarefa é depurar um problema de compatibilidade entre as nossas ferramentas de teste (`vitest`), o nosso bundler (`esbuild`) e o nosso ambiente de execução (Node.js/Replit).
+
+---
+
+**IMPLEMENTAR:**
+Correção da Infraestrutura de Testes de Integração
+
+**CURRENT STATE:**
+A execução de qualquer teste `vitest` que importe e inicialize a aplicação Express (`import { app } from '../app';`) falha com um erro relacionado a `esbuild` e `TextEncoder`, impedindo a execução de testes de integração com `supertest`.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  A causa-raiz do conflito de ambiente é identificada e corrigida. A correção pode envolver a atualização da configuração do `vitest` (`vitest.config.ts`), a instalação de polyfills, ou o ajuste da configuração do `esbuild`.
+2.  **O critério de sucesso final e não negociável:** O teste de integração `tests/integration/propostas-tac-working.test.ts` que você já criou (e que atualmente tem 6/7 testes a passar) é refatorado para usar `supertest` e a instância `app` importada.
+3.  A execução da suíte de testes refatorada (`npx vitest run tests/integration/propostas-tac-working.test.ts`) resulta na passagem de todos os testes, provando que o ambiente de integração está agora funcional.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  **Diagnóstico Primeiro:** Comece por pesquisar o erro específico de `esbuild` e `TextEncoder` no contexto do `vitest`.
+2.  **Modifique a Configuração:** O local mais provável para a correção é o arquivo `vitest.config.ts` ou a adição de um arquivo de setup de teste.
+3.  **Refatore o Teste Existente:** Uma vez que você acredite que o ambiente está corrigido, pegue o arquivo `tests/integration/propostas-tac-working.test.ts` como base. Importe `supertest` e a `app`. Modifique os testes existentes para, em vez de chamar os serviços diretamente, fazer chamadas de API reais usando `supertest(app).post('/api/propostas')...`.
+4.  **Validação Final Mandatória:** A prova de sucesso é o output do `vitest` mostrando os testes de integração baseados em `supertest` a passar.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO. O risco principal é que o problema seja uma limitação fundamental e intratável do ambiente Replit.]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que o problema é configurável e não uma incompatibilidade fundamental."]
+* **VALIDAÇÃO PENDENTE:** [A correção bem-sucedida desta infraestrutura desbloqueará todas as futuras missões de teste de integração.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear os ficheiros e configurações exatas a serem modificados.
+2.  Garantir que as novas configurações do `vitest` estão corretas.
+3.  Executar `get_latest_lsp_diagnostics` para garantir 0 erros novos.
+4.  **Declarar Nível de Confiança (0 a 100%)**.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (executar a suíte de testes refatorada e garantir que todos passem).
+7.  **Documentar Decisões Técnicas**.
