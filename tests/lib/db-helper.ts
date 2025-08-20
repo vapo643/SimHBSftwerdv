@@ -163,9 +163,15 @@ export async function setupTestEnvironment(): Promise<{
   
   try {
     // Create direct postgres connection - bypasses ALL application layer restrictions
+    // CRITICAL: Uses TEST_DATABASE_URL from .env.test when available (mapped to DATABASE_URL in setup.ts)
     const databaseUrl = process.env.DATABASE_URL;
     if (!databaseUrl) {
       throw new Error("DATABASE_URL not found in environment variables");
+    }
+    
+    // Safety check: Warn if database doesn't appear to be a test database
+    if (!databaseUrl.includes('test')) {
+      console.warn("[TEST DB] ⚠️ WARNING: Database URL doesn't contain 'test' - ensure you're using a test database!");
     }
     
     // Connect with the same configuration as server/lib/supabase.ts

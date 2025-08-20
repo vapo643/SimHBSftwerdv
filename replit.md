@@ -122,6 +122,13 @@ Error handling: Create structured documentation for automatic consultation durin
 - ✅ Hook beforeAll() em cada suite previne execução contra banco não-teste
 - ✅ Sistema preparado para isolamento completo de ambiente de teste
 
+**ISOLAMENTO DE TESTE COMPLETO (Aug 2025):** Configuração vitest para ambiente isolado:
+- ✅ tests/setup.ts criado - carrega .env.test automaticamente
+- ✅ TEST_DATABASE_URL mapeado para DATABASE_URL mantendo compatibilidade
+- ✅ dotenv instalado e configurado para carregamento de ambiente de teste
+- ✅ Avisos de segurança adicionados em db-helper.ts
+- ✅ Sistema pronto - apenas aguardando substituição do placeholder em .env.test
+
 **MANDATORY BUG DOCUMENTATION POLICY:** Every bug resolved must be documented in `docs/bugs-solved/[category]/YYYY-MM-DD-descriptive-name.md` with complete technical analysis, root cause, solution implemented, and validation evidence. No exceptions - this creates institutional knowledge and prevents regression.
 
 ## System Architecture
