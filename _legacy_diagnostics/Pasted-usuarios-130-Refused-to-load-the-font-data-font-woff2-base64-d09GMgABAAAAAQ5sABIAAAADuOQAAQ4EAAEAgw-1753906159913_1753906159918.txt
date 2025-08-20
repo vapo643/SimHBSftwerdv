@@ -1,0 +1,81 @@
+usuarios:130 Refused to load the font 'data:font/woff2;base64,d09GMgABAAAAAQ5sABIAAAADuOQAAQ4EAAEAgwAAAAAAAAAAAAAAAAAAAAAAAAAAG4SpIhy4XhSHMgZgAJJmCF4JgnMREAqGskiFyggSgrVoATYCJAOdOAuOXgAEIAWPGAfGYAyDGFsKfLME/nOMvX+HnQoMqyRqK6tt2TW8K2BDX9Umu4PZkCXwtMjpcHYNTx6UUmu30UdwcxxnVMvcNgAim7rdXiPZ////////////C5dF2ObuXM7ZvQeSECARwueHlaLVtkJEIaLRAI3ulswSE13cSPdM15RCyYQuuS7A0mBqpQO9pYZWQQMqa9lQb0dpJzHxHpLyCHIi8uBdwF58nNH+YOA40OpJvEjJtaokKaUkx/N5UeSinp5TWoW1vSpFjimBgeFGeCF66U0n6ZUN/qSqC4XC11GKUNmzSy2d5Jxyqw5JzGUlJUnyi0lKkE8BlxadTZsyRm8c1/Cti2hEjzIHnuOZ0fU6OjKc...FVw9csGnQ1BnbMbfzgRj3WjPytwZYWpPh3OtmsLZaNcxxqaGVqMVqFffFpU8bbs/0N1vG3POWfS7LUeB81TfHn+VbD7x/UnT3lXyFltHfdX6+X6Rzmg9d4dAISK7GlTj2zgME/JUwAETAECwABAUgUmAysrKI5shRwAchnFSMheQ8UoKlvnVbkW9mMeq2+bbO9EQ2q09Z9wzsADarYt4ftoamBDi8gmfbZKnl+lkZWyRx1VYVSIpVFXs9VXy9ytCyTNYt09YIAGKjqpDT22SgOdP5OsdAK/vOCXFnrpEwA/PPTJiopB7HxZV+MlaGCT/04K/LY3kjPYV/YR146Ggg+9sX6na/c2So+Epz3PXve3PKRylPIhNZASBUYVDIGhikiWc1jj/claeVCJvljX7JfvO+xhfTDIjSXBs4HV16Ol/BMfcuFQ4NRmDOWEh6diOI6NZmGl87N9J+r2JfpW2+5NhV/fGHLO57Yavbq7zaCewa/RDxp/aSH+luOPwAA' because it violates the following Content Security Policy directive: "font-src 'self' https://fonts.gstatic.com".
+Understand this error
+usuarios:1 Refused to load the script 'https://replit.com/public/js/replit-dev-banner.js' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://unpkg.com". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+Understand this error
+content-script.js:2 safeParseJson "undefined" is not valid JSON
+chunk-276SZO74.js?v=5a2a7cc1:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+content-script.js:22 Document already loaded, running initialization immediately
+content-script.js:4 Attempting to initialize AdUnit
+content-script.js:6 AdUnit initialized successfully
+webcomponents-ce.js:33 Uncaught Error: A custom element with name 'mce-autosize-textarea' has already been defined.
+    at Aa (webcomponents-ce.js:33:363)
+    at m.define (webcomponents-ce.js:33:133)
+    at overlay_bundle.js:147:5559
+    at D (overlay_bundle.js:44:680)
+    at overlay_bundle.js:158:392
+Aa @ webcomponents-ce.js:33
+m.define @ webcomponents-ce.js:33
+(anonymous) @ overlay_bundle.js:147
+D @ overlay_bundle.js:44
+(anonymous) @ overlay_bundle.js:158Understand this error
+content.js:208 {}
+AuthContext.tsx:161 🔐 [AUTH EVENT] SIGNED_IN {hasSession: true, tokenLength: 767}
+AuthContext.tsx:161 🔐 [AUTH EVENT] INITIAL_SESSION {hasSession: true, tokenLength: 767}
+apiClient.ts:154 🔐 [TOKEN MANAGER] Fresh token obtained, length: 767
+apiClient.ts:330 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.GZWkTth6jo3vCAFw8nB4zSdkquHWJLOtOVfvBYaSBe4', hasToken: true, isFormData: false}
+apiClient.ts:330 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/admin/users', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.GZWkTth6jo3vCAFw8nB4zSdkquHWJLOtOVfvBYaSBe4', hasToken: true, isFormData: false}
+apiClient.ts:330 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.GZWkTth6jo3vCAFw8nB4zSdkquHWJLOtOVfvBYaSBe4', hasToken: true, isFormData: false}
+2AuthContext.tsx:95 🔐 [AUTH RESTORED] User profile loaded with valid token
+chunk-PCYBE7IL.js?v=5a2a7cc1:337 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-PCYBE7IL.js?v=5a2a7cc1:337
+commitHookEffectListMount @ chunk-276SZO74.js?v=5a2a7cc1:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=5a2a7cc1:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=5a2a7cc1:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=5a2a7cc1:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=5a2a7cc1:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=5a2a7cc1:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=5a2a7cc1:19447
+commitRootImpl @ chunk-276SZO74.js?v=5a2a7cc1:19416
+commitRoot @ chunk-276SZO74.js?v=5a2a7cc1:19277
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=5a2a7cc1:18895
+flushSyncCallbacks @ chunk-276SZO74.js?v=5a2a7cc1:9119
+(anonymous) @ chunk-276SZO74.js?v=5a2a7cc1:18627Understand this warning
+apiClient.ts:330 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…is3g.janeway.replit.dev/api/admin/system/metadata', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.GZWkTth6jo3vCAFw8nB4zSdkquHWJLOtOVfvBYaSBe4', hasToken: true, isFormData: false}
+apiClient.ts:330 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/parceiros', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.GZWkTth6jo3vCAFw8nB4zSdkquHWJLOtOVfvBYaSBe4', hasToken: true, isFormData: false}
+apiClient.ts:330 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/admin/lojas', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.GZWkTth6jo3vCAFw8nB4zSdkquHWJLOtOVfvBYaSBe4', hasToken: true, isFormData: false}
+apiClient.ts:330 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/admin/users', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.GZWkTth6jo3vCAFw8nB4zSdkquHWJLOtOVfvBYaSBe4', hasToken: true, isFormData: false}
+requests.js:1  POST https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/admin/users 400 (Bad Request)
+s.fetch @ requests.js:1
+(anonymous) @ traffic.js:1
+fetch @ traffic.js:1
+fetchWithTimeout @ apiClient.ts:251
+apiClient @ apiClient.ts:358
+await in apiClient
+post @ apiClient.ts:480
+mutationFn @ usuarios.tsx:54
+fn @ @tanstack_react-query.js?v=5a2a7cc1:1189
+run @ @tanstack_react-query.js?v=5a2a7cc1:494
+start @ @tanstack_react-query.js?v=5a2a7cc1:536
+execute @ @tanstack_react-query.js?v=5a2a7cc1:1225
+await in execute
+mutate @ @tanstack_react-query.js?v=5a2a7cc1:2630
+(anonymous) @ @tanstack_react-query.js?v=5a2a7cc1:3295
+handleCreateOrEdit @ usuarios.tsx:88
+(anonymous) @ chunk-YGCRICWC.js?v=5a2a7cc1:1465
+await in (anonymous)
+callCallback2 @ chunk-276SZO74.js?v=5a2a7cc1:3674
+invokeGuardedCallbackDev @ chunk-276SZO74.js?v=5a2a7cc1:3699
+invokeGuardedCallback @ chunk-276SZO74.js?v=5a2a7cc1:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-276SZO74.js?v=5a2a7cc1:3736
+executeDispatch @ chunk-276SZO74.js?v=5a2a7cc1:7014
+processDispatchQueueItemsInOrder @ chunk-276SZO74.js?v=5a2a7cc1:7034
+processDispatchQueue @ chunk-276SZO74.js?v=5a2a7cc1:7043
+dispatchEventsForPlugins @ chunk-276SZO74.js?v=5a2a7cc1:7051
+(anonymous) @ chunk-276SZO74.js?v=5a2a7cc1:7174
+batchedUpdates$1 @ chunk-276SZO74.js?v=5a2a7cc1:18913
+batchedUpdates @ chunk-276SZO74.js?v=5a2a7cc1:3579
+dispatchEventForPluginEventSystem @ chunk-276SZO74.js?v=5a2a7cc1:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-276SZO74.js?v=5a2a7cc1:5478
+dispatchEvent @ chunk-276SZO74.js?v=5a2a7cc1:5472
+dispatchDiscreteEvent @ chunk-276SZO74.js?v=5a2a7cc1:5449Understand this error
+useIdleTimer.ts:108 🔍 [IDLE TIMER] Tab became hidden, timer continues

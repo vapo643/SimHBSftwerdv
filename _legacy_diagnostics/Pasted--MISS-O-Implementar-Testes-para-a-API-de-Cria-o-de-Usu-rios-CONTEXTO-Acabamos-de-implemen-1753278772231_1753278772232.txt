@@ -1,0 +1,18 @@
+# MISSÃO: Implementar Testes para a API de Criação de Usuários
+
+**CONTEXTO:** Acabamos de implementar a funcionalidade de criação de usuários. O serviço está em `/server/services/userService.ts` e o endpoint em `/server/routes.ts`. Precisamos agora criar testes de unidade e integração para garantir a sua qualidade e estabilidade. A nossa framework de testes é Vitest.
+
+**AÇÃO:** Crie os ficheiros de teste necessários e implemente uma suíte de testes abrangente para a lógica de criação de usuários.
+
+**ROADMAP DE EXECUÇÃO:**
+
+1.  **Crie o Ficheiro de Teste:** Crie um novo ficheiro de teste em `/server/services/userService.test.ts`.
+
+2.  **Implemente os Casos de Teste:** No novo ficheiro, escreva testes utilizando Vitest para a função `createUser`. Você precisará simular (mock) o cliente Supabase. Os testes devem cobrir os seguintes cenários:
+    * **Cenário de Sucesso (ATENDENTE):** Um teste que cria um usuário com o perfil 'ATENDENTE' e um `lojaId` válido, e verifica se o resultado está correto.
+    * **Cenário de Sucesso (GERENTE):** Um teste que cria um usuário com o perfil 'GERENTE' e um array `lojaIds` válido, e verifica se a associação na tabela `gerente_lojas` foi chamada corretamente.
+    * **Cenário de Falha (Email Duplicado):** Um teste que tenta criar um usuário com um email que já existe e verifica se um erro do tipo 'ConflictError' é lançado.
+    * **Cenário de Falha (Dados Inválidos):** Um teste que tenta criar um 'ATENDENTE' sem `lojaId` e verifica se a validação Zod (que deve ser testada a nível de rota, mas podemos simular aqui) rejeita a criação.
+    * **Cenário de Sucesso (Rollback):** Um teste avançado que simula uma falha na inserção do `profile` e verifica se a função de `deleteUser` do Supabase é chamada para executar o rollback.
+
+3.  **Configure os Mocks:** Crie os mocks necessários para o cliente Supabase (`supabase.auth.admin.getUserByEmail`, `supabase.auth.admin.createUser`, `supabase.from('profiles').insert`, etc.) para isolar a lógica de serviço do banco de dados real.

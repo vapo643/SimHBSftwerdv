@@ -1,0 +1,21 @@
+# MISSÃO DE IMPLEMENTAÇÃO: Conectar a Criação de Propostas à Fila de Análise
+
+**Contexto:** Olá, Agente. O seu último trabalho foi um sucesso! A criação de propostas na tela "Nova Proposta" (T-01) está finalmente a funcionar. Agora, precisamos de conectar esta funcionalidade à próxima etapa do nosso fluxo de negócio: a "Fila de Análise" do Analista.
+
+**Lista de Tarefas a Executar:**
+
+* **1. Corrija o Status Inicial da Proposta:**
+    * **O Problema (Sintoma):** Quando um `ATENDENTE` cria uma nova proposta, ela está a ser salva com o status "Rascunho".
+    * **O Requisito:** O status inicial correto para uma proposta recém-enviada deve ser **"aguardando_analise"**.
+    * **Sua Tarefa:** Modifique a lógica no backend (provavelmente no endpoint `POST /api/propostas`) para garantir que toda nova proposta seja criada com o status `aguardando_analise`.
+
+* **2. Conecte a "Fila de Análise" (T-02) aos Dados Reais:**
+    * **O Problema (Sintoma):** A página da "Fila de Análise", que é a tela principal do `ANALISTA`, ainda está a mostrar dados fictícios ("mock data"). As propostas reais que os atendentes criam não aparecem lá.
+    * **Sua Tarefa:** Refatore a página da "Fila de Análise" (provavelmente `/client/src/pages/credito/fila.tsx`). Remova os dados "mock" e conecte a tabela de propostas à nossa API (`GET /api/propostas`) para que ela exiba a lista de propostas **reais** que estão no banco de dados com os status `aguardando_analise` ou `em_analise`.
+
+* **3. Corrija o Botão "Analisar" (T-03):**
+    * **O Problema (Sintoma):** Tanto na tela "Minhas Propostas" do atendente quanto na "Fila de Análise" do analista, ao clicar em "Analisar", a página de detalhes da proposta (T-03) abre com o erro "Proposta não encontrada".
+    * **Sua Tarefa:** Investigue e corrija o componente da página de "Detalhes da Proposta" (T-03). Garanta que ele pegue o `id` da proposta a partir do URL e chame a API de backend (provavelmente `GET /api/propostas/:id`) para buscar e exibir os dados corretos da proposta selecionada.
+
+**Resumo da Missão:**
+Ao final, o fluxo deve ser o seguinte: um `ATENDENTE` cria uma proposta, ela aparece imediatamente na "Fila de Análise" do `ANALISTA`, e o `ANALISTA` consegue clicar em "Analisar" para ver os detalhes completos da proposta real.

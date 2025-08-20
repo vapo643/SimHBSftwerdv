@@ -1,0 +1,23 @@
+# MISSÃO DE IMPLEMENTAÇÃO: Finalizar o Fluxo de Documentos de Ponta a Ponta
+
+**Contexto:** Olá, Agente. A sua última auditoria do nosso fluxo de documentos foi perfeita e nos mostrou exatamente o que falta construir. A sua nova missão é implementar as peças que faltam para que o nosso ciclo de vida de documentos funcione de ponta a ponta.
+
+**AÇÃO:**
+Sua missão é executar um plano de 3 passos para construir as "pontes" que faltam na nossa arquitetura de documentos.
+
+**ROADMAP DE EXECUÇÃO (Sequencial):**
+
+**PASSO 1: Criar a Fundação (A Tabela de Ligação no Banco de Dados):**
+* **O Problema:** Atualmente, não temos como saber a qual proposta um documento pertence.
+* **Sua Tarefa:** Crie uma nova tabela de junção no nosso banco de dados chamada `proposta_documentos`. Esta tabela servirá como a "ponte" entre as propostas e os documentos. Ela deve ter, no mínimo, as colunas `proposta_id` e `documento_url` (ou `documento_nome_arquivo`).
+
+**PASSO 2: Corrigir a Criação da Proposta (A Primeira Ponte):**
+* **O Problema:** Quando um `ATENDENTE` cria uma "Nova Proposta" e anexa documentos, os ficheiros são salvos, mas não são associados à proposta.
+* **Sua Tarefa:** Modifique a lógica do nosso endpoint de backend `POST /api/propostas`. Após criar a proposta principal, ele deve pegar a lista de documentos que foram enviados e criar os registos correspondentes na nossa nova tabela `proposta_documentos`, ligando cada documento à proposta recém-criada.
+
+**PASSO 3: Implementar o Upload na Tela de Correção (A Segunda Ponte):**
+* **O Problema:** Na tela de "Corrigir Proposta", o `ATENDENTE` não tem a funcionalidade para anexar novos documentos.
+* **Sua Tarefa:** Implemente a funcionalidade de upload de ficheiros nesta tela. Quando o atendente anexa um novo documento e salva, o ficheiro deve ser enviado para o Supabase Storage e um novo registo deve ser criado na tabela `proposta_documentos`, associando este novo documento à proposta que está a ser corrigida.
+
+**Resumo da Missão:**
+Ao final, todo o fluxo deve funcionar: um documento anexado na criação deve aparecer para o Analista, e um novo documento anexado na correção também deve aparecer.

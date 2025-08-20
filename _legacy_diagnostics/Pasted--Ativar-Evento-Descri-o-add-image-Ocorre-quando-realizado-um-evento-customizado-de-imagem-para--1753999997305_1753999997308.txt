@@ -1,0 +1,32 @@
+
+Ativar	Evento	Descrição
+add_image	Ocorre quando é realizado um evento customizado de imagem para um documento.
+upload	Ocorre quando é realizado o upload de um documento.
+add_signer	Ocorre quando são adicionados signatários a um documento.
+remove_signer	Ocorre quando são removidos signatários de um documento.
+sign	Ocorre quando um signatário assina um documento
+close	Ocorre quando um documento é finalizado manualmente
+auto_close	Ocorre quando um documento é finalizado automaticamente logo após a última assinatura.
+deadline	Ocorre quando a data limite de assinatura de um documento for atingida. Se o documento contiver ao menos uma assinatura, ele é finalizado. Caso contrário, o documento é cancelado.
+document_closed	Ocorre quando o documento assinado está pronto para download.
+cancel	Ocorre quando um documento é cancelado manualmente
+update_deadline	Ocorre quando a data limite de assinatura de um documento é alterada.
+update_auto_close	Ocorre quando a opção de finalização automática de um documento é alterada.
+update_locale	Ocorre quando é alterado o idioma de um documento.
+custom	Ocorre quando é realizado um evento customizado de token (e-mail, sms) para um documento
+refusal	Ocorre quando um documento é recusado.
+acceptance_term_enqueued	Ocorre quando um “Aceite via WhatsApp” está na fila para envio (destinatário já possui um Aceite em processo).
+acceptance_term_sent	Ocorre quando um “Aceite via WhatsApp” é enviado.
+acceptance_term_completed	Ocorre quando um “Aceite via WhatsApp” é finalizado com sucesso.
+acceptance_term_refused	Ocorre quando um “Aceite via WhatsApp” é recusado (encerrado pelo destinatário).
+acceptance_term_canceled	Ocorre quando um “Aceite via WhatsApp” é cancelado pelo remetente.
+acceptance_term_expired	Ocorre quando um “Aceite via Whatsapp” é expirado (tempo limite para aceite atingido).
+acceptance_term_error	Ocorre quando há um erro interno na funcionalidade junto à Clicksign ou ao WhatsApp
+attempts_by_whatsapp_exceeded	Ocorre quando as tentativas de reenvio de Token via WhatsApp são excedidas
+attempts_by_liveness_or_facematch_exceeded	Ocorre quando as tentativas de autenticação via Selfie dinâmica ou Biometria facial são excedidas
+liveness_refused	Ocorre quando a análise da Selfie dinâmica é recusada.
+facematch_refused	Ocorre quando a análise da Biometria Facial é recusada.
+documentscopy_refused	Ocorre quando a análise da Documentscopia é recusada.
+biometric_refused	Ocorre quando a análise da Biometria Facial SERPRO é recusada.
+ocr_refused	Ocorre quando a análise da OCR é recusada.
+signature_started	Ocorre quando a assinatura de um documento é iniciada.

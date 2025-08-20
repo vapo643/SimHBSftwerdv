@@ -1,0 +1,39 @@
+**### MODO DE OPERAÇÃO: REALISMO CÉTICO (MANDATÓRIO)**
+Sua lealdade é para com a verdade do código e a estabilidade da produção.
+
+---
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Realizar uma auditoria forense completa da "Ficha do Cliente", focando em três pontos de falha: a lógica não idempotente do botão "Baixar Carnê", a funcionalidade do botão "Atualizar Status" e a precisão dos dados do "Resumo Financeiro".
+* **Intenção Estratégica (O Porquê):** O Arquiteto identificou falhas críticas que tornam a Ficha do Cliente não confiável. Antes de qualquer correção, precisamos de um diagnóstico preciso de *por que* estas funcionalidades estão a falhar.
+* **Histórico Relevante (Consulta Obrigatória):** Falhamos repetidamente em estabilizar este componente. A premissa é que as implementações anteriores foram incorretas ou incompletas. Sua tarefa é encontrar as falhas exatas no código.
+* **Modelo Mental (Como se Encaixa):** Você é um Engenheiro de Qualidade Sênior a realizar uma Análise de Causa Raiz (RCA). Sua missão é ler, analisar e reportar, não modificar.
+* **Riscos Antecipados:** **Risco:** Uma análise superficial. **Contramedida:** Sua missão não é resolver, mas sim **PROVAR**, com evidências de código, onde está cada falha.
+
+---
+
+**IMPLEMENTAR:**
+Um relatório de auditoria detalhado. **NÃO FAÇA MODIFICAÇÕES.**
+
+**CURRENT STATE:**
+A "Ficha do Cliente" está com bugs críticos que a tornam não confiável para a operação.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um relatório de auditoria que responda a todas as questões abaixo.
+
+**CONSTRAINTS (Roadmap de Auditoria Forense):**
+
+**1. Auditoria do Bug "Baixar Carnê" (Falha na Re-execução):**
+    - **Ação:** Inspecione o endpoint `POST /api/propostas/:id/gerar-carne` e a lógica `onClick` do botão no frontend.
+    - **Relatório:** O código atual possui uma lógica de "verificar primeiro"? Ele verifica se o carnê já existe no Storage antes de tentar gerá-lo novamente? Apresente o código do backend e do frontend e aponte a ausência desta lógica de verificação como a causa raiz.
+
+**2. Auditoria do Botão "Atualizar Status":**
+    - **Ação:** Inspecione a lógica `onClick` do botão "Atualizar Status" (`Sincronizar Status`) no frontend e o endpoint que ele chama.
+    - **Relatório:** Rastreie o fluxo completo. O botão está a chamar o endpoint `POST /api/cobrancas/propostas/:id/sincronizar-status`? A `mutation` do TanStack Query está a invalidar corretamente o cache da "Ficha do Cliente" (`queryKey: ["/api/cobrancas/ficha", ...]`) no `onSuccess` para forçar a atualização da UI? Apresente o código da `mutation`.
+
+**3. Auditoria do "Resumo Financeiro":**
+    - **Ação:** Inspecione o endpoint que busca os dados para a "Ficha do Cliente" (`GET /api/cobrancas/:id/ficha`).
+    * **Relatório:** A lógica de cálculo para o resumo financeiro (valor pago, valor restante, etc.) está a ser feita com base na **soma dos status e valores das parcelas individuais** (que são a fonte da verdade), ou está a buscar dados potencialmente desatualizados da tabela principal `propostas`? Apresente o trecho de código que faz este cálculo.
+
+**Relatório Final:**
+O critério de sucesso é um relatório que nos dê um mapa claro das três causas raiz, com evidências de código para cada uma.

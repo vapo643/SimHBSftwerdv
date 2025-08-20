@@ -1,0 +1,42 @@
+# MISSÃO DE IMPLEMENTAÇÃO FINAL (ANTI-FALHA): CRUD Completo de Lojas
+
+**CONTEXTO ESTRATÉGICO:**
+Este prompt é o resultado final de um debate técnico rigoroso. Ele contém a arquitetura aprovada para a funcionalidade full-stack de Update e "Soft Delete" para a "Gestão de Lojas". Siga o roadmap e as especificações com precisão absoluta.
+
+**ROADMAP DE EXECUÇÃO (Sequencial):**
+
+**PASSO 1: MIGRAÇÃO DE SCHEMA (Pré-requisito)**
+* **Ação:** Antes de qualquer outra coisa, garanta que a tabela `lojas` no banco de dados possua uma coluna `is_active`.
+* **Comando SQL de Referência:** `ALTER TABLE lojas ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT true;`
+* **Ação Adicional:** Garanta que todas as queries `GET` existentes para listar lojas filtrem apenas por `is_active = true`.
+
+---
+**SLICE 1: FUNCIONALIDADE DE ATUALIZAÇÃO (UPDATE)**
+
+* **1.1 (Backend): Implemente o Endpoint `PUT /api/admin/lojas/:id`**
+    * **Segurança:** A rota deve ser protegida por um `adminMiddleware` que valide a role 'ADMINISTRADOR'.
+    * **Validação:** Utilize um schema Zod com `.strict()` para validar o corpo da requisição. Em caso de falha, retorne `400 Bad Request`.
+    * **Lógica:** Atualize a loja no banco de dados.
+    * **Resposta:** Em caso de sucesso, retorne `200 OK` com o objeto da loja atualizada. Em caso de loja não encontrada, retorne `404 Not Found`.
+
+* **1.2 (Frontend): Integre a Funcionalidade de "Editar"**
+    * **Ficheiro Alvo:** `/client/src/pages/admin/lojas/index.tsx` (ou similar).
+    * **Lógica:** Conecte a submissão do formulário de edição para chamar o endpoint `PUT`.
+    * **UX:** O botão "Salvar" deve ter um estado de "carregando" (`isLoading`) durante a submissão. Exiba notificações "toast" de sucesso e erro.
+    * **Cache:** Em caso de sucesso, utilize `queryClient.invalidateQueries` para as chaves `['lojas']` e `['loja', lojaId]` para garantir que a UI seja atualizada.
+
+---
+**SLICE 2: FUNCIONALIDADE DE DESATIVAÇÃO (SOFT DELETE)**
+
+* **2.1 (Backend): Implemente o Endpoint `DELETE /api/admin/lojas/:id`**
+    * **Segurança:** Proteja a rota com o `adminMiddleware`.
+    * **Regra de Negócio:** Antes de desativar, execute uma query (usando CTE, como planeado) para verificar se a loja possui dependências ativas (`usuários`, `propostas`, `gerentes`).
+    * **Lógica de Bloqueio:** Se existirem dependências, retorne `409 Conflict` (o prompt original tinha 400, mas 409 é mais semântico para conflito de estado) com um corpo JSON detalhando as dependências.
+    * **Lógica de Sucesso (Soft Delete):** Se não houver dependências, execute um `UPDATE lojas SET is_active = false WHERE id = $1`.
+    * **Resposta de Sucesso:** Retorne `200 OK` com uma mensagem de sucesso (ex: "Loja desativada com sucesso").
+
+* **2.2 (Frontend): Integre a Funcionalidade de "Excluir"**
+    * **Ficheiro Alvo:** `/client/src/pages/admin/lojas/index.tsx` (ou similar).
+    * **Lógica:** Conecte o botão "Excluir", após um modal de confirmação, para chamar o endpoint `DELETE`.
+    * **UX:** O botão deve ter um estado de "carregando". Exiba notificações "toast" de sucesso (para desativação) e de erro (para bloqueio), utilizando a mensagem detalhada da API.
+    * **Cache:** Em caso de sucesso, utilize `queryClient.invalidateQueries` e `queryClient.removeQueries` para atualizar a lista de lojas na UI.

@@ -1,0 +1,221 @@
+ # DIRETIVA DE COMBATE "FORTALEZA DIGITAL": Auditoria Final e Blindagem do Sistema Simpix
+
+
+
+**## CONTEXTO, INTENÇÃO E EXPECTATIVA (LEITURA OBRIGATÓRIA)**
+
+
+
+**Contexto e Intenção Estratégica:**
+
+Olá, Agente. Chegamos ao momento decisivo da nossa iniciativa de cibersegurança. A nossa jornada até aqui foi uma guerra de atrito. Superamos falhas catastróficas e re-arquitetamos a nossa fundação. Agora, com base nos pilares da OWASP (SAMM, ASVS, Cheat Sheets, WSTG), a nossa intenção é simples: transformar o Simpix de uma aplicação funcional para uma **fortaleza digital**.
+
+
+
+Para isso, eu compilei toda a nossa base de conhecimento estratégico e tático — todos os manuais de operação, guias de segurança, playbooks e a nossa própria arquitetura — num único Dossiê de Inteligência.
+
+
+
+**Sua Missão (A Tarefa):**
+
+A sua tarefa é atuar como um "Red Team Lead", o nosso principal adversário simulado. Você deve absorver completamente o Dossiê de Inteligência abaixo e usá-lo para pensar como o nosso hacker mais sofisticado. A sua missão é realizar uma auditoria de penetração simulada, identificar **TODAS** as vulnerabilidades e, em seguida, projetar o plano de batalha final para blindar o Simpix contra o inimigo.
+
+
+
+---
+
+**## DOSSIÊ DE INTELIGÊNCIA (A FONTE DA VERDADE)**
+
+
+
+Primeira Etapa: Reconhecimento e Coleta de Informações (Information Gathering)
+
+O objetivo inicial do hacker não é atacar, mas sim aprender. Ele quer criar um mapa completo do nosso sistema, identificando todos os pontos de entrada e potenciais fraquezas, sem disparar nenhum alarme.
+
+Raciocínio do Hacker:
+
+"Qual é a tecnologia?": "Vou inspecionar a página de login, as requisições de rede e os cabeçalhos HTTP. Qual framework eles usam (React, Remix)? Qual é o servidor de backend (Express)? Onde a aplicação está hospedada (Replit)? Eles usam Supabase para o banco de dados? Cada peça de tecnologia tem as suas próprias vulnerabilidades conhecidas."
+
+"Quais são as portas de entrada?": "Vou mapear todos os 'endpoints' de API que consigo encontrar. POST /api/auth/login, GET /api/propostas, PUT /api/propostas/:id/status. O que acontece se eu tentar aceder a um endpoint de ADMIN (/api/admin/users) sem estar logado? A mensagem de erro me dá alguma pista?"
+
+"Posso enumerar usuários?": "Vou para a tela de 'esqueci a senha'. Se eu digitar um email que existe, a mensagem de resposta é diferente de quando eu digito um que não existe? Se for, eu posso usar isso para descobrir uma lista de emails de usuários válidos para atacar."
+
+"Há ficheiros esquecidos?": "Vou usar ferramentas para procurar por ficheiros ou diretórios que não deveriam ser públicos, como .git, backup.zip, ou ficheiros de configuração antigos, que possam conter 'segredos'."
+
+A Segunda Escalação de Privilégios e Exfiltração/Manipulação de Dados
+
+Após as fases intermediárias de exploração (onde ele tentaria ataques como injeção de SQL, XSS, etc.), o objetivo final do hacker é alcançar o seu prémio. Ele não quer apenas encontrar uma falha, ele quer usar essa falha para obter o controlo total ou causar o dano máximo.
+
+Raciocínio do Hacker:
+
+"Como me torno Administrador?": "Eu descobri uma vulnerabilidade de Cross-Site Scripting (XSS) no campo de 'observação' das propostas. Agora, vou criar uma proposta com um script malicioso neste campo. Quando o ANALISTA ou o ADMINISTRADOR abrir esta proposta para rever, o script irá executar no browser dele e enviar o seu 'token de sessão' para o meu servidor. Com este token, eu posso 'hijack' a sessão dele e agir como se fosse ele, com todos os seus privilégios."
+
+"Como roubo todos os dados?": "Eu descobri uma falha na nossa política de RLS (um ataque de Insecure Direct Object Reference - IDOR). Agora sei que, como ATENDENTE, eu não deveria ver as propostas de outras lojas, mas se eu adivinhar o ID, a API me retorna os dados. Vou escrever um script simples que faz um loop de PROP-00001 a PROP-99999 e baixar os dados de todos os clientes do sistema."
+
+"Como manipulo o negócio?": "Eu encontrei uma forma de contornar a guarda de permissão no endpoint PUT /api/propostas/:id/status. Agora, vou criar uma proposta em nome de um cliente fictício, aprová-la eu mesmo com o valor máximo, passá-la por todas as etapas e enviá-la para a 'Fila de Pagamento', tentando desviar o dinheiro."
+
+
+
+Mapa do Raciocínio do Hacker (Continuação)
+
+Etapas Segunda: Exploração de Vetores de Ataque Comuns
+
+Após o reconhecimento, o hacker experiente entra na fase de exploração ativa. O seu objetivo é testar sistematicamente cada funcionalidade em busca de falhas conhecidas, usando o conhecimento que ele adquiriu sobre a nossa tecnologia.
+
+Raciocínio do Hacker:
+
+"A Autenticação é Sólida? (WSTG 4.4)": "Eu já tenho credenciais de um ATENDENTE. Será que consigo explorar o processo de login? Vou tentar ataques de 'força bruta' com senhas comuns contra outros usuários que descobri. O 'rate limit' que implementaram vai me bloquear? E o token de sessão (JWT)? Ele é complexo o suficiente ou consigo adivinhar o próximo token?"
+
+"A Autorização é Granular? (WSTG 4.5)": "Este é o vetor de ataque mais promissor. A aplicação tem roles complexas (ATENDENTE, GERENTE, ANALISTA). Estando logado como ATENDENTE, eu só deveria ver as minhas propostas. Mas o que acontece se eu pegar o ID de uma proposta da minha loja e tentar adivinhar o ID de outra, de outra loja, e fizer a chamada direta à API (GET /api/propostas/PROP-ID-DE-OUTRA-LOJA)? Se a API retornar os dados, eles têm uma vulnerabilidade de Insecure Direct Object Reference (IDOR), e as suas políticas de RLS falharam."
+
+"A Validação de Entrada é Confiável? (WSTG 4.7)": "A tela de 'Nova Proposta' e o 'Histórico de Comunicação' são campos de entrada de texto. O que acontece se eu inserir código malicioso em vez de texto normal? Vou tentar injetar um payload de Cross-Site Scripting (XSS), como <script>alert('Hacked')</script>, no campo de 'Observação' ao reenviar uma proposta pendente. Se este script executar no browser do ANALISTA quando ele for rever a proposta, eu posso usar esta falha para roubar o seu token de sessão."
+
+"A Lógica de Negócio Pode Ser Manipulada? (WSTG 4.10)": "O fluxo da proposta tem múltiplos passos. Será que posso quebrar a sequência? Quando estou na tela de 'Nova Proposta', posso interceptar a requisição e mudar o status inicial de aguardando_analise para aprovado? Quando um ANALISTA 'pendencia' uma proposta, posso interceptar a resposta e modificar os dados antes que eles cheguem ao meu browser? Eu vou testar cada passo do fluxo para ver se consigo manipular os dados em trânsito e burlar as regras de negócio."
+
+Etapas Terceiras Avançadas: Exploração de Falhas de Lógica e Arquitetura
+
+Após testar os "suspeitos do costume" (Autenticação, Autorização, Injeção), o hacker experiente aprofunda a sua análise, procurando por falhas mais subtis na arquitetura e na lógica de negócio da aplicação.
+
+Raciocínio do Hacker:
+
+"A Gestão de Ficheiros é Segura? (WSTG 4.10 & ASVS V5)": "A aplicação tem um fluxo complexo de upload de documentos. Esta é uma superfície de ataque enorme. O que acontece se eu fizer o upload de um ficheiro que não é um PDF, mas que eu renomeei para
+
+ .pdf? O backend valida o conteúdo do ficheiro (os seus 'magic bytes') ou confia apenas na extensão? E se eu fizer o upload de uma 'bomba de zip' (um ficheiro zip pequeno que se expande para gigabytes) para tentar causar uma Negação de Serviço (DoS)? Ou, ainda mais subtil, se eu fizer o upload de um ficheiro SVG que na verdade contém um payload de XSS? O sistema deles está a sanitizar os ficheiros que recebe?"
+
+"A Gestão de Sessão é à Prova de Falahas? (WSTG 4.6 & ASVS V7)": "Eles implementaram a rotação de tokens, o que é bom, mas será que é infalível? Vou tentar um ataque de 'Fixação de Sessão'. E se eu fizer login, copiar o meu token de sessão, fazer logout, e depois tentar usar esse mesmo token numa nova requisição? O servidor invalida-o corretamente no momento do logout, ou há uma janela de oportunidade? Consigo capturar o token de um usuário e 'reproduzi-lo' indefinidamente?"
+
+"A Criptografia está Bem Configurada? (WSTG 4.9 & ASVS V11)": "A aplicação usa HTTPS, mas a configuração está correta? Vou usar ferramentas de scan SSL/TLS para verificar se eles estão a usar versões de TLS antigas e vulneráveis, ou se têm 'cipher suites' fracos ativados. O certificado deles é válido e de uma autoridade confiável? Eles têm o cabeçalho HSTS (Strict-Transport-Security) ativado para forçar conexões seguras?"
+
+"A Aplicação Vaza Informação? (WSTG 4.8 & ASVS V13.4)": "O que a aplicação me diz quando eu cometo um erro? Se uma chamada à API falha, eu recebo uma mensagem de erro genérica ('Ocorreu um erro'), ou recebo uma 'stack trace' completa que revela a estrutura interna do código, os caminhos dos ficheiros no servidor e as queries de banco de dados que eles estão a usar? Existem endpoints de
+
+ debug que foram deixados abertos em produção? Os cabeçalhos de resposta HTTP revelam a versão exata do Express.js ou de outras tecnologias que eles usam (X-Powered-By)? Cada pedaço de informação que vaza me ajuda a montar um ataque mais eficaz."
+
+
+
+Etapas quartas  Avançadas: Exploração de Falhas de Lógica, Arquitetura e Configuração
+
+Com os alvos principais já testados, o hacker experiente agora foca-se na "higiene" do sistema, procurando por erros subtis de configuração e lógica de negócio que a maioria dos desenvolvedores ignora.
+
+Raciocínio do Hacker:
+
+"A Lógica de Negócio é à Prova de Absurdos? (WSTG 4.10 & ASVS V2.3)": "Eu testei a lógica do fluxo, mas e a lógica dos dados? O que acontece se eu tentar criar uma proposta com um valor de empréstimo negativo? Ou com um prazo de 1000 anos? Ou com uma comissão de 110%? A validação do backend (provavelmente com Zod) tem 'sanity checks' para estes cenários que são 'logicamente' possíveis mas absurdos para o negócio? Consigo causar um 'integer overflow' ou um cálculo financeiro incorreto que me beneficie?"
+
+"A Configuração do Servidor é Preguiçosa? (WSTG 4.2 & ASVS V13)": "Vamos verificar a 'higiene' do servidor. Os endpoints que deveriam aceitar apenas POST (como o de criação de proposta) também aceitam GET por engano? E se eu enviar um parâmetro duas vezes na URL, como .../propostas?status=aprovado&status=pendente (um ataque de HTTP Parameter Pollution)? Qual dos dois o backend considera: o primeiro ou o último? Posso usar isso para contornar filtros. E a política de CORS? Está configurada com um * preguiçoso (Access-Control-Allow-Origin: *), permitindo que qualquer site malicioso faça requisições à nossa API a partir do browser de um usuário logado?"
+
+"O Histórico Vaza Informação? (Information Leakage)": "A aplicação usa Git. Vou clonar o repositório e analisar o histórico de commits completo. Será que algum desenvolvedor fez o commit de uma chave de API ou de um 'segredo' por engano e depois o removeu num commit seguinte? A chave continua lá, no histórico. E os comentários no código fonte do frontend? Existem comentários como // TODO: Ligar ao endpoint de admin real ou // Bug temporário, remover antes da produção que me revelem endpoints internos ou fragilidades?"
+
+"A Proteção Contra Negação de Serviço (DoS) é Completa? (WSTG 4.8 & ASVS V2.4)": "Eu já vi o Rate Limiter a funcionar no login, mas será que ele protege todos os endpoints? E os endpoints que consomem muitos recursos? A geração da CCB em PDF, por exemplo, deve ser uma operação 'pesada' para o servidor. Este endpoint (/api/propostas/:id/gerar-ccb) está protegido por um rate limit específico e mais restrito? Consigo chamar este endpoint em um loop a partir de múltiplos IPs para sobrecarregar o servidor e derrubar a aplicação para usuários legítimos?"
+
+
+
+Fase Quintas Final: Persistência, Ocultação e Ataques à Cadeia de Suprimentos
+
+Após explorar as vulnerabilidades mais comuns, o hacker de elite foca-se em garantir que o seu acesso seja duradouro (persistência), que as suas ações não sejam detetadas (ocultação) e em explorar o próprio processo de desenvolvimento.
+
+Raciocínio do Hacker:
+
+"Como eu garanto que fico cá dentro? (Persistência)": "Eu consegui acesso de ADMINISTRADOR ao roubar uma sessão. Ótimo. Mas essa sessão vai expirar. Não posso depender dela. A minha primeira ação como 'falso admin' é criar um novo usuário administrador oculto para mim, talvez com um nome genérico como 'support_user'. Depois, vou procurar uma forma de plantar um 'backdoor': um pequeno script, talvez numa rota de API pouco usada, que me dê um 'remote shell' no servidor. Assim, mesmo que eles descubram a minha conta falsa e troquem todas as senhas, eu ainda terei uma porta de entrada."
+
+"Como ataco os 'tijolos' em vez da 'casa'? (Ataque à Cadeia de Suprimentos)": "Atacar a aplicação diretamente está a ficar difícil. Mas e as dependências que eles usam? Vou escanear o
+
+ package.json deles. Eles estão a usar alguma versão antiga do Express, jsonwebtoken ou de outra biblioteca que tenha uma vulnerabilidade crítica já conhecida? Posso usar um 'exploit' público para essa vulnerabilidade. E se não houver? Vou tentar um ataque de 'Typosquatting': vou criar um pacote malicioso no NPM com um nome muito parecido com uma biblioteca que eles usam (ex: drizle-orm em vez de drizzle-orm) e esperar que um desenvolvedor cometa um erro de digitação ao instalar. Se eu conseguir, o meu código malicioso será executado no ambiente de desenvolvimento deles, me dando acesso."
+
+"Consigo escapar da 'jaula'? (Fuga de Contêiner)": "A aplicação está a correr num contêiner do Replit. Isso oferece algum isolamento. Mas, se eu conseguir uma vulnerabilidade de 'Injeção de Comando' (Command Injection), consigo executar comandos no 'shell' do contêiner. A partir daí, o que mais eu consigo ver? Consigo listar os 'Secrets' do Replit que estão montados como variáveis de ambiente? Consigo ver os processos de outras aplicações que possam estar a correr no mesmo 'host'? A 'jaula' do contêiner é tão segura quanto eles pensam?"
+
+"E se o código for seguro? Eu ataco as pessoas (Engenharia Social):" "O código está a ficar robusto. O elo mais fraco, como sempre, são os humanos. Vou usar o LinkedIn e o GitHub para encontrar os nomes dos desenvolvedores do 'Simpix'. Vou criar um email de 'phishing' convincente, talvez a fingir que sou do suporte do Replit ou do Supabase, com um link para uma página de login falsa. Se eu conseguir as credenciais de um único desenvolvedor, eu tenho as chaves do reino. Ou talvez eu me possa passar por um novo funcionário e pedir ajuda a alguém da equipa para obter acesso."
+
+
+
+Fase Sextas Final: Ataques ao Ecossistema, à Confiança e ao Fator Humano
+
+Com os vetores técnicos mais diretos explorados, o hacker experiente eleva o seu ataque, focando-se no processo de desenvolvimento, na infraestrutura e na psicologia dos desenvolvedores e usuários.
+
+Raciocínio do Hacker:
+
+"A Lógica de Múltiplos Fatores é à Prova de Fadiga? (Ataque de 'MFA Fatigue')": "A aplicação provavelmente tem ou terá Autenticação de Múltiplos Fatores (MFA), o que é bom. Mas como ela é implementada? Será que a implementação tem 'rate limiting'? Vou descobrir o email de um ADMINISTRADOR e tentar fazer login com a sua senha (que posso ter obtido de outro vazamento de dados). Isto irá disparar uma notificação 'push' para o telemóvel dele. E se eu fizer isto 100 vezes à 1 da manhã? Será que, por cansaço ou irritação, ele clica em 'Aprovar' por engano? Este é um ataque de 'MFA Fatigue', e ele explora a psicologia humana, não uma falha de código."
+
+"O Processo de 'Build' é uma Porta de Entrada? (Ataque ao Pipeline de CI/CD)": "A equipa usa GitHub Actions para o seu pipeline de CI/CD. O ficheiro de 'workflow' (
+
+.github/workflows/main.yml) está protegido? Se eu conseguir, de alguma forma, fazer um 'commit' neste ficheiro, eu não preciso de atacar a aplicação em produção. Eu posso modificar o pipeline para, durante o processo de 'build', enviar todos os 'Secrets' do Replit (como a SUPABASE_SERVICE_ROLE_KEY) para um servidor meu. É um ataque silencioso que me dá as chaves do reino sem nunca tocar na aplicação principal."
+
+"Posso Enganar a IA? (Ataque de 'Envenenamento de Contexto de IA')": "Esta equipa confia imensamente numa IA para escrever e corrigir código. Isto cria uma nova superfície de ataque. E se eu conseguir 'envenenar' o contexto que a IA usa? Posso fazer um 'pull request' com código aparentemente inocente, mas ofuscado, num repositório público que eu sei que o Agente deles pode consultar via 'Web Search'. Ou, ainda mais direto, se eu conseguir injetar um 'prompt injection' num campo de texto da aplicação (como uma 'observação' de proposta), e souber que esse texto será mais tarde usado para compor um novo prompt para a IA, posso tentar fazer com que a IA execute uma ação maliciosa por mim, como desativar as políticas de RLS."
+
+"A Aplicação Cumpre a Lei? (Análise de Conformidade e Riscos Legais):" "O alvo final pode não ser técnico. A aplicação lida com dados financeiros e de crédito, o que a coloca sob o escrutínio de leis de proteção de dados como a LGPD (no Brasil). Será que eles estão a armazenar ou a processar os dados dos clientes de uma forma que viola estas leis? Se eu, como um 'insider' malicioso ou um concorrente, conseguir provar uma falha de conformidade, o dano de uma multa regulatória e da perda de reputação pode ser muito maior do que o de um simples 'vazamento de dados'."
+
+
+
+
+
+Fase Setima e Ultima Final: Ataques à Lógica de Negócio, à Integridade dos Dados e à Confiança
+
+Com a aplicação tecnicamente blindada, o atacante de elite muda o seu foco. Ele não procura mais por buracos, mas por alavancas. Ele quer usar as próprias regras de negócio do Simpix contra a empresa.
+
+Raciocínio do Hacker:
+
+"Como posso fazer o sistema mentir para si mesmo? (Ataque à Integridade dos Dados)": "A aplicação agora regista tudo na tabela proposta_logs. Excelente. Isso significa que o ANALISTA e os futuros auditores confiam cegamente no que está escrito ali. E se eu conseguir, através de uma vulnerabilidade de SQL Injection muito subtil que eles não encontraram, modificar um registo antigo no histórico? Posso apagar uma 'pendência' do histórico, ou, ainda mais devastador, posso alterar o autor_id de uma proposta aprovada e paga, fazendo parecer que um ATENDENTE diferente a submeteu, para incriminá-lo ou para desviar o pagamento da comissão. O meu objetivo não é roubar dados, é corromper a 'memória' do sistema, tornando a sua trilha de auditoria inútil e semeando a desconfiança."
+
+"Como posso usar as regras financeiras a meu favor? (Ataque à Lógica de Negócio Financeiro)": "A aplicação tem uma lógica complexa para calcular juros, TAC e comissões. Eu analisei o productController.ts e vi a função. E se eu criar centenas de propostas com valores e prazos muito específicos, nos limites exatos onde as regras de arredondamento de casas decimais podem ser exploradas? Será que consigo, ao longo de milhares de transações, criar uma discrepância de um único cêntimo em cada uma, que seja desviado para uma conta controlada por mim? É o clássico 'ataque salami slicing'. Não é um bug, é a exploração da matemática do sistema em grande escala."
+
+"Como posso atacar os parceiros através da Simpix? (Ataque à Cadeia de Confiança):" "A Simpix tem uma relação de confiança com os seus Parceiros. As propostas e os dados dos clientes fluem entre eles. Se eu conseguir encontrar uma forma de injetar dados maliciosos no perfil de um cliente que é enviado para a Fila de Análise — talvez no campo de 'endereço' ou 'ocupação' — será que esses dados, quando visualizados pelo ANALISTA, podem explorar uma vulnerabilidade no sistema dele? O meu alvo não é a Simpix, mas os seus parceiros. Eu uso a Simpix como um 'cavalo de Troia' para atacar todo o ecossistema que confia nela."
+
+"Como posso fazer o sistema trabalhar contra si mesmo? (Ataque de Abuso de Funcionalidade):" "A aplicação tem funcionalidades 'pesadas', como a geração de PDFs da CCB e a verificação de documentos. O que acontece se eu escrever um script que cria milhares de propostas e as aprova e pendencia repetidamente? Cada ação irá acionar a geração de PDFs, o registo de logs e o envio de notificações, consumindo recursos do servidor, enchendo o banco de dados com lixo e, potencialmente, aumentando a fatura de serviços de nuvem da empresa. Não é um ataque de DoS tradicional, é um ataque de 'esgotamento de recursos' que usa as funcionalidades legítimas da aplicação para a degradar lentamente."
+
+
+
+---
+
+**## ROADMAP DE ANÁLISE (PENSE COMO UM HACKER)**
+
+
+
+Com base no Dossiê, execute uma análise de segurança de ponta a ponta, seguindo o raciocínio de um atacante:
+
+
+
+**FASE 1: Reconhecimento Passivo e Ativo:**
+
+* Identifique a nossa superfície de ataque. Quais tecnologias usamos? Quais são os nossos endpoints públicos? Há algum vazamento de informação nos cabeçalhos HTTP ou no código-fonte?
+
+
+
+**FASE 2: Exploração de Vulnerabilidades (OWASP TOP 10):**
+
+* Simule ataques contra as nossas defesas. Verifique se a nossa implementação de RLS (**ASVS V8**) é à prova de ataques de IDOR. Verifique se os nossos formulários são vulneráveis a XSS (**ASVS V1**). Verifique se a nossa gestão de sessão (**ASVS V7**) é segura contra fixação de sessão e outros ataques.
+
+
+
+**FASE 3: Ataques à Lógica de Negócio:**
+
+* Pense além das vulnerabilidades comuns. Como um atacante poderia abusar da nossa lógica de negócio para cometer fraude (ex: "salami slicing" nos cálculos de juros) ou causar negação de serviço (ex: sobrecarregando a geração de CCB)?
+
+
+
+**FASE 4: Ataques ao Ecossistema e à Confiança:**
+
+* Analise os riscos na nossa cadeia de suprimentos (dependências em `package.json`), no nosso pipeline de CI/CD e no próprio uso de IA no nosso desenvolvimento.
+
+
+
+---
+
+**## O SEU RELATÓRIO DE BATALHA (O DELIVERABLE FINAL)**
+
+
+
+Ao final da sua análise, você deve criar um novo documento em Markdown na raiz do projeto, chamado `PLANO_DE_BLINDAGEM.md`. Este relatório deve conter:
+
+
+
+1.  **Uma Lista Priorizada de Vulnerabilidades:** Cada vulnerabilidade identificada deve ser listada com:
+
+    * **Descrição:** O que é a falha.
+
+    * **Severidade:** (Crítica, Alta, Média, Baixa).
+
+    * **Referência:** O capítulo correspondente do ASVS/WSTG.
+
+2.  **Um Roadmap de Correção:** Um plano de implementação sequencial e detalhado para corrigir cada uma das vulnerabilidades encontradas, começando pelas mais críticas.
+
+
+
+Execute este plano para nos dar o mapa final para a nossa fortaleza digital.

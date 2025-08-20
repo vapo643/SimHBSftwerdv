@@ -1,0 +1,42 @@
+**### MODO DE OPERAÇÃO: REALISMO CÉTICO (MANDATÁRIO)**
+Sua lealdade é para com a verdade do código e a estabilidade da produção.
+
+---
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Corrigir o filtro de segurança defeituoso no endpoint `GET /api/pagamentos` que está a remover incorretamente todas as propostas da lista, resultando em uma "Tela de Pagamentos" vazia.
+* **Intenção Estratégica (O Porquê):** Restaurar a funcionalidade crítica da "Tela de Pagamentos", garantindo que a equipe financeira possa ver e processar as propostas elegíveis que a nossa lógica de negócio principal já identificou corretamente.
+* **Histórico Relevante (Consulta Obrigatória):** A "evidência bruta" dos logs do servidor provou que a query de negócio funciona, mas um filtro de segurança subsequente (`[PAGAMENTOS SECURITY]`) está a zerar os resultados. Sua missão é dissecar e corrigir este filtro específico.
+* **Modelo Mental (Como se Encaixa):** Você atuará como um Engenheiro de Segurança de Backend. Sua tarefa é analisar a lógica de um filtro de segurança e corrigir a condição que está a causar um "falso positivo", bloqueando dados legítimos.
+* **Riscos Antecipados:** **Risco:** Relaxar demais o filtro pode introduzir uma vulnerabilidade. **Contramedida:** A correção não deve remover o filtro, mas sim ajustar sua lógica para que ela permita a passagem de propostas válidas (status `BOLETOS_EMITIDOS`, etc.) enquanto ainda bloqueia as inválidas.
+
+---
+
+**IMPLEMENTAR:**
+A correção do filtro de segurança no endpoint da "Tela de Pagamentos".
+
+**CURRENT STATE:**
+O endpoint `GET /api/pagamentos` retorna um array vazio (`[]`) porque um filtro de segurança está a remover todas as propostas, mesmo as válidas.
+
+**EXPECTED (Estado Final de Sucesso):**
+O endpoint `GET /api/pagamentos` deve retornar a lista correta de propostas com status `BOLETOS_EMITIDOS` (e posteriores), sem que elas sejam removidas pelo filtro de segurança. A "Tela de Pagamentos" deve ser populada com os dados corretos.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+**1. Localização e Análise do Filtro:**
+    - **Ação:** No ficheiro da rota `GET /api/pagamentos`, encontre a seção de código identificada pelo log `[PAGAMENTOS SECURITY] Aplicando filtros críticos...`.
+    - **Implementação:** Analise a condição `if` ou `.filter()` que está a ser aplicada às propostas. Identifique por que ela está a falhar para propostas com status `BOLETOS_EMITIDOS`.
+
+**2. Implementação da Correção:**
+    - **Ação:** Refatore a lógica do filtro de segurança.
+    - **Implementação:** Altere a condição para que ela permita a passagem de propostas que estão nos estados corretos para pagamento, conforme o nosso "Blueprint" do Sistema de Status V2.0.
+
+---
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+Siga o protocolo completo. O teste funcional deve ser direto:
+1.  Acesse a "Tela de Pagamentos" na UI.
+2.  O critério final de sucesso é a tabela ser populada com as **2 propostas válidas** que os logs do backend já provaram que a query inicial encontra.
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+Preencha a declaração completa ao final da sua implementação.
+---

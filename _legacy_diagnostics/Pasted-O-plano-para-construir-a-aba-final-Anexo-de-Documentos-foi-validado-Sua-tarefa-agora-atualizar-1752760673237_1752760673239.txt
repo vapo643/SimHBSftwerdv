@@ -1,0 +1,105 @@
+O plano para construir a aba final "Anexo de Documentos" foi validado.
+
+Sua tarefa agora é atualizar a página `/client/src/pages/propostas/nova.tsx` com o código final que completa todos os formulários da tela.
+
+Por favor, substitua todo o conteúdo deste arquivo pelo seguinte código exato:
+
+```typescript
+import React from 'react';
+import DashboardLayout from '@/components/DashboardLayout';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import DadosClienteForm from '@/components/forms/DadosClienteForm';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+
+const NovaProposta: React.FC = () => {
+  return (
+    <DashboardLayout title="Nova Proposta de Crédito">
+      <Tabs defaultValue="dados-cliente" className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="dados-cliente">Dados do Cliente</TabsTrigger>
+          <TabsTrigger value="condicoes-emprestimo">Condições do Empréstimo</TabsTrigger>
+          <TabsTrigger value="anexo-documentos">Anexo de Documentos</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="dados-cliente">
+          <div className="p-4 border rounded-md mt-4">
+            <DadosClienteForm />
+          </div>
+        </TabsContent>
+
+        <TabsContent value="condicoes-emprestimo">
+          <div className="space-y-4 p-4 border rounded-md mt-4">
+            <div>
+              <Label htmlFor="valor-solicitado">Valor Solicitado</Label>
+              <Input id="valor-solicitado" type="text" placeholder="R$ 0,00" />
+            </div>
+            <div>
+              <Label htmlFor="produto">Produto</Label>
+              <Select>
+                <SelectTrigger id="produto">
+                  <SelectValue placeholder="Selecione o produto" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="veiculos">Veículos</SelectItem>
+                  <SelectItem value="imoveis">Imóveis</SelectItem>
+                  <SelectItem value="pessoal">Empréstimo Pessoal</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="tabela-juros">Tabela de Juros</Label>
+              <Select>
+                <SelectTrigger id="tabela-juros">
+                  <SelectValue placeholder="Selecione a tabela" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="tabela-a">Tabela A</SelectItem>
+                  <SelectItem value="tabela-b">Tabela B</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="prazo">Prazo</Label>
+              <Select>
+                <SelectTrigger id="prazo">
+                  <SelectValue placeholder="Selecione o prazo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="12">12 meses</SelectItem>
+                  <SelectItem value="24">24 meses</SelectItem>
+                  <SelectItem value="36">36 meses</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="resumo">Resumo da Simulação</Label>
+              <Textarea id="resumo" readOnly placeholder="Valor da Parcela: ...&#10;CET Anual: ..." rows={3} />
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="anexo-documentos">
+          <div className="space-y-4 p-4 border rounded-md mt-4">
+            <div>
+              <Label htmlFor="documento-identidade">Documento de Identidade (Frente e Verso)</Label>
+              <Input id="documento-identidade" type="file" />
+            </div>
+            <div>
+              <Label htmlFor="comprovante-residencia">Comprovante de Residência</Label>
+              <Input id="comprovante-residencia" type="file" />
+            </div>
+            <div>
+              <Label htmlFor="comprovante-renda">Comprovante de Renda</Label>
+              <Input id="comprovante-renda" type="file" />
+            </div>
+          </div>
+        </TabsContent>
+      </Tabs>
+    </DashboardLayout>
+  );
+};
+
+export default NovaProposta;

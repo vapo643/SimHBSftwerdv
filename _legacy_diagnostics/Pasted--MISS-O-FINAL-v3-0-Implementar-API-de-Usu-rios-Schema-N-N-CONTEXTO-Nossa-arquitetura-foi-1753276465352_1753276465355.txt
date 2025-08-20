@@ -1,0 +1,32 @@
+# MISSÃO FINAL v3.0: Implementar API de Usuários (Schema N:N)
+
+**CONTEXTO:** Nossa arquitetura foi validada. O sistema utiliza uma tabela de junção `gerente_lojas` para criar uma relação de muitos-para-muitos (N:N) entre gerentes e lojas. A criação de usuários do tipo 'ATENDENTE' ainda utiliza uma relação de 1:1 (coluna `loja_id` na tabela `profiles`). Nossa stack é Express, Zod e supabase-js.
+
+**AÇÃO:** Gere o código backend para criar novos usuários, lidando com a lógica distinta para 'GERENTES' e 'ATENDENTES'.
+
+**ETAPAS:**
+
+**1. Lógica de Serviço (Ficheiro: `/server/services/userService.ts`):**
+Crie e exporte uma função de serviço assíncrona chamada `createUser`.
+- **Lógica:**
+    a. Verifique se o email já existe em `auth.users`.
+    b. Gere uma senha provisória criptograficamente segura.
+    c. Crie o usuário no Supabase Auth.
+    d. Insira os dados principais (`id`, `role`, `full_name`) na tabela `profiles`. **Para o perfil 'ATENDENTE', inclua também o `loja_id` nesta inserção.**
+    e. **Lógica Condicional para GERENTE:** Se o `role` do novo usuário for 'GERENTE', percorra o array de `lojaIds` recebido e insira um registro para cada loja na tabela de junção `gerente_lojas` (`gerente_id`, `loja_id`).
+    f. **Implemente "rollback":** Se qualquer etapa após a criação do usuário no Auth falhar (inserção em `profiles` ou em `gerente_lojas`), delete o usuário recém-criado do Auth.
+    g. Chame uma função `sendWelcomeEmail` mockada.
+
+**2. Endpoint da Rota (Ficheiro: a ser adicionado em `/server/routes.ts`):**
+Crie o endpoint `POST /api/admin/users`.
+- **Middleware:** Proteja a rota para que apenas 'ADMINISTRADORES' possam acessá-la.
+- **Validação com Zod:** Crie um schema Zod que:
+    a. Valide `fullName`, `email`, e `role`.
+    b. **Use `.refine()`** para as regras:
+        - Se `role` for 'ATENDENTE', o campo `lojaId` (singular) deve ser um número/inteiro válido e obrigatório.
+        - Se `role` for 'GERENTE', o campo `lojaIds` (plural) deve ser um array de números/inteiros, não vazio e obrigatório.
+- **Controlador da Rota:**
+    a. Chame a função `createUser` do serviço.
+    b. Retorne os status codes de erro apropriados (`400`, `409`, `500`) e `201 Created` para sucesso.
+
+Por favor, forneça o código completo para o ficheiro `userService.ts` e o código a ser adicionado em `routes.ts`.

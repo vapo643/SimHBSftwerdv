@@ -1,0 +1,24 @@
+**IMPLEMENTAR:** A lógica de backend e frontend para buscar e exibir o PDF da Cédula de Crédito Bancário (CCB) **assinada** diretamente da API da ClickSign.
+
+**CONTEXT:** A nossa auditoria confirmou que um botão "Ver CCB" existe, mas sua funcionalidade é incerta. É uma exigência de negócio e conformidade legal que a equipe financeira possa visualizar o documento final com a assinatura eletrônica do cliente.
+
+**CURRENT STATE:** Atualmente, não temos uma integração implementada para buscar documentos já assinados na API da ClickSign. A funcionalidade do botão "Ver CCB" é desconhecida ou incompleta.
+
+**EXPECTED (Estado Final de Sucesso):** Ao clicar no botão "Ver CCB Assinada" na Página de Pagamentos, o sistema deve buscar o documento correspondente na API da ClickSign em tempo real e exibi-lo para o usuário.
+
+**CONSTRAINTS (Diretrizes de Implementação):**
+1.  **Pesquisa de Documentação da API:** Sua primeira tarefa é usar sua capacidade de 'Web Search' para encontrar a documentação oficial da API da ClickSign, especificamente o endpoint para "Download de Documentos Assinados". A requisição provavelmente exigirá um `document_key` ou um identificador similar.
+2.  **Lógica de Backend:**
+    - Crie um novo serviço, se necessário (ex: `clicksignService.ts`), para encapsular a lógica de comunicação com a API da ClickSign.
+    - Crie um novo endpoint seguro no backend (ex: `GET /api/propostas/:propostaId/ccb-assinada`). Este endpoint será responsável por chamar a API da ClickSign e retornar o arquivo PDF.
+3.  **Segurança:** As credenciais da API da ClickSign (`CLICKSIGN_API_TOKEN`) devem ser lidas exclusivamente a partir dos 'Secrets' do Replit.
+
+**BANCO (Diretriz Crítica):**
+- Investigue o schema da nossa tabela `propostas` (e tabelas relacionadas) para encontrar o campo que armazena o identificador único do documento no sistema da ClickSign (ex: `clicksign_document_key` ou similar). Este é o dado-chave que você precisará para fazer a chamada correta à API.
+
+**TESTE:**
+1.  O critério de sucesso é a implementação de um serviço de backend que, ao receber um `propostaId`, consiga:
+    a. Encontrar o `document_key` correspondente no nosso banco de dados.
+    b. Usar esse `document_key` para fazer uma chamada bem-sucedida à API da ClickSign.
+    c. Retornar o conteúdo do arquivo PDF assinado.
+2.  Apresente o código do novo serviço e do novo endpoint para validação.

@@ -1,0 +1,54 @@
+**### MODO DE OPERAÇÃO: REALISMO CÉTICO (MANDATÓRIO)**
+Sua lealdade é para com a verdade do código e a estabilidade da produção.
+
+---
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Corrigir a chamada de função defeituosa para `apiRequest` dentro do handler `handleViewCCB`, alinhando-a com a assinatura correta da função para eliminar o erro `UNSUPPORTED METHOD: UNDEFINED`.
+* **Intenção Estratégica (O Porquê):** Restaurar a funcionalidade crítica de visualização da CCB assinada, que é um passo inegociável no processo de verificação de pagamento.
+* **Histórico Relevante (Consulta Obrigatória):** Use o seu relatório de auditoria forense anterior como a única fonte da verdade. Ele provou conclusivamente que a falha é uma incompatibilidade na passagem de parâmetros para a função `apiRequest`. Sua missão é implementar a correção que você mesmo projetou.
+* **Modelo Mental (Como se Encaixa):** Você atuará como Engenheiro de Frontend. A correção é cirúrgica e foca em uma única linha de código, garantindo que o objeto `options` seja passado corretamente.
+* **Riscos Antecipados:** **Risco:** BAIXO. Esta é uma correção de baixo risco, focada em sintaxe e bem diagnosticada.
+
+---
+
+**IMPLEMENTAR:**
+A correção da chamada de função para `apiRequest` no fluxo de visualização da CCB.
+
+**BUG:**
+A chamada para `apiRequest` está a passar os parâmetros incorretamente (`url, "GET", undefined, "blob"`), em vez de passar um único objeto de opções como segundo parâmetro, o que causa o erro `UNSUPPORTED METHOD: UNDEFINED`.
+
+**EXPECTED (Estado Final de Sucesso):**
+Clicar no botão "Ver CCB" no modal "Confirmar Veracidade" agora abre com sucesso o PDF da CCB assinada em uma nova aba do navegador, sem nenhum erro no console.
+
+**CONSTRAINTS (Roadmap de Implementação Cirúrgico):**
+
+**1. Localização e Refatoração:**
+    - **Ação:** No ficheiro `client/src/pages/financeiro/pagamentos-review.tsx`, localize a chamada `apiRequest` defeituosa dentro da função `handleViewCCB`.
+    - **Implementação:** Substitua a chamada incorreta pela versão correta, que você mesmo identificou em sua análise.
+
+    - **Código ANTES (Problemático):**
+      ```typescript
+      const blob = await apiRequest(
+        `/api/documentos/download?path=${encodeURIComponent(ccbPath)}`,
+        "GET",
+        undefined,
+        "blob"
+      ) as Blob;
+      ```
+
+    - **Código DEPOIS (Corrigido):**
+      ```typescript
+      const blob = await apiRequest(
+        `/api/documentos/download?path=${encodeURIComponent(ccbPath)}`,
+        { method: "GET", responseType: "blob" }
+      ) as Blob;
+      ```
+
+---
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+Siga o protocolo completo. O teste funcional consistirá em, após a sua correção, abrir o modal "Confirmar Veracidade" para uma proposta com CCB assinada e clicar no botão "Ver CCB". O critério de sucesso é o PDF a ser aberto em uma nova aba sem erros.
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+Preencha a declaração completa ao final da sua implementação.
+---

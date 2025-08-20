@@ -1,0 +1,131 @@
+🚨 SUPER MEGA PROMPT: Re-Arquitetura da Tela de Formalização (Simpix) 🚨
+ATENÇÃO AGENTE REPLIT: Leia este prompt integralmente antes de iniciar qualquer ação. O não cumprimento das diretrizes resultará na falha da missão.
+
+1. DIRETRIZ MESTRA E OBJETIVO
+IMPLEMENTAR: Re-arquitetura completa e implementação do fluxo ponta-a-ponta da "Tela de Formalização".
+
+DIRETRIZ MESTRA: Você NÃO deve implementar a solução inteira agora. Sua tarefa inicial é analisar todos os requisitos e gerar um ROADMAP DE EXECUÇÃO detalhado. Após apresentar o roadmap, você deverá implementar APENAS A FASE 1 desse roadmap.
+
+2. CONTEXTO E ESTADO ATUAL
+CONTEXT: A "Tela de Formalização" é o módulo central do sistema de crédito Simpix (React, Express, Drizzle/PostgreSQL). É onde propostas aprovadas se tornam contratos legais (CCB), são assinadas (ClickSign) e os instrumentos de cobrança (Boletos Inter) são gerados. A robustez deste fluxo é crítica para a operação.
+
+CURRENT STATE:
+
+A geração da CCB ignora o template PDF fornecido e cria um documento novo e desformatado.
+
+O fluxo de assinatura com a ClickSign é instável e não confiável (webhooks incertos, download do documento assinado não implementado).
+
+A geração de boletos em lote (parcelas) não funciona.
+
+A Timeline de eventos na UI não sincroniza corretamente com o estado real do backend.
+
+EXPECTED (Estado Final de Sucesso):
+Um fluxo de formalização automatizado, robusto e transparente, onde:
+
+A CCB é gerada preenchendo perfeitamente o template_ccb.pdf.
+
+A assinatura via ClickSign é orquestrada (envio, link/QR code, webhook de confirmação, download do documento assinado).
+
+A geração de boletos no Banco Inter é liberada somente após a assinatura confirmada.
+
+Todas as parcelas são geradas e disponibilizadas para download (PDFs individuais e um arquivo .zip).
+
+A Timeline da UI reflete cada etapa em tempo real (utilizando invalidação de cache do React Query).
+
+O status da proposta avança corretamente para os módulos de Pagamento/Cobrança.
+
+3. AÇÃO PRIMÁRIA: GERAÇÃO DO ROADMAP E EXECUÇÃO DA FASE 1
+ROADMAP DE EXECUÇÃO:
+Sua primeira tarefa é analisar os "REQUISITOS DETALHADOS" (Seção 4) e os "CONSTRANGIMENTOS TÉCNICOS" (Seção 5) e criar um Roadmap de Execução.
+
+O Roadmap deve ser dividido em Fases lógicas (ex: Fase 1 - Geração e Armazenamento da CCB, Fase 2 - Integração de Envio ClickSign, Fase 3 - Webhooks e Download ClickSign, Fase 4 - Geração de Boletos Inter, Fase 5 - Download em Lote e Sincronização UI).
+
+Cada fase deve detalhar:
+
+Objetivo da Fase.
+
+Arquivos a serem modificados/criados (Frontend e Backend).
+
+Tecnologias/Bibliotecas a serem utilizadas.
+
+Critérios de Aceite específicos da fase.
+
+APRESENTE ESTE ROADMAP PRIMEIRO. APÓS A APRESENTAÇÃO, EXECUTE IMEDIATAMENTE APENAS A FASE 1.
+
+4. REQUISITOS DETALHADOS PARA O ROADMAP
+4.1. Geração da CCB a partir de Template
+Objetivo: Carregar template_ccb.pdf e preencher seus campos existentes com os dados da proposta.
+
+Diretriz Técnica: Utilize a biblioteca pdf-lib no backend. Especificamente, use a funcionalidade de PDFForm. O processo deve ser: Carregar o PDF -> Acessar o formulário (pdfDoc.getForm()) -> Ler os campos do template (form.getFields()) -> Mapeá-los para os dados da proposta -> Preenchê-los (ex: textField.setText()) -> Achatar o formulário (form.flatten()) para tornar o texto permanente.
+
+Restrição Crítica: NÃO tente recriar o PDF do zero (usando pdfkit ou similares) ou extrair texto. Você DEVE usar o template como base para preservar o design exato.
+
+Resultado: O PDF gerado deve ser armazenado no Supabase Storage e o caminho registrado na tabela propostas.
+
+4.2. Fluxo de Assinatura (Envio - ClickSign)
+Gatilho: Botão "Enviar para Assinatura" (habilitado somente após a CCB ser gerada).
+
+Ação Backend:
+
+Buscar o PDF gerado no Storage.
+
+Chamar a API da ClickSign para criar o documento e os signatários.
+
+Armazenar os IDs retornados (Document Key, Signer Key) no banco de dados.
+
+Ação Frontend: Exibir o link de assinatura retornado pela API e gerar um QR Code visualizável na tela (usar biblioteca qrcode.react ou similar).
+
+4.3. Webhooks e Documento Assinado (Recebimento - ClickSign)
+Infraestrutura: Criar um endpoint dedicado POST /api/webhooks/clicksign.
+
+Segurança: Validar o HMAC/token do webhook para garantir a autenticidade da origem (segurança crítica).
+
+Lógica de Negócio (Evento: signed ou closed):
+
+Identificar a proposta pela Document Key.
+
+Atualizar o status da proposta (assinatura_eletronica_concluida = true).
+
+Imediatamente, fazer uma chamada autenticada à API da ClickSign para baixar a versão assinada da CCB.
+
+Substituir a versão não assinada no Supabase Storage pela versão assinada (ou versionar).
+
+Biometria: Garantir que o mesmo fluxo trate a confirmação de biometria, se aplicável.
+
+4.4. Geração de Boletos (Banco Inter)
+Gatilho: Botão "Gerar Boletos" (habilitado somente após assinatura_eletronica_concluida = true).
+
+Lógica de Negócio: Iterar com base no prazo da proposta (ex: 12 meses). Para cada iteração, chamar o interBankService para gerar um boleto com a data de vencimento correta.
+
+Transação (CRÍTICO): Toda a operação de geração de boletos deve ocorrer dentro de uma transação Drizzle (db.transaction()) para garantir atomicidade (ou todos são gerados e salvos, ou nenhum é).
+
+Armazenamento: Registrar cada boleto na tabela inter_collections.
+
+4.5. Download de Boletos (Banco Inter)
+Gatilho: Botão "Baixar Todos os Boletos".
+
+Ação Backend:
+
+Buscar todos os registros de inter_collections para a proposta.
+
+Fazer requisições em lote à API do Inter para baixar o PDF de cada boleto. Use Promise.allSettled para resiliência em caso de falha parcial.
+
+Usar uma biblioteca de compressão (ex: archiver ou jszip) para criar um único arquivo .zip contendo todos os PDFs.
+
+Streamar o arquivo .zip como resposta ao frontend.
+
+4.6. Sincronização da Timeline (UI)
+Objetivo: Garantir atualização em tempo real sem recarregar a página.
+
+Diretriz Técnica: Utilize o React Query de forma eficaz. Após cada mutação bem-sucedida (ex: geração de CCB, envio de assinatura, geração de boletos), utilize queryClient.invalidateQueries() mirando na chave da proposta (ex: ['proposta', id]) para forçar o refetch dos dados e da timeline.
+
+5. CONSTRANGIMENTOS TÉCNICOS E QUALIDADE
+BANCO (Drizzle/PostgreSQL): Uso obrigatório de Transações Drizzle para operações de escrita múltiplas (Seção 4.4). Garanta que todos os schemas Drizzle estejam sincronizados com o banco.
+
+INTEGRAÇÃO (APIs Externas): Implemente tratamento de erros robusto (try/catch, verificação de status HTTP) e logging detalhado para todas as interações com ClickSign e Banco Inter.
+
+ROLES (RBAC): Mantenha a validação de roles (ADMINISTRADOR, FINANCEIRO) em todos os endpoints relevantes usando o middleware de autenticação existente.
+
+CÓDIGO LIMPO: Mantenha a separação de responsabilidades (Services, Routes, UI Components). Tipagem TypeScript deve ser estrita.
+
+AGORA, GERE O ROADMAP DE EXECUÇÃO E IMPLEMENTE APENAS A FASE 1.

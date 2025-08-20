@@ -1,0 +1,33 @@
+**IMPLEMENTAR:** Na "Página de Pagamentos do Financeiro", a funcionalidade do botão "Confirmar Veracidade" e a lógica subsequente para "Liberar Chave PIX" para pagamento.
+
+**CONTEXT:** Este é o passo final e irreversível de verificação humana antes que um empréstimo seja pago a um cliente. A equipe financeira precisa de um mecanismo de confirmação explícito para garantir que todos os dados e documentos foram validados. Apenas após esta confirmação, as informações de pagamento (chave PIX) do cliente devem ser reveladas.
+
+**CURRENT STATE:** A página exibe propostas elegíveis, mas não possui este portão final de segurança e aprovação.
+
+**EXPECTED (Estado Final de Sucesso):**
+
+**1. Botão "Confirmar Veracidade":**
+    - Para cada proposta na lista, adicione um novo botão "Confirmar Veracidade".
+    - O botão deve estar habilitado apenas para propostas em status apropriado (ex: `pronto_pagamento`).
+    - Ao ser clicado, deve abrir um modal de confirmação com um texto de alerta claro, como: "Você confirma que todos os dados e documentos desta proposta são autênticos e autoriza a liberação do pagamento? Esta ação é irreversível e será registrada." O modal deve ter botões "Confirmar" e "Cancelar".
+
+**2. Lógica de Backend:**
+    - Ao confirmar no modal, uma chamada deve ser feita para um novo endpoint seguro: `POST /api/pagamentos/:id/confirmar-veracidade`.
+    - Este endpoint deve:
+        a. Mudar o status da proposta no banco de dados para um novo status: `pagamento_autorizado`.
+        b. Registrar esta ação como um evento de auditoria na tabela `historico_observacoes_cobranca`, incluindo qual usuário realizou a confirmação.
+
+**3. Liberação da Chave PIX na UI:**
+    - Após o sucesso da confirmação no backend, a interface do usuário para aquela proposta deve ser atualizada em tempo real.
+    - O botão "Confirmar Veracidade" deve desaparecer ou ser desabilitado permanentemente.
+    - A chave PIX do cliente (armazenada na tabela `propostas`) deve ser exibida na tela de forma clara, acompanhada de um botão "Copiar" para facilitar a operação do financeiro.
+
+**ROLES:** Apenas usuários com as roles `ADMIN` e `FINANCEIRO` devem ter permissão para ver e utilizar o botão "Confirmar Veracidade".
+
+**BANCO (Diretriz Crítica de Schema):**
+- Esta missão requer uma alteração no schema do banco de dados. Antes de implementar a lógica, **crie e aplique uma migração Drizzle** para adicionar o novo valor `pagamento_autorizado` ao `enum` de status na tabela `propostas`.
+
+**TESTE:**
+1.  Valide se o botão "Confirmar Veracidade" aparece apenas para propostas elegíveis.
+2.  Execute o fluxo de confirmação. Verifique no banco de dados se o status da proposta mudou para `pagamento_autorizado` e se o log de auditoria foi criado.
+3.  Valide na UI se, após a confirmação, a chave PIX do cliente é corretamente exibida e o botão de confirmação é desativado.

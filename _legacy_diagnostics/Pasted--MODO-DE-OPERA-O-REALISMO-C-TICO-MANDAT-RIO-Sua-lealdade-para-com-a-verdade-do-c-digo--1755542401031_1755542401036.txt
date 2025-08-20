@@ -1,0 +1,46 @@
+**### MODO DE OPERAÇÃO: REALISMO CÉTICO (MANDATÁRIO)**
+Sua lealdade é para com a verdade do código e a estabilidade da produção.
+
+---
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Realizar uma auditoria forense do componente do modal "Confirmar Veracidade" (`pagamentos-review.tsx`) para identificar a causa raiz exata pela qual o botão "Visualizar CCB Assinada" não está a ser renderizado.
+* **Intenção Estratégica (O Porquê):** O Arquiteto identificou uma falha crítica que impede a equipe financeira de executar sua função mais importante: verificar o documento legal antes de autorizar um pagamento. Precisamos de um diagnóstico preciso para restaurar esta funcionalidade inegociável.
+* **Histórico Relevante (Consulta Obrigatória):** Uma auditoria anterior (`DEBATE-MAXIMO-AUDITORIA-FINAL-MODAL-VERACIDADE-01`) mostrou que o código para este botão existe. A sua missão é descobrir por que, apesar de existir, ele não está a ser renderizado na UI. A falha está na condição que o envolve.
+* **Modelo Mental (Como se Encaixa):** Você é um engenheiro de depuração de frontend. Sua tarefa é analisar a lógica de renderização condicional (`if`, `&&`, etc.) e provar, com evidências, qual condição está a falhar.
+
+---
+
+**IMPLEMENTAR:**
+Um relatório de auditoria detalhado. **NÃO FAÇA MODIFICAÇÕES.**
+
+**CURRENT STATE:**
+O modal "Confirmar Veracidade" abre, mas o botão para visualizar a CCB assinada, que é a peça de evidência mais importante, está ausente.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um relatório de auditoria que aponte a linha de código exata da condição que está a esconder o botão e explique por que a condição está a falhar.
+
+**CONSTRAINTS (Roadmap de Auditoria Forense):**
+
+**1. Auditoria da Lógica de Renderização Condicional:**
+    - **Ação:** Inspecione o ficheiro `client/src/pages/financeiro/pagamentos-review.tsx`.
+    - **Relatório 1 (A Evidência Crítica):** Localize e apresente o trecho de código JSX completo que contém a lógica de renderização condicional para o botão "Ver CCB". Deve ser algo como:
+      ```jsx
+      {CONDICAO && (
+        <Button onClick={handleViewCCB}>
+          Ver CCB
+        </Button>
+      )}
+      ```
+
+**2. Análise da Condição Falha:**
+    - **Ação:** Analise a `CONDICAO` que você encontrou acima. Ela provavelmente verifica um campo como `proposta.assinaturaEletronicaConcluida`.
+    - **Ação:** Adicione um `console.log` imediatamente antes desta condição para imprimir o valor do objeto `proposta` que o modal está a receber, focando no campo usado na condição.
+    - **Relatório 2:** Apresente o resultado deste `console.log`. O valor do campo na condição (ex: `proposta.assinaturaEletronicaConcluida`) é `true` ou `false`?
+
+**3. Hipótese de Causa Raiz:**
+    - **Ação:** Com base nas suas descobertas, formule uma hipótese para a falha.
+    - **Relatório 3:** A falha é porque o backend não está a enviar o campo de status da assinatura corretamente? Ou o frontend está a verificar o nome errado da propriedade?
+
+**Relatório Final:**
+O critério de sucesso é um relatório forense que nos dê um diagnóstico definitivo, com evidências de código e de logs, explicando exatamente por que o botão da CCB não está visível.

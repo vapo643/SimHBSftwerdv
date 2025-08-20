@@ -1,0 +1,61 @@
+}
+[INTER] ========== RESPONSE DETAILS ==========
+[INTER] 📊 STATUS: 406 Not Acceptable
+[INTER] 📋 RESPONSE HEADERS: {
+  'content-length': '360',
+  'content-type': 'application/json',
+  date: 'Tue, 12 Aug 2025 18:11:00 GMT',
+  server: 'istio-envoy',
+  'strict-transport-security': 'max-age=31536000; includeSubDomains',
+  traceparent: '00-06e5b7e74bd5b22cd8c8419b75c7cfdb-6a807e2f7879ce90-00',
+  'x-envoy-upstream-service-time': '5',
+  'x-rate-limit-remaining': '119',
+  'x-rate-limit-time': '1755022321085',
+  'x-upstream-time': '10'
+}
+[INTER] 🔍 Response Content-Type: application/json
+[INTER] 🔍 Is PDF Response: false
+[INTER] 📦 Response buffer size: 360 bytes
+[INTER] ❌❌❌ ERROR RESPONSE ❌❌❌
+[INTER] 🚨 Status Code: 406
+[INTER] 🚨 Error Body: "{"title":"Falha durante a execução da request.","detail":"Verifique se os dados informados estão de acordo com a documentação disponibilizada e tente novamente","timestamp":"2025-08-12T15:11:01.099804545-03:00","violacoes":[{"razao":"Specified Accept Types [application/pdf] not supported. Supported types: [application/problem+json, application/json]"}]}"
+[INTER] 🚨 Error Body Length: 355 chars
+[INTER] 📄 PDF ENDPOINT ERROR ANALYSIS:
+[INTER] 📄 Requested endpoint: /cobranca/v3/cobrancas/c3599570-b534-4b13-9dc4-e53e7109a163/pdf
+[INTER] 📄 Accept header sent: application/pdf
+[INTER] 📄 Content-Type received: application/json
+[INTER] 📋 Error as JSON: {
+  "title": "Falha durante a execução da request.",
+  "detail": "Verifique se os dados informados estão de acordo com a documentação disponibilizada e tente novamente",
+  "timestamp": "2025-08-12T15:11:01.099804545-03:00",
+  "violacoes": [
+    {
+      "razao": "Specified Accept Types [application/pdf] not supported. Supported types: [application/problem+json, application/json]"
+    }
+  ]
+}
+[INTER] ❌❌❌ END ERROR RESPONSE ❌❌❌
+[INTER] ❌ DEEP RESEARCH: PDF download failed: Error: Inter API error: 406 - {"title":"Falha durante a execução da request.","detail":"Verifique se os dados informados estão de acordo com a documentação disponibilizada e tente novamente","timestamp":"2025-08-12T15:11:01.099804545-03:00","violacoes":[{"razao":"Specified Accept Types [application/pdf] not supported. Supported types: [application/problem+json, application/json]"}]}
+    at IncomingMessage.<anonymous> (/home/runner/workspace/server/services/interBankService.ts:550:17)
+    at IncomingMessage.emit (node:events:536:35)
+    at endReadableNT (node:internal/streams/readable:1698:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+[INTER] ❌ ERROR 406 - POSSIBLE CAUSES:
+- Boleto não está no status correto (precisa ser REGISTRADO?)
+- codigoSolicitacao incorreto (tentar nossoNumero?)
+- Headers ainda não corretos
+- Permissões da aplicação não incluem PDF download
+[INTER] Failed to get PDF: Error: Inter API error: 406 - {"title":"Falha durante a execução da request.","detail":"Verifique se os dados informados estão de acordo com a documentação disponibilizada e tente novamente","timestamp":"2025-08-12T15:11:01.099804545-03:00","violacoes":[{"razao":"Specified Accept Types [application/pdf] not supported. Supported types: [application/problem+json, application/json]"}]}
+    at IncomingMessage.<anonymous> (/home/runner/workspace/server/services/interBankService.ts:550:17)
+    at IncomingMessage.emit (node:events:536:35)
+    at endReadableNT (node:internal/streams/readable:1698:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/debug/me
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/login
+[JWT DEBUG] Header Auth presente: false
+[JWT DEBUG] Header começa com Bearer: undefined
+⚠️ [SECURITY] TOKEN_INVALID | severity=MEDIUM | FAILURE | ip=187.36.168.240 | endpoint=/api/debug/me

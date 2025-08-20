@@ -1,0 +1,56 @@
+**### MODO DE OPERAÇÃO: REALISMO CÉTICO (MANDATÓRIO)**
+Sua lealdade é para com a verdade do código e a estabilidade da produção.
+
+---
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Implementar a arquitetura final da "Ficha do Cliente", incluindo o "Frontend Consciente de Estado" (Status-Aware Frontend) para downloads de PDF, a "UX Informativa" para dados de PIX inconsistentes e a "UI Simplificada" com a remoção de ações redundantes.
+* **Intenção Estratégica (O Porquê):** Para erradicar definitivamente as falhas de usabilidade e integridade de dados na Ficha do Cliente, transformando-a em uma ferramenta de trabalho 100% confiável, resiliente e intuitiva para a equipe de cobranças.
+* **Histórico Relevante (Consulta Obrigatória):** Use o seu próprio documento de arquitetura (`ARQUITETURA_COMPLETA_-_PRONTA_PARA_IMPLEMENTAÇÃO.md`) como a única fonte da verdade e o mapa de implementação para esta missão. Sua tarefa é traduzir o seu plano em código funcional.
+* **Modelo Mental (Como se Encaixa):** Você atuará como Engenheiro Full-Stack Sênior. A missão exigirá modificações coordenadas no backend (para criar o novo endpoint de status) e no frontend (para implementar o polling inteligente, a lógica de tooltips e a simplificação da UI).
+* **Riscos Antecipados:** **Risco:** A lógica de polling pode ser complexa. **Contramedida:** A sua implementação deve ser robusta, com limites de segurança (máximo de tentativas/timeout) para evitar loops infinitos.
+
+---
+
+**IMPLEMENTAR:**
+A refatoração completa da "Ficha do Cliente" conforme a arquitetura que você projetou.
+
+**CURRENT STATE:**
+A ficha sofre de uma condição de corrida no download de PDFs e exibe uma UI inconsistente para os botões de "Copiar PIX".
+
+**EXPECTED (Estado Final de Sucesso):**
+Uma "Ficha do Cliente" 100% alinhada com o seu documento de arquitetura:
+1.  O botão de download do carnê/PDF fica desabilitado e com um spinner enquanto a sincronização assíncrona do backend ocorre. Ele só é habilitado quando o novo endpoint de status confirma que o ficheiro está pronto.
+2.  O botão "Copiar PIX" está sempre visível, mas desabilitado e com um tooltip informativo se os dados do PIX não foram fornecidos pelo banco.
+3.  O botão "Copiar Boleto" (linha digitável) é completamente removido da interface.
+
+**CONSTRAINTS (Roadmap de Implementação Faseado):**
+
+**FASE 1: Backend - O Endpoint de "Consciência de Estado":**
+    - **Ação:** Implemente o novo endpoint `GET /api/propostas/:id/sync-status` que você projetou.
+    - **Implementação:** Ele deve verificar o estado da sincronização dos boletos e retornar um JSON com a estrutura `{ syncStatus: 'nao_iniciado' | 'em_andamento' | 'concluido' | 'falhou', ... }`.
+
+**FASE 2: Frontend - A Lógica de Orquestração e UI:**
+    - **Ação:** Refatore o componente da "Ficha do Cliente" (`CobrancasPage.tsx`).
+    - **Implementação:**
+        a. **Polling Inteligente:** Ao abrir a ficha, chame o novo endpoint de status. Se o status for `em_andamento`, inicie um polling (ex: a cada 3 segundos) para verificar novamente, com um limite de tentativas para evitar loops.
+        b. **UI Consciente de Estado:** A propriedade `disabled` do botão de download de PDF deve ser controlada pelo resultado do polling.
+        c. **UX Informativa:** Implemente a lógica do `tooltip` no botão "Copiar PIX" para que ele informe o usuário por que está desabilitado quando for o caso.
+        d. **UI Simplificada:** Remova completamente o JSX e a lógica do botão "Copiar Boleto".
+
+---
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1. Mapear os arquivos de backend e frontend envolvidos.
+2. Garantir que a implementação siga estritamente o seu próprio documento de arquitetura.
+3. Executar `get_latest_lsp_diagnostics` e corrigir TODOS os erros.
+4. **Declarar Nível de Confiança (0-100%)**.
+5. **Categorizar Riscos Descobertos**.
+6. **Teste Funcional Obrigatório:** Execute um teste ponta-a-ponta completo, validando o polling, a habilitação/desabilitação dos botões e os novos tooltips.
+7. **Documentar Decisões Técnicas**.
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher]
+* **RISCOS IDENTIFICADOS:** [Preencher]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Preencher]
+* **VALIDAÇÃO PENDENTE:** [Valide visualmente que o novo fluxo de UI consciente de estado funciona perfeitamente.]
+---

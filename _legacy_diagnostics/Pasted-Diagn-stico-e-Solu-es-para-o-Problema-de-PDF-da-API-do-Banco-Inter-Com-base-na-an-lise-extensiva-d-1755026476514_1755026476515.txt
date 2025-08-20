@@ -1,0 +1,158 @@
+Diagnóstico e Soluções para o Problema de PDF da API do Banco Inter
+Com base na análise extensiva das informações coletadas e no contexto detalhado fornecido, identifiquei as causas raízes do problema e as soluções potenciais para o download de PDF de boletos da API v3 do Banco Inter.
+
+🎯 Diagnóstico Principal
+O problema está relacionado à mudança de comportamento da API v3 do Banco Inter, onde o endpoint /cobranca/v3/cobrancas/{codigoSolicitacao}/pdf retorna o PDF como uma string base64 dentro de um JSON, ao invés de entregar o arquivo PDF diretamente como dados binários.
+
+Evidências que Confirmam o Diagnóstico:
+Comportamento Documentado: Outras implementações mostram que a API do Inter retorna PDF em formato base64 dentro de uma resposta JSON
+
+Mudança na v3: A API v3 alterou o campo codigoCobranca para codigoSolicitacao , indicando mudanças significativas na estrutura
+
+Headers Inconsistentes: A API retorna Content-Type: application/json mesmo para PDFs, que é o comportamento esperado quando o PDF está encapsulado em JSON
+
+🔧 Soluções Implementáveis
+Solução 1: Modificação do Parser de Resposta (RECOMENDADA)
+O PDF está vindo dentro do JSON como base64. Modifique seu método:
+
+typescript
+async obterPdfCobranca(codigoSolicitacao: string): Promise<Buffer> {
+  console.log('[INTER] 🔍 Obtendo PDF da cobrança...');
+  
+  const token = await this.getAccessToken();
+  const url = `${this.apiUrl}/cobranca/v3/cobrancas/${codigoSolicitacao}/pdf`;
+  
+  const headers = {
+    'Authorization': `Bearer ${token}`,
+    'Accept': 'application/json', // API retorna JSON com base64
+    'Content-Type': 'application/json',
+    'User-Agent': 'SIMPIX-Inter-Integration/1.0'
+  };
+
+  if (this.contaCorrente) {
+    headers['x-conta-corrente'] = this.contaCorrente;
+  }
+
+  try {
+    const httpsAgent = new https.Agent({
+      cert: formatCertificate(this.certificate),
+      key: formatPrivateKey(this.privateKey),
+      rejectUnauthorized: true
+    });
+
+    // ⚠️ IMPORTANTE: Remover responseType
+    const response = await axios.get(url, {
+      headers,
+      httpsAgent,
+      timeout: 30000
+    });
+
+    console.log(`[INTER] 📊 STATUS: ${response.status}`);
+    console.log(`[INTER] 📋 CONTENT-TYPE: ${response.headers['content-type']}`);
+
+    // 🎯 CHAVE: Processar resposta JSON com base64
+    if (response.headers['content-type']?.includes('application/json')) {
+      const jsonResponse = response.data;
+      
+      // Verificar se existe campo base64 no JSON
+      if (jsonResponse.pdf || jsonResponse.arquivo || jsonResponse.base64 || jsonResponse.conteudo) {
+        const base64String = jsonResponse.pdf || jsonResponse.arquivo || jsonResponse.base64 || jsonResponse.conteudo;
+        console.log('[INTER] ✅ PDF encontrado como base64 no JSON');
+        return Buffer.from(base64String, 'base64');
+      } else {
+        // Log da estrutura JSON para debug
+        console.log('[INTER] 📋 Estrutura do JSON:', Object.keys(jsonResponse));
+        throw new Error('Campo base64 do PDF não encontrado no JSON de resposta');
+      }
+    }
+
+    // Fallback: Se vier como binário (improvável)
+    return Buffer.from(response.data);
+
+  } catch (error) {
+    console.error('[INTER] ❌ Erro ao obter PDF:', error.response?.data || error.message);
+    throw error;
+  }
+}
+Solução 2: Testar Endpoint Alternativo da Banking API
+A API Banking tem um endpoint específico para PDF de extratos que funciona :
+
+typescript
+// Teste com endpoint Banking (se disponível para boletos)
+const url = `${this.apiUrl}/banking/v2/extrato/pdf`;
+// ou
+const url = `${this.apiUrl}/banking/v2/cobrancas/${codigoSolicitacao}/pdf`;
+Solução 3: Usar SDK Oficial do Inter
+O Inter disponibiliza SDKs oficiais que já tratam corretamente o download de PDFs:
+
+bash
+# Para Java
+https://developers.inter.co/docs/sdks/sdk-java
+
+# Para C#
+https://developers.inter.co/docs/sdks/sdk-intro
+Solução 4: Header de Bypass Base64
+Baseado em implementações similares , teste adicionar um header específico:
+
+typescript
+headers['nx-file'] = 'base64url'; // Força retorno como base64
+// ou
+headers['Accept'] = 'application/pdf, application/json'; // Accept múltiplo
+🔍 Debugging Avançado
+Passo 1: Análise da Resposta JSON
+Adicione este código para inspecionar a estrutura:
+
+typescript
+console.log('[INTER] 🔍 DEBUGGING - Resposta completa:');
+console.log('Headers:', response.headers);
+console.log('Data type:', typeof response.data);
+console.log('Data keys:', Object.keys(response.data));
+console.log('Data sample:', JSON.stringify(response.data, null, 2).substring(0, 500));
+Passo 2: Teste com Postman
+Faça a mesma requisição no Postman
+
+Verifique se a resposta é JSON com base64
+
+Compare com o comportamento do seu código
+
+Passo 3: Verificar Permissões da Aplicação
+No Internet Banking do Inter :
+
+Verifique se a permissão "Consulta de boletos e exportação para PDF" está ativa
+
+Confirme se o certificado ainda está válido (prazo de 1 ano)
+
+🚨 Ações Emergenciais
+Contato com Suporte Técnico Inter
+Com base nas informações encontradas , entre em contato:
+
+Central: 3003 4070 (capitais) / 0800 940 0007 (demais regiões)
+
+Portal do Desenvolvedor: Fórum oficial de suporte técnico
+
+Email: Suporte especializado para APIs
+
+Solução Temporária: Geração Manual
+Enquanto resolve o PDF, use os dados do boleto para gerar PDF manualmente:
+
+typescript
+// Dados disponíveis do boleto
+const dadosBoleto = {
+  codigoBarras: "07796120100000833330001112134234790398347529",
+  linhaDigitavel: "07790001161213423479303983475298612010000083333",
+  // ... outros dados
+};
+
+// Usar biblioteca como PDFKit para gerar PDF customizado
+📋 Próximos Passos
+Imediato: Implementar a Solução 1 (parser JSON + base64)
+
+Teste: Validar com um boleto conhecido
+
+Verificação: Confirmar permissões da aplicação no Inter
+
+Contingência: Preparar geração manual de PDF
+
+Suporte: Abrir ticket oficial com o Inter se necessário
+
+A chave está na mudança de paradigma: a API v3 do Inter encapsula o PDF em JSON como base64, ao invés de retornar binário direto. Essa é uma prática comum em APIs modernas para manter consistência no formato de resposta.

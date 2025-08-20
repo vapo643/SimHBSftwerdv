@@ -1,0 +1,45 @@
+**### MODO DE OPERAÇÃO: REALISMO CÉTICO (MANDATÓRIO)**
+Sua lealdade é para com a verdade do código e a estabilidade da produção.
+
+---
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Implementar um serviço de reconciliação para sincronizar o status de pagamento da tabela `inter_collections` para a tabela `parcelas`, garantindo que `parcelas` se torne a fonte única da verdade para a lógica de negócio, e remover o botão "Boleto" obsoleto da UI.
+* **Intenção Estratégica (O Porquê):** Para erradicar a inconsistência de dados crítica que está a tornar a "Tela de Cobranças" não confiável. Ao garantir que um pagamento recebido via webhook atualize o status da `parcela` correspondente, nós unificamos nossa fonte da verdade e garantimos que todos os cálculos (`parcelasPagas`, `statusVencimento`) sejam precisos.
+* **Histórico Relevante (Consulta Obrigatória):** Use o seu relatório de auditoria forense anterior como a única fonte da verdade. Ele provou a dessincronização entre as tabelas `inter_collections` e `parcelas`. Sua missão é construir a ponte que falta.
+* **Modelo Mental (Como se Encaixa):** Você atuará como Engenheiro de Backend. A principal modificação será no handler do webhook do Banco Inter. Após atualizar a tabela `inter_collections`, você adicionará uma nova etapa que encontra a `parcela` correspondente e atualiza o seu status para `'pago'`.
+* **Riscos Antecipados:** **Risco:** A lógica para encontrar a parcela correspondente pode ser complexa. **Contramedida:** A relação deve ser feita através do `proposta_id` e do `numero_parcela`.
+
+---
+
+**IMPLEMENTAR:**
+A lógica de sincronização de status entre `inter_collections` e `parcelas`, e a limpeza da UI.
+
+**CURRENT STATE:**
+Um pagamento recebido via webhook atualiza a `inter_collections.situacao`, mas a `parcelas.status` permanece inalterada, causando uma discrepância permanente nos dados. O botão "Boleto" ainda existe na UI principal.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  Quando um webhook de pagamento do Inter é recebido, o `status` da `parcela` correspondente na tabela `parcelas` é **automaticamente atualizado** para `pago`.
+2.  Como resultado, a "Tela de Cobranças" (que lê da tabela `parcelas`) exibe o número correto de parcelas pagas, o status de vencimento correto e os KPIs corretos.
+3.  O botão "Boleto" é permanentemente removido da tabela principal de cobranças.
+
+**CONSTRAINTS (Roadmap de Implementação Faseado):**
+
+**FASE 1: Implementação do Serviço de Reconciliação (Backend):**
+    - **Ação:** No endpoint que processa o webhook do Banco Inter (provavelmente em `server/routes/webhooks/inter.ts`).
+    - **Implementação:** **Imediatamente após** o código que atualiza a `inter_collections.situacao` para `'RECEBIDO'` ou `'PAGO'`, adicione a nova lógica de reconciliação:
+        a. Com base no `codigoSolicitacao` do webhook, encontre o registro completo em `inter_collections`.
+        b. Extraia o `proposta_id` e o `numero_parcela`.
+        c. Execute um comando `db.update(parcelas).set({ status: 'pago' })` na tabela `parcelas`, usando o `proposta_id` e o `numero_parcela` na cláusula `WHERE` para encontrar a linha exata a ser atualizada.
+
+**FASE 2: Limpeza da UI (Frontend):**
+    - **Ação:** No ficheiro `client/src/pages/financeiro/CobrancasPage.tsx`.
+    - **Implementação:** Localize e **remova completamente** o JSX e a lógica do botão "Boleto" na coluna de "Ações" da tabela principal.
+
+---
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+Siga o protocolo completo. O teste funcional deve ser rigoroso: simule um webhook de pagamento e valide diretamente no banco de dados que o `status` na tabela `parcelas` foi atualizado. Em seguida, valide na UI que a contagem de "Parcelas Pagas" e o "Status de Vencimento" foram atualizados corretamente.
+---
+**DECLARAção DE INCERTEZA (OBRIGATÓRIO):**
+Preencha a declaração completa ao final da sua implementação.
+---

@@ -1,0 +1,29 @@
+**Plano de Teste de Validação End-to-End**
+
+**Objetivo:** Validar que a cascata de bugs de mapeamento de dados foi definitivamente resolvida, desde a entrada de dados no frontend até a renderização final no PDF da CCB.
+
+**ETAPA 1: CRIAÇÃO DA PROVA (Origem dos Dados)**
+1.  **Ação:** Acesse a tela "Nova Proposta".
+2.  **Validação:** Confirme que os **novos campos** (`Local de Nascimento`, `Data de Emissão do RG`, `UF do RG`) estão agora visíveis no formulário.
+3.  **Ação Crítica:** Crie uma **NOVA PROPOSTA DO ZERO**. Preencha **TODOS** os campos com dados únicos e fáceis de identificar (ex: Rua do Teste Final 123, Bairro da Validação, Banco 999, Agência 9999, etc.).
+
+**ETAPA 2: GERAÇÃO DO ARTEFATO (Resultado Final)**
+1.  **Ação:** Avance com esta nova proposta de teste por todo o fluxo até a "Tela de Formalização".
+2.  **Ação Crítica:** Acione a funcionalidade de "Gerar CCB".
+
+**ETAPA 3: AUDITORIA VISUAL DO PDF**
+1.  **Ação:** Abra o documento PDF da CCB que foi gerado.
+2.  **Validação Crítica:** Com o PDF aberto, verifique rigorosamente CADA um dos pontos de falha que reportamos anteriormente:
+    * **[ ] Endereço:** O endereço está agora perfeitamente formatado, com cada parte (Rua, Bairro, CEP, Cidade) em seu campo e coordenada exatos, conforme o `MAPEAMENTO_COMPLETO_CCB_COORDENADAS.md`?
+    * **[ ] Dados de RG:** Os campos `Local de Nascimento`, `Data de Emissão do RG` e `UF do RG` estão preenchidos com os dados que você inseriu?
+    * **[ ] Dados Bancários:** As informações de `Banco`, `Agência`, `Conta` e `Chave PIX` estão agora visíveis e corretas?
+    * **[ ] Conflito Expedidor/Nacionalidade:** O campo "Órgão Expedidor" está preenchido corretamente e **visualmente separado** do campo "Nacionalidade"?
+
+---
+**Relatório Final para Mim:**
+Após executar os testes, por favor, retorne com um veredito final:
+
+* **`[SUCESSO]`** se TODOS os pontos de validação forem confirmados.
+* **`[FALHA]`** se QUALQUER um dos pontos falhar, indicando qual deles.
+
+O sucesso desta validação encerrará o nosso "Debate Máximo" e resolverá a crise de instabilidade na funcionalidade mais crítica do nosso sistema. Aguardo seu relatório.

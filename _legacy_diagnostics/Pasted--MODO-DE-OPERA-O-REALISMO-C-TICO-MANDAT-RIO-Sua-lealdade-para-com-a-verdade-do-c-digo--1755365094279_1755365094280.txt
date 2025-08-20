@@ -1,0 +1,57 @@
+**### MODO DE OPERAÇÃO: REALISMO CÉTICO (MANDATÓRIO)**
+Sua lealdade é para com a verdade do código e a estabilidade da produção.
+
+---
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Implementar a validação de assinatura HMAC no nosso endpoint de webhook do Banco Inter (`/api/webhooks/inter-refactored`) para garantir a autenticidade e a integridade das notificações recebidas.
+* **Intenção Estratégica (O Porquê):** Como você corretamente identificou, um webhook sem validação de assinatura é uma vulnerabilidade de segurança crítica. Ele permitiria que um ator malicioso enviasse payloads falsos para o nosso sistema, corrompendo o status dos nossos boletos. Esta missão é para fechar esta porta.
+* **Histórico Relevante (Consulta Obrigatória):** Já implementamos com sucesso a validação HMAC para o webhook da ClickSign. Use o ficheiro `server/routes/webhooks/clicksign.ts` como a sua principal referência e "fonte da verdade" para a arquitetura de segurança correta.
+* **Modelo Mental (Como se Encaixa):** Você atuará como um Engenheiro de Segurança. Sua tarefa é adicionar uma camada de verificação no início do endpoint do webhook. Nenhuma lógica de negócio deve ser executada antes que a assinatura da requisição seja validada com sucesso.
+* **Riscos Antecipados:** **Risco:** A lógica de criptografia pode ser complexa. **Contramedida:** Replique o padrão já validado do webhook da ClickSign, adaptando-o para as especificidades (chaves, headers) do Banco Inter.
+
+---
+
+**IMPLEMENTAR:**
+A validação de segurança HMAC no endpoint de webhook do Banco Inter.
+
+**CURRENT STATE:**
+O endpoint está funcional, mas inseguro. Ele aceita e processa qualquer payload `POST` que chegue, sem verificar sua origem.
+
+**EXPECTED (Estado Final de Sucesso):**
+O endpoint `POST /api/webhooks/inter-refactored` agora possui uma lógica de validação HMAC.
+1.  Requisições com uma assinatura HMAC válida são processadas normalmente.
+2.  Requisições com uma assinatura inválida ou ausente são **imediatamente rejeitadas** com um erro `HTTP 401 Unauthorized`, e a ação é registada em nossos logs de segurança.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+**1. Pesquisa de Documentação (Se Necessário):**
+    - **Ação:** Se não tiver certeza, consulte brevemente a documentação para desenvolvedores do Banco Inter sobre webhooks para confirmar qual `header` eles usam para enviar a assinatura e qual o algoritmo de hash esperado (ex: `sha256`).
+
+**2. Criação de um Middleware de Validação:**
+    - **Ação:** Seguindo o padrão do webhook da ClickSign, crie uma função de middleware (ex: `validateInterWebhook`) que encapsule a lógica de validação.
+    - **Implementação:**
+        a. A função deve ler o corpo bruto (`raw body`) da requisição.
+        b. Ela deve ler a assinatura do `header` apropriado.
+        c. Ela deve usar a nossa chave secreta do webhook do Inter (que deve estar nos 'Secrets') para gerar uma assinatura HMAC do corpo bruto.
+        d. Ela deve comparar, de forma segura (usando uma função de comparação de tempo constante), a assinatura que ela gerou com a assinatura recebida no `header`. Se forem diferentes, deve lançar um erro.
+
+**3. Integração no Endpoint:**
+    - **Ação:** Aplique este novo middleware de validação ao endpoint `POST /api/webhooks/inter-refactored`.
+
+---
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1. Mapear os arquivos envolvidos.
+2. Garantir que o middleware de validação seja a **primeira** etapa do endpoint.
+3. Executar `get_latest_lsp_diagnostics` e corrigir TODOS os erros.
+4. **Declarar Nível de Confiança (0-100%)**.
+5. **Categorizar Riscos Descobertos**.
+6. **Teste Funcional Obrigatório:** Crie um script de teste (usando `curl` ou similar) para simular duas chamadas ao endpoint: uma com uma assinatura HMAC válida e outra com uma inválida, e valide que o sistema se comporta como esperado em ambos os casos.
+7. **Documentar Decisões Técnicas**.
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher]
+* **RISCOS IDENTIFICADOS:** [Preencher]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Preencher]
+* **VALIDAÇÃO PENDENTE:** [Preencher]
+---

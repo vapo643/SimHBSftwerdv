@@ -1,0 +1,45 @@
+## AUDITORIA COMPLETA: Fluxo de Download de Boletos do Banco Inter
+
+### PROBLEMA IDENTIFICADO
+- Boletos criados mas retornando 404 na API do Inter
+- PDF não disponível para download
+- Status permanece em "EM_PROCESSAMENTO"
+
+### DIAGNÓSTICO DETALHADO
+
+#### 1. ANÁLISE DOS LOGS
+```
+[INTER] Status Code: 404
+"Cobrança não encontrada"
+código: d39921c1-a828-b766-c970-16f97fb5a6af
+```
+
+#### 2. POSSÍVEIS CAUSAS
+1. **Códigos UUID incorretos**: Os códigos salvos são UUIDs aleatórios, não códigos do Inter
+2. **Boletos não foram criados**: Apenas salvamos no banco local, não enviamos ao Inter
+3. **Ambiente incorreto**: Pode estar tentando buscar em produção boletos de sandbox
+4. **Formato do código**: Inter pode usar formato diferente de identificação
+
+#### 3. FLUXO ATUAL (IDENTIFICADO)
+```
+1. Frontend solicita PDF
+2. Backend busca código no banco local
+3. Backend tenta buscar no Inter com esse código
+4. Inter retorna 404 (não encontrado)
+5. Frontend mostra "PDF indisponível"
+```
+
+#### 4. FLUXO CORRETO (DEVERIA SER)
+```
+1. Criar boleto no Inter API (POST /cobranca/v3/cobrancas)
+2. Receber codigoSolicitacao do Inter
+3. Salvar código REAL no banco
+4. Buscar detalhes com código REAL (GET /cobranca/v3/cobrancas/{codigo})
+5. Baixar PDF com código REAL (GET /cobranca/v3/cobrancas/{codigo}/pdf)
+```
+
+### SOLUÇÃO PROPOSTA
+1. Verificar se boletos foram realmente criados no Inter
+2. Se não, criar boletos reais via API
+3. Atualizar códigos no banco com códigos reais do Inter
+4. Implementar download com códigos válidos

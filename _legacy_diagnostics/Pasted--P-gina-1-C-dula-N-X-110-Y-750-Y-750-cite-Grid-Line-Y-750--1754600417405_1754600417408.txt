@@ -1,0 +1,107 @@
+### **Página 1**
+*   **Cédula Nº:** (X: 110, Y: 750)
+    *   Y: 750 [cite: Grid Line "Y:750"]
+    *   X: 110 [cite: Label "Cédula Nº", Grid Lines "X:100", "X:150". Start of input area immediately following the label.]
+*   **Data de Emissão:** (X: 315, Y: 750)
+    *   Y: 750 [cite: Grid Line "Y:750"]
+    *   X: 315 [cite: Label "Data de Emissão", Grid Lines "X:300", "X:350". Start of input area immediately following the label.]
+*   **Finalidade da Operação:** (X: 485, Y: 750)
+    *   Y: 750 [cite: Grid Line "Y:750"]
+    *   X: 485 [cite: Label "Finalidade da Operação", Grid Lines "X:450", "X:500". Start of input area immediately following the label.]
+*   **CPF/CNPJ:** (X: 475, Y: 700)
+    *   Y: 700 [cite: Grid Line "Y:700"]
+    *   X: 475 [cite: Label "CPF/CNPJ", Grid Lines "X:450", "X:500". Start of input area immediately following the label.]
+*   **Nome/Razão Social:** (X: 160, Y: 650)
+    *   Y: 650 [cite: Grid Line "Y:650"]
+    *   X: 160 [cite: Label "Nome/Razão Social", Grid Lines "X:150", "X:200". Start of input area immediately following the label.]
+*   **RG:** (X: 270, Y: 650)
+    *   Y: 650 [cite: Grid Line "Y:650"]
+    *   X: 270 [cite: Label "RG", Grid Lines "X:250", "X:300". Start of input area immediately following the label.]
+*   **Endereço (Emitente):** (X: 105, Y: 600)
+    *   Y: 600 [cite: Grid Line "Y:600"]
+    *   X: 105 [cite: Label "Endereço", Grid Lines "X:100", "X:150". Start of input area immediately following the label.]
+*   **Razão Social (Credor):** (X: 115, Y: 500)
+    *   Y: 500 [cite: Grid Line "Y:500"]
+    *   X: 115 [cite: Label "Razão Social", Grid Lines "X:100", "X:150". Start of input area immediately following the label.]
+*   **Endereço (Credor):** (X: 105, Y: 450)
+    *   Y: 450 [cite: Grid Line "Y:450"]
+    *   X: 105 [cite: Label "Endereço", Grid Lines "X:100", "X:150". Start of input area immediately following the label.]
+*   **1. Valor de Principal:** (X: 155, Y: 400)
+    *   Y: 400 [cite: Grid Line "Y:400"]
+    *   X: 155 [cite: Label "1. Valor de Principal:", Grid Lines "X:150", "X:200". Start of input area immediately following the label.]
+*   **16.Custo Efetivo Total - CET:** (X: 455, Y: 200)
+    *   Y: 200 [cite: Grid Line "Y:200"]
+    *   X: 455 [cite: Label "16.Custo Efetivo Total - CET:", Grid Lines "X:450", "X:500". Start of input area immediately following the label.]
+
+### **Página 2**
+*   **N° Banco (Emitente):** (X: 160, Y: 690)
+    *   Y: 690 [cite: Estimated baseline below Grid Line "Y:700" and above "Y:650", aligned with Label "N° Banco:".]
+    *   X: 160 [cite: Label "N° Banco:", Grid Lines "X:150", "X:200". Start of input area immediately following the label.]
+*   **Conta N° (Emitente):** (X: 430, Y: 690)
+    *   Y: 690 [cite: Estimated baseline below Grid Line "Y:700" and above "Y:650", aligned with Label "Conta N°:".]
+    *   X: 430 [cite: Label "Conta N°:", Grid Lines "X:400", "X:450". Start of input area immediately following the label.]
+*   **Nome da Instituição favorecida:** (X: 55, Y: 550)
+    *   Y: 550 [cite: Grid Line "Y:550"]
+    *   X: 55 [cite: Placeholder "Nome da Instituição favorecida", Grid Line "X:50". Start of input area for the first column in Section IV.]
+*   **Nº contrato:** (X: 255, Y: 550)
+    *   Y: 550 [cite: Grid Line "Y:550"]
+    *   X: 255 [cite: Placeholder "Nº contrato 000000", Grid Line "X:250". Start of input area for the second column in Section IV.]
+*   **Linha digitavel do boleto:** (X: 405, Y: 550)
+    *   Y: 550 [cite: Grid Line "Y:550"]
+    *   X: 405 [cite: Placeholder "Linha digitavel do boleto", Grid Line "X:400". Start of input area for the third column in Section IV.]
+
+### **Página 8**
+*   **Linha 1 - Data Pagamento:** (X: 55, Y: 700)
+    *   Y: 700 [cite: Grid Line "Y:700"]
+    *   X: 55 [cite: Header "Data Pagamento", Grid Line "X:50". Start of input area for column 1.]
+*   **Linha 1 - Valor R$:** (X: 155, Y: 700)
+    *   Y: 700 [cite: Grid Line "Y:700"]
+    *   X: 155 [cite: Header "Valor R$", Grid Line "X:150". Start of input area for column 2.]
+*   **Linha 1 - Número do Cheque/Linha Digitável:** (X: 255, Y: 700)
+    *   Y: 700 [cite: Grid Line "Y:700"]
+    *   X: 255 [cite: Header "Número do Cheque/Linha Digitável do Boleto", Grid Line "X:250". Start of input area for column 3.]
+*   **Linha 2 - Data Pagamento:** (X: 55, Y: 650)
+    *   Y: 650 [cite: Grid Line "Y:650"]
+    *   X: 55 [cite: Header "Data Pagamento", Grid Line "X:50". Start of input area for column 1.]
+*   **Linha 2 - Valor R$:** (X: 155, Y: 650)
+    *   Y: 650 [cite: Grid Line "Y:650"]
+    *   X: 155 [cite: Header "Valor R$", Grid Line "X:150". Start of input area for column 2.]
+*   **Linha 2 - Número do Cheque/Linha Digitável:** (X: 255, Y: 650)
+    *   Y: 650 [cite: Grid Line "Y:650"]
+    *   X: 255 [cite: Header "Número do Cheque/Linha Digitável do Boleto", Grid Line "X:250". Start of input area for column 3.]
+*   **Linha 3 - Data Pagamento:** (X: 55, Y: 600)
+    *   Y: 600 [cite: Grid Line "Y:600"]
+    *   X: 55 [cite: Header "Data Pagamento", Grid Line "X:50". Start of input area for column 1.]
+*   **Linha 3 - Valor R$:** (X: 155, Y: 600)
+    *   Y: 600 [cite: Grid Line "Y:600"]
+    *   X: 155 [cite: Header "Valor R$", Grid Line "X:150". Start of input area for column 2.]
+*   **Linha 3 - Número do Cheque/Linha Digitável:** (X: 255, Y: 600)
+    *   Y: 600 [cite: Grid Line "Y:600"]
+    *   X: 255 [cite: Header "Número do Cheque/Linha Digitável do Boleto", Grid Line "X:250". Start of input area for column 3.]
+*   **Linha 4 - Data Pagamento:** (X: 55, Y: 550)
+    *   Y: 550 [cite: Grid Line "Y:550"]
+    *   X: 55 [cite: Header "Data Pagamento", Grid Line "X:50". Start of input area for column 1.]
+*   **Linha 4 - Valor R$:** (X: 155, Y: 550)
+    *   Y: 550 [cite: Grid Line "Y:550"]
+    *   X: 155 [cite: Header "Valor R$", Grid Line "X:150". Start of input area for column 2.]
+*   **Linha 4 - Número do Cheque/Linha Digitável:** (X: 255, Y: 550)
+    *   Y: 550 [cite: Grid Line "Y:550"]
+    *   X: 255 [cite: Header "Número do Cheque/Linha Digitável do Boleto", Grid Line "X:250". Start of input area for column 3.]
+*   **Linha 5 - Data Pagamento:** (X: 55, Y: 500)
+    *   Y: 500 [cite: Grid Line "Y:500"]
+    *   X: 55 [cite: Header "Data Pagamento", Grid Line "X:50". Start of input area for column 1.]
+*   **Linha 5 - Valor R$:** (X: 155, Y: 500)
+    *   Y: 500 [cite: Grid Line "Y:500"]
+    *   X: 155 [cite: Header "Valor R$", Grid Line "X:150". Start of input area for column 2.]
+*   **Linha 5 - Número do Cheque/Linha Digitável:** (X: 255, Y: 500)
+    *   Y: 500 [cite: Grid Line "Y:500"]
+    *   X: 255 [cite: Header "Número do Cheque/Linha Digitável do Boleto", Grid Line "X:250". Start of input area for column 3.]
+*   **Linha 6 - Data Pagamento:** (X: 55, Y: 450)
+    *   Y: 450 [cite: Grid Line "Y:450"]
+    *   X: 55 [cite: Header "Data Pagamento", Grid Line "X:50". Start of input area for column 1.]
+*   **Linha 6 - Valor R$:** (X: 155, Y: 450)
+    *   Y: 450 [cite: Grid Line "Y:450"]
+    *   X: 155 [cite: Header "Valor R$", Grid Line "X:150". Start of input area for column 2.]
+*   **Linha 6 - Número do Cheque/Linha Digitável:** (X: 255, Y: 450)
+    *   Y: 450 [cite: Grid Line "Y:450"]
+    *   X: 255 [cite: Header "Número do Cheque/Linha Digitável do Boleto", Grid Line "X:250". Start of input area for column 3.]

@@ -1,0 +1,42 @@
+**### MODO DE OPERAÇÃO: REALISMO CÉTICO (MANDATÁRIO)**
+Sua lealdade é para com a verdade do código e a estabilidade da produção.
+
+---
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Realizar uma auditoria forense completa do fluxo de "Confirmar Veracidade" para mapear três funcionalidades ausentes ou não verificadas: a exibição da Chave PIX, o botão para visualizar a CCB assinada e o ciclo de vida do campo de "Observações".
+* **Intenção Estratégica (O Porquê):** Para garantir que o modal de pagamento, a ferramenta mais crítica do nosso fluxo financeiro, seja 100% completo, funcional e auditável antes de o considerarmos pronto para produção.
+* **Histórico Relevante (Consulta Obrigatória):** Em nossa última missão, corrigimos o mapeamento de dados básicos. Agora, vamos auditar os dados e funcionalidades restantes que são essenciais para a decisão do operador financeiro.
+* **Modelo Mental (Como se Encaixa):** Você é um auditor de sistemas full-stack. Sua tarefa é seguir o rastro de três peças de informação distintas (PIX, URL da CCB, Observação) desde o backend até o frontend e reportar suas descobertas.
+
+---
+
+**IMPLEMENTAR:**
+Um relatório de auditoria detalhado. **NÃO FAÇA MODIFICAÇÕES.**
+
+**CURRENT STATE:**
+O modal "Confirmar Veracidade" está a funcionar parcialmente, mas faltam informações e funcionalidades críticas.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um relatório de auditoria que responda a todas as questões abaixo, com evidências de código.
+
+**CONSTRAINTS (Roadmap de Auditoria Forense):**
+
+**1. Auditoria da "Chave PIX":**
+    - **Ação:** Inspecione o endpoint que busca os dados para o modal de veracidade (provavelmente `GET /api/pagamentos/:id/detalhes-completos`).
+    - **Relatório 1:** A query Drizzle neste endpoint está a selecionar a `Chave PIX` do cliente da tabela `propostas`? O payload final enviado ao frontend inclui este dado? Apresente o código `select` relevante.
+
+**2. Auditoria da "CCB Assinada":**
+    - **Ação:** Inspecione o mesmo endpoint.
+    - **Relatório 2:** A query está a buscar o caminho (`path`) da CCB assinada que está armazenada no nosso Supabase Storage (provavelmente da coluna `caminho_ccb_assinado`)?
+    - **Ação:** Inspecione o código JSX do modal (`pagamentos-review.tsx`).
+    - **Relatório 3:** Existe alguma lógica, mesmo que comentada ou incompleta, para renderizar um botão "Visualizar CCB Assinada"?
+
+**3. Auditoria do Campo "Observações":**
+    - **Ação:** Inspecione o endpoint que **processa** a confirmação de veracidade (`POST /api/pagamentos/:id/confirmar-veracidade`).
+    - **Relatório 4 (A Escrita):** Este endpoint está a receber o texto do campo "Observações" e a salvá-lo em algum lugar no banco de dados (provavelmente na nossa tabela `historico_observacoes_cobranca`)? Apresente o código que faz o salvamento.
+    - **Ação:** Faça uma busca no código.
+    - **Relatório 5 (A Leitura):** Existe alguma tela ou componente no sistema que **lê e exibe** as observações que são salvas a partir deste modal? Se sim, onde? Se não, declare `[VISUALIZAÇÃO DE OBSERVAÇÕES AUSENTE]`.
+
+**Relatório Final:**
+O critério de sucesso é um relatório forense completo que nos dê um mapa claro de todas as implementações que faltam para completar a "Ficha de Veracidade".

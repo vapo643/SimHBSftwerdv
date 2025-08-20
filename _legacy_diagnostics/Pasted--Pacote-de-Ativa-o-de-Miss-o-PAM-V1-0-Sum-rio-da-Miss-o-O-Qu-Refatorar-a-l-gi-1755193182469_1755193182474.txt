@@ -1,0 +1,59 @@
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Refatorar a lógica de filtragem local (busca) na "Tela de Cobranças" para garantir que ela não remova incorretamente propostas válidas com campos de texto vazios.
+* **Intenção Estratégica (O Porquê):** A lógica de filtro atual é defeituosa e cria uma discrepância de dados perigosa entre o que o backend envia e o que o usuário vê, escondendo contratos válidos e comprometendo a operação de cobranças.
+* **Histórico Relevante (Consulta Obrigatória):** Seu diagnóstico forense foi perfeito. A causa raiz está na função `propostasFiltradas` em `CobrancasPage.tsx`. Sua missão é corrigir a lógica que você mesmo identificou.
+* **Modelo Mental (Como se Encaixa):** A correção é puramente no frontend. O backend está a funcionar corretamente. Você deve criar uma lógica de filtro que seja resiliente, ou seja, que ignore campos nulos ou vazios ao realizar a busca, em vez de falhar ou excluir o registo inteiro.
+* **Riscos Antecipados:** **Risco:** Uma nova lógica de filtro complexa pode introduzir outros bugs. **Contramedida:** A solução deve ser simples, legível e robusta, tratando explicitamente os casos de campos vazios.
+
+---
+
+**IMPLEMENTAR:**
+Correção da lógica de filtragem secundária no frontend da "Tela de Cobranças".
+
+**BUG:**
+O diagnóstico forense foi conclusivo: a "Tela de Cobranças" está a esconder propostas válidas da equipe. O problema não está no backend, mas sim em uma lógica de `propostas.filter()` defeituosa no frontend, que remove incorretamente propostas com campos vazios (como `nomeCliente`) quando o usuário digita no campo de busca.
+
+**PROCESSO SISTEMÁTICO (Roadmap de Correção):**
+
+**1. Isolamento do Ponto de Falha:**
+    - **Ação:** Concentre-se exclusivamente no ficheiro `client/src/pages/financeiro/CobrancasPage.tsx` e na constante `propostasFiltradas`.
+
+**2. Implementação da Correção Robusta:**
+    - **Ação:** Refatore a lógica do `.filter()` para ser mais inteligente e resiliente a campos vazios ou nulos.
+    - **Implementação:** A nova lógica deve garantir que, ao buscar:
+        a. Apenas campos que **existem e não são vazios** sejam considerados na busca.
+        b. A busca inclua também o novo campo `numero_cedula` (ou `numero_proposta`), que é um identificador importante.
+        c. Se o termo de busca for encontrado em **qualquer um** dos campos pesquisáveis de uma proposta, a proposta deve ser incluída no resultado.
+
+    - **Código de Exemplo para a Nova Lógica (implemente uma solução baseada neste princípio):**
+      ```typescript
+      const propostasFiltradas = propostas?.filter((proposta: any) => {
+        if (!searchTerm) return true; // Mantém a lógica de não filtrar se a busca estiver vazia
+        
+        const search = searchTerm.toLowerCase();
+        
+        // Cria uma lista de campos pesquisáveis, tratando valores nulos ou vazios
+        const searchableFields = [
+          proposta.nomeCliente,
+          proposta.cpfCliente,
+          proposta.numeroContrato,
+          proposta.id,
+          proposta.numero_proposta // Adicionar o novo campo de busca
+        ].filter(Boolean); // O .filter(Boolean) remove todos os valores falsy (null, undefined, "")
+
+        // Verifica se algum dos campos válidos corresponde ao termo de busca
+        return searchableFields.some(field => 
+          String(field).toLowerCase().includes(search)
+        );
+      });
+      ```
+
+**PROTOCOLO OBRIGATÓRIO 5-CHECK:**
+1.  Mapear o ficheiro e a função exata.
+2.  Garantir que a nova lógica de filtro seja limpa e legível.
+3.  Executar `get_latest_lsp_diagnostics` para garantir ZERO erros.
+4.  Realizar o teste funcional crítico:
+    - **Cenário:** Tenha na tela a "Proposta #1" (sem nome) e a "Proposta #2" (com nome "Gabriel").
+    - **Teste:** Digite "Gabriel" no campo de busca. Apenas a "Proposta #2" deve aparecer. Em seguida, apague e digite parte do `id` da "Proposta #1". Apenas a "Proposta #1" deve aparecer.
+5.  O critério final de sucesso é que a busca funcione perfeitamente, sem nunca mais esconder propostas válidas.

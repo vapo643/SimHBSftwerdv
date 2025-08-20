@@ -1,0 +1,38 @@
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Realizar uma auditoria de diagnóstico ponta-a-ponta para identificar a causa raiz exata da falha na comunicação de estado entre o backend e o frontend no fluxo de geração de carnês.
+* **Intenção Estratégica (O Porquê):** Estamos presos em um loop de erro onde o backend gera o carnê com sucesso, mas o frontend falha em exibir o botão de download. Precisamos de um diagnóstico forense para entender *onde* a informação se perde e por quê, antes de tentar qualquer nova correção.
+* **Histórico Relevante (Consulta Obrigatória):** Ative sua base de conhecimento. A falha atual é uma continuação direta da nossa última missão. Você implementou o endpoint `/api/propostas/:id/carne-status` e a lógica de `useEffect` no frontend. A sua análise deve focar na interação entre estes dois componentes.
+* **Modelo Mental (Como se Encaixa):** Pense como um detetive de dados. O "crime" é uma informação (`carneExists: true`) que não chega ao seu destino (o estado React que controla a UI). Sua missão é rastrear o percurso desta informação e encontrar o ponto onde ela se perde.
+* **Riscos Antecipados:** **Risco:** Uma análise superficial pode levar a outra correção falha. **Contramedida:** A sua missão não é corrigir. É **produzir logs e evidências**.
+
+---
+
+**IMPLEMENTAR:**
+Auditoria de diagnóstico completa. **NÃO FAÇA CORREÇÕES.**
+
+**CURRENT STATE:**
+O carnê existe no Supabase Storage. O frontend chama o endpoint de status, mas a UI não renderiza o botão "Baixar Carnê", e tentativas subsequentes de gerar o carnê iniciam o processo do zero.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um relatório de diagnóstico com logs detalhados que respondam às seguintes questões.
+
+**CONSTRAINTS (Roadmap de Diagnóstico - Execute na Ordem):**
+
+**1. Instrumentação e Auditoria do Backend (`/api/propostas/:id/carne-status`):**
+    - **Ação:** Modifique este endpoint. Adicione `console.log` para exibir:
+        a. O `propostaId` exato que ele recebe como parâmetro.
+        b. O caminho **COMPLETO** que ele está a construir para verificar o ficheiro no Supabase Storage (ex: `propostas/ID_DA_PROPOSTA/carnes/NOME_DO_FICHEIRO`).
+        c. O resultado da verificação no Storage (se o ficheiro foi encontrado ou não).
+        d. O JSON **exato** que ele está a enviar de volta para o frontend.
+
+**2. Instrumentação e Auditoria do Frontend (`formalizacao.tsx`):**
+    - **Ação:** Modifique o `useEffect` que chama o endpoint `/carne-status`. Adicione `console.log` para exibir:
+        a. O `propostaId` exato que está a ser usado para construir a URL da API.
+        b. O momento em que a chamada de API é disparada.
+        c. A **resposta completa e não tratada** recebida do backend.
+        d. O valor final que está a ser definido no estado React que controla a UI (ex: `setCarneState(...)`).
+
+**3. Execução do Teste e Coleta de Evidência:**
+    - **Ação:** Com os logs implementados, acesse a "Tela de Formalização" de uma proposta que você **sabe** que já tem um carnê no Storage.
+    - **Relatório Final:** Apresente os logs completos do console do **backend** e do **frontend** gerados durante o carregamento da página. Com base nesta evidência, formule sua hipótese final para a causa raiz da falha.

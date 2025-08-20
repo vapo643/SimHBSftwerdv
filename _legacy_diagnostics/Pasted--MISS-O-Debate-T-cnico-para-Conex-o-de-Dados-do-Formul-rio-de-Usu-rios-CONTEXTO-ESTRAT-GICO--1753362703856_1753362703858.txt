@@ -1,0 +1,33 @@
+# MISSÃO: Debate Técnico para Conexão de Dados do Formulário de Usuários
+
+**CONTEXTO ESTRATÉGICO:**
+Enfrentamos um bloqueio crítico: o formulário de criação de usuários (em "Gestão de Usuários") está a usar dados 'mock' para os dropdowns de 'Parceiro' e 'Loja', o que nos impede de criar usuários de teste e validar a nossa segurança RBAC. Precisamos de refatorar este componente para que ele consuma os dados reais das nossas APIs.
+
+**SUA TAREFA (ASSISTENTE):**
+A sua tarefa não é escrever código. A sua tarefa é atuar como um Arquiteto de Frontend e propor um plano de implementação robusto para esta refatoração. Esta será a nossa **Interação 1 de 3**.
+
+---
+### **Análise da Missão (Sua Perspectiva)**
+
+**Missão:** Refatorar a página de "Gestão de Usuários" para que os dropdowns de 'Parceiro' e 'Loja' no formulário de criação (`UserForm.tsx`) sejam populados com dados reais das APIs `GET /api/admin/parceiros` e `GET /api/admin/lojas`, e para que funcionem em cascata.
+
+### **Interação 1: Sua Proposta de Plano e Análise de Risco**
+
+Por favor, responda seguindo **exatamente** esta estrutura:
+
+**1. Estratégia de Fetching de Dados:**
+* Onde (em qual componente) e como (com qual hook do TanStack Query) devemos buscar os dados iniciais de todos os Parceiros e Lojas? Justifique a sua escolha.
+
+**2. Proposta de Gestão de Estado no Frontend:**
+* Como devemos gerir o estado dentro do componente do formulário? Descreva quais `useState` hooks seriam necessários para controlar o parceiro selecionado e a lista de lojas filtrada.
+
+**3. Lógica do Dropdown em Cascata:**
+* Descreva, passo a passo, a lógica que deve ser implementada. Como o `onChange` do dropdown de Parceiros deve acionar a filtragem da lista de Lojas? A filtragem deve ser feita no frontend (client-side) ou através de uma nova chamada à API? Justifique a sua recomendação de performance.
+
+**4. Análise de Risco e Experiência do Usuário (UX):**
+* Quais são os principais riscos de UX nesta implementação? Proponha soluções para os seguintes cenários:
+    * O que o usuário deve ver enquanto os dados de Parceiros e Lojas estão a ser carregados pela primeira vez?
+    * O que deve acontecer com o dropdown de Lojas se a busca de dados falhar?
+    * O dropdown de Lojas deve estar desabilitado até que um Parceiro seja selecionado?
+
+---

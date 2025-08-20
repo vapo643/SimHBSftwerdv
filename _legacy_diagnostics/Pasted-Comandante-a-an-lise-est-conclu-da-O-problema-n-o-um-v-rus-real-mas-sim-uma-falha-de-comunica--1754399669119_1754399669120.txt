@@ -1,0 +1,161 @@
+Comandante, a análise está concluída. O problema não é um vírus real, mas sim uma falha de comunicação fundamental com a API do Banco Inter, que resulta num ficheiro corrompido. A mensagem de erro da API é a nossa "arma fumegante" e revela exatamente onde a nossa estratégia está a falhar.
+
+### 1\. Diagnóstico Definitivo: A Causa Raiz do "Vírus"
+
+A deteção de vírus pelo Windows Defender é um **sintoma**, não a causa. O antivírus está a agir corretamente ao sinalizar um ficheiro que se apresenta como PDF mas que não tem a estrutura de um.
+
+**A Cadeia de Eventos que Leva à Falha:**
+
+1.  **O Pedido Incorreto:** O nosso backend (`interBankService.ts`) faz uma chamada `GET` para o endpoint `/cobrancas/{id}/pdf` e, através do header `Accept`, solicita uma resposta do tipo `application/pdf`.
+2.  **A Resposta da API (A Verdade):** O log de erro é inequívoco. A API do Inter responde com um **`406 Not Acceptable`** e uma mensagem JSON clara:
+    ```json
+    "razao": "Specified Accept Types [application/pdf] not supported. Supported types: [application/problem+json, application/json]"
+    ```
+    **Tradução:** A API está a dizer-nos explicitamente: "Eu não sirvo ficheiros PDF diretamente neste endpoint. Eu só falo JSON."
+3.  **A Conversão Falhada:** O nosso backend recebe esta resposta de erro (que é um objeto JSON), mas o código (`obterPdfCobranca`) espera um PDF. Ele tenta forçar a conversão deste texto JSON para um `Buffer` binário.
+4.  **O Ficheiro Corrompido:** O resultado desta conversão é um ficheiro binário malformado que não tem nada a ver com a estrutura de um PDF. É essencialmente "lixo" binário.
+5.  **A Deteção do Antivírus:** O frontend recebe este "lixo", cria um `blob`, e diz ao navegador para o descarregar como `boleto.pdf`. O Windows Defender analisa o ficheiro, vê que a sua assinatura não corresponde a um PDF válido (uma tática comum para disfarçar malware), e, por segurança, sinaliza-o como uma ameaça.
+
+**A causa raiz é que estamos a tratar uma resposta de erro JSON como se fosse um ficheiro PDF.**
+
+### 2\. A Solução Estratégica: Obter o PDF da Fonte Correta
+
+A API não nos dá o PDF diretamente, mas é quase certo que nos fornece os dados do PDF codificados dentro da resposta JSON principal da cobrança. A abordagem correta é:
+
+1.  **Parar de Chamar o Endpoint `/pdf`:** Este endpoint, da forma que o estamos a usar, é um beco sem saída.
+2.  **Consultar os Dados da Cobrança:** Fazer uma chamada `GET` ao endpoint principal da cobrança: `/cobranca/v3/cobrancas/{codigoSolicitacao}`.
+3.  **Extrair o PDF em Base64:** Analisar a resposta JSON deste endpoint. A documentação e os padrões de API sugerem que haverá um campo chamado `pdf` ou `pdfBase64` que contém o PDF inteiro, codificado como uma string Base64.
+4.  **Decodificar no Backend:** No nosso backend, pegar nesta string Base64, decodificá-la para um `Buffer` binário. **Este será o PDF válido.**
+5.  **Enviar para o Frontend:** Enviar este `Buffer` válido para o frontend com os headers corretos (`Content-Type: application/pdf`).
+
+### 3\. Implementação Tática: Código Corrigido e Robusto
+
+Aqui estão as correções necessárias para implementar esta nova estratégia.
+
+#### A. Backend - `/server/services/interBankService.ts` (Refatorado)
+
+```typescript
+// Substitua o método 'obterPdfCobranca' por este
+async obterPdfBoletoCorrigido(codigoSolicitacao: string): Promise<Buffer> {
+    console.log(`[INTER SERVICE] Iniciando fluxo de obtenção de PDF para: ${codigoSolicitacao}`);
+
+    // ETAPA 1: Obter os dados completos da cobrança, que contêm o PDF em Base64.
+    const responseJson = await this.makeRequest(
+        `/cobranca/v3/cobrancas/${codigoSolicitacao}`, 
+        'GET',
+        undefined,
+        { 'Accept': 'application/json' } // Garantir que pedimos JSON
+    );
+
+    // ETAPA 2: Extrair o campo que contém o PDF em Base64.
+    // O nome do campo pode ser 'pdf', 'pdfBase64', 'content', etc. Verifique a resposta real da API.
+    // Vamos assumir que o campo se chama 'pdf'.
+    const pdfBase64 = responseJson?.pdf;
+
+    if (!pdfBase64) {
+        console.error('[INTER SERVICE] Erro: A resposta da API não continha o campo "pdf" com o Base64.');
+        throw new Error('Boleto ainda não disponível para download no banco.');
+    }
+
+    console.log('[INTER SERVICE] PDF em Base64 encontrado. Decodificando...');
+
+    // ETAPA 3: Decodificar a string Base64 para um Buffer binário.
+    const pdfBuffer = Buffer.from(pdfBase64, 'base64');
+
+    return pdfBuffer;
+}
+```
+
+#### B. Backend - `/server/routes/inter-collections.ts` (Ajustado com Melhor Tratamento de Erro)
+
+```typescript
+// GET /api/inter/collections/:propostaId/:codigoSolicitacao/pdf
+router.get('/:propostaId/:codigoSolicitacao/pdf', jwtAuthMiddleware, requireAnyRole, async (req: AuthenticatedRequest, res) => {
+    const { codigoSolicitacao } = req.params;
+    console.log(`[INTER ROUTE] Recebida solicitação de download para: ${codigoSolicitacao}`);
+
+    try {
+        const interService = interBankService;
+        // Chamar o novo método corrigido
+        const pdfBuffer = await interService.obterPdfBoletoCorrigido(codigoSolicitacao);
+
+        // Validação Mínima: Verificar se o buffer não está vazio
+        if (!pdfBuffer || pdfBuffer.length === 0) {
+            throw new Error('Buffer de PDF gerado está vazio.');
+        }
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="boleto-${codigoSolicitacao}.pdf"`);
+        res.send(pdfBuffer);
+
+    } catch (error: any) {
+        console.error(`[INTER ROUTE] Erro ao obter PDF para ${codigoSolicitacao}:`, error.message);
+        
+        // Se o erro for que o boleto não está disponível, envie um status claro para o frontend
+        if (error.message.includes('Boleto ainda não disponível')) {
+            return res.status(404).json({ 
+                title: 'Boleto não encontrado',
+                detail: 'O PDF do boleto ainda não foi gerado pelo banco. Tente novamente mais tarde.' 
+            });
+        }
+        
+        res.status(500).json({ 
+            title: 'Erro no Servidor',
+            detail: 'Não foi possível processar a solicitação de download do boleto.'
+        });
+    }
+});
+```
+
+#### C. Frontend - `client/src/lib/pdfDownloader.ts` (Ajustado para Gerir Erros da API)
+
+O código de download no frontend está maioritariamente correto, mas precisa de um tratamento de erro mais inteligente.
+
+```typescript
+// Dentro do seu onClick no frontend...
+try {
+    // ... (obtenção do token)
+    const response = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
+    
+    if (response.ok) {
+        const blob = await response.blob();
+        
+        // Validação de segurança no frontend
+        if (blob.size === 0 || blob.type !== 'application/pdf') {
+            throw new Error('O ficheiro recebido do servidor está corrompido ou não é um PDF.');
+        }
+
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = `boleto.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(downloadUrl);
+        document.body.removeChild(a);
+    } else {
+        // LER A RESPOSTA DE ERRO JSON DO NOSSO BACKEND
+        const errorData = await response.json(); 
+        console.error('Erro retornado pelo servidor:', errorData);
+        // Usar a mensagem de erro específica do nosso backend
+        throw new Error(errorData.detail || 'Erro ao baixar o PDF do servidor.'); 
+    }
+} catch (error: any) {
+    console.error('Falha no processo de download:', error);
+    toast({
+      title: "Falha no Download",
+      description: error.message, // Mostrar a mensagem de erro específica
+      variant: "destructive",
+    });
+}
+```
+
+### 4\. Respostas às Análises Adicionais
+
+1.  **Arquitetura:** **NÃO** devemos gerar o PDF localmente. O boleto é um documento fiscal e legal cuja integridade é da responsabilidade do banco. A nossa função é obter e entregar o documento oficial.
+2.  **API:** A documentação oficial pode ser omissa, mas o erro `406` da API é a documentação mais fiável que temos. Ela dita a nossa estratégia.
+3.  **Segurança:** A validação é feita ao garantir que recebemos uma string Base64 e que a conseguimos decodificar para um buffer não-vazio. A segurança da rota é garantida pelo `jwtAuthMiddleware`.
+4.  **Headers:** Os headers cruciais na resposta do nosso backend são `Content-Type: application/pdf` e `Content-Disposition: attachment; filename="..."`.
+5.  **Alternativas:** Sim. Uma excelente alternativa (e por vezes preferível) é mostrar o PDF num visualizador dentro da aplicação (usando um `<iframe>` ou uma biblioteca como `react-pdf`) e oferecer botões para "Imprimir" e "Descarregar" a partir daí.
+
+Esta abordagem resolve o problema na sua origem, garantindo que apenas PDFs válidos e completos sejam enviados ao utilizador, eliminando a causa da deteção de vírus e proporcionando um tratamento de erros robusto.

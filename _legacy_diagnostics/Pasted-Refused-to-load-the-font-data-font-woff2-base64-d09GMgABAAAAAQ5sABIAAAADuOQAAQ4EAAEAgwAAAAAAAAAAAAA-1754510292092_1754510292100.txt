@@ -1,0 +1,104 @@
+Refused to load the font 'data:font/woff2;base64,d09GMgABAAAAAQ5sABIAAAADuOQAAQ4EAAEAgwAAAAAAAAAAAAAAAAAAAAAAAAAAG4SpIhy4XhSHMgZgAJJmCF4JgnMREAqGskiFyggSgrVoATYCJAOdOAuOXgAEIAWPGAfGYAyDGFsKfLME/nOMvX+HnQoMqyRqK6tt2TW8K2BDX9Umu4PZkCXwtMjpcHYNTx6UUmu30UdwcxxnVMvcNgAim7rdXiPZ////////////C5dF2ObuXM7ZvQeSECARwueHlaLVtkJEIaLRAI3ulswSE13cSPdM15RCyYQuuS7A0mBqpQO9pYZWQQMqa9lQb0dpJzHxHpLyCHIi8uBdwF58nNH+YOA40OpJvEjJtaokKaUkx/N5UeSinp5TWoW1vSpFjimBgeFGeCF66U0n6ZUN/qSqC4XC11GKUNmzSy2d5Jxyqw5JzGUlJUnyi0lKkE8BlxadTZsyRm8c1/Cti2hEjzIHnuOZ0fU6OjKc...FVw9csGnQ1BnbMbfzgRj3WjPytwZYWpPh3OtmsLZaNcxxqaGVqMVqFffFpU8bbs/0N1vG3POWfS7LUeB81TfHn+VbD7x/UnT3lXyFltHfdX6+X6Rzmg9d4dAISK7GlTj2zgME/JUwAETAECwABAUgUmAysrKI5shRwAchnFSMheQ8UoKlvnVbkW9mMeq2+bbO9EQ2q09Z9wzsADarYt4ftoamBDi8gmfbZKnl+lkZWyRx1VYVSIpVFXs9VXy9ytCyTNYt09YIAGKjqpDT22SgOdP5OsdAK/vOCXFnrpEwA/PPTJiopB7HxZV+MlaGCT/04K/LY3kjPYV/YR146Ggg+9sX6na/c2So+Epz3PXve3PKRylPIhNZASBUYVDIGhikiWc1jj/claeVCJvljX7JfvO+xhfTDIjSXBs4HV16Ol/BMfcuFQ4NRmDOWEh6diOI6NZmGl87N9J+r2JfpW2+5NhV/fGHLO57Yavbq7zaCewa/RDxp/aSH+luOPwAA' because it violates the following Content Security Policy directive: "font-src 'self' https://fonts.gstatic.com".
+Understand this error
+pagamentos:1 Refused to load the script 'https://replit.com/public/js/replit-dev-banner.js' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://unpkg.com". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+Understand this error
+content-script.js:2 [Violation] 'setInterval' handler took 108ms
+content-script.js:2 safeParseJson "undefined" is not valid JSON
+client:495 [vite] connecting...
+client:536 WebSocket connection to 'wss://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/?token=HsJdppcqtmjX' failed: 
+setupWebSocket @ client:536
+(anonymous) @ client:531Understand this error
+client:536 Uncaught (in promise) SyntaxError: Failed to construct 'WebSocket': The URL 'wss://localhost:undefined/?token=HsJdppcqtmjX' is invalid.
+    at setupWebSocket (client:536:19)
+    at fallback (client:509:16)
+    at WebSocket.<anonymous> (client:555:7)
+setupWebSocket @ client:536
+fallback @ client:509
+(anonymous) @ client:555Understand this error
+chunk-276SZO74.js?v=609c6d10:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+content-script.js:22 Document already loaded, running initialization immediately
+content-script.js:4 Attempting to initialize AdUnit
+content-script.js:6 AdUnit initialized successfully
+webcomponents-ce.js:33 Uncaught Error: A custom element with name 'mce-autosize-textarea' has already been defined.
+    at Aa (webcomponents-ce.js:33:363)
+    at m.define (webcomponents-ce.js:33:133)
+    at overlay_bundle.js:147:5559
+    at D (overlay_bundle.js:44:680)
+    at overlay_bundle.js:158:392
+Aa @ webcomponents-ce.js:33
+m.define @ webcomponents-ce.js:33
+(anonymous) @ overlay_bundle.js:147
+D @ overlay_bundle.js:44
+(anonymous) @ overlay_bundle.js:158Understand this error
+[Violation] 'setTimeout' handler took 76ms
+content.js:208 {}
+AuthContext.tsx:161 🔐 [AUTH EVENT] SIGNED_IN {hasSession: true, tokenLength: 767}
+pagamentos.tsx:249 [PAGAMENTOS FRONTEND] Dados recebidos: 0
+pagamentos.tsx:250 [PAGAMENTOS FRONTEND] Termo de busca: 
+pagamentos.tsx:251 [PAGAMENTOS FRONTEND] Dados filtrados: 0
+pagamentos.tsx:121 [PAGAMENTOS] Buscando pagamentos com filtros: {statusFilter: 'todos', periodoFilter: 'todos'}
+AuthContext.tsx:161 🔐 [AUTH EVENT] INITIAL_SESSION {hasSession: true, tokenLength: 767}
+apiClient.ts:161 🔐 [TOKEN MANAGER] Fresh token obtained, length: 767
+apiClient.ts:338 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.AJqYiOlOcv-4jyTAumy7qg7CmnzlxgnFhsHXeE8CSEg', hasToken: true, isFormData: false}
+apiClient.ts:338 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/pagamentos?', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.AJqYiOlOcv-4jyTAumy7qg7CmnzlxgnFhsHXeE8CSEg', hasToken: true, isFormData: false}
+apiClient.ts:338 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.AJqYiOlOcv-4jyTAumy7qg7CmnzlxgnFhsHXeE8CSEg', hasToken: true, isFormData: false}
+pagamentos:1 Unchecked runtime.lastError: The message port closed before a response was received.Understand this error
+2AuthContext.tsx:95 🔐 [AUTH RESTORED] User profile loaded with valid token
+pagamentos.tsx:127 [PAGAMENTOS] Resposta recebida: [{…}]
+pagamentos.tsx:249 [PAGAMENTOS FRONTEND] Dados recebidos: 1
+pagamentos.tsx:250 [PAGAMENTOS FRONTEND] Termo de busca: 
+pagamentos.tsx:251 [PAGAMENTOS FRONTEND] Dados filtrados: 1
+pagamentos.tsx:253 [PAGAMENTOS FRONTEND] Primeiro pagamento: {id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d', propostaId: '902183dd-b5d1-4e20-8a72-79d3d3559d4d', numeroContrato: 'CONT-902183DD', nomeCliente: 'Gabriel de Jesus Santana Serri', cpfCliente: '20528464760', …}
+pagamentos-review.tsx:169 🔍 [REVIEW MODAL DEBUG] dadosProposta final: null
+pagamentos-review.tsx:170 🔍 [REVIEW MODAL DEBUG] isLoadingProposta: false
+pagamentos-review.tsx:171 🔍 [REVIEW MODAL DEBUG] propostaCompleta: undefined
+pagamentos-review.tsx:174 ⚠️ [REVIEW MODAL DEBUG] Proposta não encontrada, fechando modal
+chunk-276SZO74.js?v=609c6d10:18625 [Violation] 'setTimeout' handler took 194ms
+pagamentos.tsx:249 [PAGAMENTOS FRONTEND] Dados recebidos: 1
+pagamentos.tsx:250 [PAGAMENTOS FRONTEND] Termo de busca: 
+pagamentos.tsx:251 [PAGAMENTOS FRONTEND] Dados filtrados: 1
+pagamentos.tsx:253 [PAGAMENTOS FRONTEND] Primeiro pagamento: {id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d', propostaId: '902183dd-b5d1-4e20-8a72-79d3d3559d4d', numeroContrato: 'CONT-902183DD', nomeCliente: 'Gabriel de Jesus Santana Serri', cpfCliente: '20528464760', …}
+pagamentos-review.tsx:169 🔍 [REVIEW MODAL DEBUG] dadosProposta final: {id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d', propostaId: '902183dd-b5d1-4e20-8a72-79d3d3559d4d', numeroContrato: 'CONT-902183DD', nomeCliente: 'Gabriel de Jesus Santana Serri', cpfCliente: '20528464760', …}
+pagamentos-review.tsx:170 🔍 [REVIEW MODAL DEBUG] isLoadingProposta: true
+pagamentos-review.tsx:171 🔍 [REVIEW MODAL DEBUG] propostaCompleta: undefined
+pagamentos-review.tsx:56 🔍 [REVIEW MODAL DEBUG] Modal opened with proposta: {id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d', propostaId: '902183dd-b5d1-4e20-8a72-79d3d3559d4d', numeroContrato: 'CONT-902183DD', nomeCliente: 'Gabriel de Jesus Santana Serri', cpfCliente: '20528464760', …}
+pagamentos-review.tsx:57 🔍 [REVIEW MODAL DEBUG] Proposta ID: 902183dd-b5d1-4e20-8a72-79d3d3559d4d
+pagamentos-review.tsx:58 🔍 [REVIEW MODAL DEBUG] All proposta keys: (22) ['id', 'propostaId', 'numeroContrato', 'nomeCliente', 'cpfCliente', 'valorFinanciado', 'valorLiquido', 'valorIOF', 'valorTAC', 'contaBancaria', 'status', 'dataRequisicao', 'dataAprovacao', 'dataPagamento', 'requisitadoPor', 'aprovadoPor', 'motivoRejeicao', 'observacoes', 'comprovante', 'formaPagamento', 'loja', 'produto']
+pagamentos-review.tsx:69 [REVIEW MODAL] Proposta recebida: {id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d', propostaId: '902183dd-b5d1-4e20-8a72-79d3d3559d4d', numeroContrato: 'CONT-902183DD', nomeCliente: 'Gabriel de Jesus Santana Serri', cpfCliente: '20528464760', …}
+pagamentos-review.tsx:70 [REVIEW MODAL] Buscando dados completos da proposta: 902183dd-b5d1-4e20-8a72-79d3d3559d4d
+chunk-276SZO74.js?v=609c6d10:18625 [Violation] 'click' handler took 228ms
+apiClient.ts:338 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…dd-b5d1-4e20-8a72-79d3d3559d4d/detalhes-completos', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.AJqYiOlOcv-4jyTAumy7qg7CmnzlxgnFhsHXeE8CSEg', hasToken: true, isFormData: false}
+[Violation] Forced reflow while executing JavaScript took 99ms
+requests.js:1  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/pagamentos/902183dd-b5d1-4e20-8a72-79d3d3559d4d/detalhes-completos 500 (Internal Server Error)
+s.fetch @ requests.js:1
+(anonymous) @ traffic.js:1
+fetch @ traffic.js:1
+fetchWithTimeout @ apiClient.ts:258
+apiClient @ apiClient.ts:366
+await in apiClient
+get @ apiClient.ts:513
+apiRequest @ queryClient.ts:19
+queryFn @ pagamentos-review.tsx:71
+fetchFn @ @tanstack_react-query.js?v=609c6d10:840
+run @ @tanstack_react-query.js?v=609c6d10:494
+start @ @tanstack_react-query.js?v=609c6d10:536
+fetch @ @tanstack_react-query.js?v=609c6d10:926
+executeFetch_fn @ @tanstack_react-query.js?v=609c6d10:2211
+setOptions @ @tanstack_react-query.js?v=609c6d10:1955
+(anonymous) @ @tanstack_react-query.js?v=609c6d10:3032
+commitHookEffectListMount @ chunk-276SZO74.js?v=609c6d10:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=609c6d10:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=609c6d10:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=609c6d10:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=609c6d10:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=609c6d10:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=609c6d10:19447
+commitRootImpl @ chunk-276SZO74.js?v=609c6d10:19416
+commitRoot @ chunk-276SZO74.js?v=609c6d10:19277
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=609c6d10:18895
+flushSyncCallbacks @ chunk-276SZO74.js?v=609c6d10:9119
+(anonymous) @ chunk-276SZO74.js?v=609c6d10:18627Understand this error
+pagamentos-review.tsx:169 🔍 [REVIEW MODAL DEBUG] dadosProposta final: {id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d', propostaId: '902183dd-b5d1-4e20-8a72-79d3d3559d4d', numeroContrato: 'CONT-902183DD', nomeCliente: 'Gabriel de Jesus Santana Serri', cpfCliente: '20528464760', …}
+pagamentos-review.tsx:170 🔍 [REVIEW MODAL DEBUG] isLoadingProposta: false
+pagamentos-review.tsx:171 🔍 [REVIEW MODAL DEBUG] propostaCompleta: undefined
+chunk-276SZO74.js?v=609c6d10:18625 [Violation] 'setTimeout' handler took 52ms

@@ -1,0 +1,32 @@
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Realizar uma auditoria forense do código de frontend na "Ficha do Cliente" para extrair a lógica exata que manuseia a resposta da API de download de boletos.
+* **Intenção Estratégica (O Porquê):** A nossa última implementação para corrigir a autenticação do download falhou, introduzindo um novo bug. Antes de qualquer nova tentativa de correção, precisamos da "evidência bruta" — o código exato que está a ser executado — para realizar uma análise de causa raiz definitiva.
+* **Histórico Relevante (Consulta Obrigatória):** Em sua última missão, você refatorou a chamada de download para usar o nosso wrapper `apiRequest`. A falha reside no código que processa o *sucesso* dessa chamada.
+* **Modelo Mental (Como se Encaixa):** Você é um engenheiro de depuração. Sua tarefa não é corrigir. É **isolar e apresentar o código da "cena do crime"**.
+* **Riscos Antecipados:** **Risco:** Uma análise superficial. **Contramedida:** A sua missão não é analisar. É apenas **extrair e reportar** o trecho de código exato solicitado.
+
+---
+
+**IMPLEMENTAR:**
+Um relatório de auditoria de código. **NÃO FAÇA MODIFICAÇÕES.**
+
+**CURRENT STATE:**
+Ao clicar no botão "Baixar Boleto", o usuário recebe um erro genérico de "Não foi possível baixar o boleto", mesmo que a autenticação esteja correta.
+
+**EXPECTED (Estado Final de Sucesso):**
+O código-fonte completo e não editado da função de frontend que é acionada pelo clique no botão "Baixar Boleto".
+
+**CONSTRAINTS (Roadmap de Auditoria Forense):**
+
+**1. Localização do Código:**
+    - **Ação:** No ficheiro `client/src/pages/financeiro/CobrancasPage.tsx`, localize a função `onClick` ou a `mutation` do TanStack Query que é responsável por acionar o download do PDF de uma parcela individual.
+
+**2. Relatório de Evidência:**
+    - **Ação:** Apresente o **código-fonte completo e não editado** desta função. Precisamos ver a lógica exata (`try/catch`, `async/await`, `.then()`, etc.) que você implementou para:
+        a. Chamar o `apiRequest`.
+        b. Receber a resposta.
+        c. Tentar processar a resposta (que deve ser um `blob`) e iniciar o download no navegador.
+
+**Relatório Final:**
+O critério de sucesso é a apresentação deste trecho de código. Ele será a base para a nossa próxima e, esperançosamente, última interação de correção para este fluxo.

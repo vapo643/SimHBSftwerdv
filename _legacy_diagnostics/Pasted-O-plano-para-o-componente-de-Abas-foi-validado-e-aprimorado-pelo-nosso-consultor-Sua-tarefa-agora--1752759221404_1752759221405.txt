@@ -1,0 +1,84 @@
+O plano para o componente de Abas foi validado e aprimorado pelo nosso consultor. Sua tarefa agora é executar a implementação final e robusta.
+
+Crie um novo arquivo no caminho `/client/src/components/ui/tabs.tsx` e cole exatamente o seguinte código dentro dele:
+
+```typescript
+import React, { useState, ReactNode, Children, cloneElement, isValidElement } from 'react';
+import { cn } from "@/lib/utils";
+
+// Interface para as props de cada Aba individual
+interface TabProps {
+  label: string;
+  value: string;
+  children: ReactNode;
+  isActive?: boolean;
+  onClick?: () => void;
+}
+
+// O componente da Aba (o botão clicável)
+const Tab: React.FC<TabProps> = ({ isActive, onClick, label }) => {
+  return (
+    <button
+      role="tab"
+      aria-selected={isActive}
+      onClick={onClick}
+      className={cn(
+        "py-2 px-4 text-sm font-medium border-b-2",
+        isActive
+          ? "border-blue-500 text-blue-600"
+          : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+      )}
+    >
+      {label}
+    </button>
+  );
+};
+
+// Interface para as props do container de Abas
+interface TabsProps {
+  children: React.ReactElement<TabProps>[];
+  defaultValue: string;
+}
+
+// O componente container que gerencia tudo
+const Tabs: React.FC<TabsProps> & { Tab: React.FC<TabProps> } = ({ children, defaultValue }) => {
+  const [activeTab, setActiveTab] = useState(defaultValue);
+
+  const handleTabClick = (value: string) => {
+    setActiveTab(value);
+  };
+
+  const renderTabs = () => {
+    return Children.map(children, (child) => {
+      if (isValidElement(child) && child.type === Tab) {
+        return cloneElement(child, {
+          isActive: child.props.value === activeTab,
+          onClick: () => handleTabClick(child.props.value),
+        });
+      }
+      return null;
+    });
+  };
+
+  const renderActiveContent = () => {
+    const activeChild = Children.toArray(children).find(
+      (child) => isValidElement(child) && child.props.value === activeTab
+    );
+    return activeChild ? <div>{(activeChild as React.ReactElement<TabProps>).props.children}</div> : null;
+  };
+
+  return (
+    <div>
+      <div className="flex space-x-4 border-b">
+        {renderTabs()}
+      </div>
+      <div className="mt-6 p-4 border rounded-md">
+        {renderActiveContent()}
+      </div>
+    </div>
+  );
+};
+
+Tabs.Tab = Tab;
+
+export { Tabs, Tab };

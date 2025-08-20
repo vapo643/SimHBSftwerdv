@@ -1,0 +1,43 @@
+# MISSÃO DE CORREÇÃO CRÍTICA: Implementar o Cliente de Admin do Supabase
+
+**CONTEXTO ESTRATÉGICO:**
+O diagnóstico final da nossa falha crítica "User not allowed" está completo. A causa raiz é a utilização da chave pública (`ANON_KEY`) do Supabase para operações de backend que exigem privilégios de administrador. A solução é criar e utilizar um cliente de Supabase dedicado para operações de admin que use a chave de serviço (`SERVICE_ROLE_KEY`).
+
+**AÇÃO:**
+Sua missão é refatorar a nossa configuração do Supabase no backend para resolver esta falha de permissão de forma definitiva.
+
+**ROADMAP DE EXECUÇÃO (Sequencial):**
+
+**PASSO 1: Criar o Cliente de Admin Dedicado**
+* **Ficheiro Alvo:** `/server/lib/supabase.ts`
+* **Tarefa:** Adicione a seguinte nova função ao ficheiro. Ela irá criar um cliente Supabase com os privilégios de administrador necessários.
+
+    ```typescript
+    // NOVA FUNÇÃO para operações Admin:
+    export function createServerSupabaseAdminClient() {
+      if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+        throw new Error('SUPABASE_SERVICE_ROLE_KEY é obrigatória para operações administrativas');
+      }
+      
+      // Corrigido para importar a função createClient do pacote supabase-js
+      const { createClient } = require('@supabase/supabase-js');
+      
+      return createClient(
+        process.env.SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        {
+          auth: {
+            autoRefreshToken: false,
+            persistSession: false
+          }
+        }
+      );
+    }
+    ```
+
+**PASSO 2: Atualizar o Serviço de Usuário**
+* **Ficheiro Alvo:** `/server/services/userService.ts`
+* **Tarefa:** Modifique a função `createUser` para que ela utilize o nosso novo cliente de admin.
+* **Alteração Específica:** Encontre a linha `const supabase = createServerSupabaseClient();` e altere-a para `const supabase = createServerSupabaseAdminClient();`. Garanta que a importação também seja atualizada.
+
+Execute estes dois passos para corrigir a falha de permissão.

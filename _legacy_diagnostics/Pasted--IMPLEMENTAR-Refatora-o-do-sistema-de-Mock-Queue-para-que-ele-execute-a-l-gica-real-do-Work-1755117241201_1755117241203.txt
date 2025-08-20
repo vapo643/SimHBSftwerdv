@@ -1,0 +1,31 @@
+**IMPLEMENTAR:**
+Refatoração do sistema de `Mock Queue` para que ele execute a lógica real do `Worker` em desenvolvimento, eliminando a desconexão entre a API e o processamento de jobs, e remover todos os `mock data` residuais.
+
+**CONTEXT:**
+Seu diagnóstico foi perfeito. A causa raiz da nossa falha é que a API está a enviar jobs para um `Mock Queue` que apenas simula o trabalho (`setTimeout`), enquanto nosso `Worker` real, com toda a lógica de negócio, nunca é ativado no ambiente de desenvolvimento. Esta missão é para conectar estas duas partes e remover os dados estáticos.
+
+**CURRENT STATE:**
+A API (`propostas-carne.ts`) importa e usa `mock-queue.ts`. O `mock-queue.ts` não executa nenhum código real do `worker.ts`. O sistema ainda contém fallbacks de dados hardcoded (ex: "NÃO INFORMADO").
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  O `Mock Queue` (`mock-queue.ts`) é refatorado para ser um "dispatcher" inteligente.
+2.  Quando a API adiciona um job ao `Mock Queue`, o `Mock Queue` deve agora **importar e invocar diretamente a função de processamento correspondente do ficheiro `worker.ts`**, passando os dados do job.
+3.  O fluxo em desenvolvimento agora deve simular perfeitamente o fluxo de produção: a API enfileira o job, e a lógica real do worker é executada.
+4.  Todos os `mock data` e fallbacks (ex: "NÃO INFORMADO") são removidos. O sistema deve falhar de forma explícita se os dados reais não forem fornecidos.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+**1. Refatorar o `mock-queue.ts`:**
+    - **Ação:** Modifique o `mock-queue.ts`.
+    - **Implementação:** Importe os processadores de job do `server/worker.ts` para dentro do `mock-queue.ts`. Na função `add` do `MockQueue`, substitua a lógica de `setTimeout` por uma chamada `await` à função de processamento correta do worker, passando os dados do job.
+
+**2. Remover Dados Estáticos (Hardening):**
+    - **Ação:** Faça uma busca global por `"NÃO INFORMADO"` e outros placeholders no código do backend, especialmente em `ccbGenerationService.ts`.
+    - **Implementação:** Remova esses fallbacks. O código deve agora depender de dados reais e lançar um erro (`throw new Error(...)`) se um dado obrigatório estiver ausente.
+
+**PROTOCOLO OBRIGATÓRIO 5-CHECK:**
+1.  Mapear os arquivos envolvidos.
+2.  Garantir a conexão clara entre o `mock-queue.ts` e o `worker.ts`.
+3.  Executar `get_latest_lsp_diagnostics` para garantir ZERO erros.
+4.  Realizar o teste funcional completo: chame o endpoint de "Gerar Carnê" no ambiente de desenvolvimento.
+5.  O critério final de sucesso é ver os **LOGS DO WORKER REAL** (ex: `[WORKER] Processando job...`, logs de fusão de PDF, etc.) aparecerem no console, provando que a lógica real foi executada e o carnê foi gerado e baixado com sucesso.

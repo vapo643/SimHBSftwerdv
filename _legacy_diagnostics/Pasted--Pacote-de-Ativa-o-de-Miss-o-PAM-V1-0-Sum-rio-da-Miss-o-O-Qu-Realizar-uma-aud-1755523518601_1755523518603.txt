@@ -1,0 +1,35 @@
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Realizar uma auditoria forense completa da "Ficha do Cliente" para identificar as causas raiz de três falhas críticas: erro na re-execução do "Baixar Carnê", status de parcela "Pago" incorreto e a ausência do botão de download individual.
+* **Intenção Estratégica (O Porquê):** O Arquiteto identificou uma falha sistêmica que torna a Ficha do Cliente inoperável e não confiável. Antes de qualquer correção, precisamos de um diagnóstico 100% preciso para cada um dos três bugs.
+* **Histórico Relevante (Consulta Obrigatória):** Sua última implementação da "Ficha do Cliente" introduziu estas regressões. Sua análise deve focar no código que você modificou ou adicionou.
+* **Modelo Mental (Como se Encaixa):** Você é um Engenheiro de Qualidade Sênior a realizar uma Análise de Causa Raiz (RCA). Sua tarefa é ler, analisar e relatar, não modificar.
+* **Riscos Antecipados:** **Risco:** Uma análise superficial nos manterá neste loop de erro. **Contramedida:** Sua missão não é resolver, mas sim **PROVAR**, com evidências de código, onde está cada falha.
+
+---
+
+**IMPLEMENTAR:**
+Um relatório de auditoria detalhado. **NÃO FAÇA MODIFICAÇÕES.**
+
+**CURRENT STATE:**
+A "Ficha do Cliente" está com três bugs críticos que a tornam inutilizável.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um relatório de auditoria que responda a todas as questões abaixo.
+
+**CONSTRAINTS (Roadmap de Auditoria Forense):**
+
+**1. Auditoria do Bug "Baixar Carnê" (Falha na Re-execução):**
+    - **Ação:** Inspecione o endpoint `POST /api/propostas/:id/gerar-carne`.
+    - **Relatório:** Qual é a lógica exata que causa o erro quando o carnê já foi gerado? O código verifica se o ficheiro já existe no Storage e, se sim, lança um erro em vez de retornar a URL do ficheiro existente? Apresente o trecho de código que contém esta lógica defeituosa.
+
+**2. Auditoria do Bug de Status "Pago" Incorreto:**
+    - **Ação:** Inspecione o serviço de backend que gera os boletos em lote e os salva na tabela `inter_collections`.
+    - **Relatório:** Qual é o `status` ou `situacao` padrão que está a ser atribuído a cada nova parcela no momento da sua criação em nosso banco de dados? Apresente o trecho de código exato que define este valor inicial, que está a causar o status "Pago" incorreto.
+
+**3. Auditoria da UI (Botão de Download Individual Ausente):**
+    - **Ação:** Inspecione o componente de frontend `CobrancasPage.tsx`, especificamente a seção que renderiza a lista de parcelas na "Ficha do Cliente".
+    - **Relatório:** Confirme que o botão de download de PDF individual foi de facto removido. Aponte a seção de código onde ele deveria estar (ao lado dos botões "Copiar PIX", etc.) e confirme sua ausência.
+
+**Relatório Final:**
+O critério de sucesso é um relatório que nos dê um mapa claro das três causas raiz, com evidências de código para cada uma.

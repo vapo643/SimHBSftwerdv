@@ -1,0 +1,63 @@
+[CLICKSIGN V3] ✅ Envelope created: 43e0f220-2e19-4fea-b345-37fb9efd95ed
+[CLICKSIGN V3] 🔨 Adding document to envelope 43e0f220-2e19-4fea-b345-37fb9efd95ed
+[CLICKSIGN V3] 📡 POST /envelopes/43e0f220-2e19-4fea-b345-37fb9efd95ed/documents
+[CLICKSIGN V3] Headers: {
+  'Content-Type': 'application/vnd.api+json',
+  Accept: 'application/vnd.api+json',
+  Authorization: 'b73b3b90-c...'
+}
+[CLICKSIGN V3] ❌ Error 400: {
+  errors: [
+    {
+      code: 'bad_request',
+      status: 400,
+      source: [Object],
+      detail: 'content_base64 deve ser informado(a)'
+    }
+  ]
+}
+[CLICKSIGN V3] ❌ Full error details: {
+  status: 400,
+  statusText: 'Bad Request',
+  headers: {
+    'cache-control': 'no-cache',
+    connection: 'keep-alive',
+    'content-security-policy': "default-src 'self' data: blob: https: *.clicksign.com *.clicksign.dev *.crazyegg.com; img-src https: 'self' blob: data: android-webview-video-poster:; script-src 'strict-dynamic' 'unsafe-eval' *.clicksign.com *.clicksign.dev *.hubspot.com *.hotjar.com *.iproov.app *.visualwebsiteoptimizer.com bat.bing.com analytics.tiktok.com js.usemessages.com js.hs-scripts.com js.hscollectedforms.net js.hs-banner.com js.hs-analytics.net js.hsadspixel.net *.visualwebsiteoptimizer.com *.googletagmanager.com *.facebook.net *.appcues.com *.facebook.com cdnv2-app.clicksign.com https://cdn.iproov.app *.crazyegg.com 'nonce-u+U/zhLnvm2hzuAT0hLzYw=='; style-src 'self' 'unsafe-inline' *.clicksign.com *.clicksign.dev *.posthog.com *.googleapis.com *.appcues.com *.google.com *.iproov.app *.crazyegg.com *.gstatic.com *.youtube.com *.visualwebsiteoptimizer.com cdnv2-app.clicksign.com; script-src-elem 'self' blob: 'unsafe-inline' *.clicksign.com *.clicksign.dev *.google.com *.googleapis.com *.hubspot.com *.hs-scripts.com *.hs-banner.com *.hs-analytics.net *.hsforms.com *.hsadspixel.net *.clarity.ms *.hscollectedforms.net *.usemessages.com *.facebook.net *.facebook.com *.hotjar.com *.gstatic.com script.crazyegg.com *.appcues.com *.google-analytics.com *.googletagmanager.com googleads.g.doubleclick.net apis.google.com *.googleadservices.com *.iproov.app analytics.tiktok.com snap.licdn.com *.vwo.com dev.visualwebsiteoptimizer.com cdn.rudderlabs.com cdn.jsdelivr.net pixel.byspotify.com posthog-production.clicksign.dev cdnv2-app.clicksign.com bat.bing.com cdnjs.cloudflare.com fonts.cdnfonts.com cdn.jsdelivr.net js-agent.newrelic.com; style-src-elem 'self' 'unsafe-inline' *.clicksign.com *.clicksign.dev *.google.com *.googleapis.com *.gstatic.com *.crazyegg.com *.appcues.com *.youtube.com *.googletagmanager.com *.visualwebsiteoptimizer.com *.vwo.com *.iproov.app p.typekit.net fonts.cdnfonts.com cdnjs.cloudflare.com cdnv2-app.clicksign.com; frame-src 'self' *.clicksign.com *.clicksign.dev *.posthog.com *.google.com gateway.zscaler.net *.youtube.com *.hotjar.com *.vwo.com *.visualwebsiteoptimizer.com *.hs-scripts.com *.googlesyndication.com td.doubleclick.net saml.saasprotection.com *.zscloud.net *.googletagmanager.com calendly.com content.googleapis.com docs.google.com *.apryse.com *.hubspot.com clicksign.github.io bat.bing.com *.hsforms.com *.facebook.com *.hs-sites.com; font-src 'self' data: *.clicksign.com *.clicksign.dev *.googleapis.com *.gstatic.com *.iproov.app use.typekit.net static.hsappstatic.net fonts.cdnfonts.com cdnjs.cloudflare.com; media-src 'self' data: *.clicksign.com *.clicksign.dev; object-src 'self' *.clicksign.com *.clicksign.dev; manifest-src 'self' *.clicksign.com *.clicksign.dev cdnv2-app.clicksign.com; frame-ancestors 'self' clicksign.github.io; connect-src 'self' wss: https: blob: ws://localhost:12387 *.clicksign.com *.clicksign.dev *.crazyegg.com *.facebook.com https://www.facebook.com *.linkedin.com https://px.ads.linkedin.com data: https://stats.g.doubleclick.net analytics.tiktok.com https://pagestates-tracking.crazyegg.com https://assets-tracking.crazyegg.com us.rp.secure.iproov.me api.public.caf.io cdn.iproov.app https://www.google.com *.google.com https://api.hubapi.com https://clicksign-template-preview-staging.s3.amazonaws.com https://clicksign-template-preview-sandbox.s3.amazonaws.com https://clicksign-template-preview-production.s3.amazonaws.com clicksign-content-production.s3.amazonaws.com cta-service-cms2.hubspot.com bat.bing.com api.hubspot.com; report-uri /security/csp",
+    'content-type': 'application/json; charset=utf-8',
+    date: 'Fri, 01 Aug 2025 20:25:19 GMT',
+    'referrer-policy': 'strict-origin-when-cross-origin',
+    'set-cookie': '_tavola_session=xT2iKAS9m%2FgovcjAXZTCusnLJop8SMVw9MRuiyEW0NmXq7DzMFu8fVBrr1oz4RzjgKx3m381EfsXlgFEfou959QJcyrF7R7tRG6aEb2dtTYIkgjo54rwGi79VI1RA9IrunoFgmVRThaIdeSd784DGvSgkt4bVQXSSAqPeAgPeApPMoIwqXb%2BGAFd1tDNN%2Fni0PpnCa0P3tz21XEfadzKd%2Bta%2FiLNEWlL3XBmnnDvV8txffzmVk%2B0EJkqR%2BUz4AnNxA%3D%3D--6HFGhGFMFb03BJ9U--K2Ovqrledbu9JHli9DMy9w%3D%3D; domain=.app.clicksign.com; path=/; expires=Sat, 02 Aug 2025 02:25:19 GMT; secure; HttpOnly; SameSite=Lax',
+    'strict-transport-security': 'max-age=63072000; includeSubDomains',
+    'transfer-encoding': 'chunked',
+    vary: 'Accept',
+    'x-content-type-options': 'nosniff',
+    'x-download-options': 'noopen',
+    'x-frame-options': 'SAMEORIGIN',
+    'x-permitted-cross-domain-policies': 'none',
+    'x-rate-limit': '50',
+    'x-rate-limit-remaining': '48',
+    'x-rate-limit-reset': '1754079920',
+    'x-request-id': '03644de5-1d6e-4611-8591-a16bce25818d',
+    'x-runtime': '0.064907',
+    'x-xss-protection': '1; mode=block'
+  },
+  body: { errors: [ [Object] ] }
+}
+[CLICKSIGN V3] ❌ Request failed: Error: content_base64 deve ser informado(a)
+    at ClickSignServiceV3.makeRequest (/home/runner/workspace/server/services/clickSignServiceV3.ts:149:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async ClickSignServiceV3.addDocumentToEnvelope (/home/runner/workspace/server/services/clickSignServiceV3.ts:202:22)
+    at async ClickSignServiceV3.sendCCBForSignature (/home/runner/workspace/server/services/clickSignServiceV3.ts:413:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/clicksign-integration.ts:207:20)
+[CLICKSIGN V3] ❌ Failed to send CCB for signature: Error: content_base64 deve ser informado(a)
+    at ClickSignServiceV3.makeRequest (/home/runner/workspace/server/services/clickSignServiceV3.ts:149:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async ClickSignServiceV3.addDocumentToEnvelope (/home/runner/workspace/server/services/clickSignServiceV3.ts:202:22)
+    at async ClickSignServiceV3.sendCCBForSignature (/home/runner/workspace/server/services/clickSignServiceV3.ts:413:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/clicksign-integration.ts:207:20)
+[CLICKSIGN] ❌ Error regenerating signature link: Error: content_base64 deve ser informado(a)
+    at ClickSignServiceV3.makeRequest (/home/runner/workspace/server/services/clickSignServiceV3.ts:149:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async ClickSignServiceV3.addDocumentToEnvelope (/home/runner/workspace/server/services/clickSignServiceV3.ts:202:22)
+    at async ClickSignServiceV3.sendCCBForSignature (/home/runner/workspace/server/services/clickSignServiceV3.ts:413:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/clicksign-integration.ts:207:20)

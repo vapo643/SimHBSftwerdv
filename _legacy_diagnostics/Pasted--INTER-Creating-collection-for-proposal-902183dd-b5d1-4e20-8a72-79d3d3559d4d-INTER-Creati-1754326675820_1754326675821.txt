@@ -1,0 +1,60 @@
+}
+[INTER] Creating collection for proposal: 902183dd-b5d1-4e20-8a72-79d3d3559d4d
+[INTER] 🚀 Creating collection for proposal: 902183dd-b5d1-4e20-8a72-79d3d3559d4d
+[INTER] 📤 Creating collection: 902183dd-b5d1-4
+[INTER] 🔑 Requesting new access token...
+[INTER] 🌐 Token URL: cdpj.partners.bancointer.com.br/oauth/v2/token
+[INTER] 📄 Using form-based authentication per official docs
+[INTER] 🔓 Certificate configured: ✅ Present
+[INTER] 🔑 Private Key configured: ✅ Present
+[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=boleto-cobranca.read boleto-cobranca.write webhook.write webhook.read
+[INTER] 🔒 Using mTLS certificate authentication
+[INTER] 🔄 Formatting certificates with proper line breaks...
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] ✅ Certificate formatted with line breaks
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] ✅ Private key formatted with line breaks
+[INTER] ✅ Certificates formatted and ready
+[INTER] 🚀 Making mTLS request with custom agent...
+[INTER] 📡 Response status: 400
+[INTER] 📡 Response headers: Headers {
+  traceparent: '00-6c3e186766bd6a53ac210971a8647c23-3fcf20512e33e16c-00',
+  date: 'Mon, 04 Aug 2025 16:57:37 GMT',
+  'content-length': '0'
+}
+[INTER] ❌ Error response body: 
+[INTER] 🔍 Bad Request - possible causes:
+[INTER]   - Invalid grant_type or scope
+[INTER]   - Invalid client credentials
+[INTER]   - Missing required parameters
+[INTER]   - Response headers: {
+  'content-length': '0',
+  date: 'Mon, 04 Aug 2025 16:57:37 GMT',
+  traceparent: '00-6c3e186766bd6a53ac210971a8647c23-3fcf20512e33e16c-00'
+}
+[INTER] POST /cobranca/v3/cobrancas
+[INTER] Error 400: 
+[INTER] Request failed for /cobranca/v3/cobrancas: Error: Inter API error: 400 - 
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:412:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.emitirCobranca (/home/runner/workspace/server/services/interBankService.ts:464:24)
+    at async InterBankService.criarCobrancaParaProposta (/home/runner/workspace/server/services/interBankService.ts:774:22)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter.ts:189:32)
+[INTER] ❌ Failed to create collection: Error: Inter API error: 400 - 
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:412:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.emitirCobranca (/home/runner/workspace/server/services/interBankService.ts:464:24)
+    at async InterBankService.criarCobrancaParaProposta (/home/runner/workspace/server/services/interBankService.ts:774:22)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter.ts:189:32)
+[INTER] ❌ Failed to create collection for proposal: Error: Inter API error: 400 - 
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:412:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.emitirCobranca (/home/runner/workspace/server/services/interBankService.ts:464:24)
+    at async InterBankService.criarCobrancaParaProposta (/home/runner/workspace/server/services/interBankService.ts:774:22)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter.ts:189:32)
+[INTER] Failed to create collection: Error: Inter API error: 400 - 
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:412:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.emitirCobranca (/home/runner/workspace/server/services/interBankService.ts:464:24)
+    at async InterBankService.criarCobrancaParaProposta (/home/runner/workspace/server/services/interBankService.ts:774:22)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter.ts:189:32)

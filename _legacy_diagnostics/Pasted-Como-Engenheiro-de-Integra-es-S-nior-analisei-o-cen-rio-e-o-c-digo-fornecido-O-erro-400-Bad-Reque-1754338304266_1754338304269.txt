@@ -1,0 +1,462 @@
+Como Engenheiro de Integrações Sênior, analisei o cenário e o código fornecido. O erro 400 Bad Request com corpo vazio é um sintoma clássico e frustrante, geralmente indicando uma falha na camada de transporte (mTLS) ou no gateway da API, antes que a lógica da aplicação possa processar o payload e retornar um erro estruturado em JSON.
+
+A sua depuração foi minuciosa, mas o problema reside em uma sutil, porém crítica, inconsistência na forma como as requisições mTLS são tratadas no seu serviço.
+
+1. Análise da Causa Raiz
+A causa raiz do problema é dupla, consistindo em uma falha crítica na camada de transporte e múltiplos erros na construção do payload.
+
+Causa Primária: Falha na Negociação mTLS na Requisição de Cobrança
+
+O diagnóstico principal é que a sua função makeRequest não está utilizando a configuração mTLS.
+
+Autenticação vs. Operação: A sua função getAccessToken configura corretamente um undici.Agent com os certificados mTLS e o utiliza para obter o token de autenticação. É por isso que o OAuth2 funciona perfeitamente.
+
+Falha na Requisição Subsequente: No entanto, a função makeRequest, que é usada para todas as outras chamadas à API (incluindo emitirCobranca), utiliza o fetch global do Node.js sem passar o agente mTLS (dispatcher).
+
+Consequência: A requisição POST /cobranca/v3/cobrancas é enviada sem o certificado de cliente. O gateway da API do Banco Inter, esperando uma conexão mTLS, não recebe o certificado, resultando em uma falha no handshake TLS. Ele rejeita a conexão imediatamente com um erro genérico 400 Bad Request e fecha a conexão antes que qualquer corpo de resposta possa ser enviado. Isso explica perfeitamente a ausência de um corpo de erro em JSON.
+
+Causas Secundárias: Erros Críticos no Payload JSON
+
+Mesmo que o problema de mTLS fosse corrigido, a sua requisição ainda falharia devido a erros estruturais no payload enviado para a API v3:
+
+Campo Inválido dataEmissao: A documentação da API de Cobrança v3 não inclui o campo dataEmissao no corpo da requisição para criação de boletos. A sua presença causa uma falha de validação.    
+
+Campo Inválido formasRecebimento: Este campo não existe na especificação da API de Cobrança v3 e deve ser removido.    
+
+Estrutura de desconto Incorreta: O objeto desconto no seu código utiliza o campo quantidadeDias, que não é compatível com o codigo: 'PERCENTUALDATAINFORMADA'. Este código exige um campo data (string no formato YYYY-MM-DD) para especificar até quando o desconto é válido.    
+
+Manipulação de valorNominal: A função customStringify é uma solução complexa e frágil para um problema que não deveria existir. O JSON.stringify nativo lida corretamente com números. O valor deve ser um tipo number com até duas casas decimais (ex: 1000.00) diretamente no objeto JavaScript.
+
+2. Código Refatorado (interBankService.ts)
+A seguir, apresento uma versão refatorada do interBankService.ts. As mudanças corrigem a falha de mTLS, os erros de payload e melhoram a estrutura geral, a resiliência e a capacidade de depuração do serviço.
+
+Principais Melhorias:
+
+Agente mTLS Centralizado: Um único UndiciAgent é criado no construtor e reutilizado para todas as requisições, garantindo que o mTLS seja aplicado consistentemente.
+
+Lógica de Certificado Isolada: A formatação dos certificados PEM foi movida para uma função utilitária (formatPem), tornando o código mais limpo e testável.
+
+makeRequest Corrigido: A função agora recebe e utiliza o dispatcher mTLS em todas as chamadas fetch.
+
+Remoção de Hacks: A função customStringify foi removida.
+
+Payload Corrigido: A função criarCobrancaParaProposta foi ajustada para gerar um payload 100% compatível com a API v3.
+
+Tratamento de Erros Aprimorado: O bloco catch agora loga os headers da resposta, o que pode fornecer trace-ids valiosos para o suporte do banco, mesmo com corpo vazio.
+
+TypeScript
+
+// server/services/interBankService.ts (Refatorado)
+
+import { Agent as UndiciAgent, request } from 'undici';
+import { URLSearchParams } from 'url';
+
+// --- Interfaces (sem alterações) ---
+//... (mantenha todas as interfaces como no original)
+interface InterBankConfig {
+  apiUrl: string;
+  clientId: string;
+  clientSecret: string;
+  certificate: string;
+  privateKey: string;
+  contaCorrente?: string;
+  environment: 'sandbox' | 'production';
+}
+
+interface InterTokenResponse {
+  access_token: string;
+  token_type: string;
+  expires_in: number;
+  scope: string;
+}
+
+interface ClientData {
+  cpfCnpj: string;
+  tipoPessoa: 'FISICA' | 'JURIDICA';
+  nome: string;
+  email?: string;
+  ddd?: string;
+  telefone?: string;
+  endereco: string;
+  numero: string;
+  complemento?: string;
+  bairro: string;
+  cidade: string;
+  uf: string;
+  cep: string;
+}
+
+interface CobrancaRequest {
+  seuNumero: string;
+  valorNominal: number;
+  dataVencimento: string;
+  numDiasAgenda: number;
+  pagador: ClientData;
+  desconto?: {
+    codigo: 'VALORFIXODATAINFORMADA' | 'PERCENTUALDATAINFORMADA';
+    data: string; // Corrigido: 'data' é obrigatório para estes códigos
+    taxa: number;
+  };
+  multa?: {
+    codigo: 'VALORFIXO' | 'PERCENTUAL';
+    taxa: number;
+  };
+  mora?: {
+    codigo: 'TAXAMENSAL' | 'VALORDIA'; // Corrigido: TAXADIARIA não é um enum válido
+    taxa: number;
+  };
+  mensagem?: {
+    linha1?: string;
+    linha2?: string;
+    linha3?: string;
+    linha4?: string;
+    linha5?: string;
+  };
+}
+
+//... (demais interfaces)
+
+/**
+ * Formata uma chave ou certificado PEM de linha única para o formato multi-linha
+ * exigido pelo Node.js.
+ * @param pemContent O conteúdo PEM em linha única.
+ * @returns O conteúdo PEM formatado corretamente.
+ */
+const formatPem = (pemContent: string): string => {
+  if (!pemContent |
+
+| pemContent.includes('\n')) {
+    return pemContent; // Retorna se vazio ou já formatado
+  }
+
+  const pemType = pemContent.includes('CERTIFICATE')? 'CERTIFICATE' : 'PRIVATE KEY';
+  const match = pemContent.match(new RegExp(`-----BEGIN (.*?)-----(.*?)-----END (.*?)-----`));
+
+  if (match && match[1]) {
+    const header = `-----BEGIN ${match[2]}-----`;
+    const footer = `-----END ${match[3]}-----`;
+    const base64Content = match.[1]trim();
+    const formattedContent = base64Content.match(/.{1,64}/g)?.join('\n') |
+
+| base64Content;
+    return `${header}\n${formattedContent}\n${footer}`;
+  }
+
+  console.warn(` ⚠️ Falha ao formatar conteúdo PEM para: ${pemType}`);
+  return pemContent;
+};
+
+
+class InterBankService {
+  private config: InterBankConfig;
+  private mTLSDispatcher: UndiciAgent;
+  private tokenCache: {
+    token: string;
+    expiresAt: number;
+  } | null = null;
+
+  constructor() {
+    const isProduction =!!process.env.INTER_CONTA_CORRENTE;
+
+    this.config = {
+      environment: isProduction? 'production' : 'sandbox',
+      apiUrl: isProduction
+       ? 'https://cdpj.partners.bancointer.com.br'
+        : 'https://cdpj-sandbox.partners.uatinter.co',
+      clientId: process.env.INTER_CLIENT_ID |
+
+| '',
+      clientSecret: process.env.INTER_CLIENT_SECRET |
+
+| '',
+      certificate: process.env.INTER_CERTIFICATE |
+
+| '',
+      privateKey: process.env.INTER_PRIVATE_KEY |
+
+| '',
+      contaCorrente: process.env.INTER_CONTA_CORRENTE |
+
+| ''
+    };
+
+    if (!this.config.clientId ||!this.config.clientSecret ||!this.config.certificate ||!this.config.privateKey) {
+      console.error(' ❌ Credenciais, certificados ou chave privada não configurados. A integração falhará.');
+    }
+
+    // CRÍTICO: Cria um agente mTLS centralizado para ser usado em TODAS as requisições
+    this.mTLSDispatcher = new UndiciAgent({
+      connect: {
+        cert: formatPem(this.config.certificate),
+        key: formatPem(this.config.privateKey),
+        rejectUnauthorized: this.config.environment === 'production' // Valida o certificado em produção
+      }
+    });
+
+    console.log(` 🏦 Serviço inicializado em modo ${this.config.environment}.`);
+  }
+
+  /**
+   * Obtém um token de acesso OAuth2, utilizando cache.
+   */
+  private async getAccessToken(): Promise<string> {
+    if (this.tokenCache && Date.now() < this.tokenCache.expiresAt) {
+      return this.tokenCache.token;
+    }
+
+    console.log(' 🔑 Solicitando novo token de acesso...');
+
+    const formBody = new URLSearchParams({
+      'client_id': this.config.clientId,
+      'client_secret': this.config.clientSecret,
+      'grant_type': 'client_credentials',
+      'scope': 'boleto-cobranca.read boleto-cobranca.write webhook.read webhook.write'
+    });
+
+    try {
+      const response = await request(`${this.config.apiUrl}/oauth/v2/token`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: formBody.toString(),
+        dispatcher: this.mTLSDispatcher // Utiliza o agente mTLS
+      });
+
+      if (response.statusCode!== 200) {
+        const errorBody = await response.body.text();
+        throw new Error(`Falha ao obter token: ${response.statusCode} - ${errorBody}`);
+      }
+
+      const tokenData: InterTokenResponse = await response.body.json();
+
+      // Cache com 5 minutos de margem
+      this.tokenCache = {
+        token: tokenData.access_token,
+        expiresAt: Date.now() + ((tokenData.expires_in - 300) * 1000)
+      };
+
+      console.log(` ✅ Token de acesso obtido com sucesso.`);
+      return tokenData.access_token;
+
+    } catch (error) {
+      console.error(' ❌ Erro catastrófico ao obter token de acesso:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Realiza uma requisição autenticada e com mTLS para a API do Inter.
+   * Esta é a função central que garante a configuração correta para todas as chamadas.
+   */
+  private async makeRequest<T>(endpoint: string, method: 'GET' | 'POST' | 'PATCH' | 'DELETE' | 'PUT' = 'GET', data?: any): Promise<T> {
+    const token = await this.getAccessToken();
+    const url = `${this.config.apiUrl}${endpoint}`;
+
+    const headers: Record<string, string> = {
+      'Authorization': `Bearer ${token}`,
+      'Accept': 'application/json'
+    };
+
+    if (this.config.contaCorrente) {
+      headers['x-conta-corrente'] = this.config.contaCorrente;
+    } else {
+      // Em produção, a conta corrente é essencial.
+      if (this.config.environment === 'production') {
+        console.error(' ❌ ERRO CRÍTICO: x-conta-corrente não configurado para ambiente de produção.');
+        throw new Error('x-conta-corrente é obrigatório em produção.');
+      }
+    }
+
+    const options: Parameters<typeof request>[2] = {
+      method,
+      headers,
+      dispatcher: this.mTLSDispatcher // CRÍTICO: Aplica mTLS a esta requisição
+    };
+
+    if (data && (method === 'POST' |
+
+| method === 'PATCH' |
+| method === 'PUT')) {
+      headers = 'application/json; charset=utf-8';
+      options.body = JSON.stringify(data); // Usa o stringify padrão
+    }
+
+    console.log(` -> ${method} ${url}`);
+    if (options.body) {
+      console.log(' -> Payload:', options.body);
+    }
+
+    try {
+      const response = await request(url, options);
+
+      console.log(` <- ${response.statusCode} ${method} ${url}`);
+
+      // Para DELETE ou respostas sem conteúdo
+      if (response.statusCode === 204) {
+        return { success: true } as T;
+      }
+
+      const responseText = await response.body.text();
+
+      if (response.statusCode < 200 |
+
+| response.statusCode >= 300) {
+        console.error('---------- INÍCIO ERRO INTER API ----------');
+        console.error(` 🚨 Status: ${response.statusCode}`);
+        console.error(' 🚨 Headers da Resposta:', response.headers); // Loga headers para obter trace-id
+        console.error(` 🚨 Corpo do Erro: "${responseText}"`);
+        console.error('----------- FIM ERRO INTER API -----------');
+        throw new Error(`Erro na API do Inter: ${response.statusCode} - ${responseText |
+
+| 'Corpo vazio'}`);
+      }
+      
+      // Retorna o texto puro se não for JSON válido (ex: PDF)
+      try {
+        return JSON.parse(responseText) as T;
+      } catch {
+        return responseText as T;
+      }
+
+    } catch (error) {
+      console.error(` ❌ Falha na requisição para ${endpoint}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Cria uma cobrança para uma proposta, montando o payload de acordo com a API v3.
+   */
+  async criarCobrancaParaProposta(proposalData: {
+    id: string;
+    valorTotal: number;
+    dataVencimento: string;
+    clienteData: ClientData;
+  }): Promise<CobrancaResponse> {
+    console.log(' 🚀 Criando cobrança para proposta:', proposalData.id);
+
+    // Gera um identificador único para a cobrança
+    const seuNumero = `${proposalData.id.substring(0, 13)}-${Date.now().toString().slice(-1)}`;
+
+    // Garante que o valor está no formato numérico correto
+    const valorNominal = parseFloat(proposalData.valorTotal.toFixed(2));
+
+    // Limpa e formata dados do pagador
+    const pagadorLimpo: ClientData = {
+     ...proposalData.clienteData,
+      cpfCnpj: proposalData.clienteData.cpfCnpj.replace(/\D/g, ''),
+      cep: proposalData.clienteData.cep.replace(/\D/g, ''),
+      nome: proposalData.clienteData.nome.trim(),
+      endereco: proposalData.clienteData.endereco.trim(),
+      bairro: proposalData.clienteData.bairro.trim(),
+      cidade: proposalData.clienteData.cidade.trim(),
+    };
+
+    // Monta o payload ESTRITAMENTE de acordo com a documentação da API v3
+    const cobrancaData: CobrancaRequest = {
+      seuNumero,
+      valorNominal,
+      dataVencimento: proposalData.dataVencimento,
+      numDiasAgenda: 30, // Permanecer ativa por 30 dias após vencimento
+      pagador: pagadorLimpo,
+      multa: {
+        codigo: 'PERCENTUAL',
+        taxa: 2.00
+      },
+      mora: {
+        codigo: 'TAXAMENSAL',
+        taxa: 1.00
+      },
+      mensagem: {
+        linha1: `Ref. Proposta: ${proposalData.id}`,
+        linha2: 'Pague via PIX ou boleto bancário.',
+        linha3: 'Dúvidas: contato@simpix.com.br'
+      }
+    };
+
+    // REMOVIDO: dataEmissao - Campo inválido na requisição
+    // REMOVIDO: formasRecebimento - Campo inválido na requisição
+    // REMOVIDO: desconto - Opcional, e a estrutura estava incorreta. Adicionar apenas se necessário e com a estrutura correta (com 'data').
+
+    return this.makeRequest<CobrancaResponse>('/cobranca/v3/cobrancas', 'POST', cobrancaData);
+  }
+
+  // --- Mantenha os outros métodos do serviço (recuperarCobranca, pesquisarCobrancas, etc.) ---
+  // Eles agora usarão automaticamente o `makeRequest` refatorado e funcionarão corretamente.
+  //...
+}
+
+export const interBankService = new InterBankService();
+3. Plano de Ação de Diagnóstico
+Se, após aplicar o código refatorado, o erro persistir, siga estes passos para um diagnóstico definitivo, isolando o problema da sua aplicação Node.js.
+
+Passo 1: Validar Variáveis de Ambiente
+
+Certifique-se de que as variáveis de ambiente no seu servidor de produção estão corretas e acessíveis pelo processo Node.js:
+
+INTER_CLIENT_ID
+
+INTER_CLIENT_SECRET
+
+INTER_CERTIFICATE (o conteúdo completo do arquivo.crt, pode ser em linha única)
+
+INTER_PRIVATE_KEY (o conteúdo completo do arquivo.key, pode ser em linha única)
+
+INTER_CONTA_CORRENTE (o número da sua conta corrente)
+
+Passo 2: Preparar Arquivos para curl
+
+No seu servidor, crie os seguintes arquivos no mesmo diretório:
+
+cert.pem: Cole o conteúdo da sua variável INTER_CERTIFICATE neste arquivo.
+
+key.pem: Cole o conteúdo da sua variável INTER_PRIVATE_KEY neste arquivo.
+
+payload.json: Crie um arquivo com o payload JSON corrigido.
+
+JSON
+
+{
+  "seuNumero": "curl-teste-001",
+  "valorNominal": 10.50,
+  "dataVencimento": "2025-12-25",
+  "numDiasAgenda": 30,
+  "pagador": {
+    "cpfCnpj": "20528464760",
+    "tipoPessoa": "FISICA",
+    "nome": "Teste Curl de Jesus",
+    "endereco": "Rua do Teste",
+    "numero": "123",
+    "bairro": "Centro",
+    "cidade": "Serra",
+    "uf": "ES",
+    "cep": "29165460"
+  },
+  "multa": {
+    "codigo": "PERCENTUAL",
+    "taxa": 2.0
+  },
+  "mora": {
+    "codigo": "TAXAMENSAL",
+    "taxa": 1.0
+  }
+}
+Passo 3: Executar o Comando curl
+
+Execute o comando curl abaixo, substituindo os placeholders <SEU_TOKEN> e <SUA_CONTA_CORRENTE>. Você pode obter um token válido executando a sua aplicação com o código refatorado uma vez e copiando o token do log.
+
+Bash
+
+curl -v -X POST https://cdpj.partners.bancointer.com.br/cobranca/v3/cobrancas \
+--cert./cert.pem \
+--key./key.pem \
+-H "Authorization: Bearer <SEU_TOKEN>" \
+-H "x-conta-corrente: <SUA_CONTA_CORRENTE>" \
+-H "Content-Type: application/json" \
+-d @payload.json
+Análise do Resultado do curl:
+
+-v (verbose): A flag mais importante. Ela mostrará toda a negociação TLS.
+
+Sucesso: Se você vir linhas como * SSL connection using TLSv1.3 / TLS_AES_256_GCM_SHA384 e * Server certificate verify OK, e receber uma resposta 200 OK com um codigoSolicitacao, significa que suas credenciais e o payload estão corretos. O problema estava 100% na aplicação Node.js, que o código refatorado resolve.
+
+Falha: Se o curl falhar com um erro de handshake, peer did not return a certificate, ou similar, o problema está nos seus arquivos de certificado/chave ou em alguma restrição de firewall/rede no seu servidor. Se falhar com um 400 Bad Request e um corpo de erro JSON, analise as violações reportadas para ajustar o payload.json.

@@ -1,0 +1,44 @@
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Implementar o endpoint de backend para receber, validar e processar webhooks de atualização de status de boletos (ex: pago, vencido) enviados pela API do Banco Inter.
+* **Intenção Estratégica (O Porquê):** A "Tela de Cobranças" atualmente mostra dados estáticos. Para ser uma ferramenta operacional eficaz, a equipe precisa ver o status dos pagamentos em tempo real, sem ação manual. Este webhook é a fundação para essa reatividade.
+* **Histórico Relevante (Consulta Obrigatória):** Sua auditoria da tela foi excelente. Agora vamos aprimorá-la. Já implementamos com sucesso um webhook para a ClickSign; aplique os mesmos princípios de segurança e lógica aqui, como a validação da requisição.
+* **Modelo Mental (Como se Encaixa):** O Banco Inter enviará uma notificação `POST` para um novo endpoint em nosso sistema. Este endpoint irá validar a requisição, extrair o identificador do boleto e seu novo `status`, e atualizar a linha correspondente na nossa tabela `inter_collections`.
+* **Riscos Antecipados:** **Risco:** Webhooks podem ser falsificados por atores maliciosos. **Contramedida:** A documentação do Banco Inter deve ser consultada para entender o mecanismo de segurança deles (ex: assinatura HMAC, verificação de IP). A implementação DEVE incluir esta validação de segurança.
+
+---
+
+**IMPLEMENTAR:**
+O endpoint de backend para receber e processar webhooks de atualização de status de boletos do Banco Inter.
+
+**CURRENT STATE:**
+Não existe um endpoint para receber notificações de pagamento do Banco Inter. O status dos boletos em nosso sistema só é atualizado quando consultamos a API ativamente.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  Um novo endpoint seguro (ex: `POST /api/webhooks/inter`).
+2.  O endpoint valida a autenticidade da requisição vinda do Banco Inter.
+3.  Ele extrai os dados do payload (identificador do boleto e novo status).
+4.  Ele atualiza a coluna `situacao` na nossa tabela `inter_collections` com o novo status.
+5.  A ação é registrada em nossos logs de webhook para fins de auditoria.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+**1. Pesquisa de Documentação (Ação Crítica):**
+    - **Ação:** Sua primeira tarefa é usar "Web Search" para encontrar a **documentação oficial para desenvolvedores do Banco Inter sobre webhooks de cobranças**.
+    - **Foco da Pesquisa:** Identifique o formato do payload para eventos como "boleto pago" e, crucialmente, o **mecanismo de segurança** que eles usam para você validar a autenticidade da requisição do webhook.
+
+**2. Criação do Endpoint:**
+    - **Ação:** Crie o novo ficheiro de rota e o endpoint `POST /api/webhooks/inter`.
+
+**3. Implementação da Lógica de Segurança:**
+    - **Ação:** Implemente a validação de segurança do webhook EXATAMENTE como descrito na documentação do Inter. Se não houver um mecanismo de segurança, reporte isso como um risco.
+
+**4. Implementação da Lógica de Negócio:**
+    - **Ação:** Após a validação, escreva a lógica para buscar o boleto correspondente em nossa tabela `inter_collections` (usando o `codigoSolicitacao` ou outro identificador) e atualizar seu status.
+
+**PROTOCOLO OBRIGATÓRIO 5-CHECK:**
+1.  Mapear os arquivos a serem criados/modificados.
+2.  Garantir que a validação de segurança seja a primeira etapa dentro do endpoint.
+3.  Executar `get_latest_lsp_diagnostics`.
+4.  O teste exigirá uma forma de simular uma chamada de webhook do Inter para o nosso endpoint (você pode criar um script de teste com `curl` ou similar).
+5.  O critério de sucesso é que uma chamada simulada ao webhook atualize corretamente o status de um boleto no nosso banco de dados.

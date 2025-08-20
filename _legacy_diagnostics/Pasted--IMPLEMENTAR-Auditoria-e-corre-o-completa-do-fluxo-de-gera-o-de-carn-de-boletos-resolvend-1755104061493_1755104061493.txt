@@ -1,0 +1,32 @@
+**IMPLEMENTAR:**
+Auditoria e correção completa do fluxo de geração de "carnê" de boletos, resolvendo os erros de "Rate Limiting" no backend e de autenticação no frontend.
+
+**CONTEXT:**
+A funcionalidade de gerar o carnê consolidado está a falhar. O usuário clica no botão, mas recebe uma mensagem de erro. A análise dos logs (que serão anexados a este prompt) indica que estamos a sobrecarregar a API do Banco Inter com muitas requisições simultâneas e que o frontend não está a enviar o token de autenticação corretamente para o novo endpoint.
+
+**CURRENT STATE:**
+A tentativa de gerar o carnê resulta em erro, e os logs mostram falhas `HTTP 429` (Too Many Requests) e `HTTP 403` (Forbidden / bad_jwt).
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  O usuário clica no botão para baixar o carnê.
+2.  O sistema baixa **TODOS** os boletos do Banco Inter de forma confiável, um por um, para não violar o limite da API.
+3.  Todos os boletos são fundidos em um único PDF.
+4.  O download do ficheiro PDF consolidado ("carnê") é iniciado com sucesso no navegador do usuário.
+
+**CONSTRAINTS (Roadmap de Auditoria e Correção):**
+
+**1. Correção do "Rate Limiting" no Backend (Ação Principal):**
+    - **Ação:** Inspecione o serviço `pdfMergeService.ts`, especificamente a função `gerarCarneParaProposta`.
+    - **Diagnóstico:** Você verá que a lógica atual provavelmente usa `Promise.all` para baixar todos os boletos, o que causa o erro `429`.
+    - **Implementação:** Refatore esta lógica. Substitua o `Promise.all` por um **loop sequencial** (como `for...of`). Dentro do loop, baixe um boleto, espere a conclusão e só então prossiga para o próximo. Isso será um pouco mais lento, mas garantirá que não sejamos bloqueados pela API do Inter.
+
+**2. Correção da Autenticação no Frontend:**
+    - **Ação:** Inspecione o componente do frontend (provavelmente na "Tela de Formalização") onde o botão de download do carnê foi adicionado.
+    - **Implementação:** Garanta que a chamada de API para o nosso endpoint de backend (`GET /api/propostas/:id/carne-pdf`) utilize o nosso wrapper de API padrão (ex: `api.get(...)`) que anexa automaticamente o token de autenticação JWT à requisição.
+
+**PROTOCOLO OBRIGATÓRIO 5-CHECK:**
+1.  Mapear os arquivos envolvidos.
+2.  Corrigir primeiro o backend, depois o frontend.
+3.  Executar `get_latest_lsp_diagnostics` para garantir ZERO erros.
+4.  Realizar um teste funcional completo: crie uma proposta, gere os boletos e clique no botão de download do carnê.
+5.  O critério final de sucesso é o **download bem-sucedido de um ficheiro PDF consolidado**, contendo todas as parcelas da proposta.

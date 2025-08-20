@@ -1,0 +1,39 @@
+**### MODO DE OPERAÇÃO: REALISMO CÉTICO (MANDATÁRIO)**
+Sua lealdade é para com a verdade do código e a estabilidade da produção.
+
+---
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Realizar uma auditoria forense completa do fluxo de dados do modal "Confirmar Veracidade" na "Tela de Pagamentos" para identificar a causa raiz exata pela qual todos os dados essenciais (Cliente, CPF, Dados Bancários, CCB) estão ausentes.
+* **Intenção Estratégica (O Porquê):** O Arquiteto identificou uma falha de integridade de dados inaceitável no ponto mais crítico do nosso fluxo financeiro. Antes de qualquer correção, precisamos de um diagnóstico 100% preciso de *onde* e *por que* os dados estão a ser perdidos.
+* **Histórico Relevante (Consulta Obrigatória):** A "Tela de Pagamentos" passou por múltiplas refatorações. A falha atual é provavelmente uma regressão ou uma falha de integração introduzida nessas mudanças. Sua análise deve ser ponta-a-ponta.
+* **Modelo Mental (Como se Encaixa):** Você é um auditor de sistemas full-stack. Sua tarefa é seguir o rastro dos dados, desde a query no backend, através da passagem de `props` no frontend, até a renderização final no modal, e provar, com evidências, onde a corrente se quebra.
+* **Riscos Antecipados:** **Risco:** Uma análise superficial. **Contramedida:** Sua missão não é corrigir. É **PROVAR** onde o sistema falha.
+
+---
+
+**IMPLEMENTAR:**
+Um relatório de auditoria detalhado. **NÃO FAÇA MODIFICAções.**
+
+**CURRENT STATE:**
+Ao clicar em "Confirmar Veracidade", o modal abre, mas exibe campos vazios para Nome do Cliente, CPF, Dados Bancários e um status incorreto de "CCB Pendente de Assinatura".
+
+**EXPECTED (Estado Final de Sucesso):**
+Um relatório de auditoria que responda a todas as questões abaixo, com evidências de código.
+
+**CONSTRAINTS (Roadmap de Auditoria Forense):**
+
+**1. Auditoria da Fonte de Dados (Backend):**
+    * **Ação:** Inspecione o endpoint que busca os dados para a **tabela principal** da "Tela de Pagamentos" (provavelmente `GET /api/pagamentos`).
+    * **Relatório 1 (A Evidência Crítica):** A query Drizzle para este endpoint está a selecionar (`select`) os campos `clienteNome`, `clienteCpf`, `dadosPagamentoBanco`, `caminho_ccb_assinado`, etc.? Apresente o `select` completo. Se estes campos não estiverem a ser selecionados aqui, esta é a nossa causa raiz primária.
+
+**2. Auditoria da Transmissão de Dados (Frontend - da Tabela para o Modal):**
+    * **Ação:** Inspecione o ficheiro `client/src/pages/financeiro/pagamentos.tsx`.
+    * **Relatório 2:** Quando o usuário clica em "Confirmar Veracidade" na linha de uma proposta, como os dados daquela proposta são passados para o componente do modal? É através de `props`? O objeto `proposta` que é passado como `prop` contém todos os dados que o backend enviou? (Use `console.log` para provar).
+
+**3. Auditoria da Renderização (Frontend - Dentro do Modal):**
+    * **Ação:** Inspecione o código JSX do componente do modal de veracidade.
+    * **Relatório 3:** O código do modal está a tentar aceder às propriedades corretas do objeto que ele recebe? (ex: `proposta.clienteNome`, `proposta.dadosPagamentoBanco`). Apresente o trecho de código que tenta renderizar o nome do cliente.
+
+**Relatório Final:**
+O critério de sucesso é um relatório forense que nos dê um mapa claro de onde os dados estão a ser perdidos, com evidências de código para cada etapa do fluxo.

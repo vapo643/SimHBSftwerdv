@@ -1,0 +1,57 @@
+**### MODO DE OPERAÇÃO: REALISMO CÉTICO (MANDATÓRIO)**
+Sua lealdade é para com a verdade do código e a estabilidade da produção.
+
+---
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Refatorar a lógica de frontend do botão "Baixar Carnê" na "Ficha do Cliente" para que ele interprete corretamente a resposta da API e inicie o download imediato de carnês já existentes.
+* **Intenção Estratégica (O Porquê):** Para eliminar a experiência do usuário frustrante e incorreta onde o sistema re-processa desnecessariamente um carnê que já está pronto, garantindo um fluxo de download instantâneo e eficiente.
+* **Histórico Relevante (Consulta Obrigatória):** Use o seu relatório de auditoria forense anterior como a única fonte da verdade. Ele provou que o backend já retorna a flag `existingFile: true` e a `signedUrl`. Sua missão é fazer com que o frontend utilize esta informação.
+* **Modelo Mental (Como se Encaixa):** Você atuará como Engenheiro de Frontend. A correção está na lógica que processa o sucesso da chamada da API `POST /api/propostas/:id/gerar-carne`. Você vai adicionar uma condição `if` para tratar os dois cenários de sucesso possíveis.
+* **Riscos Antecipados:** **Risco:** Uma lógica condicional mal implementada. **Contramedida:** A lógica deve ser simples e direta, com um `if/else` claro para os dois casos.
+
+---
+
+**IMPLEMENTAR:**
+A refatoração da lógica de tratamento de resposta do botão "Baixar Carnê".
+
+**CURRENT STATE:**
+O frontend aciona a geração do carnê, mas não diferencia entre um carnê novo e um já existente, causando a impressão de re-processamento desnecessário e falha em iniciar o download.
+
+**EXPECTED (Estado Final de Sucesso):**
+Uma lógica de frontend inteligente e de dois estágios:
+1.  Ao clicar em "Baixar Carnê", o frontend chama o endpoint `POST /api/propostas/:id/gerar-carne`.
+2.  **SE** a resposta da API contiver a flag `existingFile: true`, o frontend **imediatamente** usa a `signedUrl` retornada para iniciar o download, sem iniciar nenhum polling.
+3.  **SE** a resposta da API contiver um `jobId`, o frontend inicia o fluxo de **polling** que já implementamos para aguardar a conclusão do novo carnê.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+**1. Refatoração da Lógica de Resposta da API:**
+    - **Ação:** No ficheiro `client/src/pages/financeiro/CobrancasPage.tsx`, localize a função `async` que é acionada pelo botão "Baixar Carnê".
+    - **Implementação:** Dentro do bloco `try` (ou no `onSuccess` da `mutation`), adicione a seguinte lógica condicional:
+
+    - **Código de Exemplo para a Nova Lógica (implemente este padrão):**
+      ```typescript
+      // ... dentro da função de download, após receber 'response' da API
+      if (response.existingFile && response.signedUrl) {
+        // CENÁRIO 1: O carnê já existe. Iniciar download imediato.
+        console.log('[CARNE] Carnê já existente encontrado. Iniciando download...');
+        window.open(response.signedUrl, '_blank');
+        toast({ title: "Download iniciado", description: "O carnê já estava pronto." });
+      } else if (response.jobId) {
+        // CENÁRIO 2: Novo carnê está a ser gerado. Iniciar polling.
+        console.log('[CARNE] Geração de novo carnê iniciada. Job ID:', response.jobId);
+        // ... (aqui vai a sua lógica de polling que já existe) ...
+      } else {
+        // CENÁRIO DE ERRO
+        throw new Error('Resposta da API inválida.');
+      }
+      ```
+
+---
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+Siga o protocolo completo. O teste funcional deve cobrir os dois cenários: baixar um carnê que **já existe** (o download deve ser instantâneo) e gerar um carnê **pela primeira vez** (o polling deve ser iniciado).
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+Preencha a declaração completa ao final da sua implementação.
+---

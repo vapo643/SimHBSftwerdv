@@ -1,0 +1,28 @@
+Missão: VALIDACAO-FINAL-RECONCILIACAO-PARCELAS-01
+
+Objetivo: Validar que um evento de pagamento (simulado via webhook) aciona corretamente a cadeia de sincronização de dados entre as tabelas e que a "Tela de Cobranças" reflete esta atualização em tempo real.
+
+Passos de Execução e Validação:
+
+1. Preparação:
+* Ação: Acesse a "Tela de Cobranças". Identifique uma proposta de teste com múltiplas parcelas pendentes e anote a contagem atual de "Parcelas Pagas" (ex: "0/12 pagas").
+
+2. Execução do Gatilho (Simulação de Pagamento):
+* Ação: Use uma ferramenta de API (curl ou Postman) para simular o recebimento de um webhook de pagamento do Banco Inter, utilizando o comando exato que o Agente preparou em seu relatório. Substitua [codigo_real] pelo codigoSolicitacao de uma das parcelas pendentes.
+bash curl -X POST http://SEU_REPLIT_URL/api/webhooks/inter \ -H "Content-Type: application/json" \ -d '{ "codigoSolicitacao": "[SEU_CODIGO_DE_TESTE]", "situacao": "RECEBIDO", "valorPago": 1000.00, "dataPagamento": "2025-08-18T12:00:00Z" }' 
+
+3. Validação da Sincronização (A Prova Final):
+* Validação dos Logs: Inspecione os logs do servidor. Confirme que as mensagens [RECONCILIAÇÃO PAM V1.0] Sincronizando pagamento... e ✅ [RECONCILIAÇÃO PAM V1.0] Parcela X marcada como PAGA apareceram.
+* Validação da UI (Ponto Crítico): Observe a "Tela de Cobranças". A contagem de "Parcelas Pagas" para a sua proposta de teste foi atualizada automaticamente (via Realtime) para refletir o pagamento (ex: "1/12 pagas")? O Status de Vencimento e os KPIs foram recalculados?
+
+4. Validação da Limpeza da UI:
+* Confirme: O botão "Boleto" foi permanentemente removido da tabela principal, deixando a UI mais limpa?
+
+Relatório Final para Mim:
+Após executar os testes, por favor, retorne com um veredito final:
+
+[SUCESSO TOTAL] se a UI foi atualizada em tempo real e de forma correta após a simulação do webhook.
+
+[FALHA] se os dados na UI permaneceram desatualizados.
+
+O sucesso desta validação encerrará este "Debate Máximo" com uma vitória completa na integridade de dados da nossa plataforma.

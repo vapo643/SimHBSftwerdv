@@ -1,0 +1,46 @@
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Implementar a interface do usuário (UI) para o novo "Sistema de Alertas Proativos", incluindo o ícone de sino no header (Camada 1) e o dropdown de notificações (Camada 2).
+* **Intenção Estratégica (O Porquê):** Para tornar os alertas gerados pelo nosso novo motor de regras no backend visíveis e acionáveis para o usuário. Uma boa UI é crucial para que os alertas agreguem valor real à operação e não sejam ignorados.
+* **Histórico Relevante (Consulta Obrigatória):** Esta missão é a execução da **"Fase 2: Interface"** do seu próprio plano de arquitetura, contido no relatório `PAM_V1.0_ARQUITETURA_ALERTAS_PROATIVOS.md`. O backend e os endpoints de API necessários para esta tarefa devem ser criados como parte desta missão.
+* **Modelo Mental (Como se Encaixa):** Você atuará como Engenheiro Full-Stack. Primeiro, construirá os endpoints de API necessários no backend. Em seguida, como Engenheiro de Frontend, construirá os componentes React para consumir estes endpoints e renderizar as notificações.
+* **Riscos Antecipados:** **Risco:** Uma UI de notificações muito intrusiva pode ser irritante. **Contramedida:** A implementação deve seguir estritamente o design de "múltiplas camadas" (Sino -> Dropdown -> Página Completa) que você mesmo projetou, garantindo uma experiência não-intrusiva.
+
+---
+
+**IMPLEMENTAR:**
+A Camada 1 (Indicador Global de Sino) e a Camada 2 (Dropdown de Notificações) da interface do usuário do Sistema de Alertas.
+
+**CURRENT STATE:**
+O backend e o banco de dados para os alertas existem, mas não há nenhuma representação visual deles na aplicação.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  **Backend:** Os endpoints de API para listar e gerir notificações (`GET /api/notificacoes`, `POST /api/notificacoes/:id/marcar-lida`, etc.) estão implementados e funcionais.
+2.  **Frontend (Header):** Um ícone de "sino" (Bell) aparece no header principal da aplicação. Um badge no sino exibe a contagem de notificações não lidas para o usuário logado.
+3.  **Frontend (Dropdown):** Clicar no sino abre um dropdown que lista as notificações mais recentes. Cada item na lista é clicável e leva o usuário para a página relevante (ex: a proposta em cobrança). Há opções para marcar notificações como lidas.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+**FASE 1: Construção dos Endpoints de API (Backend):**
+    - **Ação:** Crie um novo ficheiro de rota (ex: `server/routes/notificacoes.ts`).
+    - **Implementação:** Implemente os endpoints de API que você mesmo projetou em sua arquitetura para:
+        - `GET /api/notificacoes`: Listar as notificações para o usuário logado.
+        - `POST /api/notificacoes/:id/marcar-lida`: Marcar uma notificação específica como lida.
+        - `POST /api/notificacoes/marcar-todas-lidas`: Marcar todas as notificações do usuário como lidas.
+
+**FASE 2: Implementação dos Componentes de UI (Frontend):**
+    - **Ação:** Crie os novos componentes React: `<NotificationBell />` e `<NotificationDropdown />`.
+    - **Implementação:**
+        a. Integre o `<NotificationBell />` no layout principal da aplicação (ex: `DashboardLayout.tsx`).
+        b. Use `TanStack Query` para chamar o endpoint `GET /api/notificacoes` e obter os dados. Considere configurar um `refetchInterval` (ex: a cada 1 minuto) para manter a contagem de notificações atualizada.
+        c. Construa o `<NotificationDropdown />` para exibir os dados e use `useMutation` para conectar as ações de "marcar como lida" aos seus respectivos endpoints.
+
+**PROTOCOLO OBRIGATÓRIO 5-CHECK:**
+1.  Mapear os arquivos envolvidos.
+2.  Garantir que os endpoints tenham validação de autenticação.
+3.  Executar `get_latest_lsp_diagnostics`.
+4.  Realizar um teste funcional: crie manualmente uma notificação no banco de dados para um usuário de teste. Faça login como este usuário.
+5.  O critério final de sucesso é:
+    a. O ícone de sino deve aparecer com um badge "1".
+    b. O dropdown deve mostrar a notificação que você criou.
+    c. Marcar a notificação como lida deve fazer o badge desaparecer.

@@ -1,0 +1,68 @@
+O plano para corrigir o fluxo de navegação da "Formalização" foi validado e corrigido.
+
+Sua tarefa agora é executar o seguinte plano de 3 etapas:
+
+**1. Crie a Nova Página de Fila:**
+Crie um novo arquivo no caminho `/client/src/pages/formalizacao/fila.tsx` e cole o seguinte código exato dentro dele:
+
+```typescript
+import React from 'react';
+import { Link } from "wouter";
+import DashboardLayout from '@/components/DashboardLayout';
+import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+
+const mockData = [
+  { id: 'PROP-098', cliente: 'Empresa A', status: 'Assinatura Pendente' },
+  { id: 'PROP-101', cliente: 'Empresa B', status: 'Biometria Concluída' },
+  { id: 'PROP-105', cliente: 'Empresa C', status: 'CCB Gerada' },
+];
+
+const FilaFormalizacao: React.FC = () => {
+  return (
+    <DashboardLayout title="Fila de Formalização">
+      <div className="space-y-6">
+        <h1 className="text-2xl font-bold">Fila de Formalização</h1>
+        <Card>
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>ID Proposta</TableHead>
+                  <TableHead>Cliente</TableHead>
+                  <TableHead>Status da Formalização</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {mockData.map(proposta => (
+                  <TableRow key={proposta.id}>
+                    <TableCell className="font-medium">{proposta.id}</TableCell>
+                    <TableCell>{proposta.cliente}</TableCell>
+                    <TableCell>{proposta.status}</TableCell>
+                    <TableCell className="text-right">
+                      <Link to={`/formalizacao/acompanhamento/${proposta.id}`}>
+                        <Button variant="outline" size="sm">Acompanhar</Button>
+                      </Link>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </div>
+    </DashboardLayout>
+  );
+};
+
+export default FilaFormalizacao;
+2. Adicione a Nova Rota:
+Modifique o arquivo /client/src/App.tsx para adicionar a nova rota para a página /formalizacao/fila, garantindo que ela seja uma rota protegida.
+
+3. Corrija o Link de Navegação:
+Modifique o arquivo /client/src/components/DashboardLayout.tsx. Encontre o item de menu "Formalização" no array navigation e corrija o href dele para que aponte para a nova página de fila. A linha deve ficar assim:
+{ name: "Formalização", href: "/formalizacao/fila", icon: FileText }
+
+Execute este plano de 3 etapas.

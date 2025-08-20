@@ -1,0 +1,186 @@
+
+> rest-express@1.0.0 dev
+✅ Database: Configuring Supabase connection...
+✅ Database: Connection configured (lazy)
+[CLICKSIGN V1] 🚀 Initialized in PRODUCTION mode (legal signatures)
+[CLICKSIGN V1] API URL: https://app.clicksign.com/api/v1
+[CLICKSIGN V1] Token configured: b73b3b90-c87...
+[CLICKSIGN] 🔴 Circuit Breaker will be initialized on first use
+[INTER] 🏦 Initialized in production mode
+[INTER] 🌐 API URL: https://cdpj.partners.bancointer.com.br
+[INTER] 🔴 Circuit Breakers will be initialized on first use
+[CLICKSIGN V1] 🚀 Initialized in PRODUCTION mode (legal signatures)
+[CLICKSIGN V1] API URL: https://app.clicksign.com/api/v1
+[CLICKSIGN V1] Token configured: b73b3b90-c...
+[DEV QUEUE] 📦 Created development queue: pdf-processing
+[DEV QUEUE] 📦 Created development queue: boleto-sync
+[DEV QUEUE] 📦 Created development queue: document-processing
+[DEV QUEUE] 📦 Created development queue: notifications
+[DEV QUEUE] 🚀 Development queues initialized with REAL worker processing
+🚀 [TIMING MIDDLEWARE] Creating middleware instance...
+🚀 [TIMING MIDDLEWARE] Middleware instance created and exported
+7:11:48 PM [express] ✅ All secrets loaded successfully
+7:11:48 PM [express] 🔒 [SECURITY] CORS protection configured - ASVS V13.2.1
+7:11:48 PM [express] 🔒 [SECURITY] OPTIONS preflight handling configured
+7:11:48 PM [express] 🔧 [DEV] Using basic CSP configuration optimized for Vite development
+7:11:48 PM [express] 🔒 [SECURITY] Input sanitization middleware activated
+7:11:48 PM [express] 🔒 [SECURITY] URL token validation middleware activated - ASVS V7.1.1
+7:11:48 PM [express] 🔒 [SECURITY] CSRF protection middleware activated - OWASP Cheat Sheet
+7:11:48 PM [express] 🔧 [DEV] Rate limiting configurado para desenvolvimento - limites altos
+[SEMGREP MCP] Development mode - using in-memory cache
+🧠 [ML] Treinando modelo de detecção...
+7:11:48 PM [express] 🔐 Security WebSocket initialized
+[CCB SYNC] 🚀 Starting fallback polling (every 6 hours)
+[CCB SYNC] ℹ️ Primary processing via webhooks, polling is safety net only
+7:11:48 PM [express] 🔄 CCB Sync Service initialized - Webhook primary, polling fallback every 6 hours
+7:11:48 PM [express] ℹ️  Security monitoring disabled. Set ENABLE_SECURITY_MONITORING=true to enable
+7:11:48 PM [express] 🔧 App Config Status:
+7:11:48 PM [express]   - Port: 5000
+7:11:48 PM [express]   - Environment: development
+7:11:48 PM [express]   - Database: ✅ Connected
+7:11:48 PM [express]   - Supabase: ✅ Connected
+7:11:48 PM [express]   - Security: Rate Limit ✅, Helmet ✅
+7:11:48 PM [express] 🚀 Server running on port 5000
+7:11:48 PM [express] 🌍 Environment: development
+7:11:48 PM [express] 📦 Checking storage buckets...
+7:11:49 PM [express] ✅ Storage bucket "documents" already exists as PRIVATE
+Browserslist: browsers data (caniuse-lite) is 10 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+✅ [ML] Modelo treinado com 0 amostras
+✅ Database: Connection test successful
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/debug/me
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/financeiro/cobrancas
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-14T19:13:25.167Z'
+}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/debug/me
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/financeiro/cobrancas
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+🔍 [COBRANÇAS] ====== INÍCIO DA BUSCA DE PROPOSTAS ======
+🔍 [COBRANÇAS] Filtros aplicados: { status: undefined, atraso: undefined }
+🔍 [COBRANÇAS] PAM V1.0 - Buscando propostas que possuem boletos...
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-14T19:13:39.892Z'
+}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/debug/me
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/financeiro/cobrancas
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+🔍 [COBRANÇAS] PAM V1.0 - Encontradas 2 propostas com boletos gerados
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-14T19:13:40.958Z'
+}
+🔍 [COBRANÇAS] Proposta 88a44696 (Sem nome) INCLUÍDA - 10 boletos ativos de 10 total
+🔍 [COBRANÇAS] Proposta 902183dd (Gabriel de Jesus Santana Serri) INCLUÍDA - 1 boletos ativos de 5 total
+🔍 [COBRANÇAS] Total de propostas elegíveis: 2
+🔍 [COBRANÇAS] Total de propostas após filtros: 2
+🔍 [COBRANÇAS] ====== FIM DA BUSCA DE PROPOSTAS ======
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/debug/me
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/financeiro/cobrancas
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-14T19:14:12.950Z'
+}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/debug/me
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/financeiro/cobrancas
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-14T19:14:26.055Z'
+}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/debug/me
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/financeiro/cobrancas
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-14T19:14:58.419Z'
+}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /propostas/88a44696-9b63-42ee-aa81-15f9519d24cb/observacoes
+[JWT DEBUG] Método: POST
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/financeiro/cobrancas
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-14T19:15:10.369Z'
+}
+📝 [OBSERVAÇÕES] Nova observação para proposta 88a44696-9b63-42ee-aa81-15f9519d24cb: {
+  usuario: 'gabrielserri238@gmail.com',
+  tipo: 'Outros',
+  mensagem: 'DGS...'
+}
+✅ [OBSERVAÇÕES] Observação salva com sucesso: 543aa803-0715-4a16-a799-20953698bd2d
+🔍 [AUDIT-OBSERVAÇÃO] Nova observação registrada: {
+  proposta_id: '88a44696-9b63-42ee-aa81-15f9519d24cb',
+  usuario: 'gabrielserri238@gmail.com',
+  tipo: 'Outros',
+  timestamp: '2025-08-14T19:15:12.180Z'
+}
+🔍 [COBRANÇAS] ====== INÍCIO DA BUSCA DE PROPOSTAS ======
+🔍 [COBRANÇAS] Filtros aplicados: { status: undefined, atraso: undefined }
+🔍 [COBRANÇAS] PAM V1.0 - Buscando propostas que possuem boletos...
+🔍 [COBRANÇAS] PAM V1.0 - Encontradas 2 propostas com boletos gerados
+🔍 [COBRANÇAS] Proposta 88a44696 (Sem nome) INCLUÍDA - 10 boletos ativos de 10 total
+🔍 [COBRANÇAS] Proposta 902183dd (Gabriel de Jesus Santana Serri) INCLUÍDA - 1 boletos ativos de 5 total
+🔍 [COBRANÇAS] Total de propostas elegíveis: 2
+🔍 [COBRANÇAS] Total de propostas após filtros: 2
+🔍 [COBRANÇAS] ====== FIM DA BUSCA DE PROPOSTAS ======

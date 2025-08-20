@@ -1,0 +1,38 @@
+**IMPLEMENTAR:**
+Um novo serviço de backend que lê múltiplos ficheiros PDF individuais de uma proposta do nosso Supabase Storage, os funde em um único "carnê" e salva o resultado de volta no Storage.
+
+**CONTEXT:**
+A primeira fase da nossa nova arquitetura foi um sucesso. Os PDFs individuais dos boletos agora são baixados e armazenados de forma confiável. Esta missão é para construir a segunda fase: a lógica de fusão que opera a partir destes ficheiros já armazenados.
+
+**CURRENT STATE:**
+Temos um serviço que popula o Storage com boletos individuais. Não temos a funcionalidade para consolidá-los em um carnê.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  Uma nova função, `gerarCarneDoStorage(propostaId)`, provavelmente no `boletoStorageService.ts`.
+2.  Quando esta função for chamada, ela deve:
+    a. Listar todos os ficheiros PDF na pasta `propostas/{propostaId}/boletos/emitidos_pendentes/` do Supabase Storage.
+    b. Baixar os buffers de todos estes PDFs do nosso Storage.
+    c. Usar a biblioteca `pdf-lib` para fundir todos os buffers em um único documento PDF.
+    d. Fazer o upload deste novo PDF consolidado para uma nova pasta no Storage: `propostas/{propostaId}/carnes/carne-{timestamp}.pdf`.
+    e. Retornar a URL pública ou assinada para este novo ficheiro de carnê.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+**1. Criação da Função de Geração de Carnê:**
+    - **Ação:** No serviço `boletoStorageService.ts`, crie a nova função `gerarCarneDoStorage(propostaId)`.
+    - **Implementação:**
+        1.  **Listar Ficheiros:** Use o cliente do Supabase para listar todos os ficheiros na pasta `emitidos_pendentes` da proposta.
+        2.  **Download em Lote do Storage:** Em um loop sequencial, baixe o conteúdo de cada um destes ficheiros.
+        3.  **Lógica de Fusão com `pdf-lib`:** Utilize a mesma lógica de fusão que já validamos (criar um documento em branco, copiar as páginas dos documentos de origem).
+        4.  **Upload do Carnê:** Faça o upload do buffer do PDF final para a pasta `carnes/`.
+        5.  **Retorno:** Retorne a URL do ficheiro recém-criado.
+
+**2. Criação do Endpoint de Gatilho:**
+    - **Ação:** Crie um novo endpoint, `POST /api/propostas/:id/gerar-carne`, que aciona este processo.
+    - **Implementação:** Este endpoint deve ser protegido e, ao ser chamado, deve invocar a função `gerarCarneDoStorage` e retornar o JSON contendo a URL final do carnê.
+
+**PROTOCOLO OBRIGATÓRIO 5-CHECK:**
+1.  Mapear todos os arquivos envolvidos.
+2.  Implementar de forma modular.
+3.  Executar `get_latest_lsp_diagnostics` para garantir ZERO erros.
+4.  O critério de sucesso é que, após chamar o novo endpoint, um único ficheiro PDF consolidado apareça na pasta `carnes/` do Supabase Storage e que a URL retornada pela API aponte para este ficheiro.

@@ -1,0 +1,23 @@
+# MISSÃO DE VALIDAÇÃO (RED TEAM): Testar a Eficácia do "Projeto Cérbero"
+
+**Contexto:** Olá, Agente. O nosso sistema de segurança automatizado, "Projeto Cérbero", está implementado. Agora, precisamos de realizar um teste "Red Team" para garantir que ele está de facto a funcionar e a detetar as ameaças para as quais foi construído.
+
+**Sua Missão:**
+A sua tarefa é simular duas vulnerabilidades conhecidas, uma de dependência e uma de código, e verificar se as nossas novas ferramentas as detetam.
+
+**ROADMAP DE EXECUÇÃO:**
+
+**PASSO 1: Simular uma Vulnerabilidade de Dependência (Teste do SCA)**
+* **Ação:** No nosso `package.json`, instale uma versão antiga e sabidamente vulnerável de uma biblioteca comum (por exemplo, uma versão antiga do `axios` ou `lodash` que tenha uma vulnerabilidade de segurança conhecida e documentada).
+* **Teste:** Em seguida, execute o nosso script de verificação de dependências (`.security/run-dependency-check.sh`).
+* **Resultado Esperado:** O script deve **falhar o "build"** e reportar a vulnerabilidade exata que você acabou de introduzir.
+
+**PASSO 2: Simular uma Vulnerabilidade de Código (Teste do SAST)**
+* **Ação:** Crie um ficheiro temporário de teste (ex: `server/routes/test-vulnerability.ts`) e, dentro dele, adicione um pedaço de código que viole uma das nossas regras do Semgrep. Por exemplo, escreva uma linha de código com uma senha "hardcoded" (ex: `const superSecretKey = 'password123';`).
+* **Teste:** Em seguida, use a nossa interface no Dashboard de Segurança para escanear este novo ficheiro (`server/routes/test-vulnerability.ts`).
+* **Resultado Esperado:** O dashboard deve exibir um alerta do Semgrep, identificando a linha exata com a senha "hardcoded".
+
+**PASSO 3: Limpeza**
+* **Ação:** Após os testes bem-sucedidos, reverta as alterações: remova a dependência vulnerável do `package.json` e exclua o ficheiro de teste `test-vulnerability.ts`, retornando o sistema ao seu estado seguro.
+
+Execute este plano para nos dar a prova irrefutável de que o nosso "sistema imunitário" está alerta e a funcionar.

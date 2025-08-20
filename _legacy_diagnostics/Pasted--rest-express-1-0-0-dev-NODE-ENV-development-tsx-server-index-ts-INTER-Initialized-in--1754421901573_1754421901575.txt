@@ -1,0 +1,702 @@
+
+> rest-express@1.0.0 dev
+> NODE_ENV=development tsx server/index.ts
+
+[INTER] 🏦 Initialized in production mode
+[INTER] 🌐 API URL: https://cdpj.partners.bancointer.com.br
+[CLICKSIGN V1] 🚀 Initialized in PRODUCTION mode (legal signatures)
+[CLICKSIGN V1] API URL: https://app.clicksign.com/api/v1
+[CLICKSIGN V1] Token configured: b73b3b90-c...
+🚀 [TIMING MIDDLEWARE] Creating middleware instance...
+🚀 [TIMING MIDDLEWARE] Middleware instance created and exported
+7:22:20 PM [express] ✅ All secrets loaded successfully
+7:22:20 PM [express] 🔒 [SECURITY] CORS protection configured - ASVS V13.2.1
+7:22:20 PM [express] 🔒 [SECURITY] OPTIONS preflight handling configured
+7:22:20 PM [express] 🔧 [DEV] CSP disabled in development mode for debugging
+7:22:20 PM [express] 🔒 [SECURITY] Input sanitization middleware activated
+7:22:20 PM [express] 🔒 [SECURITY] URL token validation middleware activated - ASVS V7.1.1
+7:22:20 PM [express] 🔒 [SECURITY] CSRF protection middleware activated - OWASP Cheat Sheet
+7:22:20 PM [express] 🔧 [DEV] Rate limiting configurado para desenvolvimento - limites altos
+[SEMGREP MCP] Development mode - using in-memory cache
+🧠 [ML] Treinando modelo de detecção...
+7:22:21 PM [express] 🔐 Security WebSocket initialized
+7:22:21 PM [express] ℹ️  Security monitoring disabled. Set ENABLE_SECURITY_MONITORING=true to enable
+7:22:21 PM [express] 🔧 App Config Status:
+7:22:21 PM [express]   - Port: 5000
+7:22:21 PM [express]   - Environment: development
+7:22:21 PM [express]   - Database: ✅ Connected
+7:22:21 PM [express]   - Supabase: ✅ Connected
+7:22:21 PM [express]   - Security: Rate Limit ✅, Helmet ✅
+7:22:21 PM [express] 🚀 Server running on port 5000
+7:22:21 PM [express] 🌍 Environment: development
+7:22:21 PM [express] 📦 Checking storage buckets...
+7:22:22 PM [express] ✅ Storage bucket "documents" already exists as PRIVATE
+✅ [ML] Modelo treinado com 0 amostras
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/debug/me
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/financeiro/pagamentos
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-05T19:23:43.465Z'
+}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/financeiro/pagamentos
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-05T19:23:44.469Z'
+}
+[PAGAMENTOS DEBUG] Total propostas: 24
+[PAGAMENTOS DEBUG] Propostas aprovadas: 10
+[PAGAMENTOS DEBUG] Propostas com CCB assinada: 2
+[PAGAMENTOS DEBUG] Propostas com boletos Inter: 1
+[PAGAMENTOS DEBUG] Proposta com boleto Inter ID: 902183dd-b5d1-4e20-8a72-79d3d3559d4d
+[PAGAMENTOS DEBUG] Status da proposta com boleto: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true,
+  clienteNome: 'João Silva'
+}
+[PAGAMENTOS DEBUG] Propostas com status pronto_pagamento: 2
+[PAGAMENTOS DEBUG] IDs: [ 'formal-test-005', '902183dd-b5d1-4e20-8a72-79d3d3559d4d' ]
+[PAGAMENTOS DEBUG] ========== ANÁLISE DE BOLETOS ==========
+[PAGAMENTOS DEBUG] Total de propostas com boletos Inter: 14
+[PAGAMENTOS DEBUG] Proposta com boleto 1: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  clienteNome: 'João Silva',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true
+}
+[PAGAMENTOS DEBUG] Proposta com boleto 2: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  clienteNome: 'João Silva',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true
+}
+[PAGAMENTOS DEBUG] Proposta com boleto 3: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  clienteNome: 'João Silva',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true
+}
+[PAGAMENTOS DEBUG] Proposta com boleto 4: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  clienteNome: 'João Silva',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true
+}
+[PAGAMENTOS DEBUG] Proposta com boleto 5: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  clienteNome: 'João Silva',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true
+}
+[PAGAMENTOS DEBUG] Proposta com boleto 6: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  clienteNome: 'João Silva',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true
+}
+[PAGAMENTOS DEBUG] Proposta com boleto 7: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  clienteNome: 'João Silva',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true
+}
+[PAGAMENTOS DEBUG] Proposta com boleto 8: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  clienteNome: 'João Silva',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true
+}
+[PAGAMENTOS DEBUG] Proposta com boleto 9: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  clienteNome: 'João Silva',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true
+}
+[PAGAMENTOS DEBUG] Proposta com boleto 10: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  clienteNome: 'João Silva',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true
+}
+[PAGAMENTOS DEBUG] Proposta com boleto 11: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  clienteNome: 'João Silva',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true
+}
+[PAGAMENTOS DEBUG] Proposta com boleto 12: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  clienteNome: 'João Silva',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true
+}
+[PAGAMENTOS DEBUG] Proposta com boleto 13: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  clienteNome: 'João Silva',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true
+}
+[PAGAMENTOS DEBUG] Proposta com boleto 14: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  clienteNome: 'João Silva',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true
+}
+[PAGAMENTOS DEBUG] ========================================
+[PAGAMENTOS SECURITY] Aplicando filtros críticos de segurança para pagamentos
+Erro ao buscar pagamentos: PostgresError: operator does not exist: uuid = integer
+    at ErrorResponse (file:///home/runner/workspace/node_modules/postgres/src/connection.js:794:26)
+    at handle (file:///home/runner/workspace/node_modules/postgres/src/connection.js:480:6)
+    at TLSSocket.data (file:///home/runner/workspace/node_modules/postgres/src/connection.js:315:9)
+    at TLSSocket.emit (node:events:524:28)
+    at addChunk (node:internal/streams/readable:561:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+    at Readable.push (node:internal/streams/readable:392:5)
+    at TLSWrap.onStreamRead (node:internal/stream_base_commons:191:23) {
+  severity_local: 'ERROR',
+  severity: 'ERROR',
+  code: '42883',
+  hint: 'No operator matches the given name and argument types. You might need to add explicit type casts.',
+  position: '2571',
+  file: 'parse_oper.c',
+  line: '635',
+  routine: 'op_error'
+}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/financeiro/pagamentos
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-05T19:23:48.088Z'
+}
+Browserslist: browsers data (caniuse-lite) is 10 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+[PAGAMENTOS DEBUG] Total propostas: 24
+[PAGAMENTOS DEBUG] Propostas aprovadas: 10
+[PAGAMENTOS DEBUG] Propostas com CCB assinada: 2
+[PAGAMENTOS DEBUG] Propostas com boletos Inter: 1
+[PAGAMENTOS DEBUG] Proposta com boleto Inter ID: 902183dd-b5d1-4e20-8a72-79d3d3559d4d
+[PAGAMENTOS DEBUG] Status da proposta com boleto: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true,
+  clienteNome: 'João Silva'
+}
+[PAGAMENTOS DEBUG] Propostas com status pronto_pagamento: 2
+[PAGAMENTOS DEBUG] IDs: [ 'formal-test-005', '902183dd-b5d1-4e20-8a72-79d3d3559d4d' ]
+[PAGAMENTOS DEBUG] ========== ANÁLISE DE BOLETOS ==========
+[PAGAMENTOS DEBUG] Total de propostas com boletos Inter: 14
+[PAGAMENTOS DEBUG] Proposta com boleto 1: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  clienteNome: 'João Silva',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true
+}
+[PAGAMENTOS DEBUG] Proposta com boleto 2: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  clienteNome: 'João Silva',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true
+}
+[PAGAMENTOS DEBUG] Proposta com boleto 3: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  clienteNome: 'João Silva',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true
+}
+[PAGAMENTOS DEBUG] Proposta com boleto 4: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  clienteNome: 'João Silva',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true
+}
+[PAGAMENTOS DEBUG] Proposta com boleto 5: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  clienteNome: 'João Silva',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true
+}
+[PAGAMENTOS DEBUG] Proposta com boleto 6: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  clienteNome: 'João Silva',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true
+}
+[PAGAMENTOS DEBUG] Proposta com boleto 7: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  clienteNome: 'João Silva',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true
+}
+[PAGAMENTOS DEBUG] Proposta com boleto 8: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  clienteNome: 'João Silva',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true
+}
+[PAGAMENTOS DEBUG] Proposta com boleto 9: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  clienteNome: 'João Silva',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true
+}
+[PAGAMENTOS DEBUG] Proposta com boleto 10: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  clienteNome: 'João Silva',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true
+}
+[PAGAMENTOS DEBUG] Proposta com boleto 11: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  clienteNome: 'João Silva',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true
+}
+[PAGAMENTOS DEBUG] Proposta com boleto 12: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  clienteNome: 'João Silva',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true
+}
+[PAGAMENTOS DEBUG] Proposta com boleto 13: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  clienteNome: 'João Silva',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true
+}
+[PAGAMENTOS DEBUG] Proposta com boleto 14: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  clienteNome: 'João Silva',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true
+}
+[PAGAMENTOS DEBUG] ========================================
+[PAGAMENTOS SECURITY] Aplicando filtros críticos de segurança para pagamentos
+Erro ao buscar pagamentos: PostgresError: operator does not exist: uuid = integer
+    at ErrorResponse (file:///home/runner/workspace/node_modules/postgres/src/connection.js:794:26)
+    at handle (file:///home/runner/workspace/node_modules/postgres/src/connection.js:480:6)
+    at TLSSocket.data (file:///home/runner/workspace/node_modules/postgres/src/connection.js:315:9)
+    at TLSSocket.emit (node:events:524:28)
+    at addChunk (node:internal/streams/readable:561:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+    at Readable.push (node:internal/streams/readable:392:5)
+    at TLSWrap.onStreamRead (node:internal/stream_base_commons:191:23) {
+  severity_local: 'ERROR',
+  severity: 'ERROR',
+  code: '42883',
+  hint: 'No operator matches the given name and argument types. You might need to add explicit type casts.',
+  position: '2571',
+  file: 'parse_oper.c',
+  line: '635',
+  routine: 'op_error'
+}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/debug/me
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/financeiro/pagamentos
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/financeiro/pagamentos
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-05T19:24:02.218Z'
+}
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-05T19:24:02.222Z'
+}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/debug/me
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/financeiro/pagamentos
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-05T19:24:03.058Z'
+}
+[PAGAMENTOS DEBUG] Total propostas: 24
+[PAGAMENTOS DEBUG] Propostas aprovadas: 10
+[PAGAMENTOS DEBUG] Propostas com CCB assinada: 2
+[PAGAMENTOS DEBUG] Propostas com boletos Inter: 1
+[PAGAMENTOS DEBUG] Proposta com boleto Inter ID: 902183dd-b5d1-4e20-8a72-79d3d3559d4d
+[PAGAMENTOS DEBUG] Status da proposta com boleto: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true,
+  clienteNome: 'João Silva'
+}
+[PAGAMENTOS DEBUG] Propostas com status pronto_pagamento: 2
+[PAGAMENTOS DEBUG] IDs: [ 'formal-test-005', '902183dd-b5d1-4e20-8a72-79d3d3559d4d' ]
+[PAGAMENTOS DEBUG] ========== ANÁLISE DE BOLETOS ==========
+[PAGAMENTOS DEBUG] Total de propostas com boletos Inter: 14
+[PAGAMENTOS DEBUG] Proposta com boleto 1: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  clienteNome: 'João Silva',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true
+}
+[PAGAMENTOS DEBUG] Proposta com boleto 2: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  clienteNome: 'João Silva',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true
+}
+[PAGAMENTOS DEBUG] Proposta com boleto 3: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  clienteNome: 'João Silva',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true
+}
+[PAGAMENTOS DEBUG] Proposta com boleto 4: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  clienteNome: 'João Silva',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true
+}
+[PAGAMENTOS DEBUG] Proposta com boleto 5: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  clienteNome: 'João Silva',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true
+}
+[PAGAMENTOS DEBUG] Proposta com boleto 6: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  clienteNome: 'João Silva',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true
+}
+[PAGAMENTOS DEBUG] Proposta com boleto 7: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  clienteNome: 'João Silva',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true
+}
+[PAGAMENTOS DEBUG] Proposta com boleto 8: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  clienteNome: 'João Silva',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true
+}
+[PAGAMENTOS DEBUG] Proposta com boleto 9: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  clienteNome: 'João Silva',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true
+}
+[PAGAMENTOS DEBUG] Proposta com boleto 10: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  clienteNome: 'João Silva',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true
+}
+[PAGAMENTOS DEBUG] Proposta com boleto 11: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  clienteNome: 'João Silva',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true
+}
+[PAGAMENTOS DEBUG] Proposta com boleto 12: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  clienteNome: 'João Silva',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true
+}
+[PAGAMENTOS DEBUG] Proposta com boleto 13: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  clienteNome: 'João Silva',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true
+}
+[PAGAMENTOS DEBUG] Proposta com boleto 14: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  clienteNome: 'João Silva',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true
+}
+[PAGAMENTOS DEBUG] ========================================
+[PAGAMENTOS SECURITY] Aplicando filtros críticos de segurança para pagamentos
+Erro ao buscar pagamentos: PostgresError: operator does not exist: uuid = integer
+    at ErrorResponse (file:///home/runner/workspace/node_modules/postgres/src/connection.js:794:26)
+    at handle (file:///home/runner/workspace/node_modules/postgres/src/connection.js:480:6)
+    at TLSSocket.data (file:///home/runner/workspace/node_modules/postgres/src/connection.js:315:9)
+    at TLSSocket.emit (node:events:524:28)
+    at addChunk (node:internal/streams/readable:561:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+    at Readable.push (node:internal/streams/readable:392:5)
+    at TLSWrap.onStreamRead (node:internal/stream_base_commons:191:23) {
+  severity_local: 'ERROR',
+  severity: 'ERROR',
+  code: '42883',
+  hint: 'No operator matches the given name and argument types. You might need to add explicit type casts.',
+  position: '2571',
+  file: 'parse_oper.c',
+  line: '635',
+  routine: 'op_error'
+}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/financeiro/pagamentos
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-05T19:24:05.746Z'
+}
+[PAGAMENTOS DEBUG] Total propostas: 24
+[PAGAMENTOS DEBUG] Propostas aprovadas: 10
+[PAGAMENTOS DEBUG] Propostas com CCB assinada: 2
+[PAGAMENTOS DEBUG] Propostas com boletos Inter: 1
+[PAGAMENTOS DEBUG] Proposta com boleto Inter ID: 902183dd-b5d1-4e20-8a72-79d3d3559d4d
+[PAGAMENTOS DEBUG] Status da proposta com boleto: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true,
+  clienteNome: 'João Silva'
+}
+[PAGAMENTOS DEBUG] Propostas com status pronto_pagamento: 2
+[PAGAMENTOS DEBUG] IDs: [ 'formal-test-005', '902183dd-b5d1-4e20-8a72-79d3d3559d4d' ]
+[PAGAMENTOS DEBUG] ========== ANÁLISE DE BOLETOS ==========
+[PAGAMENTOS DEBUG] Total de propostas com boletos Inter: 14
+[PAGAMENTOS DEBUG] Proposta com boleto 1: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  clienteNome: 'João Silva',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true
+}
+[PAGAMENTOS DEBUG] Proposta com boleto 2: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  clienteNome: 'João Silva',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true
+}
+[PAGAMENTOS DEBUG] Proposta com boleto 3: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  clienteNome: 'João Silva',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true
+}
+[PAGAMENTOS DEBUG] Proposta com boleto 4: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  clienteNome: 'João Silva',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true
+}
+[PAGAMENTOS DEBUG] Proposta com boleto 5: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  clienteNome: 'João Silva',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true
+}
+[PAGAMENTOS DEBUG] Proposta com boleto 6: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  clienteNome: 'João Silva',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true
+}
+[PAGAMENTOS DEBUG] Proposta com boleto 7: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  clienteNome: 'João Silva',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true
+}
+[PAGAMENTOS DEBUG] Proposta com boleto 8: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  clienteNome: 'João Silva',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true
+}
+[PAGAMENTOS DEBUG] Proposta com boleto 9: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  clienteNome: 'João Silva',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true
+}
+[PAGAMENTOS DEBUG] Proposta com boleto 10: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  clienteNome: 'João Silva',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true
+}
+[PAGAMENTOS DEBUG] Proposta com boleto 11: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  clienteNome: 'João Silva',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true
+}
+[PAGAMENTOS DEBUG] Proposta com boleto 12: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  clienteNome: 'João Silva',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true
+}
+[PAGAMENTOS DEBUG] Proposta com boleto 13: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  clienteNome: 'João Silva',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true
+}
+[PAGAMENTOS DEBUG] Proposta com boleto 14: {
+  id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+  clienteNome: 'João Silva',
+  status: 'pronto_pagamento',
+  ccbGerado: true,
+  assinaturaEletronicaConcluida: true
+}
+[PAGAMENTOS DEBUG] ========================================
+[PAGAMENTOS SECURITY] Aplicando filtros críticos de segurança para pagamentos
+Erro ao buscar pagamentos: PostgresError: operator does not exist: uuid = integer
+    at ErrorResponse (file:///home/runner/workspace/node_modules/postgres/src/connection.js:794:26)
+    at handle (file:///home/runner/workspace/node_modules/postgres/src/connection.js:480:6)
+    at TLSSocket.data (file:///home/runner/workspace/node_modules/postgres/src/connection.js:315:9)
+    at TLSSocket.emit (node:events:524:28)
+    at addChunk (node:internal/streams/readable:561:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+    at Readable.push (node:internal/streams/readable:392:5)
+    at TLSWrap.onStreamRead (node:internal/stream_base_commons:191:23) {
+  severity_local: 'ERROR',
+  severity: 'ERROR',
+  code: '42883',
+  hint: 'No operator matches the given name and argument types. You might need to add explicit type casts.',
+  position: '2571',
+  file: 'parse_oper.c',
+  line: '635',
+  routine: 'op_error'
+}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/financeiro/pagamentos
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-05T19:24:10.388Z'
+}
+Profile query failed: {
+  message: 'TypeError: fetch failed',
+  details: 'TypeError: fetch failed\n' +
+    '    at node:internal/deps/undici/undici:13510:13\n' +
+    '    at async jwtAuthMiddleware (/home/runner/workspace/server/lib/jwt-auth-middleware.ts:196:52)',
+  hint: '',
+  code: ''
+}
+🚨 [SECURITY] ACCESS_DENIED | severity=HIGH | FAILURE | user=gabrielserri238@gmail.com | ip=187.36.168.240 | endpoint=/api/pagamentos?

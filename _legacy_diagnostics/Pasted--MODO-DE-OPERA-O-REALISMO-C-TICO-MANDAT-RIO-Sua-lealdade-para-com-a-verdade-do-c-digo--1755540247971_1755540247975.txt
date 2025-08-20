@@ -1,0 +1,55 @@
+**### MODO DE OPERAÇÃO: REALISMO CÉTICO (MANDATÓRIO)**
+Sua lealdade é para com a verdade do código e a estabilidade da produção.
+
+---
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Refatorar a camada de formatação de dados no endpoint `GET /api/pagamentos` para corrigir a incompatibilidade de nomes de campos entre o backend e o frontend, garantindo que o modal "Confirmar Veracidade" exiba os dados corretos.
+* **Intenção Estratégica (O Porquê):** Para restaurar a funcionalidade completa do modal de pagamento, eliminando a falha de integridade de dados que impede as decisões financeiras.
+* **Histórico Relevante (Consulta Obrigatória):** Use o seu relatório de auditoria forense anterior como a única fonte da verdade. Ele provou que a falha é um `mismatch` de nomes de campos. Sua missão é alinhar o backend com os nomes que o frontend já espera.
+* **Modelo Mental (Como se Encaixa):** Você atuará como Engenheiro de Backend. A correção é cirúrgica e foca exclusivamente na transformação do objeto de dados antes de ele ser enviado na resposta da API.
+* **Riscos Antecipados:** **Risco:** Uma refatoração incorreta pode quebrar o mapeamento de outros campos. **Contramedida:** A sua modificação deve ser focada apenas nos campos que você mesmo identificou como incompatíveis.
+
+---
+
+**IMPLEMENTAR:**
+A correção do mapeamento de dados no endpoint `GET /api/pagamentos`.
+
+**CURRENT STATE:**
+O backend envia dados com nomes de campos como `nomeCliente`, `cpfCliente` e `contaBancaria.banco`, enquanto o frontend espera `clienteNome`, `clienteCpf` e `dadosPagamentoBanco`, resultando em campos vazios no modal.
+
+**EXPECTED (Estado Final de Sucesso):**
+O backend é refatorado para enviar o payload com os nomes de campos exatamente como o frontend espera. Como resultado, o modal "Confirmar Veracidade" é populado com **TODOS** os dados corretos: Valor, Nome do Cliente, CPF e Dados Bancários.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+**1. Localização e Refatoração:**
+    - **Ação:** No ficheiro `server/routes/pagamentos.ts`, localize o bloco de código que formata o `pagamentoFormatado` antes do `res.json()`.
+    - **Implementação:** Corrija o mapeamento. Altere as chaves do objeto de retorno para corresponder ao que o frontend espera.
+
+    - **Lógica de Exemplo para a Correção:**
+      ```typescript
+      // ANTES (Problemático)
+      // const pagamentoFormatado = {
+      //   nomeCliente: proposta.clienteNome,
+      //   cpfCliente: proposta.clienteCpf,
+      //   contaBancaria: { banco: proposta.dadosPagamentoBanco }
+      // }
+
+      // DEPOIS (Corrigido)
+      const pagamentoFormatado = {
+        // ... outros campos que já estão corretos
+        clienteNome: proposta.clienteNome, // Corrigir nome da chave
+        clienteCpf: proposta.clienteCpf,   // Corrigir nome da chave
+        dadosPagamentoBanco: proposta.dadosPagamentoBanco // Corrigir nome e estrutura
+        // Adicionar os outros campos de dados bancários (agencia, conta) aqui também...
+      }
+      ```
+
+---
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+Siga o protocolo completo. O teste funcional consistirá em, após a sua correção, abrir o modal "Confirmar Veracidade" e **validar visualmente** que os campos de Nome do Cliente, CPF e Dados Bancários estão agora 100% preenchidos.
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+Preencha a declaração completa ao final da sua implementação.
+---

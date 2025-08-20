@@ -1,0 +1,25 @@
+# MISSÃO DE IMPLEMENTAÇÃO FINAL: Conectar o Fluxo de Propostas com Validação Avançada
+
+**Contexto:** Olá, Agente. O seu último trabalho foi um grande avanço, mas a nossa aplicação ainda está desconectada e o formulário principal está a falhar. A sua nova missão é a mais importante até agora: conectar de ponta a ponta o nosso fluxo de criação e análise de propostas e, ao mesmo tempo, implementar um sistema de validação de formulário de alta qualidade para eliminar o nosso bug persistente de "dados inválidos".
+
+**AÇÃO:**
+Execute o seguinte roadmap de 4 passos.
+
+**ROADMAP DE EXECUÇÃO:**
+
+**PASSO 1: Audite o Schema de Backend**
+* **Tarefa:** Primeiro, inspecione o nosso schema Zod para a criação de propostas (`insertPropostaSchema` em `/shared/schema.ts`). Identifique e entenda todas as regras de formato específicas (ex: `z.string().min(11)`, `z.string().email()`) para cada campo.
+
+**PASSO 2: Implemente a Validação Avançada no Frontend (T-01)**
+* **Tarefa:** Refatore o formulário da "Nova Proposta" (`/client/src/pages/propostas/nova.tsx` e seus sub-componentes).
+    * **Validação em Tempo Real:** Use as regras que você descobriu no Passo 1 para implementar a validação no frontend. Se um campo não corresponder ao formato exigido enquanto o usuário digita, ele deve ficar com a **borda vermelha** e exibir uma **mensagem de erro específica** abaixo dele.
+    * **Input Guiado (Máscara):** Para campos como CPF, CNPJ e Telefone, implemente um **"input com máscara"** que formata automaticamente os números enquanto o usuário digita (ex: `123.456.789-00`).
+
+**PASSO 3: Conecte a Criação (T-01) à Fila de Análise (T-02)**
+* **Tarefa:** Garanta que, ao submeter o formulário da T-01 com dados válidos, a proposta seja criada com sucesso no backend (resolvendo o bug de "invalid data").
+
+**PASSO 4: Conecte a Fila de Análise (T-02) aos Dados Reais**
+* **Tarefa:** Refatore a página da "Fila de Análise" (T-02). Remova quaisquer dados "mock" restantes e conecte a tabela de propostas à API de backend (`GET /api/propostas`) para que ela exiba a lista de propostas **reais** que estão no banco de dados. A nova proposta criada no Passo 3 deve aparecer aqui.
+
+**Resumo da Missão:**
+Ao final, um usuário `ATENDENTE` deve ser capaz de preencher o formulário da T-01 (com validação e máscaras de ajuda), submeter a proposta com sucesso, e essa mesma proposta deve aparecer na "Fila de Análise" para o `ANALISTA`.

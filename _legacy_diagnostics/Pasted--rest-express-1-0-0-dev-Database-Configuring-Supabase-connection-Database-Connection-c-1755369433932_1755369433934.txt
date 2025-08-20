@@ -1,0 +1,2132 @@
+
+> rest-express@1.0.0 dev
+✅ Database: Configuring Supabase connection...
+✅ Database: Connection configured (lazy)
+[CLICKSIGN V1] 🚀 Initialized in PRODUCTION mode (legal signatures)
+[CLICKSIGN V1] API URL: https://app.clicksign.com/api/v1
+[CLICKSIGN V1] Token configured: b73b3b90-c87...
+[CLICKSIGN] 🔴 Circuit Breaker will be initialized on first use
+[INTER] 🏦 Initialized in production mode
+[INTER] 🌐 API URL: https://cdpj.partners.bancointer.com.br
+[INTER] 🔴 Circuit Breakers will be initialized on first use
+[CLICKSIGN V1] 🚀 Initialized in PRODUCTION mode (legal signatures)
+[CLICKSIGN V1] API URL: https://app.clicksign.com/api/v1
+[CLICKSIGN V1] Token configured: b73b3b90-c...
+[DEV QUEUE] 📦 Created development queue: pdf-processing
+[DEV QUEUE] 📦 Created development queue: boleto-sync
+[DEV QUEUE] 📦 Created development queue: document-processing
+[DEV QUEUE] 📦 Created development queue: notifications
+[DEV QUEUE] 🚀 Development queues initialized with REAL worker processing
+🚀 [TIMING MIDDLEWARE] Creating middleware instance...
+🚀 [TIMING MIDDLEWARE] Middleware instance created and exported
+6:32:52 PM [express] ✅ All secrets loaded successfully
+6:32:52 PM [express] 🔒 [SECURITY] CORS protection configured - ASVS V13.2.1
+6:32:52 PM [express] 🔒 [SECURITY] OPTIONS preflight handling configured
+6:32:52 PM [express] 🔧 [DEV] Using basic CSP configuration optimized for Vite development
+6:32:52 PM [express] 🔒 [SECURITY] Input sanitization middleware activated
+6:32:52 PM [express] 🔒 [SECURITY] URL token validation middleware activated - ASVS V7.1.1
+6:32:52 PM [express] 🔒 [SECURITY] CSRF protection middleware activated - OWASP Cheat Sheet
+6:32:52 PM [express] 🔧 [DEV] Rate limiting configurado para desenvolvimento - limites altos
+[SEMGREP MCP] Development mode - using in-memory cache
+🧠 [ML] Treinando modelo de detecção...
+6:32:52 PM [express] 🔐 Security WebSocket initialized
+[CCB SYNC] 🚀 Starting fallback polling (every 6 hours)
+[CCB SYNC] ℹ️ Primary processing via webhooks, polling is safety net only
+6:32:52 PM [express] 🔄 CCB Sync Service initialized - Webhook primary, polling fallback every 6 hours
+6:32:52 PM [express] 🔔 Sistema de Alertas Proativos inicializado - Próxima execução: 17/08/2025, 04:00:00
+6:32:52 PM [express] ℹ️  Security monitoring disabled. Set ENABLE_SECURITY_MONITORING=true to enable
+6:32:52 PM [express] 🔧 App Config Status:
+6:32:52 PM [express]   - Port: 5000
+6:32:52 PM [express]   - Environment: development
+6:32:52 PM [express]   - Database: ✅ Connected
+6:32:52 PM [express]   - Supabase: ✅ Connected
+6:32:52 PM [express]   - Security: Rate Limit ✅, Helmet ✅
+6:32:52 PM [express] 🚀 Server running on port 5000
+6:32:52 PM [express] 🌍 Environment: development
+6:32:52 PM [express] 📦 Checking storage buckets...
+6:32:54 PM [express] ✅ Storage bucket "documents" already exists as PRIVATE
+Browserslist: browsers data (caniuse-lite) is 10 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+✅ [ML] Modelo treinado com 0 amostras
+✅ Database: Connection test successful
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/debug/me
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /notificacoes
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/propostas
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-16T18:33:06.059Z'
+}
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-16T18:33:06.067Z'
+}
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-16T18:33:06.095Z'
+}
+[ALERTAS] Mapeamento: gabrielserri238@gmail.com -> Local ID: 2
+🔍 [DEBUG] Role: ADMINISTRADOR, Queue: undefined, IsAnalysisQueue: false
+🔒 [SECURITY] ADMINISTRADOR a65efc54-90cd-4b94-b971-c8a560104032 - acesso total
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/debug/me
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[2025-08-16T15:33:06.000-03:00] Retornando 29 propostas
+[ALERTAS] Encontradas 4 notificações, 0 não lidas
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-16T18:33:07.124Z'
+}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/debug/me
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-16T18:33:18.505Z'
+}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/debug/me
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/financeiro/cobrancas
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-16T18:33:35.894Z'
+}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/debug/me
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/financeiro/cobrancas
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /notificacoes
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/financeiro/cobrancas
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+🔍 [COBRANÇAS] ====== INÍCIO DA BUSCA DE PROPOSTAS ======
+🔍 [COBRANÇAS] Filtros aplicados: { status: undefined, atraso: undefined }
+🔍 [COBRANÇAS] PAM V1.0 - Filtrando propostas por STATUS conforme Blueprint...
+[DEBUG-BACKEND-1] Iniciando query de cobranças com os seguintes filtros: {
+  statusElegiveis: [
+    'BOLETOS_EMITIDOS',
+    'PAGAMENTO_PENDENTE',
+    'PAGAMENTO_PARCIAL',
+    'PAGAMENTO_CONFIRMADO',
+    'pronto_pagamento'
+  ],
+  whereConditions: '[object Object]',
+  userRole: '',
+  queryParams: { status: undefined, atraso: undefined }
+}
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-16T18:33:42.338Z'
+}
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-16T18:33:42.356Z'
+}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/debug/me
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/financeiro/cobrancas
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-16T18:33:42.845Z'
+}
+[DEBUG-BACKEND-2] Resultado BRUTO do DB: {
+  totalPropostas: 3,
+  primeiraProposta: {
+    id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+    numeroProposta: 300028,
+    lojaId: 13,
+    status: 'BOLETOS_EMITIDOS',
+    clienteNome: 'Gabriel de Jesus Santana Serri',
+    clienteCpf: '20528464760',
+    clienteEmail: 'gabrieldjesus238@gmail.com',
+    clienteTelefone: '(27) 99853-8565',
+    clienteDataNascimento: '1990-05-15',
+    clienteRenda: '5000.00',
+    clienteRg: null,
+    clienteOrgaoEmissor: null,
+    clienteRgUf: null,
+    clienteRgDataEmissao: null,
+    clienteEstadoCivil: null,
+    clienteNacionalidade: 'Brasileira',
+    clienteLocalNascimento: null,
+    clienteCep: '29165-460',
+    clienteEndereco: 'Rua miguel angelo',
+    clienteLogradouro: null,
+    clienteNumero: null,
+    clienteComplemento: null,
+    clienteBairro: null,
+    clienteCidade: null,
+    clienteUf: null,
+    clienteOcupacao: null,
+    tipoPessoa: 'PF',
+    clienteRazaoSocial: null,
+    clienteCnpj: null,
+    valor: '1000.00',
+    prazo: 12,
+    valorTac: '50.00',
+    valorIof: '150.00',
+    valorTotalFinanciado: '1000.00',
+    valorLiquidoLiberado: null,
+    taxaJuros: '2.50',
+    dataAprovacao: 2025-08-01T13:21:55.000Z,
+    ccbGerado: true,
+    assinaturaEletronicaConcluida: true,
+    dadosPagamentoBanco: null,
+    dadosPagamentoAgencia: null,
+    dadosPagamentoConta: null,
+    dadosPagamentoTipo: null,
+    dadosPagamentoPix: null,
+    dadosPagamentoTipoPix: null,
+    createdAt: 2025-08-01T16:08:35.623Z,
+    deletedAt: null
+  },
+  idsEncontrados: [
+    '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+    '88a44696-9b63-42ee-aa81-15f9519d24cb',
+    'formal-test-005'
+  ],
+  statusEncontrados: [
+    {
+      id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+      status: 'BOLETOS_EMITIDOS'
+    },
+    {
+      id: '88a44696-9b63-42ee-aa81-15f9519d24cb',
+      status: 'BOLETOS_EMITIDOS'
+    },
+    { id: 'formal-test-005', status: 'BOLETOS_EMITIDOS' }
+  ]
+}
+🔍 [COBRANÇAS] PAM V1.0 - Encontradas 3 propostas com status elegível
+[ALERTAS] Mapeamento: gabrielserri238@gmail.com -> Local ID: 2
+[ALERTAS] Encontradas 4 notificações, 0 não lidas
+🔍 [COBRANÇAS] Total de propostas após filtros: 3
+🔍 [COBRANÇAS] ====== FIM DA BUSCA DE PROPOSTAS ======
+[DEBUG-BACKEND-3] Payload FINAL enviado para o Frontend: {
+  totalPropostas: 3,
+  primeiraPropostaCompleta: {
+    id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+    numeroContrato: '902183DD',
+    nomeCliente: 'Gabriel de Jesus Santana Serri',
+    cpfCliente: '20528464760',
+    telefoneCliente: '(27) 99853-8565',
+    emailCliente: 'gabrieldjesus238@gmail.com',
+    enderecoCliente: 'Rua miguel angelo',
+    cepCliente: '29165-460',
+    valorTotal: 1000,
+    valorFinanciado: 1000,
+    quantidadeParcelas: 6,
+    parcelasPagas: 0,
+    parcelasPendentes: 6,
+    parcelasVencidas: 0,
+    valorTotalPago: 0,
+    valorTotalPendente: 1203.8,
+    valorTotalVencido: 0,
+    diasAtraso: 0,
+    status: 'em_dia',
+    dataContrato: 2025-08-01T13:21:55.000Z,
+    ccbAssinada: true,
+    parcelas: [ [Object], [Object], [Object], [Object], [Object], [Object] ],
+    interCodigoSolicitacao: '44a467d1-e93f-4e91-b1f9-c79438ef5eea',
+    interSituacao: 'A_RECEBER',
+    interDataVencimento: '2025-11-10',
+    dadosBancarios: {
+      banco: null,
+      agencia: null,
+      conta: null,
+      tipoConta: null,
+      pix: null,
+      tipoPix: null
+    }
+  },
+  resumoDados: [
+    {
+      id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+      nomeCliente: 'Gabriel de Jesus Santana Serri',
+      cpfCliente: '20528464760',
+      status: 'em_dia',
+      valorTotal: 1000
+    },
+    {
+      id: '88a44696-9b63-42ee-aa81-15f9519d24cb',
+      nomeCliente: 'Gabriel Santana Jesus ',
+      cpfCliente: '205.284.647-60',
+      status: 'em_dia',
+      valorTotal: 0
+    },
+    {
+      id: 'formal-test-005',
+      nomeCliente: 'Carlos Ferreira Pagamento',
+      cpfCliente: '99988877766',
+      status: 'em_dia',
+      valorTotal: 0
+    }
+  ]
+}
+[FICHA] Buscando status em tempo real para parcela 1
+[INTER] 📋 Retrieving collection: CORRETO-1755013508.325368-1
+[INTER] 🔑 Requesting new access token...
+[INTER] 🌐 Token URL: cdpj.partners.bancointer.com.br/oauth/v2/token
+[INTER] 📄 Using form-based authentication per official docs
+[INTER] 🔓 Certificate configured: ✅ Present
+[INTER] 🔑 Private Key configured: ✅ Present
+[INTER] 📊 Client ID length: 36 chars
+[INTER] 📊 Client Secret length: 36 chars
+[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=boleto-cobranca.read boleto-cobranca.write webhook.read webhook.write
+[INTER] 📝 Form body string length: 203 chars
+[INTER] 📝 Form body preview: client_id=05fc3816-9a8f-4a2d-8b28-277cd3617cc2&client_secret=bbb82b01-2ca0-407f-a21c-0e1dff659d42&gr...
+[INTER] 🔒 Using mTLS certificate authentication
+[INTER] 🔄 Formatting certificates with proper line breaks...
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] ✅ Certificate formatted with line breaks
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] ✅ Private key formatted with line breaks
+[INTER] ✅ Certificates formatted and ready
+[INTER] 🔧 Creating Undici agent for mTLS...
+[INTER] 🚀 Making mTLS request with Undici agent...
+[FICHA] Buscando status em tempo real para parcela 2
+[INTER] 📋 Retrieving collection: CORRETO-1755013508.325368-2
+[INTER] 🔑 Requesting new access token...
+[INTER] 🌐 Token URL: cdpj.partners.bancointer.com.br/oauth/v2/token
+[INTER] 📄 Using form-based authentication per official docs
+[INTER] 🔓 Certificate configured: ✅ Present
+[INTER] 🔑 Private Key configured: ✅ Present
+[INTER] 📊 Client ID length: 36 chars
+[INTER] 📊 Client Secret length: 36 chars
+[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=boleto-cobranca.read boleto-cobranca.write webhook.read webhook.write
+[INTER] 📝 Form body string length: 203 chars
+[INTER] 📝 Form body preview: client_id=05fc3816-9a8f-4a2d-8b28-277cd3617cc2&client_secret=bbb82b01-2ca0-407f-a21c-0e1dff659d42&gr...
+[INTER] 🔒 Using mTLS certificate authentication
+[INTER] 🔄 Formatting certificates with proper line breaks...
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] ✅ Certificate formatted with line breaks
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] ✅ Private key formatted with line breaks
+[INTER] ✅ Certificates formatted and ready
+[INTER] 🔧 Creating Undici agent for mTLS...
+[INTER] 🚀 Making mTLS request with Undici agent...
+[FICHA] Buscando status em tempo real para parcela 3
+[INTER] 📋 Retrieving collection: 6f378471-4bde-4e1e-b335-ae4a28abb060
+[INTER] 🔑 Requesting new access token...
+[INTER] 🌐 Token URL: cdpj.partners.bancointer.com.br/oauth/v2/token
+[INTER] 📄 Using form-based authentication per official docs
+[INTER] 🔓 Certificate configured: ✅ Present
+[INTER] 🔑 Private Key configured: ✅ Present
+[INTER] 📊 Client ID length: 36 chars
+[INTER] 📊 Client Secret length: 36 chars
+[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=boleto-cobranca.read boleto-cobranca.write webhook.read webhook.write
+[INTER] 📝 Form body string length: 203 chars
+[INTER] 📝 Form body preview: client_id=05fc3816-9a8f-4a2d-8b28-277cd3617cc2&client_secret=bbb82b01-2ca0-407f-a21c-0e1dff659d42&gr...
+[INTER] 🔒 Using mTLS certificate authentication
+[INTER] 🔄 Formatting certificates with proper line breaks...
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] ✅ Certificate formatted with line breaks
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] ✅ Private key formatted with line breaks
+[INTER] ✅ Certificates formatted and ready
+[INTER] 🔧 Creating Undici agent for mTLS...
+[INTER] 🚀 Making mTLS request with Undici agent...
+[FICHA] Buscando status em tempo real para parcela 4
+[INTER] 📋 Retrieving collection: 96c8ac2f-f26d-4198-89a1-5751152d3d04
+[INTER] 🔑 Requesting new access token...
+[INTER] 🌐 Token URL: cdpj.partners.bancointer.com.br/oauth/v2/token
+[INTER] 📄 Using form-based authentication per official docs
+[INTER] 🔓 Certificate configured: ✅ Present
+[INTER] 🔑 Private Key configured: ✅ Present
+[INTER] 📊 Client ID length: 36 chars
+[INTER] 📊 Client Secret length: 36 chars
+[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=boleto-cobranca.read boleto-cobranca.write webhook.read webhook.write
+[INTER] 📝 Form body string length: 203 chars
+[INTER] 📝 Form body preview: client_id=05fc3816-9a8f-4a2d-8b28-277cd3617cc2&client_secret=bbb82b01-2ca0-407f-a21c-0e1dff659d42&gr...
+[INTER] 🔒 Using mTLS certificate authentication
+[INTER] 🔄 Formatting certificates with proper line breaks...
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] ✅ Certificate formatted with line breaks
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] ✅ Private key formatted with line breaks
+[INTER] ✅ Certificates formatted and ready
+[INTER] 🔧 Creating Undici agent for mTLS...
+[INTER] 🚀 Making mTLS request with Undici agent...
+[FICHA] Buscando status em tempo real para parcela 5
+[INTER] 📋 Retrieving collection: 957e99ca-083f-4652-8d06-bc537772ec1f
+[INTER] 🔑 Requesting new access token...
+[INTER] 🌐 Token URL: cdpj.partners.bancointer.com.br/oauth/v2/token
+[INTER] 📄 Using form-based authentication per official docs
+[INTER] 🔓 Certificate configured: ✅ Present
+[INTER] 🔑 Private Key configured: ✅ Present
+[INTER] 📊 Client ID length: 36 chars
+[INTER] 📊 Client Secret length: 36 chars
+[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=boleto-cobranca.read boleto-cobranca.write webhook.read webhook.write
+[INTER] 📝 Form body string length: 203 chars
+[INTER] 📝 Form body preview: client_id=05fc3816-9a8f-4a2d-8b28-277cd3617cc2&client_secret=bbb82b01-2ca0-407f-a21c-0e1dff659d42&gr...
+[INTER] 🔒 Using mTLS certificate authentication
+[INTER] 🔄 Formatting certificates with proper line breaks...
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] ✅ Certificate formatted with line breaks
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] ✅ Private key formatted with line breaks
+[INTER] ✅ Certificates formatted and ready
+[INTER] 🔧 Creating Undici agent for mTLS...
+[INTER] 🚀 Making mTLS request with Undici agent...
+[FICHA] Buscando status em tempo real para parcela 6
+[INTER] 📋 Retrieving collection: fc01f610-05e5-4879-b237-dd9d63f0e4b4
+[INTER] 🔑 Requesting new access token...
+[INTER] 🌐 Token URL: cdpj.partners.bancointer.com.br/oauth/v2/token
+[INTER] 📄 Using form-based authentication per official docs
+[INTER] 🔓 Certificate configured: ✅ Present
+[INTER] 🔑 Private Key configured: ✅ Present
+[INTER] 📊 Client ID length: 36 chars
+[INTER] 📊 Client Secret length: 36 chars
+[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=boleto-cobranca.read boleto-cobranca.write webhook.read webhook.write
+[INTER] 📝 Form body string length: 203 chars
+[INTER] 📝 Form body preview: client_id=05fc3816-9a8f-4a2d-8b28-277cd3617cc2&client_secret=bbb82b01-2ca0-407f-a21c-0e1dff659d42&gr...
+[INTER] 🔒 Using mTLS certificate authentication
+[INTER] 🔄 Formatting certificates with proper line breaks...
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] ✅ Certificate formatted with line breaks
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] ✅ Private key formatted with line breaks
+[INTER] ✅ Certificates formatted and ready
+[INTER] 🔧 Creating Undici agent for mTLS...
+[INTER] 🚀 Making mTLS request with Undici agent...
+[FICHA] Buscando status em tempo real para parcela 7
+[INTER] 📋 Retrieving collection: 126dffb8-a53f-40af-a7df-04b07fdbed3b
+[INTER] 🔑 Requesting new access token...
+[INTER] 🌐 Token URL: cdpj.partners.bancointer.com.br/oauth/v2/token
+[INTER] 📄 Using form-based authentication per official docs
+[INTER] 🔓 Certificate configured: ✅ Present
+[INTER] 🔑 Private Key configured: ✅ Present
+[INTER] 📊 Client ID length: 36 chars
+[INTER] 📊 Client Secret length: 36 chars
+[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=boleto-cobranca.read boleto-cobranca.write webhook.read webhook.write
+[INTER] 📝 Form body string length: 203 chars
+[INTER] 📝 Form body preview: client_id=05fc3816-9a8f-4a2d-8b28-277cd3617cc2&client_secret=bbb82b01-2ca0-407f-a21c-0e1dff659d42&gr...
+[INTER] 🔒 Using mTLS certificate authentication
+[INTER] 🔄 Formatting certificates with proper line breaks...
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] ✅ Certificate formatted with line breaks
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] ✅ Private key formatted with line breaks
+[INTER] ✅ Certificates formatted and ready
+[INTER] 🔧 Creating Undici agent for mTLS...
+[INTER] 🚀 Making mTLS request with Undici agent...
+[FICHA] Buscando status em tempo real para parcela 8
+[INTER] 📋 Retrieving collection: CORRETO-1755013508.325368-8
+[INTER] 🔑 Requesting new access token...
+[INTER] 🌐 Token URL: cdpj.partners.bancointer.com.br/oauth/v2/token
+[INTER] 📄 Using form-based authentication per official docs
+[INTER] 🔓 Certificate configured: ✅ Present
+[INTER] 🔑 Private Key configured: ✅ Present
+[INTER] 📊 Client ID length: 36 chars
+[INTER] 📊 Client Secret length: 36 chars
+[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=boleto-cobranca.read boleto-cobranca.write webhook.read webhook.write
+[INTER] 📝 Form body string length: 203 chars
+[INTER] 📝 Form body preview: client_id=05fc3816-9a8f-4a2d-8b28-277cd3617cc2&client_secret=bbb82b01-2ca0-407f-a21c-0e1dff659d42&gr...
+[INTER] 🔒 Using mTLS certificate authentication
+[INTER] 🔄 Formatting certificates with proper line breaks...
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] ✅ Certificate formatted with line breaks
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] ✅ Private key formatted with line breaks
+[INTER] ✅ Certificates formatted and ready
+[INTER] 🔧 Creating Undici agent for mTLS...
+[INTER] 🚀 Making mTLS request with Undici agent...
+[FICHA] Buscando status em tempo real para parcela 9
+[INTER] 📋 Retrieving collection: CORRETO-1755013508.325368-9
+[INTER] 🔑 Requesting new access token...
+[INTER] 🌐 Token URL: cdpj.partners.bancointer.com.br/oauth/v2/token
+[INTER] 📄 Using form-based authentication per official docs
+[INTER] 🔓 Certificate configured: ✅ Present
+[INTER] 🔑 Private Key configured: ✅ Present
+[INTER] 📊 Client ID length: 36 chars
+[INTER] 📊 Client Secret length: 36 chars
+[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=boleto-cobranca.read boleto-cobranca.write webhook.read webhook.write
+[INTER] 📝 Form body string length: 203 chars
+[INTER] 📝 Form body preview: client_id=05fc3816-9a8f-4a2d-8b28-277cd3617cc2&client_secret=bbb82b01-2ca0-407f-a21c-0e1dff659d42&gr...
+[INTER] 🔒 Using mTLS certificate authentication
+[INTER] 🔄 Formatting certificates with proper line breaks...
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] ✅ Certificate formatted with line breaks
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] ✅ Private key formatted with line breaks
+[INTER] ✅ Certificates formatted and ready
+[INTER] 🔧 Creating Undici agent for mTLS...
+[INTER] 🚀 Making mTLS request with Undici agent...
+[FICHA] Buscando status em tempo real para parcela 10
+[INTER] 📋 Retrieving collection: CORRETO-1755013508.325368-10
+[INTER] 🔑 Requesting new access token...
+[INTER] 🌐 Token URL: cdpj.partners.bancointer.com.br/oauth/v2/token
+[INTER] 📄 Using form-based authentication per official docs
+[INTER] 🔓 Certificate configured: ✅ Present
+[INTER] 🔑 Private Key configured: ✅ Present
+[INTER] 📊 Client ID length: 36 chars
+[INTER] 📊 Client Secret length: 36 chars
+[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=boleto-cobranca.read boleto-cobranca.write webhook.read webhook.write
+[INTER] 📝 Form body string length: 203 chars
+[INTER] 📝 Form body preview: client_id=05fc3816-9a8f-4a2d-8b28-277cd3617cc2&client_secret=bbb82b01-2ca0-407f-a21c-0e1dff659d42&gr...
+[INTER] 🔒 Using mTLS certificate authentication
+[INTER] 🔄 Formatting certificates with proper line breaks...
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] ✅ Certificate formatted with line breaks
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] ✅ Private key formatted with line breaks
+[INTER] ✅ Certificates formatted and ready
+[INTER] 🔧 Creating Undici agent for mTLS...
+[INTER] 🚀 Making mTLS request with Undici agent...
+[FICHA] Buscando status em tempo real para parcela 11
+[INTER] 📋 Retrieving collection: 4f3c1f03-222a-46e3-bafd-0c9d6c9cad02
+[INTER] 🔑 Requesting new access token...
+[INTER] 🌐 Token URL: cdpj.partners.bancointer.com.br/oauth/v2/token
+[INTER] 📄 Using form-based authentication per official docs
+[INTER] 🔓 Certificate configured: ✅ Present
+[INTER] 🔑 Private Key configured: ✅ Present
+[INTER] 📊 Client ID length: 36 chars
+[INTER] 📊 Client Secret length: 36 chars
+[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=boleto-cobranca.read boleto-cobranca.write webhook.read webhook.write
+[INTER] 📝 Form body string length: 203 chars
+[INTER] 📝 Form body preview: client_id=05fc3816-9a8f-4a2d-8b28-277cd3617cc2&client_secret=bbb82b01-2ca0-407f-a21c-0e1dff659d42&gr...
+[INTER] 🔒 Using mTLS certificate authentication
+[INTER] 🔄 Formatting certificates with proper line breaks...
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] ✅ Certificate formatted with line breaks
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] ✅ Private key formatted with line breaks
+[INTER] ✅ Certificates formatted and ready
+[INTER] 🔧 Creating Undici agent for mTLS...
+[INTER] 🚀 Making mTLS request with Undici agent...
+[FICHA] Buscando status em tempo real para parcela 12
+[INTER] 📋 Retrieving collection: CORRETO-1755013508.325368-12
+[INTER] 🔑 Requesting new access token...
+[INTER] 🌐 Token URL: cdpj.partners.bancointer.com.br/oauth/v2/token
+[INTER] 📄 Using form-based authentication per official docs
+[INTER] 🔓 Certificate configured: ✅ Present
+[INTER] 🔑 Private Key configured: ✅ Present
+[INTER] 📊 Client ID length: 36 chars
+[INTER] 📊 Client Secret length: 36 chars
+[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=boleto-cobranca.read boleto-cobranca.write webhook.read webhook.write
+[INTER] 📝 Form body string length: 203 chars
+[INTER] 📝 Form body preview: client_id=05fc3816-9a8f-4a2d-8b28-277cd3617cc2&client_secret=bbb82b01-2ca0-407f-a21c-0e1dff659d42&gr...
+[INTER] 🔒 Using mTLS certificate authentication
+[INTER] 🔄 Formatting certificates with proper line breaks...
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] ✅ Certificate formatted with line breaks
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] ✅ Private key formatted with line breaks
+[INTER] ✅ Certificates formatted and ready
+[INTER] 🔧 Creating Undici agent for mTLS...
+[INTER] 🚀 Making mTLS request with Undici agent...
+[FICHA] Buscando status em tempo real para parcela 13
+[INTER] 📋 Retrieving collection: CORRETO-1755013508.325368-13
+[INTER] 🔑 Requesting new access token...
+[INTER] 🌐 Token URL: cdpj.partners.bancointer.com.br/oauth/v2/token
+[INTER] 📄 Using form-based authentication per official docs
+[INTER] 🔓 Certificate configured: ✅ Present
+[INTER] 🔑 Private Key configured: ✅ Present
+[INTER] 📊 Client ID length: 36 chars
+[INTER] 📊 Client Secret length: 36 chars
+[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=boleto-cobranca.read boleto-cobranca.write webhook.read webhook.write
+[INTER] 📝 Form body string length: 203 chars
+[INTER] 📝 Form body preview: client_id=05fc3816-9a8f-4a2d-8b28-277cd3617cc2&client_secret=bbb82b01-2ca0-407f-a21c-0e1dff659d42&gr...
+[INTER] 🔒 Using mTLS certificate authentication
+[INTER] 🔄 Formatting certificates with proper line breaks...
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] ✅ Certificate formatted with line breaks
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] ✅ Private key formatted with line breaks
+[INTER] ✅ Certificates formatted and ready
+[INTER] 🔧 Creating Undici agent for mTLS...
+[INTER] 🚀 Making mTLS request with Undici agent...
+[FICHA] Buscando status em tempo real para parcela 14
+[INTER] 📋 Retrieving collection: CORRETO-1755013508.325368-14
+[INTER] 🔑 Requesting new access token...
+[INTER] 🌐 Token URL: cdpj.partners.bancointer.com.br/oauth/v2/token
+[INTER] 📄 Using form-based authentication per official docs
+[INTER] 🔓 Certificate configured: ✅ Present
+[INTER] 🔑 Private Key configured: ✅ Present
+[INTER] 📊 Client ID length: 36 chars
+[INTER] 📊 Client Secret length: 36 chars
+[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=boleto-cobranca.read boleto-cobranca.write webhook.read webhook.write
+[INTER] 📝 Form body string length: 203 chars
+[INTER] 📝 Form body preview: client_id=05fc3816-9a8f-4a2d-8b28-277cd3617cc2&client_secret=bbb82b01-2ca0-407f-a21c-0e1dff659d42&gr...
+[INTER] 🔒 Using mTLS certificate authentication
+[INTER] 🔄 Formatting certificates with proper line breaks...
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] ✅ Certificate formatted with line breaks
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] ✅ Private key formatted with line breaks
+[INTER] ✅ Certificates formatted and ready
+[INTER] 🔧 Creating Undici agent for mTLS...
+[INTER] 🚀 Making mTLS request with Undici agent...
+[FICHA] Buscando status em tempo real para parcela 15
+[INTER] 📋 Retrieving collection: CORRETO-1755013508.325368-15
+[INTER] 🔑 Requesting new access token...
+[INTER] 🌐 Token URL: cdpj.partners.bancointer.com.br/oauth/v2/token
+[INTER] 📄 Using form-based authentication per official docs
+[INTER] 🔓 Certificate configured: ✅ Present
+[INTER] 🔑 Private Key configured: ✅ Present
+[INTER] 📊 Client ID length: 36 chars
+[INTER] 📊 Client Secret length: 36 chars
+[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=boleto-cobranca.read boleto-cobranca.write webhook.read webhook.write
+[INTER] 📝 Form body string length: 203 chars
+[INTER] 📝 Form body preview: client_id=05fc3816-9a8f-4a2d-8b28-277cd3617cc2&client_secret=bbb82b01-2ca0-407f-a21c-0e1dff659d42&gr...
+[INTER] 🔒 Using mTLS certificate authentication
+[INTER] 🔄 Formatting certificates with proper line breaks...
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] ✅ Certificate formatted with line breaks
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] ✅ Private key formatted with line breaks
+[INTER] ✅ Certificates formatted and ready
+[INTER] 🔧 Creating Undici agent for mTLS...
+[INTER] 🚀 Making mTLS request with Undici agent...
+[FICHA] Buscando status em tempo real para parcela 16
+[INTER] 📋 Retrieving collection: CORRETO-1755013508.325368-16
+[INTER] 🔑 Requesting new access token...
+[INTER] 🌐 Token URL: cdpj.partners.bancointer.com.br/oauth/v2/token
+[INTER] 📄 Using form-based authentication per official docs
+[INTER] 🔓 Certificate configured: ✅ Present
+[INTER] 🔑 Private Key configured: ✅ Present
+[INTER] 📊 Client ID length: 36 chars
+[INTER] 📊 Client Secret length: 36 chars
+[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=boleto-cobranca.read boleto-cobranca.write webhook.read webhook.write
+[INTER] 📝 Form body string length: 203 chars
+[INTER] 📝 Form body preview: client_id=05fc3816-9a8f-4a2d-8b28-277cd3617cc2&client_secret=bbb82b01-2ca0-407f-a21c-0e1dff659d42&gr...
+[INTER] 🔒 Using mTLS certificate authentication
+[INTER] 🔄 Formatting certificates with proper line breaks...
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] ✅ Certificate formatted with line breaks
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] ✅ Private key formatted with line breaks
+[INTER] ✅ Certificates formatted and ready
+[INTER] 🔧 Creating Undici agent for mTLS...
+[INTER] 🚀 Making mTLS request with Undici agent...
+[FICHA] Buscando status em tempo real para parcela 17
+[INTER] 📋 Retrieving collection: 210074a3-e28a-41a5-807a-ee3981ff0d15
+[INTER] 🔑 Requesting new access token...
+[INTER] 🌐 Token URL: cdpj.partners.bancointer.com.br/oauth/v2/token
+[INTER] 📄 Using form-based authentication per official docs
+[INTER] 🔓 Certificate configured: ✅ Present
+[INTER] 🔑 Private Key configured: ✅ Present
+[INTER] 📊 Client ID length: 36 chars
+[INTER] 📊 Client Secret length: 36 chars
+[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=boleto-cobranca.read boleto-cobranca.write webhook.read webhook.write
+[INTER] 📝 Form body string length: 203 chars
+[INTER] 📝 Form body preview: client_id=05fc3816-9a8f-4a2d-8b28-277cd3617cc2&client_secret=bbb82b01-2ca0-407f-a21c-0e1dff659d42&gr...
+[INTER] 🔒 Using mTLS certificate authentication
+[INTER] 🔄 Formatting certificates with proper line breaks...
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] ✅ Certificate formatted with line breaks
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] ✅ Private key formatted with line breaks
+[INTER] ✅ Certificates formatted and ready
+[INTER] 🔧 Creating Undici agent for mTLS...
+[INTER] 🚀 Making mTLS request with Undici agent...
+[FICHA] Buscando status em tempo real para parcela 18
+[INTER] 📋 Retrieving collection: CORRETO-1755013508.325368-18
+[INTER] 🔑 Requesting new access token...
+[INTER] 🌐 Token URL: cdpj.partners.bancointer.com.br/oauth/v2/token
+[INTER] 📄 Using form-based authentication per official docs
+[INTER] 🔓 Certificate configured: ✅ Present
+[INTER] 🔑 Private Key configured: ✅ Present
+[INTER] 📊 Client ID length: 36 chars
+[INTER] 📊 Client Secret length: 36 chars
+[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=boleto-cobranca.read boleto-cobranca.write webhook.read webhook.write
+[INTER] 📝 Form body string length: 203 chars
+[INTER] 📝 Form body preview: client_id=05fc3816-9a8f-4a2d-8b28-277cd3617cc2&client_secret=bbb82b01-2ca0-407f-a21c-0e1dff659d42&gr...
+[INTER] 🔒 Using mTLS certificate authentication
+[INTER] 🔄 Formatting certificates with proper line breaks...
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] ✅ Certificate formatted with line breaks
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] ✅ Private key formatted with line breaks
+[INTER] ✅ Certificates formatted and ready
+[INTER] 🔧 Creating Undici agent for mTLS...
+[INTER] 🚀 Making mTLS request with Undici agent...
+[FICHA] Buscando status em tempo real para parcela 19
+[INTER] 📋 Retrieving collection: d5422afd-a164-4331-b5ff-29fe9ce758ee
+[INTER] 🔑 Requesting new access token...
+[INTER] 🌐 Token URL: cdpj.partners.bancointer.com.br/oauth/v2/token
+[INTER] 📄 Using form-based authentication per official docs
+[INTER] 🔓 Certificate configured: ✅ Present
+[INTER] 🔑 Private Key configured: ✅ Present
+[INTER] 📊 Client ID length: 36 chars
+[INTER] 📊 Client Secret length: 36 chars
+[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=boleto-cobranca.read boleto-cobranca.write webhook.read webhook.write
+[INTER] 📝 Form body string length: 203 chars
+[INTER] 📝 Form body preview: client_id=05fc3816-9a8f-4a2d-8b28-277cd3617cc2&client_secret=bbb82b01-2ca0-407f-a21c-0e1dff659d42&gr...
+[INTER] 🔒 Using mTLS certificate authentication
+[INTER] 🔄 Formatting certificates with proper line breaks...
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] ✅ Certificate formatted with line breaks
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] ✅ Private key formatted with line breaks
+[INTER] ✅ Certificates formatted and ready
+[INTER] 🔧 Creating Undici agent for mTLS...
+[INTER] 🚀 Making mTLS request with Undici agent...
+[FICHA] Buscando status em tempo real para parcela 20
+[INTER] 📋 Retrieving collection: 214dc1d5-59c2-4497-a3ed-b421989ef167
+[INTER] 🔑 Requesting new access token...
+[INTER] 🌐 Token URL: cdpj.partners.bancointer.com.br/oauth/v2/token
+[INTER] 📄 Using form-based authentication per official docs
+[INTER] 🔓 Certificate configured: ✅ Present
+[INTER] 🔑 Private Key configured: ✅ Present
+[INTER] 📊 Client ID length: 36 chars
+[INTER] 📊 Client Secret length: 36 chars
+[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=boleto-cobranca.read boleto-cobranca.write webhook.read webhook.write
+[INTER] 📝 Form body string length: 203 chars
+[INTER] 📝 Form body preview: client_id=05fc3816-9a8f-4a2d-8b28-277cd3617cc2&client_secret=bbb82b01-2ca0-407f-a21c-0e1dff659d42&gr...
+[INTER] 🔒 Using mTLS certificate authentication
+[INTER] 🔄 Formatting certificates with proper line breaks...
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] ✅ Certificate formatted with line breaks
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] ✅ Private key formatted with line breaks
+[INTER] ✅ Certificates formatted and ready
+[INTER] 🔧 Creating Undici agent for mTLS...
+[INTER] 🚀 Making mTLS request with Undici agent...
+[FICHA] Buscando status em tempo real para parcela 21
+[INTER] 📋 Retrieving collection: CORRETO-1755013508.325368-21
+[INTER] 🔑 Requesting new access token...
+[INTER] 🌐 Token URL: cdpj.partners.bancointer.com.br/oauth/v2/token
+[INTER] 📄 Using form-based authentication per official docs
+[INTER] 🔓 Certificate configured: ✅ Present
+[INTER] 🔑 Private Key configured: ✅ Present
+[INTER] 📊 Client ID length: 36 chars
+[INTER] 📊 Client Secret length: 36 chars
+[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=boleto-cobranca.read boleto-cobranca.write webhook.read webhook.write
+[INTER] 📝 Form body string length: 203 chars
+[INTER] 📝 Form body preview: client_id=05fc3816-9a8f-4a2d-8b28-277cd3617cc2&client_secret=bbb82b01-2ca0-407f-a21c-0e1dff659d42&gr...
+[INTER] 🔒 Using mTLS certificate authentication
+[INTER] 🔄 Formatting certificates with proper line breaks...
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] ✅ Certificate formatted with line breaks
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] ✅ Private key formatted with line breaks
+[INTER] ✅ Certificates formatted and ready
+[INTER] 🔧 Creating Undici agent for mTLS...
+[INTER] 🚀 Making mTLS request with Undici agent...
+[FICHA] Buscando status em tempo real para parcela 22
+[INTER] 📋 Retrieving collection: CORRETO-1755013508.325368-22
+[INTER] 🔑 Requesting new access token...
+[INTER] 🌐 Token URL: cdpj.partners.bancointer.com.br/oauth/v2/token
+[INTER] 📄 Using form-based authentication per official docs
+[INTER] 🔓 Certificate configured: ✅ Present
+[INTER] 🔑 Private Key configured: ✅ Present
+[INTER] 📊 Client ID length: 36 chars
+[INTER] 📊 Client Secret length: 36 chars
+[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=boleto-cobranca.read boleto-cobranca.write webhook.read webhook.write
+[INTER] 📝 Form body string length: 203 chars
+[INTER] 📝 Form body preview: client_id=05fc3816-9a8f-4a2d-8b28-277cd3617cc2&client_secret=bbb82b01-2ca0-407f-a21c-0e1dff659d42&gr...
+[INTER] 🔒 Using mTLS certificate authentication
+[INTER] 🔄 Formatting certificates with proper line breaks...
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] ✅ Certificate formatted with line breaks
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] ✅ Private key formatted with line breaks
+[INTER] ✅ Certificates formatted and ready
+[INTER] 🔧 Creating Undici agent for mTLS...
+[INTER] 🚀 Making mTLS request with Undici agent...
+[FICHA] Buscando status em tempo real para parcela 23
+[INTER] 📋 Retrieving collection: 66715aeb-5beb-4258-82b1-db684ec91c86
+[INTER] 🔑 Requesting new access token...
+[INTER] 🌐 Token URL: cdpj.partners.bancointer.com.br/oauth/v2/token
+[INTER] 📄 Using form-based authentication per official docs
+[INTER] 🔓 Certificate configured: ✅ Present
+[INTER] 🔑 Private Key configured: ✅ Present
+[INTER] 📊 Client ID length: 36 chars
+[INTER] 📊 Client Secret length: 36 chars
+[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=boleto-cobranca.read boleto-cobranca.write webhook.read webhook.write
+[INTER] 📝 Form body string length: 203 chars
+[INTER] 📝 Form body preview: client_id=05fc3816-9a8f-4a2d-8b28-277cd3617cc2&client_secret=bbb82b01-2ca0-407f-a21c-0e1dff659d42&gr...
+[INTER] 🔒 Using mTLS certificate authentication
+[INTER] 🔄 Formatting certificates with proper line breaks...
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] ✅ Certificate formatted with line breaks
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] ✅ Private key formatted with line breaks
+[INTER] ✅ Certificates formatted and ready
+[INTER] 🔧 Creating Undici agent for mTLS...
+[INTER] 🚀 Making mTLS request with Undici agent...
+[FICHA] Buscando status em tempo real para parcela 24
+[INTER] 📋 Retrieving collection: CORRETO-1755013508.325368-24
+[INTER] 🔑 Requesting new access token...
+[INTER] 🌐 Token URL: cdpj.partners.bancointer.com.br/oauth/v2/token
+[INTER] 📄 Using form-based authentication per official docs
+[INTER] 🔓 Certificate configured: ✅ Present
+[INTER] 🔑 Private Key configured: ✅ Present
+[INTER] 📊 Client ID length: 36 chars
+[INTER] 📊 Client Secret length: 36 chars
+[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=boleto-cobranca.read boleto-cobranca.write webhook.read webhook.write
+[INTER] 📝 Form body string length: 203 chars
+[INTER] 📝 Form body preview: client_id=05fc3816-9a8f-4a2d-8b28-277cd3617cc2&client_secret=bbb82b01-2ca0-407f-a21c-0e1dff659d42&gr...
+[INTER] 🔒 Using mTLS certificate authentication
+[INTER] 🔄 Formatting certificates with proper line breaks...
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] ✅ Certificate formatted with line breaks
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] ✅ Private key formatted with line breaks
+[INTER] ✅ Certificates formatted and ready
+[INTER] 🔧 Creating Undici agent for mTLS...
+[INTER] 🚀 Making mTLS request with Undici agent...
+[INTER] ❌ Fetch error: fetch failed
+[INTER] 🔄 Falling back to raw HTTPS request...
+[INTER] ❌ Fetch error: fetch failed
+[INTER] 🔄 Falling back to raw HTTPS request...
+[INTER] ❌ Fetch error: fetch failed
+[INTER] 🔄 Falling back to raw HTTPS request...
+[INTER] ❌ Fetch error: fetch failed
+[INTER] 🔄 Falling back to raw HTTPS request...
+[INTER] ❌ Fetch error: fetch failed
+[INTER] 🔄 Falling back to raw HTTPS request...
+[INTER] ❌ Fetch error: fetch failed
+[INTER] 🔄 Falling back to raw HTTPS request...
+[INTER] ❌ Fetch error: fetch failed
+[INTER] 🔄 Falling back to raw HTTPS request...
+[INTER] ❌ Fetch error: fetch failed
+[INTER] 🔄 Falling back to raw HTTPS request...
+[INTER] ❌ Fetch error: fetch failed
+[INTER] 🔄 Falling back to raw HTTPS request...
+[INTER] ❌ Fetch error: fetch failed
+[INTER] 🔄 Falling back to raw HTTPS request...
+[INTER] ❌ Fetch error: fetch failed
+[INTER] 🔄 Falling back to raw HTTPS request...
+[INTER] ❌ Fetch error: fetch failed
+[INTER] 🔄 Falling back to raw HTTPS request...
+[INTER] ❌ Fetch error: fetch failed
+[INTER] 🔄 Falling back to raw HTTPS request...
+[INTER] ❌ Fetch error: fetch failed
+[INTER] 🔄 Falling back to raw HTTPS request...
+[INTER] ❌ Fetch error: fetch failed
+[INTER] 🔄 Falling back to raw HTTPS request...
+[INTER] ❌ Fetch error: fetch failed
+[INTER] 🔄 Falling back to raw HTTPS request...
+[INTER] ❌ Fetch error: fetch failed
+[INTER] 🔄 Falling back to raw HTTPS request...
+[INTER] ❌ Fetch error: fetch failed
+[INTER] 🔄 Falling back to raw HTTPS request...
+[INTER] ❌ Fetch error: fetch failed
+[INTER] 🔄 Falling back to raw HTTPS request...
+[INTER] ❌ Fetch error: fetch failed
+[INTER] 🔄 Falling back to raw HTTPS request...
+[INTER] ❌ Fetch error: fetch failed
+[INTER] 🔄 Falling back to raw HTTPS request...
+[INTER] ❌ Fetch error: fetch failed
+[INTER] 🔄 Falling back to raw HTTPS request...
+[INTER] ❌ Fetch error: fetch failed
+[INTER] 🔄 Falling back to raw HTTPS request...
+[INTER] ❌ Fetch error: fetch failed
+[INTER] 🔄 Falling back to raw HTTPS request...
+[INTER] 📡 Response status: 200
+[INTER] ✅ Access token obtained successfully (expires in 3600s)
+[CIRCUIT_BREAKER] ✅ interTokenBreaker request succeeded
+[INTER] ========== REQUEST DETAILS ==========
+[INTER] 🌐 FULL URL: https://cdpj.partners.bancointer.com.br/cobranca/v3/cobrancas/CORRETO-1755013508.325368-1
+[INTER] 🔧 METHOD: GET
+[INTER] 🪙 TOKEN (first 20 chars):', 91a071e7-e105-4d05-8...
+[INTER] ===================================
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] 🏦 CONTA CORRENTE HEADER ADDED: 346470536
+[INTER] 🔑 ALL HEADERS: {
+  "Authorization": "Bearer 91a071e7-e105-4d05-8461-ce9dc2d22290",
+  "Accept": "application/json",
+  "User-Agent": "SIMPIX-Inter-Integration/1.0",
+  "x-conta-corrente": "346470536"
+}
+[INTER] 📡 Response status: 200
+[INTER] ✅ Access token obtained successfully (expires in 3600s)
+[CIRCUIT_BREAKER] ✅ interTokenBreaker request succeeded
+[INTER] ========== REQUEST DETAILS ==========
+[INTER] 🌐 FULL URL: https://cdpj.partners.bancointer.com.br/cobranca/v3/cobrancas/CORRETO-1755013508.325368-2
+[INTER] 🔧 METHOD: GET
+[INTER] 🪙 TOKEN (first 20 chars):', e199bc0d-db71-49ad-9...
+[INTER] ===================================
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] 🏦 CONTA CORRENTE HEADER ADDED: 346470536
+[INTER] 🔑 ALL HEADERS: {
+  "Authorization": "Bearer e199bc0d-db71-49ad-9c7e-b9813cb5fdd3",
+  "Accept": "application/json",
+  "User-Agent": "SIMPIX-Inter-Integration/1.0",
+  "x-conta-corrente": "346470536"
+}
+[INTER] 📡 Response status: 200
+[INTER] ✅ Access token obtained successfully (expires in 3600s)
+[CIRCUIT_BREAKER] ✅ interTokenBreaker request succeeded
+[INTER] ========== REQUEST DETAILS ==========
+[INTER] 🌐 FULL URL: https://cdpj.partners.bancointer.com.br/cobranca/v3/cobrancas/957e99ca-083f-4652-8d06-bc537772ec1f
+[INTER] 🔧 METHOD: GET
+[INTER] 🪙 TOKEN (first 20 chars):', 56e30581-1fa1-46d8-a...
+[INTER] ===================================
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] 🏦 CONTA CORRENTE HEADER ADDED: 346470536
+[INTER] 🔑 ALL HEADERS: {
+  "Authorization": "Bearer 56e30581-1fa1-46d8-ad26-c2c30e519a5f",
+  "Accept": "application/json",
+  "User-Agent": "SIMPIX-Inter-Integration/1.0",
+  "x-conta-corrente": "346470536"
+}
+[INTER] 📡 Response status: 429
+[INTER] ❌ Error response body: 
+[INTER] ❌ Error response is not JSON
+[INTER] ❌ Failed to get access token: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[CIRCUIT_BREAKER] ❌ interTokenBreaker request failed: Token request failed: 429 - 
+[INTER] Request failed for /cobranca/v3/cobrancas/6f378471-4bde-4e1e-b335-ae4a28abb060: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[CIRCUIT_BREAKER] ❌ interApiBreaker request failed: Token request failed: 429 - 
+[INTER] ❌ Failed to retrieve collection: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[FICHA] Erro ao buscar status em tempo real: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[INTER] 📡 Response status: 200
+[INTER] ✅ Access token obtained successfully (expires in 3600s)
+[CIRCUIT_BREAKER] ✅ interTokenBreaker request succeeded
+[INTER] ========== REQUEST DETAILS ==========
+[INTER] 🌐 FULL URL: https://cdpj.partners.bancointer.com.br/cobranca/v3/cobrancas/96c8ac2f-f26d-4198-89a1-5751152d3d04
+[INTER] 🔧 METHOD: GET
+[INTER] 🪙 TOKEN (first 20 chars):', e3da0e8f-2699-494f-b...
+[INTER] ===================================
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] 🏦 CONTA CORRENTE HEADER ADDED: 346470536
+[INTER] 🔑 ALL HEADERS: {
+  "Authorization": "Bearer e3da0e8f-2699-494f-bbc9-9db4750b6ac4",
+  "Accept": "application/json",
+  "User-Agent": "SIMPIX-Inter-Integration/1.0",
+  "x-conta-corrente": "346470536"
+}
+[INTER] 📡 Response status: 200
+[INTER] ✅ Access token obtained successfully (expires in 3600s)
+[CIRCUIT_BREAKER] ✅ interTokenBreaker request succeeded
+[INTER] ========== REQUEST DETAILS ==========
+[INTER] 🌐 FULL URL: https://cdpj.partners.bancointer.com.br/cobranca/v3/cobrancas/CORRETO-1755013508.325368-8
+[INTER] 🔧 METHOD: GET
+[INTER] 🪙 TOKEN (first 20 chars):', d6bf06a7-ddbf-45f6-9...
+[INTER] ===================================
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] 🏦 CONTA CORRENTE HEADER ADDED: 346470536
+[INTER] 🔑 ALL HEADERS: {
+  "Authorization": "Bearer d6bf06a7-ddbf-45f6-9d80-623426c5616f",
+  "Accept": "application/json",
+  "User-Agent": "SIMPIX-Inter-Integration/1.0",
+  "x-conta-corrente": "346470536"
+}
+[INTER] 📡 Response status: 429
+[INTER] ❌ Error response body: 
+[INTER] ❌ Error response is not JSON
+[INTER] ❌ Failed to get access token: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[CIRCUIT_BREAKER] ❌ interTokenBreaker request failed: Token request failed: 429 - 
+[INTER] Request failed for /cobranca/v3/cobrancas/CORRETO-1755013508.325368-18: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[CIRCUIT_BREAKER] ❌ interApiBreaker request failed: Token request failed: 429 - 
+[INTER] ❌ Failed to retrieve collection: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[FICHA] Erro ao buscar status em tempo real: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[INTER] 📡 Response status: 429
+[INTER] ❌ Error response body: 
+[INTER] ❌ Error response is not JSON
+[INTER] ❌ Failed to get access token: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[CIRCUIT_BREAKER] ❌ interTokenBreaker request failed: Token request failed: 429 - 
+[INTER] Request failed for /cobranca/v3/cobrancas/CORRETO-1755013508.325368-12: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[CIRCUIT_BREAKER] ❌ interApiBreaker request failed: Token request failed: 429 - 
+[INTER] ❌ Failed to retrieve collection: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[FICHA] Erro ao buscar status em tempo real: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[INTER] 📡 Response status: 429
+[INTER] ❌ Error response body: 
+[INTER] ❌ Error response is not JSON
+[INTER] ❌ Failed to get access token: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[CIRCUIT_BREAKER] ❌ interTokenBreaker request failed: Token request failed: 429 - 
+[INTER] Request failed for /cobranca/v3/cobrancas/CORRETO-1755013508.325368-15: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[CIRCUIT_BREAKER] ❌ interApiBreaker request failed: Token request failed: 429 - 
+[INTER] ❌ Failed to retrieve collection: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[FICHA] Erro ao buscar status em tempo real: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[INTER] 📡 Response status: 429
+[INTER] ❌ Error response body: 
+[INTER] ❌ Error response is not JSON
+[INTER] ❌ Failed to get access token: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[CIRCUIT_BREAKER] ❌ interTokenBreaker request failed: Token request failed: 429 - 
+[INTER] Request failed for /cobranca/v3/cobrancas/CORRETO-1755013508.325368-13: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[CIRCUIT_BREAKER] ❌ interApiBreaker request failed: Token request failed: 429 - 
+[INTER] ❌ Failed to retrieve collection: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[FICHA] Erro ao buscar status em tempo real: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[INTER] 📡 Response status: 429
+[INTER] ❌ Error response body: 
+[INTER] ❌ Error response is not JSON
+[INTER] ❌ Failed to get access token: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[CIRCUIT_BREAKER] ❌ interTokenBreaker request failed: Token request failed: 429 - 
+[INTER] Request failed for /cobranca/v3/cobrancas/CORRETO-1755013508.325368-22: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[CIRCUIT_BREAKER] ❌ interApiBreaker request failed: Token request failed: 429 - 
+[INTER] ❌ Failed to retrieve collection: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[FICHA] Erro ao buscar status em tempo real: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[INTER] 📡 Response status: 429
+[INTER] ❌ Error response body: 
+[INTER] ❌ Error response is not JSON
+[INTER] ❌ Failed to get access token: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[CIRCUIT_BREAKER] ❌ interTokenBreaker request failed: Token request failed: 429 - 
+[INTER] Request failed for /cobranca/v3/cobrancas/126dffb8-a53f-40af-a7df-04b07fdbed3b: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[CIRCUIT_BREAKER] ❌ interApiBreaker request failed: Token request failed: 429 - 
+[INTER] ❌ Failed to retrieve collection: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[FICHA] Erro ao buscar status em tempo real: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[INTER] 📡 Response status: 429
+[INTER] ❌ Error response body: 
+[INTER] ❌ Error response is not JSON
+[INTER] ❌ Failed to get access token: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[CIRCUIT_BREAKER] ❌ interTokenBreaker request failed: Token request failed: 429 - 
+[INTER] Request failed for /cobranca/v3/cobrancas/CORRETO-1755013508.325368-9: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[CIRCUIT_BREAKER] ❌ interApiBreaker request failed: Token request failed: 429 - 
+[INTER] ❌ Failed to retrieve collection: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[FICHA] Erro ao buscar status em tempo real: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[INTER] 📡 Response status: 429
+[INTER] ❌ Error response body: 
+[INTER] ❌ Error response is not JSON
+[INTER] ❌ Failed to get access token: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[CIRCUIT_BREAKER] ❌ interTokenBreaker request failed: Token request failed: 429 - 
+[INTER] Request failed for /cobranca/v3/cobrancas/4f3c1f03-222a-46e3-bafd-0c9d6c9cad02: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[CIRCUIT_BREAKER] ❌ interApiBreaker request failed: Token request failed: 429 - 
+[INTER] ❌ Failed to retrieve collection: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[FICHA] Erro ao buscar status em tempo real: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[INTER] 📡 Response status: 429
+[INTER] ❌ Error response body: 
+[INTER] ❌ Error response is not JSON
+[INTER] ❌ Failed to get access token: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[CIRCUIT_BREAKER] ❌ interTokenBreaker request failed: Token request failed: 429 - 
+[CIRCUIT_BREAKER] 🔴 interTokenBreaker OPENED - Too many failures detected
+[CIRCUIT_BREAKER] ⏰ Will attempt recovery in 30000ms
+[INTER] Request failed for /cobranca/v3/cobrancas/fc01f610-05e5-4879-b237-dd9d63f0e4b4: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[CIRCUIT_BREAKER] ❌ interApiBreaker request failed: Token request failed: 429 - 
+[CIRCUIT_BREAKER] 🔴 interApiBreaker OPENED - Too many failures detected
+[CIRCUIT_BREAKER] ⏰ Will attempt recovery in 30000ms
+[INTER] ❌ Failed to retrieve collection: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[FICHA] Erro ao buscar status em tempo real: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[INTER] 📡 Response status: 429
+[INTER] ❌ Error response body: 
+[INTER] ❌ Error response is not JSON
+[INTER] ❌ Failed to get access token: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[CIRCUIT_BREAKER] ❌ interTokenBreaker request failed: Token request failed: 429 - 
+[INTER] Request failed for /cobranca/v3/cobrancas/CORRETO-1755013508.325368-16: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[CIRCUIT_BREAKER] ❌ interApiBreaker request failed: Token request failed: 429 - 
+[INTER] ❌ Failed to retrieve collection: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[FICHA] Erro ao buscar status em tempo real: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[INTER] 📡 Response status: 429
+[INTER] ❌ Error response body: 
+[INTER] ❌ Error response is not JSON
+[INTER] ❌ Failed to get access token: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[CIRCUIT_BREAKER] ❌ interTokenBreaker request failed: Token request failed: 429 - 
+[INTER] Request failed for /cobranca/v3/cobrancas/CORRETO-1755013508.325368-21: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[CIRCUIT_BREAKER] ❌ interApiBreaker request failed: Token request failed: 429 - 
+[INTER] ❌ Failed to retrieve collection: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[FICHA] Erro ao buscar status em tempo real: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[INTER] 📡 Response status: 429
+[INTER] ❌ Error response body: 
+[INTER] ❌ Error response is not JSON
+[INTER] ❌ Failed to get access token: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[CIRCUIT_BREAKER] ❌ interTokenBreaker request failed: Token request failed: 429 - 
+[INTER] Request failed for /cobranca/v3/cobrancas/210074a3-e28a-41a5-807a-ee3981ff0d15: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[CIRCUIT_BREAKER] ❌ interApiBreaker request failed: Token request failed: 429 - 
+[INTER] ❌ Failed to retrieve collection: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[FICHA] Erro ao buscar status em tempo real: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[INTER] 📡 Response status: 429
+[INTER] ❌ Error response body: 
+[INTER] ❌ Error response is not JSON
+[INTER] ❌ Failed to get access token: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[CIRCUIT_BREAKER] ❌ interTokenBreaker request failed: Token request failed: 429 - 
+[INTER] Request failed for /cobranca/v3/cobrancas/214dc1d5-59c2-4497-a3ed-b421989ef167: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[CIRCUIT_BREAKER] ❌ interApiBreaker request failed: Token request failed: 429 - 
+[INTER] ❌ Failed to retrieve collection: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[FICHA] Erro ao buscar status em tempo real: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[INTER] 📡 Response status: 429
+[INTER] ❌ Error response body: 
+[INTER] ❌ Error response is not JSON
+[INTER] ❌ Failed to get access token: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[CIRCUIT_BREAKER] ❌ interTokenBreaker request failed: Token request failed: 429 - 
+[INTER] Request failed for /cobranca/v3/cobrancas/CORRETO-1755013508.325368-10: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[CIRCUIT_BREAKER] ❌ interApiBreaker request failed: Token request failed: 429 - 
+[INTER] ❌ Failed to retrieve collection: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[FICHA] Erro ao buscar status em tempo real: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[INTER] 📡 Response status: 429
+[INTER] ❌ Error response body: 
+[INTER] ❌ Error response is not JSON
+[INTER] ❌ Failed to get access token: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[CIRCUIT_BREAKER] ❌ interTokenBreaker request failed: Token request failed: 429 - 
+[INTER] Request failed for /cobranca/v3/cobrancas/CORRETO-1755013508.325368-14: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[CIRCUIT_BREAKER] ❌ interApiBreaker request failed: Token request failed: 429 - 
+[INTER] ❌ Failed to retrieve collection: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[FICHA] Erro ao buscar status em tempo real: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[INTER] 📡 Response status: 429
+[INTER] ❌ Error response body: 
+[INTER] ❌ Error response is not JSON
+[INTER] ❌ Failed to get access token: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[CIRCUIT_BREAKER] ❌ interTokenBreaker request failed: Token request failed: 429 - 
+[INTER] Request failed for /cobranca/v3/cobrancas/CORRETO-1755013508.325368-24: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[CIRCUIT_BREAKER] ❌ interApiBreaker request failed: Token request failed: 429 - 
+[INTER] ❌ Failed to retrieve collection: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[FICHA] Erro ao buscar status em tempo real: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[INTER] 📡 Response status: 429
+[INTER] ❌ Error response body: 
+[INTER] ❌ Error response is not JSON
+[INTER] ❌ Failed to get access token: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[CIRCUIT_BREAKER] ❌ interTokenBreaker request failed: Token request failed: 429 - 
+[INTER] Request failed for /cobranca/v3/cobrancas/66715aeb-5beb-4258-82b1-db684ec91c86: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[CIRCUIT_BREAKER] ❌ interApiBreaker request failed: Token request failed: 429 - 
+[INTER] ❌ Failed to retrieve collection: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[FICHA] Erro ao buscar status em tempo real: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[INTER] 📡 Response status: 429
+[INTER] ❌ Error response body: 
+[INTER] ❌ Error response is not JSON
+[INTER] ❌ Failed to get access token: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[CIRCUIT_BREAKER] ❌ interTokenBreaker request failed: Token request failed: 429 - 
+[INTER] Request failed for /cobranca/v3/cobrancas/d5422afd-a164-4331-b5ff-29fe9ce758ee: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[CIRCUIT_BREAKER] ❌ interApiBreaker request failed: Token request failed: 429 - 
+[INTER] ❌ Failed to retrieve collection: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[FICHA] Erro ao buscar status em tempo real: Error: Token request failed: 429 - 
+    at InterBankService.getAccessTokenDirect (/home/runner/workspace/server/services/interBankService.ts:431:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[INTER] ========== RESPONSE DETAILS ==========
+[INTER] 📊 STATUS: 400 Bad Request
+[INTER] 📋 RESPONSE HEADERS: {
+  'content-length': '294',
+  'content-type': 'application/json',
+  date: 'Sat, 16 Aug 2025 18:33:50 GMT',
+  server: 'istio-envoy',
+  'strict-transport-security': 'max-age=31536000; includeSubDomains',
+  traceparent: '00-b4118028b210f486bee3a9d8e52f0ae1-0728879f0309a8ef-00',
+  'x-envoy-upstream-service-time': '4',
+  'x-rate-limit-remaining': '119',
+  'x-rate-limit-time': '1755369290319',
+  'x-upstream-time': '7'
+}
+[INTER] 🔍 Response Content-Type: application/json
+[INTER] 🔍 Is PDF Response: false
+[INTER] 📦 Response buffer size: 294 bytes
+[INTER] ❌❌❌ ERROR RESPONSE ❌❌❌
+[INTER] 🚨 Status Code: 400
+[INTER] 🚨 Error Body: "{"title":"Dados inválidos.","detail":"Verifique se os dados informados estão de acordo com a documentação disponibilizada e tente novamente.","timestamp":"2025-08-16T15:33:50.336048375-03:00","violacoes":[{"razao":"Não foi possível converter o valor.","propriedade":"codigoSolicitacao"}]}"
+[INTER] 🚨 Error Body Length: 288 chars
+[INTER] 📋 Error as JSON: {
+  "title": "Dados inválidos.",
+  "detail": "Verifique se os dados informados estão de acordo com a documentação disponibilizada e tente novamente.",
+  "timestamp": "2025-08-16T15:33:50.336048375-03:00",
+  "violacoes": [
+    {
+      "razao": "Não foi possível converter o valor.",
+      "propriedade": "codigoSolicitacao"
+    }
+  ]
+}
+[INTER] ❌❌❌ END ERROR RESPONSE ❌❌❌
+[CIRCUIT_BREAKER] ❌ interApiBreaker request failed: Inter API error: 400 - {"title":"Dados inválidos.","detail":"Verifique se os dados informados estão de acordo com a documentação disponibilizada e tente novamente.","timestamp":"2025-08-16T15:33:50.336048375-03:00","violacoes":[{"razao":"Não foi possível converter o valor.","propriedade":"codigoSolicitacao"}]}
+[INTER] ❌ Failed to retrieve collection: Error: Inter API error: 400 - {"title":"Dados inválidos.","detail":"Verifique se os dados informados estão de acordo com a documentação disponibilizada e tente novamente.","timestamp":"2025-08-16T15:33:50.336048375-03:00","violacoes":[{"razao":"Não foi possível converter o valor.","propriedade":"codigoSolicitacao"}]}
+    at IncomingMessage.<anonymous> (/home/runner/workspace/server/services/interBankService.ts:615:17)
+    at IncomingMessage.emit (node:events:536:35)
+    at endReadableNT (node:internal/streams/readable:1698:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+[FICHA] Erro ao buscar status em tempo real: Error: Inter API error: 400 - {"title":"Dados inválidos.","detail":"Verifique se os dados informados estão de acordo com a documentação disponibilizada e tente novamente.","timestamp":"2025-08-16T15:33:50.336048375-03:00","violacoes":[{"razao":"Não foi possível converter o valor.","propriedade":"codigoSolicitacao"}]}
+    at IncomingMessage.<anonymous> (/home/runner/workspace/server/services/interBankService.ts:615:17)
+    at IncomingMessage.emit (node:events:536:35)
+    at endReadableNT (node:internal/streams/readable:1698:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+[INTER] ========== RESPONSE DETAILS ==========
+[INTER] 📊 STATUS: 400 Bad Request
+[INTER] 📋 RESPONSE HEADERS: {
+  'content-length': '294',
+  'content-type': 'application/json',
+  date: 'Sat, 16 Aug 2025 18:33:50 GMT',
+  server: 'istio-envoy',
+  'strict-transport-security': 'max-age=31536000; includeSubDomains',
+  traceparent: '00-09f59b5af0e202fc2329112ae5b45fef-d625eff734d582a2-00',
+  'x-envoy-upstream-service-time': '3',
+  'x-rate-limit-remaining': '119',
+  'x-rate-limit-time': '1755369290367',
+  'x-upstream-time': '27'
+}
+[INTER] 🔍 Response Content-Type: application/json
+[INTER] 🔍 Is PDF Response: false
+[INTER] 📦 Response buffer size: 294 bytes
+[INTER] ❌❌❌ ERROR RESPONSE ❌❌❌
+[INTER] 🚨 Status Code: 400
+[INTER] 🚨 Error Body: "{"title":"Dados inválidos.","detail":"Verifique se os dados informados estão de acordo com a documentação disponibilizada e tente novamente.","timestamp":"2025-08-16T15:33:50.409510143-03:00","violacoes":[{"razao":"Não foi possível converter o valor.","propriedade":"codigoSolicitacao"}]}"
+[INTER] 🚨 Error Body Length: 288 chars
+[INTER] 📋 Error as JSON: {
+  "title": "Dados inválidos.",
+  "detail": "Verifique se os dados informados estão de acordo com a documentação disponibilizada e tente novamente.",
+  "timestamp": "2025-08-16T15:33:50.409510143-03:00",
+  "violacoes": [
+    {
+      "razao": "Não foi possível converter o valor.",
+      "propriedade": "codigoSolicitacao"
+    }
+  ]
+}
+[INTER] ❌❌❌ END ERROR RESPONSE ❌❌❌
+[CIRCUIT_BREAKER] ❌ interApiBreaker request failed: Inter API error: 400 - {"title":"Dados inválidos.","detail":"Verifique se os dados informados estão de acordo com a documentação disponibilizada e tente novamente.","timestamp":"2025-08-16T15:33:50.409510143-03:00","violacoes":[{"razao":"Não foi possível converter o valor.","propriedade":"codigoSolicitacao"}]}
+[INTER] ❌ Failed to retrieve collection: Error: Inter API error: 400 - {"title":"Dados inválidos.","detail":"Verifique se os dados informados estão de acordo com a documentação disponibilizada e tente novamente.","timestamp":"2025-08-16T15:33:50.409510143-03:00","violacoes":[{"razao":"Não foi possível converter o valor.","propriedade":"codigoSolicitacao"}]}
+    at IncomingMessage.<anonymous> (/home/runner/workspace/server/services/interBankService.ts:615:17)
+    at IncomingMessage.emit (node:events:536:35)
+    at endReadableNT (node:internal/streams/readable:1698:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+[FICHA] Erro ao buscar status em tempo real: Error: Inter API error: 400 - {"title":"Dados inválidos.","detail":"Verifique se os dados informados estão de acordo com a documentação disponibilizada e tente novamente.","timestamp":"2025-08-16T15:33:50.409510143-03:00","violacoes":[{"razao":"Não foi possível converter o valor.","propriedade":"codigoSolicitacao"}]}
+    at IncomingMessage.<anonymous> (/home/runner/workspace/server/services/interBankService.ts:615:17)
+    at IncomingMessage.emit (node:events:536:35)
+    at endReadableNT (node:internal/streams/readable:1698:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+[INTER] ========== RESPONSE DETAILS ==========
+[INTER] 📊 STATUS: 400 Bad Request
+[INTER] 📋 RESPONSE HEADERS: {
+  'content-length': '293',
+  'content-type': 'application/json',
+  date: 'Sat, 16 Aug 2025 18:33:50 GMT',
+  server: 'istio-envoy',
+  'strict-transport-security': 'max-age=31536000; includeSubDomains',
+  traceparent: '00-993041722495cb08ec5af757c27b8777-1d64e46be49dcaf7-00',
+  'x-envoy-upstream-service-time': '3',
+  'x-rate-limit-remaining': '119',
+  'x-rate-limit-time': '1755369290394',
+  'x-upstream-time': '5'
+}
+[INTER] 🔍 Response Content-Type: application/json
+[INTER] 🔍 Is PDF Response: false
+[INTER] 📦 Response buffer size: 293 bytes
+[INTER] ❌❌❌ ERROR RESPONSE ❌❌❌
+[INTER] 🚨 Status Code: 400
+[INTER] 🚨 Error Body: "{"title":"Dados inválidos.","detail":"Verifique se os dados informados estão de acordo com a documentação disponibilizada e tente novamente.","timestamp":"2025-08-16T15:33:50.41592194-03:00","violacoes":[{"razao":"Não foi possível converter o valor.","propriedade":"codigoSolicitacao"}]}"
+[INTER] 🚨 Error Body Length: 287 chars
+[INTER] 📋 Error as JSON: {
+  "title": "Dados inválidos.",
+  "detail": "Verifique se os dados informados estão de acordo com a documentação disponibilizada e tente novamente.",
+  "timestamp": "2025-08-16T15:33:50.41592194-03:00",
+  "violacoes": [
+    {
+      "razao": "Não foi possível converter o valor.",
+      "propriedade": "codigoSolicitacao"
+    }
+  ]
+}
+[INTER] ❌❌❌ END ERROR RESPONSE ❌❌❌
+[CIRCUIT_BREAKER] ❌ interApiBreaker request failed: Inter API error: 400 - {"title":"Dados inválidos.","detail":"Verifique se os dados informados estão de acordo com a documentação disponibilizada e tente novamente.","timestamp":"2025-08-16T15:33:50.41592194-03:00","violacoes":[{"razao":"Não foi possível converter o valor.","propriedade":"codigoSolicitacao"}]}
+[INTER] ❌ Failed to retrieve collection: Error: Inter API error: 400 - {"title":"Dados inválidos.","detail":"Verifique se os dados informados estão de acordo com a documentação disponibilizada e tente novamente.","timestamp":"2025-08-16T15:33:50.41592194-03:00","violacoes":[{"razao":"Não foi possível converter o valor.","propriedade":"codigoSolicitacao"}]}
+    at IncomingMessage.<anonymous> (/home/runner/workspace/server/services/interBankService.ts:615:17)
+    at IncomingMessage.emit (node:events:536:35)
+    at endReadableNT (node:internal/streams/readable:1698:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+[FICHA] Erro ao buscar status em tempo real: Error: Inter API error: 400 - {"title":"Dados inválidos.","detail":"Verifique se os dados informados estão de acordo com a documentação disponibilizada e tente novamente.","timestamp":"2025-08-16T15:33:50.41592194-03:00","violacoes":[{"razao":"Não foi possível converter o valor.","propriedade":"codigoSolicitacao"}]}
+    at IncomingMessage.<anonymous> (/home/runner/workspace/server/services/interBankService.ts:615:17)
+    at IncomingMessage.emit (node:events:536:35)
+    at endReadableNT (node:internal/streams/readable:1698:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+[INTER] ========== RESPONSE DETAILS ==========
+[INTER] 📊 STATUS: 200 OK
+[INTER] 📋 RESPONSE HEADERS: {
+  'content-length': '974',
+  'content-type': 'application/json',
+  date: 'Sat, 16 Aug 2025 18:33:50 GMT',
+  server: 'istio-envoy',
+  'strict-transport-security': 'max-age=31536000; includeSubDomains',
+  traceparent: '00-5d8fcedd3432637a864fea149d0ecca2-cc159df25249626b-00',
+  'x-envoy-upstream-service-time': '81',
+  'x-rate-limit-remaining': '119',
+  'x-rate-limit-time': '1755369290371',
+  'x-upstream-time': '84'
+}
+[INTER] 🔍 Response Content-Type: application/json
+[INTER] 🔍 Is PDF Response: false
+[INTER] 📦 Response buffer size: 974 bytes
+[INTER] ✅ Response OK
+[INTER] =====================================
+[CIRCUIT_BREAKER] ✅ interApiBreaker request succeeded
+[INTER] 📊 Collection data: {
+  "cobranca": {
+    "codigoSolicitacao": "957e99ca-083f-4652-8d06-bc537772ec1f",
+    "seuNumero": "SX69889-5",
+    "dataEmissao": "2025-08-12",
+    "dataVencimento": "2026-01-09",
+    "valorNominal": 833.33,
+    "tipoCobranca": "SIMPLES",
+    "situacao": "A_RECEBER",
+    "dataSituacao": "2025-08-12",
+    "arquivada": false,
+    "descontos": [],
+    "pagador": {
+      "cpfCnpj": "20528464760",
+      "tipoPessoa": "FISICA",
+      "nome": "GABRIEL DE JESUS SANTANA SERRI",
+      "endereco": "RUA MIGUEL ANGELO",
+      "bairro": "CENTRO",
+      "cidade": "SERRA",
+      "uf": "ES",
+      "cep": "29165460",
+      "email": "",
+      "ddd": "",
+      "telefone": "",
+      "numero": "100",
+      "complemento": ""
+    }
+  },
+  "boleto": {
+    "nossoNumero": "90398347651",
+    "codigoBarras": "07791132100000833330001112134234790398347651",
+    "linhaDigitavel": "07790001161213423479303983476510113210000083333"
+  },
+  "pix": {
+    "txid": "3464705361755009070000hRxAP6Vj76BRe",
+    "pixCopiaECola": "00020101021226980014BR.GOV.BCB.PIX2576spi-qrcode.bancointer.com.br/spi/pj/v2/cobv/dccce7772f2246f8996b3eaabcbbb7e55204000053039865406833.335802BR5901*6007VITORIA61082901819062070503***63042E2F"
+  }
+}
+[INTER] ⚠️ QR Code generation not implemented yet
+[INTER] ✅ Collection retrieved and enriched successfully
+[INTER] 📊 Linha digitável: 07790001161213423479303983476510113210000083333
+[INTER] 📊 Código de barras: 07791132100000833330001112134234790398347651
+[INTER] 📊 PIX disponível: Sim
+[INTER] ========== RESPONSE DETAILS ==========
+[INTER] 📊 STATUS: 200 OK
+[INTER] 📋 RESPONSE HEADERS: {
+  'content-length': '974',
+  'content-type': 'application/json',
+  date: 'Sat, 16 Aug 2025 18:33:50 GMT',
+  server: 'istio-envoy',
+  'strict-transport-security': 'max-age=31536000; includeSubDomains',
+  traceparent: '00-6ce4e07f6085b6e4040f428a48f4484e-2ad7a00acf5eec21-01',
+  'x-envoy-upstream-service-time': '62',
+  'x-rate-limit-remaining': '119',
+  'x-rate-limit-time': '1755369290392',
+  'x-upstream-time': '64'
+}
+[INTER] 🔍 Response Content-Type: application/json
+[INTER] 🔍 Is PDF Response: false
+[INTER] 📦 Response buffer size: 974 bytes
+[INTER] ✅ Response OK
+[INTER] =====================================
+[CIRCUIT_BREAKER] ✅ interApiBreaker request succeeded
+[INTER] 📊 Collection data: {
+  "cobranca": {
+    "codigoSolicitacao": "96c8ac2f-f26d-4198-89a1-5751152d3d04",
+    "seuNumero": "SX68997-4",
+    "dataEmissao": "2025-08-12",
+    "dataVencimento": "2025-12-10",
+    "valorNominal": 833.33,
+    "tipoCobranca": "SIMPLES",
+    "situacao": "A_RECEBER",
+    "dataSituacao": "2025-08-12",
+    "arquivada": false,
+    "descontos": [],
+    "pagador": {
+      "cpfCnpj": "20528464760",
+      "tipoPessoa": "FISICA",
+      "nome": "GABRIEL DE JESUS SANTANA SERRI",
+      "endereco": "RUA MIGUEL ANGELO",
+      "bairro": "CENTRO",
+      "cidade": "SERRA",
+      "uf": "ES",
+      "cep": "29165460",
+      "email": "",
+      "ddd": "",
+      "telefone": "",
+      "numero": "100",
+      "complemento": ""
+    }
+  },
+  "boleto": {
+    "nossoNumero": "90398347644",
+    "codigoBarras": "07797129100000833330001112134234790398347644",
+    "linhaDigitavel": "07790001161213423479303983476445712910000083333"
+  },
+  "pix": {
+    "txid": "3464705361755009069000HzHZjMi3wBWKH",
+    "pixCopiaECola": "00020101021226980014BR.GOV.BCB.PIX2576spi-qrcode.bancointer.com.br/spi/pj/v2/cobv/488648fbb82d4513ae1c593011beede85204000053039865406833.335802BR5901*6007VITORIA61082901819062070503***6304418A"
+  }
+}
+[INTER] ⚠️ QR Code generation not implemented yet
+[INTER] ✅ Collection retrieved and enriched successfully
+[INTER] 📊 Linha digitável: 07790001161213423479303983476445712910000083333
+[INTER] 📊 Código de barras: 07797129100000833330001112134234790398347644
+[INTER] 📊 PIX disponível: Sim
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /collections/CORRETO-1755013508.325368-2/pdf
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/financeiro/cobrancas
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[JWT DEBUG - PDF ESPECÍFICO] Request path: /collections/CORRETO-1755013508.325368-2/pdf
+[JWT DEBUG - PDF ESPECÍFICO] Auth header completo length: 774
+[JWT DEBUG - PDF ESPECÍFICO] Token preview: Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R...
+[JWT AUTH - PDF DOWNLOAD] Token length: 767
+[JWT AUTH - PDF DOWNLOAD] Token first 20 chars: eyJhbGciOiJIUzI1NiIs...
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-16T18:33:56.521Z'
+}
+[INTER] Getting PDF for collection: CORRETO-1755013508.325368-2
+[INTER] 📄 SOLUÇÃO IDENTIFICADA: API v3 retorna PDF como base64 em JSON
+[INTER] 🔍 Processando codigoSolicitacao: CORRETO-1755013508.325368-2
+[INTER] 🔍 STEP 1: Verificando se cobrança existe...
+[INTER] 📋 Retrieving collection: CORRETO-1755013508.325368-2
+[CIRCUIT_BREAKER] 🚫 interApiBreaker rejected request - circuit is OPEN
+[CIRCUIT_BREAKER] Circuit for Inter API is OPEN. Job failed immediately to protect the system.
+[INTER] ❌ Failed to retrieve collection: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async InterBankService.obterPdfCobranca (/home/runner/workspace/server/services/interBankService.ts:899:7)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter.ts:1096:25)
+[INTER] ❌ Erro ao obter PDF: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+[INTER] 🔄 Tentando endpoints alternativos...
+[INTER] 🔄 Testando endpoints alternativos para PDF...
+[INTER] 🔄 Tentando: /cobranca/v3/cobrancas/CORRETO-1755013508.325368-2/pdf/download
+[CIRCUIT_BREAKER] 🚫 interApiBreaker rejected request - circuit is OPEN
+[CIRCUIT_BREAKER] Circuit for Inter API is OPEN. Job failed immediately to protect the system.
+[INTER] ❌ Endpoint /cobranca/v3/cobrancas/CORRETO-1755013508.325368-2/pdf/download falhou
+[INTER] 🔄 Tentando: /cobranca/v3/cobrancas/CORRETO-1755013508.325368-2/arquivo
+[CIRCUIT_BREAKER] 🚫 interApiBreaker rejected request - circuit is OPEN
+[CIRCUIT_BREAKER] Circuit for Inter API is OPEN. Job failed immediately to protect the system.
+[INTER] ❌ Endpoint /cobranca/v3/cobrancas/CORRETO-1755013508.325368-2/arquivo falhou
+[INTER] 🔄 Tentando: /cobranca/v3/cobrancas/CORRETO-1755013508.325368-2/documento
+[CIRCUIT_BREAKER] 🚫 interApiBreaker rejected request - circuit is OPEN
+[CIRCUIT_BREAKER] Circuit for Inter API is OPEN. Job failed immediately to protect the system.
+[INTER] ❌ Endpoint /cobranca/v3/cobrancas/CORRETO-1755013508.325368-2/documento falhou
+[INTER] 🔄 Tentando: /banking/v2/cobrancas/CORRETO-1755013508.325368-2/pdf
+[CIRCUIT_BREAKER] 🚫 interApiBreaker rejected request - circuit is OPEN
+[CIRCUIT_BREAKER] Circuit for Inter API is OPEN. Job failed immediately to protect the system.
+[INTER] ❌ Endpoint /banking/v2/cobrancas/CORRETO-1755013508.325368-2/pdf falhou
+[INTER] Failed to get PDF: Error: Nenhum endpoint funcionou para obter o PDF
+    at InterBankService.tentarEndpointsAlternativos (/home/runner/workspace/server/services/interBankService.ts:1082:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter.ts:1096:25)
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /parcelas/6f378471-4bde-4e1e-b335-ae4a28abb060/marcar-pago
+[JWT DEBUG] Método: PATCH
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/financeiro/cobrancas
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-16T18:34:02.699Z'
+}
+[COBRANCAS] Parcela 6f378471-4bde-4e1e-b335-ae4a28abb060 marcada como paga por Sistema
+[FICHA] Buscando status em tempo real para parcela 1
+[INTER] 📋 Retrieving collection: CORRETO-1755013508.325368-1
+[CIRCUIT_BREAKER] 🚫 interApiBreaker rejected request - circuit is OPEN
+[FICHA] Buscando status em tempo real para parcela 2
+[INTER] 📋 Retrieving collection: CORRETO-1755013508.325368-2
+[CIRCUIT_BREAKER] 🚫 interApiBreaker rejected request - circuit is OPEN
+[FICHA] Buscando status em tempo real para parcela 3
+[INTER] 📋 Retrieving collection: 6f378471-4bde-4e1e-b335-ae4a28abb060
+[CIRCUIT_BREAKER] 🚫 interApiBreaker rejected request - circuit is OPEN
+[FICHA] Buscando status em tempo real para parcela 4
+[INTER] 📋 Retrieving collection: 96c8ac2f-f26d-4198-89a1-5751152d3d04
+[CIRCUIT_BREAKER] 🚫 interApiBreaker rejected request - circuit is OPEN
+[FICHA] Buscando status em tempo real para parcela 5
+[INTER] 📋 Retrieving collection: 957e99ca-083f-4652-8d06-bc537772ec1f
+[CIRCUIT_BREAKER] 🚫 interApiBreaker rejected request - circuit is OPEN
+[FICHA] Buscando status em tempo real para parcela 6
+[INTER] 📋 Retrieving collection: fc01f610-05e5-4879-b237-dd9d63f0e4b4
+[CIRCUIT_BREAKER] 🚫 interApiBreaker rejected request - circuit is OPEN
+[FICHA] Buscando status em tempo real para parcela 7
+[INTER] 📋 Retrieving collection: 126dffb8-a53f-40af-a7df-04b07fdbed3b
+[CIRCUIT_BREAKER] 🚫 interApiBreaker rejected request - circuit is OPEN
+[FICHA] Buscando status em tempo real para parcela 8
+[INTER] 📋 Retrieving collection: CORRETO-1755013508.325368-8
+[CIRCUIT_BREAKER] 🚫 interApiBreaker rejected request - circuit is OPEN
+[FICHA] Buscando status em tempo real para parcela 9
+[INTER] 📋 Retrieving collection: CORRETO-1755013508.325368-9
+[CIRCUIT_BREAKER] 🚫 interApiBreaker rejected request - circuit is OPEN
+[FICHA] Buscando status em tempo real para parcela 10
+[INTER] 📋 Retrieving collection: CORRETO-1755013508.325368-10
+[CIRCUIT_BREAKER] 🚫 interApiBreaker rejected request - circuit is OPEN
+[FICHA] Buscando status em tempo real para parcela 11
+[INTER] 📋 Retrieving collection: 4f3c1f03-222a-46e3-bafd-0c9d6c9cad02
+[CIRCUIT_BREAKER] 🚫 interApiBreaker rejected request - circuit is OPEN
+[FICHA] Buscando status em tempo real para parcela 12
+[INTER] 📋 Retrieving collection: CORRETO-1755013508.325368-12
+[CIRCUIT_BREAKER] 🚫 interApiBreaker rejected request - circuit is OPEN
+[FICHA] Buscando status em tempo real para parcela 13
+[INTER] 📋 Retrieving collection: CORRETO-1755013508.325368-13
+[CIRCUIT_BREAKER] 🚫 interApiBreaker rejected request - circuit is OPEN
+[FICHA] Buscando status em tempo real para parcela 14
+[INTER] 📋 Retrieving collection: CORRETO-1755013508.325368-14
+[CIRCUIT_BREAKER] 🚫 interApiBreaker rejected request - circuit is OPEN
+[FICHA] Buscando status em tempo real para parcela 15
+[INTER] 📋 Retrieving collection: CORRETO-1755013508.325368-15
+[CIRCUIT_BREAKER] 🚫 interApiBreaker rejected request - circuit is OPEN
+[FICHA] Buscando status em tempo real para parcela 16
+[INTER] 📋 Retrieving collection: CORRETO-1755013508.325368-16
+[CIRCUIT_BREAKER] 🚫 interApiBreaker rejected request - circuit is OPEN
+[FICHA] Buscando status em tempo real para parcela 17
+[INTER] 📋 Retrieving collection: 210074a3-e28a-41a5-807a-ee3981ff0d15
+[CIRCUIT_BREAKER] 🚫 interApiBreaker rejected request - circuit is OPEN
+[FICHA] Buscando status em tempo real para parcela 18
+[INTER] 📋 Retrieving collection: CORRETO-1755013508.325368-18
+[CIRCUIT_BREAKER] 🚫 interApiBreaker rejected request - circuit is OPEN
+[FICHA] Buscando status em tempo real para parcela 19
+[INTER] 📋 Retrieving collection: d5422afd-a164-4331-b5ff-29fe9ce758ee
+[CIRCUIT_BREAKER] 🚫 interApiBreaker rejected request - circuit is OPEN
+[FICHA] Buscando status em tempo real para parcela 20
+[INTER] 📋 Retrieving collection: 214dc1d5-59c2-4497-a3ed-b421989ef167
+[CIRCUIT_BREAKER] 🚫 interApiBreaker rejected request - circuit is OPEN
+[FICHA] Buscando status em tempo real para parcela 21
+[INTER] 📋 Retrieving collection: CORRETO-1755013508.325368-21
+[CIRCUIT_BREAKER] 🚫 interApiBreaker rejected request - circuit is OPEN
+[FICHA] Buscando status em tempo real para parcela 22
+[INTER] 📋 Retrieving collection: CORRETO-1755013508.325368-22
+[CIRCUIT_BREAKER] 🚫 interApiBreaker rejected request - circuit is OPEN
+[FICHA] Buscando status em tempo real para parcela 23
+[INTER] 📋 Retrieving collection: 66715aeb-5beb-4258-82b1-db684ec91c86
+[CIRCUIT_BREAKER] 🚫 interApiBreaker rejected request - circuit is OPEN
+[FICHA] Buscando status em tempo real para parcela 24
+[INTER] 📋 Retrieving collection: CORRETO-1755013508.325368-24
+[CIRCUIT_BREAKER] 🚫 interApiBreaker rejected request - circuit is OPEN
+[CIRCUIT_BREAKER] Circuit for Inter API is OPEN. Job failed immediately to protect the system.
+[CIRCUIT_BREAKER] Circuit for Inter API is OPEN. Job failed immediately to protect the system.
+[CIRCUIT_BREAKER] Circuit for Inter API is OPEN. Job failed immediately to protect the system.
+[CIRCUIT_BREAKER] Circuit for Inter API is OPEN. Job failed immediately to protect the system.
+[CIRCUIT_BREAKER] Circuit for Inter API is OPEN. Job failed immediately to protect the system.
+[CIRCUIT_BREAKER] Circuit for Inter API is OPEN. Job failed immediately to protect the system.
+[CIRCUIT_BREAKER] Circuit for Inter API is OPEN. Job failed immediately to protect the system.
+[CIRCUIT_BREAKER] Circuit for Inter API is OPEN. Job failed immediately to protect the system.
+[CIRCUIT_BREAKER] Circuit for Inter API is OPEN. Job failed immediately to protect the system.
+[CIRCUIT_BREAKER] Circuit for Inter API is OPEN. Job failed immediately to protect the system.
+[CIRCUIT_BREAKER] Circuit for Inter API is OPEN. Job failed immediately to protect the system.
+[CIRCUIT_BREAKER] Circuit for Inter API is OPEN. Job failed immediately to protect the system.
+[CIRCUIT_BREAKER] Circuit for Inter API is OPEN. Job failed immediately to protect the system.
+[CIRCUIT_BREAKER] Circuit for Inter API is OPEN. Job failed immediately to protect the system.
+[CIRCUIT_BREAKER] Circuit for Inter API is OPEN. Job failed immediately to protect the system.
+[CIRCUIT_BREAKER] Circuit for Inter API is OPEN. Job failed immediately to protect the system.
+[CIRCUIT_BREAKER] Circuit for Inter API is OPEN. Job failed immediately to protect the system.
+[CIRCUIT_BREAKER] Circuit for Inter API is OPEN. Job failed immediately to protect the system.
+[CIRCUIT_BREAKER] Circuit for Inter API is OPEN. Job failed immediately to protect the system.
+[CIRCUIT_BREAKER] Circuit for Inter API is OPEN. Job failed immediately to protect the system.
+[CIRCUIT_BREAKER] Circuit for Inter API is OPEN. Job failed immediately to protect the system.
+[CIRCUIT_BREAKER] Circuit for Inter API is OPEN. Job failed immediately to protect the system.
+[CIRCUIT_BREAKER] Circuit for Inter API is OPEN. Job failed immediately to protect the system.
+[CIRCUIT_BREAKER] Circuit for Inter API is OPEN. Job failed immediately to protect the system.
+[INTER] ❌ Failed to retrieve collection: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 0)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[INTER] ❌ Failed to retrieve collection: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 1)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[INTER] ❌ Failed to retrieve collection: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 2)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[INTER] ❌ Failed to retrieve collection: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 3)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[INTER] ❌ Failed to retrieve collection: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 4)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[INTER] ❌ Failed to retrieve collection: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 5)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[INTER] ❌ Failed to retrieve collection: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 6)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[INTER] ❌ Failed to retrieve collection: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 7)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[INTER] ❌ Failed to retrieve collection: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 8)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[INTER] ❌ Failed to retrieve collection: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 9)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[INTER] ❌ Failed to retrieve collection: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 10)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[INTER] ❌ Failed to retrieve collection: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 11)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[INTER] ❌ Failed to retrieve collection: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 12)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[INTER] ❌ Failed to retrieve collection: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 13)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[INTER] ❌ Failed to retrieve collection: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 14)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[INTER] ❌ Failed to retrieve collection: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 15)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[INTER] ❌ Failed to retrieve collection: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 16)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[INTER] ❌ Failed to retrieve collection: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 17)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[INTER] ❌ Failed to retrieve collection: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 18)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[INTER] ❌ Failed to retrieve collection: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 19)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[INTER] ❌ Failed to retrieve collection: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 20)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[INTER] ❌ Failed to retrieve collection: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 21)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[INTER] ❌ Failed to retrieve collection: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 22)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[INTER] ❌ Failed to retrieve collection: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 23)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[FICHA] Erro ao buscar status em tempo real: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 0)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[FICHA] Erro ao buscar status em tempo real: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 1)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[FICHA] Erro ao buscar status em tempo real: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 2)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[FICHA] Erro ao buscar status em tempo real: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 3)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[FICHA] Erro ao buscar status em tempo real: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 4)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[FICHA] Erro ao buscar status em tempo real: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 5)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[FICHA] Erro ao buscar status em tempo real: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 6)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[FICHA] Erro ao buscar status em tempo real: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 7)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[FICHA] Erro ao buscar status em tempo real: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 8)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[FICHA] Erro ao buscar status em tempo real: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 9)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[FICHA] Erro ao buscar status em tempo real: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 10)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[FICHA] Erro ao buscar status em tempo real: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 11)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[FICHA] Erro ao buscar status em tempo real: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 12)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[FICHA] Erro ao buscar status em tempo real: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 13)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[FICHA] Erro ao buscar status em tempo real: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 14)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[FICHA] Erro ao buscar status em tempo real: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 15)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[FICHA] Erro ao buscar status em tempo real: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 16)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[FICHA] Erro ao buscar status em tempo real: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 17)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[FICHA] Erro ao buscar status em tempo real: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 18)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[FICHA] Erro ao buscar status em tempo real: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 19)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[FICHA] Erro ao buscar status em tempo real: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 20)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[FICHA] Erro ao buscar status em tempo real: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 21)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[FICHA] Erro ao buscar status em tempo real: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 22)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[FICHA] Erro ao buscar status em tempo real: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 23)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[FICHA] Buscando status em tempo real para parcela 1
+[INTER] 📋 Retrieving collection: e3c68ed7-7402-49bc-ae66-2d3adec83275
+[CIRCUIT_BREAKER] 🚫 interApiBreaker rejected request - circuit is OPEN
+[FICHA] Buscando status em tempo real para parcela 2
+[INTER] 📋 Retrieving collection: ef1472b8-876a-4d0b-a575-a3aed7cbf362
+[CIRCUIT_BREAKER] 🚫 interApiBreaker rejected request - circuit is OPEN
+[FICHA] Buscando status em tempo real para parcela 3
+[INTER] 📋 Retrieving collection: e01209d8-7263-448b-b5f7-2376892fdfd7
+[CIRCUIT_BREAKER] 🚫 interApiBreaker rejected request - circuit is OPEN
+[FICHA] Buscando status em tempo real para parcela 4
+[INTER] 📋 Retrieving collection: 44a467d1-e93f-4e91-b1f9-c79438ef5eea
+[CIRCUIT_BREAKER] 🚫 interApiBreaker rejected request - circuit is OPEN
+[FICHA] Buscando status em tempo real para parcela 5
+[INTER] 📋 Retrieving collection: 54d85ce0-979d-4c7f-872a-f903513fae01
+[CIRCUIT_BREAKER] 🚫 interApiBreaker rejected request - circuit is OPEN
+[FICHA] Buscando status em tempo real para parcela 6
+[INTER] 📋 Retrieving collection: a3f3986e-4e47-4c1b-b436-d3eb21ef01c9
+[CIRCUIT_BREAKER] 🚫 interApiBreaker rejected request - circuit is OPEN
+[CIRCUIT_BREAKER] Circuit for Inter API is OPEN. Job failed immediately to protect the system.
+[CIRCUIT_BREAKER] Circuit for Inter API is OPEN. Job failed immediately to protect the system.
+[CIRCUIT_BREAKER] Circuit for Inter API is OPEN. Job failed immediately to protect the system.
+[CIRCUIT_BREAKER] Circuit for Inter API is OPEN. Job failed immediately to protect the system.
+[CIRCUIT_BREAKER] Circuit for Inter API is OPEN. Job failed immediately to protect the system.
+[CIRCUIT_BREAKER] Circuit for Inter API is OPEN. Job failed immediately to protect the system.
+[INTER] ❌ Failed to retrieve collection: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 0)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[INTER] ❌ Failed to retrieve collection: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 1)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[INTER] ❌ Failed to retrieve collection: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 2)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[INTER] ❌ Failed to retrieve collection: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 3)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[INTER] ❌ Failed to retrieve collection: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 4)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[INTER] ❌ Failed to retrieve collection: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 5)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[FICHA] Erro ao buscar status em tempo real: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 0)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[FICHA] Erro ao buscar status em tempo real: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 1)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[FICHA] Erro ao buscar status em tempo real: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 2)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[FICHA] Erro ao buscar status em tempo real: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 3)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[FICHA] Erro ao buscar status em tempo real: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 4)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[FICHA] Erro ao buscar status em tempo real: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:468:15)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:737:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:491:40)
+    at async Promise.all (index 5)
+    at async <anonymous> (/home/runner/workspace/server/routes/cobrancas.ts:478:32)
+[CIRCUIT_BREAKER] 🟡 interTokenBreaker HALF-OPEN - Testing if service recovered
+[CIRCUIT_BREAKER] 🟡 interApiBreaker HALF-OPEN - Testing if service recovered
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/debug/me
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-16T18:34:21.886Z'
+}

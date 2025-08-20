@@ -1,0 +1,44 @@
+**### MODO DE OPERAÇÃO: REALISMO CÉTICO (MANDATÓRIO)**
+Sua lealdade é para com a verdade do código e a estabilidade da produção.
+
+---
+
+**IMPLEMENTAR:**
+A criação de um ficheiro de CCB de teste na pasta correta do Supabase Storage e a sua associação à proposta `#CONT-902183DD` para permitir a validação do fluxo de visualização na "Tela de Pagamentos".
+
+**CONTEXT:**
+Para validar a funcionalidade "Ver CCB Assinada" no modal de "Confirmar Veracidade", precisamos de uma proposta de teste que tenha um ficheiro de CCB assinado corretamente associado a ela no nosso banco de dados e no Storage.
+
+**CURRENT STATE:**
+A proposta de teste `#CONT-902183DD` (ID: `902183dd-b5d1-4e20-8a72-79d3d3559d4d`) pode não ter um ficheiro de CCB assinado associado ou o caminho pode estar incorreto.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  Um ficheiro de teste (pode ser um PDF simples com o texto "CCB Assinada de Teste") é carregado para a pasta correta no Supabase Storage.
+2.  A coluna `caminho_ccb_assinado` para a proposta `902183dd-b5d1-4e20-8a72-79d3d3559d4d` em nosso banco de dados é atualizada para apontar para o caminho exato deste novo ficheiro.
+3.  O ambiente está 100% pronto para o teste de validação do Arquiteto.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+**1. Criação do Ficheiro de Teste:**
+    - **Ação:** Crie um ficheiro PDF de teste simples em seu ambiente local.
+
+**2. Upload para o Supabase Storage:**
+    - **Ação:** Faça o upload deste PDF de teste para o Supabase Storage.
+    - **Caminho de Destino Obrigatório:** O ficheiro deve ser salvo no seguinte caminho: `ccb/assinadas/902183dd-b5d1-4e20-8a72-79d3d3559d4d/ccb_assinada_teste.pdf`.
+
+**3. Atualização do Banco de Dados:**
+    - **Ação:** Execute um comando `UPDATE` no banco de dados.
+    - **Implementação:**
+      ```sql
+      UPDATE propostas
+      SET caminho_ccb_assinado = 'ccb/assinadas/902183dd-b5d1-4e20-8a72-79d3d3559d4d/ccb_assinada_teste.pdf'
+      WHERE id = '902183dd-b5d1-4e20-8a72-79d3d3559d4d';
+      ```
+
+---
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+Siga o protocolo completo. O critério final de sucesso é um relatório confirmando que o ficheiro foi carregado para o Storage e que a coluna do banco de dados foi atualizada com sucesso.
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+Preencha a declaração completa ao final da sua implementação.
+---

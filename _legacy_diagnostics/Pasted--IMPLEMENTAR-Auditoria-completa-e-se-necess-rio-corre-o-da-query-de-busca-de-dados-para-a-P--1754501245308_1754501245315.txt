@@ -1,0 +1,23 @@
+**IMPLEMENTAR:** Auditoria completa e, se necessário, correção da query de busca de dados para a "Página de Pagamentos do Financeiro".
+
+**CONTEXT:** Esta página é crítica para a operação financeira. É absolutamente vital que ela exiba *apenas* e *todas* as propostas que estão no estágio exato de aguardar o pagamento do empréstimo ao cliente. Uma proposta mostrada indevidamente ou uma proposta faltante representa um risco operacional grave.
+
+**CURRENT STATE:** A página existe, mas não temos certeza se o filtro de dados está 100% correto e alinhado com o fluxo de negócio mandatório.
+
+**EXPECTED (Estado Final de Sucesso):** Um relatório de auditoria confirmando que a query está correta ou, caso contrário, o código da query Drizzle já corrigida. O critério de sucesso é que a lista de propostas na página corresponda perfeitamente à regra de negócio.
+
+**CONSTRAINTS (A Regra de Negócio para Exibição):**
+Uma proposta SÓ PODE aparecer nesta página se, e somente se, ela atender a **TODAS** as seguintes condições simultaneamente:
+1.  A proposta DEVE ter uma CCB gerada (`ccbGerado` = `true`).
+2.  A proposta DEVE ter a assinatura eletrônica concluída (`assinaturaEletronicaConcluida` = `true`).
+3.  A proposta DEVE ter pelo menos um boleto de cobrança ativo registrado na tabela `inter_collections`.
+
+**TESTE (Roadmap de Auditoria Obrigatório):**
+1.  **Localize a Query:** Encontre o endpoint no backend (nos arquivos de `server/routes/`) e a respectiva query Drizzle que é responsável por alimentar a "Página de Pagamentos do Financeiro".
+2.  **Analise a Query Atual:** Revise a cláusula `WHERE` da query. Compare-a rigorosamente com as 3 regras de negócio listadas em `[CONSTRAINTS]`.
+3.  **Valide com Dados Reais:** Verifique no banco de dados se existem propostas em diferentes estágios (ex: assinada mas sem boleto; com boleto mas não assinada). Sua análise deve provar que a query filtra corretamente esses casos.
+4.  **Relatório e Correção:**
+    - Se a query atual já implementa perfeitamente as 3 regras, reporte `[CONFORMIDADE TOTAL]`.
+    - Se a query estiver incorreta, reporte `[NÃO CONFORMIDADE]` e forneça o código da nova query Drizzle corrigida que aplica todas as 3 regras de negócio usando o operador `and()`.
+
+**BANCO:** Sua análise deve se basear nos schemas e nas relações entre as tabelas `propostas` e `inter_collections`.

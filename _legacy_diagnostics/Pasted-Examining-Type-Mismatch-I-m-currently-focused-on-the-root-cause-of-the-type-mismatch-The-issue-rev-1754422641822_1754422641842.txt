@@ -1,0 +1,117 @@
+Examining Type Mismatch
+
+I'm currently focused on the root cause of the type mismatch. The issue revolves around a JOIN operation failing due to uuid and text column incompatibility within a PostgreSQL database, exacerbated by Drizzle ORM and Supabase with Row Level Security. I've analyzed two failed query attempts. The initial error mistakenly indicated uuid = integer, hinting at possible type inference issues. My next attempt, using raw SQL with a cast to uuid, correctly identified text = uuid, but Postgres still struggled with the direct comparison. I'm now exploring if the text column has invalid UUID values.
+
+Resolving the Join Issue
+
+I've been analyzing the join issue. I've deduced the error is due to a direct type mismatch between uuid and text columns in the JOIN condition. Initial errors were misleading but the root cause is now clear. I've identified the issue stems from an incompatibility during type comparisons within the database. I'm exploring casting to ensure both join columns are compatible. I'm searching for relevant Drizzle ORM constructs for PostgreSQL to implement type casting within my queries. My objective is to resolve this without schema modification.
+
+Exploring Casting Solutions
+
+I've been focusing on how to properly cast fields within the Drizzle ORM query.  My initial exploration involved using the sql template literal to achieve the cast, as there isn't a dedicated function. Tentativa 3, which attempted to cast interCollections.propostaId to UUID, threw an error. This is puzzling because the cast should have resolved the type mismatch. I'm now re-examining Tentativa 3 to understand why the Postgres operator was not found. I'm going to investigate what is actually happening with the casts.
+
+Refining Casting Logic
+
+After reviewing Tentativa 3, it appears the issue stems from Drizzle's interpretation of the column types within the sql template. The error suggests that propostas.id, declared as UUID, is being treated as TEXT by Postgres during the comparison, even with the explicit cast applied to interCollections.propostaId. This unexpected behavior warrants further investigation into how Drizzle handles column references within custom SQL fragments. I plan to construct test cases to simulate the different scenarios more precisely.
+
+Analyzing Type Inference Issues
+
+My focus has shifted to the underlying type inference issues within Drizzle ORM when using custom SQL fragments. It's becoming clear that the ORM might be misinterpreting column types in the join condition, leading to Postgres errors.  I am digging deeper into how Drizzle handles column references within the sql template literal and how it interacts with the Postgres type system.  A thorough verification of column types and RLS policies is needed to understand the uuid = integer error.
+
+Refining Join Conditions
+
+I've been re-examining the JOIN conditions and the type discrepancies in the queries. My investigation shows that the issue stems from Drizzle's interpretation of column types within the sql template.  Although I had previously assumed the type casts were being applied correctly, the errors point to Postgres misinterpreting the comparison. To resolve this, I'm going to explicitly cast the UUID to text within the JOIN condition. This way I should avoid any further type confusion when comparing the columns.
+
+Este é um cenário de crise clássico, mas totalmente solucionável. O erro PostgresError: operator does not exist: text = uuid é direto: você está tentando comparar dois tipos de dados incompatíveis.
+
+No entanto, o detalhe mais crítico no seu relatório é a falha da Tentativa 4 (Buscar dados separadamente). O fato de você não conseguir consultar a tabela inter_collections isoladamente, recebendo o mesmo erro de tipos, é a evidência crucial de que o problema não está apenas no JOIN.
+
+O problema quase certamente reside nas Políticas de Row Level Security (RLS) implementadas recentemente no Supabase.
+
+Abaixo está o plano de ação imediato para desbloquear a tela de Pagamentos.
+
+Análise Crítica: O Papel do RLS
+Quando o RLS está ativo, o PostgreSQL reescreve silenciosamente suas consultas para incluir as regras de segurança definidas. Se uma política RLS compara uma coluna TEXT com uma função que retorna UUID (como a função auth.uid() do Supabase), qualquer consulta à tabela falhará com o erro text = uuid, mesmo antes de avaliar o JOIN.
+
+Isso explica por que a implementação recente do OWASP/RLS coincide com o erro e por que a Tentativa 4 falhou.
+
+Solução Imediata (Duas Frentes)
+Precisamos corrigir as comparações de tipo tanto nas políticas RLS quanto na consulta Drizzle.
+
+Frente 1: Correção das Políticas RLS (Prioridade Máxima)
+Você deve auditar as políticas RLS no Supabase imediatamente.
+
+Acesse o Painel do Supabase.
+
+Vá para "Authentication" > "Policies".
+
+Inspecione as políticas nas tabelas inter_collections e propostas.
+
+Procure por comparações onde tipos incompatíveis são usados.
+
+Exemplo de Política Problemática:
+
+SQL
+
+-- Supondo que você tenha uma coluna 'user_id' (TEXT) em inter_collections
+-- e esteja comparando com o usuário autenticado (UUID).
+CREATE POLICY select_own_collections ON inter_collections
+FOR SELECT
+USING (user_id = auth.uid());
+-- ERRO: TEXT = UUID
+A Correção (Casting Explícito):
+
+Você deve fazer o cast da função UUID para TEXT usando ::text.
+
+SQL
+
+CREATE POLICY select_own_collections ON inter_collections
+FOR SELECT
+USING (user_id = auth.uid()::text); -- CORREÇÃO APLICADA
+Você deve garantir que todas as comparações nas suas políticas RLS usem tipos correspondentes.
+
+Frente 2: Correção do JOIN no Drizzle ORM
+Depois de corrigir o RLS, você ainda precisa corrigir o JOIN explícito em server/routes/pagamentos.ts. Precisamos fazer o cast de propostas.id (UUID) para TEXT para compará-lo com inter_collections.proposta_id (TEXT).
+
+TypeScript
+
+import { sql, eq } from 'drizzle-orm';
+
+// ... sua consulta Drizzle
+
+const resultado = await db.select({
+  // ... campos
+})
+.from(propostas)
+.innerJoin(
+  interCollections,
+  // SOLUÇÃO: Cast explícito de UUID para TEXT
+  sql`${propostas.id}::text = ${interCollections.propostaId}`
+)
+// ... restante dos filtros (status, ccb_gerado, etc.)
+Por que converter UUID para TEXT? É a abordagem mais segura. Todo UUID pode ser convertido para TEXT. O inverso (TEXT para UUID) falharia se a coluna inter_collections.proposta_id contivesse algum dado que não fosse um UUID válido.
+
+Respostas às Perguntas Críticas
+Por que o erro mudou de "uuid = integer" para "text = uuid"?
+O erro inicial uuid = integer foi provavelmente uma anomalia. Em consultas complexas, o Drizzle ORM ou o otimizador do PostgreSQL pode ter inferido incorretamente o tipo de interCollections.propostaId momentaneamente. O erro text = uuid é o diagnóstico correto baseado na definição atual do seu schema.
+
+Por que a posição do erro mudou de 2571 para 216?
+A posição indica o caractere na string SQL onde o parser encontrou o erro. Ao mudar sua abordagem (de ORM puro para sql raw), o Drizzle gerou uma string SQL completamente diferente. Uma posição baixa (216) indica que o erro foi encontrado muito cedo na consulta, o que é comum quando o erro está na cláusula JOIN principal ou em uma política RLS que é injetada no início da execução.
+
+As políticas RLS podem estar interferindo na comparação de tipos?
+Sim, é extremamente provável. Esta é a razão pela qual a sua Tentativa 4 falhou. Se a política RLS contém uma comparação de tipo inválida (ex: TEXT = UUID), toda consulta que tenta acessar a tabela falhará, independentemente da lógica de JOIN da aplicação.
+
+Existe alguma forma de fazer esse JOIN funcionar sem alterar o schema?
+Sim. As soluções fornecidas acima (Casting explícito no RLS e no Drizzle) resolvem o problema no nível da consulta, sem necessidade de migrações urgentes no banco de dados.
+
+Recomendação de Longo Prazo (Pós-Crise)
+A solução imediata resolve a urgência. No entanto, a causa raiz é um erro de modelagem de dados. Uma chave estrangeira referenciando um UUID deve ser do tipo UUID.
+
+Assim que o sistema estiver estável, planeje a seguinte migração:
+
+SQL
+
+-- Altera o tipo da coluna de TEXT para UUID, usando o cast para converter os dados existentes.
+ALTER TABLE inter_collections
+ALTER COLUMN proposta_id TYPE UUID USING proposta_id::uuid;
+Após esta migração, você poderá remover os casts explícitos do seu código Drizzle e das políticas RLS.

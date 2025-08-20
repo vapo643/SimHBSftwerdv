@@ -1,0 +1,38 @@
+**### MODO DE OPERAÇÃO: REALISMO CÉTICO (MANDATÓRIO)**
+Sua lealdade é para com a verdade do código e a estabilidade da produção.
+
+---
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Realizar uma auditoria de arquitetura para explicar o significado do status "Aguardando Aprovação" e mapear o fluxo de trabalho completo associado a ele.
+* **Intenção Estratégica (O Porquê):** O Arquiteto identificou uma inconsistência crítica: a "Tela de Pagamentos" está a exibir um status ("Aguardando Aprovação") sem a ação correspondente, o que torna a interface confusa e inoperável. Precisamos de um "blueprint" do fluxo de aprovação que você implementou.
+* **Histórico Relevante (Consulta Obrigatória):** Em missões anteriores, você implementou um workflow de aprovação hierárquico (`COBRADOR` -> `SUPERVISOR`) e refatorou a "Tela de Pagamentos". A falha atual reside na intersecção ou conflito entre estes dois sistemas.
+* **Modelo Mental (Como se Encaixa):** Você é o Arquiteto de Software que projetou o sistema de aprovações. Sua tarefa é explicar o seu design, como um sênior a orientar um novo membro da equipe.
+
+---
+
+**IMPLEMENTAR:**
+Um relatório de arquitetura detalhado. **NÃO FAÇA MODIFICAÇÕES.**
+
+**CURRENT STATE:**
+A "Tela de Pagamentos" exibe propostas com o status "Aguardando Aprovação", mas não há um botão visível para o usuário do Financeiro executar a aprovação.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um relatório claro que responda a todas as questões abaixo, com evidências de código.
+
+**CONSTRAINTS (Roadmap de Auditoria de Arquitetura):**
+
+**1. Definição e Origem do Status:**
+    - **Ação:** Analise o nosso sistema de status e a lógica de negócio que você implementou.
+    - **Relatório 1:** O que significa, no nosso sistema, o status "Aguardando Aprovação"? Qual ação específica, executada por qual `role` e em qual tela, faz com que uma proposta entre neste estado? Apresente o trecho de código do backend que define este status.
+
+**2. Localização da Ação de Aprovação (O Ponto Crítico):**
+    - **Ação:** Faça uma busca completa no código do frontend.
+    - **Relatório 2:** Em qual tela (componente `.tsx`) e para qual `role` de usuário a interface para **APROVAR** uma solicitação foi projetada para aparecer? Apresente o trecho de código JSX que renderiza o botão ou a lista de aprovações pendentes.
+
+**3. Análise da Falha de Design:**
+    - **Ação:** Com base nas suas respostas acima, formule uma hipótese para a falha.
+    - **Relatório 3:** Por que uma proposta em "Aguardando Aprovação" (uma tarefa de um `SUPERVISOR` na "Tela de Cobranças") está a aparecer na "Tela de Pagamentos" (uma ferramenta para o `FINANCEIRO`)? A nossa query da "Tela de Pagamentos" está a incluir este status por engano?
+
+**Relatório Final:**
+O critério de sucesso é um relatório que nos dê clareza total sobre como o fluxo de aprovação foi projetado para funcionar, para que possamos corrigir a inconsistência.

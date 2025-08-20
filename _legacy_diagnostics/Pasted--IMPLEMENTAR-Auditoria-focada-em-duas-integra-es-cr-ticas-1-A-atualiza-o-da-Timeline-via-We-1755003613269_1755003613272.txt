@@ -1,0 +1,32 @@
+**IMPLEMENTAR:**
+Auditoria focada em duas integrações críticas: 1) A atualização da Timeline via Webhook do ClickSign e 2) O download de PDFs de boletos via API do Banco Inter.
+
+**CONTEXT:**
+Para garantir a confiabilidade do nosso fluxo de formalização, precisamos de uma verificação rigorosa de que nossos sistemas de notificação (webhooks) e de recuperação de documentos (PDFs) estão 100% operacionais e comunicando corretamente com os serviços externos.
+
+**CURRENT STATE:**
+As integrações com ClickSign e Banco Inter estão implementadas, mas precisamos de uma auditoria focada para confirmar que os webhooks estão a atualizar a UI em tempo real e que o download de boletos está funcional.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um relatório de auditoria claro, com evidências (logs e análise de código), confirmando o sucesso ou a falha de cada um dos dois fluxos testados.
+
+**CONSTRAINTS (Roadmap de Auditoria Sistemática):**
+
+**Parte 1: Auditoria do Webhook ClickSign e Atualização da Timeline**
+1.  **Análise de Código:**
+    - **Ação:** Localize e apresente o código do endpoint do nosso backend que está configurado para receber os webhooks da ClickSign.
+    - **Auditoria:** Analise este código e descreva: Qual evento específico da ClickSign (ex: `sign`) ele está programado para processar? Quais ações ele executa ao receber este evento (ex: atualiza qual campo em qual tabela)?
+2.  **Validação do Fluxo:**
+    - **Ação:** Descreva o mecanismo pelo qual a atualização no banco de dados (feita pelo webhook) deveria notificar o frontend para atualizar a "Timeline".
+    - **Auditoria:** Estamos a usar o Supabase Realtime na tabela `propostas` para transmitir esta mudança? Se sim, confirme que a tabela está com o Realtime ativado. Se não, explique qual é o método utilizado.
+
+**Parte 2: Auditoria do Download de Boletos (Banco Inter)**
+1.  **Análise de Código:**
+    - **Ação:** Inspecione o serviço `interBankService.ts`.
+    - **Auditoria:** Confirme que o método `obterPdfCobranca` está a construir corretamente a URL do request para o endpoint de download de PDF do Banco Inter e a incluir o `codigoSolicitacao` e o token de autorização.
+2.  **Validação do Fluxo:**
+    - **Ação:** Descreva o fluxo que é acionado quando um usuário clica para baixar um boleto.
+    - **Auditoria:** O frontend chama um endpoint no nosso backend que, por sua vez, chama o `obterPdfCobranca`? Confirme se a resposta deste endpoint para o frontend está corretamente configurada com o `Content-Type` como `application/pdf` para que o navegador inicie o download.
+
+**Relatório Final:**
+Apresente um relatório ponto a ponto, respondendo a cada uma das questões de auditoria acima com sua análise do código e do fluxo de dados.

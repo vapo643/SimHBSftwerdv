@@ -1,0 +1,18 @@
+**BUG:**
+O diagnóstico foi conclusivo: os dados estruturados de endereço (Rua, Número, Bairro, Complemento) estão a ser perdidos durante o processo de salvamento da "Nova Proposta". Embora o frontend os envie e o backend os receba, eles não são persistidos corretamente no campo JSON `cliente_data` da tabela `propostas`, resultando em campos vazios no banco de dados.
+
+**PROCESSO SISTEMÁTICO (Roadmap de Correção):**
+
+**1. Isolamento do Ponto de Falha:**
+    - **Ação:** Concentre-se exclusivamente no ficheiro de rota do backend que contém a lógica para o endpoint `POST /api/propostas`.
+
+**2. Implementação da Correção:**
+    - **Ação:** Audite a função que lida com a criação de uma nova proposta. O seu relatório anterior confirmou que o backend *recebe* os campos (`clienteLogradouro`, `clienteCep`, etc.).
+    - **Implementação:** Corrija a lógica de inserção do Drizzle (`db.insert(propostas)...`) para garantir que **TODOS** os campos de endereço recebidos do frontend (`clienteLogradouro`, `clienteNumero`, `clienteComplemento`, `clienteBairro`) sejam corretamente mapeados e salvos dentro do objeto JSON na coluna `cliente_data`.
+
+**3. Validação Final (Protocolo 5-CHECK):**
+    - **Ação Obrigatória:** Após as correções, execute `get_latest_lsp_diagnostics` para garantir ZERO erros de LSP.
+    - **Teste de Confirmação Obrigatório:** Após a correção do código, execute o seguinte teste ponta-a-ponta:
+        a. Crie uma **NOVA PROPOSTA** através da interface do usuário, preenchendo TODOS os campos de endereço com valores únicos e fáceis de identificar.
+        b. Imediatamente após, execute uma query SQL direta no banco de dados para inspecionar o campo `cliente_data` da proposta que você acabou de criar.
+    - **Relatório Final Obrigatório:** O critério de sucesso é um `console.log` do resultado desta query que mostre o JSON `cliente_data` com **TODOS OS CAMPOS DE ENDEREÇO CORRETAMENTE PREENCHIDOS**. A missão só estará concluída quando você apresentar esta prova irrefutável de que os dados estão a ser 100% persistidos no banco de dados.

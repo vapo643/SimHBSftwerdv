@@ -1,0 +1,24 @@
+# MISSÃO DE REFINAMENTO FINAL (FULL-STACK): Corrigir e Finalizar a Gestão de Parceiros
+
+**CONTEXTO ESTRATÉGICO:**
+Uma tentativa anterior de refinar esta funcionalidade resultou num crash do sistema, forçando um rollback. Estamos a re-iniciar esta missão com diretrizes claras e com o contexto estratégico para cada mudança.
+
+**DIRETRIZ DE DESIGN GERAL:**
+Lembre-se que o tema de design do nosso software é **"blackout"**. Todas as alterações de estilo devem respeitar um fundo escuro com elementos de texto e UI em alto contraste.
+
+**ROADMAP DE REFINAMENTO (Execute na ordem):**
+
+**1. Correção de Estilo (Restaurar o Tema Blackout):**
+* **Ficheiro Alvo:** O componente da página "Gestão de Parceiros" (provavelmente `/client/src/pages/parceiros/index.tsx`).
+* **Justificativa (O Porquê):** Em uma execução anterior, o fundo da área de conteúdo principal foi alterado para branco, quebrando a consistência visual do nosso tema "blackout".
+* **Tarefa:** Investigue as classes CSS ou Tailwind CSS aplicadas e reverta a cor de fundo para o padrão escuro da nossa aplicação.
+
+**2. Remoção do Campo 'Comissão Padrão':**
+* **Ficheiro Alvo:** O componente do formulário de parceiros (provavelmente `/client/src/components/parceiros/PartnerForm.tsx`).
+* **Justificativa Estratégica (O Porquê):** Este campo é obsoleto porque a comissão não é mais um valor fixo no parceiro. A nossa lógica de negócio é mais flexível: a comissão é definida dentro de cada **"Tabela Comercial"**.
+* **Tarefa:** Remova completamente o campo de input para "Comissão Padrão" da interface, do seu estado no React Hook Form e de qualquer schema de validação Zod associado a este formulário.
+
+**3. Remoção do Campo 'Tabela Comercial Padrão':**
+* **Ficheiro Alvo:** O mesmo ficheiro do passo anterior (`PartnerForm.tsx`).
+* **Justificativa Estratégica (O Porquê):** Este campo é obsoleto. A criação e associação de tabelas comerciais é uma função centralizada na tela de **"Gestão de Tabelas Comerciais"**.
+* **Tarefa:** Remova completamente o campo de seleção (dropdown) para "Tabela Comercial Padrão" da interface, do seu estado e da sua validação.

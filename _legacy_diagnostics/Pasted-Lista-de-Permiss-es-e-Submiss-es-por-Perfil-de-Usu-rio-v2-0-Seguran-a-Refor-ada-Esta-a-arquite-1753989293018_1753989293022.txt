@@ -1,0 +1,108 @@
+Lista de Permissões e Submissões por Perfil de Usuário (v2.0 - Segurança Reforçada)
+Esta é a arquitetura de RBAC (Role-Based Access Control) e RLS (Row Level Security) que implementamos, agora com a doutrina de "Defesa em Profundidade":
+
+No Frontend (UI): O menu de navegação é dinâmico e oculta os links para as funcionalidades que o usuário não tem permissão para aceder.
+
+No Backend (API): Todas as rotas são protegidas por "guards" de permissão. Mesmo que um usuário tente aceder a uma funcionalidade diretamente pelo URL (slug), a API irá bloquear a requisição com um erro 403 Forbidden, garantindo que ele não consiga nem ver e nem agir sobre dados ou telas restritas.
+
+1. O ATENDENTE
+Função: A linha de frente do negócio. Responsável por originar as propostas de crédito.
+
+Visão:
+
+Dashboard: Vê um painel de performance com as suas próprias métricas (propostas criadas hoje, na semana, no mês).
+
+Minhas Propostas / Fila de Análise: Vê uma lista apenas das propostas que ele mesmo criou, em todos os status.
+
+Formalização: Vê apenas as suas próprias propostas que foram aprovadas e estão na fase de formalização.
+
+Menus Restritos: Os menus de "Configurações de Admin" (Usuários, Parceiros, Lojas, Tabelas Comerciais, Produtos) e "Pagamentos" são totalmente invisíveis e inacessíveis (mesmo por URL) para ele.
+
+Ações e Submissões:
+
+Criar Nova Proposta: Pode aceder à tela T-01 e submeter uma nova proposta completa.
+
+Corrigir Proposta Pendente: Pode aceder à tela de edição de uma proposta sua que foi pendenciada para corrigir os dados e reenviá-la para análise.
+
+Gerir Formalização: Pode interagir com as suas propostas na fila de formalização.
+
+2. O ANALISTA
+Função: O cérebro da operação de crédito. Não tem vínculo com nenhuma loja ou parceiro.
+
+Visão:
+
+Tela Principal: A sua tela principal é a "Fila de Análise".
+
+Fila de Análise: Vê todas as propostas de todas as lojas que estão com os status aguardando_analise ou em_analise.
+
+Menus Restritos: Os menus de "Configurações de Admin" e "Pagamentos" são totalmente invisíveis e inacessíveis (mesmo por URL).
+
+Ações e Submissões:
+
+Analisar Proposta: Pode abrir qualquer proposta da sua fila para ver todos os detalhes.
+
+Tomar a Decisão: No "Painel de Decisão", pode Aprovar, Negar ou Pendenciar uma proposta.
+
+3. O GERENTE
+Função: O supervisor tático. Responsável por gerir a sua loja e a sua equipa de atendentes.
+
+Visão:
+
+Visão de Loja: Em todas as telas, ele vê todos os dados que pertencem apenas à sua loja.
+
+Menus Restritos: Os menus de "Configurações de Admin" (Parceiros, Usuários globais) são totalmente invisíveis e inacessíveis (mesmo por URL).
+
+Ações e Submissões:
+
+Herda todas as permissões do ATENDENTE e do ANALISTA, sempre restritas ao escopo da sua loja.
+
+Pode gerir as Lojas e os Usuários da sua equipa.
+
+4. O FINANCEIRO
+Função: O responsável pela execução dos pagamentos.
+
+Visão:
+
+Tela Principal: A sua tela principal é a "Fila de Pagamento".
+
+Fila de Pagamento: Vê todas as propostas de todas as lojas que estão com o status pronto_pagamento.
+
+Menus Restritos: Os menus de "Configurações de Admin" são totalmente invisíveis e inacessíveis (mesmo por URL).
+
+Ações e Submissões:
+
+Pode marcar uma proposta como pago.
+
+5. O ADMINISTRADOR
+Função: O superusuário. Tem controlo total sobre o sistema.
+
+Visão:
+
+Tem uma visão global e irrestrita. Vê todos os dados de todas as lojas, parceiros e usuários.
+
+Ações e Submissões:
+
+Pode executar todas as ações de todos os outros perfis.
+
+Tem acesso exclusivo e completo a todas as telas de "Configurações de Admin".
+
+O Fluxo Comum do Software (A Jornada da Proposta)
+Originação (Atendente): Um ATENDENTE preenche o formulário da "Nova Proposta" (T-01). Ao submeter, a proposta é criada com o status aguardando_analise.
+
+Fila de Análise (Analista): A nova proposta aparece na "Fila de Análise" (T-02) do ANALISTA.
+
+Decisão (Analista): O ANALISTA abre o "Painel de Análise" (T-03).
+
+Se APROVAR: A proposta muda de status para aprovado.
+
+Se NEGAR: A proposta muda de status para negado.
+
+Se PENDENCIAR: A proposta muda de status para pendente e volta para o ATENDENTE.
+
+Ciclo de Correção (Atendente): O ATENDENTE corrige a proposta pendente e a reenvia, fazendo-a voltar para o Passo 2.
+
+Formalização (Atendente): A proposta aprovada aparece na "Fila de Formalização" (T-04) do ATENDENTE.
+
+Pagamento (Financeiro): Após a formalização, o status muda para pronto_pagamento e a proposta aparece na "Fila de Pagamento" (T-05).
+
+Cobrança: Após o pagamento, a proposta entra no módulo de Cobrança.

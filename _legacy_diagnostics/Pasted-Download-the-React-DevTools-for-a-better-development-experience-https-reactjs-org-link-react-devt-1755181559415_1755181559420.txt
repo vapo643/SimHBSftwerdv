@@ -1,0 +1,294 @@
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+content-script.js:22 Document already loaded, running initialization immediately
+content-script.js:4 Attempting to initialize AdUnit
+content-script.js:6 AdUnit initialized successfully
+webcomponents-ce.js:33 Uncaught Error: A custom element with name 'mce-autosize-textarea' has already been defined.
+    at Aa (webcomponents-ce.js:33:363)
+    at m.define (webcomponents-ce.js:33:133)
+    at overlay_bundle.js:148:5559
+    at D (overlay_bundle.js:44:680)
+    at overlay_bundle.js:159:392
+Aa @ webcomponents-ce.js:33
+m.define @ webcomponents-ce.js:33
+(anonymous) @ overlay_bundle.js:148
+D @ overlay_bundle.js:44
+(anonymous) @ overlay_bundle.js:159Understand this error
+content.js:208 {}
+AuthContext.tsx:170 🔐 [AUTH EVENT] SIGNED_IN {hasSession: true, tokenLength: 767}
+formalizacao.tsx:647 [PAM V1.0 DIAGNÓSTICO FRONTEND] 🔄 USEEFFECT_TRIGGERED:
+formalizacao.tsx:648 [PAM V1.0 DIAGNÓSTICO FRONTEND]   - proposta exists: false
+formalizacao.tsx:649 [PAM V1.0 DIAGNÓSTICO FRONTEND]   - propostaId: 88a44696-9b63-42ee-aa81-15f9519d24cb
+formalizacao.tsx:650 [PAM V1.0 DIAGNÓSTICO FRONTEND]   - collectionsData exists: false
+formalizacao.tsx:651 [PAM V1.0 DIAGNÓSTICO FRONTEND]   - collectionsData length: undefined
+formalizacao.tsx:658 [PAM V1.0 DIAGNÓSTICO FRONTEND] ❌ CONDICOES_NAO_ATENDIDAS - checkCarneStatus() NÃO será chamada
+formalizacao.tsx:850 🔄 [REALTIME] Configurando escuta para proposta: 88a44696-9b63-42ee-aa81-15f9519d24cb
+AuthContext.tsx:170 🔐 [AUTH EVENT] INITIAL_SESSION {hasSession: true, tokenLength: 767}
+apiClient.ts:166 🔐 [TOKEN MANAGER] Fresh token obtained, length: 767
+apiClient.ts:343 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.Yxz-Nupcp-mvvT-CmleFi02AtGFcGQBsIi35mtoyyoA', hasToken: true, isFormData: false}
+apiClient.ts:343 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…88a44696-9b63-42ee-aa81-15f9519d24cb/formalizacao', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.Yxz-Nupcp-mvvT-CmleFi02AtGFcGQBsIi35mtoyyoA', hasToken: true, isFormData: false}
+apiClient.ts:343 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.Yxz-Nupcp-mvvT-CmleFi02AtGFcGQBsIi35mtoyyoA', hasToken: true, isFormData: false}
+AuthContext.tsx:102 🔐 [AUTH RESTORED] User profile loaded with valid token
+formalizacao.tsx:899 ✅ [REALTIME] Conectado ao canal de atualizações
+AuthContext.tsx:102 🔐 [AUTH RESTORED] User profile loaded with valid token
+formalizacao.tsx:626 [INTER QUERY] Buscando boletos para proposta: 88a44696-9b63-42ee-aa81-15f9519d24cb
+formalizacao.tsx:647 [PAM V1.0 DIAGNÓSTICO FRONTEND] 🔄 USEEFFECT_TRIGGERED:
+formalizacao.tsx:648 [PAM V1.0 DIAGNÓSTICO FRONTEND]   - proposta exists: true
+formalizacao.tsx:649 [PAM V1.0 DIAGNÓSTICO FRONTEND]   - propostaId: 88a44696-9b63-42ee-aa81-15f9519d24cb
+formalizacao.tsx:650 [PAM V1.0 DIAGNÓSTICO FRONTEND]   - collectionsData exists: false
+formalizacao.tsx:651 [PAM V1.0 DIAGNÓSTICO FRONTEND]   - collectionsData length: undefined
+formalizacao.tsx:658 [PAM V1.0 DIAGNÓSTICO FRONTEND] ❌ CONDICOES_NAO_ATENDIDAS - checkCarneStatus() NÃO será chamada
+apiClient.ts:343 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…alizacao/88a44696-9b63-42ee-aa81-15f9519d24cb/ccb', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.Yxz-Nupcp-mvvT-CmleFi02AtGFcGQBsIi35mtoyyoA', hasToken: true, isFormData: false}
+apiClient.ts:343 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…/collections/88a44696-9b63-42ee-aa81-15f9519d24cb', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.Yxz-Nupcp-mvvT-CmleFi02AtGFcGQBsIi35mtoyyoA', hasToken: true, isFormData: false}
+formalizacao.tsx:628 [INTER QUERY] Boletos encontrados: 24
+formalizacao.tsx:1628 [PAM V1.0 DIAGNÓSTICO FRONTEND] 🎨 RENDERIZACAO_BOTOES - Estado atual: {
+  "exists": false,
+  "url": null,
+  "fileName": null,
+  "isLoading": true
+}
+formalizacao.tsx:1636 [PAM V1.0 DIAGNÓSTICO FRONTEND] ⚪ RENDERIZANDO: Estado alternativo ou carregamento
+formalizacao.tsx:647 [PAM V1.0 DIAGNÓSTICO FRONTEND] 🔄 USEEFFECT_TRIGGERED:
+formalizacao.tsx:648 [PAM V1.0 DIAGNÓSTICO FRONTEND]   - proposta exists: true
+formalizacao.tsx:649 [PAM V1.0 DIAGNÓSTICO FRONTEND]   - propostaId: 88a44696-9b63-42ee-aa81-15f9519d24cb
+formalizacao.tsx:650 [PAM V1.0 DIAGNÓSTICO FRONTEND]   - collectionsData exists: true
+formalizacao.tsx:651 [PAM V1.0 DIAGNÓSTICO FRONTEND]   - collectionsData length: 24
+formalizacao.tsx:654 [PAM V1.0] Proposta carregada, verificando carnê automaticamente
+formalizacao.tsx:655 [PAM V1.0 DIAGNÓSTICO FRONTEND] ✅ CONDICOES_ATENDIDAS - CHAMANDO checkCarneStatus()
+formalizacao.tsx:479 [PAM V1.0 DIAGNÓSTICO FRONTEND] 🆔 PROPOSTA_ID_USADO: "88a44696-9b63-42ee-aa81-15f9519d24cb" (type: string)
+formalizacao.tsx:483 [PAM V1.0 DIAGNÓSTICO FRONTEND] 🌐 URL_API_CONSTRUIDA: "/api/propostas/88a44696-9b63-42ee-aa81-15f9519d24cb/carne-status"
+formalizacao.tsx:486 [PAM V1.0 DIAGNÓSTICO FRONTEND] ⏰ MOMENTO_CHAMADA_API: 2025-08-14T14:25:02.633Z
+formalizacao.tsx:491 [PAM V1.0] Verificando status do carnê para proposta: 88a44696-9b63-42ee-aa81-15f9519d24cb
+apiClient.ts:343 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…a44696-9b63-42ee-aa81-15f9519d24cb/storage-status', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.Yxz-Nupcp-mvvT-CmleFi02AtGFcGQBsIi35mtoyyoA', hasToken: true, isFormData: false}
+apiClient.ts:343 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…88a44696-9b63-42ee-aa81-15f9519d24cb/carne-status', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.Yxz-Nupcp-mvvT-CmleFi02AtGFcGQBsIi35mtoyyoA', hasToken: true, isFormData: false}
+formalizacao.tsx:1628 [PAM V1.0 DIAGNÓSTICO FRONTEND] 🎨 RENDERIZACAO_BOTOES - Estado atual: {
+  "exists": false,
+  "url": null,
+  "fileName": null,
+  "isLoading": true
+}
+formalizacao.tsx:1636 [PAM V1.0 DIAGNÓSTICO FRONTEND] ⚪ RENDERIZANDO: Estado alternativo ou carregamento
+requests.js:1  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/88a44696-9b63-42ee-aa81-15f9519d24cb/storage-status 404 (Not Found)
+(anonymous) @ requests.js:1
+(anonymous) @ traffic.js:1
+fetch @ traffic.js:1
+fetchWithTimeout @ apiClient.ts:263
+apiClient @ apiClient.ts:371
+await in apiClient
+get @ apiClient.ts:527
+apiRequest @ queryClient.ts:19
+checkStorageStatus @ formalizacao.tsx:567
+(anonymous) @ formalizacao.tsx:640
+commitHookEffectListMount @ chunk-276SZO74.js?v=df08af2b:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=df08af2b:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=df08af2b:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=df08af2b:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=df08af2b:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=df08af2b:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=df08af2b:19447
+commitRootImpl @ chunk-276SZO74.js?v=df08af2b:19416
+commitRoot @ chunk-276SZO74.js?v=df08af2b:19277
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=df08af2b:18895
+flushSyncCallbacks @ chunk-276SZO74.js?v=df08af2b:9119
+(anonymous) @ chunk-276SZO74.js?v=df08af2b:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=df08af2b:555
+flush @ @tanstack_react-query.js?v=df08af2b:569
+batch @ @tanstack_react-query.js?v=df08af2b:587
+dispatch_fn @ @tanstack_react-query.js?v=df08af2b:996
+setData @ @tanstack_react-query.js?v=df08af2b:696
+onSuccess @ @tanstack_react-query.js?v=df08af2b:897
+resolve @ @tanstack_react-query.js?v=df08af2b:456
+Promise.then
+run @ @tanstack_react-query.js?v=df08af2b:498
+start @ @tanstack_react-query.js?v=df08af2b:536
+fetch @ @tanstack_react-query.js?v=df08af2b:926
+executeFetch_fn @ @tanstack_react-query.js?v=df08af2b:2211
+setOptions @ @tanstack_react-query.js?v=df08af2b:1955
+(anonymous) @ @tanstack_react-query.js?v=df08af2b:3032
+commitHookEffectListMount @ chunk-276SZO74.js?v=df08af2b:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=df08af2b:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=df08af2b:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=df08af2b:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=df08af2b:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=df08af2b:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=df08af2b:19447
+commitRootImpl @ chunk-276SZO74.js?v=df08af2b:19416
+commitRoot @ chunk-276SZO74.js?v=df08af2b:19277
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=df08af2b:18895
+flushSyncCallbacks @ chunk-276SZO74.js?v=df08af2b:9119
+(anonymous) @ chunk-276SZO74.js?v=df08af2b:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=df08af2b:555
+flush @ @tanstack_react-query.js?v=df08af2b:569
+batch @ @tanstack_react-query.js?v=df08af2b:587
+dispatch_fn @ @tanstack_react-query.js?v=df08af2b:996
+setData @ @tanstack_react-query.js?v=df08af2b:696
+onSuccess @ @tanstack_react-query.js?v=df08af2b:897
+resolve @ @tanstack_react-query.js?v=df08af2b:456
+Promise.then
+run @ @tanstack_react-query.js?v=df08af2b:498
+start @ @tanstack_react-query.js?v=df08af2b:536
+fetch @ @tanstack_react-query.js?v=df08af2b:926
+executeFetch_fn @ @tanstack_react-query.js?v=df08af2b:2211
+onSubscribe @ @tanstack_react-query.js?v=df08af2b:1898
+subscribe @ @tanstack_react-query.js?v=df08af2b:24
+(anonymous) @ @tanstack_react-query.js?v=df08af2b:3022
+subscribeToStore @ chunk-276SZO74.js?v=df08af2b:11984
+commitHookEffectListMount @ chunk-276SZO74.js?v=df08af2b:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=df08af2b:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=df08af2b:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=df08af2b:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=df08af2b:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=df08af2b:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=df08af2b:19447
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=df08af2b:18868
+flushSyncCallbacks @ chunk-276SZO74.js?v=df08af2b:9119
+commitRootImpl @ chunk-276SZO74.js?v=df08af2b:19432
+commitRoot @ chunk-276SZO74.js?v=df08af2b:19277
+finishConcurrentRender @ chunk-276SZO74.js?v=df08af2b:18805
+performConcurrentWorkOnRoot @ chunk-276SZO74.js?v=df08af2b:18718
+workLoop @ chunk-276SZO74.js?v=df08af2b:197
+flushWork @ chunk-276SZO74.js?v=df08af2b:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=df08af2b:384Understand this error
+formalizacao.tsx:614 [STORAGE STATUS] Erro ao verificar status: ApiError: [object Object]
+    at apiClient (apiClient.ts:462:13)
+    at async apiRequest (queryClient.ts:19:22)
+    at async checkStorageStatus (formalizacao.tsx:567:24)
+checkStorageStatus @ formalizacao.tsx:614
+await in checkStorageStatus
+(anonymous) @ formalizacao.tsx:640
+commitHookEffectListMount @ chunk-276SZO74.js?v=df08af2b:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=df08af2b:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=df08af2b:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=df08af2b:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=df08af2b:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=df08af2b:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=df08af2b:19447
+commitRootImpl @ chunk-276SZO74.js?v=df08af2b:19416
+commitRoot @ chunk-276SZO74.js?v=df08af2b:19277
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=df08af2b:18895
+flushSyncCallbacks @ chunk-276SZO74.js?v=df08af2b:9119
+(anonymous) @ chunk-276SZO74.js?v=df08af2b:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=df08af2b:555
+flush @ @tanstack_react-query.js?v=df08af2b:569
+batch @ @tanstack_react-query.js?v=df08af2b:587
+dispatch_fn @ @tanstack_react-query.js?v=df08af2b:996
+setData @ @tanstack_react-query.js?v=df08af2b:696
+onSuccess @ @tanstack_react-query.js?v=df08af2b:897
+resolve @ @tanstack_react-query.js?v=df08af2b:456
+Promise.then
+run @ @tanstack_react-query.js?v=df08af2b:498
+start @ @tanstack_react-query.js?v=df08af2b:536
+fetch @ @tanstack_react-query.js?v=df08af2b:926
+executeFetch_fn @ @tanstack_react-query.js?v=df08af2b:2211
+setOptions @ @tanstack_react-query.js?v=df08af2b:1955
+(anonymous) @ @tanstack_react-query.js?v=df08af2b:3032
+commitHookEffectListMount @ chunk-276SZO74.js?v=df08af2b:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=df08af2b:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=df08af2b:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=df08af2b:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=df08af2b:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=df08af2b:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=df08af2b:19447
+commitRootImpl @ chunk-276SZO74.js?v=df08af2b:19416
+commitRoot @ chunk-276SZO74.js?v=df08af2b:19277
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=df08af2b:18895
+flushSyncCallbacks @ chunk-276SZO74.js?v=df08af2b:9119
+(anonymous) @ chunk-276SZO74.js?v=df08af2b:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=df08af2b:555
+flush @ @tanstack_react-query.js?v=df08af2b:569
+batch @ @tanstack_react-query.js?v=df08af2b:587
+dispatch_fn @ @tanstack_react-query.js?v=df08af2b:996
+setData @ @tanstack_react-query.js?v=df08af2b:696
+onSuccess @ @tanstack_react-query.js?v=df08af2b:897
+resolve @ @tanstack_react-query.js?v=df08af2b:456
+Promise.then
+run @ @tanstack_react-query.js?v=df08af2b:498
+start @ @tanstack_react-query.js?v=df08af2b:536
+fetch @ @tanstack_react-query.js?v=df08af2b:926
+executeFetch_fn @ @tanstack_react-query.js?v=df08af2b:2211
+onSubscribe @ @tanstack_react-query.js?v=df08af2b:1898
+subscribe @ @tanstack_react-query.js?v=df08af2b:24
+(anonymous) @ @tanstack_react-query.js?v=df08af2b:3022
+subscribeToStore @ chunk-276SZO74.js?v=df08af2b:11984
+commitHookEffectListMount @ chunk-276SZO74.js?v=df08af2b:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=df08af2b:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=df08af2b:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=df08af2b:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=df08af2b:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=df08af2b:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=df08af2b:19447
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=df08af2b:18868
+flushSyncCallbacks @ chunk-276SZO74.js?v=df08af2b:9119
+commitRootImpl @ chunk-276SZO74.js?v=df08af2b:19432
+commitRoot @ chunk-276SZO74.js?v=df08af2b:19277
+finishConcurrentRender @ chunk-276SZO74.js?v=df08af2b:18805
+performConcurrentWorkOnRoot @ chunk-276SZO74.js?v=df08af2b:18718
+workLoop @ chunk-276SZO74.js?v=df08af2b:197
+flushWork @ chunk-276SZO74.js?v=df08af2b:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=df08af2b:384Understand this error
+formalizacao.tsx:1628 [PAM V1.0 DIAGNÓSTICO FRONTEND] 🎨 RENDERIZACAO_BOTOES - Estado atual: {
+  "exists": false,
+  "url": null,
+  "fileName": null,
+  "isLoading": true
+}
+formalizacao.tsx:1636 [PAM V1.0 DIAGNÓSTICO FRONTEND] ⚪ RENDERIZANDO: Estado alternativo ou carregamento
+formalizacao.tsx:502 [PAM V1.0 DIAGNÓSTICO FRONTEND] 📥 RESPOSTA_COMPLETA_BACKEND: {
+  "success": true,
+  "carneExists": true,
+  "hasCarnet": true,
+  "fileName": "carne-2025-08-13_18-24-48-667.pdf",
+  "url": "https://dvglgxrvhmtsixaabxha.supabase.co/storage/v1/object/sign/documents/propostas/88a44696-9b63-42ee-aa81-15f9519d24cb/carnes/carne-2025-08-13_18-24-48-667.pdf?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV80OTVlMjJjYS1lMDMxLTQ0Y2YtOTM3Zi03N2M3ZWNiMTk2YzkiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJkb2N1bWVudHMvcHJvcG9zdGFzLzg4YTQ0Njk2LTliNjMtNDJlZS1hYTgxLTE1Zjk1MTlkMjRjYi9jYXJuZXMvY2FybmUtMjAyNS0wOC0xM18xOC0yNC00OC02NjcucGRmIiwiaWF0IjoxNzU1MTgxNTAzLCJleHAiOjE3NTUxODUxMDN9.6pBhscvkFRINDXp6JxPzo698U294wnRAbm2dQxCqxUY",
+  "totalBoletos": null,
+  "createdAt": "2025-08-13T18:24:50.005Z",
+  "message": "Carnê disponível para download"
+}
+formalizacao.tsx:504 [PAM V1.0] Resposta do carne-status: {success: true, carneExists: true, hasCarnet: true, fileName: 'carne-2025-08-13_18-24-48-667.pdf', url: 'https://dvglgxrvhmtsixaabxha.supabase.co/storage/v…xMDN9.6pBhscvkFRINDXp6JxPzo698U294wnRAbm2dQxCqxUY', …}
+formalizacao.tsx:515 [PAM V1.0 DIAGNÓSTICO FRONTEND] 🎯 ESTADO_REACT_FINAL_DEFINIDO: {
+  "exists": true,
+  "url": "https://dvglgxrvhmtsixaabxha.supabase.co/storage/v1/object/sign/documents/propostas/88a44696-9b63-42ee-aa81-15f9519d24cb/carnes/carne-2025-08-13_18-24-48-667.pdf?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV80OTVlMjJjYS1lMDMxLTQ0Y2YtOTM3Zi03N2M3ZWNiMTk2YzkiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJkb2N1bWVudHMvcHJvcG9zdGFzLzg4YTQ0Njk2LTliNjMtNDJlZS1hYTgxLTE1Zjk1MTlkMjRjYi9jYXJuZXMvY2FybmUtMjAyNS0wOC0xM18xOC0yNC00OC02NjcucGRmIiwiaWF0IjoxNzU1MTgxNTAzLCJleHAiOjE3NTUxODUxMDN9.6pBhscvkFRINDXp6JxPzo698U294wnRAbm2dQxCqxUY",
+  "fileName": "carne-2025-08-13_18-24-48-667.pdf",
+  "isLoading": false
+}
+formalizacao.tsx:1628 [PAM V1.0 DIAGNÓSTICO FRONTEND] 🎨 RENDERIZACAO_BOTOES - Estado atual: {
+  "exists": true,
+  "url": "https://dvglgxrvhmtsixaabxha.supabase.co/storage/v1/object/sign/documents/propostas/88a44696-9b63-42ee-aa81-15f9519d24cb/carnes/carne-2025-08-13_18-24-48-667.pdf?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV80OTVlMjJjYS1lMDMxLTQ0Y2YtOTM3Zi03N2M3ZWNiMTk2YzkiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJkb2N1bWVudHMvcHJvcG9zdGFzLzg4YTQ0Njk2LTliNjMtNDJlZS1hYTgxLTE1Zjk1MTlkMjRjYi9jYXJuZXMvY2FybmUtMjAyNS0wOC0xM18xOC0yNC00OC02NjcucGRmIiwiaWF0IjoxNzU1MTgxNTAzLCJleHAiOjE3NTUxODUxMDN9.6pBhscvkFRINDXp6JxPzo698U294wnRAbm2dQxCqxUY",
+  "fileName": "carne-2025-08-13_18-24-48-667.pdf",
+  "isLoading": false
+}
+formalizacao.tsx:1632 [PAM V1.0 DIAGNÓSTICO FRONTEND] 🟢 RENDERIZANDO: Botão BAIXAR carnê (verde)
+formalizacao.tsx:1628 [PAM V1.0 DIAGNÓSTICO FRONTEND] 🎨 RENDERIZACAO_BOTOES - Estado atual: {
+  "exists": true,
+  "url": "https://dvglgxrvhmtsixaabxha.supabase.co/storage/v1/object/sign/documents/propostas/88a44696-9b63-42ee-aa81-15f9519d24cb/carnes/carne-2025-08-13_18-24-48-667.pdf?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV80OTVlMjJjYS1lMDMxLTQ0Y2YtOTM3Zi03N2M3ZWNiMTk2YzkiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJkb2N1bWVudHMvcHJvcG9zdGFzLzg4YTQ0Njk2LTliNjMtNDJlZS1hYTgxLTE1Zjk1MTlkMjRjYi9jYXJuZXMvY2FybmUtMjAyNS0wOC0xM18xOC0yNC00OC02NjcucGRmIiwiaWF0IjoxNzU1MTgxNTAzLCJleHAiOjE3NTUxODUxMDN9.6pBhscvkFRINDXp6JxPzo698U294wnRAbm2dQxCqxUY",
+  "fileName": "carne-2025-08-13_18-24-48-667.pdf",
+  "isLoading": false
+}
+formalizacao.tsx:1632 [PAM V1.0 DIAGNÓSTICO FRONTEND] 🟢 RENDERIZANDO: Botão BAIXAR carnê (verde)
+useIdleTimer.ts:108 🔍 [IDLE TIMER] Tab became hidden, timer continues
+AuthContext.tsx:170 🔐 [AUTH EVENT] SIGNED_IN {hasSession: true, tokenLength: 767}
+apiClient.ts:343 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.Yxz-Nupcp-mvvT-CmleFi02AtGFcGQBsIi35mtoyyoA', hasToken: true, isFormData: false}
+formalizacao.tsx:1628 [PAM V1.0 DIAGNÓSTICO FRONTEND] 🎨 RENDERIZACAO_BOTOES - Estado atual: {
+  "exists": true,
+  "url": "https://dvglgxrvhmtsixaabxha.supabase.co/storage/v1/object/sign/documents/propostas/88a44696-9b63-42ee-aa81-15f9519d24cb/carnes/carne-2025-08-13_18-24-48-667.pdf?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV80OTVlMjJjYS1lMDMxLTQ0Y2YtOTM3Zi03N2M3ZWNiMTk2YzkiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJkb2N1bWVudHMvcHJvcG9zdGFzLzg4YTQ0Njk2LTliNjMtNDJlZS1hYTgxLTE1Zjk1MTlkMjRjYi9jYXJuZXMvY2FybmUtMjAyNS0wOC0xM18xOC0yNC00OC02NjcucGRmIiwiaWF0IjoxNzU1MTgxNTAzLCJleHAiOjE3NTUxODUxMDN9.6pBhscvkFRINDXp6JxPzo698U294wnRAbm2dQxCqxUY",
+  "fileName": "carne-2025-08-13_18-24-48-667.pdf",
+  "isLoading": false
+}
+formalizacao.tsx:1632 [PAM V1.0 DIAGNÓSTICO FRONTEND] 🟢 RENDERIZANDO: Botão BAIXAR carnê (verde)
+AuthContext.tsx:102 🔐 [AUTH RESTORED] User profile loaded with valid token
+formalizacao.tsx:1628 [PAM V1.0 DIAGNÓSTICO FRONTEND] 🎨 RENDERIZACAO_BOTOES - Estado atual: {
+  "exists": true,
+  "url": "https://dvglgxrvhmtsixaabxha.supabase.co/storage/v1/object/sign/documents/propostas/88a44696-9b63-42ee-aa81-15f9519d24cb/carnes/carne-2025-08-13_18-24-48-667.pdf?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV80OTVlMjJjYS1lMDMxLTQ0Y2YtOTM3Zi03N2M3ZWNiMTk2YzkiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJkb2N1bWVudHMvcHJvcG9zdGFzLzg4YTQ0Njk2LTliNjMtNDJlZS1hYTgxLTE1Zjk1MTlkMjRjYi9jYXJuZXMvY2FybmUtMjAyNS0wOC0xM18xOC0yNC00OC02NjcucGRmIiwiaWF0IjoxNzU1MTgxNTAzLCJleHAiOjE3NTUxODUxMDN9.6pBhscvkFRINDXp6JxPzo698U294wnRAbm2dQxCqxUY",
+  "fileName": "carne-2025-08-13_18-24-48-667.pdf",
+  "isLoading": false
+}
+formalizacao.tsx:1632 [PAM V1.0 DIAGNÓSTICO FRONTEND] 🟢 RENDERIZANDO: Botão BAIXAR carnê (verde)
+formalizacao.tsx:1628 [PAM V1.0 DIAGNÓSTICO FRONTEND] 🎨 RENDERIZACAO_BOTOES - Estado atual: {
+  "exists": true,
+  "url": "https://dvglgxrvhmtsixaabxha.supabase.co/storage/v1/object/sign/documents/propostas/88a44696-9b63-42ee-aa81-15f9519d24cb/carnes/carne-2025-08-13_18-24-48-667.pdf?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV80OTVlMjJjYS1lMDMxLTQ0Y2YtOTM3Zi03N2M3ZWNiMTk2YzkiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJkb2N1bWVudHMvcHJvcG9zdGFzLzg4YTQ0Njk2LTliNjMtNDJlZS1hYTgxLTE1Zjk1MTlkMjRjYi9jYXJuZXMvY2FybmUtMjAyNS0wOC0xM18xOC0yNC00OC02NjcucGRmIiwiaWF0IjoxNzU1MTgxNTAzLCJleHAiOjE3NTUxODUxMDN9.6pBhscvkFRINDXp6JxPzo698U294wnRAbm2dQxCqxUY",
+  "fileName": "carne-2025-08-13_18-24-48-667.pdf",
+  "isLoading": false
+}
+formalizacao.tsx:1632 [PAM V1.0 DIAGNÓSTICO FRONTEND] 🟢 RENDER

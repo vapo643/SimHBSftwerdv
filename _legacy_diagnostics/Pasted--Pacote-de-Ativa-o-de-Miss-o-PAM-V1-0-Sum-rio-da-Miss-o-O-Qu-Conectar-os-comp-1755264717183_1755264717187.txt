@@ -1,0 +1,42 @@
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Conectar os componentes de UI (modais de "Aplicar Desconto" e "Prorrogar Vencimento") da "Tela de Cobranças" aos novos endpoints de backend que foram implementados.
+* **Intenção Estratégica (O Porquê):** O backend está pronto e funcional. Esta missão finaliza o fluxo, permitindo que a equipe de cobranças execute ações financeiras reais diretamente da interface, transformando o dashboard em uma ferramenta de gestão ativa e completa.
+* **Histórico Relevante (Consulta Obrigatória):** Sua auditoria original confirmou que os modais já existem na UI. Sua implementação do backend criou os endpoints `PATCH /api/cobrancas/boletos/:codigo/prorrogar` e `POST /api/cobrancas/boletos/:codigo/aplicar-desconto`. Sua missão é conectar um ao outro.
+* **Modelo Mental (Como se Encaixa):** Você atuará como Engenheiro de Frontend. Sua tarefa é gerir o estado dos modais, coletar os dados do usuário e, na submissão, executar uma `mutation` (usando `TanStack Query`) para chamar o endpoint de backend correspondente.
+* **Riscos Antecipados:** **Risco:** A passagem de dados entre o modal e a API pode ser incorreta. **Contramedida:** A implementação deve incluir um `console.log` do payload exato que está a ser enviado para o backend para fins de depuração.
+
+---
+
+**IMPLEMENTAR:**
+A lógica de frontend para as ações de "Aplicar Desconto" e "Prorrogar Vencimento".
+
+**CURRENT STATE:**
+Os botões e modais na "Tela de Cobranças" existem, mas não estão conectados à lógica de backend recém-criada. Eles não executam nenhuma ação real.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  Ao usar o modal "Prorrogar Vencimento", a confirmação aciona uma chamada `PATCH` para o endpoint `/api/cobrancas/boletos/:codigo/prorrogar` com a nova data.
+2.  Ao usar o modal "Aplicar Desconto", a confirmação aciona uma chamada `POST` para o endpoint `/api/cobrancas/boletos/:codigo/aplicar-desconto` com os detalhes do desconto.
+3.  Após o sucesso de qualquer uma das operações, a tabela de cobranças na UI é atualizada automaticamente (via `refetch` ou Realtime) para refletir a mudança.
+4.  O sistema de notificações (toast) informa ao usuário sobre o sucesso ou a falha da operação.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+**1. Lógica de "Prorrogar Vencimento":**
+    - **Ação:** No componente `CobrancasPage.tsx`, localize a função de submissão do modal de prorrogação.
+    - **Implementação:** Use o `useMutation` do `TanStack Query` para executar a chamada `PATCH` para o endpoint correto, enviando o `codigoSolicitacao` do boleto e a `novaDataVencimento` selecionada.
+
+**2. Lógica de "Aplicar Desconto":**
+    - **Ação:** Localize a função de submissão do modal de desconto.
+    - **Implementação:** Da mesma forma, use `useMutation` para executar a chamada `POST` para o endpoint de desconto, enviando o `codigoSolicit-acao` e o objeto de desconto (valor, data, etc.).
+
+**3. Feedback para o Usuário:**
+    - **Ação:** Integre a lógica `onSuccess` e `onError` das `mutations`.
+    - **Implementação:** No `onSuccess`, acione a invalidação da query principal (`queryClient.invalidateQueries`) para atualizar a tabela e mostre uma notificação de sucesso. No `onError`, mostre uma notificação de erro.
+
+**PROTOCOLO OBRIGATÓRIO 5-CHECK:**
+1.  Mapear o ficheiro `client/src/pages/financeiro/CobrancasPage.tsx`.
+2.  Garantir que as chamadas `fetch` ou `axios` usem os métodos `PATCH` e `POST` corretos.
+3.  Executar `get_latest_lsp_diagnostics`.
+4.  Realizar um teste funcional completo para cada uma das duas ações.
+5.  O critério final de sucesso é a capacidade de prorrogar um vencimento e aplicar um desconto a partir da UI, com a mudança a ser refletida na tabela e validada por uma chamada bem-sucedida à API do Banco Inter nos logs do backend.

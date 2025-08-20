@@ -1,0 +1,40 @@
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Refatorar o arquivo `client/src/pages/formalizacao.tsx` para erradicar todas as 60+ referências a status de propostas obsoletos e implementar 100% o novo Sistema de Status V2.0.
+* **Intenção Estratégica (O Porquê):** Este arquivo é o mais crítico e a fonte de 40% da nossa dívida técnica de status. Corrigi-lo primeiro terá o maior impacto na estabilização do sistema e na restauração da consistência de dados para o usuário, resolvendo os bugs visuais na timeline e nos indicadores de status.
+* **Histórico Relevante (Consulta Obrigatória):** Sua auditoria (`AUDITORIA_STATUS_LEGADOS_FRONTEND.md`) é a única fonte da verdade para esta missão. Você encontrou mais de 60 ocorrências de status legados neste único arquivo. Sua missão é eliminá-las sistematicamente.
+* **Modelo Mental (Como se Encaixa):** Você atuará como um engenheiro de refatoração. Sua tarefa é percorrer o arquivo `formalizacao.tsx` e substituir a lógica antiga pela nova, garantindo que a funcionalidade da tela seja preservada e aprimorada com os novos status.
+* **Riscos Antecipados:** **Risco:** Uma refatoração tão grande pode introduzir novos bugs ou quebrar a UI. **Contramedida:** A implementação deve ser seguida por um teste rigoroso de todas as funcionalidades da tela de formalização. O `Protocolo 5-CHECK` é mandatório.
+
+---
+
+**IMPLEMENTAR:**
+Refatoração completa do arquivo `client/src/pages/formalizacao.tsx` para adotar o novo Sistema de Status V2.0.
+
+**CURRENT STATE:**
+O arquivo está poluído com mais de 60 referências a status legados (ex: `contratos_assinados`, `pendenciado`), incluindo enums hardcoded, mapeamentos de cores e lógicas de timeline quebradas.
+
+**EXPECTED (Estado Final de Sucesso):**
+O arquivo `formalizacao.tsx` é 100% refatorado.
+1.  Todas as referências a status antigos são substituídas pelos seus equivalentes no novo enum V2.0 (ex: `contratos_assinados` deve virar `ASSINATURA_CONCLUIDA`).
+2.  O enum de status hardcoded é removido.
+3.  A lógica da timeline, dos badges de status e de qualquer renderização condicional é atualizada para funcionar perfeitamente com os novos valores.
+
+**CONSTRAINTS (Roadmap de Refatoração):**
+
+**1. Remoção de Enums Locais:**
+    - **Ação:** Comece por deletar qualquer `enum` ou `const` de status hardcoded dentro do arquivo.
+    - **Implementação:** Importe e use o `statusEnum` oficial de `shared/schema.ts` como a única fonte da verdade para os status.
+
+**2. Substituição Sistemática:**
+    - **Ação:** Use a função de busca e substituição do seu ambiente para encontrar e substituir cada uma das 60+ ocorrências de status legados pelos seus novos equivalentes V2.0.
+
+**3. Refatoração da Lógica de UI:**
+    - **Ação:** Revise toda a lógica de renderização condicional (`if`, `switch`, ternários), filtros e mapeamentos de UI (cores, textos, ícones) para garantir que eles funcionem corretamente com os novos valores de status.
+
+**PROTOCOLO OBRIGATÓRIO 5-CHECK:**
+1.  Usar o relatório de auditoria como um checklist para garantir que todas as 60+ ocorrências sejam tratadas.
+2.  Realizar as substituições em lote para garantir consistência.
+3.  Executar `get_latest_lsp_diagnostics` para garantir ZERO erros.
+4.  Realizar um teste funcional completo na "Tela de Formalização", avançando uma proposta por várias etapas.
+5.  O critério final de sucesso é uma tela que reflete perfeitamente cada novo status V2.0 (ex: `CCB_GERADA`, `AGUARDANDO_ASSINATURA`, etc.) à medida que uma proposta de teste avança pelo fluxo.

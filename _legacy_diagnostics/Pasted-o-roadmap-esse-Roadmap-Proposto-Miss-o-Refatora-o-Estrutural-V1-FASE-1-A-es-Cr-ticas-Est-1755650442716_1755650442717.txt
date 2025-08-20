@@ -1,0 +1,85 @@
+o roadmap é esse ; Roadmap Proposto - Missão: Refatoração Estrutural V1
+
+FASE 1: Ações Críticas (Estabilização e Limpeza Imediata)
+
+Objetivo: Restaurar a sanidade da estrutura do projeto, eliminando a desordem e integrando os testes ao fluxo de trabalho padrão.
+
+Passos de Execução:
+
+[PENDENTE] Passo 1.1 (Integração do Executor de Testes): Criar o script "test": "vitest run" no arquivo package.json para padronizar a execução da suíte de testes.
+
+[PENDENTE] Passo 1.2 (Quarentena de Arquivos Obsoletos):
+
+Ação 1: Criar um diretório de quarentena na raiz: _legacy_diagnostics/.
+
+Ação 2: Mover TODOS os ~70 arquivos de diagnóstico e teste (test-*.cjs, etc.) identificados na raiz do projeto para a pasta _legacy_diagnostics/.
+
+Justificativa: A quarentena é uma manobra de segurança. Em vez de deletar imediatamente, isolamos os arquivos. Se nenhuma funcionalidade quebrar após um ciclo de desenvolvimento, poderemos deletá-los com 100% de confiança na FASE 3.
+
+FASE 2: Ações de Média Prioridade (Organização e Padronização)
+
+Objetivo: Centralizar e organizar os ativos do projeto (testes, documentação, arquivos públicos) para alinhar com as melhores práticas.
+
+Passos de Execução:
+
+[PENDENTE] Passo 2.1 (Centralização de Testes): Mover os 3 arquivos de teste dispersos (de client/ e server/) para a estrutura correta dentro do diretório tests/.
+
+[PENDENTE] Passo 2.2 (Criação do Diretório public/): Criar a pasta public/ na raiz e mover para ela os assets estáticos atualmente em attached_assets/.
+
+[PENDENTE] Passo 2.3 (Consolidação da Documentação): Unificar os múltiplos diretórios de documentação (architecture/, docs/, erros_e_solucoes_docs/, owasp_*) em uma única estrutura lógica dentro de docs/.
+
+FASE 3: Ações de Baixa Prioridade (Deleção Final)
+
+Objetivo: Completar a limpeza do projeto, removendo permanentemente os arquivos em quarentena.
+
+Passos de Execução:
+
+[PENDENTE] Passo 3.1 (Deleção de Arquivos em Quarentena): Após a confirmação de que o sistema permanece estável, executar a remoção permanente do diretório _legacy_diagnostics/. NOS ESTAMOS ORGANIZADO OS ARQUIVOS E FILES!
+
+
+
+2
+2° - Desenvolvedor Full-Stack V10- Orquestrador de Refinamento de IA
+Gem personalizado
+
+Mostrar raciocínio
+Veredito: Comando recebido. A missão foi reorientada. Foco total na "Missão: Refatoração Estrutural V1". O objetivo é claro: organizar arquivos e pastas para alinhar o projeto aos padrões de mercado e eliminar código obsoleto.
+
+Aderindo ao nosso protocolo mestre — AUDITAR > PLANEJAR > DEBATER > EXECUTAR — analisei o roadmap proposto por você à luz da inteligência de campo que coletamos nas missões anteriores.
+
+A fase de AUDITORIA já foi concluída com sucesso. O relatório do Agente nos deu um mapa preciso da estrutura atual.
+
+Estamos agora na fase de PLANEJAMENTO e DEBATE.
+
+Detectei um bloqueador crítico que nos impede de executar o roadmap exatamente como escrito.
+
+Análise Tática do Roadmap Proposto
+Ponto de Conflito: Passo 1.1 (Integração do Executor de Testes)
+
+Diretiva do Roadmap: Criar o script "test": "vitest run" no package.json.
+
+Inteligência de Campo (Relatório do Agente, Missão Anterior): A plataforma Replit tem uma proteção de segurança que proíbe a edição direta do package.json. Nossa tentativa anterior de executar esta exata tarefa resultou em uma falha de permissão da plataforma.
+
+Conclusão: O Passo 1.1 é inexequível como está definido. Tentar executá-lo novamente resultará em falha e desperdício de recursos.
+
+Plano de Batalha Adaptado (Proposta para DEBATE)
+Para contornar o bloqueio da plataforma e ainda assim atingir a intenção estratégica do Passo 1.1 (padronizar a execução de testes), proponho o seguinte plano de ação adaptado:
+
+FASE 1: Ações Críticas (Padronização e Limpeza)
+[PENDENTE] Passo 1.1 (ADAPTADO - Padronização via Documentação):
+
+Ação: Em vez de modificar o package.json, a missão será criar ou atualizar um arquivo CONTRIBUTING.md na raiz do projeto, documentando oficialmente que o comando padrão para executar a suíte de testes é npx vitest run.
+
+Justificativa: Atingimos o objetivo de padronizar o processo para todos os desenvolvedores, respeitando as limitações da plataforma.
+
+[PENDENTE] Passo 1.2 (Quarentena de Arquivos Obsoletos):
+
+Ação: Criar o diretório _legacy_diagnostics/ e mover os ~70 arquivos de teste e diagnóstico da raiz para lá.
+
+Justificativa: Esta ação permanece crítica para a limpeza e organização do projeto.
+
+(As FASES 2 e 3 do seu roadmap permanecem válidas e serão executadas na sequência.)
+
+Arquiteto Chefe, este é o plano adaptado que respeita a realidade do nosso ambiente operacional.
+
+Solicito sua revisão e autorização para este novo plano. Se aprovado, procederei imediatamente com a geração do Pacote de Ativação de Missão (PAM) para o Passo 1.1 Adaptado.

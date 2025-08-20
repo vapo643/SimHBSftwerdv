@@ -1,0 +1,258 @@
+
+> rest-express@1.0.0 dev
+✅ Database: Configuring Supabase connection...
+✅ Database: Connection configured (lazy)
+[CLICKSIGN V1] 🚀 Initialized in PRODUCTION mode (legal signatures)
+[CLICKSIGN V1] API URL: https://app.clicksign.com/api/v1
+[CLICKSIGN V1] Token configured: b73b3b90-c87...
+[INTER] 🏦 Initialized in production mode
+[INTER] 🌐 API URL: https://cdpj.partners.bancointer.com.br
+[CLICKSIGN V1] 🚀 Initialized in PRODUCTION mode (legal signatures)
+[CLICKSIGN V1] API URL: https://app.clicksign.com/api/v1
+[CLICKSIGN V1] Token configured: b73b3b90-c...
+🚀 [TIMING MIDDLEWARE] Creating middleware instance...
+🚀 [TIMING MIDDLEWARE] Middleware instance created and exported
+8:38:13 PM [express] ✅ All secrets loaded successfully
+8:38:13 PM [express] 🔒 [SECURITY] CORS protection configured - ASVS V13.2.1
+8:38:13 PM [express] 🔒 [SECURITY] OPTIONS preflight handling configured
+8:38:13 PM [express] 🔧 [DEV] CSP disabled in development mode for debugging
+8:38:13 PM [express] 🔒 [SECURITY] Input sanitization middleware activated
+8:38:13 PM [express] 🔒 [SECURITY] URL token validation middleware activated - ASVS V7.1.1
+8:38:13 PM [express] 🔒 [SECURITY] CSRF protection middleware activated - OWASP Cheat Sheet
+8:38:13 PM [express] 🔧 [DEV] Rate limiting configurado para desenvolvimento - limites altos
+[SEMGREP MCP] Development mode - using in-memory cache
+🧠 [ML] Treinando modelo de detecção...
+8:38:13 PM [express] 🔐 Security WebSocket initialized
+[CCB SYNC] 🚀 Starting fallback polling (every 6 hours)
+[CCB SYNC] ℹ️ Primary processing via webhooks, polling is safety net only
+8:38:13 PM [express] 🔄 CCB Sync Service initialized - Webhook primary, polling fallback every 6 hours
+8:38:13 PM [express] ℹ️  Security monitoring disabled. Set ENABLE_SECURITY_MONITORING=true to enable
+8:38:13 PM [express] 🔧 App Config Status:
+8:38:13 PM [express]   - Port: 5000
+8:38:13 PM [express]   - Environment: development
+8:38:13 PM [express]   - Database: ✅ Connected
+8:38:13 PM [express]   - Supabase: ✅ Connected
+8:38:13 PM [express]   - Security: Rate Limit ✅, Helmet ✅
+8:38:13 PM [express] 🚀 Server running on port 5000
+8:38:13 PM [express] 🌍 Environment: development
+8:38:13 PM [express] 📦 Checking storage buckets...
+8:38:14 PM [express] ✅ Storage bucket "documents" already exists as PRIVATE
+Browserslist: browsers data (caniuse-lite) is 10 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/debug/me
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/formalizacao/acompanhamento/93b5919d-4223-40ee-a776-aaf184f16049
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+✅ [ML] Modelo treinado com 0 amostras
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: '60672873-b0f8-4753-a403-2741f7ddf5d2',
+  timestamp: '2025-08-08T20:38:18.581Z'
+}
+✅ Database: Connection test successful
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/debug/me
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/formalizacao/acompanhamento/93b5919d-4223-40ee-a776-aaf184f16049
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /93b5919d-4223-40ee-a776-aaf184f16049
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/formalizacao/acompanhamento/93b5919d-4223-40ee-a776-aaf184f16049
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/propostas/93b5919d-4223-40ee-a776-aaf184f16049/formalizacao
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/formalizacao/acompanhamento/93b5919d-4223-40ee-a776-aaf184f16049
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: '60672873-b0f8-4753-a403-2741f7ddf5d2',
+  timestamp: '2025-08-08T20:39:09.429Z'
+}
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: '60672873-b0f8-4753-a403-2741f7ddf5d2',
+  timestamp: '2025-08-08T20:39:09.439Z'
+}
+[2025-08-08T17:39:09.000-03:00] 🔍 INICIO - Buscando dados de formalização para proposta: 93b5919d-4223-40ee-a776-aaf184f16049
+[2025-08-08T17:39:09.000-03:00] 🔍 STEP 1 - Fazendo query direta no Supabase...
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: '60672873-b0f8-4753-a403-2741f7ddf5d2',
+  timestamp: '2025-08-08T20:39:09.709Z'
+}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/debug/me
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/formalizacao/acompanhamento/93b5919d-4223-40ee-a776-aaf184f16049
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[2025-08-08T17:39:09.000-03:00] 🔍 STEP 2 - Proposta encontrada: true
+[2025-08-08T17:39:09.000-03:00] 🔍 STEP 2.1 - Dados da proposta: {
+  id: '93b5919d-4223-40ee-a776-aaf184f16049',
+  status: 'aprovado',
+  tabela_comercial_id: 5,
+  produto_id: 1,
+  atendente_id: undefined
+}
+[2025-08-08T17:39:09.000-03:00] 🔍 STEP 3 - Buscando documentos...
+[INTER COLLECTIONS] Fetching collections for proposal: 93b5919d-4223-40ee-a776-aaf184f16049
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: '60672873-b0f8-4753-a403-2741f7ddf5d2',
+  timestamp: '2025-08-08T20:39:09.945Z'
+}
+[2025-08-08T17:39:09.000-03:00] 🔍 STEP 4 - Documentos encontrados: 1
+[2025-08-08T17:39:09.000-03:00] 🔍 STEP 4.1 - Estrutura dos documentos: [
+  {
+    id: 33,
+    proposta_id: '93b5919d-4223-40ee-a776-aaf184f16049',
+    nome_arquivo: '96d9d0ba-cece-41e8-9cdb-0fe1555ed2a7-00-3u929fjpxz1vm.spock.replit.dev_financeiro_pagamentos - Google Chrome 18_07_2025 14_50_45.png',
+    url: 'https://dvglgxrvhmtsixaabxha.supabase.co/storage/v1/object/sign/documents/proposta-93b5919d-4223-40ee-a776-aaf184f16049/1754682301772-96d9d0ba-cece-41e8-9cdb-0fe1555ed2a7-00-3u929fjpxz1vm.spock.replit.dev_financeiro_pagamentos%20-%20Google%20Chrome%2018_07_2025%2014_50_45.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV80OTVlMjJjYS1lMDMxLTQ0Y2YtOTM3Zi03N2M3ZWNiMTk2YzkiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJkb2N1bWVudHMvcHJvcG9zdGEtOTNiNTkxOWQtNDIyMy00MGVlLWE3NzYtYWFmMTg0ZjE2MDQ5LzE3NTQ2ODIzMDE3NzItOTZkOWQwYmEtY2VjZS00MWU4LTljZGItMGZlMTU1NWVkMmE3LTAwLTN1OTI5ZmpweHoxdm0uc3BvY2sucmVwbGl0LmRldl9maW5hbmNlaXJvX3BhZ2FtZW50b3MgLSBHb29nbGUgQ2hyb21lIDE4XzA3XzIwMjUgMTRfNTBfNDUucG5nIiwiaWF0IjoxNzU0NjgyMzA0LCJleHAiOjE3NTQ2ODU5MDR9.P6FAUwcZchohJfGsvZbOtQkR49xBmMq7iYirGDkOHzk',
+    tamanho: 0,
+    tipo: 'image/png',
+    created_at: '2025-08-08T19:45:04.747279'
+  }
+]
+[2025-08-08T17:39:09.000-03:00] 🔍 STEP 4.2 - Gerando URLs assinadas para 1 documentos...
+🔍 [FORMALIZAÇÃO] Tentando gerar URL para documento: {
+  nome: '96d9d0ba-cece-41e8-9cdb-0fe1555ed2a7-00-3u929fjpxz1vm.spock.replit.dev_financeiro_pagamentos - Google Chrome 18_07_2025 14_50_45.png',
+  url: 'https://dvglgxrvhmtsixaabxha.supabase.co/storage/v1/object/sign/documents/proposta-93b5919d-4223-40ee-a776-aaf184f16049/1754682301772-96d9d0ba-cece-41e8-9cdb-0fe1555ed2a7-00-3u929fjpxz1vm.spock.replit.dev_financeiro_pagamentos%20-%20Google%20Chrome%2018_07_2025%2014_50_45.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV80OTVlMjJjYS1lMDMxLTQ0Y2YtOTM3Zi03N2M3ZWNiMTk2YzkiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJkb2N1bWVudHMvcHJvcG9zdGEtOTNiNTkxOWQtNDIyMy00MGVlLWE3NzYtYWFmMTg0ZjE2MDQ5LzE3NTQ2ODIzMDE3NzItOTZkOWQwYmEtY2VjZS00MWU4LTljZGItMGZlMTU1NWVkMmE3LTAwLTN1OTI5ZmpweHoxdm0uc3BvY2sucmVwbGl0LmRldl9maW5hbmNlaXJvX3BhZ2FtZW50b3MgLSBHb29nbGUgQ2hyb21lIDE4XzA3XzIwMjUgMTRfNTBfNDUucG5nIiwiaWF0IjoxNzU0NjgyMzA0LCJleHAiOjE3NTQ2ODU5MDR9.P6FAUwcZchohJfGsvZbOtQkR49xBmMq7iYirGDkOHzk',
+  tipo: 'image/png',
+  proposta_id: '93b5919d-4223-40ee-a776-aaf184f16049'
+}
+🔍 [FORMALIZAÇÃO] Caminho extraído para URL assinada: proposta-93b5919d-4223-40ee-a776-aaf184f16049/1754682301772-96d9d0ba-cece-41e8-9cdb-0fe1555ed2a7-00-3u929fjpxz1vm.spock.replit.dev_financeiro_pagamentos%20-%20Google%20Chrome%2018_07_2025%2014_50_45.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV80OTVlMjJjYS1lMDMxLTQ0Y2YtOTM3Zi03N2M3ZWNiMTk2YzkiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJkb2N1bWVudHMvcHJvcG9zdGEtOTNiNTkxOWQtNDIyMy00MGVlLWE3NzYtYWFmMTg0ZjE2MDQ5LzE3NTQ2ODIzMDE3NzItOTZkOWQwYmEtY2VjZS00MWU4LTljZGItMGZlMTU1NWVkMmE3LTAwLTN1OTI5ZmpweHoxdm0uc3BvY2sucmVwbGl0LmRldl9maW5hbmNlaXJvX3BhZ2FtZW50b3MgLSBHb29nbGUgQ2hyb21lIDE4XzA3XzIwMjUgMTRfNTBfNDUucG5nIiwiaWF0IjoxNzU0NjgyMzA0LCJleHAiOjE3NTQ2ODU5MDR9.P6FAUwcZchohJfGsvZbOtQkR49xBmMq7iYirGDkOHzk
+[2025-08-08T17:39:10.000-03:00] ✅ URL gerada para documento: 96d9d0ba-cece-41e8-9cdb-0fe1555ed2a7-00-3u929fjpxz1vm.spock.replit.dev_financeiro_pagamentos - Google Chrome 18_07_2025 14_50_45.png
+[2025-08-08T17:39:10.000-03:00] 🔍 STEP 5 - Verificando tabela_comercial_id: 5
+[2025-08-08T17:39:10.000-03:00] 🔍 STEP 5.1 - Buscando tabela comercial ID: 5
+[2025-08-08T17:39:10.000-03:00] 🔍 STEP 5.2 - Resultado da consulta tabela comercial: {
+  data: { taxa_juros: 1.8, nome_tabela: 'Tabela Premium B', parceiro_id: 1 },
+  error: undefined,
+  hasData: true
+}
+[2025-08-08T17:39:10.000-03:00] ✅ Taxa de juros encontrada: 1.8 % da tabela "Tabela Premium B"
+[2025-08-08T17:39:10.000-03:00] 🔍 STEP 6 - Processando dados JSONB...
+[2025-08-08T17:39:10.000-03:00] ✅ SUCESSO - Dados de formalização retornados para proposta 93b5919d-4223-40ee-a776-aaf184f16049: {
+  id: '93b5919d-4223-40ee-a776-aaf184f16049',
+  status: 'aprovado',
+  ccbGerado: false,
+  dataAprovacao: '2025-08-08T16:46:55',
+  temClienteData: true,
+  temCondicoesData: true,
+  totalDocumentos: 1,
+  clienteNome: 'Gabriel Santana Jesus Santana',
+  valorEmprestimo: 10000,
+  taxaJuros: 1.8
+}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /93b5919d-4223-40ee-a776-aaf184f16049/ccb
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/formalizacao/acompanhamento/93b5919d-4223-40ee-a776-aaf184f16049
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: '60672873-b0f8-4753-a403-2741f7ddf5d2',
+  timestamp: '2025-08-08T20:39:11.048Z'
+}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /generate-ccb
+[JWT DEBUG] Método: POST
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/formalizacao/acompanhamento/93b5919d-4223-40ee-a776-aaf184f16049
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: '60672873-b0f8-4753-a403-2741f7ddf5d2',
+  timestamp: '2025-08-08T20:39:13.142Z'
+}
+📄 [CCB] Iniciando geração CORRETA para proposta 93b5919d-4223-40ee-a776-aaf184f16049
+📄 [CCB] Template path: /home/runner/workspace/server/templates/template_ccb.pdf
+📊 [CCB] ========== AUDITORIA COMPLETA DE DADOS ==========
+📊 [CCB] ID da Proposta: 93b5919d-4223-40ee-a776-aaf184f16049
+📊 [CCB] Cliente Nome (direto): null
+📊 [CCB] Cliente CPF (direto): null
+📊 [CCB] Cliente RG (direto): null
+📊 [CCB] Cliente Endereco (direto): null
+📊 [CCB] Valor Aprovado: null
+📊 [CCB] Taxa Juros: null
+📊 [CCB] Prazo: null
+📊 [CCB] Dados Pagamento Banco: null
+📊 [CCB] PIX presente: false
+📊 [CCB] Loja Nome: Loja Teste29
+📊 [CCB] Produto Nome: Crédito Imobiliário
+📊 [CCB] Cliente Data (JSONB) campos: [
+  'rg',             'cep',
+  'cpf',            'nome',
+  'email',          'renda',
+  'endereco',       'ocupacao',
+  'telefone',       'estadoCivil',
+  'orgaoEmissor',   'nacionalidade',
+  'dataNascimento', 'telefoneEmpresa'
+]
+📊 [CCB] Condicoes Data (JSONB) campos: [
+  'prazo',
+  'valor',
+  'garantia',
+  'valorIof',
+  'valorTac',
+  'finalidade',
+  'valorTotalFinanciado'
+]
+📊 [CCB] ========== FIM DA AUDITORIA ==========
+📄 [CCB] Dados da proposta carregados: {
+  nome: 'Gabriel Santana Jesus Santana',
+  cpf: '205.284.647-60',
+  valor: 10000
+}
+📄 [CCB] Carregando template PDF existente...
+📄 [CCB] Template carregado: 564692 bytes
+📄 [CCB] PDF carregado: 8 páginas
+📄 [CCB] Dimensões da página: 595.5x842.2499787
+📄 [CCB] Total de páginas no template: 8
+📄 [CCB] ✅ IMPLEMENTANDO TODOS OS 95 CAMPOS MAPEADOS
+📄 [CCB] Total de campos mapeados: 122
+📊 [CCB] ========== MAPEAMENTO DE DADOS PARA CCB ==========
+📊 [CCB] Cliente mapeado: Gabriel Santana Jesus Santana - 205.284.647-60
+📊 [CCB] Condições: R$ 10000 em 6x
+📊 [CCB] Pagamento via: NÃO INFORMADO
+📊 [CCB] Parcelas encontradas: 0
+❌ [CCB] Erro na geração: ReferenceError: clienteData is not defined
+    at CCBGenerationService.generateCCBWithAdjustments (/home/runner/workspace/server/services/ccbGenerationService.ts:306:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes/formalizacao.ts:108:20)

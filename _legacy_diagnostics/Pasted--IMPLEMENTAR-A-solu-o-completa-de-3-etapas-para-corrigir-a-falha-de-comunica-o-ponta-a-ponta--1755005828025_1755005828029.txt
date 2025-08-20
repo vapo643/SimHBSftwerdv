@@ -1,0 +1,34 @@
+**IMPLEMENTAR:**
+A solução completa de 3 etapas para corrigir a falha de comunicação ponta-a-ponta entre o webhook da ClickSign e a atualização em tempo real da "Timeline".
+
+**CONTEXT:**
+Seu relatório de auditoria foi perfeito e conclusivo. Ele identificou 3 falhas críticas: o backend não atualiza o status da proposta, a infraestrutura de Realtime está ausente e o frontend não escuta os eventos. Esta missão é para executar a solução exata que você propôs para tornar o fluxo 100% funcional e automático.
+
+**CURRENT STATE:**
+A cadeia de comunicação está quebrada. A assinatura no ClickSign não reflete em tempo real na nossa UI, forçando o usuário a recarregar a página manualmente.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um fluxo 100% funcional. Quando um documento é assinado no ClickSign:
+1.  O webhook é recebido.
+2.  O **status** da proposta é atualizado corretamente no banco de dados.
+3.  A "Timeline" na tela de formalização é atualizada **automaticamente e em tempo real**, sem a necessidade de qualquer interação do usuário.
+
+**CONSTRAINTS (Roadmap de Implementação - Execute o seu próprio plano):**
+
+**1. ETAPA 1 - Correção Crítica do Backend:**
+    - **Ação:** No ficheiro `server/routes/webhooks.ts`, substitua a chamada incorreta ao `documentProcessingService` pela chamada correta ao `clickSignWebhookService.processEvent(...)`, conforme você mesmo identificou em seu relatório.
+
+**2. ETAPA 2 - Configuração da Infraestrutura Realtime:**
+    - **Ação:** Acesse as configurações do nosso projeto no Supabase.
+    - **Implementação:** **Ative o Realtime** para a tabela `propostas`. Garanta que a publicação padrão (`supabase_realtime`) esteja a transmitir eventos de `UPDATE` para esta tabela.
+
+**3. ETAPA 3 - Implementação da Escuta no Frontend:**
+    - **Ação:** No ficheiro `client/src/pages/formalizacao.tsx`.
+    - **Implementação:** Adicione o hook `useEffect` com a lógica `supabase.channel(...).on(...).subscribe()` para escutar as atualizações da tabela `propostas`. Quando um evento de `UPDATE` for recebido para a proposta que está a ser visualizada, acione a função de `refetch` do `useQuery` (ou `queryClient.invalidateQueries`) para atualizar a UI.
+
+**TESTE (Validação Final Obrigatória):**
+- Após a implementação, execute o teste ponta-a-ponta:
+    a. Mantenha a "Tela de Formalização" de uma proposta de teste aberta.
+    b. Assine o documento correspondente no ClickSign.
+    c. Valide que a "Timeline" na tela **atualiza sozinha** em poucos segundos, sem recarregar a página.
+- Execute o **Protocolo 5-CHECK** (`get_latest_lsp_diagnostics`, etc.) antes de concluir.

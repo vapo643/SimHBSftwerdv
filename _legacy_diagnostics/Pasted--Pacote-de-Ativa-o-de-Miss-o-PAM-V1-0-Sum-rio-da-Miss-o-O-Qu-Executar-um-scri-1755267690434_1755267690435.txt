@@ -1,0 +1,40 @@
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Executar um script de reparo de dados para a proposta corrompida `88a44696...` e realizar uma auditoria de "hardening" na barreira de validação da API de criação de propostas.
+* **Intenção Estratégica (O Porquê):** Nosso "Debate Máximo" provou que a causa raiz de todos os nossos problemas na "Tela de Cobranças" é uma única proposta com dados de cliente nulos em suas colunas relacionais. Esta missão visa reparar este dado corrompido e garantir que nossa "porta de entrada" de dados esteja 100% blindada para que este problema nunca mais se repita.
+* **Histórico Relevante (Consulta Obrigatória):** Seu último relatório forense é a fonte da verdade. A proposta `88a44696...` é o alvo do reparo. A API `POST /api/propostas` é o alvo da auditoria de blindagem.
+* **Modelo Mental (Como se Encaixa):** Você atuará primeiro como um Engenheiro de Dados, reparando os dados. Em seguida, como um Engenheiro de Qualidade, testando e provando que nossas defesas contra dados inválidos estão a funcionar.
+* **Riscos Antecipados:** **Risco:** O reparo dos dados pode falhar se o JSON `cliente_data` também estiver incompleto. **Contramedida:** O script deve primeiro ler e validar o conteúdo do JSON antes de tentar o `UPDATE`.
+
+---
+
+**IMPLEMENTAR:**
+Reparo dos dados corrompidos e auditoria final da barreira de validação na criação de propostas.
+
+**CURRENT STATE:**
+Uma proposta com dados de cliente `NULL` (`id: 88a44696...`) está a poluir a "Tela de Cobranças". Temos uma barreira de validação Zod que deveria prevenir isso, mas precisamos de uma prova final de que ela está ativa.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  A proposta `88a44696...` é reparada, com suas colunas relacionais (`cliente_nome`, `cliente_cpf`, etc.) preenchidas com os dados da sua coluna JSON `cliente_data`.
+2.  Temos a prova irrefutável de que é impossível criar uma nova proposta com campos de cliente essenciais em falta.
+3.  A "Tela de Cobranças" fica finalmente limpa, exibindo apenas propostas válidas e completas.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+**FASE 1: Reparo dos Dados Legados:**
+    - **Ação:** Crie e execute um script único (ex: `scripts/repair-proposal-88a44696.ts`).
+    - **Implementação:**
+        1.  O script deve primeiro fazer um `SELECT` na proposta com `id = '88a44696...'` e extrair o conteúdo da coluna JSON `cliente_data`.
+        2.  Em seguida, o script deve executar um comando `UPDATE` para esta mesma proposta, populando as colunas relacionais (`cliente_nome`, `cliente_cpf`, `cliente_email`, `cliente_telefone`, etc.) com os valores correspondentes de dentro do JSON.
+
+**FASE 2: Auditoria de Blindagem:**
+    - **Ação:** Revise o endpoint `POST /api/propostas`.
+    - **Verificação:** Confirme que a validação de schema Zod que implementamos está ativa e a bloquear tentativas de criar propostas com `clienteNome` ou `clienteCpf` nulos.
+    - **Teste Obrigatório:** Use uma ferramenta de API (como `curl` ou crie um script de teste) para fazer uma requisição `POST` para `/api/propostas` com um payload **intencionalmente inválido** (sem o campo `clienteNome`).
+
+**PROTOCOLO OBRIGATÓRIO 5-CHECK:**
+1.  Mapear os arquivos envolvidos.
+2.  Executar o reparo primeiro.
+3.  Executar `get_latest_lsp_diagnostics`.
+4.  O critério de sucesso da FASE 1 é a confirmação de que a proposta foi reparada (verifique com um `SELECT`).
+5.  O critério de sucesso da FASE 2 é apresentar o resultado do teste de API, mostrando que o servidor respondeu com um erro `HTTP 400 Bad Request` e que **NADA** foi inserido no banco de dados.

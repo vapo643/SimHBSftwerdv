@@ -1,0 +1,31 @@
+# MISSÃO DE RE-IMPLEMENTAÇÃO: Restaurar o Fluxo de Assinatura Eletrónica com ClickSign
+
+**Contexto:**
+Olá, Agente. Precisamos da sua ajuda para restaurar uma funcionalidade crítica que desapareceu da nossa tela de "Formalização". O nosso processo de negócio depende da capacidade do `ATENDENTE` de enviar o contrato (CCB) para assinatura eletrónica via ClickSign e obter o link para o cliente.
+
+**O Problema (O Que Está Quebrado):**
+Atualmente, na tela de "Formalização", o botão que o `ATENDENTE` usava para "Enviar para Assinatura (ClickSign)" não está mais visível. Como resultado, o nosso fluxo está bloqueado, pois não temos como obter o link de assinatura para o cliente.
+
+**Sua Missão (A Solução):**
+A sua tarefa é re-implementar este fluxo completo, do frontend ao backend, garantindo que o `ATENDENTE` possa orquestrar o processo de assinatura.
+
+**Roadmap de Execução:**
+
+1.  **Restaure o Botão na Interface (Frontend):**
+    * **Ficheiro Alvo:** `/client/src/pages/formalizacao.tsx`.
+    * **Tarefa:** Adicione novamente um botão claro e funcional chamado **"Enviar Contrato para Assinatura (ClickSign)"**. Garanta que este botão seja visível e ativo para o `ATENDENTE` quando uma proposta estiver nesta fase.
+
+2.  **Construa a Ponte com a API (Backend):**
+    * **Tarefa:** Faça com que este novo botão, ao ser clicado, chame um endpoint de backend dedicado (ex: `POST /api/propostas/:id/clicksign/enviar`).
+    * **Lógica do Endpoint:** Este endpoint deve fazer o seguinte:
+        a.  Encontrar a proposta e o seu documento CCB.
+        b.  Conectar-se à API da ClickSign usando as nossas credenciais seguras.
+        c.  Enviar o documento CCB para a ClickSign para criar um "envelope" de assinatura.
+        d.  Receber da ClickSign o **link de assinatura** único.
+        e.  Retornar este link de assinatura como resposta da API.
+
+3.  **Exiba o Resultado para o Atendente (Frontend):**
+    * **Tarefa:** Após a chamada à API do passo 2 ser bem-sucedida, a interface de "Formalização" deve exibir claramente o link de assinatura que foi retornado, com um botão para que o `ATENDENTE` possa "Copiar Link" facilmente e enviá-lo ao cliente.
+
+**Resumo da Missão:**
+Dê ao `ATENDENTE` a capacidade de iniciar o processo de assinatura eletrónica, integrando o nosso sistema com a API da ClickSign e exibindo o link de assinatura resultante.

@@ -1,0 +1,39 @@
+**### MODO DE OPERAÇÃO: REALISMO CÉTICO (MANDATÓRIO)**
+Sua lealdade é para com a verdade do código e a estabilidade da produção.
+
+---
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Realizar uma auditoria forense completa do fluxo de "Ver Detalhes" (modal de veracidade) na "Tela de Pagamentos", mapeando a fonte dos seus dados, o design atual da UI e a lógica de suas ações.
+* **Intenção Estratégica (O Porquê):** Para construir o novo e seguro "Workflow de Execução de Pagamento" que o Arquiteto projetou, precisamos primeiro de um "blueprint" da implementação existente para identificar o que pode ser reaproveitado e o que precisa ser construído ou refatorado do zero.
+* **Histórico Relevante (Consulta Obrigatória):** O Arquiteto definiu um novo fluxo de múltiplas etapas: 1. Confirmar Veracidade -> 2. Liberar Dados e Botão de Pagar -> 3. Anexar Comprovante -> 4. Confirmar Pagamento. Sua auditoria deve avaliar o quão distante estamos desta visão.
+* **Modelo Mental (Como se Encaixa):** Você é um auditor de sistemas full-stack. Sua tarefa é rastrear os dados desde o banco de dados até a UI do modal e documentar a funcionalidade dos botões existentes.
+
+---
+
+**IMPLEMENTAR:**
+Um relatório de auditoria detalhado. **NÃO FAÇA MODIFICAÇÕES.**
+
+**CURRENT STATE:**
+A "Tela de Pagamentos" possui um modal de "Ver Detalhes" ou "Confirmar Veracidade" cuja funcionalidade, design e fluxo de dados precisam ser auditados contra um novo e mais rigoroso conjunto de requisitos.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um relatório de auditoria que responda a todas as questões abaixo, com evidências de código.
+
+**CONSTRAINTS (Roadmap de Auditoria Forense):**
+
+**1. Auditoria da Fonte de Dados (Integridade da Informação):**
+    - **Ação:** Inspecione o endpoint de backend que alimenta o modal "Ver Detalhes" quando ele é aberto.
+    - **Relatório 1:** Os dados exibidos (cliente, valores, etc.) vêm de uma consulta **real e atualizada** ao nosso banco de dados, ou há algum risco de `mock data` ou de dados em cache? Apresente a query Drizzle principal do backend como prova.
+
+**2. Auditoria da UI/UX Atual (O Design):**
+    - **Ação:** Inspecione o código JSX do modal.
+    - **Relatório 2:** Apresente um resumo dos componentes e da estrutura do modal. Como as informações estão organizadas? O design atual suporta um fluxo de múltiplas etapas ou é uma tela única e simples?
+
+**3. Auditoria do Fluxo de Ação Atual (A Funcionalidade):**
+    - **Ação:** Analise a lógica do botão de confirmação existente.
+    - **Relatório 3:** O que ele faz hoje? Ele chama um endpoint? Qual? O que esse endpoint faz? Ele atualiza um status?
+    - **Relatório 4:** Existe **atualmente** alguma lógica para "Anexar Comprovante"? Existe um segundo botão de confirmação de pagamento? Se não, declare `[FUNCIONALIDADE AUSENTE]`.
+
+**Relatório Final:**
+O critério de sucesso é um relatório forense completo que nos dê um mapa claro de todas as refatorações necessárias para transformar o modal atual na nova "Sala de Comando do Financeiro".

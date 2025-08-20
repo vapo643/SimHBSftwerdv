@@ -1,0 +1,35 @@
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Projetar a arquitetura da solução definitiva para os problemas de inconsistência no download de PDFs e na exibição de dados do PIX na "Ficha do Cliente", com base nas descobertas da nossa auditoria forense.
+* **Intenção Estratégica (O Porquê):** Para criar uma experiência de usuário robusta e confiável, a nossa interface precisa ser "consciente" do estado dos processos assíncronos do backend e lidar de forma inteligente com dados inconsistentes de APIs externas.
+* **Histórico Relevante (Consulta Obrigatória):** Use o seu relatório de auditoria forense anterior como a única fonte da verdade. Sua missão é projetar a solução para as "Inconsistências Críticas" que você mesmo identificou (sincronização assíncrona e dados parciais do Inter).
+* **Modelo Mental (Como se Encaixa):** Você atuará como Arquiteto de Soluções. Sua tarefa é projetar a comunicação e a lógica de estado entre o frontend e o backend, bem como refinar a UI para ser mais simples e informativa.
+* **Riscos Antecipados:** **Risco:** Uma arquitetura de polling pode sobrecarregar o servidor. **Contramedida:** O seu design deve incluir um mecanismo de polling inteligente com limites (ex: parar após sucesso ou número máximo de tentativas).
+
+---
+
+**IMPLEMENTAR:**
+Um documento de arquitetura detalhado. **NÃO IMPLEMENTE O CÓDIGO AINDA.**
+
+**CURRENT STATE:**
+O sistema sofre de uma condição de corrida no download de PDFs e de uma UI inconsistente devido a dados externos incompletos.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um relatório de arquitetura que descreva, em detalhe, o plano de implementação para resolver as falhas.
+
+**CONSTRAINTS (Roadmap de Planejamento Arquitetural):**
+
+**1. Arquitetura da Solução para a Condição de Corrida (PDFs):**
+    - **Ação:** Projete um mecanismo para que o frontend saiba quando o processo de sincronização de boletos no backend terminou.
+    - **Proposta:** Avalie e descreva a implementação de um novo endpoint de backend `GET /api/propostas/:id/sync-status` que retorne o estado da sincronização (ex: `'em_andamento'`, `'concluido'`, `'falhou'`). O frontend, ao abrir a Ficha do Cliente, chamaria este endpoint e habilitaria o botão de download do carnê **apenas** quando o status fosse `'concluido'`.
+
+**2. Arquitetura da Solução para os Dados Inconsistentes (PIX):**
+    - **Ação:** Projete como o sistema deve lidar com parcelas onde o Banco Inter não retorna o `pixCopiaECola`.
+    - **Proposta:** A UI deve sempre exibir o botão "Copiar PIX", mas se o dado não existir, o botão deve estar **desabilitado** e exibir um **tooltip** informativo ao passar o mouse (ex: "Código PIX não fornecido pelo banco para esta parcela").
+
+**3. Arquitetura da Solução para a UI Simplificada:**
+    - **Ação:** Planeje a remoção do botão "Copiar Boleto" (linha digitável).
+    - **Proposta:** Descreva os passos para remover este botão e sua lógica associada do componente `CobrancasPage.tsx`, simplificando a interface de ações da parcela para apenas "Baixar PDF" e "Copiar PIX".
+
+**Relatório Final:**
+O critério de sucesso é a entrega deste documento de arquitetura. Ele será a base para o nosso prompt de implementação final.

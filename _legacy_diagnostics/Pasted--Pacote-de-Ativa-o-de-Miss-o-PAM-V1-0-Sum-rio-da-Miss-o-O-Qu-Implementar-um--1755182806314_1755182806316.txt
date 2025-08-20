@@ -1,0 +1,44 @@
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Implementar um "Número de Proposta" sequencial e humanamente legível (começando em 300001), que será usado em toda a interface do usuário para facilitar a identificação pelos atendentes.
+* **Intenção Estratégica (O Porquê):** Os identificadores UUID atuais são longos e difíceis de comunicar. Um número sequencial simples (ex: "Proposta Nº 300005") melhora drasticamente a usabilidade para os atendentes e a comunicação com os clientes.
+* **Histórico Relevante (Consulta Obrigatória):** Esta missão é a implementação formal da arquitetura híbrida de identificadores que já foi aprovada. A chave é manter o `id` (UUID) como a chave primária interna para a integridade do sistema, enquanto adicionamos este novo número para fins de exibição. Consulte a documentação do Drizzle e do PostgreSQL sobre como criar e gerenciar `SEQUENCES`.
+* **Modelo Mental (Como se Encaixa):** A tabela `propostas` terá duas formas de identificação. O `id` (UUID) permanece como a chave para todas as relações de banco de dados e chamadas de API. O novo `numero_proposta` será o identificador principal exibido na UI para o usuário.
+* **Riscos Antecipados:** **Risco:** A migração do banco de dados precisa ser executada corretamente. **Contramedida:** A implementação será dividida em fases: primeiro a migração do banco de dados, depois a integração no código.
+
+---
+
+**IMPLEMENTAR:**
+A adição de uma nova coluna de ID sequencial (`numero_proposta`) à nossa tabela `propostas` e sua integração em toda a interface do usuário (UI).
+
+**CURRENT STATE:**
+As propostas são identificadas na UI pelo `id` UUID, que é longo e pouco prático.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  A tabela `propostas` possui uma nova coluna `numero_proposta`.
+2.  Ao criar uma nova proposta, o banco de dados atribui automaticamente um número sequencial único, começando em `300001`.
+3.  **Toda a UI** (listas, dashboards, detalhes da proposta, etc.) exibe o `numero_proposta` como o identificador principal para o usuário.
+4.  O sistema continua a usar o `id` (UUID) "nos bastidores" para todas as operações internas (rotas de API, chaves de componentes React, etc.).
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+**FASE 1: Migração do Banco de Dados (Drizzle):**
+    - **Ação:** Crie e aplique uma nova migração Drizzle.
+    - **Implementação:**
+        1.  Adicione uma nova coluna `numero_proposta` à tabela `propostas`. Ela deve ser do tipo `INTEGER`, `UNIQUE`, e `NOT NULL`.
+        2.  **Crucial:** Utilize uma `SEQUENCE` do PostgreSQL para gerenciar a auto-incrementação. Configure-a para iniciar em `300001` (`START WITH 300001`).
+        3.  Defina o valor `default` da coluna `numero_proposta` para ser o próximo valor da sequência.
+
+**FASE 2: Integração no Backend:**
+    - **Ação:** Garanta que os endpoints da API que retornam listas ou detalhes de propostas incluam o novo campo `numero_proposta`.
+
+**FASE 3: Integração no Frontend:**
+    - **Ação:** Realize uma auditoria completa nos componentes do frontend (em `/client/src/pages` e `/client/src/components`).
+    - **Implementação:** Em todos os locais onde o `id` da proposta é exibido para o usuário, substitua-o pela exibição do `numero_proposta`.
+
+**PROTOCOLO OBRIGATÓRIO 5-CHECK:**
+1.  Mapear todos os arquivos de UI que precisam ser alterados.
+2.  Garantir que a migração do banco de dados seja executada antes das alterações no código da aplicação.
+3.  Executar `get_latest_lsp_diagnostics`.
+4.  Realizar um teste ponta-a-ponta: crie uma nova proposta e valide se ela recebe o número sequencial correto.
+5.  O critério final de sucesso é ver o novo "Número da Proposta" (ex: 300001) na UI, enquanto a URL da página ainda usa o UUID (ex: `/propostas/uuid-aqui...`).

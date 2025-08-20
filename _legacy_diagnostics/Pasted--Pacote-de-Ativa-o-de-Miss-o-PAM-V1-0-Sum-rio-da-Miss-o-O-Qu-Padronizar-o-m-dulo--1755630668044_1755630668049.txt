@@ -1,0 +1,44 @@
+### Pacote de Ativação de Missão (PAM) V1.0
+
+* **Sumário da Missão (O Quê):** Padronizar o módulo de rotas de pagamentos, movendo o arquivo `pagamentos.ts` para `pagamentos/index.ts` e corrigindo a importação no orquestrador de rotas `server/routes.ts`.
+* **Intenção Estratégica (O Porquê):** Esta missão serve como um "teste de padrão" de baixo risco para o nosso processo de migração. O sucesso aqui validará a nossa abordagem para as extrações mais complexas que virão a seguir, garantindo que a decomposição do monolito possa ser feita de forma segura e incremental.
+* **Histórico Relevante (Consulta Obrigatória):** A auditoria anterior confirmou que `server/routes/pagamentos.ts` é um módulo especializado e que `server/routes.ts` atua como o orquestrador que o importa e utiliza.
+* **Modelo Mental (Como se Encaixa):** Esta é uma refatoração de estrutura de arquivos. Estamos movendo um arquivo para seu diretório de domínio correto e atualizando o "ponteiro" (a declaração de `import`) no arquivo principal para que ele aponte para o novo local.
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco:** A atualização da importação no monolito `server/routes.ts` pode ser feita incorretamente, quebrando todas as 12 rotas de pagamento.
+    * **Contramedida:** A missão exige a execução de testes de integração existentes para o módulo de pagamentos como prova final de que a refatoração foi bem-sucedida e não introduziu regressões.
+
+---
+
+**IMPLEMENTAR:**
+Padronização do Módulo de Rotas de Pagamentos
+
+**CURRENT STATE:**
+O arquivo com as 12 rotas de pagamento, `server/routes/pagamentos.ts`, reside na raiz do diretório `server/routes/`. O arquivo `server/routes.ts` o importa a partir deste local.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  O arquivo `server/routes/pagamentos.ts` é movido para `server/routes/pagamentos/index.ts`.
+2.  A declaração de importação para as rotas de pagamento dentro do arquivo monolítico `server/routes.ts` é atualizada para apontar para o novo caminho.
+3.  A aplicação permanece 100% funcional. A prova final será a execução bem-sucedida dos testes de integração relacionados aos pagamentos.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  **Mova o Arquivo:** Execute a operação de movimentação de arquivo: `mv server/routes/pagamentos.ts server/routes/pagamentos/index.ts`.
+2.  **Refatore a Importação:** Abra `server/routes.ts`. Localize a linha que importa o router de pagamentos (ex: `import pagamentosRouter from './pagamentos';`). Modifique o caminho para que aponte para o novo local (`'./pagamentos/index'`).
+3.  **Validação Final Mandatória:** Localize o arquivo de teste de integração relevante para as rotas de pagamentos ou cobranças (provavelmente em `tests/routes/`). Execute este arquivo de teste para validar que todos os endpoints de pagamento continuam funcionando corretamente após a refatoração. O resultado do teste deve ser incluído no seu relatório final.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO. O risco principal é a quebra das rotas se a importação for corrigida incorretamente.]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que existe um arquivo de teste de integração que cobre os endpoints de pagamento."]
+* **VALIDAÇÃO PENDENTE:** [Nenhuma. A validação via teste de integração é parte desta missão.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear ficheiros e funções exatas afetadas (`server/routes/pagamentos.ts` movido, `server/routes.ts` modificado).
+2.  Garantir que o novo caminho de importação está sintaticamente correto.
+3.  Executar `get_latest_lsp_diagnostics` para garantir 0 erros novos.
+4.  **Declarar Nível de Confiança (0-100%)**.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (executar os testes de integração relevantes e reportar o sucesso).
+7.  **Documentar Decisões Técnicas** confirmando o sucesso da validação.

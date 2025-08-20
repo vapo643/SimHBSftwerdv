@@ -1,0 +1,40 @@
+**### MODO DE OPERAÇÃO: REALISMO CÉTICO (MANDATÓRIO)**
+Sua lealdade é para com a verdade do código e a estabilidade da produção.
+
+---
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Realizar uma auditoria forense completa da Tabela Principal na "Tela de Cobranças", verificando a fonte e a precisão de todos os dados exibidos, com foco especial na sincronização em tempo real do status das parcelas e do vencimento.
+* **Intenção Estratégica (O Porquê):** Para garantir que a visão principal da equipe de cobranças seja um reflexo 100% preciso e em tempo real da realidade financeira de cada contrato, eliminando qualquer possibilidade de dados desatualizados que possam levar a erros operacionais graves.
+* **Histórico Relevante (Consulta Obrigatória):** Já blindamos a "Ficha do Cliente". Agora, aplicaremos o mesmo rigor à tabela principal que leva a ela. A principal suspeita é que a query principal (`GET /api/cobrancas`) pode não estar a calcular/retornar todos os dados agregados (status, resumo de parcelas) de forma correta e em tempo real.
+* **Modelo Mental (Como se Encaixa):** Você é um auditor de dados full-stack. Sua missão é rastrear cada campo exibido na tabela, desde a sua origem no banco de dados, através da lógica de agregação no backend, até a sua renderização e atualização no frontend.
+
+---
+
+**IMPLEMENTAR:**
+Um relatório de auditoria detalhado. **NÃO FAÇA MODIFICAÇÕES.**
+
+**CURRENT STATE:**
+A tabela exibe dados, mas há suspeitas sobre a sua precisão e sincronização em tempo real, especialmente nas colunas de status, valor e resumo de parcelas.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um relatório que, para cada campo auditado, confirme a fonte dos dados e se a lógica de cálculo e atualização está correta e alinhada com a nossa "fonte da verdade" (os webhooks e APIs do Banco Inter).
+
+**CONSTRAINTS (Roadmap de Auditoria Forense):**
+
+**1. Auditoria da Fonte de Dados Principal (`GET /api/cobrancas`):**
+    - **Ação:** Apresente a query Drizzle completa para este endpoint.
+    - **Relatório 1 (Dados do Cliente/Contrato):** A query busca e retorna o `numero_proposta` (ID do contrato), `clienteNome`, `cpf`, `telefone` da forma correta?
+    - **Relatório 2 (Cálculo do Resumo de Parcelas - Ponto Crítico):** Como o backend calcula a coluna de resumo das parcelas (ex: "3/12 pagas")? Ele está a fazer um `COUNT` na tabela `inter_collections` com o status `PAGO` para cada proposta na lista? Apresente este trecho de código.
+    - **Relatório 3 (Cálculo do `Status de Vencimento` e `Valor Restante`):** Como o backend calcula o `status de vencimento` geral e o `valor restante` para cada proposta? Ele se baseia nos dados agregados das parcelas individuais? Apresente o código que faz estes cálculos.
+
+**2. Auditoria da Sincronização em Tempo Real (Frontend):**
+    - **Ação:** Inspecione o ficheiro `client/src/pages/financeiro/CobrancasPage.tsx`.
+    - **Relatório 4:** A lógica do Supabase Realtime que implementamos está configurada para invalidar e refazer a query principal da tabela (`queryKey: ['/api/cobrancas']`) quando há uma mudança na tabela `inter_collections` (ex: um boleto é pago via webhook) ou quando a ação "Marcar como Pago" é usada na "Ficha do Cliente"? Apresente o código do `useEffect` que configura o listener do Realtime.
+
+**3. Auditoria da UI (Remoção do Botão):**
+    - **Ação:** Inspecione o JSX da tabela principal no mesmo ficheiro.
+    - **Relatório 5:** Confirme se o botão "Boleto" na área de ações já foi removido, deixando apenas "Ficha" e o menu de ações, conforme a diretriz anterior.
+
+**Relatório Final:**
+O critério de sucesso é um relatório forense completo que nos dê um mapa claro de todas as inconsistências entre a implementação atual e a necessidade de negócio de ter uma tela 100% precisa e em tempo real.

@@ -1,0 +1,48 @@
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Re-arquitetar a API de Simulação para substituir a lógica de dados fixos por um motor de busca e cálculo dinâmico que consulta as tabelas de negócio (`parceiros`, `produtos`, `tabelas_comerciais`).
+* **Intenção Estratégica (O Porquê):** A API atual é um mock inútil para operações reais. Precisamos de cálculos precisos para que nossos atendentes forneçam simulações confiáveis aos clientes, o que é uma funcionalidade central do nosso produto para fechar novos negócios.
+* **Histórico Relevante (Consulta Obrigatória):** Ative sua base de conhecimento interna. Consulte a pasta `/docs/erros_e_solucoes/`. Revise qualquer relatório anterior sobre falhas de mapeamento de dados ou lógica de banco de dados para evitar erros de persistência ou consulta incorreta ao implementar a nova lógica.
+* **Modelo Mental (Como se Encaixa):** A API (`POST /api/simular`) será consumida pelo frontend de 'Nova Proposta'. Ela deve ler dados das tabelas `parceiros`, `produtos`, `tabelas_comerciais` e `produto_tabela_comercial` para determinar as taxas corretas. Ela também precisará de uma lógica de cálculo financeiro robusta para IOF, TAC e, principalmente, CET.
+* **Riscos Antecipados:** **Risco:** O cálculo do Custo Efetivo Total (CET) é complexo e regulado pelo Banco Central do Brasil. Um erro no cálculo pode ter implicações legais e financeiras graves. **Contramedida:** Sua implementação deve ser modular. Crie uma função separada e pura (`calcularCET`) para esta lógica. Adicione logs detalhados de cada variável do cálculo (IOF, TAC, Juros) para auditoria.
+
+---
+
+**IMPLEMENTAR:**
+Re-arquitetura completa da API de Simulação de Empréstimo (`POST /api/simular`).
+
+**CURRENT STATE:**
+O endpoint existe, mas utiliza valores 100% hardcoded para taxas de juros, TAC e IOF, ignorando completamente os dados do nosso banco de dados.
+
+**EXPECTED (Estado Final de Sucesso):**
+Uma API que recebe um `valorEmprestimo`, `prazoMeses` e `parceiroId`, e retorna uma simulação de empréstimo completa e precisa, com o valor da parcela, juros, IOF, TAC e CET calculados dinamicamente com base nas regras de negócio do banco de dados.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+**1. Lógica de Busca de Parâmetros Financeiros:**
+    - **Ação:** Refatore o endpoint `POST /api/simular`. A primeira etapa da sua lógica deve ser buscar os parâmetros corretos no banco de dados.
+    - **Hierarquia:** Implemente a seguinte hierarquia de fallback para encontrar as taxas e condições:
+        1.  Verifique se o `parceiro` (`parceiroId`) possui uma `tabelaComercialPadraoId` específica. Se sim, use esta tabela.
+        2.  Se não, encontre os `produtos` associados a este parceiro.
+        3.  Para os produtos, encontre as `tabelas_comerciais` associadas através da tabela de junção `produto_tabela_comercial`.
+        4.  Verifique se o `parceiro` possui uma `comissaoPadrao` que sobreponha a comissão da tabela.
+
+**2. Lógica do Motor de Cálculo Financeiro:**
+    - **Ação:** Crie um novo serviço, talvez em `server/services/financeService.ts`, para encapsular toda a lógica de cálculo.
+    - **Implementação:**
+        a. **`calcularParcela`:** Utilize a fórmula da Tabela Price.
+        b. **`calcularIOF`:** Implemente o cálculo do IOF conforme a regulação brasileira (alíquota diária sobre o valor do empréstimo + alíquota adicional fixa de 0.38% sobre o valor total).
+        c. **`calcularCET`:** Implemente o cálculo do Custo Efetivo Total. Esta é a função mais crítica. A fórmula deve consolidar TODOS os custos da operação (principal, juros, IOF, TAC) em uma única taxa percentual anual. Comente o código desta função detalhadamente.
+
+**3. Integração e Resposta da API:**
+    - **Ação:** Orquestre o endpoint `POST /api/simular` para:
+        1.  Buscar os parâmetros (Passo 1).
+        2.  Executar os cálculos (Passo 2).
+        3.  Retornar um objeto JSON completo com todos os detalhes da simulação: `valorDaParcela`, `taxaDeJurosMensal`, `valorIOF`, `valorTAC`, `CETAnual`, `valorTotalAPagar`, e um `cronogramaDePagamento` (array com cada parcela, data de vencimento e valor).
+
+**PROTOCOLO OBRIGATÓRIO 5-CHECK:**
+1.  Mapear os arquivos envolvidos: `server/routes.ts`, e os serviços novos ou existentes.
+2.  Realizar as edições de forma modular.
+3.  Executar `get_latest_lsp_diagnostics` para garantir ZERO erros.
+4.  Criar cenários de teste para validar a hierarquia de regras de negócio (um com parceiro com tabela especial, outro sem).
+5.  Para um valor de entrada fixo (ex: R$10.000, 12 meses), demonstre o cálculo passo a passo do CET nos logs do console como prova de que a lógica está correta.

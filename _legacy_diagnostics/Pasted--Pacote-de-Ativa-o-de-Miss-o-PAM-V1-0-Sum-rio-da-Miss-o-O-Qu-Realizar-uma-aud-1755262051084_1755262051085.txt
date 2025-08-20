@@ -1,0 +1,35 @@
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Realizar uma auditoria de diagnóstico no componente `formalizacao.tsx` para identificar a causa raiz do bug de visualização que surgiu após a sua refatoração para o Sistema de Status V2.0.
+* **Intenção Estratégica (O Porquê):** Embora a refatoração dos status tenha sido concluída, ela quebrou a renderização da tela. Antes de prosseguirmos para outros arquivos, é inegociável que a "Tela de Formalização", uma das mais críticas do sistema, esteja 100% funcional.
+* **Histórico Relevante (Consulta Obrigatória):** Sua última missão (`REATORACAO-STATUS-FORMALIZACAO-TSX-01`) substituiu mais de 70 referências de status. A falha atual é um efeito colateral direto dessa refatoração massiva. A causa provável é uma lógica de renderização condicional que quebrou com os novos valores de status.
+* **Modelo Mental (Como se Encaixa):** Você é um engenheiro de depuração de frontend. Sua tarefa é analisar o fluxo de renderização do componente `formalizacao.tsx` e encontrar o ponto exato onde a lógica está a falhar e a impedir a exibição do conteúdo.
+* **Riscos Antecipados:** **Risco:** Uma análise superficial pode não encontrar a causa. **Contramedida:** A sua missão não é corrigir. É **produzir um relatório de diagnóstico** com a linha de código exata da falha e uma hipótese clara.
+
+---
+
+**IMPLEMENTAR:**
+Auditoria de diagnóstico completa. **NÃO FAÇA CORREÇÕES.**
+
+**CURRENT STATE:**
+A "Tela de Formalização" está em branco ou com a visualização quebrada após a refatoração para os novos status V2.0.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um relatório de diagnóstico que identifique a causa raiz exata da falha de renderização.
+
+**CONSTRAINTS (Roadmap de Auditoria):**
+
+**1. Análise da Lógica de Renderização Condicional:**
+    - **Ação:** Inspecione o ficheiro `client/src/pages/formalizacao.tsx`.
+    - **Análise Crítica:** O componente principal provavelmente possui uma lógica de renderização condicional que decide o que mostrar com base no `status` da proposta (ex: `if (proposta.status === '...')`). A sua refatoração para os novos status (ex: `ASSINATURA_CONCLUIDA`) pode ter quebrado uma dessas condições, fazendo com que nenhum bloco de UI seja renderizado.
+    - **Relatório:** Encontre e apresente os principais blocos de renderização condicional baseados em status. Formule uma hipótese: qual condição específica está a falhar e a impedir a renderização?
+
+**2. Verificação do Fluxo de Dados:**
+    - **Ação:** Adicione `console.log` no início do retorno do componente para exibir o objeto `proposta` completo que ele recebe, incluindo o novo `status` V2.0.
+    - **Análise Crítica:** O componente está a receber os dados da proposta corretamente? O campo `status` contém o valor esperado do novo enum?
+    - **Relatório:** Apresente o log do objeto `proposta` que o componente está a receber.
+
+**Relatório Final:**
+O critério de sucesso é um relatório que nos diga:
+1.  O componente está a receber os dados corretos da proposta (com o novo status)?
+2.  Qual é a linha de código exata na lógica de renderização condicional que está a falhar e a causar a tela em branco?

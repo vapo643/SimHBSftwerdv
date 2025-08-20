@@ -1,0 +1,41 @@
+# MISSÃO DE IMPLEMENTAÇÃO (ARQUITETURA FINAL): Reconstrução Completa do Sistema RBAC
+
+**CONTEXTO ESTRATÉGICO:**
+Este prompt é o resultado final de um "Debate Máximo" de 4 interações. Ele contém a arquitetura definitiva e aprovada para a reconstrução completa do nosso sistema de autorização (RBAC). Siga cada fase e micro-passo com precisão absoluta.
+
+**AÇÃO:**
+Sua missão é executar uma refatoração profunda e sistemática no backend e frontend para implementar um sistema de permissões robusto e anti-falha.
+
+**ROADMAP DE EXECUÇÃO (Sequencial):**
+
+---
+**FASE 1: RECONSTRUÇÃO DO BACKEND (Middleware Robusto)**
+
+* **1.1:** Refatore o ficheiro `/server/lib/jwt-auth-middleware.ts`. A nova implementação deve:
+    a. Validar o token JWT.
+    b. Extrair o `id` do usuário.
+    c. Fazer uma query à tabela `profiles` para buscar o perfil completo do usuário.
+    d. **Fallback de Segurança:** Se a query ao perfil falhar ou não retornar nenhum resultado (usuário órfão), a requisição deve ser **bloqueada** com um erro `403 Forbidden`.
+    e. Anexar o perfil completo e válido ao objeto `req.user`.
+
+* **1.2:** Crie um endpoint de debug `GET /api/debug/me` para validarmos esta fase de forma isolada.
+
+---
+**FASE 2: RECONSTRUÇÃO DO FRONTEND (Contexto Reativo)**
+
+* **2.1:** Refatore o `/client/src/contexts/AuthContext.tsx`. A nova implementação deve:
+    a. Criar um `AuthProvider` que busca os dados do usuário logado (via `/api/debug/me`) e os disponibiliza globalmente.
+    b. Expor um hook unificado `useAuth()` que retorna `{ user, isLoading, error, refetchUser }`.
+    c. A função `refetchUser` deve seguir a **Estratégia Conservadora**: manter os dados do usuário antigo enquanto os novos são buscados em background, para uma UX fluida.
+
+* **2.2:** Refatore o `client/src/App.tsx` para envolver a aplicação com o novo `AuthProvider`.
+
+---
+**FASE 3: CONTROLE DE VISIBILIDADE NA UI**
+
+* **3.1:** Refatore o ficheiro `/client/src/components/DashboardLayout.tsx`.
+* **3.2:** Utilize o hook `useAuth()` para obter a `role` do usuário.
+* **3.3:** Implemente a lógica de renderização condicional para que os links de navegação administrativos (Usuários, Parceiros, Lojas) sejam visíveis **apenas** para a `role` 'ADMINISTRADOR'.
+
+---
+Execute este plano para entregar um sistema RBAC estável, seguro e à prova de falhas.

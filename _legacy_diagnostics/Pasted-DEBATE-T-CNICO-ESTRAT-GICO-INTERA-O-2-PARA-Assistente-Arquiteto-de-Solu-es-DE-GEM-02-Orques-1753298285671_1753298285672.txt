@@ -1,0 +1,34 @@
+DEBATE TÉCNICO ESTRATÉGICO - INTERAÇÃO 2
+PARA: Assistente (Arquiteto de Soluções)
+DE: GEM 02 (Orquestrador)
+ASSUNTO: Decisões Arquiteturais e Refinamento do Plano v2.0
+
+1. Sobre o Sequenciamento Lógico:
+A sua recomendação pela abordagem de "feature slice" está APROVADA. É a metodologia correta para garantir a validação incremental e reduzir os riscos de integração. Procederemos implementando o PUT (backend e frontend) e depois o DELETE (backend e frontend).
+
+2. Sobre os Riscos de Backend:
+Endpoint PUT: A utilização de .strict() no schema Zod para prevenir a injeção de campos maliciosos é uma excelente adição de segurança e está APROVADA.
+
+Endpoint DELETE: A sua proposta de query com WITH ... AS (...) (Common Table Expression) para a verificação de dependências é tecnicamente superior, pois é atómica e eficiente. Está APROVADA. Agora, respondendo à sua primeira questão crítica:
+
+DECISÃO ARQUITETURAL #1 (Soft Delete): Implementaremos o soft delete para Lojas. A nossa doutrina preza pela integridade histórica dos dados. Uma loja nunca será verdadeiramente apagada do banco. A ação DELETE na API deve, portanto, traduzir-se para um UPDATE no banco que altera uma coluna is_active (ou similar) para false. O seu "contrato de API" para o DELETE deve ser ajustado para refletir isso: a operação ainda pode ser bloqueada por dependências, mas o sucesso significa desativação, não exclusão.
+
+3. Sobre os Riscos de Frontend:
+As suas propostas para o feedback de UX (mensagem de erro detalhada) e a estratégia de invalidação de cache em múltiplos níveis (queryClient.invalidateQueries) estão APROVADAS. São implementações robustas e alinhadas com as melhores práticas.
+
+4. Sobre as Questões Críticas para Debate:
+Já tomei a decisão sobre "Soft vs. Hard Delete". Agora, as restantes:
+
+DECISÃO ARQUITETURAL #2 (RLS & N:N): A sua preocupação com RLS é pertinente. A segurança será em camadas:
+
+A nível de API, o adminMiddleware garante que apenas um Administrador pode chamar o endpoint.
+
+A nível de Banco de Dados, para garantir que um admin de um parceiro não possa editar/desativar lojas de outro (se essa regra for implementada no futuro), a query UPDATE do soft delete deve incluir uma cláusula WHERE que valide a posse da loja. O seu 404 Not Found no contrato já cobre este cenário.
+
+DECISÃO ARQUITETURAL #3 (Preview de Exclusão): Um endpoint de "preview de exclusão" é uma excelente ideia para a V2 da funcionalidade, mas para o nosso MVP atual, a mensagem de erro detalhada que você propôs ("Não é possível excluir a loja '{nomeLoja}'. Existem {count} dependências ativas...") é suficiente. Vamos manter o escopo focado.
+
+PRÓXIMA AÇÃO
+
+Com estas decisões tomadas, o plano está 99% completo.
+
+A sua Interação 3 e final é agora a de consolidar todas estas decisões (feature slice, soft delete, query CTE, UX aprimorado, etc.) num plano de implementação v3.0 finalizado. Este documento final será a base para o prompt que entregaremos ao Agente.

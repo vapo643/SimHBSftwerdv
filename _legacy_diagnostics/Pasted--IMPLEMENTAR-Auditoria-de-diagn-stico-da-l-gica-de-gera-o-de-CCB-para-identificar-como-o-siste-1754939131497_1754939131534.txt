@@ -1,0 +1,25 @@
+**IMPLEMENTAR:**
+Auditoria de diagnóstico da lógica de geração de CCB para identificar como o sistema atualmente diferencia (ou falha em diferenciar) clientes Pessoa Física (PF) e Pessoa Jurídica (PJ).
+
+**CONTEXT:**
+Estamos a enfrentar um problema onde, ao gerar uma CCB para um cliente PF, campos que são exclusivos de PJ (como Razão Social) aparecem no documento com o texto "não informado" ou similar. Precisamos de uma lógica inteligente que renderize apenas os campos relevantes para cada tipo de cliente.
+
+**CURRENT STATE:**
+A geração da CCB tenta preencher todos os campos possíveis, resultando em documentos poluídos com informações irrelevantes para o tipo de cliente.
+
+**PROCESSO SISTEMÁTICO (Roadmap de Auditoria - NÃO FAÇA CORREÇÕES AGORA):**
+
+**1. Auditoria da Fonte de Dados (Tabela `propostas`):**
+    - **Ação:** Analise o schema da tabela `propostas`.
+    - **Relatório:** Como o sistema diferencia um cliente PF de um PJ? Confirme se existe uma coluna `tipo_pessoa` (com valores como 'FISICA' ou 'JURIDICA') ou se essa distinção é inferida de outra forma (ex: pelo comprimento do campo `cpf_cnpj`).
+
+**2. Identificação dos Campos Específicos:**
+    - **Ação:** Consulte o documento `MAPEAMENTO_COMPLETO_CCB_COORDENADAS.md`.
+    - **Relatório:** Com base no mapeamento, liste todos os campos que são **exclusivos para PF** (ex: RG, Estado Civil, etc.) e todos os campos que são **exclusivos para PJ** (ex: Razão Social, CNPJ, Inscrição Estadual, etc.).
+
+**3. Análise do Código de Renderização (`pdfGeneratorService.ts`):**
+    - **Ação:** Inspecione a função `generateCcbFromTemplate`.
+    - **Relatório:** Atualmente, existe alguma lógica condicional (`if/else`, `switch case`) que verifica o tipo de pessoa antes de renderizar os campos no PDF? Ou a função tenta renderizar todos os campos para todos os tipos de cliente incondicionalmente?
+
+**Relatório Final:**
+O critério de sucesso é um relatório de auditoria que responda claramente às três questões acima.

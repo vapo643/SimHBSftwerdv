@@ -1,0 +1,30 @@
+**CONTEXTO DA MISSÃO:**
+Iniciando "Debate Máximo". Esta é uma missão de **diagnóstico puramente analítico**. Sua tarefa é ler o código-fonte e reportar suas descobertas. **NÃO execute ou modifique nenhum código.** O objetivo é identificar a causa raiz das falhas de preenchimento na geração da CCB.
+
+**ETAPA 1: ANÁLISE DO FLUXO DE DADOS (Ponta-a-Ponta Teórico)**
+Analise o código e descreva o fluxo de dados para as informações de endereço e dados bancários:
+1.  **Origem (Frontend):** Inspecione o formulário de "Nova Proposta". Quais são os nomes exatos das variáveis de estado para os campos de endereço e dados bancários?
+2.  **Transmissão (API):** Analise a rota `POST /api/propostas`. Como essas variáveis do frontend são recebidas e mapeadas para os objetos que serão salvos no banco de dados?
+3.  **Destino (Serviço PDF):** Analise o `pdfGeneratorService.ts`. Qual é a estrutura de dados exata que a função `generateCcbFromTemplate` espera receber?
+4.  **Hipótese:** Com base nesta análise, a estrutura de dados na **Origem** é compatível com a que se espera no **Destino**? Formule uma hipótese sobre onde ocorre a quebra no fluxo de dados.
+
+**ETAPA 2: MAPEAMENTO DO CÓDIGO AOS SINTOMAS REPORTADOS**
+O Arquiteto reportou a seguinte lista específica de falhas de mapeamento. Analise estaticamente o ficheiro `pdfGeneratorService.ts` para encontrar as linhas de código correspondentes a CADA um destes sintomas:
+
+**SINTOMAS ATIVOS:**
+* **Sintoma A (Endereço Completo):** Os campos de endereço (`CEP`, `Rua`, `Bairro`, etc.) estão a ser renderizados todos juntos, de forma desordenada, num local incorreto no topo do PDF.
+* **Sintoma B (Órgão Expedidor do RG):** O dado do "Órgão Expedidor" está a ser preenchido no mesmo campo que a "Nacionalidade".
+* **Sintoma C (Campos Ausentes):** Os seguintes campos não aparecem de todo no PDF:
+    * `Local de Nascimento`
+    * `Data de Emissão do RG`
+    * `UF do RG`
+    * `Dados Bancários` (`Banco`, `Agência`, `Conta`, `Chave PIX`)
+
+**SUA TAREFA DE AUDITORIA:**
+Para cada sintoma listado acima, identifique e reporte as linhas de código exatas (ou a ausência delas) que estão a causar o problema.
+1.  **Para o Sintoma A:** Aponte a(s) linha(s) de código que renderiza(m) o endereço. A lógica está a usar chamadas `page.drawText()` separadas para cada parte do endereço?
+2.  **Para o Sintoma B:** Qual é a linha de código que preenche o "Órgão Expedidor" e qual a linha que preenche a "Nacionalidade"? Elas estão a usar as mesmas coordenadas ou a mesma variável de dados por engano?
+3.  **Para o Sintoma C:** Liste as linhas de código que deveriam preencher os campos ausentes. Se não encontrar nenhuma linha de código para estes campos, declare explicitamente `[CÓDIGO AUSENTE]` para cada um deles.
+
+**CRITÉRIO DE SUCESSO:**
+Sua missão estará concluída quando você apresentar um relatório analítico respondendo a todas as questões das Etapas 1 e 2.

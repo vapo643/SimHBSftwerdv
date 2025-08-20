@@ -1,0 +1,38 @@
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Realizar uma auditoria forense completa do estado atual da tabela `propostas` para diagnosticar as inconsistências geradas pela recente migração para o Sistema de Status V2.0.
+* **Intenção Estratégica (O Porquê):** O Arquiteto detectou que a migração deixou os dados em um estado "bagunçado". Antes de qualquer tentativa de correção, precisamos de um relatório de inteligência preciso que nos mostre a natureza e a extensão do problema.
+* **Histórico Relevante (Consulta Obrigatória):** A missão anterior, `MIGRACAO-COMPLETA-STATUS-V2-E-REFATORACAO-FRONTEND-01`, executou um script de migração. Sua primeira tarefa será analisar a lógica daquele script e compará-la com o estado atual dos dados.
+* **Modelo Mental (Como se Encaixa):** Você é um Auditor de Dados. Sua única ferramenta é a query SQL/Drizzle. Sua missão é extrair dados que revelem inconsistências lógicas.
+* **Riscos Antecipados:** **Risco:** Uma análise superficial pode não encontrar todos os problemas. **Contramedida:** A sua auditoria deve ser sistemática e baseada em comparações lógicas entre o sistema de status antigo (flags booleanas) e o novo (o campo `status`).
+
+---
+
+**IMPLEMENTAR:**
+Um relatório de auditoria de dados. **NÃO FAÇA NENHUMA MODIFICAÇÃO DE DADOS.**
+
+**CURRENT STATE:**
+A tabela `propostas` foi migrada para o novo sistema de status, mas o resultado é inconsistente.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um relatório de auditoria detalhado com os resultados das queries abaixo, que nos dará um mapa claro das inconsistências.
+
+**CONSTRAINTS (Roadmap de Auditoria Forense):**
+
+**1. Análise da Lógica de Migração:**
+    - **Ação:** Relembre e apresente a lógica exata (os comandos `UPDATE`) do script de migração que você executou na missão anterior.
+
+**2. Auditoria da Distribuição de Status:**
+    - **Ação:** Execute uma query que agrupe as propostas pelo novo campo `status` e conte quantas existem em cada estado.
+    - **Relatório:** Apresente a tabela de contagem de status (ex: `ASSINATURA_CONCLUIDA: 15 propostas`, `BOLETOS_EMITIDOS: 10 propostas`, etc.).
+
+**3. Auditoria de Inconsistência Lógica (Ação Mais Crítica):**
+    - **Ação:** Execute queries de verificação cruzada para encontrar propostas onde a lógica antiga (flags booleanas) contradiz o novo status.
+    - **Implementação:** Execute as seguintes verificações e reporte o `COUNT` de propostas para cada caso:
+        a. Propostas com `status = 'ASSINATURA_CONCLUIDA'` mas onde a flag antiga `assinaturaEletronicaConcluida` é `false`.
+        b. Propostas com `status = 'BOLETOS_EMITIDOS'` mas para as quais **NÃO** existe um registro correspondente na tabela `inter_collections`.
+        c. Propostas com `status` anterior a `ASSINATURA_CONCLUIDA` mas que, por engano, possuem `assinaturaEletronicaConcluida = true`.
+    - **Relatório:** Apresente os resultados destas contagens. Qualquer resultado maior que zero é a prova da inconsistência.
+
+**Relatório Final:**
+O critério de sucesso é um relatório de auditoria que nos mostre, com dados, onde a migração falhou e qual a dimensão do problema.

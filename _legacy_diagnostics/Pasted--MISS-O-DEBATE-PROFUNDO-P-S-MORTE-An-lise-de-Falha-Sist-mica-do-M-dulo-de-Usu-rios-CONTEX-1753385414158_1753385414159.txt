@@ -1,0 +1,26 @@
+# MISSÃO: DEBATE PROFUNDO (PÓS-MORTE) - Análise de Falha Sistémica do Módulo de Usuários
+
+**CONTEXTO ESTRATÉGICO:**
+A última missão de implementação, baseada num plano arquitetural detalhado, resultou numa falha catastrófica e exigiu um rollback. Os sintomas incluem: a API de listagem de usuários (`GET /api/admin/users`) falhou, a criação de usuários resulta em erro `500`, a UI está visualmente quebrada, e o bug crítico de dependência de cache entre páginas persiste.
+
+**SUA TAREFA (ASSISTENTE):**
+A sua tarefa não é escrever código. A sua tarefa é atuar como um Arquiteto de Software Sênior e realizar uma análise pós-morte para identificar as causas raiz desta falha sistémica. Esta será a nossa **Interação 1 de 3** de um debate profundo.
+
+---
+### **Interação 1: Proposta de Diagnóstico e Plano de Recuperação Arquitetural**
+
+Por favor, analise a nossa situação crítica e responda com a sua proposta para os seguintes pontos:
+
+**1. Análise da Causa Raiz do Backend:**
+* **Hipótese:** A falha na listagem (`GET /api/admin/users`) e o erro `500` na criação (`POST`) indicam uma falha grave na camada de backend. A nossa atual estrutura monolítica em `/server/routes.ts` e `/server/storage.ts` provavelmente contribuiu para esta fragilidade. Como uma refatoração para **rotas modularizadas por domínio** e a implementação de um **padrão Repository** para o acesso a dados poderia ter prevenido este tipo de erro em cascata?
+
+**2. Análise da Causa Raiz do Frontend:**
+* **Hipótese:** O bug de dependência de cache, onde a página de Usuários depende da visita prévia à página de Parceiros, persistiu. Qual é a falha fundamental no nosso uso do TanStack Query que permite esta "poluição de cache"? Proponha um **padrão de `queryKey` rigoroso e hierárquico** (ex: `['users', 'list', { filters }]`) que eliminaria este problema de forma definitiva, garantindo a total independência de dados entre as páginas.
+
+**3. Análise da Falha de Execução do Agente:**
+* **Hipótese:** O Agente recebeu um prompt detalhado e, ainda assim, a implementação falhou. Com base nos sintomas, qual é a sua teoria sobre o modo de falha do Agente? Ele ignorou passos? Ele introduziu código incorreto que não estava no plano? A complexidade da refatoração em múltiplos ficheiros excedeu a sua capacidade de manter o contexto?
+
+**4. Proposta de Roadmap de Recuperação (Micro-Passos):**
+* **Ação:** Com base na sua análise completa, proponha um **novo roadmap de recuperação**, decomposto em **"micro-passos" atómicos e sequenciais**. Cada passo deve ser uma única ação, num único ficheiro, com um critério de validação claro. O objetivo é reconstruir a funcionalidade com risco próximo de zero. (Ex: "Passo 1.1: Criar o ficheiro `userRepository.ts`...", "Passo 1.2: Implementar APENAS a função `findUsers`...", "Passo 1.3: Validar a função com um teste de unidade...", etc.).
+
+---

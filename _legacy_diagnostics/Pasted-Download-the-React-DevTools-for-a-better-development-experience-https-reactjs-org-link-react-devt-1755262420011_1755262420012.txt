@@ -1,0 +1,377 @@
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+content-script.js:22 Document already loaded, running initialization immediately
+content-script.js:4 Attempting to initialize AdUnit
+content-script.js:6 AdUnit initialized successfully
+formalizacao:1 Unchecked runtime.lastError: The message port closed before a response was received.
+webcomponents-ce.js:33 Uncaught Error: A custom element with name 'mce-autosize-textarea' has already been defined.
+    at Aa (webcomponents-ce.js:33:363)
+    at m.define (webcomponents-ce.js:33:133)
+    at overlay_bundle.js:148:5559
+    at D (overlay_bundle.js:44:680)
+    at overlay_bundle.js:159:392
+content.js:208 
+Object
+login:1 [DOM] Input elements should have autocomplete attributes (suggested: "current-password"): (More info: https://goo.gl/9p2vKq) 
+AuthContext.tsx:170 🔐 [AUTH EVENT] INITIAL_SESSION 
+Object
+AuthContext.tsx:170 🔐 [AUTH EVENT] SIGNED_IN 
+Object
+supabase-auth-provider.ts:61 [PASSO 1 - LOGIN] 
+Object
+apiClient.ts:166 🔐 [TOKEN MANAGER] Fresh token obtained, length: 767
+apiClient.ts:343 [PASSO 3 - ENVIO] 
+Object
+dashboard.tsx:213 DEBUG - First 3 proposals values: 
+Array(0)
+apiClient.ts:343 [PASSO 3 - ENVIO] 
+Object
+AuthContext.tsx:102 🔐 [AUTH RESTORED] User profile loaded with valid token
+dashboard.tsx:213 DEBUG - First 3 proposals values: 
+Array(0)
+length
+: 
+0
+[[Prototype]]
+: 
+Array(0)
+dashboard.tsx:213 DEBUG - First 3 proposals values: 
+Array(3)
+0
+: 
+{id: '88a44696-9b63-42ee-aa81-15f9519d24cb', valorSolicitado: 20000, type: 'number'}
+1
+: 
+{id: '93b5919d-4223-40ee-a776-aaf184f16049', valorSolicitado: 10000, type: 'number'}
+2
+: 
+{id: '6492cfeb-8b66-4fa7-beb6-c7998be61b78', valorSolicitado: 1037.77, type: 'number'}
+length
+: 
+3
+[[Prototype]]
+: 
+Array(0)
+formalizacao.tsx:251 🔍 [PAM V1.0 DIAGNÓSTICO] FormalizacaoList - Estado atual: 
+Object
+hasError
+: 
+false
+isLoading
+: 
+true
+primeiraPropostaStatus
+: 
+"NENHUMA"
+propostas
+: 
+[]
+totalPropostas
+: 
+0
+[[Prototype]]
+: 
+Object
+formalizacao.tsx:189 Fazendo requisição para /api/propostas/formalizacao
+apiClient.ts:343 [PASSO 3 - ENVIO] 
+Object
+authorizationHeader
+: 
+"Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0RqRkZVR3giLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2R2Z2xneHJ2aG10c2l4YWFieGhhLnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiJhNjVlZmM1NC05MGNkLTRiOTQtYjk3MS1jOGE1NjAxMDQwMzIiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzU1MjY1OTE0LCJpYXQiOjE3NTUyNjIzMTQsImVtYWlsIjoiZ2FicmllbHNlcnJpMjM4QGdtYWlsLmNvbSIsInBob25lIjoiIiwiYXBwX21ldGFkYXRhIjp7InByb3ZpZGVyIjoiZW1haWwiLCJwcm92aWRlcnMiOlsiZW1haWwiXSwicm9sZSI6IkFETUlOSVNUUkFET1IifSwidXNlcl9tZXRhZGF0YSI6eyJlbWFpbF92ZXJpZmllZCI6dHJ1ZX0sInJvbGUiOiJhdXRoZW50aWNhdGVkIiwiYWFsIjoiYWFsMSIsImFtciI6W3sibWV0aG9kIjoicGFzc3dvcmQiLCJ0aW1lc3RhbXAiOjE3NTUyNjIzMTR9XSwic2Vzc2lvbl9pZCI6IjM1Mzk2ZDYyLTcxOGMtNGE3NS05MGUxLTRjODFlN2QxYjBiNiIsImlzX2Fub255bW91cyI6ZmFsc2V9.FVe_XY2elsj58qyaQJQ2l-tIQTC72QRD51b6To5CnH8"
+hasToken
+: 
+true
+isFormData
+: 
+false
+url
+: 
+"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/formalizacao"
+[[Prototype]]
+: 
+Object
+formalizacao.tsx:191 Resposta do endpoint formalizacao: 
+Array(1)
+0
+: 
+{id: 'formal-test-001', cliente_data: {…}, condicoes_data: {…}, status: 'aprovado', loja_id: 1, …}
+length
+: 
+1
+[[Prototype]]
+: 
+Array(0)
+formalizacao.tsx:200 Propostas com dados parseados: 
+Array(1)
+0
+: 
+{id: 'formal-test-001', cliente_data: {…}, condicoes_data: {…}, status: 'aprovado', loja_id: 1, …}
+length
+: 
+1
+[[Prototype]]
+: 
+Array(0)
+formalizacao.tsx:251 🔍 [PAM V1.0 DIAGNÓSTICO] FormalizacaoList - Estado atual: 
+Object
+hasError
+: 
+false
+isLoading
+: 
+false
+primeiraPropostaStatus
+: 
+"aprovado"
+propostas
+: 
+[{…}]
+totalPropostas
+: 
+1
+[[Prototype]]
+: 
+Object
+formalizacao.tsx:345 🔍 [PAM V1.0 DIAGNÓSTICO] Renderizando proposta: 
+Object
+clienteData
+: 
+{cpf: '12345678901', nome: 'João Silva Formalização', email: 'joao.formal@test.com', renda: '5500.00', telefone: '(11) 99999-9999', …}
+id
+: 
+"formal-test-001"
+status
+: 
+"aprovado"
+statusColor
+: 
+"bg-green-500"
+statusText
+: 
+"Aprovado"
+userRole
+: 
+"ADMINISTRADOR"
+[[Prototype]]
+: 
+Object
+formalizacao.tsx:189 Fazendo requisição para /api/propostas/formalizacao
+apiClient.ts:343 [PASSO 3 - ENVIO] 
+Object
+authorizationHeader
+: 
+"Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0RqRkZVR3giLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2R2Z2xneHJ2aG10c2l4YWFieGhhLnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiJhNjVlZmM1NC05MGNkLTRiOTQtYjk3MS1jOGE1NjAxMDQwMzIiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzU1MjY1OTE0LCJpYXQiOjE3NTUyNjIzMTQsImVtYWlsIjoiZ2FicmllbHNlcnJpMjM4QGdtYWlsLmNvbSIsInBob25lIjoiIiwiYXBwX21ldGFkYXRhIjp7InByb3ZpZGVyIjoiZW1haWwiLCJwcm92aWRlcnMiOlsiZW1haWwiXSwicm9sZSI6IkFETUlOSVNUUkFET1IifSwidXNlcl9tZXRhZGF0YSI6eyJlbWFpbF92ZXJpZmllZCI6dHJ1ZX0sInJvbGUiOiJhdXRoZW50aWNhdGVkIiwiYWFsIjoiYWFsMSIsImFtciI6W3sibWV0aG9kIjoicGFzc3dvcmQiLCJ0aW1lc3RhbXAiOjE3NTUyNjIzMTR9XSwic2Vzc2lvbl9pZCI6IjM1Mzk2ZDYyLTcxOGMtNGE3NS05MGUxLTRjODFlN2QxYjBiNiIsImlzX2Fub255bW91cyI6ZmFsc2V9.FVe_XY2elsj58qyaQJQ2l-tIQTC72QRD51b6To5CnH8"
+hasToken
+: 
+true
+isFormData
+: 
+false
+url
+: 
+"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas/formalizacao"
+[[Prototype]]
+: 
+Object
+formalizacao.tsx:251 🔍 [PAM V1.0 DIAGNÓSTICO] FormalizacaoList - Estado atual: 
+Object
+hasError
+: 
+false
+isLoading
+: 
+false
+primeiraPropostaStatus
+: 
+"aprovado"
+propostas
+: 
+[{…}]
+totalPropostas
+: 
+1
+[[Prototype]]
+: 
+Object
+formalizacao.tsx:345 🔍 [PAM V1.0 DIAGNÓSTICO] Renderizando proposta: 
+Object
+clienteData
+: 
+{cpf: '12345678901', nome: 'João Silva Formalização', email: 'joao.formal@test.com', renda: '5500.00', telefone: '(11) 99999-9999', …}
+id
+: 
+"formal-test-001"
+status
+: 
+"aprovado"
+statusColor
+: 
+"bg-green-500"
+statusText
+: 
+"Aprovado"
+userRole
+: 
+"ADMINISTRADOR"
+[[Prototype]]
+: 
+Object
+formalizacao.tsx:191 Resposta do endpoint formalizacao: 
+Array(1)
+0
+: 
+{id: 'formal-test-001', cliente_data: {…}, condicoes_data: {…}, status: 'aprovado', loja_id: 1, …}
+length
+: 
+1
+[[Prototype]]
+: 
+Array(0)
+formalizacao.tsx:200 Propostas com dados parseados: 
+Array(1)
+0
+: 
+{id: 'formal-test-001', cliente_data: {…}, condicoes_data: {…}, status: 'aprovado', loja_id: 1, …}
+length
+: 
+1
+[[Prototype]]
+: 
+Array(0)
+formalizacao.tsx:251 🔍 [PAM V1.0 DIAGNÓSTICO] FormalizacaoList - Estado atual: 
+Object
+hasError
+: 
+false
+isLoading
+: 
+false
+primeiraPropostaStatus
+: 
+"aprovado"
+propostas
+: 
+[{…}]
+totalPropostas
+: 
+1
+[[Prototype]]
+: 
+Object
+formalizacao.tsx:345 🔍 [PAM V1.0 DIAGNÓSTICO] Renderizando proposta: 
+Object
+useIdleTimer.ts:108 🔍 [IDLE TIMER] Tab became hidden, timer continues
+AuthContext.tsx:170 🔐 [AUTH EVENT] SIGNED_IN 
+Object
+hasSession
+: 
+true
+tokenLength
+: 
+767
+[[Prototype]]
+: 
+Object
+apiClient.ts:343 [PASSO 3 - ENVIO] 
+Object
+authorizationHeader
+: 
+"Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0RqRkZVR3giLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2R2Z2xneHJ2aG10c2l4YWFieGhhLnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiJhNjVlZmM1NC05MGNkLTRiOTQtYjk3MS1jOGE1NjAxMDQwMzIiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzU1MjY1OTE0LCJpYXQiOjE3NTUyNjIzMTQsImVtYWlsIjoiZ2FicmllbHNlcnJpMjM4QGdtYWlsLmNvbSIsInBob25lIjoiIiwiYXBwX21ldGFkYXRhIjp7InByb3ZpZGVyIjoiZW1haWwiLCJwcm92aWRlcnMiOlsiZW1haWwiXSwicm9sZSI6IkFETUlOSVNUUkFET1IifSwidXNlcl9tZXRhZGF0YSI6eyJlbWFpbF92ZXJpZmllZCI6dHJ1ZX0sInJvbGUiOiJhdXRoZW50aWNhdGVkIiwiYWFsIjoiYWFsMSIsImFtciI6W3sibWV0aG9kIjoicGFzc3dvcmQiLCJ0aW1lc3RhbXAiOjE3NTUyNjIzMTR9XSwic2Vzc2lvbl9pZCI6IjM1Mzk2ZDYyLTcxOGMtNGE3NS05MGUxLTRjODFlN2QxYjBiNiIsImlzX2Fub255bW91cyI6ZmFsc2V9.FVe_XY2elsj58qyaQJQ2l-tIQTC72QRD51b6To5CnH8"
+hasToken
+: 
+true
+isFormData
+: 
+false
+url
+: 
+"https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me"
+[[Prototype]]
+: 
+Object
+formalizacao.tsx:251 🔍 [PAM V1.0 DIAGNÓSTICO] FormalizacaoList - Estado atual: 
+Object
+hasError
+: 
+false
+isLoading
+: 
+false
+primeiraPropostaStatus
+: 
+"aprovado"
+propostas
+: 
+[{…}]
+totalPropostas
+: 
+1
+[[Prototype]]
+: 
+Object
+formalizacao.tsx:345 🔍 [PAM V1.0 DIAGNÓSTICO] Renderizando proposta: 
+Object
+clienteData
+: 
+{cpf: '12345678901', nome: 'João Silva Formalização', email: 'joao.formal@test.com', renda: '5500.00', telefone: '(11) 99999-9999', …}
+id
+: 
+"formal-test-001"
+status
+: 
+"aprovado"
+statusColor
+: 
+"bg-green-500"
+statusText
+: 
+"Aprovado"
+userRole
+: 
+"ADMINISTRADOR"
+[[Prototype]]
+: 
+Object
+AuthContext.tsx:102 🔐 [AUTH RESTORED] User profile loaded with valid token
+formalizacao.tsx:251 🔍 [PAM V1.0 DIAGNÓSTICO] FormalizacaoList - Estado atual: 
+Object
+hasError
+: 
+false
+isLoading
+: 
+false
+primeiraPropostaStatus
+: 
+"aprovado"
+propostas
+: 
+[{…}]
+totalPropostas
+: 
+1
+[[Prototype]]
+: 
+Object
+formalizacao.tsx:345 🔍 [PAM V1.0 DIAGNÓSTICO] Renderizando proposta: 
+Object
+clienteData
+: 
+{cpf: '12345678901', nome: 'João Silva Formalização', email: 'joao.formal@test.com', renda: '5500.00', telefone: '(11) 99999-9999', …}
+id
+: 
+"formal-test-001"
+status
+: 
+"aprovado"
+statusColor
+: 
+"bg-green-500"
+statusText
+: 
+"Aprovado"
+userRole
+: 
+"ADMINISTRADOR"
+[[Prototype]]
+: 
+Object

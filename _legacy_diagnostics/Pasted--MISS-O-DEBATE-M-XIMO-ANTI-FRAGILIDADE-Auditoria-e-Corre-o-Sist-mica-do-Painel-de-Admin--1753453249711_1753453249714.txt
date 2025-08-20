@@ -1,0 +1,26 @@
+# MISSÃO: DEBATE MÁXIMO (ANTI-FRAGILIDADE) - Auditoria e Correção Sistémica do Painel de Admin
+
+**CONTEXTO ESTRATÉGICO:**
+Olá, Assistente. A nossa arquitetura de segurança (RBAC) está a funcionar a um nível fundamental, mas o nosso painel de administração está repleto de bugs de integração que o tornam inoperacional. Precisamos da sua ajuda para diagnosticar e projetar uma solução definitiva.
+
+**SUA TAREFA (ASSISTENTE):**
+A sua tarefa é atuar como um Arquiteto Full-Stack Sênior e realizar um "Raio-X" da nossa base de código para identificar a causa raiz comum a todos estes problemas. Esta será a nossa **Interação 1 de 5**.
+
+---
+### **Interação 1: Diagnóstico Holístico e Proposta de Refatoração**
+
+**Os Sintomas Atuais (O Que o Administrador Vê):**
+
+1.  **Na "Gestão de Usuários":** A página carrega, mas a tabela de usuários exibe **"erro ao carregar usuarios"**.
+2.  **Na "Gestão de Parceiros":** Eu consigo criar um novo parceiro (a API funciona!), mas ele **não aparece na tabela** até que eu recarregue a página.
+3.  **Na "Gestão de Lojas":** A lista de lojas sumiu. Ao tentar criar uma "Nova Loja", é impossível, porque o campo para selecionar o **"Parceiro" não puxa nenhum dado**.
+4.  **Na "Gestão de Produtos":** Eu consigo criar e ativar/inativar produtos, mas a tentativa de **excluir um produto resulta num erro**.
+
+**A Minha Pergunta Para Você (Análise de Alto Nível):**
+
+Qual é a sua **"Teoria do Ponto Único de Falha"**? Você acredita que estes quatro problemas são sintomas de uma única falha arquitetural fundamental? A minha intuição aponta para uma falha sistémica na forma como o nosso frontend está a gerir o estado e a comunicar com o backend (especificamente, a invalidação de cache e o tratamento de erros no TanStack Query). Qual é a sua análise?
+
+**Proposta de Plano de Correção:**
+Com base na sua teoria, proponha um **roadmap de refatoração** em "micro-passos" para corrigir esta fragilidade de forma definitiva em todos os nossos módulos de administração.
+
+---

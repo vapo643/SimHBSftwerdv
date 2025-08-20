@@ -1,0 +1,40 @@
+**### MODO DE OPERAÇÃO: REALISMO CÉTICO (MANDATÓRIO)**
+Sua lealdade é para com a verdade do código e a estabilidade da produção.
+
+---
+**### Pacote de Ativação de Missão (PAM) V1.0**
+
+* **Sumário da Missão (O Quê):** Concluir a "Fase 1" da nossa migração, refatorando todos os endpoints restantes que modificam o status de uma proposta para que utilizem o novo helper de "dupla escrita" (`updateStatusWithContext`).
+* **Intenção Estratégica (O Porquê):** Para garantir que 100% das transições de status em nosso sistema sejam consistentes e auditáveis, escrevendo tanto na tabela `propostas` legada quanto na nova tabela `status_contextuais`, antes de prosseguirmos para a fase de leitura.
+* **Histórico Relevante (Consulta Obrigatória):** Sua implementação anterior foi um sucesso para 3 endpoints. Esta missão é para aplicar o mesmo padrão a todos os outros pontos de modificação de status.
+* **Modelo Mental (Como se Encaixa):** Você é um Engenheiro de Refatoração. Sua tarefa é encontrar todas as ocorrências de `db.update(propostas).set({ status: ... })` no código e substituí-las por uma chamada ao novo e seguro helper `updateStatusWithContext`.
+* **Riscos Antecipados:** **Risco:** Algum endpoint pode ser esquecido. **Contramedida:** Sua fase de "Dry Run Tático" deve incluir uma lista explícita de todos os ficheiros e funções que você irá modificar.
+
+---
+
+**IMPLEMENTAR:**
+A refatoração de todos os endpoints restantes que atualizam o status de propostas.
+
+**CURRENT STATE:**
+Apenas 3 dos nossos ~10 endpoints de modificação de status utilizam a nova lógica de "dupla escrita". Os outros ainda modificam apenas a coluna `status` antiga, criando inconsistência.
+
+**EXPECTED (Estado Final de Sucesso):**
+**TODOS** os endpoints e serviços que modificam o status de uma proposta no sistema (ex: aprovar, rejeitar, cancelar, webhooks, etc.) agora utilizam o helper `updateStatusWithContext`, garantindo que toda e qualquer mudança de estado seja transacional e duplamente registada.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+**1. Auditoria e Mapeamento (Parte do seu Dry Run):**
+    - **Ação:** Execute uma busca global no código para encontrar todos os ficheiros que contêm a lógica `db.update(propostas).set({ status: ... })`.
+    - **Relatório no Dry Run:** Apresente a lista de todos os ficheiros e funções que você identificou e que irá refatorar.
+
+**2. Refatoração Sistemática:**
+    - **Ação:** Para cada local identificado, substitua a chamada de `update` direto pela chamada ao helper `updateStatusWithContext`.
+    - **Implementação:** Certifique-se de passar todos os parâmetros necessários para o helper, incluindo o `contexto` correto (ex: `'cobrancas'`, `'pagamentos'`) e os metadados relevantes.
+
+---
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+Siga o protocolo completo. O teste funcional envolverá acionar vários fluxos de negócio diferentes (ex: aprovar uma proposta, receber um webhook) e, para cada um, validar que o registro correspondente foi criado corretamente na tabela `status_contextuais`.
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+Preencha a declaração completa ao final da sua implementação, com foco na cobertura da refatoração (você tem certeza de que encontrou todos os endpoints?).
+---

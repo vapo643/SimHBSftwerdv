@@ -1,0 +1,29 @@
+**IMPLEMENTAR:**
+A lógica condicional (`if/else`) no serviço `pdfGeneratorService.ts` para renderizar apenas os campos relevantes para Pessoa Física (PF) ou Pessoa Jurídica (PJ) na CCB, resolvendo o problema de campos "NÃO INFORMADO".
+
+**CONTEXT:**
+Seu diagnóstico confirmou que a falta de lógica condicional é a causa raiz dos campos irrelevantes em nossas CCBs. Esta missão é para implementar essa inteligência, garantindo que cada contrato seja limpo, profissional e específico para o tipo de cliente.
+
+**CURRENT STATE:**
+O serviço de geração de PDF tenta renderizar todos os campos (tanto de PF quanto de PJ) para todos os clientes, poluindo o documento final.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  Ao gerar uma CCB para um cliente **PF**, apenas os campos de PF (CPF, RG, etc.) devem ser preenchidos. Os campos de PJ (CNPJ, Razão Social, etc.) **não devem aparecer de forma alguma**.
+2.  Ao gerar uma CCB para um cliente **PJ**, apenas os campos de PJ devem ser preenchidos. Os campos de PF **não devem aparecer de forma alguma**.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+**1. Lógica de Detecção do Tipo de Cliente:**
+    - **Ação:** Dentro da função `generateCcbFromTemplate`, sua primeira ação deve ser determinar o tipo de cliente.
+    - **Regra:** Baseado no seu diagnóstico, a regra é: se o objeto `propostaData.cliente_data` contém um campo `cnpj` preenchido e válido, o cliente é `PJ`. Caso contrário, é `PF`.
+
+**2. Implementação da Renderização Condicional:**
+    - **Ação:** Envolva os blocos de código `page.drawText()` que preenchem os campos no PDF em estruturas condicionais.
+    - **Implementação:** Crie um grande bloco `if (tipoCliente === 'PF') { ... }` para todos os `page.drawText()` que preenchem campos exclusivos de PF (RG, Data de Emissão RG, UF RG, Local de Nascimento, etc.).
+    - **Implementação:** Crie um bloco `else if (tipoCliente === 'PJ') { ... }` para todos os `page.drawText()` que preenchem campos exclusivos de PJ (Razão Social, CNPJ, Inscrição Estadual, etc.).
+    - **Importante:** Campos que são comuns a ambos (ex: Endereço, Valor do Empréstimo, Parcelas, Dados Bancários) devem permanecer fora dos blocos condicionais para serem renderizados para todos.
+
+**TESTE (Validação Final Obrigatória):**
+1.  **Cenário 1 (Teste PF):** Crie ou utilize uma proposta para um cliente **PF**. Gere a CCB e valide visualmente que NENHUM campo de PJ (CNPJ, Razão Social) aparece no documento.
+2.  **Cenário 2 (Teste PJ):** Crie ou utilize uma proposta para um cliente **PJ**. Gere a CCB e valide visualmente que NENHUM campo de PF (RG, Estado Civil) aparece no documento.
+3.  **Protocolo 5-CHECK:** Execute `get_latest_lsp_diagnostics` e zere todos os erros antes de declarar a missão concluída.

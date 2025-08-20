@@ -1,0 +1,55 @@
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+content-script.js:22 Document already loaded, running initialization immediately
+content-script.js:4 Attempting to initialize AdUnit
+content-script.js:6 AdUnit initialized successfully
+webcomponents-ce.js:33 Uncaught Error: A custom element with name 'mce-autosize-textarea' has already been defined.
+    at Aa (webcomponents-ce.js:33:363)
+    at m.define (webcomponents-ce.js:33:133)
+    at overlay_bundle.js:148:5559
+    at D (overlay_bundle.js:44:680)
+    at overlay_bundle.js:159:392Understand this error
+pagamentos:1 Unchecked runtime.lastError: The message port closed before a response was received.Understand this error
+content.js:208 Object
+AuthContext.tsx:170 🔐 [AUTH EVENT] SIGNED_IN Object
+pagamentos.tsx:288 [PAGAMENTOS FRONTEND] Dados recebidos: 0
+pagamentos.tsx:289 [PAGAMENTOS FRONTEND] Termo de busca: 
+pagamentos.tsx:290 [PAGAMENTOS FRONTEND] Dados filtrados: 0
+pagamentos.tsx:152 [PAGAMENTOS] Buscando pagamentos com filtros: Object
+AuthContext.tsx:170 🔐 [AUTH EVENT] INITIAL_SESSION Object
+apiClient.ts:166 🔐 [TOKEN MANAGER] Fresh token obtained, length: 767
+apiClient.ts:343 [PASSO 3 - ENVIO] Object
+apiClient.ts:343 [PASSO 3 - ENVIO] Object
+apiClient.ts:343 [PASSO 3 - ENVIO] Object
+apiClient.ts:343 [PASSO 3 - ENVIO] Object
+about:blank:1 Unchecked runtime.lastError: The message port closed before a response was received.Understand this error
+2AuthContext.tsx:102 🔐 [AUTH RESTORED] User profile loaded with valid token
+pagamentos.tsx:158 [PAGAMENTOS] Resposta recebida: Array(0)
+pagamentos.tsx:288 [PAGAMENTOS FRONTEND] Dados recebidos: 0
+pagamentos.tsx:289 [PAGAMENTOS FRONTEND] Termo de busca: 
+pagamentos.tsx:290 [PAGAMENTOS FRONTEND] Dados filtrados: 0
+pagamentos-review.tsx:189 🔍 [REVIEW MODAL DEBUG] dadosProposta final: null
+pagamentos-review.tsx:190 🔍 [REVIEW MODAL DEBUG] isLoadingProposta: false
+pagamentos-review.tsx:191 🔍 [REVIEW MODAL DEBUG] propostaCompleta: undefined
+pagamentos-review.tsx:194 ⚠️ [REVIEW MODAL DEBUG] Proposta não encontrada, fechando modal
+pagamentos.tsx:152 [PAGAMENTOS] Buscando pagamentos com filtros: Object
+apiClient.ts:343 [PASSO 3 - ENVIO] Object
+pagamentos.tsx:158 [PAGAMENTOS] Resposta recebida: Array(0)
+pagamentos.tsx:152 [PAGAMENTOS] Buscando pagamentos com filtros: Object
+apiClient.ts:343 [PASSO 3 - ENVIO] Object
+pagamentos.tsx:152 [PAGAMENTOS] Buscando pagamentos com filtros: Object
+apiClient.ts:343 [PASSO 3 - ENVIO] Object
+pagamentos.tsx:158 [PAGAMENTOS] Resposta recebida: Array(0)
+pagamentos.tsx:158 [PAGAMENTOS] Resposta recebida: Array(0)
+pagamentos.tsx:152 [PAGAMENTOS] Buscando pagamentos com filtros: Object
+apiClient.ts:343 [PASSO 3 - ENVIO] Object
+useIdleTimer.ts:108 🔍 [IDLE TIMER] Tab became hidden, timer continues
+pagamentos.tsx:158 [PAGAMENTOS] Resposta recebida: Array(0)
+AuthContext.tsx:170 🔐 [AUTH EVENT] SIGNED_IN Object
+apiClient.ts:343 [PASSO 3 - ENVIO] Object
+AuthContext.tsx:102 🔐 [AUTH RESTORED] User profile loaded with valid token
+pagamentos:1 Refused to load the stylesheet 'https://www.gstatic.com/_/translate_http/_/ss/k=translate_http.tr.pgV-E-68K-A.L.W.O/am=gMA/d=0/rs=AN8SPfpszKJssl6IA0boGClFdsaAZGtXEQ/m=el_main_css' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+Understand this error
+useIdleTimer.ts:108 🔍 [IDLE TIMER] Tab became hidden, timer continues
+AuthContext.tsx:170 🔐 [AUTH EVENT] SIGNED_IN {hasSession: true, tokenLength: 767}
+apiClient.ts:343 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.2rHylj52PsqTjn6eXxbfAmUVx5GGODlALBeSEdDpmnQ', hasToken: true, isFormData: false}
+AuthContext.tsx:102 🔐 [AUTH RESTORED] User profile loaded with valid token

@@ -1,0 +1,30 @@
+# MISSÃO: DEBATE MÁXIMO (ANTI-FALHA) - Diagnóstico e Re-arquitetura do Fluxo de Token JWT
+
+**CONTEXTO ESTRATÉGICO:**
+Enfrentamos uma falha de autenticação catastrófica. Mesmo após um login bem-sucedido, o nosso frontend não está a enviar o token de autenticação para o backend, resultando em erros `401 Unauthorized` em todas as rotas protegidas.
+
+**SUA TAREFA (ASSISTENTE):**
+A sua tarefa é atuar como um Arquiteto de Segurança e projetar um plano de diagnóstico e implementação **extremamente granular e verificável** para reconstruir o nosso fluxo de autenticação de ponta a ponta. Esta será a nossa **Interação 1 de 3**.
+
+---
+### **Interação 1: Proposta de Diagnóstico e Plano de Reconstrução do Fluxo de Token**
+
+Por favor, analise a nossa situação crítica e responda com a sua proposta para os seguintes pontos:
+
+**1. Análise da Causa Raiz da Falha no Envio do Token:**
+* **Hipótese:** Descreva, passo a passo, a jornada que um token JWT deveria fazer, desde o login até a requisição da API. Com base nisso, qual é a sua principal teoria para o ponto de falha no nosso código?
+    * O token não está a ser guardado corretamente no `localStorage` após o login?
+    * O nosso `AuthContext` não está a conseguir ler o token do `localStorage`?
+    * O nosso `apiClient` não está a receber o token do `AuthContext` ou não está a anexá-lo ao `header` 'Authorization'?
+
+**2. Proposta de Plano de Depuração e Validação (Micro-Passos):**
+* **Ação:** Proponha um plano de depuração em "micro-passos" para que possamos validar cada etapa da jornada do token.
+    * **Passo 1 (Validação do Login):** Como podemos adicionar `console.log` na nossa função de login para **confirmar** que estamos a receber o `accessToken` do Supabase?
+    * **Passo 2 (Validação do Armazenamento):** Como podemos usar as Ferramentas de Desenvolvedor do browser para inspecionar o `localStorage` e **confirmar** que a chave da sessão do Supabase está a ser guardada?
+    * **Passo 3 (Validação da Leitura):** Como podemos adicionar `console.log` no nosso `AuthContext` para **confirmar** que ele está a ler o token do `localStorage` com sucesso?
+    * **Passo 4 (Validação do Envio):** Como podemos usar o separador "Rede" (Network) das Ferramentas de Desenvolvedor para inspecionar uma requisição à API e **confirmar** se o `header` 'Authorization: Bearer <token>' está presente ou ausente?
+
+**3. Proposta de Arquitetura de Código (se necessário):**
+* Com base na sua análise, a estrutura do nosso `AuthContext` e `apiClient` está correta, ou você propõe uma refatoração para garantir que o token seja gerido e transmitido de forma mais robusta?
+
+---

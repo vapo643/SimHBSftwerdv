@@ -1,0 +1,26 @@
+# MISSÃO: DEBATE TÉCNICO DE EMERGÊNCIA - Diagnóstico e Re-arquitetura da Política de RLS da Formalização
+
+**CONTEXTO ESTRATÉGICO:**
+Estamos a enfrentar uma falha persistente e crítica: a "Fila de Formalização" não está a exibir as propostas aprovadas para o `ATENDENTE`. O Agente já tentou múltiplas correções que falharam. Suspeitamos que a causa raiz é uma falha fundamental na política de Row Level Security (RLS) no nosso banco de dados Supabase.
+
+**SUA TAREFA (ASSISTENTE):**
+A sua tarefa é atuar como um Especialista em Segurança Supabase e projetar uma política de RLS anti-frágil para resolver este problema de uma vez por todas. Esta será a nossa **Interação 1 de 3**.
+
+---
+### **Interação 1: Proposta de Diagnóstico e Arquitetura de Política de RLS**
+
+Por favor, analise a nossa situação e responda com a sua proposta para os seguintes pontos:
+
+**1. Análise da Causa Raiz da Falha:**
+* **Hipótese:** A política de RLS atual para a "Fila de Formalização" está provavelmente mal formulada. Qual é a sua principal teoria sobre o erro na lógica da política? Ela está a comparar os campos errados (ex: `user_id` vs `auth.uid()`)? A verificação dos `status` de formalização está incorreta?
+
+**2. Proposta de Arquitetura de Política de RLS Definitiva:**
+* **Ação:** Escreva o script SQL **exato, completo e robusto** para a política de `SELECT` na tabela `propostas` que governa a "Fila de Formalização". A sua política deve garantir que um usuário autenticado possa ver uma proposta se **TODAS** as seguintes condições forem verdadeiras:
+    a. A `role` do usuário (vinda da nossa função de contexto `get_current_user_context()`) for `ATENDENTE`.
+    b. O `autor_id` da proposta for igual ao `id` do `ATENDENTE` logado.
+    c. O `status` da proposta estiver na lista de status de formalização (`'aprovado'`, `'documentos_enviados'`, etc.).
+
+**3. Proposta de Plano de Validação (SQL):**
+* **Ação:** Forneça um script de **validação** em SQL. A sua query deve simular a visão de um `ATENDENTE` específico, buscando na tabela `propostas` e nos mostrando quantas propostas ele *deveria* estar a ver na Fila de Formalização, para que possamos comparar com o resultado da aplicação.
+
+---

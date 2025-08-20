@@ -1,0 +1,25 @@
+Hello. Please refactor the CCB synchronization logic to implement a more resilient and efficient hybrid architecture using Webhooks with a Polling fallback.
+
+The goal is to stop the current high-frequency polling (every 2 minutes) and adopt an event-driven approach as the primary method, using polling only as a safety net.
+
+Here are the required implementation steps:
+
+**1. Create a Webhook Listener Endpoint:**
+* Create a new route, for example, `POST /api/webhooks/clicksign`, to receive signing completion events from ClickSign.
+* This endpoint must securely validate the incoming request (e.g., using HMAC signature verification).
+* Upon successful validation, it should trigger the core logic to process the signed document.
+
+**2. Abstract the Core Document Processing Logic:**
+* Take the existing logic from `ccbSyncService.ts` that downloads the signed document, saves it to Supabase Storage, and updates the database.
+* Move this logic into a reusable function or method, let's call it `processSignedDocument(proposalId)`.
+* Both the new webhook listener and the refactored polling service will call this same function to avoid code duplication.
+
+**3. Refactor the Polling Service (`ccbSyncService.ts`):**
+* Change the polling frequency from every 2 minutes to a much lower frequency, such as once every 6 hours.
+* Modify the polling query. It should no longer check for all recently signed proposals. Instead, it should act as a safety net, querying only for proposals that are in an "awaiting signature" state for more than a few hours and haven't been processed yet. This will catch any events the webhook might have missed.
+* When the polling service finds such a proposal, it should call the same `processSignedDocument(proposalId)` function.
+
+**4. Enhance Logging:**
+* Add specific logs to differentiate how a document was processed. For example: `INFO: Document for proposal [ID] processed via Webhook.` or `WARN: Document for proposal [ID] processed via Polling fallback.`.
+
+Please implement these changes to create a more robust and efficient system.

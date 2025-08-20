@@ -1,0 +1,664 @@
+
+> rest-express@1.0.0 dev
+✅ Database: Configuring Supabase connection...
+✅ Database: Connection configured (lazy)
+[CLICKSIGN V1] 🚀 Initialized in PRODUCTION mode (legal signatures)
+[CLICKSIGN V1] API URL: https://app.clicksign.com/api/v1
+[CLICKSIGN V1] Token configured: b73b3b90-c87...
+[CLICKSIGN] 🔴 Circuit Breaker will be initialized on first use
+[INTER] 🏦 Initialized in production mode
+[INTER] 🌐 API URL: https://cdpj.partners.bancointer.com.br
+[INTER] 🔴 Circuit Breakers will be initialized on first use
+[CLICKSIGN V1] 🚀 Initialized in PRODUCTION mode (legal signatures)
+[CLICKSIGN V1] API URL: https://app.clicksign.com/api/v1
+[CLICKSIGN V1] Token configured: b73b3b90-c...
+[DEV QUEUE] 📦 Created development queue: pdf-processing
+[DEV QUEUE] 📦 Created development queue: boleto-sync
+[DEV QUEUE] 📦 Created development queue: document-processing
+[DEV QUEUE] 📦 Created development queue: notifications
+[DEV QUEUE] 🚀 Development queues initialized with REAL worker processing
+🚀 [TIMING MIDDLEWARE] Creating middleware instance...
+🚀 [TIMING MIDDLEWARE] Middleware instance created and exported
+1:48:48 PM [express] ✅ All secrets loaded successfully
+1:48:48 PM [express] 🔒 [SECURITY] CORS protection configured - ASVS V13.2.1
+1:48:48 PM [express] 🔒 [SECURITY] OPTIONS preflight handling configured
+1:48:48 PM [express] 🔧 [DEV] Using basic CSP configuration optimized for Vite development
+1:48:48 PM [express] 🔒 [SECURITY] Input sanitization middleware activated
+1:48:48 PM [express] 🔒 [SECURITY] URL token validation middleware activated - ASVS V7.1.1
+1:48:48 PM [express] 🔒 [SECURITY] CSRF protection middleware activated - OWASP Cheat Sheet
+1:48:48 PM [express] 🔧 [DEV] Rate limiting configurado para desenvolvimento - limites altos
+[SEMGREP MCP] Development mode - using in-memory cache
+🧠 [ML] Treinando modelo de detecção...
+1:48:48 PM [express] 🔐 Security WebSocket initialized
+[CCB SYNC] 🚀 Starting fallback polling (every 6 hours)
+[CCB SYNC] ℹ️ Primary processing via webhooks, polling is safety net only
+1:48:48 PM [express] 🔄 CCB Sync Service initialized - Webhook primary, polling fallback every 6 hours
+1:48:48 PM [express] 🔔 Sistema de Alertas Proativos inicializado - Próxima execução: 19/08/2025, 04:00:00
+1:48:48 PM [express] ℹ️  Security monitoring disabled. Set ENABLE_SECURITY_MONITORING=true to enable
+1:48:48 PM [express] 🔧 App Config Status:
+1:48:48 PM [express]   - Port: 5000
+1:48:48 PM [express]   - Environment: development
+1:48:48 PM [express]   - Database: ✅ Connected
+1:48:48 PM [express]   - Supabase: ✅ Connected
+1:48:48 PM [express]   - Security: Rate Limit ✅, Helmet ✅
+1:48:48 PM [express] 🚀 Server running on port 5000
+1:48:48 PM [express] 🌍 Environment: development
+1:48:48 PM [express] 📦 Checking storage buckets...
+1:48:49 PM [express] ✅ Storage bucket "documents" already exists as PRIVATE
+Browserslist: browsers data (caniuse-lite) is 10 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+✅ [ML] Modelo treinado com 0 amostras
+✅ Database: Connection test successful
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/debug/me
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/financeiro/cobrancas
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-18T13:50:25.143Z'
+}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/debug/me
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/financeiro/cobrancas
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+🔍 [COBRANÇAS] ====== INÍCIO DA BUSCA DE PROPOSTAS ======
+🔍 [COBRANÇAS] Filtros aplicados: { status: undefined, atraso: undefined }
+🔍 [COBRANÇAS] PAM V1.0 - Filtrando propostas por STATUS conforme Blueprint...
+[DEBUG-BACKEND-1] Iniciando query de cobranças com os seguintes filtros: {
+  statusElegiveis: [
+    'BOLETOS_EMITIDOS',
+    'PAGAMENTO_PENDENTE',
+    'PAGAMENTO_PARCIAL',
+    'PAGAMENTO_CONFIRMADO',
+    'pronto_pagamento'
+  ],
+  whereConditions: '[object Object]',
+  userRole: '',
+  queryParams: { status: undefined, atraso: undefined }
+}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /notificacoes
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/financeiro/cobrancas
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-18T13:50:36.953Z'
+}
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-18T13:50:37.003Z'
+}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /api/debug/me
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/financeiro/cobrancas
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[DEBUG-BACKEND-2] Resultado BRUTO do DB: {
+  totalPropostas: 3,
+  primeiraProposta: {
+    id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+    numeroProposta: 300028,
+    lojaId: 13,
+    status: 'BOLETOS_EMITIDOS',
+    clienteNome: 'Gabriel de Jesus Santana Serri',
+    clienteCpf: '20528464760',
+    clienteEmail: 'gabrieldjesus238@gmail.com',
+    clienteTelefone: '(27) 99853-8565',
+    clienteDataNascimento: '1990-05-15',
+    clienteRenda: '5000.00',
+    clienteRg: null,
+    clienteOrgaoEmissor: null,
+    clienteRgUf: null,
+    clienteRgDataEmissao: null,
+    clienteEstadoCivil: null,
+    clienteNacionalidade: 'Brasileira',
+    clienteLocalNascimento: null,
+    clienteCep: '29165-460',
+    clienteEndereco: 'Rua miguel angelo',
+    clienteLogradouro: null,
+    clienteNumero: null,
+    clienteComplemento: null,
+    clienteBairro: null,
+    clienteCidade: null,
+    clienteUf: null,
+    clienteOcupacao: null,
+    tipoPessoa: 'PF',
+    clienteRazaoSocial: null,
+    clienteCnpj: null,
+    valor: '1000.00',
+    prazo: 12,
+    valorTac: '50.00',
+    valorIof: '150.00',
+    valorTotalFinanciado: '1000.00',
+    valorLiquidoLiberado: null,
+    taxaJuros: '2.50',
+    dataAprovacao: 2025-08-01T13:21:55.000Z,
+    ccbGerado: true,
+    assinaturaEletronicaConcluida: true,
+    dadosPagamentoBanco: null,
+    dadosPagamentoAgencia: null,
+    dadosPagamentoConta: null,
+    dadosPagamentoTipo: null,
+    dadosPagamentoPix: null,
+    dadosPagamentoTipoPix: null,
+    createdAt: 2025-08-01T16:08:35.623Z,
+    deletedAt: null
+  },
+  idsEncontrados: [
+    '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+    '88a44696-9b63-42ee-aa81-15f9519d24cb',
+    'formal-test-005'
+  ],
+  statusEncontrados: [
+    {
+      id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+      status: 'BOLETOS_EMITIDOS'
+    },
+    {
+      id: '88a44696-9b63-42ee-aa81-15f9519d24cb',
+      status: 'BOLETOS_EMITIDOS'
+    },
+    { id: 'formal-test-005', status: 'BOLETOS_EMITIDOS' }
+  ]
+}
+🔍 [COBRANÇAS] PAM V1.0 - Encontradas 3 propostas com status elegível
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-18T13:50:38.056Z'
+}
+[ALERTAS] Mapeamento: gabrielserri238@gmail.com -> Local ID: 2
+[ALERTAS] Encontradas 4 notificações, 0 não lidas
+🔍 [COBRANÇAS] Total de propostas após filtros: 3
+🔍 [COBRANÇAS] ====== FIM DA BUSCA DE PROPOSTAS ======
+[DEBUG-BACKEND-3] Payload FINAL enviado para o Frontend: {
+  totalPropostas: 3,
+  primeiraPropostaCompleta: {
+    id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+    numeroContrato: '902183DD',
+    nomeCliente: 'Gabriel de Jesus Santana Serri',
+    cpfCliente: '20528464760',
+    telefoneCliente: '(27) 99853-8565',
+    emailCliente: 'gabrieldjesus238@gmail.com',
+    enderecoCliente: 'Rua miguel angelo',
+    cepCliente: '29165-460',
+    valorTotal: 1000,
+    valorFinanciado: 1000,
+    quantidadeParcelas: 6,
+    parcelasPagas: 0,
+    parcelasPendentes: 6,
+    parcelasVencidas: 0,
+    valorTotalPago: 0,
+    valorTotalPendente: 1203.8,
+    valorTotalVencido: 0,
+    diasAtraso: 0,
+    status: 'em_dia',
+    dataContrato: 2025-08-01T13:21:55.000Z,
+    ccbAssinada: true,
+    parcelas: [ [Object], [Object], [Object], [Object], [Object], [Object] ],
+    interCodigoSolicitacao: '44a467d1-e93f-4e91-b1f9-c79438ef5eea',
+    interSituacao: 'A_RECEBER',
+    interDataVencimento: '2025-11-10',
+    dadosBancarios: {
+      banco: null,
+      agencia: null,
+      conta: null,
+      tipoConta: null,
+      pix: null,
+      tipoPix: null
+    }
+  },
+  resumoDados: [
+    {
+      id: '902183dd-b5d1-4e20-8a72-79d3d3559d4d',
+      nomeCliente: 'Gabriel de Jesus Santana Serri',
+      cpfCliente: '20528464760',
+      status: 'em_dia',
+      valorTotal: 1000
+    },
+    {
+      id: '88a44696-9b63-42ee-aa81-15f9519d24cb',
+      nomeCliente: 'Gabriel Santana Jesus ',
+      cpfCliente: '205.284.647-60',
+      status: 'em_dia',
+      valorTotal: 0
+    },
+    {
+      id: 'formal-test-005',
+      nomeCliente: 'Carlos Ferreira Pagamento',
+      cpfCliente: '99988877766',
+      status: 'em_dia',
+      valorTotal: 0
+    }
+  ]
+}
+[SYNC STATUS PAM V1.0] Verificando estado de sincronização para proposta 88a44696-9b63-42ee-aa81-15f9519d24cb
+[SYNC STATUS PAM V1.0] Proposta 88a44696-9b63-42ee-aa81-15f9519d24cb: {
+  syncStatus: 'nao_iniciado',
+  totalBoletos: 48,
+  boletosSincronizados: 0
+}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /88a44696-9b63-42ee-aa81-15f9519d24cb/CORRETO-1755013508.325368-1/pdf
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/financeiro/cobrancas
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[JWT DEBUG - PDF ESPECÍFICO] Request path: /88a44696-9b63-42ee-aa81-15f9519d24cb/CORRETO-1755013508.325368-1/pdf
+[JWT DEBUG - PDF ESPECÍFICO] Auth header completo length: 774
+[JWT DEBUG - PDF ESPECÍFICO] Token preview: Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R...
+[JWT AUTH - PDF DOWNLOAD] Token length: 767
+[JWT AUTH - PDF DOWNLOAD] Token first 20 chars: eyJhbGciOiJIUzI1NiIs...
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-18T13:51:01.184Z'
+}
+[PDF STORAGE] Buscando PDF no storage para: CORRETO-1755013508.325368-1
+[PDF STORAGE] Verificando arquivo: propostas/88a44696-9b63-42ee-aa81-15f9519d24cb/boletos/emitidos_pendentes/CORRETO-1755013508.325368-1.pdf
+[PDF STORAGE] ⚠️ PDF não encontrado no storage, listError: null
+[PDF STORAGE] Tentando fallback para API do Banco Inter...
+[INTER] 📄 SOLUÇÃO IDENTIFICADA: API v3 retorna PDF como base64 em JSON
+[INTER] 🔍 Processando codigoSolicitacao: CORRETO-1755013508.325368-1
+[INTER] 🔍 STEP 1: Verificando se cobrança existe...
+[INTER] 📋 Retrieving collection: CORRETO-1755013508.325368-1
+[INTER] 🔑 Requesting new access token...
+[INTER] 🌐 Token URL: cdpj.partners.bancointer.com.br/oauth/v2/token
+[INTER] 📄 Using form-based authentication per official docs
+[INTER] 🔓 Certificate configured: ✅ Present
+[INTER] 🔑 Private Key configured: ✅ Present
+[INTER] 📊 Client ID length: 36 chars
+[INTER] 📊 Client Secret length: 36 chars
+[INTER] 📝 Form parameters: client_id=***, grant_type=client_credentials, scope=boleto-cobranca.read boleto-cobranca.write webhook.read webhook.write
+[INTER] 📝 Form body string length: 203 chars
+[INTER] 📝 Form body preview: client_id=05fc3816-9a8f-4a2d-8b28-277cd3617cc2&client_secret=bbb82b01-2ca0-407f-a21c-0e1dff659d42&gr...
+[INTER] 🔒 Using mTLS certificate authentication
+[INTER] 🔄 Formatting certificates with proper line breaks...
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] ✅ Certificate formatted with line breaks
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] ✅ Private key formatted with line breaks
+[INTER] ✅ Certificates formatted and ready
+[INTER] 🔧 Creating Undici agent for mTLS...
+[INTER] 🚀 Making mTLS request with Undici agent...
+[INTER] ❌ Fetch error: fetch failed
+[INTER] 🔄 Falling back to raw HTTPS request...
+[INTER] 📡 Response status: 200
+[INTER] ✅ Access token obtained successfully (expires in 3600s)
+[CIRCUIT_BREAKER] ✅ interTokenBreaker request succeeded
+[INTER] ========== REQUEST DETAILS ==========
+[INTER] 🌐 FULL URL: https://cdpj.partners.bancointer.com.br/cobranca/v3/cobrancas/CORRETO-1755013508.325368-1
+[INTER] 🔧 METHOD: GET
+[INTER] 🪙 TOKEN (first 20 chars):', de6f5544-44b4-4a8f-8...
+[INTER] ===================================
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] 🏦 CONTA CORRENTE HEADER ADDED: 346470536
+[INTER] 🔑 ALL HEADERS: {
+  "Authorization": "Bearer de6f5544-44b4-4a8f-8987-b41d9cd0757f",
+  "Accept": "application/json",
+  "User-Agent": "SIMPIX-Inter-Integration/1.0",
+  "x-conta-corrente": "346470536"
+}
+[INTER] ========== RESPONSE DETAILS ==========
+[INTER] 📊 STATUS: 400 Bad Request
+[INTER] 📋 RESPONSE HEADERS: {
+  'content-length': '294',
+  'content-type': 'application/json',
+  date: 'Mon, 18 Aug 2025 13:51:03 GMT',
+  server: 'istio-envoy',
+  'strict-transport-security': 'max-age=31536000; includeSubDomains',
+  traceparent: '00-458c10ca46577c83a707a6a0f71986f9-0fc0d3e2e6185286-00',
+  'x-envoy-upstream-service-time': '5',
+  'x-rate-limit-remaining': '119',
+  'x-rate-limit-time': '1755525123971',
+  'x-upstream-time': '9'
+}
+[INTER] 🔍 Response Content-Type: application/json
+[INTER] 🔍 Is PDF Response: false
+[INTER] 📦 Response buffer size: 294 bytes
+[INTER] ❌❌❌ ERROR RESPONSE ❌❌❌
+[INTER] 🚨 Status Code: 400
+[INTER] 🚨 Error Body: "{"title":"Dados inválidos.","detail":"Verifique se os dados informados estão de acordo com a documentação disponibilizada e tente novamente.","timestamp":"2025-08-18T10:51:03.995473463-03:00","violacoes":[{"razao":"Não foi possível converter o valor.","propriedade":"codigoSolicitacao"}]}"
+[INTER] 🚨 Error Body Length: 288 chars
+[INTER] 📋 Error as JSON: {
+  "title": "Dados inválidos.",
+  "detail": "Verifique se os dados informados estão de acordo com a documentação disponibilizada e tente novamente.",
+  "timestamp": "2025-08-18T10:51:03.995473463-03:00",
+  "violacoes": [
+    {
+      "razao": "Não foi possível converter o valor.",
+      "propriedade": "codigoSolicitacao"
+    }
+  ]
+}
+[INTER] ❌❌❌ END ERROR RESPONSE ❌❌❌
+[CIRCUIT_BREAKER] ❌ interApiBreaker request failed: Inter API error: 400 - {"title":"Dados inválidos.","detail":"Verifique se os dados informados estão de acordo com a documentação disponibilizada e tente novamente.","timestamp":"2025-08-18T10:51:03.995473463-03:00","violacoes":[{"razao":"Não foi possível converter o valor.","propriedade":"codigoSolicitacao"}]}
+[INTER] ❌ Failed to retrieve collection: Error: Inter API error: 400 - {"title":"Dados inválidos.","detail":"Verifique se os dados informados estão de acordo com a documentação disponibilizada e tente novamente.","timestamp":"2025-08-18T10:51:03.995473463-03:00","violacoes":[{"razao":"Não foi possível converter o valor.","propriedade":"codigoSolicitacao"}]}
+    at IncomingMessage.<anonymous> (/home/runner/workspace/server/services/interBankService.ts:616:17)
+    at IncomingMessage.emit (node:events:536:35)
+    at endReadableNT (node:internal/streams/readable:1698:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+[INTER] ❌ Erro ao obter PDF: Inter API error: 400 - {"title":"Dados inválidos.","detail":"Verifique se os dados informados estão de acordo com a documentação disponibilizada e tente novamente.","timestamp":"2025-08-18T10:51:03.995473463-03:00","violacoes":[{"razao":"Não foi possível converter o valor.","propriedade":"codigoSolicitacao"}]}
+[INTER] 🔄 Tentando endpoints alternativos...
+[INTER] 🔄 Testando endpoints alternativos para PDF...
+[INTER] 🔄 Tentando: /cobranca/v3/cobrancas/CORRETO-1755013508.325368-1/pdf/download
+[CIRCUIT_BREAKER] ✅ interTokenBreaker request succeeded
+[INTER] ========== REQUEST DETAILS ==========
+[INTER] 🌐 FULL URL: https://cdpj.partners.bancointer.com.br/cobranca/v3/cobrancas/CORRETO-1755013508.325368-1/pdf/download
+[INTER] 🔧 METHOD: GET
+[INTER] 🪙 TOKEN (first 20 chars):', de6f5544-44b4-4a8f-8...
+[INTER] ===================================
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] 🏦 CONTA CORRENTE HEADER ADDED: 346470536
+[INTER] 🔑 ALL HEADERS: {
+  "Authorization": "Bearer de6f5544-44b4-4a8f-8987-b41d9cd0757f",
+  "Accept": "application/pdf, application/json",
+  "User-Agent": "SIMPIX-Inter-Integration/1.0",
+  "Content-Type": "application/json",
+  "x-conta-corrente": "346470536"
+}
+[INTER] ❌ Request error for /cobranca/v3/cobrancas/CORRETO-1755013508.325368-1/pdf/download: Error: socket hang up
+    at TLSSocket.socketOnEnd (node:_http_client:528:25)
+    at TLSSocket.emit (node:events:536:35)
+    at endReadableNT (node:internal/streams/readable:1698:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21) {
+  code: 'ECONNRESET'
+}
+[CIRCUIT_BREAKER] ❌ interApiBreaker request failed: socket hang up
+[INTER] ❌ Endpoint /cobranca/v3/cobrancas/CORRETO-1755013508.325368-1/pdf/download falhou
+[INTER] 🔄 Tentando: /cobranca/v3/cobrancas/CORRETO-1755013508.325368-1/arquivo
+[CIRCUIT_BREAKER] ✅ interTokenBreaker request succeeded
+[INTER] ========== REQUEST DETAILS ==========
+[INTER] 🌐 FULL URL: https://cdpj.partners.bancointer.com.br/cobranca/v3/cobrancas/CORRETO-1755013508.325368-1/arquivo
+[INTER] 🔧 METHOD: GET
+[INTER] 🪙 TOKEN (first 20 chars):', de6f5544-44b4-4a8f-8...
+[INTER] ===================================
+[INTER] 📋 Certificate is single-line PEM, adding line breaks...
+[INTER] 🔑 Private key is single-line PEM, adding line breaks...
+[INTER] 🏦 CONTA CORRENTE HEADER ADDED: 346470536
+[INTER] 🔑 ALL HEADERS: {
+  "Authorization": "Bearer de6f5544-44b4-4a8f-8987-b41d9cd0757f",
+  "Accept": "application/pdf, application/json",
+  "User-Agent": "SIMPIX-Inter-Integration/1.0",
+  "Content-Type": "application/json",
+  "x-conta-corrente": "346470536"
+}
+[INTER] ❌ Request error for /cobranca/v3/cobrancas/CORRETO-1755013508.325368-1/arquivo: Error: socket hang up
+    at TLSSocket.socketOnEnd (node:_http_client:528:25)
+    at TLSSocket.emit (node:events:536:35)
+    at endReadableNT (node:internal/streams/readable:1698:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21) {
+  code: 'ECONNRESET'
+}
+[CIRCUIT_BREAKER] ❌ interApiBreaker request failed: socket hang up
+[CIRCUIT_BREAKER] 🔴 interApiBreaker OPENED - Too many failures detected
+[CIRCUIT_BREAKER] ⏰ Will attempt recovery in 30000ms
+[INTER] ❌ Endpoint /cobranca/v3/cobrancas/CORRETO-1755013508.325368-1/arquivo falhou
+[INTER] 🔄 Tentando: /cobranca/v3/cobrancas/CORRETO-1755013508.325368-1/documento
+[CIRCUIT_BREAKER] 🚫 interApiBreaker rejected request - circuit is OPEN
+[CIRCUIT_BREAKER] Circuit for Inter API is OPEN. Job failed immediately to protect the system.
+[INTER] ❌ Endpoint /cobranca/v3/cobrancas/CORRETO-1755013508.325368-1/documento falhou
+[INTER] 🔄 Tentando: /banking/v2/cobrancas/CORRETO-1755013508.325368-1/pdf
+[CIRCUIT_BREAKER] 🚫 interApiBreaker rejected request - circuit is OPEN
+[CIRCUIT_BREAKER] Circuit for Inter API is OPEN. Job failed immediately to protect the system.
+[INTER] ❌ Endpoint /banking/v2/cobrancas/CORRETO-1755013508.325368-1/pdf falhou
+[PDF STORAGE] ❌ Fallback API também falhou: Nenhum endpoint funcionou para obter o PDF
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /sincronizar/88a44696-9b63-42ee-aa81-15f9519d24cb
+[JWT DEBUG] Método: POST
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/financeiro/cobrancas
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-18T13:51:07.824Z'
+}
+[SYNC] Iniciando sincronização para proposta 88a44696-9b63-42ee-aa81-15f9519d24cb
+[STATUS SERVICE] 🔄 Iniciando sincronização para proposta 88a44696-9b63-42ee-aa81-15f9519d24cb
+[STATUS SERVICE] 📊 Encontradas 48 cobranças para sincronizar
+[STATUS SERVICE] 🔍 Consultando status: 4f3c1f03-222a-46e3-bafd-0c9d6c9cad02
+[STATUS SERVICE] ❌ Erro ao sincronizar 4f3c1f03-222a-46e3-bafd-0c9d6c9cad02: InterBankService is not a constructor
+[STATUS SERVICE] 🔍 Consultando status: 957e99ca-083f-4652-8d06-bc537772ec1f
+[STATUS SERVICE] ❌ Erro ao sincronizar 957e99ca-083f-4652-8d06-bc537772ec1f: InterBankService is not a constructor
+[STATUS SERVICE] 🔍 Consultando status: 210074a3-e28a-41a5-807a-ee3981ff0d15
+[STATUS SERVICE] ❌ Erro ao sincronizar 210074a3-e28a-41a5-807a-ee3981ff0d15: InterBankService is not a constructor
+[STATUS SERVICE] 🔍 Consultando status: CORRETO-1755013508.325368-8
+[STATUS SERVICE] ❌ Erro ao sincronizar CORRETO-1755013508.325368-8: InterBankService is not a constructor
+[STATUS SERVICE] 🔍 Consultando status: CORRETO-1755013508.325368-9
+[STATUS SERVICE] ❌ Erro ao sincronizar CORRETO-1755013508.325368-9: InterBankService is not a constructor
+[STATUS SERVICE] 🔍 Consultando status: CORRETO-1755013508.325368-10
+[STATUS SERVICE] ❌ Erro ao sincronizar CORRETO-1755013508.325368-10: InterBankService is not a constructor
+[STATUS SERVICE] 🔍 Consultando status: CORRETO-1755013508.325368-11
+[STATUS SERVICE] ❌ Erro ao sincronizar CORRETO-1755013508.325368-11: InterBankService is not a constructor
+[STATUS SERVICE] 🔍 Consultando status: CORRETO-1755013508.325368-12
+[STATUS SERVICE] ❌ Erro ao sincronizar CORRETO-1755013508.325368-12: InterBankService is not a constructor
+[STATUS SERVICE] 🔍 Consultando status: CORRETO-1755013508.325368-13
+[STATUS SERVICE] ❌ Erro ao sincronizar CORRETO-1755013508.325368-13: InterBankService is not a constructor
+[STATUS SERVICE] 🔍 Consultando status: CORRETO-1755013508.325368-14
+[STATUS SERVICE] ❌ Erro ao sincronizar CORRETO-1755013508.325368-14: InterBankService is not a constructor
+[STATUS SERVICE] 🔍 Consultando status: CORRETO-1755013508.325368-15
+[STATUS SERVICE] ❌ Erro ao sincronizar CORRETO-1755013508.325368-15: InterBankService is not a constructor
+[STATUS SERVICE] 🔍 Consultando status: CORRETO-1755013508.325368-16
+[STATUS SERVICE] ❌ Erro ao sincronizar CORRETO-1755013508.325368-16: InterBankService is not a constructor
+[STATUS SERVICE] 🔍 Consultando status: CORRETO-1755013508.325368-17
+[STATUS SERVICE] ❌ Erro ao sincronizar CORRETO-1755013508.325368-17: InterBankService is not a constructor
+[STATUS SERVICE] 🔍 Consultando status: CORRETO-1755013508.325368-18
+[STATUS SERVICE] ❌ Erro ao sincronizar CORRETO-1755013508.325368-18: InterBankService is not a constructor
+[STATUS SERVICE] 🔍 Consultando status: 6f378471-4bde-4e1e-b335-ae4a28abb060
+[STATUS SERVICE] ❌ Erro ao sincronizar 6f378471-4bde-4e1e-b335-ae4a28abb060: InterBankService is not a constructor
+[STATUS SERVICE] 🔍 Consultando status: CORRETO-1755013508.325368-24
+[STATUS SERVICE] ❌ Erro ao sincronizar CORRETO-1755013508.325368-24: InterBankService is not a constructor
+[STATUS SERVICE] 🔍 Consultando status: 14d56dd6-000d-417f-92a4-dc785db66ef8
+[STATUS SERVICE] ❌ Erro ao sincronizar 14d56dd6-000d-417f-92a4-dc785db66ef8: InterBankService is not a constructor
+[STATUS SERVICE] 🔍 Consultando status: 928adfab-f412-49aa-bbc9-8a1a7803ddd3
+[STATUS SERVICE] ❌ Erro ao sincronizar 928adfab-f412-49aa-bbc9-8a1a7803ddd3: InterBankService is not a constructor
+[STATUS SERVICE] 🔍 Consultando status: 126dffb8-a53f-40af-a7df-04b07fdbed3b
+[STATUS SERVICE] ❌ Erro ao sincronizar 126dffb8-a53f-40af-a7df-04b07fdbed3b: InterBankService is not a constructor
+[STATUS SERVICE] 🔍 Consultando status: 214dc1d5-59c2-4497-a3ed-b421989ef167
+[STATUS SERVICE] ❌ Erro ao sincronizar 214dc1d5-59c2-4497-a3ed-b421989ef167: InterBankService is not a constructor
+[STATUS SERVICE] 🔍 Consultando status: 170a1d54-d276-4ccc-a297-3ce65f98f5fc
+[STATUS SERVICE] ❌ Erro ao sincronizar 170a1d54-d276-4ccc-a297-3ce65f98f5fc: InterBankService is not a constructor
+[STATUS SERVICE] 🔍 Consultando status: e5ea8ee4-8e41-4606-9ba3-a20b8be99234
+[STATUS SERVICE] ❌ Erro ao sincronizar e5ea8ee4-8e41-4606-9ba3-a20b8be99234: InterBankService is not a constructor
+[STATUS SERVICE] 🔍 Consultando status: 66715aeb-5beb-4258-82b1-db684ec91c86
+[STATUS SERVICE] ❌ Erro ao sincronizar 66715aeb-5beb-4258-82b1-db684ec91c86: InterBankService is not a constructor
+[STATUS SERVICE] 🔍 Consultando status: 07caf7d0-f986-4f3f-a71b-9704c5cb6e17
+[STATUS SERVICE] ❌ Erro ao sincronizar 07caf7d0-f986-4f3f-a71b-9704c5cb6e17: InterBankService is not a constructor
+[STATUS SERVICE] 🔍 Consultando status: fc01f610-05e5-4879-b237-dd9d63f0e4b4
+[STATUS SERVICE] ❌ Erro ao sincronizar fc01f610-05e5-4879-b237-dd9d63f0e4b4: InterBankService is not a constructor
+[STATUS SERVICE] 🔍 Consultando status: d5422afd-a164-4331-b5ff-29fe9ce758ee
+[STATUS SERVICE] ❌ Erro ao sincronizar d5422afd-a164-4331-b5ff-29fe9ce758ee: InterBankService is not a constructor
+[STATUS SERVICE] 🔍 Consultando status: CORRETO-1755013508.325368-1
+[STATUS SERVICE] ❌ Erro ao sincronizar CORRETO-1755013508.325368-1: InterBankService is not a constructor
+[STATUS SERVICE] 🔍 Consultando status: CORRETO-1755013508.325368-19
+[STATUS SERVICE] ❌ Erro ao sincronizar CORRETO-1755013508.325368-19: InterBankService is not a constructor
+[STATUS SERVICE] 🔍 Consultando status: CORRETO-1755013508.325368-20
+[STATUS SERVICE] ❌ Erro ao sincronizar CORRETO-1755013508.325368-20: InterBankService is not a constructor
+[STATUS SERVICE] 🔍 Consultando status: CORRETO-1755013508.325368-21
+[STATUS SERVICE] ❌ Erro ao sincronizar CORRETO-1755013508.325368-21: InterBankService is not a constructor
+[STATUS SERVICE] 🔍 Consultando status: CORRETO-1755013508.325368-22
+[STATUS SERVICE] ❌ Erro ao sincronizar CORRETO-1755013508.325368-22: InterBankService is not a constructor
+[STATUS SERVICE] 🔍 Consultando status: CORRETO-1755013508.325368-23
+[STATUS SERVICE] ❌ Erro ao sincronizar CORRETO-1755013508.325368-23: InterBankService is not a constructor
+[STATUS SERVICE] 🔍 Consultando status: CORRETO-1755013508.325368-2
+[STATUS SERVICE] ❌ Erro ao sincronizar CORRETO-1755013508.325368-2: InterBankService is not a constructor
+[STATUS SERVICE] 🔍 Consultando status: 3721fc7d-3301-44bd-8836-072a2299d570
+[STATUS SERVICE] ❌ Erro ao sincronizar 3721fc7d-3301-44bd-8836-072a2299d570: InterBankService is not a constructor
+[STATUS SERVICE] 🔍 Consultando status: 96c8ac2f-f26d-4198-89a1-5751152d3d04
+[STATUS SERVICE] ❌ Erro ao sincronizar 96c8ac2f-f26d-4198-89a1-5751152d3d04: InterBankService is not a constructor
+[STATUS SERVICE] 🔍 Consultando status: CORRETO-1755013508.325368-3
+[STATUS SERVICE] ❌ Erro ao sincronizar CORRETO-1755013508.325368-3: InterBankService is not a constructor
+[STATUS SERVICE] 🔍 Consultando status: CORRETO-1755013508.325368-4
+[STATUS SERVICE] ❌ Erro ao sincronizar CORRETO-1755013508.325368-4: InterBankService is not a constructor
+[STATUS SERVICE] 🔍 Consultando status: CORRETO-1755013508.325368-5
+[STATUS SERVICE] ❌ Erro ao sincronizar CORRETO-1755013508.325368-5: InterBankService is not a constructor
+[STATUS SERVICE] 🔍 Consultando status: CORRETO-1755013508.325368-6
+[STATUS SERVICE] ❌ Erro ao sincronizar CORRETO-1755013508.325368-6: InterBankService is not a constructor
+[STATUS SERVICE] 🔍 Consultando status: CORRETO-1755013508.325368-7
+[STATUS SERVICE] ❌ Erro ao sincronizar CORRETO-1755013508.325368-7: InterBankService is not a constructor
+[STATUS SERVICE] 🔍 Consultando status: f5f7fe5a-44b8-4a43-9d7f-a864cfdc84c9
+[STATUS SERVICE] ❌ Erro ao sincronizar f5f7fe5a-44b8-4a43-9d7f-a864cfdc84c9: InterBankService is not a constructor
+[STATUS SERVICE] 🔍 Consultando status: 24cf3f92-ec3d-49c9-a99f-8639a759115c
+[STATUS SERVICE] ❌ Erro ao sincronizar 24cf3f92-ec3d-49c9-a99f-8639a759115c: InterBankService is not a constructor
+[STATUS SERVICE] 🔍 Consultando status: c3599570-b534-4b13-9dc4-e53e7109a163
+[STATUS SERVICE] ❌ Erro ao sincronizar c3599570-b534-4b13-9dc4-e53e7109a163: InterBankService is not a constructor
+[STATUS SERVICE] 🔍 Consultando status: 7438d333-e4f2-49cd-a3fc-9b66a7baaa1b
+[STATUS SERVICE] ❌ Erro ao sincronizar 7438d333-e4f2-49cd-a3fc-9b66a7baaa1b: InterBankService is not a constructor
+[STATUS SERVICE] 🔍 Consultando status: 73e76cfe-f8f8-4638-ac83-d8e809e06eef
+[STATUS SERVICE] ❌ Erro ao sincronizar 73e76cfe-f8f8-4638-ac83-d8e809e06eef: InterBankService is not a constructor
+[STATUS SERVICE] 🔍 Consultando status: 585bcc53-e077-49c7-a4cd-b000698a5bfe
+[STATUS SERVICE] ❌ Erro ao sincronizar 585bcc53-e077-49c7-a4cd-b000698a5bfe: InterBankService is not a constructor
+[STATUS SERVICE] 🔍 Consultando status: 29d44830-802d-4491-9d7a-b60e9cfe1ab6
+[STATUS SERVICE] ❌ Erro ao sincronizar 29d44830-802d-4491-9d7a-b60e9cfe1ab6: InterBankService is not a constructor
+[STATUS SERVICE] 🔍 Consultando status: a8599139-cfc4-4ea3-abda-b08d9836441a
+[STATUS SERVICE] ❌ Erro ao sincronizar a8599139-cfc4-4ea3-abda-b08d9836441a: InterBankService is not a constructor
+[SYNC] Resultado: {
+  success: false,
+  message: 'Sincronização concluída: 0 atualizações',
+  updatedCount: 0,
+  errors: [
+    'Erro ao sincronizar 4f3c1f03-222a-46e3-bafd-0c9d6c9cad02: InterBankService is not a constructor',
+    'Erro ao sincronizar 957e99ca-083f-4652-8d06-bc537772ec1f: InterBankService is not a constructor',
+    'Erro ao sincronizar 210074a3-e28a-41a5-807a-ee3981ff0d15: InterBankService is not a constructor',
+    'Erro ao sincronizar CORRETO-1755013508.325368-8: InterBankService is not a constructor',
+    'Erro ao sincronizar CORRETO-1755013508.325368-9: InterBankService is not a constructor',
+    'Erro ao sincronizar CORRETO-1755013508.325368-10: InterBankService is not a constructor',
+    'Erro ao sincronizar CORRETO-1755013508.325368-11: InterBankService is not a constructor',
+    'Erro ao sincronizar CORRETO-1755013508.325368-12: InterBankService is not a constructor',
+    'Erro ao sincronizar CORRETO-1755013508.325368-13: InterBankService is not a constructor',
+    'Erro ao sincronizar CORRETO-1755013508.325368-14: InterBankService is not a constructor',
+    'Erro ao sincronizar CORRETO-1755013508.325368-15: InterBankService is not a constructor',
+    'Erro ao sincronizar CORRETO-1755013508.325368-16: InterBankService is not a constructor',
+    'Erro ao sincronizar CORRETO-1755013508.325368-17: InterBankService is not a constructor',
+    'Erro ao sincronizar CORRETO-1755013508.325368-18: InterBankService is not a constructor',
+    'Erro ao sincronizar 6f378471-4bde-4e1e-b335-ae4a28abb060: InterBankService is not a constructor',
+    'Erro ao sincronizar CORRETO-1755013508.325368-24: InterBankService is not a constructor',
+    'Erro ao sincronizar 14d56dd6-000d-417f-92a4-dc785db66ef8: InterBankService is not a constructor',
+    'Erro ao sincronizar 928adfab-f412-49aa-bbc9-8a1a7803ddd3: InterBankService is not a constructor',
+    'Erro ao sincronizar 126dffb8-a53f-40af-a7df-04b07fdbed3b: InterBankService is not a constructor',
+    'Erro ao sincronizar 214dc1d5-59c2-4497-a3ed-b421989ef167: InterBankService is not a constructor',
+    'Erro ao sincronizar 170a1d54-d276-4ccc-a297-3ce65f98f5fc: InterBankService is not a constructor',
+    'Erro ao sincronizar e5ea8ee4-8e41-4606-9ba3-a20b8be99234: InterBankService is not a constructor',
+    'Erro ao sincronizar 66715aeb-5beb-4258-82b1-db684ec91c86: InterBankService is not a constructor',
+    'Erro ao sincronizar 07caf7d0-f986-4f3f-a71b-9704c5cb6e17: InterBankService is not a constructor',
+    'Erro ao sincronizar fc01f610-05e5-4879-b237-dd9d63f0e4b4: InterBankService is not a constructor',
+    'Erro ao sincronizar d5422afd-a164-4331-b5ff-29fe9ce758ee: InterBankService is not a constructor',
+    'Erro ao sincronizar CORRETO-1755013508.325368-1: InterBankService is not a constructor',
+    'Erro ao sincronizar CORRETO-1755013508.325368-19: InterBankService is not a constructor',
+    'Erro ao sincronizar CORRETO-1755013508.325368-20: InterBankService is not a constructor',
+    'Erro ao sincronizar CORRETO-1755013508.325368-21: InterBankService is not a constructor',
+    'Erro ao sincronizar CORRETO-1755013508.325368-22: InterBankService is not a constructor',
+    'Erro ao sincronizar CORRETO-1755013508.325368-23: InterBankService is not a constructor',
+    'Erro ao sincronizar CORRETO-1755013508.325368-2: InterBankService is not a constructor',
+    'Erro ao sincronizar 3721fc7d-3301-44bd-8836-072a2299d570: InterBankService is not a constructor',
+    'Erro ao sincronizar 96c8ac2f-f26d-4198-89a1-5751152d3d04: InterBankService is not a constructor',
+    'Erro ao sincronizar CORRETO-1755013508.325368-3: InterBankService is not a constructor',
+    'Erro ao sincronizar CORRETO-1755013508.325368-4: InterBankService is not a constructor',
+    'Erro ao sincronizar CORRETO-1755013508.325368-5: InterBankService is not a constructor',
+    'Erro ao sincronizar CORRETO-1755013508.325368-6: InterBankService is not a constructor',
+    'Erro ao sincronizar CORRETO-1755013508.325368-7: InterBankService is not a constructor',
+    'Erro ao sincronizar f5f7fe5a-44b8-4a43-9d7f-a864cfdc84c9: InterBankService is not a constructor',
+    'Erro ao sincronizar 24cf3f92-ec3d-49c9-a99f-8639a759115c: InterBankService is not a constructor',
+    'Erro ao sincronizar c3599570-b534-4b13-9dc4-e53e7109a163: InterBankService is not a constructor',
+    'Erro ao sincronizar 7438d333-e4f2-49cd-a3fc-9b66a7baaa1b: InterBankService is not a constructor',
+    'Erro ao sincronizar 73e76cfe-f8f8-4638-ac83-d8e809e06eef: InterBankService is not a constructor',
+    'Erro ao sincronizar 585bcc53-e077-49c7-a4cd-b000698a5bfe: InterBankService is not a constructor',
+    'Erro ao sincronizar 29d44830-802d-4491-9d7a-b60e9cfe1ab6: InterBankService is not a constructor',
+    'Erro ao sincronizar a8599139-cfc4-4ea3-abda-b08d9836441a: InterBankService is not a constructor'
+  ]
+}
+[JWT DEBUG] ==== INÍCIO DA VALIDAÇÃO JWT ====
+[JWT DEBUG] Rota acessada: /88a44696-9b63-42ee-aa81-15f9519d24cb/CORRETO-1755013508.325368-1/pdf
+[JWT DEBUG] Método: GET
+[JWT DEBUG] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36
+[JWT DEBUG] Origin: undefined
+[JWT DEBUG] Referer: https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/financeiro/cobrancas
+[JWT DEBUG] Header Auth presente: true
+[JWT DEBUG] Header começa com Bearer: true
+[JWT DEBUG - PDF ESPECÍFICO] Request path: /88a44696-9b63-42ee-aa81-15f9519d24cb/CORRETO-1755013508.325368-1/pdf
+[JWT DEBUG - PDF ESPECÍFICO] Auth header completo length: 774
+[JWT DEBUG - PDF ESPECÍFICO] Token preview: Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R...
+[JWT AUTH - PDF DOWNLOAD] Token length: 767
+[JWT AUTH - PDF DOWNLOAD] Token first 20 chars: eyJhbGciOiJIUzI1NiIs...
+🔐 JWT VALIDATION: {
+  hasError: false,
+  errorType: null,
+  hasUser: true,
+  userId: 'a65efc54-90cd-4b94-b971-c8a560104032',
+  timestamp: '2025-08-18T13:51:11.029Z'
+}
+[PDF STORAGE] Buscando PDF no storage para: CORRETO-1755013508.325368-1
+[PDF STORAGE] Verificando arquivo: propostas/88a44696-9b63-42ee-aa81-15f9519d24cb/boletos/emitidos_pendentes/CORRETO-1755013508.325368-1.pdf
+[PDF STORAGE] ⚠️ PDF não encontrado no storage, listError: null
+[PDF STORAGE] Tentando fallback para API do Banco Inter...
+[INTER] 📄 SOLUÇÃO IDENTIFICADA: API v3 retorna PDF como base64 em JSON
+[INTER] 🔍 Processando codigoSolicitacao: CORRETO-1755013508.325368-1
+[INTER] 🔍 STEP 1: Verificando se cobrança existe...
+[INTER] 📋 Retrieving collection: CORRETO-1755013508.325368-1
+[CIRCUIT_BREAKER] 🚫 interApiBreaker rejected request - circuit is OPEN
+[CIRCUIT_BREAKER] Circuit for Inter API is OPEN. Job failed immediately to protect the system.
+[INTER] ❌ Failed to retrieve collection: Error: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+    at InterBankService.makeRequest (/home/runner/workspace/server/services/interBankService.ts:469:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async InterBankService.recuperarCobranca (/home/runner/workspace/server/services/interBankService.ts:748:24)
+    at async InterBankService.obterPdfCobranca (/home/runner/workspace/server/services/interBankService.ts:910:7)
+    at async <anonymous> (/home/runner/workspace/server/routes/inter-collections.ts:168:27)
+[INTER] ❌ Erro ao obter PDF: Inter Bank API temporarily unavailable - circuit breaker is OPEN
+[INTER] 🔄 Tentando endpoints alternativos...
+[INTER] 🔄 Testando endpoints alternativos para PDF...
+[INTER] 🔄 Tentando: /cobranca/v3/cobrancas/CORRETO-1755013508.325368-1/pdf/download
+[CIRCUIT_BREAKER] 🚫 interApiBreaker rejected request - circuit is OPEN
+[CIRCUIT_BREAKER] Circuit for Inter API is OPEN. Job failed immediately to protect the system.
+[INTER] ❌ Endpoint /cobranca/v3/cobrancas/CORRETO-1755013508.325368-1/pdf/download falhou
+[INTER] 🔄 Tentando: /cobranca/v3/cobrancas/CORRETO-1755013508.325368-1/arquivo
+[CIRCUIT_BREAKER] 🚫 interApiBreaker rejected request - circuit is OPEN
+[CIRCUIT_BREAKER] Circuit for Inter API is OPEN. Job failed immediately to protect the system.
+[INTER] ❌ Endpoint /cobranca/v3/cobrancas/CORRETO-1755013508.325368-1/arquivo falhou
+[INTER] 🔄 Tentando: /cobranca/v3/cobrancas/CORRETO-1755013508.325368-1/documento
+[CIRCUIT_BREAKER] 🚫 interApiBreaker rejected request - circuit is OPEN
+[CIRCUIT_BREAKER] Circuit for Inter API is OPEN. Job failed immediately to protect the system.
+[INTER] ❌ Endpoint /cobranca/v3/cobrancas/CORRETO-1755013508.325368-1/documento falhou
+[INTER] 🔄 Tentando: /banking/v2/cobrancas/CORRETO-1755013508.325368-1/pdf
+[CIRCUIT_BREAKER] 🚫 interApiBreaker rejected request - circuit is OPEN
+[CIRCUIT_BREAKER] Circuit for Inter API is OPEN. Job failed immediately to protect the system.
+[INTER] ❌ Endpoint /banking/v2/cobrancas/CORRETO-1755013508.325368-1/pdf falhou
+[PDF STORAGE] ❌ Fallback API também falhou: Nenhum endpoint funcionou para obter o PDF
+[CIRCUIT_BREAKER] 🟡 interApiBreaker HALF-OPEN - Testing if service recovered

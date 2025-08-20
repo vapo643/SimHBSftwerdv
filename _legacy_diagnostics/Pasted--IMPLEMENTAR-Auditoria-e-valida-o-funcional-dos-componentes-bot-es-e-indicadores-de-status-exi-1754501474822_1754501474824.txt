@@ -1,0 +1,26 @@
+**IMPLEMENTAR:** Auditoria e validação funcional dos componentes, botões e indicadores de status existentes na "Página de Pagamentos do Financeiro".
+
+**CONTEXT:** A auditoria da query de dados foi um sucesso. Agora, precisamos garantir que os elementos da interface do usuário (UI) que dependem desses dados estão presentes, funcionais e exibindo as informações corretas para o operador do financeiro.
+
+**CURRENT STATE:** A página está a carregar a lista correta de propostas elegíveis. Sua missão é verificar as ações e informações disponíveis para cada proposta na lista.
+
+**TESTE (Roadmap de Auditoria Obrigatório):**
+Execute os seguintes testes de verificação e reporte o resultado para cada um, indicando `[✅ FUNCIONAL]` ou `[❌ FALHA/AUSENTE]` com uma breve descrição.
+
+**1. Verificação do Botão "Revisar Proposta":**
+    - **Ação:** Para uma proposta na lista, localize e clique no botão ou link "Revisar Proposta".
+    - **Validação:** Confirme se a ação redireciona corretamente para a página de detalhes completa da proposta selecionada.
+    - **Relatório:** Reporte o resultado.
+
+**2. Verificação da Exibição de Status:**
+    - **Ação:** Analise a linha de uma proposta na tabela.
+    - **Validação:** Confirme se existe um indicador de status claro (uma tag, um texto, etc.) que informa que a CCB da proposta já foi assinada e que ela se encontra no setor de "Cobranças".
+    - **Relatório:** Reporte se este indicador existe e qual texto ou valor ele exibe.
+
+**3. Verificação do Botão "Ver CCB":**
+    - **Ação:** Localize e clique no botão ou link "Ver CCB".
+    - **Validação:** Descreva em detalhe o que acontece. A ação aciona o download de um PDF? Abre uma nova aba? O documento aberto é a CCB correta para a proposta?
+    - **Observação Crítica:** Precisamos saber se o PDF aberto é a versão **gerada** ou a versão já **assinada**. Analise o conteúdo do PDF para verificar a presença de uma assinatura.
+    - **Relatório:** Reporte o resultado detalhado da sua análise.
+
+**DADOS REAIS:** Utilize a proposta com ID `902183dd-b5d1-4e20-8a72-79d3d3559d4d` para realizar estes testes funcionais.

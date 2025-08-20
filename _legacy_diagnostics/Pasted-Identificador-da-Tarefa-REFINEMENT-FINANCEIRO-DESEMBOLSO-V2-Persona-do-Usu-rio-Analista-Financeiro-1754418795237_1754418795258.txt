@@ -1,0 +1,114 @@
+Identificador da Tarefa: REFINEMENT_FINANCEIRO_DESEMBOLSO_V2
+Persona do Usuário: Analista Financeiro (Contas a Pagar), Tesouraria, Gestor Financeiro.
+Objetivo Principal: Reestruturar e finalizar a tela de "Pagamentos a Realizar", garantindo a integridade absoluta dos dados, um fluxo de processo à prova de falhas, segurança de nível transacional e a conclusão do ciclo de vida da proposta com a categorização correta pós-pagamento.
+
+Contexto Crítico: A tela atual de pagamentos é a última barreira antes da saída de capital. Ela está apresentando dados incorretos ("cliente não informado", valor do empréstimo ausente) e status desalinhados. Esta nova versão deve corrigir todas essas falhas e implementar um processo de verificação e aprovação robusto para mitigar riscos operacionais e financeiros.
+
+Requisitos Detalhados para o Agente:
+
+1. Sistema Universal de Status e Gatilho de Entrada:
+
+Alinhamento Universal: Defina um ciclo de vida de status claro e único para as propostas em todo o software. Para esta tela, o fluxo é:
+
+A proposta é aprovada, a CCB é assinada e os boletos são gerados. Status muda para AGUARDANDO_DESEMBOLSO.
+
+O financeiro realiza o pagamento. Status muda para DESEMBOLSADO.
+
+Gatilho de Exibição (Regra de Negócio Mandatória): Uma proposta só deve aparecer na fila de "Pagamentos a Realizar" se e somente se o sistema validar que ambas as seguintes condições são verdadeiras:
+
+Status da CCB = ASSINADA (com verificação de que o documento existe no storage Supabase).
+
+Status dos Boletos = GERADOS_E_REGISTRADOS (com confirmação via API do banco Inter).
+
+O status geral da proposta deve ser AGUARDANDO_DESEMBOLSO.
+
+2. Estrutura da Tabela "Pagamentos a Realizar" e Integridade dos Dados:
+Apresente uma tabela com as seguintes colunas, especificando a fonte exata de cada dado para garantir a integridade:
+
+Contrato (ID):
+
+Fonte: Este não é o ID da proposta. Deve ser o ID único do Contrato/CCB gerado e armazenado.
+
+Ação Requerida: Crie uma nova tela no sistema chamada "Consulta de Contratos". Esta tela deve listar todos os contratos formalizados, buscando-os diretamente do storage (Supabase), exibindo Cliente, Data de Assinatura, Valor e o seu ID único. O ID na tabela de pagamentos deve ser um link para este registro.
+
+Cliente:
+
+Fonte: Puxar o Nome Completo/Razão Social diretamente do registro da proposta original. O problema de "nome não informado" é uma falha de junção de dados (database join/relation) e deve ser corrigido na fonte. A consulta que alimenta esta tela deve obrigatoriamente ligar a fila de pagamentos à tabela de clientes através do ID da proposta.
+
+Valor Líquido (a Pagar):
+
+Fonte: Exibir o valor final do empréstimo a ser creditado ao cliente, conforme definido e aprovado na proposta. Este valor deve ser puxado do campo valor_liberado da proposta, que já considera deduções de taxas (IOF, etc.). Não pode haver divergência.
+
+Conta Destino:
+
+Fonte: Exibir os dados bancários (Banco, Agência, Conta) ou a Chave PIX informada pelo cliente.
+
+Ação Requerida: Adicione ao formulário de "Nova Proposta" a opção para o cliente escolher entre Conta Bancária e Chave PIX como destino do crédito. A tela de pagamentos deve exibir o que foi escolhido e validado.
+
+Status:
+
+Fonte: Exibir o status universal da proposta. Para todas as propostas nesta tela, o status deve ser AGUARDANDO_DESEMBOLSO.
+
+Solicitado em:
+
+Fonte: Data e hora em que a proposta atingiu o status AGUARDANDO_DESEMBOLSO.
+
+Solicitado por:
+
+Fonte: Exibir em duas linhas:
+
+Nome do Atendente: Puxar o nome do usuário do sistema que criou a proposta.
+
+Loja/Unidade: Puxar a loja ou unidade de negócio associada a esse atendente.
+
+Ações:
+
+Botão: Um único botão robusto: [Revisar e Pagar].
+
+3. Funcionalidade do Botão "Revisar e Pagar" (Painel de Verificação):
+Ao clicar em [Revisar e Pagar], um painel modal (pop-up) deve ser exibido, servindo como a etapa final de verificação do analista financeiro. Este painel deve conter:
+
+Cabeçalho: Nome do Cliente, CPF/CNPJ e Valor a Pagar.
+
+Seção 1: Checklist de Verificação Automática (com ícones ✓/X):
+
+[✓] CCB Assinada e Localizada no Storage
+
+[✓] Boletos de Cobrança Registrados no Inter
+
+[✓] Validação de Titularidade da Conta de Destino (se aplicável)
+
+Seção 2: Documentação para Conferência:
+
+Um visualizador de PDF embutido ou um link direto e seguro para abrir a Cédula de Crédito Bancário (CCB) assinada, recuperada do Supabase. O analista DEVE visualizar o contrato antes de pagar.
+
+Links para outros documentos relevantes da proposta.
+
+Seção 3: Ação de Pagamento:
+
+Após a conferência visual, o analista terá duas opções:
+
+Botão [Confirmar Desembolso e Marcar como Pago]:
+
+Esta ação exige autenticação de segurança (senha ou MFA).
+
+Ao confirmar, o sistema deve:
+a.  Mudar o status da proposta para DESEMBOLSADO.
+b.  Registrar um log de auditoria completo: quem pagou, quando pagou, valor, destino.
+c.  Remover a proposta da fila de "Pagamentos a Realizar".
+
+Botão [Reprovar/Devolver para Análise]: Com um campo obrigatório para justificar o motivo.
+
+4. Categorização Pós-Pagamento:
+
+Crie uma nova aba ou um filtro na tela de "Consulta de Contratos" para visualizar todos os contratos com status DESEMBOLSADO.
+
+Isso cria um repositório histórico de todos os empréstimos que foram pagos, permitindo que o financeiro gere relatórios de desembolso e faça a conciliação contábil.
+
+5. Princípios de Segurança Inegociáveis:
+
+Rastreabilidade Total: Cada clique, visualização e, principalmente, cada confirmação de pagamento deve ser registrada em uma trilha de auditoria imutável (quem, o quê, quando, onde).
+
+Segregação de Funções (SoD): As regras de permissão devem impedir que o mesmo usuário que aprovou o crédito possa aprovar o desembolso financeiro.
+
+Integridade de Dados: Bloquear qualquer tentativa de edição manual de valores ou contas de destino nesta tela. Qualquer correção deve ser feita na proposta original, passando pelo fluxo de aprovação novamente.

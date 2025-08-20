@@ -1,0 +1,278 @@
+📚 OWASP Cheat Sheet Series - LISTAGEM COMPLETA DAS 111 URLs
+📋 Páginas Gerais (7 links)
+https://cheatsheetseries.owasp.org/index.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/index.html
+
+https://cheatsheetseries.owasp.org/IndexTopTen.html
+
+https://cheatsheetseries.owasp.org/Glossary.html
+
+https://cheatsheetseries.owasp.org/faq.html
+
+https://cheatsheetseries.owasp.org/CONTRIBUTING.html
+
+https://cheatsheetseries.owasp.org/README.html
+
+🔐 Autenticação e Autorização (8 links)
+https://cheatsheetseries.owasp.org/cheatsheets/Access_Control_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Testing_Automation_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Multi-factor_Authentication_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Multifactor_Authentication_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/OAuth2_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Account_Termination_Cheat_Sheet.html
+
+🔑 Senhas e Gestão de Credenciais (8 links)
+https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Password_Reset_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Forgot_Password_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Remember_Me_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Choosing_and_Using_Security_Questions_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Security_Questions_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Credential_Stuffing_Prevention_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html
+
+🔒 Criptografia e Proteção de Dados (6 links)
+https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Protocols_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Key_Management_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Pinning_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Public_Key_Pin_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Hashing_Java_Cheat_Sheet.html
+
+🌐 Segurança Web (XSS, CSRF, Headers) (12 links)
+https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/XSS_Filter_Evasion_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/CORS_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Security_Headers_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Headers_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Content_Security_Policy_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Clickjacking_Defense_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Strict_Transport_Security_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Security_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Protection_Cheat_Sheet.html
+
+🍪 Cookies e Sessões (4 links)
+https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Cookies_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Cookie_Theft_Mitigation_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/HTTPOnly_HttpOnly_and_Secure_Cookie_Attribute_Cheat_Sheet.html
+
+💉 Prevenção de Injeção (10 links)
+https://cheatsheetseries.owasp.org/cheatsheets/Injection_Prevention_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Query_Parameterization_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/LDAP_Injection_Prevention_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Command_Injection_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/OS_Command_Injection_Defense_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Server_Side_Request_Forgery_Prevention_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Injection_Prevention_in_Java_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/LLM_Prompt_Injection_Prevention_Cheat_Sheet.html
+
+✅ Validação e Entrada de Dados (6 links)
+https://cheatsheetseries.owasp.org/cheatsheets/Input_Validation_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Sanitization_and_Validation_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Secure_File_Upload_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Secure_File_Download_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Unvalidated_Redirects_and_Forwards_Cheat_Sheet.html
+
+🔌 APIs e Serviços Web (6 links)
+https://cheatsheetseries.owasp.org/cheatsheets/API_Security_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/REST_Security_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/GraphQL_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/SOAP_Web_Service_Security_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Web_Service_Security_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/JSON_Web_Token_for_Java_Cheat_Sheet.html
+
+📱 Mobile e Cloud (4 links)
+https://cheatsheetseries.owasp.org/cheatsheets/Mobile_Security_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Mobile_Application_Security_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Cloud_Security_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Secure_Cloud_Architecture_Cheat_Sheet.html
+
+🐍 Linguagens e Frameworks (10 links)
+https://cheatsheetseries.owasp.org/cheatsheets/Java_Security_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/DotNet_Security_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/PHP_Security_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Python_Security_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Nodejs_Security_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Ruby_on_Rails_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/AngularJS_Security_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Go_Security_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Django_REST_Framework_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/C-Based_Toolchain_Hardening_Cheat_Sheet.html
+
+🏗️ DevOps e Infraestrutura (6 links)
+https://cheatsheetseries.owasp.org/cheatsheets/Infrastructure_as_Code_Security_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Kubernetes_Security_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Network_Segmentation_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Microservices_Security_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Microservices_based_Security_Arch_Doc_Cheat_Sheet.html
+
+📊 Logs, Monitoramento e Erros (4 links)
+https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Logging_Vocabulary_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Audit_Log_Security_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Error_Handling_Cheat_Sheet.html
+
+🛡️ Análise e Modelagem de Ameaças (2 links)
+https://cheatsheetseries.owasp.org/cheatsheets/Threat_Modeling_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Attack_Surface_Analysis_Cheat_Sheet.html
+
+🔧 Desenvolvimento Seguro (6 links)
+https://cheatsheetseries.owasp.org/cheatsheets/Secure_Software_Development_Lifecycle_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Secure_Product_Design_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Software_Supply_Chain_Security_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Vulnerable_Dependency_Management_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Third_Party_JavaScript_Management_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Third_Party_Javascript_Management_Cheat_Sheet.html
+
+🚨 Gestão de Incidentes e DoS (2 links)
+https://cheatsheetseries.owasp.org/cheatsheets/Denial_of_Service_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Vulnerability_Disclosure_Cheat_Sheet.html
+
+🎭 Outros Temas Especializados (10 links)
+https://cheatsheetseries.owasp.org/cheatsheets/Deserialization_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/DOM_Clobbering_Prevention_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Prototype_Pollution_Prevention_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Browser_Extension_Vulnerabilities_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Securing_Cascading_Style_Sheets_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/User_Privacy_Protection_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Legacy_Application_Management_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Transaction_Authorization_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/Insecure_Direct_Object_Reference_Prevention_Cheat_Sheet.html
+
+https://cheatsheetseries.owasp.org/cheatsheets/PHP_Configuration_Cheat_Sheet.html
+
+📊 Resumo Final
+🔢 TOTAL: 111 URLs completas
+
+📋 Páginas Gerais: 7 links
+
+🔐 Autenticação: 8 links
+
+🔑 Senhas: 8 links
+
+🔒 Criptografia: 6 links
+
+🌐 Segurança Web: 12 links
+
+🍪 Cookies/Sessões: 4 links
+
+💉 Prevenção Injeção: 10 links
+
+✅ Validação Dados: 6 links
+
+🔌 APIs: 6 links
+
+📱 Mobile/Cloud: 4 links
+
+🐍 Linguagens: 10 links
+
+🏗️ DevOps: 6 links
+
+📊 Logs/Monitoramento: 4 links
+
+🛡️ Modelagem Ameaças: 2 links
+
+🔧 Desenvolvimento: 6 links
+
+🚨 Incidentes/DoS: 2 links
+
+🎭 Temas Especializados: 10 links
+
+✅ Pronto para sua IA estudar toda a base de conhecimento OWASP!

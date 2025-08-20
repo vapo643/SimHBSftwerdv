@@ -1,0 +1,33 @@
+# MISSÃO DE RELATÓRIO ESTRATÉGICO: Análise de Retorno sobre o Investimento (ROI) da Implementação de Cibersegurança OWASP
+
+**## CONTEXTO, INTENÇÃO E EXPECTATIVA (LEITURA OBRIGATÓRIA)**
+
+**Contexto e Intenção Estratégica:**
+Olá, Agente. Nos últimos dias, nós executamos uma iniciativa de cibersegurança massiva e bem-sucedida. Implementamos uma arquitetura de segurança completa, baseada nos 4 pilares da OWASP (SAMM, ASVS, Cheat Sheets, WSTG), construímos um dashboard de segurança e um sistema de verificação de dependências ("Projeto Cérbero"). A nossa intenção agora é comunicar o imenso valor e o retorno sobre o investimento (ROI) deste trabalho para a liderança.
+
+**Sua Missão (A Tarefa):**
+A sua missão é atuar como um Consultor de Cibersegurança e Analista de Negócios Sênior. Você deve gerar um relatório executivo completo que detalhe o estado da nossa aplicação **antes** e **depois** desta implementação. O relatório deve ser técnico, mas também ter uma seção clara e simples que qualquer pessoa leiga possa entender, justificando o investimento realizado.
+
+---
+**## ROADMAP DE EXECUÇÃO (Estrutura do Relatório)**
+
+Por favor, gere o relatório seguindo **exatamente** esta estrutura:
+
+**1. Sumário Executivo:**
+* Comece com um parágrafo de alto nível que resuma a iniciativa e o seu resultado. Exemplo: "Num esforço proativo para blindar a aplicação Simpix, executamos uma implementação de segurança abrangente baseada nos standards da OWASP. O resultado é uma plataforma significativamente mais segura e resiliente, pronta para lidar com dados financeiros sensíveis."
+
+**2. Análise Técnica: O Estado da Aplicação "Antes vs. Depois"**
+* **"Antes" (O Estado de Risco):** Descreva a nossa postura de segurança antes desta missão. Mencione a falta de processos formais (conforme a análise SAMM), as vulnerabilidades críticas que encontrámos (falta de rotação de tokens, senhas fracas, conforme a análise ASVS), e a ausência de monitoramento automatizado.
+* **"Depois" (A Fortaleza Digital):** Descreva a nossa postura de segurança atual. Detalhe as novas camadas de defesa que implementamos: a conformidade com o OWASP ASVS Nível 1, o novo sistema de monitoramento contínuo ("Projeto Cérbero" com SCA e SAST) e o dashboard de segurança para visibilidade em tempo real.
+
+**3. Justificativa de Investimento (ROI) - *A Seção Para Leigos***
+* **O Risco (O "Porquê" da Urgência):** Escreva uma seção em linguagem **muito simples e direta**. Explique que o nosso software lida com **dados de empréstimos bancários**, que são extremamente sensíveis. Detalhe os riscos catastróficos que uma falha de segurança representaria: perda financeira para os clientes e para a empresa, dano irreparável à reputação da marca e possíveis consequências legais e regulatórias.
+* **O Custo vs. O Valor:**
+    * **O Custo:** Declare o custo da implementação: **"+250$"**.
+    * **O Tempo Economizado:** Estime quantas horas ou dias um time de engenharia manual levaria para fazer uma implementação de segurança deste calibre.
+    * **O Valor (A Proteção):** Conclua explicando que, apesar de o custo parecer alto, o valor que ele gera ao proteger o nosso negócio e os nossos clientes destes riscos catastróficos é imensurável. Foi um investimento essencial e muito bem-sucedido.
+
+**4. Próximos Passos:**
+* Termine o relatório com uma breve seção sobre os próximos passos, mencionando que agora, com a segurança garantida, podemos focar em expandir as funcionalidades do produto com confiança.
+
+Execute este plano para gerar o relatório que irá para o meu superior.

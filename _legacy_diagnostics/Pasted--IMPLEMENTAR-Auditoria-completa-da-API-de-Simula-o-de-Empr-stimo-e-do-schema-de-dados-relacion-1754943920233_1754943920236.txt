@@ -1,0 +1,29 @@
+**IMPLEMENTAR:**
+Auditoria completa da API de Simulação de Empréstimo e do schema de dados relacionado, para planejar a re-arquitetura da sua lógica de cálculo.
+
+**CONTEXT:**
+A API de simulação atual está desatualizada. Ela opera com dados fixos (hardcoded) e não reflete as regras de negócio dinâmicas do nosso sistema. Precisamos re-arquitetá-la para que os cálculos da simulação sejam baseados nas relações entre Parceiros, seus Produtos e suas Tabelas Comerciais específicas.
+
+**CURRENT STATE:**
+O endpoint de simulação existe, mas retorna valores de juros, CET, TAC e IOF que não são calculados com base nos dados reais do banco de dados, tornando as simulações imprecisas.
+
+**PROCESSO SISTEMÁTICO (Roadmap de Auditoria - NÃO FAÇA CORREÇÕES AGORA):**
+
+**1. Auditoria do Código Atual:**
+    - **Ação:** Localize e apresente o código completo do endpoint da API de simulação existente.
+    - **Relatório:** Aponte a seção exata do código onde os valores fixos (juros, CET, etc.) estão a ser definidos.
+
+**2. Auditoria do Schema de Dados e Relações:**
+    - **Ação:** Analise as seguintes tabelas no nosso banco de dados: `parceiros`, `produtos`, `tabelas_comerciais`, e `produto_tabela_comercial`.
+    - **Relatório:** Descreva a relação entre elas (ex: "Um Parceiro tem muitos Produtos...") e identifique as colunas exatas que armazenam os parâmetros financeiros cruciais (taxas de juros, prazos, valores, taxas administrativas, etc.).
+
+**3. Auditoria das Regras de Negócio (Condições Especiais):**
+    - **Ação:** Investigue a tabela `parceiros`.
+    - **Relatório:** Existe alguma coluna nesta tabela que defina uma "condição especial" ou uma taxa customizada que deva sobrepor os valores padrão da `tabelas_comerciais`? Se sim, descreva como esta regra de negócio parece funcionar.
+
+**4. Auditoria dos Cálculos Financeiros (CET, IOF, TAC):**
+    - **Ação:** Inspecione o código atual.
+    - **Relatório:** Existe alguma lógica, mesmo que comentada ou em stubs, para o cálculo do Custo Efetivo Total (CET), IOF e TAC? Se não, declare explicitamente `[LÓGICA DE CÁLCULO FINANCEIRO AUSENTE]`.
+
+**Relatório Final:**
+O critério de sucesso é um relatório de auditoria que responda a todas as quatro questões acima, nos fornecendo um mapa claro para a fase de implementação.

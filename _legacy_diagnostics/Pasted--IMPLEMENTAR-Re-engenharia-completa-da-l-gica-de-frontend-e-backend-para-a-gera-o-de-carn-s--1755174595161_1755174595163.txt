@@ -1,0 +1,43 @@
+**IMPLEMENTAR:**
+Re-engenharia completa da lógica de frontend e backend para a geração de "carnês" na "Tela de Formalização", tornando o sistema ciente do estado atual do Supabase Storage para evitar ações desnecessárias e guiar o usuário de forma inteligente.
+
+**CONTEXT:**
+O fluxo atual de geração de carnês está a falhar em cenários do mundo real. Ele não verifica se os boletos ou o carnê já existem no Storage antes de agir. Isso causa dois problemas críticos: 1) O sistema tenta re-sincronizar boletos que já foram baixados, sobrecarregando a API do Banco Inter. 2) A interface do usuário não exibe as opções corretas (como "Baixar Carnê") quando o ficheiro já está pronto, quebrando a experiência do usuário.
+
+**CURRENT STATE:**
+Ao entrar na tela, o sistema não sabe o estado dos boletos no Storage. O botão "Gerar Carnê" sempre tenta iniciar o processo do zero, e o botão de download não aparece de forma confiável.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um sistema inteligente que, ao carregar a "Tela de Formalização", executa as seguintes lógicas:
+
+1.  **Verificação de Estado no Carregamento:** O frontend deve, ao carregar, chamar um novo endpoint no backend para verificar o estado dos boletos da proposta no Supabase Storage.
+2.  **Lógica de Exibição de Botões (Máquina de Estados):**
+    * **SE** a verificação indicar que um **carnê completo já existe**, a UI deve exibir **APENAS** o botão verde **"Baixar Carnê"** e um botão secundário **"Regerar Carnê Parcial"**.
+    * **SE** a verificação indicar que os boletos individuais existem no Storage mas o carnê ainda não foi gerado, a UI deve exibir o botão **"Gerar Carnê a partir do Storage"**.
+    * **SE** a verificação indicar que **NENHUM** boleto foi sincronizado, a UI deve exibir o botão azul inicial **"Sincronizar e Gerar Carnê"**.
+3.  **Lógica de "Não Sincronizar de Novo":** A ação de "Sincronizar" (baixar do Banco Inter) deve ser bloqueada se os boletos já existirem em nosso Storage.
+4.  **Lógica de "Regerar Carnê Parcial":** O botão "Regerar Carnê Parcial" deve abrir um modal onde o atendente pode selecionar quais boletos (ex: apenas os 3 primeiros) devem ser incluídos em um novo carnê.
+5.  **Lógica de "Correção de Sincronização Incompleta":** Se o sistema detectar que o número de boletos no Storage é menor que o número total de parcelas da proposta, ele deve exibir uma opção para "Corrigir Sincronização", que irá deletar os ficheiros existentes e re-tentar o download de todos.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+**1. Backend - O Endpoint de "Consciência de Estado":**
+    - **Ação:** Crie um novo endpoint `GET /api/propostas/:id/storage-status`.
+    - **Implementação:** Este endpoint deve verificar o Supabase Storage e retornar um objeto JSON com o estado, como: `{ syncStatus: 'completo' | 'incompleto' | 'nenhum', carneExists: true | false, fileCount: 24 }`.
+
+**2. Frontend - A Máquina de Estados da UI (`formalizacao.tsx`):**
+    - **Ação:** No `useEffect` de carregamento da página, chame o novo endpoint `storage-status`.
+    - **Implementação:** Use o resultado desta chamada para controlar, através de um estado do React, qual conjunto de botões é renderizado na tela, implementando a lógica exata descrita em `EXPECTED`.
+
+**3. Backend - A Lógica de Correção e Regeneração:**
+    - **Ação:** Crie ou modifique os endpoints para lidar com os novos casos de uso.
+    - **Implementação:**
+        - `POST /api/propostas/:id/corrigir-sincronizacao`: Deve primeiro deletar os ficheiros existentes no Storage e depois adicionar um job à fila `boleto-sync`.
+        - `POST /api/propostas/:id/gerar-carne`: Modifique-o para aceitar um array opcional de `codigosSolicitacao` no corpo da requisição, para permitir a geração de carnês parciais.
+
+**PROTOCOLO OBRIGATÓRIO 5-CHECK:**
+1.  Mapear todos os arquivos envolvidos.
+2.  Implementar primeiro a lógica do backend e depois a do frontend.
+3.  Executar `get_latest_lsp_diagnostics`.
+4.  Realizar testes para CADA estado da máquina de UI (carnê existente, carnê inexistente, sincronização incompleta).
+5.  O critério final de sucesso é uma UI que se comporta de forma inteligente e previsível, guiando o usuário sem permitir ações desnecessárias ou redundantes.
