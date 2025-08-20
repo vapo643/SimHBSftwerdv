@@ -10,7 +10,7 @@
 
 import { db } from "../db";
 import { propostas, produtos } from "../../shared/schema";
-import { eq, or, and, isNull } from "drizzle-orm";
+import { eq, or, and, isNull, inArray } from "drizzle-orm";
 
 /**
  * Serviço responsável por todos os cálculos relacionados à Taxa de Abertura de Crédito
@@ -29,12 +29,51 @@ export class TacCalculationService {
     valorEmprestimo: number, 
     clienteCpf: string
   ): Promise<number> {
-    // TODO: Implementar lógica de busca do produto, verificação de cliente cadastrado e cálculo de TAC.
-    // Passo 1: Buscar configuração de TAC do produto (tacValor, tacTipo)
-    // Passo 2: Verificar se cliente é cadastrado usando isClienteCadastrado()
-    // Passo 3: Se cliente cadastrado, retornar 0 (isenção)
-    // Passo 4: Se não, calcular TAC baseado em tacTipo (fixo ou percentual)
-    return 0;
+    try {
+      // Passo 1: Verificar se cliente é cadastrado
+      const isClienteCadastrado = await this.isClienteCadastrado(clienteCpf);
+      
+      // Passo 2: Se cliente cadastrado, retornar 0 (isenção)
+      if (isClienteCadastrado) {
+        console.log(`[TAC] Cliente ${clienteCpf} é cadastrado - TAC isenta`);
+        return 0;
+      }
+      
+      // Passo 3: Buscar configuração de TAC do produto
+      const produto = await db.select({
+        tacValor: produtos.tacValor,
+        tacTipo: produtos.tacTipo
+      })
+      .from(produtos)
+      .where(
+        and(
+          eq(produtos.id, produtoId),
+          isNull(produtos.deletedAt)
+        )
+      )
+      .limit(1);
+      
+      if (!produto || produto.length === 0) {
+        console.error(`[TAC] Produto ${produtoId} não encontrado`);
+        // Retorna 0 se produto não encontrado para não bloquear o fluxo
+        return 0;
+      }
+      
+      // Passo 4: Calcular TAC baseado no tipo
+      const tacValor = parseFloat(produto[0].tacValor || '0');
+      const tacTipo = produto[0].tacTipo || 'fixo';
+      
+      const tacCalculada = this.calculateTacByType(tacValor, tacTipo, valorEmprestimo);
+      
+      console.log(`[TAC] TAC calculada para produto ${produtoId}: R$ ${tacCalculada.toFixed(2)} (tipo: ${tacTipo}, valor base: ${tacValor})`);
+      
+      return tacCalculada;
+      
+    } catch (error) {
+      console.error(`[TAC] Erro ao calcular TAC:`, error);
+      // Em caso de erro, retorna 0 para não bloquear o fluxo
+      return 0;
+    }
   }
 
   /**
@@ -49,11 +88,40 @@ export class TacCalculationService {
    * @returns true se o cliente é cadastrado, false caso contrário
    */
   public static async isClienteCadastrado(cpf: string): Promise<boolean> {
-    // TODO: Implementar lógica de verificação de cliente cadastrado.
-    // Passo 1: Buscar propostas do cliente pelo CPF
-    // Passo 2: Verificar se existe alguma com status aprovado/ASSINATURA_CONCLUIDA/QUITADO
-    // Passo 3: Retornar true se encontrar, false caso contrário
-    return false;
+    try {
+      // Status que indicam cliente cadastrado
+      const statusClienteCadastrado = ["aprovado", "ASSINATURA_CONCLUIDA", "QUITADO"];
+      
+      // Buscar propostas com os status especificados
+      const existingProposals = await db.select({
+        id: propostas.id,
+        status: propostas.status
+      })
+      .from(propostas)
+      .where(
+        and(
+          eq(propostas.clienteCpf, cpf),
+          inArray(propostas.status, statusClienteCadastrado),
+          isNull(propostas.deletedAt)
+        )
+      )
+      .limit(1);
+      
+      const isRegistered = existingProposals.length > 0;
+      
+      if (isRegistered) {
+        console.log(`[TAC] Cliente ${cpf} cadastrado - proposta ${existingProposals[0].id} com status ${existingProposals[0].status}`);
+      } else {
+        console.log(`[TAC] Cliente ${cpf} não é cadastrado - primeira operação`);
+      }
+      
+      return isRegistered;
+      
+    } catch (error) {
+      console.error(`[TAC] Erro ao verificar se cliente é cadastrado:`, error);
+      // Em caso de erro, considera como não cadastrado para aplicar TAC
+      return false;
+    }
   }
 
   /**
@@ -70,9 +138,24 @@ export class TacCalculationService {
     tacTipo: string,
     valorEmprestimo: number
   ): number {
-    // TODO: Implementar lógica de cálculo baseada no tipo
-    // Se tacTipo === "fixo": retornar tacValor
-    // Se tacTipo === "percentual": retornar (tacValor/100) * valorEmprestimo
-    return 0;
+    // Validação de entrada
+    if (tacValor <= 0) {
+      return 0;
+    }
+    
+    // Cálculo baseado no tipo
+    if (tacTipo === "fixo") {
+      // TAC fixo: retorna o valor direto
+      return tacValor;
+    } else if (tacTipo === "percentual") {
+      // TAC percentual: calcula porcentagem sobre o valor do empréstimo
+      const tacCalculada = (valorEmprestimo * tacValor) / 100;
+      // Arredonda para 2 casas decimais
+      return Math.round(tacCalculada * 100) / 100;
+    } else {
+      console.warn(`[TAC] Tipo de TAC desconhecido: ${tacTipo}. Usando valor fixo como padrão.`);
+      // Fallback para tipo fixo se tipo desconhecido
+      return tacValor;
+    }
   }
 }

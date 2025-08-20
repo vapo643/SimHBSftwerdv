@@ -1,0 +1,62 @@
+### Pacote de Ativação de Missão (PAM) V1.0
+
+* **Sumário da Missão (O Quê):** Implementar a lógica de negócio completa dentro dos métodos do `TacCalculationService`, incluindo a verificação de "cliente cadastrado" e o cálculo dinâmico da TAC.
+* **Intenção Estratégica (O Porquê):** Centralizar e codificar a nova regra de negócio de isenção de TAC em um serviço dedicado, tornando a lógica testável, manutenível e desacoplada do resto da aplicação. Esta é a implementação do "cérebro" da nova funcionalidade.
+* **Histórico Relevante (Consulta Obrigatória):** A FASE 0 criou o esqueleto `tacCalculationService.ts`. O nosso debate de planejamento definiu a lógica exata a ser implementada: a função `isClienteCadastrado` deve verificar os status `["aprovado", "ASSINATURA_CONCLUIDA", "QUITADO"]`, e a função `calculateTac` deve usar essa verificação para isentar o cliente ou calcular a TAC com base no produto.
+* **Modelo Mental (Como se Encaixa):** Esta é uma missão de implementação de lógica de negócio pura no backend. O Agente irá preencher os métodos vazios da classe `TacCalculationService` com consultas ao banco de dados e lógica condicional.
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco:** A consulta para verificar o status do cliente pode ser ineficiente ou a lógica de cálculo pode não tratar todos os casos.
+    * **Contramedida:** O prompt especifica uma consulta eficiente e exige que a lógica de cálculo trate ambos os `tacTipo` ("fixo" e "percentual").
+
+---
+
+**IMPLEMENTAR:**
+Implementação da Lógica de Negócio no `TacCalculationService`
+
+**CURRENT STATE:**
+O arquivo `server/services/tacCalculationService.ts` existe, mas seus métodos contêm apenas placeholders (`// TODO:`).
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  O arquivo `server/services/tacCalculationService.ts` é modificado.
+2.  O método `isClienteCadastrado(cpf: string)` é implementado:
+    * Ele executa uma consulta na tabela `propostas` para encontrar qualquer proposta para o `cpf` fornecido que tenha um `status` dentro do array `["aprovado", "ASSINATURA_CONCLUIDA", "QUITADO"]`.
+    * Retorna `true` se encontrar pelo menos uma, e `false` caso contrário.
+3.  O método `calculateTac(produtoId: number, valorEmprestimo: number, clienteCpf: string)` é implementado:
+    * Ele primeiro chama `await this.isClienteCadastrado(clienteCpf)`.
+    * Se o resultado for `true`, o método retorna `0` (isenção de TAC).
+    * Se for `false`, ele busca o `produto` no banco de dados pelo `produtoId`.
+    * Em seguida, ele chama o método privado `calculateTacByType`, passando os dados do produto para calcular a TAC.
+4.  O método privado `calculateTacByType(tacValor: number, tacTipo: string, valorEmprestimo: number)` é implementado:
+    * Se `tacTipo` for `"fixo"`, ele retorna `tacValor`.
+    * Se `tacTipo` for `"percentual"`, ele retorna `(valorEmprestimo * tacValor) / 100`.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  **Implemente `isClienteCadastrado` Primeiro:** Use o Drizzle para construir a query. A lógica deve ser semelhante a:
+    ```typescript
+    const existingProposals = await db.select().from(propostas)
+      .where(and(
+        eq(propostas.clienteCpf, cpf),
+        inArray(propostas.status, ["aprovado", "ASSINATURA_CONCLUIDA", "QUITADO"])
+      )).limit(1);
+    return existingProposals.length > 0;
+    ```
+2.  **Implemente `calculateTac`:** Siga a lógica de orquestração descrita em `EXPECTED`. Lembre-se de tratar o caso em que o `produtoId` não é encontrado no banco.
+3.  **Implemente `calculateTacByType`:** Implemente a lógica de cálculo para os tipos "fixo" e "percentual".
+4.  **Ação Restrita:** A missão é focada **exclusivamente** na implementação da lógica dentro deste serviço. **NÃO** o integre ainda em nenhuma rota.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que os status para 'cliente cadastrado' são exatamente os três definidos no debate."]
+* **VALIDAÇÃO PENDENTE:** [A criação de testes unitários para este serviço (FASE 3) será a validação final da lógica.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear ficheiros e funções exatas afetadas.
+2.  Garantir que as queries Drizzle e a lógica de cálculo estão corretas.
+3.  Executar `get_latest_lsp_diagnostics` para garantir 0 erros no arquivo.
+4.  **Declarar Nível de Confiança (0 a 100%)**.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (revisão lógica do código para garantir que ele atende aos requisitos).
+7.  **Documentar Decisões Técnicas**.
