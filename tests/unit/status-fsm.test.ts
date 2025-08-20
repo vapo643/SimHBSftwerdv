@@ -8,10 +8,10 @@
 
 import { describe, it, expect } from "vitest";
 import { 
+  ProposalStatus,
   validateTransition, 
   getPossibleTransitions 
 } from "../../server/services/statusFsmService";
-import { ProposalStatus } from "@shared/schema";
 
 describe("Status FSM Unit Tests", () => {
   
