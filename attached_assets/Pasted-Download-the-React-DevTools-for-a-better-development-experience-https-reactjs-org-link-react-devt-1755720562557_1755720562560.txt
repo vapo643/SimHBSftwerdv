@@ -1,0 +1,178 @@
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+content-script.js:22 Document already loaded, running initialization immediately
+content-script.js:4 Attempting to initialize AdUnit
+content-script.js:6 AdUnit initialized successfully
+webcomponents-ce.js:33 Uncaught Error: A custom element with name 'mce-autosize-textarea' has already been defined.
+    at Aa (webcomponents-ce.js:33:363)
+    at m.define (webcomponents-ce.js:33:133)
+    at overlay_bundle.js:148:5559
+    at D (overlay_bundle.js:44:680)
+    at overlay_bundle.js:159:392Understand this error
+content.js:208 Object
+AuthContext.tsx:170 🔐 [AUTH EVENT] SIGNED_IN Object
+AuthContext.tsx:170 🔐 [AUTH EVENT] INITIAL_SESSION Object
+apiClient.ts:166 🔐 [TOKEN MANAGER] Fresh token obtained, length: 767
+apiClient.ts:343 [PASSO 3 - ENVIO] Object
+apiClient.ts:343 [PASSO 3 - ENVIO] Object
+apiClient.ts:343 [PASSO 3 - ENVIO] Object
+apiClient.ts:343 [PASSO 3 - ENVIO] Object
+2AuthContext.tsx:102 🔐 [AUTH RESTORED] User profile loaded with valid token
+apiClient.ts:343 [PASSO 3 - ENVIO] Object
+formalizacao.tsx:251 🔍 [PAM V1.0 DIAGNÓSTICO] FormalizacaoList - Estado atual: Object
+formalizacao.tsx:189 Fazendo requisição para /api/propostas/formalizacao
+apiClient.ts:343 [PASSO 3 - ENVIO] Object
+formalizacao.tsx:191 Resposta do endpoint formalizacao: Array(0)
+formalizacao.tsx:200 Propostas com dados parseados: Array(0)
+formalizacao.tsx:251 🔍 [PAM V1.0 DIAGNÓSTICO] FormalizacaoList - Estado atual: Object
+apiClient.ts:343 [PASSO 3 - ENVIO] Object
+apiClient.ts:343 [PASSO 3 - ENVIO] Object
+apiClient.ts:343 [PASSO 3 - ENVIO] Object
+useIdleTimer.ts:108 🔍 [IDLE TIMER] Tab became hidden, timer continues
+useIdleTimer.ts:51 🕐 [IDLE TIMER] User became idle after 30 minutes of inactivity
+AuthContext.tsx:72 ⚠️ [IDLE WARNING] Showing inactivity warning to user (2 minutes left)
+AuthContext.tsx:170 🔐 [AUTH EVENT] TOKEN_REFRESHED Object
+apiClient.ts:166 🔐 [TOKEN MANAGER] Fresh token obtained, length: 767
+apiClient.ts:343 [PASSO 3 - ENVIO] Object
+apiClient.ts:343 [PASSO 3 - ENVIO] Object
+AuthContext.tsx:78 🔄 [IDLE RESET] User chose to continue session
+AuthContext.tsx:102 🔐 [AUTH RESTORED] User profile loaded with valid token
+apiClient.ts:343 [PASSO 3 - ENVIO] Object
+apiClient.ts:343 [PASSO 3 - ENVIO] Object
+apiClient.ts:343 [PASSO 3 - ENVIO] Object
+apiClient.ts:343 [PASSO 3 - ENVIO] Object
+chunk-75M3I4OJ.js?v=9b0d0ee4:339 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ chunk-75M3I4OJ.js?v=9b0d0ee4:339Understand this warning
+apiClient.ts:343 [PASSO 3 - ENVIO] Object
+apiClient.ts:343 [PASSO 3 - ENVIO] Object
+useIdleTimer.ts:108 🔍 [IDLE TIMER] Tab became hidden, timer continues
+AuthContext.tsx:170 🔐 [AUTH EVENT] SIGNED_IN Object
+apiClient.ts:343 [PASSO 3 - ENVIO] Object
+AuthContext.tsx:102 🔐 [AUTH RESTORED] User profile loaded with valid token
+useIdleTimer.ts:108 🔍 [IDLE TIMER] Tab became hidden, timer continues
+useIdleTimer.ts:51 🕐 [IDLE TIMER] User became idle after 30 minutes of inactivity
+AuthContext.tsx:72 ⚠️ [IDLE WARNING] Showing inactivity warning to user (2 minutes left)
+AuthContext.tsx:56 🔐 [IDLE TIMEOUT] User being logged out due to inactivity
+AuthContext.tsx:170 🔐 [AUTH EVENT] SIGNED_OUT Object
+login:1 [DOM] Input elements should have autocomplete attributes (suggested: "current-password"): (More info: https://goo.gl/9p2vKq) <input data-replit-metadata=​"client/​src/​pages/​login.tsx:​100:​14" data-component-name=​"Input" type=​"password" class=​"flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:​border-0 file:​bg-transparent file:​text-sm file:​font-medium file:​text-foreground placeholder:​text-muted-foreground focus-visible:​outline-none focus-visible:​ring-2 focus-visible:​ring-ring focus-visible:​ring-offset-2 disabled:​cursor-not-allowed disabled:​opacity-50 md:​text-sm" id=​"password" required name=​"password">​
+4useIdleTimer.ts:108 🔍 [IDLE TIMER] Tab became hidden, timer continues
+useIdleTimer.ts:51 🕐 [IDLE TIMER] User became idle after 30 minutes of inactivity
+AuthContext.tsx:72 ⚠️ [IDLE WARNING] Showing inactivity warning to user (2 minutes left)
+3useIdleTimer.ts:108 🔍 [IDLE TIMER] Tab became hidden, timer continues
+AuthContext.tsx:170 🔐 [AUTH EVENT] SIGNED_IN Object
+supabase-auth-provider.ts:63 [PASSO 1 - LOGIN] Object
+apiClient.ts:166 🔐 [TOKEN MANAGER] Fresh token obtained, length: 767
+apiClient.ts:343 [PASSO 3 - ENVIO] Object
+dashboard.tsx:215 DEBUG - First 3 proposals values: Array(0)
+apiClient.ts:343 [PASSO 3 - ENVIO] Object
+apiClient.ts:343 [PASSO 3 - ENVIO] Object
+api/alertas/notificacoes:1  Failed to load resource: the server responded with a status of 403 (Forbidden)Understand this error
+api/debug/me:1  Failed to load resource: the server responded with a status of 403 (Forbidden)Understand this error
+VM2266 usuarios:47 Error fetching profile data: ApiError: Acesso negado. Perfil de usuário não encontrado.
+    at apiClient (apiClient.ts:467:13)
+    at async fetchUserProfile (AuthContext.tsx:95:28)
+console.error @ VM2266 usuarios:47Understand this error
+dashboard.tsx:215 DEBUG - First 3 proposals values: Array(0)
+api/propostas:1  Failed to load resource: the server responded with a status of 403 (Forbidden)Understand this error
+dashboard.tsx:215 DEBUG - First 3 proposals values: Array(0)
+useIdleTimer.ts:108 🔍 [IDLE TIMER] Tab became hidden, timer continues
+apiClient.ts:343 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…7is3g.janeway.replit.dev/api/alertas/notificacoes', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.KHRt0ZLVIGvHB6KDdVqbDHr2ZfzqSqyIxABaTggcibk', hasToken: true, isFormData: false}
+AuthContext.tsx:170 🔐 [AUTH EVENT] SIGNED_IN {hasSession: true, tokenLength: 767}
+apiClient.ts:343 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.KHRt0ZLVIGvHB6KDdVqbDHr2ZfzqSqyIxABaTggcibk', hasToken: true, isFormData: false}
+dashboard.tsx:215 DEBUG - First 3 proposals values: []
+requests.js:1  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/alertas/notificacoes 403 (Forbidden)
+(anonymous) @ requests.js:1
+(anonymous) @ traffic.js:1
+fetch @ traffic.js:1
+fetchWithTimeout @ apiClient.ts:263
+apiClient @ apiClient.ts:371
+await in apiClient
+get @ apiClient.ts:532
+(anonymous) @ queryClient.ts:57
+fetchFn @ @tanstack_react-query.js?v=9b0d0ee4:840
+run @ @tanstack_react-query.js?v=9b0d0ee4:494
+start @ @tanstack_react-query.js?v=9b0d0ee4:536
+fetch @ @tanstack_react-query.js?v=9b0d0ee4:926
+executeFetch_fn @ @tanstack_react-query.js?v=9b0d0ee4:2211
+fetch @ @tanstack_react-query.js?v=9b0d0ee4:2011
+refetch @ @tanstack_react-query.js?v=9b0d0ee4:2001
+onFocus @ @tanstack_react-query.js?v=9b0d0ee4:749
+(anonymous) @ @tanstack_react-query.js?v=9b0d0ee4:1112
+(anonymous) @ @tanstack_react-query.js?v=9b0d0ee4:1111
+batch @ @tanstack_react-query.js?v=9b0d0ee4:583
+onFocus @ @tanstack_react-query.js?v=9b0d0ee4:1110
+(anonymous) @ @tanstack_react-query.js?v=9b0d0ee4:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=9b0d0ee4:313
+onFocus @ @tanstack_react-query.js?v=9b0d0ee4:312
+(anonymous) @ @tanstack_react-query.js?v=9b0d0ee4:299
+listener @ @tanstack_react-query.js?v=9b0d0ee4:270Understand this error
+requests.js:1  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me 403 (Forbidden)
+(anonymous) @ requests.js:1
+(anonymous) @ traffic.js:1
+fetch @ traffic.js:1
+fetchWithTimeout @ apiClient.ts:263
+apiClient @ apiClient.ts:371
+await in apiClient
+get @ apiClient.ts:532
+fetchUserProfile @ AuthContext.tsx:95
+(anonymous) @ AuthContext.tsx:179
+(anonymous) @ @supabase_supabase-js.js?v=9b0d0ee4:6688
+_notifyAllSubscribers @ @supabase_supabase-js.js?v=9b0d0ee4:6686
+_recoverAndRefresh @ @supabase_supabase-js.js?v=9b0d0ee4:6629
+await in _recoverAndRefresh
+(anonymous) @ @supabase_supabase-js.js?v=9b0d0ee4:6901
+(anonymous) @ @supabase_supabase-js.js?v=9b0d0ee4:5932
+(anonymous) @ @supabase_supabase-js.js?v=9b0d0ee4:5049Understand this error
+VM2266 usuarios:47 Error fetching profile data: ApiError: Acesso negado. Perfil de usuário não encontrado.
+    at apiClient (apiClient.ts:467:13)
+    at async fetchUserProfile (AuthContext.tsx:95:28)
+console.error @ VM2266 usuarios:47
+fetchUserProfile @ AuthContext.tsx:109
+await in fetchUserProfile
+(anonymous) @ AuthContext.tsx:179
+(anonymous) @ @supabase_supabase-js.js?v=9b0d0ee4:6688
+_notifyAllSubscribers @ @supabase_supabase-js.js?v=9b0d0ee4:6686
+_recoverAndRefresh @ @supabase_supabase-js.js?v=9b0d0ee4:6629
+await in _recoverAndRefresh
+(anonymous) @ @supabase_supabase-js.js?v=9b0d0ee4:6901
+(anonymous) @ @supabase_supabase-js.js?v=9b0d0ee4:5932
+(anonymous) @ @supabase_supabase-js.js?v=9b0d0ee4:5049Understand this error
+dashboard.tsx:215 DEBUG - First 3 proposals values: []
+useIdleTimer.ts:108 🔍 [IDLE TIMER] Tab became hidden, timer continues
+apiClient.ts:343 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…7is3g.janeway.replit.dev/api/alertas/notificacoes', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.KHRt0ZLVIGvHB6KDdVqbDHr2ZfzqSqyIxABaTggcibk', hasToken: true, isFormData: false}
+AuthContext.tsx:170 🔐 [AUTH EVENT] SIGNED_IN {hasSession: true, tokenLength: 767}
+apiClient.ts:343 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.KHRt0ZLVIGvHB6KDdVqbDHr2ZfzqSqyIxABaTggcibk', hasToken: true, isFormData: false}
+dashboard.tsx:215 DEBUG - First 3 proposals values: []
+requests.js:1  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me 403 (Forbidden)
+(anonymous) @ requests.js:1
+(anonymous) @ traffic.js:1
+fetch @ traffic.js:1
+fetchWithTimeout @ apiClient.ts:263
+apiClient @ apiClient.ts:371
+await in apiClient
+get @ apiClient.ts:532
+fetchUserProfile @ AuthContext.tsx:95
+(anonymous) @ AuthContext.tsx:179
+(anonymous) @ @supabase_supabase-js.js?v=9b0d0ee4:6688
+_notifyAllSubscribers @ @supabase_supabase-js.js?v=9b0d0ee4:6686
+_recoverAndRefresh @ @supabase_supabase-js.js?v=9b0d0ee4:6629
+await in _recoverAndRefresh
+(anonymous) @ @supabase_supabase-js.js?v=9b0d0ee4:6901
+(anonymous) @ @supabase_supabase-js.js?v=9b0d0ee4:5932
+(anonymous) @ @supabase_supabase-js.js?v=9b0d0ee4:5049Understand this error
+VM2266 usuarios:47 Error fetching profile data: ApiError: Acesso negado. Perfil de usuário não encontrado.
+    at apiClient (apiClient.ts:467:13)
+    at async fetchUserProfile (AuthContext.tsx:95:28)
+console.error @ VM2266 usuarios:47
+fetchUserProfile @ AuthContext.tsx:109
+await in fetchUserProfile
+(anonymous) @ AuthContext.tsx:179
+(anonymous) @ @supabase_supabase-js.js?v=9b0d0ee4:6688
+_notifyAllSubscribers @ @supabase_supabase-js.js?v=9b0d0ee4:6686
+_recoverAndRefresh @ @supabase_supabase-js.js?v=9b0d0ee4:6629
+await in _recoverAndRefresh
+(anonymous) @ @supabase_supabase-js.js?v=9b0d0ee4:6901
+(anonymous) @ @supabase_supabase-js.js?v=9b0d0ee4:5932
+(anonymous) @ @supabase_supabase-js.js?v=9b0d0ee4:5049Understand this error
+dashboard.tsx:215 DEBUG - First 3 proposals values: []
+requests.js:1  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/alertas/notificacoes 403 (Forbidden)

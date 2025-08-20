@@ -1,4 +1,5 @@
 // Advanced protection against custom element redefinition errors
+// Execute immediately to prevent conflicts
 (function() {
   // Store the original define method
   const originalDefine = window.customElements.define;
