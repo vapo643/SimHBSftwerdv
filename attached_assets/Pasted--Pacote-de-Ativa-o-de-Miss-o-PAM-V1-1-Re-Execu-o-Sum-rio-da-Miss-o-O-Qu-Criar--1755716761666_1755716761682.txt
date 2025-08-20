@@ -1,0 +1,51 @@
+### Pacote de Ativação de Missão (PAM) V1.1 (Re-Execução)
+
+* **Sumário da Missão (O Quê):** Criar a suíte de testes de integração **autenticada** para o fluxo de criação de propostas, validando de ponta a ponta a nova lógica de cálculo e isenção de TAC com `supertest`.
+* **Intenção Estratégica (O Porquê):** Com a infraestrutura de testes agora estável, esta missão irá finalmente construir a rede de segurança automatizada para a nossa lógica de TAC, garantindo a sua robustez e prevenindo regressões futuras através de testes de API realistas.
+* **Histórico Relevante (Consulta Obrigatória):** A sua missão anterior corrigiu com sucesso o ambiente de testes, eliminando o erro de `esbuild`. A execução de validação revelou que as chamadas de API não autenticadas são corretamente bloqueadas com um erro `401 Unauthorized`.
+* **Modelo Mental (Como se Encaixa):** Esta é uma missão de QA. O Agente irá construir uma suíte de testes que primeiro simula o login de um usuário para obter um token JWT e, em seguida, usa esse token para fazer requisições autenticadas aos endpoints protegidos.
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco:** A lógica de login e gerenciamento de token nos testes pode ser complexa.
+    * **Contramedida:** O prompt orienta a criação de um `helper` de autenticação reutilizável para encapsular essa complexidade.
+
+---
+
+**IMPLEMENTAR:**
+Suíte de Testes de Integração Autenticada para o Fluxo de TAC
+
+**CURRENT STATE:**
+O ambiente de testes de integração está funcional, mas os testes falham devido à falta de autenticação. A lógica de negócio de TAC existe e foi testada unitariamente, mas carece de um teste de integração de ponta a ponta.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  O arquivo de teste `tests/integration/propostas-tac.test.ts` (ou um novo arquivo) é criado ou finalizado.
+2.  Um `helper` de autenticação para testes é criado. Este helper deve:
+    a. Fazer uma requisição `POST /api/auth/login` com as credenciais de um usuário de teste.
+    b. Extrair o token JWT da resposta.
+    c. Retornar uma instância autenticada do `supertest` com o token JWT já configurado no header `Authorization: Bearer <token>`.
+3.  A suíte de testes utiliza este helper para executar requisições autenticadas.
+4.  Os 2 cenários críticos do PAM anterior são implementados e **passam com sucesso**:
+    * **Cenário 1 (Cliente Novo Paga TAC):** Uma requisição `POST /api/propostas` autenticada para um novo cliente resulta num `valor_tac` correto no banco de dados.
+    * **Cenário 2 (Cliente Cadastrado Isento de TAC):** Uma requisição `POST /api/propostas` autenticada para um cliente com uma proposta `"QUITADO"` anterior resulta num `valor_tac` de `0` no banco de dados.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  **Resolva a Autenticação Primeiro:** Sua primeira tarefa é criar a lógica de autenticação para os testes. Crie um `helper` para isso, para que possa ser reutilizado. Você pode precisar adicionar um usuário de teste no seu `setupTestEnvironment`.
+2.  **Use `supertest` e a `app`:** Todas as chamadas de API devem ser feitas usando o padrão `supertest(app).post(...)`, agora que o ambiente está corrigido.
+3.  **Validação no Banco de Dados:** As asserções finais DEVEM fazer uma consulta direta ao banco de dados de teste (usando Drizzle) para verificar o valor do campo `valor_tac`.
+4.  **Validação Final Mandatória:** A prova de sucesso é a execução bem-sucedida da suíte de testes (`npx vitest run ...`) mostrando os cenários a passar.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que as credenciais do usuário de teste podem ser criadas ou obtidas durante o setup do teste."]
+* **VALIDAÇÃO PENDENTE:** [Nenhuma. O sucesso é definido pela passagem de 100% dos novos testes de integração.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear ficheiros e funções exatas afetadas.
+2.  Garantir que a lógica de autenticação do teste está correta e segura.
+3.  Executar `get_latest_lsp_diagnostics` para garantir 0 erros novos.
+4.  **Declarar Nível de Confiança (0 a 100%)**.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (executar a suíte de testes e garantir que todos passem).
+7.  **Documentar Decisões Técnicas**.

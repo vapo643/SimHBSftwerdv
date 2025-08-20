@@ -69,17 +69,16 @@ if (databaseUrl.includes("supabase.com")) {
     correctedUrl = correctedUrl.replace(":5432", ":6543");
   }
 
-  // Create connection with lazy initialization
+  // Create connection with proper configuration
   dbClient = postgres(correctedUrl, {
     ssl: "require",
     max: 5,
     idle_timeout: 30,
     connect_timeout: 10,
-    lazy: true, // Prevent immediate connection
   });
   console.log("✅ Database: Connection configured (lazy)");
 } else {
-  dbClient = postgres(databaseUrl, { lazy: true });
+  dbClient = postgres(databaseUrl);
 }
 
 const client = dbClient;
@@ -91,7 +90,7 @@ setTimeout(async () => {
     await client`SELECT 1`;
     console.log("✅ Database: Connection test successful");
   } catch (error) {
-    console.warn("⚠️  Database: Connection test failed -", error.message);
+    console.warn("⚠️  Database: Connection test failed -", (error as Error).message);
     console.warn("⚠️  Database: Check DATABASE_URL credentials in Secrets");
     console.warn("⚠️  Database: App will continue using Supabase REST API only");
   }

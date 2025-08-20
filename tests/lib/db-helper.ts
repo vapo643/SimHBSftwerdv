@@ -179,55 +179,70 @@ export async function setupTestEnvironment(): Promise<{
     
     console.log("[TEST DB] 🔌 Direct postgres connection established");
     
-    // Generate test IDs
-    const testUserId = uuidv4();
-    const testEmail = `test-${Date.now()}@test.com`;
+    // Create test user using Supabase Admin for proper authentication
+    console.log("[TEST DB] 🔐 Creating Supabase auth user...");
+    const testEmail = "test@simpix.com";
+    const testPassword = "TestPassword123!";
     
-    // 1. Create auth.users entry first (required for profiles)
-    console.log("[TEST DB] 🔐 Creating auth.users entry...");
-    await directDb`
-      INSERT INTO auth.users (
-        id, email, encrypted_password, email_confirmed_at, 
-        created_at, updated_at, raw_app_meta_data, raw_user_meta_data
-      )
-      VALUES (
-        ${testUserId},
-        ${testEmail},
-        '$2a$10$example.hash.for.test.password.only',
-        NOW(),
-        NOW(),
-        NOW(),
-        '{"provider":"email","providers":["email"]}',
-        '{"name":"Test User","role":"ATENDENTE"}'
-      )
-      ON CONFLICT (id) DO UPDATE SET
-        email = EXCLUDED.email,
-        updated_at = NOW()
-    `;
+    // Import and use Supabase Admin Client
+    const { createServerSupabaseAdminClient } = await import("../../server/lib/supabase");
+    const supabaseAdmin = createServerSupabaseAdminClient();
     
-    // 2. Create test user in public.users table using raw SQL
+    // Delete any existing test user for clean state
+    try {
+      const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers();
+      const existingUser = existingUsers.users.find(u => u.email === testEmail);
+      if (existingUser) {
+        await supabaseAdmin.auth.admin.deleteUser(existingUser.id);
+        console.log("[TEST DB] 🗑️ Deleted existing test user");
+      }
+    } catch (e) {
+      // User might not exist - continue
+    }
+    
+    // Create new auth user
+    const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
+      email: testEmail,
+      password: testPassword,
+      email_confirm: true,
+      user_metadata: {
+        name: "Integration Test User",
+        role: "ATENDENTE"
+      }
+    });
+    
+    if (authError || !authUser.user) {
+      throw new Error(`Failed to create Supabase auth user: ${authError?.message}`);
+    }
+    
+    const testUserId = authUser.user.id;
+    console.log(`[TEST DB] ✅ Supabase auth user created: ${testUserId}`);
+    
+    // 2. Create test user in public.users table using same email
     console.log("[TEST DB] 👤 Creating public.users entry...");
     const userResult = await directDb`
       INSERT INTO users (name, email, password, role)
       VALUES (
-        'Test User',
+        'Integration Test User',
         ${testEmail},
         'hashed_password_test',
         'ATENDENTE'
       )
       ON CONFLICT (email) DO UPDATE SET
-        name = EXCLUDED.name
+        name = 'Integration Test User',
+        role = 'ATENDENTE'
       RETURNING id
     `;
     const dbUserId = userResult[0].id;
     
-    // 2. Create test partner using raw SQL
+    // 3. Create test partner using raw SQL (with timestamp for uniqueness)
     console.log("[TEST DB] 🏢 Creating test partner...");
+    const timestamp = Date.now();
     const partnerResult = await directDb`
       INSERT INTO parceiros (razao_social, cnpj)
       VALUES (
         'Test Partner Company',
-        '12345678000199'
+        ${`1234567800019${timestamp.toString().slice(-1)}`}
       )
       ON CONFLICT (cnpj) DO UPDATE SET
         razao_social = EXCLUDED.razao_social
@@ -248,24 +263,24 @@ export async function setupTestEnvironment(): Promise<{
     `;
     const testStoreId = storeResult[0].id;
     
-    // 4. Create test product using raw SQL
+    // 5. Create test product using raw SQL (with timestamp for uniqueness)
     console.log("[TEST DB] 📦 Creating test product...");
     const productResult = await directDb`
       INSERT INTO produtos (nome_produto, is_active)
       VALUES (
-        'Test Product',
+        ${`Test Product ${timestamp}`},
         true
       )
       RETURNING id
     `;
     const testProductId = productResult[0].id;
     
-    // 5. Create test commercial table using raw SQL
+    // 6. Create test commercial table using raw SQL (with timestamp for uniqueness)
     console.log("[TEST DB] 📊 Creating test commercial table...");
     const commercialTableResult = await directDb`
       INSERT INTO tabelas_comerciais (nome_tabela, taxa_juros, prazos, comissao)
       VALUES (
-        'Test Commercial Table',
+        ${`Test Commercial Table ${timestamp}`},
         '1.99',
         ARRAY[12, 24, 36],
         '5.00'
@@ -274,7 +289,7 @@ export async function setupTestEnvironment(): Promise<{
     `;
     const testCommercialTableId = commercialTableResult[0].id;
     
-    // 6. Create profile linking auth.users to store
+    // 6. Create profile linking auth.users to store with proper RBAC role
     console.log("[TEST DB] 👤 Creating user profile...");
     await directDb`
       INSERT INTO profiles (id, role, loja_id, full_name)
@@ -282,12 +297,15 @@ export async function setupTestEnvironment(): Promise<{
         ${testUserId},
         'ATENDENTE',
         ${testStoreId},
-        'Test User'
+        'Integration Test User'
       )
       ON CONFLICT (id) DO UPDATE SET
+        role = 'ATENDENTE',
         loja_id = EXCLUDED.loja_id,
-        full_name = EXCLUDED.full_name
+        full_name = 'Integration Test User'
     `;
+    
+    console.log("[TEST DB] ✅ Profile created with ATENDENTE role for RBAC permissions");
     
     // 7. Create gerente_lojas association for RLS
     console.log("[TEST DB] 🔗 Creating store manager association...");
