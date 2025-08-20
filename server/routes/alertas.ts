@@ -89,10 +89,11 @@ router.get("/notificacoes", jwtAuthMiddleware, async (req: any, res) => {
       .limit(1);
 
     if (!localUser) {
-      console.error(`[ALERTAS] Usuário local não encontrado para email: ${userEmail}`);
-      return res.status(404).json({
-        error: "Usuário não encontrado",
-        message: "Usuário não existe na tabela local"
+      console.log(`[ALERTAS] Usuário local não encontrado para email: ${userEmail}`);
+      // Retornar array vazio ao invés de erro 404
+      return res.json({
+        notificacoes: [],
+        totalNaoLidas: 0
       });
     }
 

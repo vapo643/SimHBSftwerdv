@@ -78,11 +78,8 @@ export function useProposalEffects() {
         // Use new POST API endpoint
         const response = await apiRequest('/api/simular', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
           body: JSON.stringify(payload),
-        });
+        }) as any; // Type assertion for now
 
         console.log('[FRONTEND] Resposta da nova API:', response);
 
@@ -105,7 +102,7 @@ export function useProposalEffects() {
           comissao: response.comissao?.valor || 0,
           comissaoPercentual: response.comissao?.percentual || 0,
           cronogramaPagamento: response.cronogramaPagamento,
-          jurosCarencia: diasCarencia > 0 ? (valorEmprestimo * (response.taxaJurosMensal / 100 / 30) * diasCarencia) : 0,
+          jurosCarencia: diasCarencia > 0 ? String(valorEmprestimo * (response.taxaJurosMensal / 100 / 30) * diasCarencia) : "0",
           diasCarencia,
           parametrosUtilizados: response.parametrosUtilizados
         });
