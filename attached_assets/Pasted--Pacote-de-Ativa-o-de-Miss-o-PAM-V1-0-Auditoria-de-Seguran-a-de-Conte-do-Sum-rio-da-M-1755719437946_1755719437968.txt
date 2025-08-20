@@ -1,0 +1,51 @@
+### Pacote de Ativação de Missão (PAM) V1.0 (Auditoria de Segurança de Conteúdo)
+
+* **Sumário da Missão (O Quê):** Realizar uma auditoria forense completa na base de código do frontend (`client/`) para identificar e catalogar todas as instâncias de CSS inline (`style="..."`), handlers de eventos inline (`onclick="..."`, etc.) e tags `<script>` inline.
+* **Intenção Estratégica (O Porquê):** Criar um mapa de risco preciso de todas as violações de separação de conteúdo. Este relatório de auditoria é o pré-requisito não negociável para planejarmos uma refatoração cirúrgica que irá melhorar a segurança e a manutenibilidade do nosso frontend.
+* **Histórico Relevante (Consulta Obrigatória):** As missões anteriores focaram na lógica de negócio e na estrutura do backend e do frontend. Esta missão foca na qualidade e segurança do código de apresentação.
+* **Modelo Mental (Como se Encaixa):** Aja como um Analista de Segurança Estática de Código (SAST). Sua tarefa é "escanear" o código-fonte em busca de padrões de código inseguros e anti-padrões e reportá-los de forma estruturada.
+
+---
+
+**IMPLEMENTAR:**
+Relatório de Auditoria de CSS e JavaScript Inline
+
+**CURRENT STATE:**
+A base de código pode conter instâncias de CSS e JavaScript embutidos diretamente nos arquivos JSX, o que representa um risco de segurança e uma violação das melhores práticas de desenvolvimento.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um relatório de auditoria detalhado em formato Markdown, dividido em três seções:
+
+**1. Inventário de CSS Inline (`style="..."`):**
+   * Liste **CADA** arquivo `.tsx` no diretório `client/` que contém o atributo `style`.
+   * Para cada arquivo, forneça o número da linha e o `snippet` de código completo da linha que contém o atributo `style`.
+
+**2. Inventário de Handlers de Eventos Inline (`on...="..."`):**
+   * Liste **CADA** arquivo `.tsx` que contém handlers de eventos inline escritos como strings (ex: `onclick="alert('hello')"`). **Nota:** Handlers que usam a sintaxe do React (`onClick={myFunction}`) são seguros e devem ser ignorados. O foco é em strings de JavaScript executáveis.
+   * Para cada ocorrência, forneça o número da linha e o `snippet` de código.
+
+**3. Inventário de Tags `<script>` Inline:**
+   * Liste **CADA** arquivo `.tsx` ou `.html` que contém uma tag `<script>` que **NÃO** utiliza um atributo `src`. O objetivo é encontrar scripts cujo código-fonte está escrito diretamente dentro da tag.
+   * Para cada ocorrência, forneça o número da linha e o `snippet` de código do script inline.
+
+**CONSTRAINTS (Roadmap de Auditoria):**
+1.  **Escopo da Análise:** A auditoria deve ser restrita ao diretório `client/`.
+2.  **Use Ferramentas de Busca:** Utilize comandos de terminal como `grep` para realizar uma busca exaustiva pelos padrões (`style="`, `onclick="`, `<script>`).
+3.  **Precisão do Relatório:** O seu relatório deve ser preciso e fornecer contexto (nome do arquivo, número da linha, snippet) para cada violação encontrada.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100% de confiança na COMPLETUDE da auditoria]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO. Ex: Risco de que alguns handlers inline usem aspas simples em vez de duplas e não sejam encontrados.]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que a busca pelos padrões mais comuns (`style=`, `onclick=`) será suficiente para cobrir a maioria dos casos."]
+* **VALIDAÇÃO PENDENTE:** [O relatório de auditoria será a base para o planejamento da missão de refatoração.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear os diretórios e padrões de arquivo exatos a serem analisados.
+2.  Garantir que a busca cobre os três tipos de violações (CSS, Event Handlers, Scripts).
+3.  Executar `get_latest_lsp_diagnostics` para garantir que o ambiente está estável.
+4.  **Declarar Nível de Confiança (0 a 100%)** na completude da auditoria.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (revisão do relatório gerado para precisão).
+7.  **Documentar Decisões Técnicas** e os critérios usados na busca.

@@ -43,49 +43,5 @@ externalPort = 80
 localPort = 6379
 externalPort = 3000
 
-[[ports]]
-localPort = 32859
-externalPort = 3001
-
-[[ports]]
-localPort = 34377
-externalPort = 8080
-
-[[ports]]
-localPort = 35937
-externalPort = 8000
-
-[[ports]]
-localPort = 36501
-externalPort = 8081
-
-[[ports]]
-localPort = 36621
-externalPort = 8008
-
-[[ports]]
-localPort = 38083
-externalPort = 8099
-
-[[ports]]
-localPort = 39401
-externalPort = 6800
-
-[[ports]]
-localPort = 41219
-externalPort = 4200
-
-[[ports]]
-localPort = 42151
-externalPort = 3003
-
-[[ports]]
-localPort = 44079
-externalPort = 3002
-
-[[ports]]
-localPort = 44181
-externalPort = 9000
-
 [agent]
 integrations = ["javascript_websocket==1.0.0", "javascript_openai==1.0.0", "javascript_supabase==1.0.0"]
