@@ -1,0 +1,44 @@
+### Pacote de Ativação de Missão (PAM) V1.0 (Auditoria de `dangerouslySetInnerHTML`)
+
+* **Sumário da Missão (O Quê):** Realizar uma auditoria de segurança no componente `client/src/components/ui/chart.tsx`, focando em como os dados são processados antes de serem passados para a propriedade `dangerouslySetInnerHTML`.
+* **Intenção Estratégica (O Porquê):** Determinar se o uso de `dangerouslySetInnerHTML` neste componente constitui uma vulnerabilidade de Cross-Site Scripting (XSS) real. A nossa doutrina de segurança exige que cada uso desta propriedade seja rigorosamente auditado e justificado.
+* **Histórico Relevante (Consulta Obrigatória):** A auditoria SAST inicial identificou o uso de `dangerouslySetInnerHTML` no `chart.tsx` como um risco de segurança de severidade MÉDIA.
+* **Modelo Mental (Como se Encaixa):** Aja como um Analista de Segurança de Aplicações. Sua tarefa é rastrear a origem dos dados (`THEMES`, `colorConfig`, `id`) que são usados para construir a string HTML/CSS, procurando por qualquer caminho pelo qual um dado não sanitizado e controlado por um ator externo possa ser injetado.
+
+---
+
+**IMPLEMENTAR:**
+Relatório de Auditoria de Sanitização de `dangerouslySetInnerHTML`
+
+**CURRENT STATE:**
+O componente `chart.tsx` utiliza `dangerouslySetInnerHTML` para injetar estilos CSS dinâmicos. A segurança desta operação é desconhecida.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um relatório de auditoria detalhado em formato Markdown, contendo duas seções:
+
+**1. Análise do Fluxo de Dados:**
+* **Origem dos Dados:** Rastreie a origem de cada variável usada para construir a string `__html`: `THEMES`, `colorConfig`, e `id`.
+* **Conclusão de Rastreamento:** Para cada variável, determine se a sua origem é estática (hardcoded no código-fonte), controlada internamente (ex: um ID gerado por `uuid`), ou se ela se origina de uma fonte externa (ex: API, input do usuário).
+
+**2. Veredito da Auditoria de Segurança:**
+* Com base na sua análise de fluxo de dados, forneça um veredito final e claro:
+    * **✅ SEGURO:** Se todos os dados usados para construir a string forem estáticos ou controlados internamente, sem nenhuma possibilidade de injeção de dados externos não sanitizados.
+    * **🚨 VULNERÁVEL:** Se existir qualquer caminho, por mais teórico que seja, pelo qual um dado externo possa ser injetado na string HTML/CSS sem a devida sanitização.
+* **Justifique o seu veredito** com base nas evidências de código.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100% de confiança na sua análise de segurança]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que as variáveis importadas de outros arquivos são estáticas, a menos que sejam funções que processem input externo."]
+* **VALIDAÇÃO PENDENTE:** [Se for considerado vulnerável, o próximo passo será uma missão de remediação.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear o ficheiro e as variáveis exatas a serem analisados (`chart.tsx`).
+2.  Garantir que o rastreamento da origem dos dados está completo.
+3.  Executar `get_latest_lsp_diagnostics` para garantir que o ambiente está estável.
+4.  **Declarar Nível de Confiança (0 a 100%)** na precisão da auditoria.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (revisão do relatório gerado para lógica e precisão).
+7.  **Documentar Decisões Técnicas** e o veredito final de segurança.
