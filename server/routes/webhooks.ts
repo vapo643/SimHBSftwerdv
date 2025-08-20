@@ -404,92 +404,95 @@ async function processInterWebhookEvent(codigoSolicitacao: string, webhookData: 
   const dataPagamento = webhookData.dataPagamento;
   const origemRecebimento = webhookData.origemRecebimento;
 
-  // Atualizar registro na tabela inter_collections
-  const updateResult = await db.execute(sql`
-    UPDATE inter_collections 
-    SET 
-      situacao = ${situacao},
-      data_situacao = ${dataPagamento || "NOW()"},
-      valor_total_recebido = ${valorPago || null},
-      origem_recebimento = ${origemRecebimento || null},
-      updated_at = NOW()
-    WHERE codigo_solicitacao = ${codigoSolicitacao}
-    RETURNING id
-  `);
+  // PAM V1.0 - TRANSAÇÃO ATÔMICA: Envolver todas as operações de escrita em uma única transação
+  await db.transaction(async (tx) => {
+    // Atualizar registro na tabela inter_collections
+    const updateResult = await tx.execute(sql`
+      UPDATE inter_collections 
+      SET 
+        situacao = ${situacao},
+        data_situacao = ${dataPagamento || "NOW()"},
+        valor_total_recebido = ${valorPago || null},
+        origem_recebimento = ${origemRecebimento || null},
+        updated_at = NOW()
+      WHERE codigo_solicitacao = ${codigoSolicitacao}
+      RETURNING id
+    `);
 
-  if (updateResult.length === 0) {
-    console.warn(`⚠️ [WEBHOOK INTER] Nenhum registro encontrado para codigoSolicitacao: ${codigoSolicitacao}`);
-  } else {
-    console.log(`✅ [WEBHOOK INTER] Status atualizado para ${codigoSolicitacao}: ${situacao}`);
-  }
+    if (updateResult.length === 0) {
+      console.warn(`⚠️ [WEBHOOK INTER] Nenhum registro encontrado para codigoSolicitacao: ${codigoSolicitacao}`);
+    } else {
+      console.log(`✅ [WEBHOOK INTER] Status atualizado para ${codigoSolicitacao}: ${situacao}`);
+    }
 
-  // Buscar proposta relacionada para atualizações adicionais
-  const collection = await db.execute(sql`
-    SELECT ic.proposta_id, ic.numero_parcela, ic.total_parcelas, p.status as proposta_status
-    FROM inter_collections ic
-    JOIN propostas p ON p.id = ic.proposta_id
-    WHERE ic.codigo_solicitacao = ${codigoSolicitacao}
-    LIMIT 1
-  `);
+    // Buscar proposta relacionada para atualizações adicionais
+    const collection = await tx.execute(sql`
+      SELECT ic.proposta_id, ic.numero_parcela, ic.total_parcelas, p.status as proposta_status
+      FROM inter_collections ic
+      JOIN propostas p ON p.id = ic.proposta_id
+      WHERE ic.codigo_solicitacao = ${codigoSolicitacao}
+      LIMIT 1
+    `);
 
-  if (collection.length > 0) {
-    const { proposta_id, numero_parcela, total_parcelas, proposta_status } = collection[0] as any;
+    if (collection.length > 0) {
+      const { proposta_id, numero_parcela, total_parcelas, proposta_status } = collection[0] as any;
 
-    // Se foi pago, verificar se todas as parcelas foram pagas
-    if (situacao === "PAGO" || situacao === "RECEBIDO") {
-      // PAM V1.0 - RECONCILIAÇÃO CRÍTICA: Sincronizar status entre inter_collections e parcelas
-      // Esta é a ponte que falta para unificar nossa fonte da verdade
-      console.log(`🔄 [RECONCILIAÇÃO PAM V1.0] Sincronizando pagamento para parcela ${numero_parcela} da proposta ${proposta_id}`);
-      
-      // Atualizar o status da parcela correspondente para 'pago'
-      const updateParcelaResult = await db.execute(sql`
-        UPDATE parcelas 
-        SET 
-          status = 'pago',
-          data_pagamento = ${dataPagamento || "NOW()"},
-          updated_at = NOW()
-        WHERE proposta_id = ${proposta_id}
-        AND numero_parcela = ${numero_parcela}
-        RETURNING id
-      `);
-      
-      if (updateParcelaResult.length > 0) {
-        console.log(`✅ [RECONCILIAÇÃO PAM V1.0] Parcela ${numero_parcela} da proposta ${proposta_id} marcada como PAGA na tabela parcelas`);
-      } else {
-        console.error(`❌ [RECONCILIAÇÃO PAM V1.0] ERRO CRÍTICO: Não foi possível atualizar parcela ${numero_parcela} da proposta ${proposta_id}`);
-      }
-      
-      const allPaid = await db.execute(sql`
-        SELECT COUNT(*) as total_paid
-        FROM inter_collections 
-        WHERE proposta_id = ${proposta_id}
-        AND (situacao = 'PAGO' OR situacao = 'RECEBIDO')
-      `);
-
-      const totalPaidCount = (allPaid[0] as any)?.total_paid || 0;
-
-      // Se todas as parcelas foram pagas, atualizar status da proposta
-      if (totalPaidCount === total_parcelas) {
-        await db.execute(sql`
-          UPDATE propostas 
-          SET status = 'pago', updated_at = NOW()
-          WHERE id = ${proposta_id}
+      // Se foi pago, verificar se todas as parcelas foram pagas
+      if (situacao === "PAGO" || situacao === "RECEBIDO") {
+        // PAM V1.0 - RECONCILIAÇÃO CRÍTICA: Sincronizar status entre inter_collections e parcelas
+        // Esta é a ponte que falta para unificar nossa fonte da verdade
+        console.log(`🔄 [RECONCILIAÇÃO PAM V1.0] Sincronizando pagamento para parcela ${numero_parcela} da proposta ${proposta_id}`);
+        
+        // Atualizar o status da parcela correspondente para 'pago'
+        const updateParcelaResult = await tx.execute(sql`
+          UPDATE parcelas 
+          SET 
+            status = 'pago',
+            data_pagamento = ${dataPagamento || "NOW()"},
+            updated_at = NOW()
+          WHERE proposta_id = ${proposta_id}
+          AND numero_parcela = ${numero_parcela}
+          RETURNING id
+        `);
+        
+        if (updateParcelaResult.length > 0) {
+          console.log(`✅ [RECONCILIAÇÃO PAM V1.0] Parcela ${numero_parcela} da proposta ${proposta_id} marcada como PAGA na tabela parcelas`);
+        } else {
+          console.error(`❌ [RECONCILIAÇÃO PAM V1.0] ERRO CRÍTICO: Não foi possível atualizar parcela ${numero_parcela} da proposta ${proposta_id}`);
+        }
+        
+        const allPaid = await tx.execute(sql`
+          SELECT COUNT(*) as total_paid
+          FROM inter_collections 
+          WHERE proposta_id = ${proposta_id}
+          AND (situacao = 'PAGO' OR situacao = 'RECEBIDO')
         `);
 
-        console.log(`🎉 [WEBHOOK INTER] Proposta ${proposta_id} totalmente paga!`);
+        const totalPaidCount = (allPaid[0] as any)?.total_paid || 0;
+
+        // Se todas as parcelas foram pagas, atualizar status da proposta
+        if (totalPaidCount === total_parcelas) {
+          await tx.execute(sql`
+            UPDATE propostas 
+            SET status = 'pago', updated_at = NOW()
+            WHERE id = ${proposta_id}
+          `);
+
+          console.log(`🎉 [WEBHOOK INTER] Proposta ${proposta_id} totalmente paga!`);
+        }
       }
     }
-  }
 
-  // Marcar callback como processado
-  await db.execute(sql`
-    UPDATE inter_callbacks 
-    SET 
-      processado = ${true},
-      processed_at = NOW()
-    WHERE codigo_solicitacao = ${codigoSolicitacao}
-    AND created_at >= NOW() - INTERVAL '1 minute'
-  `);
+    // Marcar callback como processado
+    await tx.execute(sql`
+      UPDATE inter_callbacks 
+      SET 
+        processado = ${true},
+        processed_at = NOW()
+      WHERE codigo_solicitacao = ${codigoSolicitacao}
+      AND created_at >= NOW() - INTERVAL '1 minute'
+    `);
+  });
 
   console.log(`✅ [WEBHOOK INTER] Processamento concluído para ${codigoSolicitacao} em ${Date.now() - startTime}ms`);
 }

@@ -1,0 +1,45 @@
+### Pacote de Ativação de Missão (PAM) V1.0 (Implementação de Transação Atômica)
+
+* **Sumário da Missão (O Quê):** Refatorar o handler do webhook do Banco Inter para envolver as quatro operações de escrita no banco de dados (`inter_collections`, `parcelas`, `propostas`, `inter_callbacks`) em um único bloco de transação atômica (`db.transaction`).
+* **Intenção Estratégica (O Porquê):** Eliminar o risco CRÍTICO de inconsistência de dados financeiros. Esta correção garantirá que as atualizações de pagamento sejam "tudo ou nada", prevenindo a corrupção de dados em caso de falhas parciais e assegurando a integridade da "fonte da verdade" do sistema.
+* **Histórico Relevante (Consulta Obrigatória):** A sua auditoria anterior (Passo 2.2) identificou quatro operações de `UPDATE` sequenciais e não transacionais no arquivo `server/routes/webhooks.ts` como a fonte do risco.
+* **Modelo Mental (Como se Encaixa):** Esta é uma refatoração de segurança e integridade de dados. O Agente irá "embrulhar" um conjunto de operações de banco de dados existentes dentro de uma função de transação do Drizzle, garantindo que o banco de dados trate todas elas como uma única operação atômica.
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco:** Uma implementação incorreta da transação pode levar a *locks* no banco de dados ou falhar em reverter (rollback) corretamente.
+    * **Contramedida:** O prompt exige o uso da API `db.transaction()` padrão do Drizzle, que é projetada para gerenciar transações e rollbacks de forma segura.
+
+---
+
+**IMPLEMENTAR:**
+Implementação de Transação Atômica no Webhook de Pagamentos
+
+**CURRENT STATE:**
+O endpoint do webhook do Banco Inter em `server/routes/webhooks.ts` executa quatro operações de `UPDATE` sequenciais no banco de dados sem uma transação. Isso cria um risco crítico de corrupção de dados se uma das operações intermediárias falhar.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  O arquivo `server/routes/webhooks.ts` é modificado.
+2.  A lógica que contém as quatro operações de escrita no banco de dados é agora envolvida por um bloco `await db.transaction(async (tx) => { ... })`.
+3.  Todas as operações de escrita dentro do bloco agora utilizam a instância transacional `tx` em vez do `db` global (ex: `await tx.update(...)`).
+4.  A lógica de `try/catch` existente é mantida ou aprimorada para lidar com as falhas da transação de forma graciosa.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  **Use a API de Transação do Drizzle:** A implementação DEVE usar a função `db.transaction(async (tx) => { ... })` do Drizzle para garantir a atomicidade.
+2.  **Escopo da Transação:** A transação deve envolver todas as quatro operações de escrita no banco de dados identificadas na sua auditoria: `UPDATE inter_collections`, `UPDATE parcelas`, `UPDATE propostas`, e `UPDATE inter_callbacks`.
+3.  **Use a Instância Transacional (`tx`):** Dentro do bloco da transação, todas as chamadas ao banco de dados devem ser feitas usando o objeto `tx` que é passado para a função, não o objeto `db` global.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que todas as quatro operações de escrita devem fazer parte da mesma unidade de trabalho atômica."]
+* **VALIDAÇÃO PENDENTE:** [Testes de integração são necessários para simular uma falha parcial dentro da transação e garantir que o rollback funciona como esperado.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear ficheiros e funções exatas afetadas (`server/routes/webhooks.ts`).
+2.  Garantir que o bloco de transação está sintaticamente correto e que a instância `tx` é usada.
+3.  Executar `get_latest_lsp_diagnostics` para garantir 0 erros novos.
+4.  **Declarar Nível de Confiança (0 a 100%)**.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (revisão lógica do código para confirmar que a transação foi implementada corretamente).
+7.  **Documentar Decisões Técnicas**.
