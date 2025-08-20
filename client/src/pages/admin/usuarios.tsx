@@ -53,8 +53,9 @@ const UsuariosPage: React.FC = () => {
   } = useQuery<User[]>({
     queryKey: queryKeys.users.withDetails(),
     queryFn: async () => {
-      const response = await api.get<User[]>("/api/admin/users");
-      return Array.isArray(response.data) ? response.data : response.data?.data || [];
+      const response = await api.get("/api/admin/users");
+      const data = response.data;
+      return Array.isArray(data) ? data : (data as any)?.data || [];
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes

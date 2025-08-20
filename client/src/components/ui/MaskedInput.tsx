@@ -10,8 +10,7 @@ interface MaskedInputProps extends Omit<React.InputHTMLAttributes<HTMLInputEleme
 
 const MaskedInput = forwardRef<HTMLInputElement, MaskedInputProps>(
   ({ mask, value = '', onChange, placeholder, ...props }, ref) => {
-    const [displayValue, setDisplayValue] = useState(formatValue(value, mask));
-
+    // Define helper functions first
     const applyMask = (inputValue: string, maskPattern: string): string => {
       // Remove all non-numeric characters
       const cleanValue = inputValue.replace(/\D/g, '');
@@ -30,10 +29,13 @@ const MaskedInput = forwardRef<HTMLInputElement, MaskedInputProps>(
       return formatted;
     };
 
-    function formatValue(val: string, maskPattern: string): string {
+    const formatValue = (val: string, maskPattern: string): string => {
       if (!val) return '';
       return applyMask(val, maskPattern);
-    }
+    };
+
+    // Now safely use formatValue in useState
+    const [displayValue, setDisplayValue] = useState(formatValue(value, mask));
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const inputValue = e.target.value;
