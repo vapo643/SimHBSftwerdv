@@ -1,0 +1,26 @@
+### Pacote de Ativação de Missão (PAM) V1.0 (Debate de Planejamento - Interação 2)
+
+* **Sumário da Missão (O Quê):** Detalhar o plano tático para executar a "FASE 0: Pré-Auditoria de Estado", especificando como você irá auditar os Jobs BullMQ, os Webhooks Externos e os Logs da FSM.
+* **Intenção Estratégica (O Porquê):** Transformar a estratégia da FASE 0 em um conjunto de ações de reconhecimento claras e executáveis. Precisamos saber exatamente *quais arquivos* inspecionar e *quais queries* executar para construir um mapa completo de todas as fontes de modificação de dados.
+* **Histórico Relevante (Consulta Obrigatória):** A sua análise anterior (Interação 1) identificou que Jobs, Webhooks e transições da FSM são os principais riscos à consistência dos dados que precisam ser mapeados antes da auditoria principal.
+
+---
+
+**TASK (Sua Tarefa):**
+Responda às seguintes perguntas de planejamento tático para detalhar como você executará cada passo da "FASE 0: Pré-Auditoria de Estado".
+
+**1. Mapeamento de Jobs BullMQ:**
+   * Para o passo "Mapear todos os jobs BullMQ ativos", qual é o seu plano tático?
+   * Quais arquivos específicos (`server/lib/queues.ts`, `server/worker.ts`, etc.) você irá inspecionar para encontrar as definições de `Queue` e `Worker`?
+   * Como você irá determinar quais transformações de dados cada job realiza (ex: quais campos da `proposta` são modificados pelo `boleto-sync-worker`)?
+
+**2. Identificação de Webhooks Externos:**
+   * Para o passo "Identificar webhooks externos ativos", como você irá localizar os endpoints no nosso backend que recebem chamadas do Banco Inter e do ClickSign?
+   * Quais são os nomes de arquivos mais prováveis em `server/routes/integracao/` para conter essa lógica? Como você confirmará que são webhooks (ex: procurando por lógica de validação de HMAC ou assinatura)?
+
+**3. Auditoria de Logs da FSM:**
+   * Para o passo "Auditar logs de `status_transitions` dos últimos 30 dias", qual a sua estratégia?
+   * Você irá propor uma query SQL para ser executada na tabela `status_transitions`? Se sim, qual seria a estrutura dessa query para agregar e sumarizar as transições mais comuns e identificar quais campos da proposta foram alterados durante essas transições?
+
+**4. Síntese do "Mapa de Modificação":**
+   * Ao final desta fase, como você planeja consolidar essas três fontes de informação (Jobs, Webhooks, FSM Logs) em um único relatório de inteligência que nos dê um "mapa de modificação de dados" completo e de fácil compreensão?
