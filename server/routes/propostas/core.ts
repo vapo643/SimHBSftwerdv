@@ -10,6 +10,7 @@ import { getBrasiliaTimestamp, getBrasiliaDate, generateApprovalDate } from "../
 import { storage } from "../../storage.js";
 import { timingNormalizerMiddleware } from "../../middleware/timing-normalizer.js";
 import { createPropostaValidationSchema } from "../../../shared/schema.js";
+import { randomUUID } from "crypto";
 
 const router = Router();
 
@@ -808,7 +809,8 @@ router.post("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
 
     // FIX: Transform flat structure to JSONB structure expected by database
     const dataForDatabase = {
-      // id será gerado automaticamente pela sequência
+      // ⚡ UUID GENERATION - Generate unique ID for proposal
+      id: randomUUID(),
       userId: dataWithId.userId,
       lojaId: dataWithId.lojaId,
       status: dataWithId.status || "aguardando_analise",

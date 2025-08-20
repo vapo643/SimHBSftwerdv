@@ -715,7 +715,19 @@ export const createPropostaValidationSchema = z.object({
   dadosPagamentoPixBanco: z.string().optional(),
   dadosPagamentoPixNomeTitular: z.string().optional(),
   dadosPagamentoPixCpfTitular: z.string().optional(),
-}).strict(); // strict() impede campos extras não especificados
+  dadosPagamentoNomeTitular: z.string().optional(),
+  dadosPagamentoCpfTitular: z.string().optional(),
+  
+  // Campos adicionais necessários para compatibilidade com o frontend
+  clienteEndereco: z.string().optional(), // Campo legado
+  clienteTelefoneEmpresa: z.string().optional(),
+  referenciaPessoal: z.array(z.any()).optional(),
+  dataCarencia: z.string().optional(),
+  incluirTac: z.boolean().optional(),
+  formaLiberacao: z.string().optional(),
+  formaPagamento: z.string().optional(),
+  pracaPagamento: z.string().optional(),
+}); // REMOVIDO .strict() para permitir flexibilidade
 
 export const insertTabelaComercialSchema = createInsertSchema(tabelasComerciais).omit({
   id: true,
