@@ -211,12 +211,47 @@ export default function NovaProposta() {
 
   const createProposta = useMutation({
     mutationFn: async (data: PropostaForm) => {
+      // Map frontend data to backend schema format
+      const backendData = {
+        clienteNome: data.clienteNome,
+        clienteCpf: data.clienteCpf,
+        clienteEmail: data.clienteEmail,
+        clienteTelefone: data.clienteTelefone,
+        clienteDataNascimento: data.clienteDataNascimento,
+        clienteRenda: data.clienteRenda,
+        clienteRg: data.clienteRg,
+        clienteOrgaoEmissor: data.clienteOrgaoEmissor,
+        clienteRgDataEmissao: data.clienteRgDataEmissao,
+        clienteRgUf: data.clienteRgUf,
+        clienteLocalNascimento: data.clienteLocalNascimento,
+        clienteEstadoCivil: data.clienteEstadoCivil,
+        clienteNacionalidade: data.clienteNacionalidade || "Brasileira",
+        clienteCep: data.clienteCep || "",
+        clienteLogradouro: data.clienteLogradouro || "",
+        clienteNumero: data.clienteNumero || "",
+        clienteComplemento: data.clienteComplemento || "",
+        clienteBairro: data.clienteBairro || "",
+        clienteCidade: data.clienteCidade || "",
+        clienteUf: data.clienteUf || "",
+        valor: data.valor,
+        prazo: data.prazo,
+        finalidade: data.finalidade,
+        garantia: data.garantia,
+        dadosPagamentoTipo: data.dadosPagamentoTipo,
+        dadosPagamentoPix: data.dadosPagamentoPix,
+        dadosPagamentoBanco: data.dadosPagamentoBanco,
+        dadosPagamentoAgencia: data.dadosPagamentoAgencia,
+        dadosPagamentoConta: data.dadosPagamentoConta,
+        dadosPagamentoDigito: data.dadosPagamentoDigito,
+        documentos: data.documentos || [],
+        status: "aguardando_analise",
+      };
+      
+      console.log("[DEBUG] Enviando dados mapeados:", backendData);
+      
       return apiRequest("/api/propostas", {
         method: "POST",
-        body: JSON.stringify({
-          ...data,
-          status: "aguardando_analise",
-        }),
+        body: JSON.stringify(backendData),
       });
     },
     onSuccess: () => {
@@ -250,8 +285,8 @@ export default function NovaProposta() {
         clienteBairro: "",
         clienteCidade: "",
         clienteUf: "",
-        valor: "",
-        prazo: "",
+        valor: 0,
+        prazo: 0,
         finalidade: "",
         garantia: "",
         dadosPagamentoTipo: undefined,
@@ -702,7 +737,7 @@ export default function NovaProposta() {
                       <Label htmlFor="prazo">Prazo (meses)</Label>
                       {/* Hidden input for progressive enhancement */}
                       <input type="hidden"  value={watch("prazo") || ""} />
-                      <Select onValueChange={value => setValue("prazo", value)}>
+                      <Select onValueChange={value => setValue("prazo", parseInt(value))}>
                         <SelectTrigger>
                           <SelectValue placeholder="Selecione o prazo" />
                         </SelectTrigger>

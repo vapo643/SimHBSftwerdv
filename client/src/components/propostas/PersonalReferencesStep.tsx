@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import { useProposal, useProposalActions } from "@/contexts/ProposalContext";
 import { Users, Plus, Trash2 } from "lucide-react";
-import InputMask from "react-input-mask";
+import { MaskedInput } from "@/components/ui/MaskedInput";
 
 export function PersonalReferencesStep() {
   const { state } = useProposal();
@@ -160,25 +160,16 @@ export function PersonalReferencesStep() {
 
                 <div>
                   <Label htmlFor={`telefone_${index}`}>Telefone *</Label>
-                  <InputMask
+                  <MaskedInput
                     mask="(99) 99999-9999"
                     value={reference.telefone}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      handleReferenceChange(index, "telefone", e.target.value)
+                    onChange={(value) => handleReferenceChange(index, "telefone", value)}
+                    placeholder="(11) 98765-4321"
+                    className={
+                      errors[`reference_${index}_telefone`] ? "border-destructive" : ""
                     }
-                  >
-                    {(inputProps: any) => (
-                      <Input
-                        {...inputProps}
-                        id={`telefone_${index}`}
-                        type="tel"
-                        placeholder="(11) 98765-4321"
-                        className={
-                          errors[`reference_${index}_telefone`] ? "border-destructive" : ""
-                        }
-                      />
-                    )}
-                  </InputMask>
+                    data-testid={`input-telefone-referencia-${index}`}
+                  />
                   {errors[`reference_${index}_telefone`] && (
                     <p className="mt-1 text-sm text-destructive">
                       {errors[`reference_${index}_telefone`]}
