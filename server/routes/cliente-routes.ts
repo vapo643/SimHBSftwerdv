@@ -1,5 +1,8 @@
 import { Router } from "express";
 import type { Request, Response } from "express";
+import { db } from "../lib/supabase";
+import { propostas } from "@shared/schema";
+import { eq, desc } from "drizzle-orm";
 
 const router = Router();
 
@@ -13,9 +16,72 @@ router.get("/clientes/cpf/:cpf", async (req: Request, res: Response) => {
       return res.status(400).json({ error: "CPF inválido" });
     }
 
-    // Por enquanto, vamos apenas retornar que não existe
-    // Quando implementarmos o storage, buscaremos no banco
-    return res.json({ exists: false });
+    console.log(`[CLIENTE API] Buscando dados para CPF: ${cleanCPF}`);
+
+    // Buscar a proposta mais recente do cliente
+    const [latestProposal] = await db
+      .select()
+      .from(propostas)
+      .where(eq(propostas.clienteCpf, cleanCPF))
+      .orderBy(desc(propostas.createdAt))
+      .limit(1);
+
+    if (!latestProposal) {
+      console.log(`[CLIENTE API] Nenhuma proposta encontrada para CPF: ${cleanCPF}`);
+      return res.json({ exists: false });
+    }
+
+    console.log(`[CLIENTE API] Proposta encontrada: ${latestProposal.numeroProposta} para CPF: ${cleanCPF}`);
+
+    // Retornar dados do cliente da proposta mais recente
+    const clientData = {
+      exists: true,
+      data: {
+        // Dados básicos
+        nome: latestProposal.clienteNome || "",
+        email: latestProposal.clienteEmail || "",
+        telefone: latestProposal.clienteTelefone || "",
+        cpf: latestProposal.clienteCpf || "",
+        
+        // Dados pessoais
+        dataNascimento: latestProposal.clienteDataNascimento || "",
+        rg: latestProposal.clienteRg || "",
+        orgaoEmissor: latestProposal.clienteOrgaoEmissor || "",
+        rgUf: latestProposal.clienteRgUf || "",
+        rgDataEmissao: latestProposal.clienteRgDataEmissao || "",
+        estadoCivil: latestProposal.clienteEstadoCivil || "",
+        nacionalidade: latestProposal.clienteNacionalidade || "",
+        localNascimento: latestProposal.clienteLocalNascimento || "",
+        
+        // Endereço
+        cep: latestProposal.clienteCep || "",
+        logradouro: latestProposal.clienteLogradouro || "",
+        numero: latestProposal.clienteNumero || "",
+        complemento: latestProposal.clienteComplemento || "",
+        bairro: latestProposal.clienteBairro || "",
+        cidade: latestProposal.clienteCidade || "",
+        estado: latestProposal.clienteUf || "",
+        
+        // Dados profissionais
+        ocupacao: latestProposal.clienteOcupacao || "",
+        rendaMensal: latestProposal.clienteRenda || "",
+        telefoneEmpresa: latestProposal.clienteEmpresaNome || "", // Usando nome da empresa como alternativa
+        
+        // Dados de pagamento
+        metodoPagamento: latestProposal.metodoPagamento || "conta_bancaria",
+        dadosPagamentoBanco: latestProposal.dadosPagamentoBanco || "",
+        dadosPagamentoAgencia: latestProposal.dadosPagamentoAgencia || "",
+        dadosPagamentoConta: latestProposal.dadosPagamentoConta || "",
+        dadosPagamentoDigito: latestProposal.dadosPagamentoDigito || "",
+        dadosPagamentoPix: latestProposal.dadosPagamentoPix || "",
+        dadosPagamentoTipoPix: latestProposal.dadosPagamentoTipoPix || "",
+        dadosPagamentoPixBanco: latestProposal.dadosPagamentoPixBanco || "",
+        dadosPagamentoPixNomeTitular: latestProposal.dadosPagamentoPixNomeTitular || "",
+        dadosPagamentoPixCpfTitular: latestProposal.dadosPagamentoPixCpfTitular || "",
+      }
+    };
+
+    return res.json(clientData);
   } catch (error) {
     console.error("Erro ao buscar cliente por CPF:", error);
     res.status(500).json({ error: "Erro ao buscar dados do cliente" });
