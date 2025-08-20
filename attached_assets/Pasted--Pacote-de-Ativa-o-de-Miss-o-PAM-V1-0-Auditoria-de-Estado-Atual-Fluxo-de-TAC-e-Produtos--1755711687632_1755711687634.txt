@@ -1,0 +1,57 @@
+### Pacote de Ativação de Missão (PAM) V1.0 (Auditoria de Estado Atual - Fluxo de TAC e Produtos)
+
+* **Sumário da Missão (O Quê):** Realizar uma auditoria forense completa para mapear o estado atual do schema de `produtos`, da lógica de cálculo de TAC, da definição dos status de "cliente cadastrado" e dos componentes de UI de gestão de produtos.
+* **Intenção Estratégica (O Porquê):** Coletar 100% da inteligência de campo necessária para planejar e arquitetar a nova funcionalidade de isenção de TAC e a gestão de TAC por produto, garantindo que a implementação seja segura, precisa e retrocompatível.
+* **Histórico Relevante (Consulta Obrigatória):** As missões anteriores estabilizaram e refatoraram o sistema, mas esta é a primeira grande evolução na lógica de negócio de produtos desde então.
+* **Modelo Mental (Como se Encaixa):** Aja como um analista de sistemas full-stack. Sua tarefa é inspecionar o código-fonte em todas as camadas (DB, Backend, Frontend) para nos fornecer um mapa preciso do terreno antes de qualquer modificação.
+
+---
+
+**IMPLEMENTAR:**
+Relatório de Auditoria de Estado Atual - Fluxo de TAC e Produtos
+
+**CURRENT STATE:**
+A lógica de cobrança de TAC existe, mas não é configurável por produto. A definição de "cliente cadastrado" para isenção precisa ser validada contra o código-fonte, e as telas de gestão de produtos precisam ser mapeadas.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um relatório de auditoria detalhado em formato Markdown, dividido em 4 seções, uma para cada área de investigação. O relatório deve conter trechos de código e definições de schema para cada ponto.
+
+---
+
+**CONSTRAINTS (Roadmap de Auditoria):**
+
+**1. Análise do Schema de `produtos`:**
+* **Banco de Dados:** Apresente a definição completa do Drizzle schema para a tabela `produtos` a partir do arquivo `shared/schema.ts`. Destaque os campos existentes que já controlam a TAC (ex: `tac_valor`, `tac_tipo`).
+
+**2. Análise da Lógica de Cálculo de TAC:**
+* **Backend:** Localize e apresente a função exata no backend (provavelmente em `financeService.ts` ou `preApprovalService.ts`) que é responsável por calcular o valor da TAC a ser incluída em uma nova proposta.
+
+**3. Análise dos Status de "Cliente Cadastrado":**
+* **Backend:** Inspecione o `enum ProposalStatus` (provavelmente em `statusFsmService.ts`) e identifique os valores exatos de string que correspondem aos seguintes estados de negócio:
+    * Proposta Aprovada
+    * CCB Assinada
+    * Pago no Financeiro
+
+**4. Análise das Telas de Gestão de Produtos:**
+* **Frontend:** Localize e identifique os arquivos de componente React responsáveis por:
+    * A tela de listagem/tabela de produtos.
+    * O formulário de **criação** de um novo produto.
+    * O formulário de **edição** de um produto existente.
+* Apresente os caminhos de arquivo para estes três componentes.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100% de confiança na COMPLETUDE da auditoria]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que a lógica de TAC está centralizada em um único serviço."]
+* **VALIDAÇÃO PENDENTE:** [O relatório de auditoria será a base para o planejamento e a arquitetura da nova funcionalidade.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear os arquivos e funções exatas a serem analisados (DB, Backend, Frontend).
+2.  Garantir que os trechos de código e schemas estão corretos e completos.
+3.  Executar `get_latest_lsp_diagnostics` para garantir que o ambiente está estável.
+4.  **Declarar Nível de Confiança (0 a 100%)** na completude da auditoria.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (revisão do relatório gerado para precisão).
+7.  **Documentar Decisões Técnicas** e os critérios usados na busca.
