@@ -44,7 +44,7 @@ function ProposalForm() {
       setContext(contextData as any); // Fix LSP error
       setLoading(false);
     }
-  }, [contextData, setContext, setLoading]);
+  }, [contextData]); // Removed unstable functions from dependencies
 
   // Handle errors
   React.useEffect(() => {
@@ -58,7 +58,7 @@ function ProposalForm() {
       });
       setLoading(false);
     }
-  }, [contextError, toast, setLoading]);
+  }, [contextError, toast]); // Removed setLoading from dependencies
 
   // Submit mutation
   const submitProposal = useMutation({
