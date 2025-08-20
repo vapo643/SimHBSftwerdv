@@ -19,17 +19,17 @@ export function PersonalReferencesStep() {
     useProposalActions();
   const { personalReferences, errors } = state;
 
-  // PAM V1.0: Garantir exatamente 2 referências (uma pessoal e uma profissional)
+  // PAM V1.1: Garantir exatamente 2 referências (primeira pessoal, segunda flexível)
   React.useEffect(() => {
     if (personalReferences.length === 0) {
-      // Criar referência pessoal
+      // Criar primeira referência (obrigatoriamente pessoal)
       addReference({
         nomeCompleto: "",
         grauParentesco: "",
         telefone: "",
         tipo_referencia: "pessoal",
       });
-      // Criar referência profissional
+      // Criar segunda referência (padrão profissional, mas pode ser alterada)
       addReference({
         nomeCompleto: "",
         grauParentesco: "",
@@ -37,20 +37,28 @@ export function PersonalReferencesStep() {
         tipo_referencia: "profissional",
       });
     } else if (personalReferences.length === 1) {
-      // Se tiver apenas uma, adicionar a segunda
-      const tipoExistente = personalReferences[0].tipo_referencia;
+      // Se tiver apenas uma, garantir que a primeira seja pessoal e adicionar a segunda
+      if (personalReferences[0].tipo_referencia !== "pessoal") {
+        updateReference(0, { ...personalReferences[0], tipo_referencia: "pessoal" });
+      }
+      // Adicionar segunda referência (padrão profissional)
       addReference({
         nomeCompleto: "",
         grauParentesco: "",
         telefone: "",
-        tipo_referencia: tipoExistente === "pessoal" ? "profissional" : "pessoal",
+        tipo_referencia: "profissional",
       });
+    } else if (personalReferences.length >= 2) {
+      // Garantir que a primeira seja sempre pessoal
+      if (personalReferences[0].tipo_referencia !== "pessoal") {
+        updateReference(0, { ...personalReferences[0], tipo_referencia: "pessoal" });
+      }
     }
     // Limpar referências extras se houver mais de 2
     while (personalReferences.length > 2) {
       removeReference(personalReferences.length - 1);
     }
-  }, [personalReferences.length, addReference, removeReference]);
+  }, [personalReferences.length, addReference, removeReference, updateReference]);
 
   const handleReferenceChange = (
     index: number,
@@ -76,11 +84,11 @@ export function PersonalReferencesStep() {
     }
   };
 
-  // Separar referências por tipo para facilitar renderização
-  const referencePessoal = personalReferences.find(ref => ref.tipo_referencia === "pessoal");
-  const referenceProfissional = personalReferences.find(ref => ref.tipo_referencia === "profissional");
-  const indexPessoal = personalReferences.findIndex(ref => ref.tipo_referencia === "pessoal");
-  const indexProfissional = personalReferences.findIndex(ref => ref.tipo_referencia === "profissional");
+  // PAM V1.1: Separar referências por posição (primeira sempre pessoal, segunda flexível)
+  const referencePessoal = personalReferences[0]; // Primeira referência (sempre pessoal)
+  const segundaReferencia = personalReferences[1]; // Segunda referência (pessoal ou profissional)
+  const indexPessoal = 0;
+  const indexSegundaReferencia = 1;
 
   return (
     <div className="space-y-6">
@@ -166,78 +174,115 @@ export function PersonalReferencesStep() {
         </CardContent>
       </Card>
 
-      {/* Referência Profissional */}
+      {/* Segunda Referência */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Briefcase className="h-5 w-5" />
-            Referência Profissional
+            Segunda Referência
           </CardTitle>
-          <CardDescription>Informações de contato de uma referência profissional (obrigatório)</CardDescription>
+          <CardDescription>Informações de contato de uma segunda referência - pode ser pessoal ou profissional (obrigatório)</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {referenceProfissional && indexProfissional !== -1 && (
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {segundaReferencia && (
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+              {/* Seletor de Tipo de Referência */}
+              <div>
+                <Label htmlFor="tipo_segunda_referencia">Tipo de Referência *</Label>
+                <Select
+                  value={segundaReferencia.tipo_referencia}
+                  onValueChange={value => handleReferenceChange(indexSegundaReferencia, "tipo_referencia", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o tipo..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pessoal">Pessoal</SelectItem>
+                    <SelectItem value="profissional">Profissional</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
               <div className="md:col-span-2">
-                <Label htmlFor="nomeCompleto_profissional">Nome Completo *</Label>
+                <Label htmlFor="nomeCompleto_segunda">Nome Completo *</Label>
                 <Input
-                  id="nomeCompleto_profissional"
+                  id="nomeCompleto_segunda"
                   type="text"
-                  value={referenceProfissional.nomeCompleto}
-                  onChange={e => handleReferenceChange(indexProfissional, "nomeCompleto", e.target.value)}
-                  className={errors["reference_profissional_nomeCompleto"] ? "border-destructive" : ""}
-                  data-testid="input-nome-referencia-profissional"
+                  value={segundaReferencia.nomeCompleto}
+                  onChange={e => handleReferenceChange(indexSegundaReferencia, "nomeCompleto", e.target.value)}
+                  className={errors[`reference_${segundaReferencia.tipo_referencia}_nomeCompleto`] ? "border-destructive" : ""}
+                  data-testid="input-nome-segunda-referencia"
                 />
-                {errors["reference_profissional_nomeCompleto"] && (
+                {errors[`reference_${segundaReferencia.tipo_referencia}_nomeCompleto`] && (
                   <p className="mt-1 text-sm text-destructive">
-                    {errors["reference_profissional_nomeCompleto"]}
+                    {errors[`reference_${segundaReferencia.tipo_referencia}_nomeCompleto`]}
                   </p>
                 )}
               </div>
 
               <div>
-                <Label htmlFor="grauParentesco_profissional">Relação Profissional *</Label>
+                <Label htmlFor="grauParentesco_segunda">
+                  {segundaReferencia.tipo_referencia === "pessoal" ? "Grau de Parentesco *" : "Relação Profissional *"}
+                </Label>
                 <Select
-                  value={referenceProfissional.grauParentesco}
-                  onValueChange={value => handleReferenceChange(indexProfissional, "grauParentesco", value)}
+                  value={segundaReferencia.grauParentesco}
+                  onValueChange={value => handleReferenceChange(indexSegundaReferencia, "grauParentesco", value)}
                 >
                   <SelectTrigger
-                    className={errors["reference_profissional_grauParentesco"] ? "border-destructive" : ""}
+                    className={errors[`reference_${segundaReferencia.tipo_referencia}_grauParentesco`] ? "border-destructive" : ""}
                   >
                     <SelectValue placeholder="Selecione..." />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="supervisor">Supervisor/Gerente</SelectItem>
-                    <SelectItem value="colega">Colega de Trabalho</SelectItem>
-                    <SelectItem value="cliente">Cliente</SelectItem>
-                    <SelectItem value="fornecedor">Fornecedor</SelectItem>
-                    <SelectItem value="parceiro">Parceiro de Negócios</SelectItem>
-                    <SelectItem value="chefe">Chefe Direto</SelectItem>
-                    <SelectItem value="subordinado">Subordinado</SelectItem>
-                    <SelectItem value="rh">Recursos Humanos</SelectItem>
-                    <SelectItem value="outro_profissional">Outro</SelectItem>
+                    {segundaReferencia.tipo_referencia === "pessoal" ? (
+                      <>
+                        <SelectItem value="mae">Mãe</SelectItem>
+                        <SelectItem value="pai">Pai</SelectItem>
+                        <SelectItem value="irmao">Irmão(ã)</SelectItem>
+                        <SelectItem value="conjuge">Cônjuge</SelectItem>
+                        <SelectItem value="filho">Filho(a)</SelectItem>
+                        <SelectItem value="amigo">Amigo(a)</SelectItem>
+                        <SelectItem value="tio">Tio(a)</SelectItem>
+                        <SelectItem value="primo">Primo(a)</SelectItem>
+                        <SelectItem value="sogro">Sogro(a)</SelectItem>
+                        <SelectItem value="cunhado">Cunhado(a)</SelectItem>
+                        <SelectItem value="outro">Outro</SelectItem>
+                      </>
+                    ) : (
+                      <>
+                        <SelectItem value="supervisor">Supervisor/Gerente</SelectItem>
+                        <SelectItem value="colega">Colega de Trabalho</SelectItem>
+                        <SelectItem value="cliente">Cliente</SelectItem>
+                        <SelectItem value="fornecedor">Fornecedor</SelectItem>
+                        <SelectItem value="parceiro">Parceiro de Negócios</SelectItem>
+                        <SelectItem value="chefe">Chefe Direto</SelectItem>
+                        <SelectItem value="subordinado">Subordinado</SelectItem>
+                        <SelectItem value="rh">Recursos Humanos</SelectItem>
+                        <SelectItem value="outro_profissional">Outro</SelectItem>
+                      </>
+                    )}
                   </SelectContent>
                 </Select>
-                {errors["reference_profissional_grauParentesco"] && (
+                {errors[`reference_${segundaReferencia.tipo_referencia}_grauParentesco`] && (
                   <p className="mt-1 text-sm text-destructive">
-                    {errors["reference_profissional_grauParentesco"]}
+                    {errors[`reference_${segundaReferencia.tipo_referencia}_grauParentesco`]}
                   </p>
                 )}
               </div>
 
               <div>
-                <Label htmlFor="telefone_profissional">Telefone *</Label>
+                <Label htmlFor="telefone_segunda">Telefone *</Label>
                 <MaskedInput
                   mask="(99) 99999-9999"
-                  value={referenceProfissional.telefone}
-                  onChange={(value) => handleReferenceChange(indexProfissional, "telefone", value)}
+                  value={segundaReferencia.telefone}
+                  onChange={(value) => handleReferenceChange(indexSegundaReferencia, "telefone", value)}
                   placeholder="(11) 98765-4321"
-                  className={errors["reference_profissional_telefone"] ? "border-destructive" : ""}
-                  data-testid="input-telefone-referencia-profissional"
+                  className={errors[`reference_${segundaReferencia.tipo_referencia}_telefone`] ? "border-destructive" : ""}
+                  data-testid="input-telefone-segunda-referencia"
                 />
-                {errors["reference_profissional_telefone"] && (
+                {errors[`reference_${segundaReferencia.tipo_referencia}_telefone`] && (
                   <p className="mt-1 text-sm text-destructive">
-                    {errors["reference_profissional_telefone"]}
+                    {errors[`reference_${segundaReferencia.tipo_referencia}_telefone`]}
                   </p>
                 )}
               </div>

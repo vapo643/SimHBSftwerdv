@@ -841,15 +841,16 @@ export const insertReferenciaPessoalBase = z.object({
   }),
 });
 
-// Schema para validar array de exatamente 2 referências (PAM V1.0)
+// Schema para validar array de exatamente 2 referências (PAM V1.1)
 export const validateReferenciasCompletas = z.array(insertReferenciaPessoalBase)
   .length(2, "São obrigatórias exatamente 2 referências")
   .refine(
     (refs) => {
       const tipos = refs.map(r => r.tipo_referencia);
-      return tipos.includes('pessoal') && tipos.includes('profissional');
+      // PAM V1.1: Primeira referência deve ser pessoal, segunda pode ser qualquer tipo
+      return tipos.length === 2 && refs[0].tipo_referencia === 'pessoal';
     },
-    { message: "Deve haver uma referência pessoal e uma profissional" }
+    { message: "A primeira referência deve ser pessoal, a segunda pode ser pessoal ou profissional" }
   );
 
 export const insertInterCallbackSchema = createInsertSchema(interCallbacks).omit({
