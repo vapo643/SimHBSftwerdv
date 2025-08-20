@@ -1,0 +1,52 @@
+### Pacote de Ativação de Missão (PAM) V1.0 (Implementação de Guarda de Segurança)
+
+* **Sumário da Missão (O Quê):** Adicionar uma guarda de segurança ("circuit breaker") na função `cleanTestDatabase()` para impedir a sua execução em um ambiente de produção.
+* **Intenção Estratégica (O Porquê):** Implementar a primeira e mais crítica camada de proteção para neutralizar imediatamente o risco de perda de dados catastrófica. Esta guarda de segurança tornará a função destrutiva "consciente" do seu ambiente e irá impedi-la de causar danos fora de um contexto de teste seguro.
+* **Histórico Relevante (Consulta Obrigatória):** A sua auditoria forense identificou `cleanTestDatabase()` como a causa-raiz da perda de dados, e a sua execução acidental em ambientes não-teste como o vetor de ataque.
+* **Modelo Mental (Como se Encaixa):** Esta é uma missão de programação defensiva. O Agente irá adicionar uma verificação de pré-condição no início de uma função perigosa para garantir que ela só possa ser executada sob condições seguras.
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco:** A verificação de ambiente pode ser implementada incorretamente.
+    * **Contramedida:** O prompt fornece o `snippet` de código exato e a lógica a ser implementada, e a validação exigirá testes que provem que a guarda funciona.
+
+---
+
+**IMPLEMENTAR:**
+Guarda de Segurança de Ambiente na Função de Limpeza de Testes
+
+**CURRENT STATE:**
+A função `cleanTestDatabase()` em `tests/lib/db-helper.ts` pode ser executada em qualquer ambiente, representando um risco crítico de segurança de dados.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  O arquivo `tests/lib/db-helper.ts` é modificado.
+2.  No início da função `cleanTestDatabase()`, uma guarda de segurança é adicionada.
+3.  A guarda verifica se a variável de ambiente `process.env.NODE_ENV` é estritamente igual a `'production'`.
+4.  Se a condição for verdadeira, a função deve lançar um `new Error('FATAL: Tentativa de executar a função de limpeza de banco de dados em ambiente de PRODUÇÃO. Operação abortada.')`.
+5.  A lógica de `TRUNCATE` original da função permanece inalterada, mas só será alcançada se a guarda de segurança passar.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  **Local da Modificação:** A nova lógica de verificação deve ser a **primeira coisa** dentro da função `cleanTestDatabase()`.
+2.  **Lógica Exata:** Implemente a seguinte lógica:
+    ```typescript
+    if (process.env.NODE_ENV === 'production') {
+      console.error('CRITICAL SECURITY ALERT: Tentativa de limpar o banco de dados em ambiente de PRODUÇÃO.');
+      throw new Error('FATAL: Tentativa de executar a função de limpeza de banco de dados em ambiente de PRODUÇÃO. Operação abortada.');
+    }
+    ```
+3.  **Validação:** A validação será uma revisão do código-fonte modificado para confirmar que a guarda foi implementada corretamente no local correto.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que a variável `process.env.NODE_ENV` é uma forma confiável de identificar o ambiente de produção."]
+* **VALIDAÇÃO PENDENTE:** [A FASE 2 do nosso roadmap, que cria um banco de dados de teste separado, é a solução estrutural definitiva.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear o ficheiro e a função exata a ser modificada.
+2.  Garantir que a lógica da guarda de segurança está correta.
+3.  Executar `get_latest_lsp_diagnostics` para garantir 0 erros novos.
+4.  **Declarar Nível de Confiança (0 a 100%)**.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (revisão lógica do código).
+7.  **Documentar Decisões Técnicas**.

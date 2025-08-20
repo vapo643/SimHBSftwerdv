@@ -19,6 +19,12 @@ import { v4 as uuidv4 } from "uuid";
  * SAFETY: This function should ONLY be used in test environments
  */
 export async function cleanTestDatabase(): Promise<void> {
+  // CRITICAL SECURITY GUARD - Prevent execution in production environment
+  if (process.env.NODE_ENV === 'production') {
+    console.error('CRITICAL SECURITY ALERT: Tentativa de limpar o banco de dados em ambiente de PRODUÇÃO.');
+    throw new Error('FATAL: Tentativa de executar a função de limpeza de banco de dados em ambiente de PRODUÇÃO. Operação abortada.');
+  }
+  
   const startTime = Date.now();
   console.log("[TEST DB] 🧹 Starting comprehensive database cleanup...");
   
