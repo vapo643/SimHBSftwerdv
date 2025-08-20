@@ -1,0 +1,50 @@
+### Pacote de Ativação de Missão (PAM) V1.0 (Auditoria do Fluxo de Busca por CPF)
+
+* **Sumário da Missão (O Quê):** Realizar uma auditoria forense completa do fluxo de "Busca de Cliente por CPF" na tela de "Nova Proposta", rastreando o processo desde a interação do usuário no frontend até a resposta da API no backend.
+* **Intenção Estratégica (O Porquê):** Diagnosticar a causa-raiz da falha atual na funcionalidade de busca por CPF. Um mapa preciso do sistema existente é o pré-requisito não negociável para planejarmos e arquitetarmos a nova funcionalidade de auto-preenchimento.
+* **Histórico Relevante (Consulta Obrigatória):** A observação de campo indica que um evento de preenchimento de CPF aciona uma mensagem de "Buscando dados do cliente", mas a operação falha em retornar e preencher os dados.
+* **Modelo Mental (Como se Encaixa):** Aja como um Engenheiro de Diagnóstico Full-Stack. Sua tarefa é seguir o "rastro da requisição", começando pelo componente React, passando pela chamada de API, inspecionando a rota do backend e a sua lógica de consulta ao banco de dados.
+
+---
+
+**IMPLEMENTAR:**
+Relatório de Auditoria de Causa Raiz - Busca por CPF
+
+**CURRENT STATE:**
+Na tela de "Nova Proposta", preencher o campo CPF aciona um indicador de busca, mas os dados do cliente não são encontrados nem preenchidos, mesmo para CPFs que já existem no sistema.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um relatório de auditoria detalhado em formato Markdown, dividido em 3 seções:
+
+**1. Análise do Gatilho (Frontend):**
+* **Componente Alvo:** Identifique o arquivo do componente React que contém o formulário de "Nova Proposta" (provavelmente `ClientDataStep.tsx`).
+* **Evento e Handler:** Localize o campo de input do CPF e identifique qual evento (ex: `onBlur`, `useEffect` com `debounce`) aciona a busca. Apresente o `snippet` de código da função handler.
+* **Chamada de API:** Dentro do handler, identifique a URL exata do endpoint da API que é chamado para realizar a busca por CPF.
+
+**2. Análise da Lógica (Backend):**
+* **Endpoint da API:** Localize o código do endpoint identificado no passo anterior.
+* **Lógica de Busca:** Analise a lógica deste endpoint.
+    * Ele consulta qual tabela (`clientes`, `propostas`)?
+    * Ele retorna o quê em caso de sucesso? E em caso de falha?
+* **Apresente o `snippet` de código** completo do handler deste endpoint.
+
+**3. Veredito da Auditoria (Análise de Causa Raiz):**
+* Com base na sua análise completa do fluxo, forneça uma conclusão clara e precisa sobre por que a funcionalidade está a falhar.
+* **Responda:** A falha está no frontend (não está a chamar a API corretamente)? A falha está no backend (a API não está a encontrar ou a retornar os dados corretamente)? Ou a falha está em ambos? Justifique sua conclusão com base nas evidências de código coletadas.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100% de confiança na COMPLETUDE da auditoria]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que a funcionalidade de busca já existe e não é um placeholder."]
+* **VALIDAÇÃO PENDENTE:** [O relatório de auditoria será a base para o planejamento da nova funcionalidade de auto-preenchimento.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear os arquivos e funções exatas a serem analisados (frontend e backend).
+2.  Garantir que os `snippets` de código estão completos e contextuais.
+3.  Executar `get_latest_lsp_diagnostics` para garantir que o ambiente está estável.
+4.  **Declarar Nível de Confiança (0 a 100%)** na completude da auditoria.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (revisão do relatório gerado para precisão).
+7.  **Documentar Decisões Técnicas** e a análise de causa raiz.
