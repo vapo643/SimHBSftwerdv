@@ -276,6 +276,19 @@ export const propostas = pgTable("propostas", {
   clienteData: text("cliente_data"),
   condicoesData: text("condicoes_data"),
 
+  // Novos campos de Empregador - Added August 20, 2025
+  clienteEmpresaNome: text("cliente_empresa_nome"), // NULLABLE para retrocompatibilidade
+  clienteEmpresaCnpj: text("cliente_empresa_cnpj"), // NULLABLE
+  clienteCargoFuncao: text("cliente_cargo_funcao"), // NULLABLE
+  clienteTempoEmprego: text("cliente_tempo_emprego"), // NULLABLE - Ex: "2 anos", "6 meses"
+  clienteRendaComprovada: boolean("cliente_renda_comprovada").default(false), // NOT NULL com default
+
+  // Novos campos Financeiros - Added August 20, 2025
+  clienteDividasExistentes: decimal("cliente_dividas_existentes", { precision: 12, scale: 2 }), // NULLABLE
+  clienteComprometimentoRenda: decimal("cliente_comprometimento_renda", { precision: 6, scale: 2 }), // NULLABLE - Até 9999.99%
+  clienteScoreSerasa: integer("cliente_score_serasa"), // NULLABLE - Score de crédito
+  clienteRestricoesCpf: boolean("cliente_restricoes_cpf").default(false), // NOT NULL com default
+
   // Auditoria
   userId: text("user_id"),
   createdAt: timestamp("created_at").defaultNow(),
@@ -413,6 +426,28 @@ export const referenciaPessoal = pgTable("referencia_pessoal", {
   nomeCompleto: text("nome_completo").notNull(),
   grauParentesco: text("grau_parentesco").notNull(), // Mãe, Pai, Irmão, Amigo, etc.
   telefone: text("telefone").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Referências Profissionais - Added August 20, 2025
+export const referenciasProfissionais = pgTable("referencias_profissionais", {
+  id: serial("id").primaryKey(),
+  propostaId: text("proposta_id")
+    .references(() => propostas.id, { onDelete: "cascade" })
+    .notNull()
+    .unique(), // UNIQUE constraint - apenas uma referência profissional por proposta
+  
+  // Dados da Referência
+  nomeCompleto: text("nome_completo").notNull(),
+  cargoFuncao: text("cargo_funcao").notNull(),
+  empresaNome: text("empresa_nome").notNull(),
+  empresaTelefone: text("empresa_telefone").notNull(),
+  tempoConhecimento: text("tempo_conhecimento").notNull(), // "2 anos", "5 meses"
+  
+  // Relacionamento
+  tipoRelacionamento: text("tipo_relacionamento").notNull(), // "supervisor", "colega", "rh"
+  
+  // Auditoria
   createdAt: timestamp("created_at").defaultNow(),
 });
 
