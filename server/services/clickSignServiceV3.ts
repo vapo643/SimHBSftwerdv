@@ -8,7 +8,7 @@
 
 import { getBrasiliaTimestamp } from "../lib/timezone.js";
 import { clickSignSecurityService } from "./clickSignSecurityService.js";
-import { cpf } from "cpf-cnpj-validator";
+// Removido import do cpf-cnpj-validator
 
 interface ClickSignV3Config {
   apiUrl: string;
@@ -227,7 +227,7 @@ class ClickSignServiceV3 {
   }
 
   /**
-   * Sanitize and validate CPF
+   * Sanitize CPF (validation removed per user request)
    */
   private sanitizeAndValidateCPF(rawCpf: string): string {
     // Sanitize: Remove all non-numeric characters
@@ -235,13 +235,13 @@ class ClickSignServiceV3 {
 
     console.log(`[CLICKSIGN V1] 🧹 CPF sanitization: ${rawCpf} → ${cleanCpf}`);
 
-    // Validate using the library
-    if (!cpf.isValid(cleanCpf)) {
-      console.error(`[CLICKSIGN V1] ❌ Invalid CPF: ${cleanCpf}`);
-      throw new Error("CPF do cliente é inválido. Operação abortada em ambiente de Produção.");
+    // Basic length check only (no validation per user request)
+    if (cleanCpf.length !== 11) {
+      console.error(`[CLICKSIGN V1] ❌ CPF must have 11 digits: ${cleanCpf}`);
+      throw new Error("CPF deve ter 11 dígitos.");
     }
 
-    console.log(`[CLICKSIGN V1] ✅ CPF validation passed: ${cleanCpf}`);
+    console.log(`[CLICKSIGN V1] ✅ CPF format check passed: ${cleanCpf}`);
     return cleanCpf;
   }
 

@@ -28,7 +28,7 @@ import {
 } from "lucide-react";
 import CurrencyInput from "@/components/ui/CurrencyInput";
 import { MaskedInput } from "@/components/ui/MaskedInput";
-import { cpf as cpfValidator, cnpj as cnpjValidator } from "cpf-cnpj-validator";
+// Removido import do cpf-cnpj-validator
 import { commonBanks, brazilianBanks } from "@/utils/brazilianBanks";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -80,51 +80,7 @@ interface ClientDataApiResponse {
   };
 }
 
-// Validation helpers
-const validateCPF = (cpf: string): { isValid: boolean; message: string | null } => {
-  const cleanCPF = cpf.replace(/\D/g, "");
-  if (cleanCPF.length === 0) return { isValid: false, message: null };
-  if (cleanCPF.length < 11) return { isValid: false, message: "CPF deve ter 11 dígitos" };
-  if (cleanCPF.length > 11) return { isValid: false, message: "CPF inválido" };
-
-  const isValid = cpfValidator.isValid(cpf);
-  return {
-    isValid,
-    message: isValid ? null : "CPF inválido",
-  };
-};
-
-const validateCNPJ = (cnpj: string): { isValid: boolean; message: string | null } => {
-  const cleanCNPJ = cnpj.replace(/\D/g, "");
-  if (cleanCNPJ.length === 0) return { isValid: false, message: null };
-  if (cleanCNPJ.length < 14) return { isValid: false, message: "CNPJ deve ter 14 dígitos" };
-  if (cleanCNPJ.length > 14) return { isValid: false, message: "CNPJ inválido" };
-
-  const isValid = cnpjValidator.isValid(cnpj);
-  return {
-    isValid,
-    message: isValid ? null : "CNPJ inválido",
-  };
-};
-
-const validateEmail = (email: string): { isValid: boolean; message: string | null } => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!email) return { isValid: false, message: "Email é obrigatório" };
-  if (!emailRegex.test(email)) return { isValid: false, message: "Email inválido" };
-  return { isValid: true, message: null };
-};
-
-const validatePhone = (phone: string): string | null => {
-  const cleanPhone = phone.replace(/\D/g, "");
-  if (cleanPhone.length < 10) return "Telefone deve ter pelo menos 10 dígitos";
-  return null;
-};
-
-const validateCEP = (cep: string): string | null => {
-  const cleanCEP = cep.replace(/\D/g, "");
-  if (cleanCEP.length < 8) return "CEP deve ter 8 dígitos";
-  return null;
-};
+// VALIDAÇÕES REMOVIDAS - Aceitar qualquer input sem validação
 
 export function ClientDataStep() {
   const { state } = useProposal();
@@ -132,19 +88,7 @@ export function ClientDataStep() {
   const { clientData, errors } = state;
   const { toast } = useToast();
 
-  // Estados para validação visual
-  const [cpfValidation, setCpfValidation] = useState<{ isValid: boolean; message: string | null }>({
-    isValid: false,
-    message: null,
-  });
-  const [cnpjValidation, setCnpjValidation] = useState<{
-    isValid: boolean;
-    message: string | null;
-  }>({ isValid: false, message: null });
-  const [emailValidation, setEmailValidation] = useState<{
-    isValid: boolean;
-    message: string | null;
-  }>({ isValid: false, message: null });
+  // Estados de loading para APIs
   const [loadingCep, setLoadingCep] = useState(false);
   const [loadingCpfData, setLoadingCpfData] = useState(false);
 
@@ -269,78 +213,45 @@ export function ClientDataStep() {
     });
   };
 
+  // Handlers simplificados - SEM VALIDAÇÃO
   const handleCPFChange = (value: string) => {
     updateClient({ cpf: value });
-    const validation = validateCPF(value);
-    setCpfValidation(validation);
-
-    if (validation.message) {
-      setError("cpf", validation.message);
-    } else {
-      clearError("cpf");
-      // Buscar dados existentes quando CPF for válido
-      if (validation.isValid) {
-        fetchClientDataByCpf(value);
-      }
+    clearError("cpf");
+    // Buscar dados quando tiver 11 dígitos
+    const cleanCPF = value.replace(/\D/g, "");
+    if (cleanCPF.length === 11) {
+      fetchClientDataByCpf(value);
     }
   };
 
   const handleCNPJChange = (value: string) => {
     updateClient({ cnpj: value });
-    const validation = validateCNPJ(value);
-    setCnpjValidation(validation);
-
-    if (validation.message) {
-      setError("cnpj", validation.message);
-    } else {
-      clearError("cnpj");
-    }
+    clearError("cnpj");
   };
 
   const handleEmailChange = (value: string) => {
     updateClient({ email: value });
-    const validation = validateEmail(value);
-    setEmailValidation(validation);
-
-    if (validation.message) {
-      setError("email", validation.message);
-    } else {
-      clearError("email");
-    }
+    clearError("email");
   };
 
   const handlePhoneChange = (value: string) => {
     updateClient({ telefone: value });
-    const error = validatePhone(value);
-    if (error) {
-      setError("telefone", error);
-    } else {
-      clearError("telefone");
-    }
+    clearError("telefone");
   };
 
   const handleCEPChange = (value: string) => {
     updateClient({ cep: value });
-    const error = validateCEP(value);
-    if (error) {
-      setError("cep", error);
-    } else {
-      clearError("cep");
-      // Auto-buscar endereço quando CEP for válido
-      const cleanCep = value.replace(/\D/g, "");
-      if (cleanCep.length === 8) {
-        fetchAddressByCep(value);
-      }
+    clearError("cep");
+    // Auto-buscar endereço quando CEP tiver 8 dígitos
+    const cleanCep = value.replace(/\D/g, "");
+    if (cleanCep.length === 8) {
+      fetchAddressByCep(value);
     }
   };
 
   const handleNameChange = (value: string) => {
     updateClient({ nome: value });
-    if (!value || value.trim().length === 0) {
-      setError("nome", "Nome é obrigatório");
-    } else {
-      clearError("nome");
-    }
+    clearError("nome");
   };
 
   // Calcular progresso do formulário
@@ -454,43 +365,13 @@ export function ClientDataStep() {
                     onChange={(value) => handleCNPJChange(value)}
                     id="cnpj"
                     placeholder="00.000.000/0000-00"
-                    className={`${
-                      errors.cnpj
-                        ? "border-destructive focus:border-destructive"
-                        : cnpjValidation.isValid && clientData.cnpj
-                          ? "border-green-500 focus:border-green-500"
-                          : ""
-                    } pr-10`}
+                    className={errors.cnpj ? "border-destructive focus:border-destructive" : ""}
                     data-testid="input-cnpj"
                   />
-                  {clientData.cnpj && cnpjValidation.message === null && (
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2 transform">
-                      {cnpjValidation.isValid ? (
-                        <CheckCircle2 className="h-4 w-4 text-green-500" />
-                      ) : (
-                        <XCircle className="h-4 w-4 text-red-500" />
-                      )}
-                    </div>
-                  )}
+                  {/* Ícone de validação CNPJ removido */}
                 </div>
                 {errors.cnpj && <p className="mt-1 text-sm text-destructive">{errors.cnpj}</p>}
-                {clientData.cnpj && !errors.cnpj && (
-                  <p
-                    className={`mt-1 flex items-center gap-1 text-xs ${
-                      cnpjValidation.isValid ? "text-green-600" : "text-red-600"
-                    }`}
-                  >
-                    {cnpjValidation.isValid ? (
-                      <>
-                        <CheckCircle2 className="h-3 w-3" /> CNPJ válido
-                      </>
-                    ) : (
-                      <>
-                        <XCircle className="h-3 w-3" /> CNPJ inválido
-                      </>
-                    )}
-                  </p>
-                )}
+                {/* Mensagem de CNPJ válido removida */}
               </div>
               <div>
                 <Label htmlFor="nome">Representante Legal *</Label>
@@ -517,43 +398,13 @@ export function ClientDataStep() {
                     onChange={(value) => handleCPFChange(value)}
                     id="cpf"
                     placeholder="000.000.000-00"
-                    className={`${
-                      errors.cpf
-                        ? "border-destructive focus:border-destructive"
-                        : cpfValidation.isValid && clientData.cpf
-                          ? "border-green-500 focus:border-green-500"
-                          : ""
-                    } pr-10`}
+                    className={errors.cpf ? "border-destructive focus:border-destructive" : ""}
                     data-testid="input-cpf"
                   />
-                  {clientData.cpf && cpfValidation.message === null && (
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2 transform">
-                      {cpfValidation.isValid ? (
-                        <CheckCircle2 className="h-4 w-4 text-green-500" />
-                      ) : (
-                        <XCircle className="h-4 w-4 text-red-500" />
-                      )}
-                    </div>
-                  )}
+                  {/* Ícone de validação removido */}
                 </div>
                 {errors.cpf && <p className="mt-1 text-sm text-destructive">{errors.cpf}</p>}
-                {clientData.cpf && !errors.cpf && (
-                  <p
-                    className={`mt-1 flex items-center gap-1 text-xs ${
-                      cpfValidation.isValid ? "text-green-600" : "text-red-600"
-                    }`}
-                  >
-                    {cpfValidation.isValid ? (
-                      <>
-                        <CheckCircle2 className="h-3 w-3" /> CPF válido
-                      </>
-                    ) : (
-                      <>
-                        <XCircle className="h-3 w-3" /> CPF inválido
-                      </>
-                    )}
-                  </p>
-                )}
+                {/* Mensagem de CPF válido removida */}
               </div>
 
               <div>
@@ -752,31 +603,13 @@ export function ClientDataStep() {
                 type="email"
                 value={clientData.email}
                 onChange={e => handleEmailChange(e.target.value)}
-                className={`${
-                  errors.email
-                    ? "border-destructive focus:border-destructive"
-                    : emailValidation.isValid && clientData.email
-                      ? "border-green-500 focus:border-green-500"
-                      : ""
-                } pr-10`}
+                className={errors.email ? "border-destructive focus:border-destructive" : ""}
                 data-testid="input-email"
               />
-              {clientData.email && emailValidation.message === null && (
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 transform">
-                  {emailValidation.isValid ? (
-                    <CheckCircle2 className="h-4 w-4 text-green-500" />
-                  ) : (
-                    <XCircle className="h-4 w-4 text-red-500" />
-                  )}
-                </div>
-              )}
+              {/* Ícone de validação email removido */}
             </div>
             {errors.email && <p className="mt-1 text-sm text-destructive">{errors.email}</p>}
-            {clientData.email && !errors.email && emailValidation.isValid && (
-              <p className="mt-1 flex items-center gap-1 text-xs text-green-600">
-                <CheckCircle2 className="h-3 w-3" /> E-mail válido
-              </p>
-            )}
+            {/* Mensagem de email válido removida */}
           </div>
         </CardContent>
       </Card>
