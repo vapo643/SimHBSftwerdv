@@ -1,0 +1,49 @@
+### Pacote de Ativação de Missão (PAM) V1.0 (Extração de Script Inline)
+
+* **Sumário da Missão (O Quê):** Extrair o script inline de 58 linhas do arquivo `client/index.html` para um novo arquivo JavaScript externo.
+* **Intenção Estratégica (O Porquê):** Eliminar a violação de segurança mais crítica identificada na auditoria SAST. Esta ação é o primeiro e mais importante passo para fortalecer a segurança do frontend e permitir a futura implementação de uma Content Security Policy (CSP) rigorosa.
+* **Histórico Relevante (Consulta Obrigatória):** A sua auditoria anterior identificou um script inline de 58 linhas (linhas 11-69) no arquivo `client/index.html` como uma violação de segurança de severidade CRÍTICA.
+* **Modelo Mental (Como se Encaixa):** Esta é uma missão de refatoração de "separação de responsabilidades". O Agente irá mover o código (JavaScript) para fora do conteúdo (HTML), seguindo as melhores práticas de desenvolvimento web.
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco:** O script extraído pode não ser carregado ou executado na ordem correta, quebrando a funcionalidade de proteção que ele oferece.
+    * **Contramedida:** O prompt especifica a criação de um diretório dedicado e a modificação do `index.html` será feita em um passo subsequente e controlado (Passo 1.2).
+
+---
+
+**IMPLEMENTAR:**
+Extração do Script de Proteção de Custom Elements
+
+**CURRENT STATE:**
+O arquivo `client/index.html` contém um bloco `<script>` de 58 linhas com código JavaScript embutido, violando as melhores práticas de segurança.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  Um novo diretório `client/src/scripts/` é criado.
+2.  Um novo arquivo, `custom-elements-protection.js`, é criado dentro do novo diretório.
+3.  O conteúdo JavaScript (as 58 linhas, sem as tags `<script>`) é **recortado** de `client/index.html` e **colado** no novo arquivo `client/src/scripts/custom-elements-protection.js`.
+4.  O arquivo `client/index.html` fica sem o bloco de script inline.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  **Crie a Estrutura:** Crie o diretório `client/src/scripts/` e, dentro dele, o arquivo `custom-elements-protection.js`.
+2.  **Recorte e Cole:** Execute a operação de "recortar e colar" do código JavaScript. Garanta que apenas o código JavaScript puro seja movido, não as tags `<script>`.
+3.  **Ação Restrita:** Esta missão é focada **exclusivamente** na extração do script. **NÃO** adicione a nova tag `<script src="...">` ao `index.html` ainda. Essa será a próxima missão (Passo 1.2).
+
+---
+
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que o nome `custom-elements-protection.js` é um nome de arquivo apropriado para a funcionalidade do script."]
+* **VALIDAÇÃO PENDENTE:** [A validação final ocorrerá no Passo 1.2, quando o novo script for carregado e a funcionalidade for testada.]
+
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+
+1.  Mapear os ficheiros e diretórios exatos a serem criados/modificados.
+2.  Garantir que o conteúdo do novo arquivo JavaScript está correto e completo.
+3.  Executar `get_latest_lsp_diagnostics` para garantir 0 erros novos.
+4.  **Declarar Nível de Confiança (0 a 100%)**.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (revisão dos arquivos modificados para garantir que a extração foi feita corretamente).
+7.  **Documentar Decisões Técnicas**.
