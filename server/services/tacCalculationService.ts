@@ -8,7 +8,7 @@
  * @created 2025-01-20
  */
 
-import { db } from "../db";
+import { db } from "../lib/supabase.js";
 import { propostas, produtos } from "../../shared/schema";
 import { eq, or, and, isNull, inArray } from "drizzle-orm";
 

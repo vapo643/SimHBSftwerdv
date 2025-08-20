@@ -1,0 +1,46 @@
+### Pacote de Ativação de Missão (PAM) V1.0
+
+* **Sumário da Missão (O Quê):** Integrar o `TacCalculationService` no endpoint de criação de propostas, garantindo que o valor da TAC seja calculado dinamicamente e salvo com a nova proposta.
+* **Intenção Estratégica (O Porquê):** Ativar a nova lógica de negócio de ponta a ponta no backend. Esta integração garantirá que todas as novas propostas criadas no sistema passem pela nova regra de cálculo e isenção de TAC, tornando a funcionalidade efetiva.
+* **Histórico Relevante (Consulta Obrigatória):** A missão anterior implementou com sucesso o `TacCalculationService`. Esta missão irá consumi-lo no endpoint `POST /api/propostas`, que reside em `server/routes/propostas/core.ts`.
+* **Modelo Mental (Como se Encaixa):** Esta é uma missão de refatoração de um `controller` de API. O Agente irá modificar o handler da rota para chamar o novo serviço antes de persistir os dados, injetando o resultado do cálculo no objeto que será salvo no banco de dados.
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco:** A integração pode ser feita no local errado do fluxo, ou o valor calculado pode não ser corretamente adicionado ao objeto a ser salvo.
+    * **Contramedida:** O prompt especifica o local exato da integração (antes da chamada de `storage.createProposta`) e o campo a ser preenchido (`valor_tac`).
+
+---
+
+**IMPLEMENTAR:**
+Integração do `TacCalculationService` na API de Criação de Propostas
+
+**CURRENT STATE:**
+O endpoint `POST /api/propostas` atualmente não utiliza o `TacCalculationService`. O valor da TAC, se existir, vem diretamente do frontend sem a validação da nova regra de negócio de isenção ou cálculo dinâmico.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  O arquivo `server/routes/propostas/core.ts` é modificado.
+2.  Na rota `POST /api/propostas`, o `TacCalculationService` é importado.
+3.  Antes da chamada final para persistir a proposta no banco de dados, o método `TacCalculationService.calculateTac()` é chamado, passando os parâmetros necessários (`produtoId`, `valorSolicitado`, `clienteCpf`).
+4.  O valor numérico retornado pelo serviço é atribuído ao campo `valor_tac` do objeto da proposta que será salvo no banco de dados, sobrescrevendo qualquer valor que possa ter vindo do frontend.
+5.  A aplicação permanece funcional e sem erros de LSP.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  **Local da Integração:** A nova lógica deve ser inserida dentro do handler da rota `POST /` no arquivo `server/routes/propostas/core.ts`, logo após a validação Zod e antes da chamada final ao `storage` ou `db` para criar a proposta.
+2.  **Invoque o Serviço:** Chame o método estático `calculateTac` do serviço que você acabou de criar.
+3.  **Sobrescreva o Valor:** Certifique-se de que o valor da TAC retornado pelo serviço seja o valor final a ser persistido no banco de dados para o campo `valor_tac`.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que o `produtoId` e `clienteCpf` necessários para o serviço estão disponíveis no escopo do handler da rota."]
+* **VALIDAÇÃO PENDENTE:** [Testes de integração na FASE 3 validarão que a integração está a funcionar corretamente.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear o ficheiro e a função exata a ser modificada.
+2.  Garantir que a importação e a chamada ao serviço estão corretas.
+3.  Executar `get_latest_lsp_diagnostics` para garantir 0 erros novos.
+4.  **Declarar Nível de Confiança (0 a 100%)**.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (revisão lógica do código para garantir a correta integração).
+7.  **Documentar Decisões Técnicas**.

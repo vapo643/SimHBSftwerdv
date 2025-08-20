@@ -13,6 +13,7 @@ import { createPropostaValidationSchema } from "../../../shared/schema.js";
 import { randomUUID } from "crypto";
 import { preApprovalService } from "../../services/preApprovalService.js";
 import { transitionTo } from "../../services/statusFsmService.js";
+import { TacCalculationService } from "../../services/tacCalculationService.js";
 
 const router = Router();
 
@@ -979,6 +980,38 @@ router.post("/", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
       dados_pagamento_pix: dataForDatabase.dados_pagamento_pix,
       dados_pagamento_tipo_pix: dataForDatabase.dados_pagamento_tipo_pix
     });
+
+    // 💰 INTEGRAÇÃO TAC CALCULATION SERVICE (PAM V1.0 - FASE 1)
+    // Calcular TAC dinamicamente baseado no produto e status do cliente
+    console.log("💰 [TAC] Iniciando cálculo dinâmico de TAC para nova proposta");
+    
+    let tacCalculada = 0;
+    try {
+      // Verificar se temos os dados necessários para calcular TAC
+      if (dataForDatabase.produtoId && dataForDatabase.clienteCpf && dataForDatabase.condicoesData.valor) {
+        tacCalculada = await TacCalculationService.calculateTac(
+          dataForDatabase.produtoId,
+          dataForDatabase.condicoesData.valor,
+          dataForDatabase.clienteCpf
+        );
+        
+        console.log(`💰 [TAC] TAC calculada: R$ ${tacCalculada.toFixed(2)}`);
+        
+        // Sobrescrever o valor de TAC com o calculado pelo serviço
+        dataForDatabase.condicoesData.valorTac = tacCalculada;
+        
+        // Também atualizar o campo valor_tac direto na proposta (se existir)
+        (dataForDatabase as any).valor_tac = tacCalculada;
+        
+        console.log(`✅ [TAC] Valor de TAC sobrescrito com sucesso na proposta`);
+      } else {
+        console.warn(`⚠️ [TAC] Dados insuficientes para calcular TAC - usando valor padrão`);
+      }
+    } catch (tacError) {
+      console.error(`❌ [TAC] Erro ao calcular TAC - mantendo valor original:`, tacError);
+      // Em caso de erro, manter o valor de TAC que veio do frontend ou usar 0
+      tacCalculada = dataForDatabase.condicoesData.valorTac || 0;
+    }
 
     // Create the proposal
     const proposta = await storage.createProposta(dataForDatabase);
