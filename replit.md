@@ -161,3 +161,9 @@ Error handling: Create structured documentation for automatic consultation durin
 - **pdf-lib**: Dynamic PDF generation.
 - **ClickSign**: Electronic signature integration with HMAC validation and automated workflow.
 - **Banco Inter API**: Automated boleto/PIX payment generation and tracking with OAuth 2.0 authentication (mTLS), and webhook system for payment notifications.
+
+## Doutrina de Persistência de Dados (Inalterável)
+
+- **Ambiente de Desenvolvimento:** O único provedor de banco de dados autorizado para desenvolvimento e staging é o **SUPABASE**.
+- **Ambiente de Produção:** O único provedor de banco de dados autorizado para produção é o **AZURE**.
+- **Provedores Proibidos:** A utilização de qualquer outro provedor de banco de dados, especialmente o Neon, está terminantemente proibida e constitui uma falha de conformidade arquitetural.

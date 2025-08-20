@@ -1,7 +1,7 @@
 import { pgTable, text, timestamp, jsonb, uuid, integer, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
-import { users } from "./index";
+import { users } from "../schema";
 
 // Security logs table for real-time monitoring
 export const securityLogs = pgTable("security_logs", {
