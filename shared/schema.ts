@@ -662,15 +662,11 @@ export const createPropostaValidationSchema = z.object({
     .trim(),
   
   clienteCpf: z.string()
-    .min(11, "CPF deve ter pelo menos 11 caracteres")
-    .max(14, "CPF não pode exceder 14 caracteres")
-    .regex(/^\d{3}\.?\d{3}\.?\d{3}-?\d{2}$/, "CPF deve estar em formato válido")
+    .min(1, "CPF é obrigatório")
     .trim(),
   
   clienteEmail: z.string()
-    .email("Email deve ter formato válido")
     .min(1, "Email é obrigatório")
-    .max(255, "Email não pode exceder 255 caracteres")
     .trim(),
   
   clienteTelefone: z.string()
@@ -702,44 +698,40 @@ export const createPropostaValidationSchema = z.object({
   valorTac: z.number().min(0, "TAC não pode ser negativo").optional(),
   valorIof: z.number().min(0, "IOF não pode ser negativo").optional(),
   
-  // Campos opcionais mas com validação quando presentes
-  clienteDataNascimento: z.string().optional(),
-  clienteRenda: z.string().optional(),
-  clienteRg: z.string().optional(),
-  clienteOrgaoEmissor: z.string().optional(),
-  clienteRgUf: z.string().optional(),
-  clienteRgDataEmissao: z.string().optional(),
-  clienteEstadoCivil: z.string().optional(),
-  clienteNacionalidade: z.string().optional(),
-  clienteLocalNascimento: z.string().optional(),
+  // Campos opcionais - aceitar null ou undefined
+  clienteDataNascimento: z.string().nullish(),
+  clienteRenda: z.string().nullish(),
+  clienteRg: z.string().nullish(),
+  clienteOrgaoEmissor: z.string().nullish(),
+  clienteRgUf: z.string().nullish(),
+  clienteRgDataEmissao: z.string().nullish(),
+  clienteEstadoCivil: z.string().nullish(),
+  clienteNacionalidade: z.string().nullish(),
+  clienteLocalNascimento: z.string().nullish(),
   
-  // Novos campos de empregador e dados financeiros PAM V1.0
-  clienteEmpresaNome: z.string().min(1, "Nome da empresa é obrigatório").max(200, "Nome da empresa não pode exceder 200 caracteres").optional(),
-  clienteDataAdmissao: z.string().refine((date) => {
-    if (!date) return true; // Campo opcional
-    const parsedDate = new Date(date);
-    return !isNaN(parsedDate.getTime()) && parsedDate <= new Date();
-  }, "Data de admissão deve ser uma data válida e não pode ser futura").optional(),
-  clienteDividasExistentes: z.number().min(0, "Valor de dívidas não pode ser negativo").max(10000000, "Valor de dívidas não pode exceder R$ 10.000.000,00").optional(),
+  // Novos campos de empregador e dados financeiros PAM V1.0 - aceitar null
+  clienteEmpresaNome: z.string().nullish(),
+  clienteDataAdmissao: z.string().nullish(),
+  clienteDividasExistentes: z.number().nullish(),
   
-  // Endereço - opcional mas validado quando presente
-  clienteCep: z.string().optional(),
-  clienteLogradouro: z.string().optional(),
-  clienteNumero: z.string().optional(),
-  clienteComplemento: z.string().optional(),
-  clienteBairro: z.string().optional(),
-  clienteCidade: z.string().optional(),
-  clienteUf: z.string().optional(),
-  clienteOcupacao: z.string().optional(),
+  // Endereço - aceitar null ou undefined
+  clienteCep: z.string().nullish(),
+  clienteLogradouro: z.string().nullish(),
+  clienteNumero: z.string().nullish(),
+  clienteComplemento: z.string().nullish(),
+  clienteBairro: z.string().nullish(),
+  clienteCidade: z.string().nullish(),
+  clienteUf: z.string().nullish(),
+  clienteOcupacao: z.string().nullish(),
   
   // Dados de PJ - opcional
   tipoPessoa: z.enum(["PF", "PJ"]).default("PF"),
   clienteRazaoSocial: z.string().optional(),
   clienteCnpj: z.string().optional(),
   
-  // Dados do empréstimo
-  finalidade: z.string().min(1, "Finalidade é obrigatória"),
-  garantia: z.string().min(1, "Garantia é obrigatória"),
+  // Dados do empréstimo - opcionais para evitar validação rigorosa
+  finalidade: z.string().optional(),
+  garantia: z.string().optional(),
   
   // IDs relacionais opcionais
   produtoId: z.number().int().positive().optional(),
