@@ -1,0 +1,38 @@
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+content-script.js:22 Document already loaded, running initialization immediately
+content-script.js:4 Attempting to initialize AdUnit
+content-script.js:6 AdUnit initialized successfully
+webcomponents-ce.js:33 Uncaught Error: A custom element with name 'mce-autosize-textarea' has already been defined.
+    at Aa (webcomponents-ce.js:33:363)
+    at m.define (webcomponents-ce.js:33:133)
+    at overlay_bundle.js:148:5559
+    at D (overlay_bundle.js:44:680)
+    at overlay_bundle.js:159:392Understand this error
+nova:1 Unchecked runtime.lastError: The message port closed before a response was received.Understand this error
+content.js:208 Object
+AuthContext.tsx:170 🔐 [AUTH EVENT] SIGNED_IN Object
+AuthContext.tsx:170 🔐 [AUTH EVENT] INITIAL_SESSION Object
+apiClient.ts:166 🔐 [TOKEN MANAGER] Fresh token obtained, length: 767
+apiClient.ts:343 [PASSO 3 - ENVIO] Object
+apiClient.ts:343 [PASSO 3 - ENVIO] Object
+apiClient.ts:343 [PASSO 3 - ENVIO] Object
+apiClient.ts:343 [PASSO 3 - ENVIO] Object
+about:blank:1 Unchecked runtime.lastError: The message port closed before a response was received.Understand this error
+/api/origination/context:1  Failed to load resource: the server responded with a status of 403 (Forbidden)Understand this error
+nova:179 Erro ao carregar contexto: ApiError: Acesso negado. Perfil de usuário não encontrado.
+    at apiClient (apiClient.ts:467:13)
+    at async apiRequest (queryClient.ts:30:22)
+    at async queryFn (nova.tsx:34:24)
+console.error @ nova:179Understand this error
+/api/debug/me:1  Failed to load resource: the server responded with a status of 403 (Forbidden)Understand this error
+nova:179 Error fetching profile data: ApiError: Acesso negado. Perfil de usuário não encontrado.
+    at apiClient (apiClient.ts:467:13)
+    at async fetchUserProfile (AuthContext.tsx:95:28)
+console.error @ nova:179Understand this error
+/api/alertas/notificacoes:1  Failed to load resource: the server responded with a status of 403 (Forbidden)Understand this error
+/api/debug/me:1  Failed to load resource: the server responded with a status of 403 (Forbidden)Understand this error
+nova:179 Error fetching profile data: ApiError: Acesso negado. Perfil de usuário não encontrado.
+    at apiClient (apiClient.ts:467:13)
+    at async fetchUserProfile (AuthContext.tsx:95:28)
+console.error @ nova:179Understand this error
+nova:1 Refused to load the stylesheet 'https://www.gstatic.com/_/translate_http/_/ss/k=translate_http.tr.pgV-E-68K-A.L.W.O/am=gMA/d=0/rs=AN8SPfpszKJssl6IA0boGClFdsaAZGtXEQ/m=el_main_css' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
