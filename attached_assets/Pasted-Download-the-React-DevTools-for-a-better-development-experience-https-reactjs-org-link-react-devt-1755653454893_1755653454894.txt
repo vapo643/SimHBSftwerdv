@@ -1,0 +1,945 @@
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+AuthContext.tsx:170 🔐 [AUTH EVENT] SIGNED_IN {hasSession: true, tokenLength: 766}
+ProposalContext.tsx:439 Warning: Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.
+    at ProposalForm (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/propostas/nova.tsx:35:21)
+    at main
+    at div
+    at div
+    at DashboardLayout (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/DashboardLayout.tsx:52:43)
+    at ProposalProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ProposalContext.tsx:189:36)
+    at NovaProposta
+    at ProtectedRoute (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ProtectedRoute.tsx:21:42)
+    at Route (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=df08af2b:323:16)
+    at Switch (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=df08af2b:379:17)
+    at Router
+    at Provider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-3RXG37ZK.js?v=df08af2b:38:15)
+    at TooltipProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=df08af2b:64:5)
+    at AuthProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/AuthContext.tsx:30:32)
+    at ThemeProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ThemeContext.tsx:20:33)
+    at QueryClientProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=df08af2b:2805:3)
+    at App
+printWarning @ chunk-276SZO74.js?v=df08af2b:521
+error @ chunk-276SZO74.js?v=df08af2b:505
+checkForNestedUpdates @ chunk-276SZO74.js?v=df08af2b:19665
+scheduleUpdateOnFiber @ chunk-276SZO74.js?v=df08af2b:18533
+dispatchReducerAction @ chunk-276SZO74.js?v=df08af2b:12351
+clearSimulation @ ProposalContext.tsx:439
+(anonymous) @ useProposalEffects.ts:28
+commitHookEffectListMount @ chunk-276SZO74.js?v=df08af2b:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=df08af2b:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=df08af2b:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=df08af2b:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=df08af2b:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=df08af2b:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=df08af2b:19447
+(anonymous) @ chunk-276SZO74.js?v=df08af2b:19328
+workLoop @ chunk-276SZO74.js?v=df08af2b:197
+flushWork @ chunk-276SZO74.js?v=df08af2b:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=df08af2b:384Understand this error
+AuthContext.tsx:170 🔐 [AUTH EVENT] INITIAL_SESSION {hasSession: true, tokenLength: 766}
+ProposalContext.tsx:439 Warning: Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.
+    at ProposalForm (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/propostas/nova.tsx:35:21)
+    at main
+    at div
+    at div
+    at DashboardLayout (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/DashboardLayout.tsx:52:43)
+    at ProposalProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ProposalContext.tsx:189:36)
+    at NovaProposta
+    at ProtectedRoute (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ProtectedRoute.tsx:21:42)
+    at Route (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=df08af2b:323:16)
+    at Switch (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=df08af2b:379:17)
+    at Router
+    at Provider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-3RXG37ZK.js?v=df08af2b:38:15)
+    at TooltipProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=df08af2b:64:5)
+    at AuthProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/AuthContext.tsx:30:32)
+    at ThemeProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ThemeContext.tsx:20:33)
+    at QueryClientProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=df08af2b:2805:3)
+    at App
+printWarning @ chunk-276SZO74.js?v=df08af2b:521
+error @ chunk-276SZO74.js?v=df08af2b:505
+checkForNestedUpdates @ chunk-276SZO74.js?v=df08af2b:19665
+scheduleUpdateOnFiber @ chunk-276SZO74.js?v=df08af2b:18533
+dispatchReducerAction @ chunk-276SZO74.js?v=df08af2b:12351
+clearSimulation @ ProposalContext.tsx:439
+(anonymous) @ useProposalEffects.ts:28
+commitHookEffectListMount @ chunk-276SZO74.js?v=df08af2b:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=df08af2b:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=df08af2b:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=df08af2b:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=df08af2b:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=df08af2b:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=df08af2b:19447
+(anonymous) @ chunk-276SZO74.js?v=df08af2b:19328
+workLoop @ chunk-276SZO74.js?v=df08af2b:197
+flushWork @ chunk-276SZO74.js?v=df08af2b:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=df08af2b:384Understand this error
+apiClient.ts:166 🔐 [TOKEN MANAGER] Fresh token obtained, length: 766
+apiClient.ts:343 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…xzZX0.gyoProbPCVcW9BM82TO6wk52y8JKxbyQXdwV_6CeHyk', hasToken: true, isFormData: false}
+apiClient.ts:343 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…7is3g.janeway.replit.dev/api/alertas/notificacoes', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…xzZX0.gyoProbPCVcW9BM82TO6wk52y8JKxbyQXdwV_6CeHyk', hasToken: true, isFormData: false}
+apiClient.ts:343 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…m7is3g.janeway.replit.dev/api/origination/context', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…xzZX0.gyoProbPCVcW9BM82TO6wk52y8JKxbyQXdwV_6CeHyk', hasToken: true, isFormData: false}
+apiClient.ts:343 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…xzZX0.gyoProbPCVcW9BM82TO6wk52y8JKxbyQXdwV_6CeHyk', hasToken: true, isFormData: false}
+73ProposalContext.tsx:439 Warning: Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.
+    at ProposalForm (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/propostas/nova.tsx:35:21)
+    at main
+    at div
+    at div
+    at DashboardLayout (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/DashboardLayout.tsx:52:43)
+    at ProposalProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ProposalContext.tsx:189:36)
+    at NovaProposta
+    at ProtectedRoute (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ProtectedRoute.tsx:21:42)
+    at Route (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=df08af2b:323:16)
+    at Switch (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=df08af2b:379:17)
+    at Router
+    at Provider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-3RXG37ZK.js?v=df08af2b:38:15)
+    at TooltipProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=df08af2b:64:5)
+    at AuthProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/AuthContext.tsx:30:32)
+    at ThemeProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ThemeContext.tsx:20:33)
+    at QueryClientProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=df08af2b:2805:3)
+    at App
+printWarning @ chunk-276SZO74.js?v=df08af2b:521
+error @ chunk-276SZO74.js?v=df08af2b:505
+checkForNestedUpdates @ chunk-276SZO74.js?v=df08af2b:19665
+scheduleUpdateOnFiber @ chunk-276SZO74.js?v=df08af2b:18533
+dispatchReducerAction @ chunk-276SZO74.js?v=df08af2b:12351
+clearSimulation @ ProposalContext.tsx:439
+(anonymous) @ useProposalEffects.ts:28
+commitHookEffectListMount @ chunk-276SZO74.js?v=df08af2b:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=df08af2b:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=df08af2b:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=df08af2b:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=df08af2b:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=df08af2b:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=df08af2b:19447
+(anonymous) @ chunk-276SZO74.js?v=df08af2b:19328
+workLoop @ chunk-276SZO74.js?v=df08af2b:197
+flushWork @ chunk-276SZO74.js?v=df08af2b:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=df08af2b:384Understand this error
+AuthContext.tsx:102 🔐 [AUTH RESTORED] User profile loaded with valid token
+14ProposalContext.tsx:439 Warning: Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.
+    at ProposalForm (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/propostas/nova.tsx:35:21)
+    at main
+    at div
+    at div
+    at DashboardLayout (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/DashboardLayout.tsx:52:43)
+    at ProposalProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ProposalContext.tsx:189:36)
+    at NovaProposta
+    at ProtectedRoute (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ProtectedRoute.tsx:21:42)
+    at Route (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=df08af2b:323:16)
+    at Switch (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=df08af2b:379:17)
+    at Router
+    at Provider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-3RXG37ZK.js?v=df08af2b:38:15)
+    at TooltipProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=df08af2b:64:5)
+    at AuthProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/AuthContext.tsx:30:32)
+    at ThemeProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ThemeContext.tsx:20:33)
+    at QueryClientProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=df08af2b:2805:3)
+    at App
+printWarning @ chunk-276SZO74.js?v=df08af2b:521
+error @ chunk-276SZO74.js?v=df08af2b:505
+checkForNestedUpdates @ chunk-276SZO74.js?v=df08af2b:19665
+scheduleUpdateOnFiber @ chunk-276SZO74.js?v=df08af2b:18533
+dispatchReducerAction @ chunk-276SZO74.js?v=df08af2b:12351
+clearSimulation @ ProposalContext.tsx:439
+(anonymous) @ useProposalEffects.ts:28
+commitHookEffectListMount @ chunk-276SZO74.js?v=df08af2b:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=df08af2b:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=df08af2b:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=df08af2b:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=df08af2b:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=df08af2b:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=df08af2b:19447
+(anonymous) @ chunk-276SZO74.js?v=df08af2b:19328
+workLoop @ chunk-276SZO74.js?v=df08af2b:197
+flushWork @ chunk-276SZO74.js?v=df08af2b:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=df08af2b:384Understand this error
+apiClient.ts:263  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/alertas/notificacoes 404 (Not Found)
+fetchWithTimeout @ apiClient.ts:263
+apiClient @ apiClient.ts:371
+await in apiClient
+get @ apiClient.ts:532
+(anonymous) @ queryClient.ts:57
+fetchFn @ @tanstack_react-query.js?v=df08af2b:840
+run @ @tanstack_react-query.js?v=df08af2b:494
+start @ @tanstack_react-query.js?v=df08af2b:536
+fetch @ @tanstack_react-query.js?v=df08af2b:926
+executeFetch_fn @ @tanstack_react-query.js?v=df08af2b:2211
+onSubscribe @ @tanstack_react-query.js?v=df08af2b:1898
+subscribe @ @tanstack_react-query.js?v=df08af2b:24
+(anonymous) @ @tanstack_react-query.js?v=df08af2b:3022
+subscribeToStore @ chunk-276SZO74.js?v=df08af2b:11984
+commitHookEffectListMount @ chunk-276SZO74.js?v=df08af2b:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=df08af2b:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=df08af2b:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=df08af2b:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=df08af2b:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=df08af2b:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=df08af2b:19447
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=df08af2b:18868
+flushSyncCallbacks @ chunk-276SZO74.js?v=df08af2b:9119
+commitRootImpl @ chunk-276SZO74.js?v=df08af2b:19432
+commitRoot @ chunk-276SZO74.js?v=df08af2b:19277
+finishConcurrentRender @ chunk-276SZO74.js?v=df08af2b:18805
+performConcurrentWorkOnRoot @ chunk-276SZO74.js?v=df08af2b:18718
+workLoop @ chunk-276SZO74.js?v=df08af2b:197
+flushWork @ chunk-276SZO74.js?v=df08af2b:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=df08af2b:384Understand this error
+47ProposalContext.tsx:439 Warning: Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.
+    at ProposalForm (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/propostas/nova.tsx:35:21)
+    at main
+    at div
+    at div
+    at DashboardLayout (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/DashboardLayout.tsx:52:43)
+    at ProposalProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ProposalContext.tsx:189:36)
+    at NovaProposta
+    at ProtectedRoute (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ProtectedRoute.tsx:21:42)
+    at Route (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=df08af2b:323:16)
+    at Switch (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=df08af2b:379:17)
+    at Router
+    at Provider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-3RXG37ZK.js?v=df08af2b:38:15)
+    at TooltipProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=df08af2b:64:5)
+    at AuthProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/AuthContext.tsx:30:32)
+    at ThemeProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ThemeContext.tsx:20:33)
+    at QueryClientProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=df08af2b:2805:3)
+    at App
+printWarning @ chunk-276SZO74.js?v=df08af2b:521
+error @ chunk-276SZO74.js?v=df08af2b:505
+checkForNestedUpdates @ chunk-276SZO74.js?v=df08af2b:19665
+scheduleUpdateOnFiber @ chunk-276SZO74.js?v=df08af2b:18533
+dispatchReducerAction @ chunk-276SZO74.js?v=df08af2b:12351
+clearSimulation @ ProposalContext.tsx:439
+(anonymous) @ useProposalEffects.ts:28
+commitHookEffectListMount @ chunk-276SZO74.js?v=df08af2b:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=df08af2b:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=df08af2b:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=df08af2b:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=df08af2b:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=df08af2b:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=df08af2b:19447
+(anonymous) @ chunk-276SZO74.js?v=df08af2b:19328
+workLoop @ chunk-276SZO74.js?v=df08af2b:197
+flushWork @ chunk-276SZO74.js?v=df08af2b:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=df08af2b:384Understand this error
+AuthContext.tsx:102 🔐 [AUTH RESTORED] User profile loaded with valid token
+11ProposalContext.tsx:439 Warning: Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.
+    at ProposalForm (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/propostas/nova.tsx:35:21)
+    at main
+    at div
+    at div
+    at DashboardLayout (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/DashboardLayout.tsx:52:43)
+    at ProposalProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ProposalContext.tsx:189:36)
+    at NovaProposta
+    at ProtectedRoute (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ProtectedRoute.tsx:21:42)
+    at Route (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=df08af2b:323:16)
+    at Switch (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=df08af2b:379:17)
+    at Router
+    at Provider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-3RXG37ZK.js?v=df08af2b:38:15)
+    at TooltipProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=df08af2b:64:5)
+    at AuthProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/AuthContext.tsx:30:32)
+    at ThemeProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ThemeContext.tsx:20:33)
+    at QueryClientProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=df08af2b:2805:3)
+    at App
+printWarning @ chunk-276SZO74.js?v=df08af2b:521
+error @ chunk-276SZO74.js?v=df08af2b:505
+checkForNestedUpdates @ chunk-276SZO74.js?v=df08af2b:19665
+scheduleUpdateOnFiber @ chunk-276SZO74.js?v=df08af2b:18533
+dispatchReducerAction @ chunk-276SZO74.js?v=df08af2b:12351
+clearSimulation @ ProposalContext.tsx:439
+(anonymous) @ useProposalEffects.ts:28
+commitHookEffectListMount @ chunk-276SZO74.js?v=df08af2b:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=df08af2b:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=df08af2b:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=df08af2b:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=df08af2b:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=df08af2b:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=df08af2b:19447
+(anonymous) @ chunk-276SZO74.js?v=df08af2b:19328
+workLoop @ chunk-276SZO74.js?v=df08af2b:197
+flushWork @ chunk-276SZO74.js?v=df08af2b:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=df08af2b:384Understand this error
+chunk-276SZO74.js?v=df08af2b:521 Warning: findDOMNode is deprecated and will be removed in the next major release. Instead, add a ref directly to the element you want to reference. Learn more about using refs safely here: https://reactjs.org/link/strict-mode-find-node
+    at InputElement2 (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/react-input-mask.js?v=df08af2b:497:34)
+    at div
+    at div
+    at div
+    at _c9 (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ui/card.tsx:82:12)
+    at div
+    at _c (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ui/card.tsx:20:11)
+    at div
+    at ClientDataStep (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/propostas/ClientDataStep.tsx:92:21)
+    at div
+    at https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-DVHSTOKX.js?v=df08af2b:42:13
+    at Presence (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-ED5C5U6M.js?v=df08af2b:24:11)
+    at https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tabs.js?v=df08af2b:176:13
+    at _c5 (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ui/tabs.tsx:72:12)
+    at div
+    at div
+    at https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-DVHSTOKX.js?v=df08af2b:42:13
+    at Provider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-3RXG37ZK.js?v=df08af2b:38:15)
+    at https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tabs.js?v=df08af2b:54:7
+    at ProposalForm (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/propostas/nova.tsx:35:21)
+    at main
+    at div
+    at div
+    at DashboardLayout (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/DashboardLayout.tsx:52:43)
+    at ProposalProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ProposalContext.tsx:189:36)
+    at NovaProposta
+    at ProtectedRoute (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ProtectedRoute.tsx:21:42)
+    at Route (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=df08af2b:323:16)
+    at Switch (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=df08af2b:379:17)
+    at Router
+    at Provider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-3RXG37ZK.js?v=df08af2b:38:15)
+    at TooltipProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=df08af2b:64:5)
+    at AuthProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/AuthContext.tsx:30:32)
+    at ThemeProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ThemeContext.tsx:20:33)
+    at QueryClientProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=df08af2b:2805:3)
+    at App
+printWarning @ chunk-276SZO74.js?v=df08af2b:521
+error @ chunk-276SZO74.js?v=df08af2b:505
+findDOMNode @ chunk-276SZO74.js?v=df08af2b:21379
+InputElement2._this.getInputDOMNode @ react-input-mask.js?v=df08af2b:523
+componentDidMount @ react-input-mask.js?v=df08af2b:821
+commitLayoutEffectOnFiber @ chunk-276SZO74.js?v=df08af2b:17030
+commitLayoutMountEffects_complete @ chunk-276SZO74.js?v=df08af2b:17980
+commitLayoutEffects_begin @ chunk-276SZO74.js?v=df08af2b:17969
+commitLayoutEffects @ chunk-276SZO74.js?v=df08af2b:17920
+commitRootImpl @ chunk-276SZO74.js?v=df08af2b:19353
+commitRoot @ chunk-276SZO74.js?v=df08af2b:19277
+finishConcurrentRender @ chunk-276SZO74.js?v=df08af2b:18805
+performConcurrentWorkOnRoot @ chunk-276SZO74.js?v=df08af2b:18718
+workLoop @ chunk-276SZO74.js?v=df08af2b:197
+flushWork @ chunk-276SZO74.js?v=df08af2b:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=df08af2b:384Understand this error
+716ProposalContext.tsx:439 Warning: Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.
+    at ProposalForm (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/propostas/nova.tsx:35:21)
+    at main
+    at div
+    at div
+    at DashboardLayout (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/DashboardLayout.tsx:52:43)
+    at ProposalProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ProposalContext.tsx:189:36)
+    at NovaProposta
+    at ProtectedRoute (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ProtectedRoute.tsx:21:42)
+    at Route (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=df08af2b:323:16)
+    at Switch (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=df08af2b:379:17)
+    at Router
+    at Provider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-3RXG37ZK.js?v=df08af2b:38:15)
+    at TooltipProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=df08af2b:64:5)
+    at AuthProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/AuthContext.tsx:30:32)
+    at ThemeProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ThemeContext.tsx:20:33)
+    at QueryClientProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=df08af2b:2805:3)
+    at App
+printWarning @ chunk-276SZO74.js?v=df08af2b:521
+error @ chunk-276SZO74.js?v=df08af2b:505
+checkForNestedUpdates @ chunk-276SZO74.js?v=df08af2b:19665
+scheduleUpdateOnFiber @ chunk-276SZO74.js?v=df08af2b:18533
+dispatchReducerAction @ chunk-276SZO74.js?v=df08af2b:12351
+clearSimulation @ ProposalContext.tsx:439
+(anonymous) @ useProposalEffects.ts:28
+commitHookEffectListMount @ chunk-276SZO74.js?v=df08af2b:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=df08af2b:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=df08af2b:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=df08af2b:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=df08af2b:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=df08af2b:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=df08af2b:19447
+(anonymous) @ chunk-276SZO74.js?v=df08af2b:19328
+workLoop @ chunk-276SZO74.js?v=df08af2b:197
+flushWork @ chunk-276SZO74.js?v=df08af2b:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=df08af2b:384Understand this error
+apiClient.ts:343 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…7is3g.janeway.replit.dev/api/alertas/notificacoes', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…xzZX0.gyoProbPCVcW9BM82TO6wk52y8JKxbyQXdwV_6CeHyk', hasToken: true, isFormData: false}
+31ProposalContext.tsx:439 Warning: Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.
+    at ProposalForm (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/propostas/nova.tsx:35:21)
+    at main
+    at div
+    at div
+    at DashboardLayout (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/DashboardLayout.tsx:52:43)
+    at ProposalProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ProposalContext.tsx:189:36)
+    at NovaProposta
+    at ProtectedRoute (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ProtectedRoute.tsx:21:42)
+    at Route (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=df08af2b:323:16)
+    at Switch (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=df08af2b:379:17)
+    at Router
+    at Provider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-3RXG37ZK.js?v=df08af2b:38:15)
+    at TooltipProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=df08af2b:64:5)
+    at AuthProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/AuthContext.tsx:30:32)
+    at ThemeProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ThemeContext.tsx:20:33)
+    at QueryClientProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=df08af2b:2805:3)
+    at App
+printWarning @ chunk-276SZO74.js?v=df08af2b:521
+error @ chunk-276SZO74.js?v=df08af2b:505
+checkForNestedUpdates @ chunk-276SZO74.js?v=df08af2b:19665
+scheduleUpdateOnFiber @ chunk-276SZO74.js?v=df08af2b:18533
+dispatchReducerAction @ chunk-276SZO74.js?v=df08af2b:12351
+clearSimulation @ ProposalContext.tsx:439
+(anonymous) @ useProposalEffects.ts:28
+commitHookEffectListMount @ chunk-276SZO74.js?v=df08af2b:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=df08af2b:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=df08af2b:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=df08af2b:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=df08af2b:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=df08af2b:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=df08af2b:19447
+(anonymous) @ chunk-276SZO74.js?v=df08af2b:19328
+workLoop @ chunk-276SZO74.js?v=df08af2b:197
+flushWork @ chunk-276SZO74.js?v=df08af2b:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=df08af2b:384Understand this error
+apiClient.ts:263  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/alertas/notificacoes 404 (Not Found)
+fetchWithTimeout @ apiClient.ts:263
+apiClient @ apiClient.ts:371
+await in apiClient
+get @ apiClient.ts:532
+(anonymous) @ queryClient.ts:57
+fetchFn @ @tanstack_react-query.js?v=df08af2b:840
+run @ @tanstack_react-query.js?v=df08af2b:494
+start @ @tanstack_react-query.js?v=df08af2b:536
+fetch @ @tanstack_react-query.js?v=df08af2b:926
+executeFetch_fn @ @tanstack_react-query.js?v=df08af2b:2211
+(anonymous) @ @tanstack_react-query.js?v=df08af2b:2245Understand this error
+863ProposalContext.tsx:439 Warning: Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.
+    at ProposalForm (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/propostas/nova.tsx:35:21)
+    at main
+    at div
+    at div
+    at DashboardLayout (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/DashboardLayout.tsx:52:43)
+    at ProposalProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ProposalContext.tsx:189:36)
+    at NovaProposta
+    at ProtectedRoute (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ProtectedRoute.tsx:21:42)
+    at Route (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=df08af2b:323:16)
+    at Switch (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=df08af2b:379:17)
+    at Router
+    at Provider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-3RXG37ZK.js?v=df08af2b:38:15)
+    at TooltipProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=df08af2b:64:5)
+    at AuthProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/AuthContext.tsx:30:32)
+    at ThemeProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ThemeContext.tsx:20:33)
+    at QueryClientProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=df08af2b:2805:3)
+    at App
+printWarning @ chunk-276SZO74.js?v=df08af2b:521
+error @ chunk-276SZO74.js?v=df08af2b:505
+checkForNestedUpdates @ chunk-276SZO74.js?v=df08af2b:19665
+scheduleUpdateOnFiber @ chunk-276SZO74.js?v=df08af2b:18533
+dispatchReducerAction @ chunk-276SZO74.js?v=df08af2b:12351
+clearSimulation @ ProposalContext.tsx:439
+(anonymous) @ useProposalEffects.ts:28
+commitHookEffectListMount @ chunk-276SZO74.js?v=df08af2b:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=df08af2b:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=df08af2b:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=df08af2b:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=df08af2b:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=df08af2b:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=df08af2b:19447
+(anonymous) @ chunk-276SZO74.js?v=df08af2b:19328
+workLoop @ chunk-276SZO74.js?v=df08af2b:197
+flushWork @ chunk-276SZO74.js?v=df08af2b:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=df08af2b:384Understand this error
+apiClient.ts:343 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…7is3g.janeway.replit.dev/api/alertas/notificacoes', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…xzZX0.gyoProbPCVcW9BM82TO6wk52y8JKxbyQXdwV_6CeHyk', hasToken: true, isFormData: false}
+39ProposalContext.tsx:439 Warning: Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.
+    at ProposalForm (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/propostas/nova.tsx:35:21)
+    at main
+    at div
+    at div
+    at DashboardLayout (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/DashboardLayout.tsx:52:43)
+    at ProposalProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ProposalContext.tsx:189:36)
+    at NovaProposta
+    at ProtectedRoute (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ProtectedRoute.tsx:21:42)
+    at Route (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=df08af2b:323:16)
+    at Switch (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=df08af2b:379:17)
+    at Router
+    at Provider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-3RXG37ZK.js?v=df08af2b:38:15)
+    at TooltipProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=df08af2b:64:5)
+    at AuthProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/AuthContext.tsx:30:32)
+    at ThemeProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ThemeContext.tsx:20:33)
+    at QueryClientProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=df08af2b:2805:3)
+    at App
+printWarning @ chunk-276SZO74.js?v=df08af2b:521
+error @ chunk-276SZO74.js?v=df08af2b:505
+checkForNestedUpdates @ chunk-276SZO74.js?v=df08af2b:19665
+scheduleUpdateOnFiber @ chunk-276SZO74.js?v=df08af2b:18533
+dispatchReducerAction @ chunk-276SZO74.js?v=df08af2b:12351
+clearSimulation @ ProposalContext.tsx:439
+(anonymous) @ useProposalEffects.ts:28
+commitHookEffectListMount @ chunk-276SZO74.js?v=df08af2b:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=df08af2b:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=df08af2b:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=df08af2b:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=df08af2b:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=df08af2b:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=df08af2b:19447
+(anonymous) @ chunk-276SZO74.js?v=df08af2b:19328
+workLoop @ chunk-276SZO74.js?v=df08af2b:197
+flushWork @ chunk-276SZO74.js?v=df08af2b:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=df08af2b:384Understand this error
+apiClient.ts:263  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/alertas/notificacoes 404 (Not Found)
+fetchWithTimeout @ apiClient.ts:263
+apiClient @ apiClient.ts:371
+await in apiClient
+get @ apiClient.ts:532
+(anonymous) @ queryClient.ts:57
+fetchFn @ @tanstack_react-query.js?v=df08af2b:840
+run @ @tanstack_react-query.js?v=df08af2b:494
+start @ @tanstack_react-query.js?v=df08af2b:536
+fetch @ @tanstack_react-query.js?v=df08af2b:926
+executeFetch_fn @ @tanstack_react-query.js?v=df08af2b:2211
+(anonymous) @ @tanstack_react-query.js?v=df08af2b:2245Understand this error
+822ProposalContext.tsx:439 Warning: Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.
+    at ProposalForm (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/propostas/nova.tsx:35:21)
+    at main
+    at div
+    at div
+    at DashboardLayout (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/DashboardLayout.tsx:52:43)
+    at ProposalProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ProposalContext.tsx:189:36)
+    at NovaProposta
+    at ProtectedRoute (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ProtectedRoute.tsx:21:42)
+    at Route (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=df08af2b:323:16)
+    at Switch (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=df08af2b:379:17)
+    at Router
+    at Provider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-3RXG37ZK.js?v=df08af2b:38:15)
+    at TooltipProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=df08af2b:64:5)
+    at AuthProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/AuthContext.tsx:30:32)
+    at ThemeProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ThemeContext.tsx:20:33)
+    at QueryClientProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=df08af2b:2805:3)
+    at App
+printWarning @ chunk-276SZO74.js?v=df08af2b:521
+error @ chunk-276SZO74.js?v=df08af2b:505
+checkForNestedUpdates @ chunk-276SZO74.js?v=df08af2b:19665
+scheduleUpdateOnFiber @ chunk-276SZO74.js?v=df08af2b:18533
+dispatchReducerAction @ chunk-276SZO74.js?v=df08af2b:12351
+clearSimulation @ ProposalContext.tsx:439
+(anonymous) @ useProposalEffects.ts:28
+commitHookEffectListMount @ chunk-276SZO74.js?v=df08af2b:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=df08af2b:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=df08af2b:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=df08af2b:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=df08af2b:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=df08af2b:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=df08af2b:19447
+(anonymous) @ chunk-276SZO74.js?v=df08af2b:19328
+workLoop @ chunk-276SZO74.js?v=df08af2b:197
+flushWork @ chunk-276SZO74.js?v=df08af2b:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=df08af2b:384Understand this error
+apiClient.ts:343 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…7is3g.janeway.replit.dev/api/alertas/notificacoes', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…xzZX0.gyoProbPCVcW9BM82TO6wk52y8JKxbyQXdwV_6CeHyk', hasToken: true, isFormData: false}
+22ProposalContext.tsx:439 Warning: Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.
+    at ProposalForm (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/propostas/nova.tsx:35:21)
+    at main
+    at div
+    at div
+    at DashboardLayout (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/DashboardLayout.tsx:52:43)
+    at ProposalProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ProposalContext.tsx:189:36)
+    at NovaProposta
+    at ProtectedRoute (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ProtectedRoute.tsx:21:42)
+    at Route (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=df08af2b:323:16)
+    at Switch (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=df08af2b:379:17)
+    at Router
+    at Provider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-3RXG37ZK.js?v=df08af2b:38:15)
+    at TooltipProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=df08af2b:64:5)
+    at AuthProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/AuthContext.tsx:30:32)
+    at ThemeProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ThemeContext.tsx:20:33)
+    at QueryClientProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=df08af2b:2805:3)
+    at App
+printWarning @ chunk-276SZO74.js?v=df08af2b:521
+error @ chunk-276SZO74.js?v=df08af2b:505
+checkForNestedUpdates @ chunk-276SZO74.js?v=df08af2b:19665
+scheduleUpdateOnFiber @ chunk-276SZO74.js?v=df08af2b:18533
+dispatchReducerAction @ chunk-276SZO74.js?v=df08af2b:12351
+clearSimulation @ ProposalContext.tsx:439
+(anonymous) @ useProposalEffects.ts:28
+commitHookEffectListMount @ chunk-276SZO74.js?v=df08af2b:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=df08af2b:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=df08af2b:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=df08af2b:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=df08af2b:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=df08af2b:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=df08af2b:19447
+(anonymous) @ chunk-276SZO74.js?v=df08af2b:19328
+workLoop @ chunk-276SZO74.js?v=df08af2b:197
+flushWork @ chunk-276SZO74.js?v=df08af2b:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=df08af2b:384Understand this error
+apiClient.ts:263  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/alertas/notificacoes 404 (Not Found)
+fetchWithTimeout @ apiClient.ts:263
+apiClient @ apiClient.ts:371
+await in apiClient
+get @ apiClient.ts:532
+(anonymous) @ queryClient.ts:57
+fetchFn @ @tanstack_react-query.js?v=df08af2b:840
+run @ @tanstack_react-query.js?v=df08af2b:494
+start @ @tanstack_react-query.js?v=df08af2b:536
+fetch @ @tanstack_react-query.js?v=df08af2b:926
+executeFetch_fn @ @tanstack_react-query.js?v=df08af2b:2211
+(anonymous) @ @tanstack_react-query.js?v=df08af2b:2245Understand this error
+152ProposalContext.tsx:439 Warning: Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.
+    at ProposalForm (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/propostas/nova.tsx:35:21)
+    at main
+    at div
+    at div
+    at DashboardLayout (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/DashboardLayout.tsx:52:43)
+    at ProposalProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ProposalContext.tsx:189:36)
+    at NovaProposta
+    at ProtectedRoute (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ProtectedRoute.tsx:21:42)
+    at Route (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=df08af2b:323:16)
+    at Switch (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=df08af2b:379:17)
+    at Router
+    at Provider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-3RXG37ZK.js?v=df08af2b:38:15)
+    at TooltipProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=df08af2b:64:5)
+    at AuthProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/AuthContext.tsx:30:32)
+    at ThemeProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ThemeContext.tsx:20:33)
+    at QueryClientProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=df08af2b:2805:3)
+    at App
+printWarning @ chunk-276SZO74.js?v=df08af2b:521
+error @ chunk-276SZO74.js?v=df08af2b:505
+checkForNestedUpdates @ chunk-276SZO74.js?v=df08af2b:19665
+scheduleUpdateOnFiber @ chunk-276SZO74.js?v=df08af2b:18533
+dispatchReducerAction @ chunk-276SZO74.js?v=df08af2b:12351
+clearSimulation @ ProposalContext.tsx:439
+(anonymous) @ useProposalEffects.ts:28
+commitHookEffectListMount @ chunk-276SZO74.js?v=df08af2b:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=df08af2b:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=df08af2b:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=df08af2b:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=df08af2b:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=df08af2b:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=df08af2b:19447
+(anonymous) @ chunk-276SZO74.js?v=df08af2b:19328
+workLoop @ chunk-276SZO74.js?v=df08af2b:197
+flushWork @ chunk-276SZO74.js?v=df08af2b:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=df08af2b:384Understand this error
+useIdleTimer.ts:108 🔍 [IDLE TIMER] Tab became hidden, timer continues
+136ProposalContext.tsx:439 Warning: Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.
+    at ProposalForm (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/propostas/nova.tsx:35:21)
+    at main
+    at div
+    at div
+    at DashboardLayout (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/DashboardLayout.tsx:52:43)
+    at ProposalProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ProposalContext.tsx:189:36)
+    at NovaProposta
+    at ProtectedRoute (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ProtectedRoute.tsx:21:42)
+    at Route (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=df08af2b:323:16)
+    at Switch (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=df08af2b:379:17)
+    at Router
+    at Provider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-3RXG37ZK.js?v=df08af2b:38:15)
+    at TooltipProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=df08af2b:64:5)
+    at AuthProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/AuthContext.tsx:30:32)
+    at ThemeProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ThemeContext.tsx:20:33)
+    at QueryClientProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=df08af2b:2805:3)
+    at App
+printWarning @ chunk-276SZO74.js?v=df08af2b:521
+error @ chunk-276SZO74.js?v=df08af2b:505
+checkForNestedUpdates @ chunk-276SZO74.js?v=df08af2b:19665
+scheduleUpdateOnFiber @ chunk-276SZO74.js?v=df08af2b:18533
+dispatchReducerAction @ chunk-276SZO74.js?v=df08af2b:12351
+clearSimulation @ ProposalContext.tsx:439
+(anonymous) @ useProposalEffects.ts:28
+commitHookEffectListMount @ chunk-276SZO74.js?v=df08af2b:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=df08af2b:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=df08af2b:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=df08af2b:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=df08af2b:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=df08af2b:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=df08af2b:19447
+(anonymous) @ chunk-276SZO74.js?v=df08af2b:19328
+workLoop @ chunk-276SZO74.js?v=df08af2b:197
+flushWork @ chunk-276SZO74.js?v=df08af2b:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=df08af2b:384Understand this error
+apiClient.ts:343 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…7is3g.janeway.replit.dev/api/alertas/notificacoes', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…xzZX0.gyoProbPCVcW9BM82TO6wk52y8JKxbyQXdwV_6CeHyk', hasToken: true, isFormData: false}
+AuthContext.tsx:170 🔐 [AUTH EVENT] SIGNED_IN {hasSession: true, tokenLength: 766}
+apiClient.ts:343 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…xzZX0.gyoProbPCVcW9BM82TO6wk52y8JKxbyQXdwV_6CeHyk', hasToken: true, isFormData: false}
+7ProposalContext.tsx:439 Warning: Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.
+    at ProposalForm (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/propostas/nova.tsx:35:21)
+    at main
+    at div
+    at div
+    at DashboardLayout (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/DashboardLayout.tsx:52:43)
+    at ProposalProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ProposalContext.tsx:189:36)
+    at NovaProposta
+    at ProtectedRoute (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ProtectedRoute.tsx:21:42)
+    at Route (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=df08af2b:323:16)
+    at Switch (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=df08af2b:379:17)
+    at Router
+    at Provider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-3RXG37ZK.js?v=df08af2b:38:15)
+    at TooltipProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=df08af2b:64:5)
+    at AuthProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/AuthContext.tsx:30:32)
+    at ThemeProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ThemeContext.tsx:20:33)
+    at QueryClientProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=df08af2b:2805:3)
+    at App
+printWarning @ chunk-276SZO74.js?v=df08af2b:521
+error @ chunk-276SZO74.js?v=df08af2b:505
+checkForNestedUpdates @ chunk-276SZO74.js?v=df08af2b:19665
+scheduleUpdateOnFiber @ chunk-276SZO74.js?v=df08af2b:18533
+dispatchReducerAction @ chunk-276SZO74.js?v=df08af2b:12351
+clearSimulation @ ProposalContext.tsx:439
+(anonymous) @ useProposalEffects.ts:28
+commitHookEffectListMount @ chunk-276SZO74.js?v=df08af2b:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=df08af2b:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=df08af2b:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=df08af2b:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=df08af2b:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=df08af2b:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=df08af2b:19447
+(anonymous) @ chunk-276SZO74.js?v=df08af2b:19328
+workLoop @ chunk-276SZO74.js?v=df08af2b:197
+flushWork @ chunk-276SZO74.js?v=df08af2b:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=df08af2b:384Understand this error
+AuthContext.tsx:102 🔐 [AUTH RESTORED] User profile loaded with valid token
+AuthContext.tsx:103 Warning: Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.
+printWarning @ chunk-276SZO74.js?v=df08af2b:521
+error @ chunk-276SZO74.js?v=df08af2b:505
+checkForNestedUpdates @ chunk-276SZO74.js?v=df08af2b:19665
+scheduleUpdateOnFiber @ chunk-276SZO74.js?v=df08af2b:18533
+dispatchSetState @ chunk-276SZO74.js?v=df08af2b:12403
+fetchUserProfile @ AuthContext.tsx:103
+await in fetchUserProfile
+(anonymous) @ AuthContext.tsx:179
+(anonymous) @ @supabase_supabase-js.js?v=df08af2b:6688
+_notifyAllSubscribers @ @supabase_supabase-js.js?v=df08af2b:6686
+_recoverAndRefresh @ @supabase_supabase-js.js?v=df08af2b:6629
+await in _recoverAndRefresh
+(anonymous) @ @supabase_supabase-js.js?v=df08af2b:6901
+(anonymous) @ @supabase_supabase-js.js?v=df08af2b:5932
+(anonymous) @ @supabase_supabase-js.js?v=df08af2b:5049Understand this error
+14ProposalContext.tsx:439 Warning: Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.
+    at ProposalForm (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/propostas/nova.tsx:35:21)
+    at main
+    at div
+    at div
+    at DashboardLayout (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/DashboardLayout.tsx:52:43)
+    at ProposalProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ProposalContext.tsx:189:36)
+    at NovaProposta
+    at ProtectedRoute (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ProtectedRoute.tsx:21:42)
+    at Route (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=df08af2b:323:16)
+    at Switch (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=df08af2b:379:17)
+    at Router
+    at Provider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-3RXG37ZK.js?v=df08af2b:38:15)
+    at TooltipProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=df08af2b:64:5)
+    at AuthProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/AuthContext.tsx:30:32)
+    at ThemeProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ThemeContext.tsx:20:33)
+    at QueryClientProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=df08af2b:2805:3)
+    at App
+printWarning @ chunk-276SZO74.js?v=df08af2b:521
+error @ chunk-276SZO74.js?v=df08af2b:505
+checkForNestedUpdates @ chunk-276SZO74.js?v=df08af2b:19665
+scheduleUpdateOnFiber @ chunk-276SZO74.js?v=df08af2b:18533
+dispatchReducerAction @ chunk-276SZO74.js?v=df08af2b:12351
+clearSimulation @ ProposalContext.tsx:439
+(anonymous) @ useProposalEffects.ts:28
+commitHookEffectListMount @ chunk-276SZO74.js?v=df08af2b:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=df08af2b:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=df08af2b:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=df08af2b:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=df08af2b:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=df08af2b:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=df08af2b:19447
+(anonymous) @ chunk-276SZO74.js?v=df08af2b:19328
+workLoop @ chunk-276SZO74.js?v=df08af2b:197
+flushWork @ chunk-276SZO74.js?v=df08af2b:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=df08af2b:384Understand this error
+apiClient.ts:263  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/alertas/notificacoes 404 (Not Found)
+fetchWithTimeout @ apiClient.ts:263
+apiClient @ apiClient.ts:371
+await in apiClient
+get @ apiClient.ts:532
+(anonymous) @ queryClient.ts:57
+fetchFn @ @tanstack_react-query.js?v=df08af2b:840
+run @ @tanstack_react-query.js?v=df08af2b:494
+start @ @tanstack_react-query.js?v=df08af2b:536
+fetch @ @tanstack_react-query.js?v=df08af2b:926
+executeFetch_fn @ @tanstack_react-query.js?v=df08af2b:2211
+fetch @ @tanstack_react-query.js?v=df08af2b:2011
+refetch @ @tanstack_react-query.js?v=df08af2b:2001
+onFocus @ @tanstack_react-query.js?v=df08af2b:749
+(anonymous) @ @tanstack_react-query.js?v=df08af2b:1112
+(anonymous) @ @tanstack_react-query.js?v=df08af2b:1111
+batch @ @tanstack_react-query.js?v=df08af2b:583
+onFocus @ @tanstack_react-query.js?v=df08af2b:1110
+(anonymous) @ @tanstack_react-query.js?v=df08af2b:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=df08af2b:313
+onFocus @ @tanstack_react-query.js?v=df08af2b:312
+(anonymous) @ @tanstack_react-query.js?v=df08af2b:299
+listener @ @tanstack_react-query.js?v=df08af2b:270Understand this error
+38ProposalContext.tsx:439 Warning: Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.
+    at ProposalForm (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/propostas/nova.tsx:35:21)
+    at main
+    at div
+    at div
+    at DashboardLayout (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/DashboardLayout.tsx:52:43)
+    at ProposalProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ProposalContext.tsx:189:36)
+    at NovaProposta
+    at ProtectedRoute (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ProtectedRoute.tsx:21:42)
+    at Route (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=df08af2b:323:16)
+    at Switch (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=df08af2b:379:17)
+    at Router
+    at Provider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-3RXG37ZK.js?v=df08af2b:38:15)
+    at TooltipProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=df08af2b:64:5)
+    at AuthProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/AuthContext.tsx:30:32)
+    at ThemeProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ThemeContext.tsx:20:33)
+    at QueryClientProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=df08af2b:2805:3)
+    at App
+printWarning @ chunk-276SZO74.js?v=df08af2b:521
+error @ chunk-276SZO74.js?v=df08af2b:505
+checkForNestedUpdates @ chunk-276SZO74.js?v=df08af2b:19665
+scheduleUpdateOnFiber @ chunk-276SZO74.js?v=df08af2b:18533
+dispatchReducerAction @ chunk-276SZO74.js?v=df08af2b:12351
+clearSimulation @ ProposalContext.tsx:439
+(anonymous) @ useProposalEffects.ts:28
+commitHookEffectListMount @ chunk-276SZO74.js?v=df08af2b:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=df08af2b:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=df08af2b:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=df08af2b:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=df08af2b:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=df08af2b:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=df08af2b:19447
+(anonymous) @ chunk-276SZO74.js?v=df08af2b:19328
+workLoop @ chunk-276SZO74.js?v=df08af2b:197
+flushWork @ chunk-276SZO74.js?v=df08af2b:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=df08af2b:384Understand this error
+useIdleTimer.ts:108 🔍 [IDLE TIMER] Tab became hidden, timer continues
+2243ProposalContext.tsx:439 Warning: Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.
+    at ProposalForm (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/propostas/nova.tsx:35:21)
+    at main
+    at div
+    at div
+    at DashboardLayout (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/DashboardLayout.tsx:52:43)
+    at ProposalProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ProposalContext.tsx:189:36)
+    at NovaProposta
+    at ProtectedRoute (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ProtectedRoute.tsx:21:42)
+    at Route (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=df08af2b:323:16)
+    at Switch (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=df08af2b:379:17)
+    at Router
+    at Provider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-3RXG37ZK.js?v=df08af2b:38:15)
+    at TooltipProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=df08af2b:64:5)
+    at AuthProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/AuthContext.tsx:30:32)
+    at ThemeProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ThemeContext.tsx:20:33)
+    at QueryClientProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=df08af2b:2805:3)
+    at App
+printWarning @ chunk-276SZO74.js?v=df08af2b:521
+error @ chunk-276SZO74.js?v=df08af2b:505
+checkForNestedUpdates @ chunk-276SZO74.js?v=df08af2b:19665
+scheduleUpdateOnFiber @ chunk-276SZO74.js?v=df08af2b:18533
+dispatchReducerAction @ chunk-276SZO74.js?v=df08af2b:12351
+clearSimulation @ ProposalContext.tsx:439
+(anonymous) @ useProposalEffects.ts:28
+commitHookEffectListMount @ chunk-276SZO74.js?v=df08af2b:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=df08af2b:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=df08af2b:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=df08af2b:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=df08af2b:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=df08af2b:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=df08af2b:19447
+(anonymous) @ chunk-276SZO74.js?v=df08af2b:19328
+workLoop @ chunk-276SZO74.js?v=df08af2b:197
+flushWork @ chunk-276SZO74.js?v=df08af2b:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=df08af2b:384Understand this error
+apiClient.ts:343 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…7is3g.janeway.replit.dev/api/alertas/notificacoes', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…xzZX0.gyoProbPCVcW9BM82TO6wk52y8JKxbyQXdwV_6CeHyk', hasToken: true, isFormData: false}
+AuthContext.tsx:170 🔐 [AUTH EVENT] SIGNED_IN {hasSession: true, tokenLength: 766}
+apiClient.ts:343 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…xzZX0.gyoProbPCVcW9BM82TO6wk52y8JKxbyQXdwV_6CeHyk', hasToken: true, isFormData: false}
+4ProposalContext.tsx:439 Warning: Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.
+    at ProposalForm (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/propostas/nova.tsx:35:21)
+    at main
+    at div
+    at div
+    at DashboardLayout (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/DashboardLayout.tsx:52:43)
+    at ProposalProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ProposalContext.tsx:189:36)
+    at NovaProposta
+    at ProtectedRoute (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ProtectedRoute.tsx:21:42)
+    at Route (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=df08af2b:323:16)
+    at Switch (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=df08af2b:379:17)
+    at Router
+    at Provider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-3RXG37ZK.js?v=df08af2b:38:15)
+    at TooltipProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=df08af2b:64:5)
+    at AuthProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/AuthContext.tsx:30:32)
+    at ThemeProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ThemeContext.tsx:20:33)
+    at QueryClientProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=df08af2b:2805:3)
+    at App
+printWarning @ chunk-276SZO74.js?v=df08af2b:521
+error @ chunk-276SZO74.js?v=df08af2b:505
+checkForNestedUpdates @ chunk-276SZO74.js?v=df08af2b:19665
+scheduleUpdateOnFiber @ chunk-276SZO74.js?v=df08af2b:18533
+dispatchReducerAction @ chunk-276SZO74.js?v=df08af2b:12351
+clearSimulation @ ProposalContext.tsx:439
+(anonymous) @ useProposalEffects.ts:28
+commitHookEffectListMount @ chunk-276SZO74.js?v=df08af2b:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=df08af2b:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=df08af2b:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=df08af2b:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=df08af2b:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=df08af2b:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=df08af2b:19447
+(anonymous) @ chunk-276SZO74.js?v=df08af2b:19328
+workLoop @ chunk-276SZO74.js?v=df08af2b:197
+flushWork @ chunk-276SZO74.js?v=df08af2b:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=df08af2b:384Understand this error
+AuthContext.tsx:102 🔐 [AUTH RESTORED] User profile loaded with valid token
+12ProposalContext.tsx:439 Warning: Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.
+    at ProposalForm (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/propostas/nova.tsx:35:21)
+    at main
+    at div
+    at div
+    at DashboardLayout (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/DashboardLayout.tsx:52:43)
+    at ProposalProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ProposalContext.tsx:189:36)
+    at NovaProposta
+    at ProtectedRoute (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ProtectedRoute.tsx:21:42)
+    at Route (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=df08af2b:323:16)
+    at Switch (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=df08af2b:379:17)
+    at Router
+    at Provider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-3RXG37ZK.js?v=df08af2b:38:15)
+    at TooltipProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=df08af2b:64:5)
+    at AuthProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/AuthContext.tsx:30:32)
+    at ThemeProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ThemeContext.tsx:20:33)
+    at QueryClientProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=df08af2b:2805:3)
+    at App
+printWarning @ chunk-276SZO74.js?v=df08af2b:521
+error @ chunk-276SZO74.js?v=df08af2b:505
+checkForNestedUpdates @ chunk-276SZO74.js?v=df08af2b:19665
+scheduleUpdateOnFiber @ chunk-276SZO74.js?v=df08af2b:18533
+dispatchReducerAction @ chunk-276SZO74.js?v=df08af2b:12351
+clearSimulation @ ProposalContext.tsx:439
+(anonymous) @ useProposalEffects.ts:28
+commitHookEffectListMount @ chunk-276SZO74.js?v=df08af2b:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=df08af2b:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=df08af2b:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=df08af2b:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=df08af2b:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=df08af2b:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=df08af2b:19447
+(anonymous) @ chunk-276SZO74.js?v=df08af2b:19328
+workLoop @ chunk-276SZO74.js?v=df08af2b:197
+flushWork @ chunk-276SZO74.js?v=df08af2b:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=df08af2b:384Understand this error
+apiClient.ts:263  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/alertas/notificacoes 404 (Not Found)
+fetchWithTimeout @ apiClient.ts:263
+apiClient @ apiClient.ts:371
+await in apiClient
+get @ apiClient.ts:532
+(anonymous) @ queryClient.ts:57
+fetchFn @ @tanstack_react-query.js?v=df08af2b:840
+run @ @tanstack_react-query.js?v=df08af2b:494
+start @ @tanstack_react-query.js?v=df08af2b:536
+fetch @ @tanstack_react-query.js?v=df08af2b:926
+executeFetch_fn @ @tanstack_react-query.js?v=df08af2b:2211
+fetch @ @tanstack_react-query.js?v=df08af2b:2011
+refetch @ @tanstack_react-query.js?v=df08af2b:2001
+onFocus @ @tanstack_react-query.js?v=df08af2b:749
+(anonymous) @ @tanstack_react-query.js?v=df08af2b:1112
+(anonymous) @ @tanstack_react-query.js?v=df08af2b:1111
+batch @ @tanstack_react-query.js?v=df08af2b:583
+onFocus @ @tanstack_react-query.js?v=df08af2b:1110
+(anonymous) @ @tanstack_react-query.js?v=df08af2b:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=df08af2b:313
+onFocus @ @tanstack_react-query.js?v=df08af2b:312
+(anonymous) @ @tanstack_react-query.js?v=df08af2b:299
+listener @ @tanstack_react-query.js?v=df08af2b:270Understand this error
+267ProposalContext.tsx:439 Warning: Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.
+    at ProposalForm (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/pages/propostas/nova.tsx:35:21)
+    at main
+    at div
+    at div
+    at DashboardLayout (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/DashboardLayout.tsx:52:43)
+    at ProposalProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ProposalContext.tsx:189:36)
+    at NovaProposta
+    at ProtectedRoute (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/components/ProtectedRoute.tsx:21:42)
+    at Route (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=df08af2b:323:16)
+    at Switch (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=df08af2b:379:17)
+    at Router
+    at Provider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-3RXG37ZK.js?v=df08af2b:38:15)
+    at TooltipProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=df08af2b:64:5)
+    at AuthProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/AuthContext.tsx:30:32)
+    at ThemeProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/src/contexts/ThemeContext.tsx:20:33)
+    at QueryClientProvider (https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=df08af2b:2805:3)
+    at App
