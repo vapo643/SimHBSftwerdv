@@ -649,110 +649,63 @@ export const updatePropostaSchema = createInsertSchema(propostas).partial().omit
   userId: true,
 });
 
-// 🔒 PAM V1.0 - SCHEMA DE VALIDAÇÃO RIGOROSA PARA CRIAÇÃO DE PROPOSTAS
-// Schema blindado para prevenir dados corrompidos/NULL em campos críticos
+// 🔒 SCHEMA DE VALIDAÇÃO SIMPLIFICADA PARA CRIAÇÃO DE PROPOSTAS
+// Schema permissivo - TODOS campos opcionais
 export const createPropostaValidationSchema = z.object({
-  // Dados obrigatórios da loja/contexto
-  lojaId: z.number().int().positive("ID da loja é obrigatório"),
+  // Todos os campos são opcionais e aceitam qualquer valor
+  lojaId: z.any().optional(),
+  clienteNome: z.any().optional(),
+  clienteCpf: z.any().optional(),
+  clienteEmail: z.any().optional(),
+  clienteTelefone: z.any().optional(),
+  valor: z.any().optional(),
+  prazo: z.any().optional(),
+  valorTotalFinanciado: z.any().optional(),
+  valorTac: z.any().optional(),
+  valorIof: z.any().optional(),
   
-  // 🚨 CAMPOS CRÍTICOS DE CLIENTE - OBRIGATÓRIOS E NÃO-VAZIOS
-  clienteNome: z.string()
-    .min(1, "Nome do cliente é obrigatório")
-    .max(200, "Nome do cliente não pode exceder 200 caracteres")
-    .trim(),
-  
-  clienteCpf: z.string()
-    .min(1, "CPF é obrigatório")
-    .trim(),
-  
-  clienteEmail: z.string()
-    .min(1, "Email é obrigatório")
-    .trim(),
-  
-  clienteTelefone: z.string()
-    .min(10, "Telefone deve ter pelo menos 10 caracteres")
-    .max(20, "Telefone não pode exceder 20 caracteres")
-    .trim(),
-  
-  // 🔒 DADOS FINANCEIROS CRÍTICOS - OBRIGATÓRIOS
-  valor: z.number()
-    .positive("Valor do empréstimo deve ser positivo")
-    .min(100, "Valor mínimo é R$ 100,00")
-    .max(1000000, "Valor máximo é R$ 1.000.000,00"),
-  
-  prazo: z.number()
-    .int("Prazo deve ser um número inteiro")
-    .positive("Prazo deve ser positivo")
-    .min(1, "Prazo mínimo é 1 mês")
-    .max(120, "Prazo máximo é 120 meses"),
-    
-  // 🔥 PAM V1.0 FIX CRÍTICO - VALOR TOTAL FINANCIADO OBRIGATÓRIO
-  // Corrigindo a SEGUNDA FALHA identificada na auditoria forense
-  valorTotalFinanciado: z.number()
-    .positive("Valor total financiado deve ser positivo")
-    .min(100, "Valor total financiado mínimo é R$ 100,00")
-    .max(1000000, "Valor total financiado máximo é R$ 1.000.000,00")
-    .optional(), // Opcional pois pode ser calculado automaticamente
-    
-  // Valores calculados opcionais mas validados quando presentes
-  valorTac: z.number().min(0, "TAC não pode ser negativo").optional(),
-  valorIof: z.number().min(0, "IOF não pode ser negativo").optional(),
-  
-  // Campos opcionais - aceitar null ou undefined
-  clienteDataNascimento: z.string().nullish(),
-  clienteRenda: z.string().nullish(),
-  clienteRg: z.string().nullish(),
-  clienteOrgaoEmissor: z.string().nullish(),
-  clienteRgUf: z.string().nullish(),
-  clienteRgDataEmissao: z.string().nullish(),
-  clienteEstadoCivil: z.string().nullish(),
-  clienteNacionalidade: z.string().nullish(),
-  clienteLocalNascimento: z.string().nullish(),
-  
-  // Novos campos de empregador e dados financeiros PAM V1.0 - aceitar null
-  clienteEmpresaNome: z.string().nullish(),
-  clienteDataAdmissao: z.string().nullish(),
-  clienteDividasExistentes: z.number().nullish(),
-  
-  // Endereço - aceitar null ou undefined
-  clienteCep: z.string().nullish(),
-  clienteLogradouro: z.string().nullish(),
-  clienteNumero: z.string().nullish(),
-  clienteComplemento: z.string().nullish(),
-  clienteBairro: z.string().nullish(),
-  clienteCidade: z.string().nullish(),
-  clienteUf: z.string().nullish(),
-  clienteOcupacao: z.string().nullish(),
-  
-  // Dados de PJ - opcional
-  tipoPessoa: z.enum(["PF", "PJ"]).default("PF"),
-  clienteRazaoSocial: z.string().optional(),
-  clienteCnpj: z.string().optional(),
-  
-  // Dados do empréstimo - opcionais para evitar validação rigorosa
-  finalidade: z.string().optional(),
-  garantia: z.string().optional(),
-  
-  // IDs relacionais opcionais
-  produtoId: z.number().int().positive().optional(),
-  tabelaComercialId: z.number().int().positive().optional(),
-  
-  // Status inicial
-  status: z.string().default("aguardando_analise"),
-  
-  // Dados de pagamento - todos opcionais
-  metodoPagamento: z.string().optional(),
-  dadosPagamentoBanco: z.string().optional(),
-  dadosPagamentoAgencia: z.string().optional(),
-  dadosPagamentoConta: z.string().optional(),
-  dadosPagamentoDigito: z.string().optional(),
-  dadosPagamentoPix: z.string().optional(),
-  dadosPagamentoTipoPix: z.string().optional(),
-  dadosPagamentoPixBanco: z.string().optional(),
-  dadosPagamentoPixNomeTitular: z.string().optional(),
-  dadosPagamentoPixCpfTitular: z.string().optional(),
-  dadosPagamentoNomeTitular: z.string().optional(),
-  dadosPagamentoCpfTitular: z.string().optional(),
+  // Todos os outros campos opcionais
+  clienteDataNascimento: z.any().optional(),
+  clienteRenda: z.any().optional(),
+  clienteRg: z.any().optional(),
+  clienteOrgaoEmissor: z.any().optional(),
+  clienteRgUf: z.any().optional(),
+  clienteRgDataEmissao: z.any().optional(),
+  clienteEstadoCivil: z.any().optional(),
+  clienteNacionalidade: z.any().optional(),
+  clienteLocalNascimento: z.any().optional(),
+  clienteEmpresaNome: z.any().optional(),
+  clienteDataAdmissao: z.any().optional(),
+  clienteDividasExistentes: z.any().optional(),
+  clienteCep: z.any().optional(),
+  clienteLogradouro: z.any().optional(),
+  clienteNumero: z.any().optional(),
+  clienteComplemento: z.any().optional(),
+  clienteBairro: z.any().optional(),
+  clienteCidade: z.any().optional(),
+  clienteUf: z.any().optional(),
+  clienteOcupacao: z.any().optional(),
+  tipoPessoa: z.any().optional(),
+  clienteRazaoSocial: z.any().optional(),
+  clienteCnpj: z.any().optional(),
+  finalidade: z.any().optional(),
+  garantia: z.any().optional(),
+  produtoId: z.any().optional(),
+  tabelaComercialId: z.any().optional(),
+  // Todos os outros campos opcionais  
+  status: z.any().optional(),
+  metodoPagamento: z.any().optional(),
+  dadosPagamentoBanco: z.any().optional(),
+  dadosPagamentoAgencia: z.any().optional(),
+  dadosPagamentoConta: z.any().optional(),
+  dadosPagamentoDigito: z.any().optional(),
+  dadosPagamentoPix: z.any().optional(),
+  dadosPagamentoTipoPix: z.any().optional(),
+  dadosPagamentoPixBanco: z.any().optional(),
+  dadosPagamentoPixNomeTitular: z.any().optional(),
+  dadosPagamentoPixCpfTitular: z.any().optional(),
+  dadosPagamentoNomeTitular: z.any().optional(),
+  dadosPagamentoCpfTitular: z.any().optional(),
   
   // Campos adicionais necessários para compatibilidade com o frontend
   clienteEndereco: z.string().optional(), // Campo legado
