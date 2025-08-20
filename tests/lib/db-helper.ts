@@ -19,10 +19,28 @@ import { v4 as uuidv4 } from "uuid";
  * SAFETY: This function should ONLY be used in test environments
  */
 export async function cleanTestDatabase(): Promise<void> {
-  // CRITICAL SECURITY GUARD - Prevent execution in production environment
-  if (process.env.NODE_ENV === 'production') {
-    console.error('CRITICAL SECURITY ALERT: Tentativa de limpar o banco de dados em ambiente de PRODUÇÃO.');
-    throw new Error('FATAL: Tentativa de executar a função de limpeza de banco de dados em ambiente de PRODUÇÃO. Operação abortada.');
+  // TRIPLA PROTEÇÃO CONTRA EXECUÇÃO EM PRODUÇÃO - PAM V1.0 FORENSE
+  
+  // Proteção 1: NODE_ENV DEVE ser explicitamente 'test' (não apenas "não-production")
+  if (process.env.NODE_ENV !== 'test') {
+    console.error(`🔴 CRITICAL SECURITY ALERT: NODE_ENV='${process.env.NODE_ENV}' - deve ser 'test'`);
+    throw new Error(`FATAL: NODE_ENV='${process.env.NODE_ENV}' - Esta função só pode executar com NODE_ENV='test'. Operação abortada para proteger dados.`);
+  }
+  
+  // Proteção 2: DATABASE_URL deve conter 'test' no nome
+  if (!process.env.DATABASE_URL?.includes('test')) {
+    console.error('🔴 CRITICAL SECURITY ALERT: DATABASE_URL não contém "test" no nome');
+    throw new Error('FATAL: DATABASE_URL não contém "test". Use um banco de dados de teste dedicado. Operação abortada.');
+  }
+  
+  // Proteção 3: Rejeitar URLs de produção conhecidas (defesa em profundidade)
+  const prodPatterns = ['prod', 'production', 'azure', 'live', 'main'];
+  const dbUrl = process.env.DATABASE_URL?.toLowerCase() || '';
+  const detectedProdPattern = prodPatterns.find(pattern => dbUrl.includes(pattern));
+  
+  if (detectedProdPattern) {
+    console.error(`🔴 CRITICAL SECURITY ALERT: DATABASE_URL contém padrão de produção: '${detectedProdPattern}'`);
+    throw new Error(`FATAL: DATABASE_URL parece ser de produção (contém '${detectedProdPattern}'). Operação abortada.`);
   }
   
   const startTime = Date.now();

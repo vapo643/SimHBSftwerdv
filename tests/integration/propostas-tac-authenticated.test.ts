@@ -26,10 +26,23 @@ import {
 import request from "supertest";
 
 describe("TAC Integration Tests - Authenticated & Validated", () => {
-  // CRITICAL SECURITY GUARD - Prevent tests from running against production database
+  // TRIPLA PROTEÇÃO CONTRA EXECUÇÃO EM PRODUÇÃO - PAM V1.0 FORENSE
   beforeAll(() => {
+    // Proteção 1: NODE_ENV deve ser 'test'
+    if (process.env.NODE_ENV !== 'test') {
+      throw new Error(`FATAL: NODE_ENV='${process.env.NODE_ENV}' deve ser 'test'. Testes bloqueados para proteger dados.`);
+    }
+    
+    // Proteção 2: DATABASE_URL deve conter 'test'
     if (!process.env.DATABASE_URL?.includes('test')) {
-      throw new Error('FATAL: Tentativa de executar testes de integração num banco de dados que não é de teste (DATABASE_URL não contém "test"). Operação abortada.');
+      throw new Error('FATAL: DATABASE_URL não contém "test". Use um banco de teste dedicado.');
+    }
+    
+    // Proteção 3: Rejeitar padrões de produção
+    const prodPatterns = ['prod', 'production', 'azure', 'live'];
+    const dbUrl = process.env.DATABASE_URL?.toLowerCase() || '';
+    if (prodPatterns.some(p => dbUrl.includes(p))) {
+      throw new Error(`FATAL: DATABASE_URL parece ser de produção. Operação abortada.`);
     }
   });
 

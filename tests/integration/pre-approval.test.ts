@@ -20,8 +20,16 @@ import type { Express } from "express";
 describe("Pré-Aprovação - Negação Automática por Comprometimento de Renda", () => {
   // CRITICAL SECURITY GUARD - Prevent tests from running against production database
   beforeAll(() => {
+    // TRIPLA PROTEÇÃO - PAM V1.0 FORENSE
+    if (process.env.NODE_ENV !== 'test') {
+      throw new Error(`FATAL: NODE_ENV='${process.env.NODE_ENV}' deve ser 'test'. Testes bloqueados.`);
+    }
     if (!process.env.DATABASE_URL?.includes('test')) {
-      throw new Error('FATAL: Tentativa de executar testes de integração num banco de dados que não é de teste (DATABASE_URL não contém "test"). Operação abortada.');
+      throw new Error('FATAL: DATABASE_URL não contém "test". Use banco de teste dedicado.');
+    }
+    const prodPatterns = ['prod', 'production', 'azure', 'live'];
+    if (prodPatterns.some(p => process.env.DATABASE_URL?.toLowerCase()?.includes(p))) {
+      throw new Error('FATAL: DATABASE_URL parece ser de produção. Abortado.');
     }
   });
 

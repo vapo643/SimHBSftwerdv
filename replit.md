@@ -1,7 +1,7 @@
 # Simpix Credit Management System
 
 ## Overview
-Simpix is a full-stack TypeScript application designed for comprehensive credit management, streamlining the credit proposal workflow from creation and analysis to payment processing and formalization tracking. It aims to be a robust, secure, and user-friendly platform for financial institutions, emphasizing banking-grade security, compliance, and efficient data management to be a leading solution in the credit management market.
+Simpix is a full-stack TypeScript application for comprehensive credit management, streamlining the credit proposal workflow from creation and analysis to payment processing and formalization tracking. It aims to be a robust, secure, and user-friendly platform for financial institutions, emphasizing banking-grade security, compliance, and efficient data management to be a leading solution in the credit management market.
 
 ## User Preferences
 
@@ -76,71 +76,9 @@ Error handling: Create structured documentation for automatic consultation durin
 
 **DATA INTEGRITY PROTECTION:** PAM V1.0 protocol implemented - 5-CHECK validation system for data corruption detection and repair.
 
-**AUDITORIA COMPLETA FINALIZADA (Jan 2025):** Sistema certificado production-ready após auditoria exaustiva do ciclo de vida dos dados confirmando:
-- ✅ Estratégia anti-frágil de duplo armazenamento operacional
-- ✅ Transações atômicas em todos os 4 cenários críticos 
-- ✅ Proteção contra race conditions implementada
-- ✅ Webhooks seguros com validação HMAC timing-safe
-- ✅ Consistência frontend via colunas dedicadas
-- ✅ Confiança técnica: 96% - Pronto para migração Azure
-
-**TAC INTEGRATION TESTING COMPLETE (Aug 2025):** Comprehensive authenticated integration test suite implemented and passing:
-- ✅ Real Supabase authentication integration with JWT middleware
-- ✅ Complete RBAC authorization system functioning
-- ✅ TAC calculation API fully tested with real HTTP calls
-- ✅ Database schema synchronized and validated
-- ✅ Full end-to-end workflow from authentication to data persistence
-- ✅ Test coverage: 5/5 comprehensive scenarios passing
-
-**FRONTEND SECURITY AUDIT COMPLETE (Aug 2025):** Critical CSP violation eliminated and system secured:
-- ✅ SAST audit identified 1 critical inline script violation
-- ✅ Script extraction performed maintaining functionality
-- ✅ Custom elements protection migrated to public/scripts/
-- ✅ HTTP 200 OK carregamento validado tecnicamente
-- ✅ Zero violações CSP remaining - sistema production-ready
-- ✅ XSS vulnerability in chart.tsx completely eliminated via surgical removal
-- ✅ Zero LSP errors after component deletion - system integrity maintained
-
-**EMERGÊNCIA CRÍTICA RESOLVIDA (20 Jan 2025):** Sistema de autenticação completamente restaurado após falha total:
-- ✅ Tabela profiles reconstruída com 20 usuários reais
-- ✅ Middleware JWT corrigido para contornar bloqueios RLS
-- ✅ Acesso restaurado para todos os perfis (ANALISTA, ATENDENTE, ADMINISTRADOR)
-- ✅ Bug documentado em docs/bugs-solved/ para prevenção futura
-- ✅ Zero downtime permanente - sistema operacional
-
-**AUDITORIA FORENSE COMPLETA (Aug 2025):** Causa-raiz de perda de dados em massa identificada:
-- 🚨 Culpado: Função `cleanTestDatabase()` executando TRUNCATE CASCADE em produção
-- ✅ Vetor confirmado: DATABASE_URL compartilhado entre teste e produção
-- ✅ Comando destrutivo: TRUNCATE de 20+ tabelas incluindo propostas, produtos, parceiros
-- ✅ CORREÇÃO IMPLEMENTADA: Circuit breaker adicionado - bloqueio em NODE_ENV=production
-- ✅ Guarda de segurança ativa em tests/lib/db-helper.ts linha 25-29
-
-**DEFENSE-IN-DEPTH IMPLEMENTADO (Aug 2025):** Tripla camada de proteção contra execução em produção:
-- ✅ Camada 1: cleanTestDatabase() valida NODE_ENV !== 'production'
-- ✅ Camada 2: Todos os 8 testes de integração validam DATABASE_URL contém 'test'
-- ✅ Camada 3: Arquivo .env.test criado com TEST_DATABASE_URL para isolamento físico
-- ✅ Hook beforeAll() em cada suite previne execução contra banco não-teste
-- ✅ Sistema preparado para isolamento completo de ambiente de teste
-
-**ISOLAMENTO DE TESTE COMPLETO (Aug 2025):** Configuração vitest para ambiente isolado:
-- ✅ tests/setup.ts criado - carrega .env.test automaticamente
-- ✅ TEST_DATABASE_URL mapeado para DATABASE_URL mantendo compatibilidade
-- ✅ dotenv instalado e configurado para carregamento de ambiente de teste
-- ✅ Avisos de segurança adicionados em db-helper.ts
-- ✅ Sistema pronto - apenas aguardando substituição do placeholder em .env.test
-
 **MANDATORY BUG DOCUMENTATION POLICY:** Every bug resolved must be documented in `docs/bugs-solved/[category]/YYYY-MM-DD-descriptive-name.md` with complete technical analysis, root cause, solution implemented, and validation evidence. No exceptions - this creates institutional knowledge and prevents regression.
 
 ## System Architecture
-
-### Status: Sistema Certificado Production-Ready V2.0
-**Índice de Saúde Arquitetural: 96/100** ⬆️ (+5 pontos pós-auditoria)
-- Funcionalidade: 95/100 ⬆️ (+5)
-- Manutenibilidade: 95/100 ✅
-- Performance: 90/100 ⬆️ (+5)
-- Escalabilidade: 95/100 ⬆️ (+5)
-- Testabilidade: 96/100 ⬆️ (+1)
-- **Integridade de Dados: 96/100** 🆕 (Auditoria PAM V1.0 completa)
 
 ### Frontend Architecture
 - **Framework**: React 18 with TypeScript
@@ -178,6 +116,7 @@ Error handling: Create structured documentation for automatic consultation durin
 - Sequential numeric IDs for `propostas.id` starting at 300001.
 - **Status FSM V2.0 system**: Event-driven status transitions with complete audit trail, centralized validation, and robust error handling through Finite State Machine implementation.
 - **Test Environment Support**: Direct postgres connection capabilities with auth.users, profiles, and gerente_lojas associations for comprehensive test data setup bypassing RLS policies.
+- **Doutrina de Persistência de Dados**: Development and staging environments use Supabase, production uses Azure. Other database providers are prohibited.
 
 ## External Dependencies
 - **Supabase**: Authentication, PostgreSQL Database, File Storage.
@@ -199,9 +138,3 @@ Error handling: Create structured documentation for automatic consultation durin
 - **pdf-lib**: Dynamic PDF generation.
 - **ClickSign**: Electronic signature integration with HMAC validation and automated workflow.
 - **Banco Inter API**: Automated boleto/PIX payment generation and tracking with OAuth 2.0 authentication (mTLS), and webhook system for payment notifications.
-
-## Doutrina de Persistência de Dados (Inalterável)
-
-- **Ambiente de Desenvolvimento:** O único provedor de banco de dados autorizado para desenvolvimento e staging é o **SUPABASE**.
-- **Ambiente de Produção:** O único provedor de banco de dados autorizado para produção é o **AZURE**.
-- **Provedores Proibidos:** A utilização de qualquer outro provedor de banco de dados, especialmente o Neon, está terminantemente proibida e constitui uma falha de conformidade arquitetural.
