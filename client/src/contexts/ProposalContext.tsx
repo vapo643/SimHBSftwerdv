@@ -169,6 +169,7 @@ interface PersonalReference {
   nomeCompleto: string;
   grauParentesco: string;
   telefone: string;
+  tipo_referencia: 'pessoal' | 'profissional'; // Campo obrigatório PAM V1.0
 }
 
 // Proposal state interface
