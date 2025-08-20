@@ -25,9 +25,17 @@ if (process.env.TEST_DATABASE_URL) {
   console.warn('[TEST SETUP] ⚠️ Please configure a dedicated test database in .env.test');
 }
 
-// Ensure we're in test environment
+// CRITICAL: Force NODE_ENV to 'test' to enable test-only operations
 process.env.NODE_ENV = 'test';
+
+// Security validation: Ensure test database URL contains 'test'
+if (process.env.DATABASE_URL && !process.env.DATABASE_URL.includes('test')) {
+  console.error('[TEST SETUP] 🔴 SECURITY ALERT: DATABASE_URL does not contain "test"');
+  console.error('[TEST SETUP] 🔴 This could indicate incorrect configuration');
+  throw new Error('FATAL: Test database URL must contain "test" for safety');
+}
 
 console.log('[TEST SETUP] 🔧 Test environment configured:');
 console.log(`[TEST SETUP]   - NODE_ENV: ${process.env.NODE_ENV}`);
 console.log(`[TEST SETUP]   - Database: ${process.env.DATABASE_URL?.includes('test') ? '✅ Test DB' : '⚠️ Check configuration'}`);
+console.log('[TEST SETUP] 🛡️ Triple protection active: NODE_ENV=test, isolated DB, runtime guards');

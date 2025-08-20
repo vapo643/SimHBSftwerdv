@@ -1,0 +1,51 @@
+### Pacote de Ativação de Missão (PAM) V1.0 (Implementação de Isolamento Físico de Teste)
+
+* **Sumário da Missão (O Quê):** Criar um arquivo de ambiente de teste dedicado (`.env.test`) e reconfigurar o `vitest` para carregar e utilizar exclusivamente a nova `TEST_DATABASE_URL` contida nele, completando o isolamento de ambientes.
+* **Intenção Estratégica (O Porquê):** Implementar a solução estrutural e definitiva para a vulnerabilidade de perda de dados. Ao forçar os testes a usarem uma string de conexão e um banco de dados completamente separados, eliminamos por design a possibilidade de contaminação cruzada e de execução de operações destrutivas no banco de dados de produção.
+* **Histórico Relevante (Consulta Obrigatória):** A FASE 1 implementou guardas de segurança de software. Esta missão implementa o isolamento de infraestrutura, que é a solução superior e definitiva.
+* **Modelo Mental (Como se Encaixa):** Esta é uma missão de configuração de infraestrutura como código. O Agente irá criar o arquivo de ambiente final, modificar a configuração do `vitest` e refatorar os helpers de teste para que todo o ecossistema de testes aponte para o novo banco de dados isolado.
+
+---
+
+**IMPLEMENTAR:**
+Configuração Completa do Ambiente de Teste Isolado
+
+**CURRENT STATE:**
+O projeto possui guardas de segurança de software, mas ainda utiliza a mesma variável de ambiente (`DATABASE_URL`) para desenvolvimento e teste, o que constitui a vulnerabilidade estrutural.
+
+**EXPECTED (Estado Final de Sucesso):**
+
+1.  **Criação do `.env.test`:** Um novo arquivo, `.env.test`, é criado na raiz do projeto. Ele deve conter a variável `TEST_DATABASE_URL` com um placeholder seguro e claramente identificado para as credenciais do banco de dados de teste.
+2.  **Criação do `tests/setup.ts`:** Um arquivo de setup para o `vitest` (`tests/setup.ts`) é criado. Este arquivo deve usar a biblioteca `dotenv` para carregar as variáveis do `.env.test` e realizar o mapeamento inteligente: `process.env.DATABASE_URL = process.env.TEST_DATABASE_URL`.
+3.  **Configuração do `vitest.config.ts`:** O arquivo de configuração do `vitest` é modificado para usar o novo arquivo de setup (`setupFiles: ['tests/setup.ts']`).
+4.  **Refatoração dos Helpers e Guardas:**
+    * O helper `tests/lib/db-helper.ts` é verificado para garantir que ele agora opera sobre a `DATABASE_URL` que foi sobrescrita pelo `setup.ts`.
+    * As guardas de segurança implementadas na FASE 1 são mantidas como uma camada de defesa redundante.
+5.  **Prova de Sucesso:** O seu relatório final deve incluir os `snippets` de código dos três arquivos modificados/criados (`.env.test`, `tests/setup.ts`, `vitest.config.ts`) para provar que o novo sistema de isolamento está ativo.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+1.  **Isolamento Completo:** A solução deve garantir que, ao executar `vitest`, a conexão com o banco de dados seja *sempre* a definida em `TEST_DATABASE_URL`.
+2.  **Mapeamento Inteligente:** Utilize a abordagem de mapear `TEST_DATABASE_URL` para `DATABASE_URL` dentro do `tests/setup.ts` para evitar refatorar todas as referências individuais nos arquivos de teste.
+3.  **Validação:** A validação final será uma revisão de código que confirma que a cadeia de configuração (`vitest.config.ts` -> `tests/setup.ts` -> `.env.test`) está corretamente implementada.
+
+---
+
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que o `vitest` carregará o `setupFile` antes de qualquer código de teste ser executado, permitindo o mapeamento da variável de ambiente."]
+* **VALIDAÇÃO PENDENTE:** [Após esta missão, a etapa final será popular o banco de dados de teste real e executar a suíte de testes completa contra ele para uma validação de ponta a ponta.]
+
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+
+1.  Mapear todos os ficheiros de configuração e de teste a serem modificados.
+2.  Garantir que a configuração do `vitest` e a lógica no `setup.ts` estão corretas.
+3.  Executar `get_latest_lsp_diagnostics` para garantir 0 erros novos.
+4.  **Declarar Nível de Confiança (0 a 100%)**.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (revisão lógica do código para confirmar as modificações).
+7.  **Documentar Decisões Técnicas**.
