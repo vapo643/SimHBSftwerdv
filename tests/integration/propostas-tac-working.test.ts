@@ -9,7 +9,7 @@
  * @status 100% FUNCIONAL
  */
 
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, beforeAll } from "vitest";
 import { db } from "../../server/lib/supabase";
 import { propostas, produtos } from "@shared/schema";
 import { eq, sql } from "drizzle-orm";
@@ -18,6 +18,13 @@ import { TacCalculationService } from "../../server/services/tacCalculationServi
 import { v4 as uuidv4 } from "uuid";
 
 describe("TAC Integration Tests - Production Ready", () => {
+  // CRITICAL SECURITY GUARD - Prevent tests from running against production database
+  beforeAll(() => {
+    if (!process.env.DATABASE_URL?.includes('test')) {
+      throw new Error('FATAL: Tentativa de executar testes de integração num banco de dados que não é de teste (DATABASE_URL não contém "test"). Operação abortada.');
+    }
+  });
+
   let testProductId: number;
   let testUserId: string;
   let testStoreId: number;

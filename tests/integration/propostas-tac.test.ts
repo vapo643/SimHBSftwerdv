@@ -9,7 +9,7 @@
  * @coverage Cenário 1 (Cliente Novo Paga) + Cenário 2 (Cliente Cadastrado Isento)
  */
 
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, beforeAll } from "vitest";
 import request from "supertest";
 import type { Express } from "express";
 import { createApp } from "../../server/app";
@@ -20,6 +20,13 @@ import { cleanTestDatabase, setupTestEnvironment } from "../lib/db-helper";
 import { v4 as uuidv4 } from "uuid";
 
 describe("Integração: Fluxo de TAC nas Propostas", () => {
+  // CRITICAL SECURITY GUARD - Prevent tests from running against production database
+  beforeAll(() => {
+    if (!process.env.DATABASE_URL?.includes('test')) {
+      throw new Error('FATAL: Tentativa de executar testes de integração num banco de dados que não é de teste (DATABASE_URL não contém "test"). Operação abortada.');
+    }
+  });
+
   let app: Express;
   let testUserId: string;
   let testPartnerId: number;

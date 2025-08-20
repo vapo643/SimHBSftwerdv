@@ -9,7 +9,7 @@
  * @created 2025-08-20 - PAM V1.1 após correção de infraestrutura
  */
 
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, beforeAll } from "vitest";
 import type { Express } from "express";
 import { createApp } from "../../server/app";
 import { db } from "../../server/lib/supabase";
@@ -26,6 +26,13 @@ import {
 import request from "supertest";
 
 describe("TAC Integration Tests - Authenticated & Validated", () => {
+  // CRITICAL SECURITY GUARD - Prevent tests from running against production database
+  beforeAll(() => {
+    if (!process.env.DATABASE_URL?.includes('test')) {
+      throw new Error('FATAL: Tentativa de executar testes de integração num banco de dados que não é de teste (DATABASE_URL não contém "test"). Operação abortada.');
+    }
+  });
+
   let app: Express;
   let authenticatedClient: AuthenticatedTestClient;
   let testProductId: number;

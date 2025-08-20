@@ -8,7 +8,7 @@
  * a atomicidade das operações de dupla escrita.
  */
 
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, beforeAll } from "vitest";
 import { db } from "../../server/lib/supabase";
 import { 
   propostas, 
@@ -36,6 +36,13 @@ import {
 } from "../../server/lib/status-context-helper";
 
 describe("Sistema de Status FSM - Testes de Integração", () => {
+  // CRITICAL SECURITY GUARD - Prevent tests from running against production database
+  beforeAll(() => {
+    if (!process.env.DATABASE_URL?.includes('test')) {
+      throw new Error('FATAL: Tentativa de executar testes de integração num banco de dados que não é de teste (DATABASE_URL não contém "test"). Operação abortada.');
+    }
+  });
+
   let testProposalId: string;
   let testUserId: string;
   let testStoreId: number;
