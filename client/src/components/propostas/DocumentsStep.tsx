@@ -13,7 +13,10 @@ export function DocumentsStep() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Check if user has permission to upload documents
-  const canUpload = user?.role === 'ADMINISTRADOR' || user?.role === 'ANALISTA';
+  // ATENDENTES podem fazer upload na criação de propostas
+  // ANALISTAS podem adicionar documentos durante análise  
+  // ADMINISTRADORES têm acesso total
+  const canUpload = user?.role === 'ADMINISTRADOR' || user?.role === 'ANALISTA' || user?.role === 'ATENDENTE';
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -106,7 +109,7 @@ export function DocumentsStep() {
                 <Lock className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
                 <p className="mb-2 text-lg font-medium text-muted-foreground">Upload não disponível</p>
                 <p className="text-sm text-muted-foreground">
-                  Apenas usuários com perfil de Administrador ou Analista podem fazer upload de documentos
+                  Upload de documentos disponível para Atendentes, Analistas e Administradores
                 </p>
               </div>
             )}
