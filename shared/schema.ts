@@ -731,6 +731,9 @@ export const insertProdutoTabelaComercialSchema = createInsertSchema(produtoTabe
 export const insertProdutoSchema = createInsertSchema(produtos).omit({
   id: true,
   createdAt: true,
+}).extend({
+  tacValor: z.number().min(0).default(0),
+  tacTipo: z.enum(["fixo", "percentual"]).default("fixo"),
 });
 
 export const insertPropostaDocumentoSchema = createInsertSchema(propostaDocumentos).omit({
