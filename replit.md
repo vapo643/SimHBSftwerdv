@@ -82,6 +82,8 @@ Error handling: Create structured documentation for automatic consultation durin
 
 **PAM V1.0 PRÉ-AUDITORIA COMPLETADA (21/08/2025):** Forensic analysis of all asynchronous data state modifiers completed. Identified 4 BullMQ workers, 2 external webhooks (ClickSign, Banco Inter) with HMAC validation, and FSM system that modifies contextual fields beyond status. Critical discovery: `updateStatusWithContext()` modifies `dataPagamento`, `ccbGerado`, and `ccbGeradoEm` during state transitions. Comprehensive audit report generated in `PAM_V1.0_AUDITORIA_MODIFICADORES_ESTADO.md` with 96% confidence level.
 
+**PAM V1.0 AUDITORIA PONTO DE CAPTURA COMPLETADA (21/08/2025):** Complete UI field mapping for "Nova Proposta" flow completed. Documented 60+ fields mapping UI → React State → Backend Payload with validation layers, auto-complete triggers, and data transformations. Identified critical points: monetary value conversion, dual address storage, file upload restrictions (ADMIN/ANALISTA only), and no local state persistence. Comprehensive manifest generated in `PAM_V1.0_MANIFESTO_DADOS_UI_NOVA_PROPOSTA.md` with 98% confidence level. Foundation established for Phase 2 end-to-end data consistency audit.
+
 **CCB VISUALIZATION SYSTEM:** Implemented (18/08/2025) - Complete CCB signed document visualization system with URL generation from storage. Test CCB file created for proposal #CONT-902183DD in path `ccb/assinadas/902183dd-b5d1-4e20-8a72-79d3d3559d4d/ccb_assinada_teste.pdf`. API endpoint `/api/propostas/:id/ccb` correctly retrieves signed URLs from `caminho_ccb_assinado` field with fallback to legacy paths and ClickSign integration.
 
 **ARCHITECTURAL REFINEMENT MISSION COMPLETED (19/08/2025):** 

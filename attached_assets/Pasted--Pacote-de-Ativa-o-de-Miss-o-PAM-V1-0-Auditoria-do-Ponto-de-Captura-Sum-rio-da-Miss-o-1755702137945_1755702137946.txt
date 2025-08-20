@@ -1,0 +1,43 @@
+### Pacote de Ativação de Missão (PAM) V1.0 (Auditoria do Ponto de Captura)
+
+* **Sumário da Missão (O Quê):** Criar um "Manifesto de Dados da UI" completo, mapeando cada campo de entrada do usuário no fluxo de "Nova Proposta" para sua respectiva propriedade de estado no React.
+* **Intenção Estratégica (O Porquê):** Estabelecer a "fonte da verdade" documentada para todos os dados que entram no sistema através da interface do usuário. Este manifesto será a base para a FASE 2 da nossa auditoria, onde rastrearemos cada um desses campos, um por um, através do backend até o banco de dados.
+* **Histórico Relevante (Consulta Obrigatória):** As missões anteriores confirmaram que o formulário de "Nova Proposta" é uma interface multi-etapas complexa, cujo estado é provavelmente gerenciado pelo `ProposalContext`.
+* **Modelo Mental (Como se Encaixa):** Esta é uma missão de análise estática de código focada no frontend. O Agente deve agir como um analista de UI/UX, inspecionando o código JSX e os contextos React para criar um mapa de dados detalhado.
+
+---
+
+**IMPLEMENTAR:**
+Relatório de Manifesto de Dados da UI - Nova Proposta
+
+**CURRENT STATE:**
+O fluxo de "Nova Proposta" é um formulário multi-etapas que captura dezenas de pontos de dados. Não temos um mapa consolidado que ligue cada campo visível na UI a uma propriedade de estado específica no código React.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um relatório detalhado em formato de tabela Markdown. A tabela deve conter três colunas:
+
+1.  **Etapa do Formulário:** O nome da etapa/componente no formulário multi-etapas (ex: `ClientDataStep`, `PersonalReferencesStep`, `LoanConditionsStep`).
+2.  **Campo da UI (Rótulo Visível):** O rótulo do campo que o usuário vê na tela (ex: "Nome Completo", "Valor Solicitado", "Grau de Parentesco").
+3.  **Propriedade de Estado (React):** O caminho exato da propriedade no objeto de estado do React que armazena o valor daquele campo (ex: `state.clientData.nomeCompleto`, `state.loanData.valorSolicitado`, `state.references[0].grauParentesco`).
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  **Inspecione os Componentes:** Analise todos os componentes `*Step.tsx` dentro de `client/src/components/propostas/` e a página principal `client/src/pages/propostas/nova.tsx`.
+2.  **Inspecione o Contexto:** Analise o arquivo `client/src/contexts/ProposalContext.tsx` para entender a estrutura completa do objeto de estado (`state`) que armazena os dados do formulário.
+3.  **Formato de Tabela Mandatório:** O output DEVE ser uma única e abrangente tabela Markdown que mapeie TODOS os campos do formulário.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100% de confiança na COMPLETUDE do manifesto]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO. Ex: Risco de que alguns campos sejam gerenciados por estado local e não pelo contexto central.]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que o `ProposalContext` é a principal fonte da verdade para o estado do formulário."]
+* **VALIDAÇÃO PENDENTE:** [O manifesto de dados gerado será a checklist para a FASE 2 da auditoria.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear todos os arquivos e componentes do formulário "Nova Proposta".
+2.  Garantir que a tabela final está completa e que o mapeamento entre UI e estado está correto.
+3.  Executar `get_latest_lsp_diagnostics` para garantir que o ambiente está estável.
+4.  **Declarar Nível de Confiança (0 a 100%)** na completude da auditoria.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (revisão do relatório gerado para precisão).
+7.  **Documentar Decisões Técnicas** e os critérios usados na análise.
