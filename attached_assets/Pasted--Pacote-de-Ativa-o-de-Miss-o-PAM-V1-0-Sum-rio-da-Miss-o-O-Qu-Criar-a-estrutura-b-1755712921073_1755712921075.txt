@@ -1,0 +1,54 @@
+### Pacote de Ativação de Missão (PAM) V1.0
+
+* **Sumário da Missão (O Quê):** Criar a estrutura (boilerplate) para o novo serviço `TacCalculationService`, definindo a sua classe, métodos e tipos de interface.
+* **Intenção Estratégica (O Porquê):** Estabelecer a fundação arquitetural para a nova lógica de negócio. Criar o serviço dedicado e isolado primeiro garante que a implementação subsequente seja limpa, organizada e facilmente testável, conforme o nosso roadmap aprovado.
+* **Histórico Relevante (Consulta Obrigatória):** O nosso debate de planejamento definiu a assinatura exata dos métodos que este serviço deve expor: `calculateTac` e `isClienteCadastrado`.
+* **Modelo Mental (Como se Encaixa):** Esta é uma missão de criação de esqueleto de código. O Agente deve criar o "contêiner" para a lógica de negócio, mas não implementar a lógica em si ainda. O foco é na estrutura e na interface do serviço.
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco:** O Agente pode tentar implementar a lógica completa prematuramente.
+    * **Contramedida:** O prompt restringe explicitamente a missão à criação do esqueleto (boilerplate), com a lógica interna a ser deixada como `// TODO: Implementar lógica`.
+
+---
+
+**IMPLEMENTAR:**
+Criação do Esqueleto do Serviço de Cálculo de TAC
+
+**CURRENT STATE:**
+A lógica de cálculo de TAC está espalhada e incorretamente localizada. Não existe um serviço dedicado para esta responsabilidade.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  Um novo arquivo `server/services/tacCalculationService.ts` é criado.
+2.  O arquivo contém a definição da classe `TacCalculationService`.
+3.  A classe contém as definições dos dois métodos estáticos, com os tipos corretos, mas com a lógica interna comentada:
+    * `static async calculateTac(produtoId: number, valorEmprestimo: number, clienteCpf: string): Promise<number>`
+    * `static async isClienteCadastrado(cpf: string): Promise<boolean>`
+4.  O arquivo não contém erros de LSP.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  **Crie o Novo Serviço:** Crie o arquivo `server/services/tacCalculationService.ts`.
+2.  **Implemente o Esqueleto da Classe:** Crie a classe `TacCalculationService` e adicione os métodos `calculateTac` e `isClienteCadastrado` com as assinaturas exatas definidas no nosso roadmap.
+3.  **Lógica Vazia:** A implementação de cada método deve ser apenas um placeholder que retorna um valor padrão e um comentário. Exemplo:
+    ```typescript
+    public static async calculateTac(produtoId: number, valorEmprestimo: number, clienteCpf: string): Promise<number> {
+      // TODO: Implementar lógica de busca do produto, verificação de cliente cadastrado e cálculo de TAC.
+      return 0;
+    }
+    ```
+4.  **Ação Restrita:** Esta missão é focada **exclusivamente** na criação da estrutura do serviço. **NÃO** implemente a lógica de negócio completa.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que os métodos devem ser estáticos, pois o serviço não parece precisar de um estado de instância."]
+* **VALIDAÇÃO PENDENTE:** [A implementação da lógica interna será o Passo 1.1 da nossa missão.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear ficheiros e funções exatas afetadas (criação de `tacCalculationService.ts`).
+2.  Garantir que as assinaturas dos métodos e os tipos estão corretos.
+3.  Executar `get_latest_lsp_diagnostics` para garantir 0 erros no novo arquivo.
+4.  **Declarar Nível de Confiança (0 a 100%)**.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (revisão lógica do código para garantir que ele corresponde ao esqueleto arquitetado).
+7.  **Documentar Decisões Técnicas**.
