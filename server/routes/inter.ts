@@ -848,7 +848,7 @@ router.post("/collections", jwtAuthMiddleware, async (req: AuthenticatedRequest,
     const [proposta] = await db
       .select()
       .from(propostas)
-      .where(eq(propostas.id, parseInt(validatedData.proposalId)))
+      .where(eq(propostas.id, validatedData.proposalId))
       .limit(1);
 
     if (!proposta) {
@@ -951,7 +951,7 @@ router.post("/collections", jwtAuthMiddleware, async (req: AuthenticatedRequest,
           interBoletoGerado: true,
           interBoletoGeradoEm: new Date(getBrasiliaTimestamp())
         })
-        .where(eq(propostas.id, parseInt(validatedData.proposalId)));
+        .where(eq(propostas.id, validatedData.proposalId));
       
       // Criar log da operação
       await storage.createPropostaLog({
@@ -1257,7 +1257,7 @@ router.get(
       const proposta = await db
         .select()
         .from(propostas)
-        .where(eq(propostas.id, parseInt(propostaId)))
+        .where(eq(propostas.id, propostaId))
         .limit(1);
 
       if (proposta.length === 0) {
