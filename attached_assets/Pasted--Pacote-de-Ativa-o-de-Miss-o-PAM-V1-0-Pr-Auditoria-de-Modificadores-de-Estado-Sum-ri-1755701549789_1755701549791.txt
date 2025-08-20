@@ -1,0 +1,47 @@
+### Pacote de Ativação de Missão (PAM) V1.0 (Pré-Auditoria de Modificadores de Estado)
+
+* **Sumário da Missão (O Quê):** Realizar uma pré-auditoria para mapear todas as fontes de modificação de dados assíncronas e externas no sistema, incluindo Jobs BullMQ, Webhooks e transições da FSM.
+* **Intenção Estratégica (O Porquê):** Para auditar a consistência de dados de ponta a ponta, precisamos primeiro identificar todos os atores e sistemas que podem modificar os dados de uma proposta após sua criação inicial. Esta pré-auditoria nos dará um "Mapa de Modificação de Dados" completo, que é um pré-requisito para as fases subsequentes da auditoria.
+* **Histórico Relevante (Consulta Obrigatória):** As missões anteriores confirmaram a existência de um sistema robusto de Jobs (BullMQ) e a integração com Webhooks (Banco Inter, ClickSign).
+* **Modelo Mental (Como se Encaixa):** Aja como um analista forense de sistemas. Sua tarefa é rastrear todas as "pistas" no código que indiquem modificações de dados que ocorrem fora do fluxo direto de uma requisição de API.
+
+---
+
+**IMPLEMENTAR:**
+Relatório de Mapeamento de Modificadores de Dados
+
+**CURRENT STATE:**
+Sabemos que Jobs e Webhooks existem, mas não temos um mapa consolidado de quais dados eles modificam, sob quais condições, e como eles interagem com a FSM.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um relatório de auditoria detalhado em formato Markdown, contendo 3 seções:
+
+**1. Mapeamento de Jobs BullMQ:**
+   * Liste todos os `workers` ativos (ex: `pdf-processing`, `boleto-sync`).
+   * Para cada `worker`, resuma as principais operações de **escrita no banco de dados** que ele realiza (quais tabelas e campos ele modifica).
+
+**2. Identificação de Webhooks Externos:**
+   * Localize e liste os endpoints de API que recebem webhooks do Banco Inter e do ClickSign.
+   * Para cada webhook, resuma as principais operações de **escrita no banco de dados** que ele realiza.
+   * Confirme se cada webhook possui um mecanismo de validação de segurança (ex: verificação de assinatura HMAC).
+
+**3. Auditoria de Transições da FSM:**
+   * Inspecione o `statusFsmService` e o `status-context-helper`.
+   * Confirme se as transições de estado (via `updateStatusWithContext`) também podem modificar outros campos da proposta além do `status`. Se sim, liste quais campos são potencialmente alterados durante uma transição.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100% de confiança na COMPLETUDE da auditoria]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que todas as definições de workers estão centralizadas em `server/worker.ts`."]
+* **VALIDAÇÃO PENDENTE:** [O mapa gerado será a base para as próximas fases da auditoria de consistência.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear os arquivos e funções exatas a serem analisados (`server/worker.ts`, `server/routes/integracao/`, `statusFsmService.ts`).
+2.  Garantir que a análise cobre os três pontos (Jobs, Webhooks, FSM).
+3.  Executar `get_latest_lsp_diagnostics` para garantir que o ambiente está estável.
+4.  **Declarar Nível de Confiança (0 a 100%)** na completude da auditoria.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (revisão do relatório gerado para precisão e lógica).
+7.  **Documentar Decisões Técnicas** e os critérios usados na análise.

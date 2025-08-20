@@ -78,6 +78,8 @@ Error handling: Create structured documentation for automatic consultation durin
 
 **BUG TRACKING SYSTEM:** Comprehensive bug documentation system established in `docs/bugs-solved/` (21/08/2025) - All critical bugs and solutions systematically documented with technical analysis, code fixes, and validation evidence. Categories: critical, high, medium, low priority.
 
+**MANDATORY BUG DOCUMENTATION POLICY:** Every bug resolved must be documented in `docs/bugs-solved/[category]/YYYY-MM-DD-descriptive-name.md` with complete technical analysis, root cause, solution implemented, and validation evidence. No exceptions - this creates institutional knowledge and prevents regression.
+
 **CCB VISUALIZATION SYSTEM:** Implemented (18/08/2025) - Complete CCB signed document visualization system with URL generation from storage. Test CCB file created for proposal #CONT-902183DD in path `ccb/assinadas/902183dd-b5d1-4e20-8a72-79d3d3559d4d/ccb_assinada_teste.pdf`. API endpoint `/api/propostas/:id/ccb` correctly retrieves signed URLs from `caminho_ccb_assinado` field with fallback to legacy paths and ClickSign integration.
 
 **ARCHITECTURAL REFINEMENT MISSION COMPLETED (19/08/2025):** 
