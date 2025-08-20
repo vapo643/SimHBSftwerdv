@@ -1517,6 +1517,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post(
     "/api/propostas/:id/documents",
     jwtAuthMiddleware,
+    requireRoles(['ADMINISTRADOR', 'ANALISTA']),
     upload.single("file"),
     uploadPropostaDocument
   );
@@ -3171,8 +3172,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // ============== SYSTEM METADATA ROUTES ==============
 
-  // Helper middleware to check for multiple roles
-  const requireRoles = (allowedRoles: string[]) => {
+  // Helper middleware to check for multiple roles (local version)
+  const requireRolesLocal = (allowedRoles: string[]) => {
     return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
       if (!req.user?.role || !allowedRoles.includes(req.user.role)) {
         return res.status(403).json({
@@ -3188,7 +3189,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get(
     "/api/admin/system/metadata",
     jwtAuthMiddleware,
-    requireRoles(['ADMINISTRADOR', 'DIRETOR', 'GERENTE']),
+    requireRolesLocal(['ADMINISTRADOR', 'DIRETOR', 'GERENTE']),
     async (req: AuthenticatedRequest, res) => {
       try {
         const { db } = await import("../server/lib/supabase");
@@ -3214,7 +3215,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get(
     "/api/admin/parceiros/:parceiroId/lojas",
     jwtAuthMiddleware,
-    requireRoles(['ADMINISTRADOR', 'DIRETOR', 'GERENTE']),
+    requireRolesLocal(['ADMINISTRADOR', 'DIRETOR', 'GERENTE']),
     async (req: AuthenticatedRequest, res) => {
       try {
         const { db } = await import("../server/lib/supabase");
@@ -3242,7 +3243,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get(
     "/api/admin/lojas",
     jwtAuthMiddleware,
-    requireRoles(['ADMINISTRADOR', 'DIRETOR', 'GERENTE']),
+    requireRolesLocal(['ADMINISTRADOR', 'DIRETOR', 'GERENTE']),
     async (req: AuthenticatedRequest, res) => {
       try {
         const lojas = await storage.getLojas();
