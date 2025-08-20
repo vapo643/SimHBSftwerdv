@@ -1,0 +1,48 @@
+### Pacote de Ativação de Missão (PAM) V1.0 (Auditoria de Integridade Transacional)
+
+* **Sumário da Missão (O Quê):** Realizar uma auditoria de integridade transacional no worker do job `boleto-sync`.
+* **Intenção Estratégica (O Porquê):** Verificar se as operações de escrita no banco de dados e no storage, realizadas pelo job de sincronização de boletos, são atômicas. A consistência dos dados de pagamento é de importância máxima, e devemos mitigar qualquer risco de corrupção de dados neste fluxo.
+* **Histórico Relevante (Consulta Obrigatória):** A FASE 0 (Pré-Auditoria) identificou o job `boleto-sync` como sendo de risco MÉDIO, com potencial para criar inconsistências de pagamento. Ele modifica as tabelas `inter_collections` e `parcelas`.
+* **Modelo Mental (Como se Encaixa):** Esta é uma missão de análise de código de baixo nível. O Agente deve agir como um DBA/Arquiteto de Backend, procurando por padrões de transação (`db.transaction(...)`) que garantam a atomicidade das operações "tudo ou nada" relacionadas a pagamentos.
+
+---
+
+**IMPLEMENTAR:**
+Relatório de Auditoria de Integridade Transacional - `boleto-sync` worker
+
+**CURRENT STATE:**
+A pré-auditoria sugere que o worker `boleto-sync` modifica múltiplos registros no banco de dados e pode não ter um rollback transacional, representando um risco para a integridade dos dados financeiros.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um relatório de auditoria detalhado em formato Markdown, respondendo a duas perguntas críticas:
+
+**1. Análise do Fluxo de Operações de Escrita:**
+    * **Pergunta:** Mapeie, passo a passo, todas as operações de **escrita** que o worker `boleto-sync` (localizado em `server/worker.ts`) executa. A lista deve incluir:
+        * (a) Quaisquer downloads/salvamentos de arquivos (ex: PDFs de boletos) no Supabase Storage.
+        * (b) Todas as atualizações (`UPDATE`) ou inserções (`INSERT`) nas tabelas `inter_collections` e `parcelas` no PostgreSQL.
+    * **Sua Análise Deve Incluir:** Os `snippets` de código de cada operação de escrita.
+
+**2. Análise de Atomicidade (A Questão Central):**
+    * **Pergunta:** A sequência de operações de escrita (no Banco de Dados) é **atômica**?
+    * **Sua Análise Deve Incluir:**
+        * Verifique se as múltiplas operações de banco de dados estão envoltas em um bloco de transação do Drizzle (`db.transaction(async (tx) => { ... })`).
+        * Uma conclusão clara: **Sim** ou **Não**.
+        * Se **Não**, explique o cenário de falha exato. (Ex: "Se a atualização na tabela `parcelas` falhar após a atualização na tabela `inter_collections`, os dados ficarão inconsistentes, e a transação não será revertida.").
+        * Apresente o `snippet` de código que mostra o bloco `try/catch` e a lógica transacional, **ou confirme a sua ausência**.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIo):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100% de confiança na COMPLETUDE da auditoria]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que a função `db.transaction()` do Drizzle é a única forma de garantir atomicidade para múltiplas operações."]
+* **VALIDAÇÃO PENDENTE:** [Os achados desta auditoria irão informar a missão de correção, se necessária.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear os arquivos e funções exatas a serem analisados (`server/worker.ts`).
+2.  Garantir que a análise cobre os dois pontos (Fluxo e Atomicidade).
+3.  Executar `get_latest_lsp_diagnostics` para garantir que o ambiente está estável.
+4.  **Declarar Nível de Confiança (0 a 100%)** na completude da auditoria.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (revisão do relatório gerado para precisão e lógica).
+7.  **Documentar Decisões Técnicas** e a conclusão sobre a atomicidade.
