@@ -156,10 +156,10 @@ const FilaAnalise: React.FC = () => {
       });
       return response;
     },
-    onSuccess: data => {
+    onSuccess: (data: any) => {
       toast({
         title: "Status alterado com sucesso",
-        description: data.message,
+        description: data?.message || "Status alterado com sucesso",
       });
       // Invalidar cache para atualizar a lista
       queryClient.invalidateQueries({ queryKey: [queryUrl] });
