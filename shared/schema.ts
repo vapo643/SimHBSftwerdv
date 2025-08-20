@@ -713,6 +713,15 @@ export const createPropostaValidationSchema = z.object({
   clienteNacionalidade: z.string().optional(),
   clienteLocalNascimento: z.string().optional(),
   
+  // Novos campos de empregador e dados financeiros PAM V1.0
+  clienteEmpresaNome: z.string().min(1, "Nome da empresa é obrigatório").max(200, "Nome da empresa não pode exceder 200 caracteres").optional(),
+  clienteDataAdmissao: z.string().refine((date) => {
+    if (!date) return true; // Campo opcional
+    const parsedDate = new Date(date);
+    return !isNaN(parsedDate.getTime()) && parsedDate <= new Date();
+  }, "Data de admissão deve ser uma data válida e não pode ser futura").optional(),
+  clienteDividasExistentes: z.number().min(0, "Valor de dívidas não pode ser negativo").max(10000000, "Valor de dívidas não pode exceder R$ 10.000.000,00").optional(),
+  
   // Endereço - opcional mas validado quando presente
   clienteCep: z.string().optional(),
   clienteLogradouro: z.string().optional(),

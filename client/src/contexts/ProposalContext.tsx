@@ -84,6 +84,11 @@ interface ClientData {
   ocupacao: string;
   rendaMensal: string;
   telefoneEmpresa: string;
+  
+  // Novos campos de empregador e dados financeiros
+  clienteEmpresaNome?: string; // Nome da Empresa
+  clienteDataAdmissao?: string; // Data de Admissão (formato string para DatePicker)
+  clienteDividasExistentes?: number; // Valor de Dívidas Existentes
 
   // Dados de pagamento
   metodoPagamento: "conta_bancaria" | "pix";

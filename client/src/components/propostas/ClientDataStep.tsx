@@ -34,6 +34,52 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Progress } from "@/components/ui/progress";
 
+// Interfaces para tipagem das respostas da API
+interface CepApiResponse {
+  logradouro?: string;
+  bairro?: string;
+  cidade?: string;
+  estado?: string;
+  cep?: string;
+}
+
+interface ClientDataApiResponse {
+  exists: boolean;
+  data?: {
+    nome: string;
+    email: string;
+    telefone: string;
+    dataNascimento?: string;
+    rg?: string;
+    orgaoEmissor?: string;
+    rgUf?: string;
+    rgDataEmissao?: string;
+    localNascimento?: string;
+    estadoCivil?: string;
+    nacionalidade?: string;
+    cep?: string;
+    logradouro?: string;
+    numero?: string;
+    complemento?: string;
+    bairro?: string;
+    cidade?: string;
+    estado?: string;
+    ocupacao?: string;
+    rendaMensal?: string;
+    telefoneEmpresa?: string;
+    metodoPagamento?: string;
+    dadosPagamentoBanco?: string;
+    dadosPagamentoAgencia?: string;
+    dadosPagamentoConta?: string;
+    dadosPagamentoDigito?: string;
+    dadosPagamentoPix?: string;
+    dadosPagamentoTipoPix?: string;
+    dadosPagamentoPixBanco?: string;
+    dadosPagamentoPixNomeTitular?: string;
+    dadosPagamentoPixCpfTitular?: string;
+  };
+}
+
 // Validation helpers
 const validateCPF = (cpf: string): { isValid: boolean; message: string | null } => {
   const cleanCPF = cpf.replace(/\D/g, "");
@@ -114,7 +160,7 @@ export function ClientDataStep() {
       try {
         const data = await apiRequest(`/api/cep/${cleanCep}`, {
           method: "GET",
-        });
+        }) as CepApiResponse;
 
         if (data && data.logradouro) {
           // Auto-preencher os campos de endereço
@@ -153,9 +199,9 @@ export function ClientDataStep() {
       try {
         const response = await apiRequest(`/api/clientes/cpf/${cleanCPF}`, {
           method: "GET",
-        });
+        }) as ClientDataApiResponse;
 
-        if (response && response.exists) {
+        if (response && response.exists && response.data) {
           const data = response.data;
 
           // Mostrar diálogo confirmando que encontrou dados
@@ -166,37 +212,37 @@ export function ClientDataStep() {
           if (userConfirmed) {
             // Preencher todos os campos com dados existentes
             updateClient({
-              nome: data.nome,
-              email: data.email,
-              telefone: data.telefone,
-              dataNascimento: data.dataNascimento,
-              rg: data.rg,
-              orgaoEmissor: data.orgaoEmissor,
-              rgUf: data.rgUf,
-              rgDataEmissao: data.rgDataEmissao,
-              localNascimento: data.localNascimento,
-              estadoCivil: data.estadoCivil,
-              nacionalidade: data.nacionalidade,
-              cep: data.cep,
-              logradouro: data.logradouro,
-              numero: data.numero,
-              complemento: data.complemento,
-              bairro: data.bairro,
-              cidade: data.cidade,
-              estado: data.estado,
-              ocupacao: data.ocupacao,
-              rendaMensal: data.rendaMensal,
-              telefoneEmpresa: data.telefoneEmpresa,
-              metodoPagamento: data.metodoPagamento,
-              dadosPagamentoBanco: data.dadosPagamentoBanco,
-              dadosPagamentoAgencia: data.dadosPagamentoAgencia,
-              dadosPagamentoConta: data.dadosPagamentoConta,
-              dadosPagamentoDigito: data.dadosPagamentoDigito,
-              dadosPagamentoPix: data.dadosPagamentoPix,
-              dadosPagamentoTipoPix: data.dadosPagamentoTipoPix,
-              dadosPagamentoPixBanco: data.dadosPagamentoPixBanco,
-              dadosPagamentoPixNomeTitular: data.dadosPagamentoPixNomeTitular,
-              dadosPagamentoPixCpfTitular: data.dadosPagamentoPixCpfTitular,
+              nome: data.nome || "",
+              email: data.email || "",
+              telefone: data.telefone || "",
+              dataNascimento: data.dataNascimento || "",
+              rg: data.rg || "",
+              orgaoEmissor: data.orgaoEmissor || "",
+              rgUf: data.rgUf || "",
+              rgDataEmissao: data.rgDataEmissao || "",
+              localNascimento: data.localNascimento || "",
+              estadoCivil: data.estadoCivil || "",
+              nacionalidade: data.nacionalidade || "",
+              cep: data.cep || "",
+              logradouro: data.logradouro || "",
+              numero: data.numero || "",
+              complemento: data.complemento || "",
+              bairro: data.bairro || "",
+              cidade: data.cidade || "",
+              estado: data.estado || "",
+              ocupacao: data.ocupacao || "",
+              rendaMensal: data.rendaMensal || "",
+              telefoneEmpresa: data.telefoneEmpresa || "",
+              metodoPagamento: (data.metodoPagamento as "conta_bancaria" | "pix") || "conta_bancaria",
+              dadosPagamentoBanco: data.dadosPagamentoBanco || "",
+              dadosPagamentoAgencia: data.dadosPagamentoAgencia || "",
+              dadosPagamentoConta: data.dadosPagamentoConta || "",
+              dadosPagamentoDigito: data.dadosPagamentoDigito || "",
+              dadosPagamentoPix: data.dadosPagamentoPix || "",
+              dadosPagamentoTipoPix: data.dadosPagamentoTipoPix || "",
+              dadosPagamentoPixBanco: data.dadosPagamentoPixBanco || "",
+              dadosPagamentoPixNomeTitular: data.dadosPagamentoPixNomeTitular || "",
+              dadosPagamentoPixCpfTitular: data.dadosPagamentoPixCpfTitular || "",
             });
 
             toast({
@@ -947,6 +993,47 @@ export function ClientDataStep() {
             {errors.telefoneEmpresa && (
               <p className="mt-1 text-sm text-destructive">{errors.telefoneEmpresa}</p>
             )}
+          </div>
+
+          {/* Novos campos PAM V1.0 - Dados do Empregador */}
+          <div>
+            <Label htmlFor="clienteEmpresaNome">Nome da Empresa</Label>
+            <Input
+              id="clienteEmpresaNome"
+              type="text"
+              value={clientData.clienteEmpresaNome || ""}
+              onChange={e => updateClient({ clienteEmpresaNome: e.target.value })}
+              placeholder="Ex: Empresa LTDA"
+              data-testid="input-empresa-nome"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="clienteDataAdmissao">Data de Admissão</Label>
+            <Input
+              id="clienteDataAdmissao"
+              type="date"
+              value={clientData.clienteDataAdmissao || ""}
+              onChange={e => updateClient({ clienteDataAdmissao: e.target.value })}
+              data-testid="input-data-admissao"
+            />
+          </div>
+
+          <div className="md:col-span-2">
+            <Label htmlFor="clienteDividasExistentes">Valor de Dívidas Existentes</Label>
+            <CurrencyInput
+              id="clienteDividasExistentes"
+              value={clientData.clienteDividasExistentes?.toString() || ""}
+              onChange={e => {
+                const value = parseFloat(e.target.value.replace(/[^\d,.-]/g, '').replace(',', '.'));
+                updateClient({ clienteDividasExistentes: isNaN(value) ? undefined : value });
+              }}
+              placeholder="R$ 0,00"
+              data-testid="input-dividas-existentes"
+            />
+            <p className="mt-1 text-xs text-muted-foreground">
+              Informe o valor total de dívidas em cartões, financiamentos, etc.
+            </p>
           </div>
         </CardContent>
       </Card>
