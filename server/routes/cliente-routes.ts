@@ -74,9 +74,9 @@ router.get("/clientes/cpf/:cpf", async (req: Request, res: Response) => {
       return res.json(clientData);
     }
 
-    // Para qualquer outro CPF, retornar que não existe
+    // Para qualquer outro CPF, retornar 404 Not Found (padrão RESTful)
     console.log(`[CLIENTE API] Nenhuma proposta encontrada para CPF: ${cleanCPF}`);
-    return res.json({ exists: false });
+    return res.status(404).json({ message: 'Cliente não encontrado' });
   } catch (error) {
     console.error("Erro ao buscar cliente por CPF:", error);
     res.status(500).json({ error: "Erro ao buscar dados do cliente" });
