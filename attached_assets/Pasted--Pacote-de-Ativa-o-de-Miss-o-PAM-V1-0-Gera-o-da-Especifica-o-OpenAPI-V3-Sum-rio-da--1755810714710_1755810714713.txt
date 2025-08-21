@@ -1,0 +1,50 @@
+### Pacote de Ativação de Missão (PAM) V1.0 (Geração da Especificação OpenAPI V3)
+
+* **Sumário da Missão (O Quê):** Gerar a especificação OpenAPI V3 (anteriormente conhecida como Swagger) para os endpoints da nova API de Propostas, documentando formalmente o seu contrato.
+* **Intenção Estratégica (O Porquê):** Adotar uma abordagem "Design-First" para as nossas APIs, criando uma "fonte da verdade" única para os seus contratos. Uma especificação OpenAPI serve como documentação interativa, permite a geração automática de clientes de API (SDKs) e viabiliza testes de contrato automatizados, melhorando drasticamente a DX (Developer Experience) e a robustez da integração.
+* **Histórico Relevante (Consulta Obrigatória):** A missão anterior refatorou a API de Propostas para seguir uma arquitetura DDD. Esta missão irá documentar os endpoints resultantes dessa refatoração (`POST /`, `GET /:id`, etc.).
+* **Modelo Mental (Como se Encaixa):** Aja como um Engenheiro de API. Sua tarefa é descrever os endpoints existentes de forma estruturada e padronizada, utilizando a sintaxe YAML do OpenAPI V3.
+
+---
+
+**IMPLEMENTAR:**
+Especificação OpenAPI V3 para a API de Propostas
+
+**CURRENT STATE:**
+A nova API de Propostas está funcional, mas o seu contrato (endpoints, métodos, payloads de entrada/saída, códigos de resposta) não está formalmente documentado, dificultando o seu consumo e a sua validação.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  Um novo arquivo, `architecture/02-technical/api-contracts/proposal-api.v1.yaml`, é criado.
+2.  O arquivo contém uma especificação OpenAPI V3 válida em formato YAML.
+3.  A especificação documenta, no mínimo, os seguintes endpoints da API de Propostas:
+    * `POST /api/propostas`
+    * `GET /api/propostas/{id}`
+4.  Para cada endpoint, a especificação deve detalhar:
+    * Os parâmetros (ex: `{id}` no path).
+    * O corpo da requisição (`requestBody`), referenciando um schema de componente para o payload.
+    * As respostas possíveis (`responses`), incluindo `200 OK`, `201 Created`, `400 Bad Request`, `404 Not Found`.
+5.  Os schemas de dados (ex: `Proposal`, `ErrorResponse`) são definidos de forma reutilizável na seção `components/schemas`.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  **Crie o Arquivo:** Crie o novo arquivo `architecture/02-technical/api-contracts/proposal-api.v1.yaml`.
+2.  **Use o Padrão OpenAPI V3:** A estrutura do arquivo deve seguir a especificação OpenAPI 3.0.
+3.  **Documente os Endpoints Principais:** Foque em documentar os endpoints de criação (`POST`) e busca por ID (`GET /:id`) como prova de conceito.
+4.  **Schemas Reutilizáveis:** Defina os modelos de dados na seção `components/schemas` e referencie-os (`$ref: '#/components/schemas/Proposal'`) nas definições de `requestBody` e `responses` para evitar duplicação.
+5.  **Validação:** A prova de sucesso será a validação do arquivo YAML gerado. Você pode usar um validador online (como o do Swagger Editor) para confirmar que a sua especificação está sintaticamente correta.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que o formato YAML é o mais legível para a nossa especificação OpenAPI."]
+* **VALIDAÇÃO PENDENTE:** [A especificação gerada deve ser revisada e ratificada pelo Arquiteto Chefe.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear o ficheiro exato a ser criado.
+2.  Garantir que a especificação OpenAPI está completa e sintaticamente correta.
+3.  Executar `get_latest_lsp_diagnostics` para garantir que o ambiente está estável.
+4.  **Declarar Nível de Confiança (0 a 100%)**.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (revisão da especificação YAML gerada).
+7.  **Documentar Decisões Técnicas**.

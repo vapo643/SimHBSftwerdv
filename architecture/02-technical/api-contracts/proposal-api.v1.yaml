@@ -1,0 +1,540 @@
+openapi: 3.0.3
+info:
+  title: Simpix Proposal API
+  description: |
+    API for credit proposal management within the Simpix platform.
+    
+    This API follows Domain-Driven Design (DDD) architecture with clear separation between:
+    - Presentation Layer (Controllers & Routes)
+    - Application Layer (Use Cases & Orchestration)  
+    - Domain Layer (Business Logic & Entities)
+    - Infrastructure Layer (Data Persistence)
+    
+    All endpoints follow a consistent response format and include comprehensive error handling.
+  version: 1.0.0
+  contact:
+    name: Simpix Development Team
+    email: dev@simpix.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.simpix.com/api
+    description: Production server
+  - url: https://staging-api.simpix.com/api
+    description: Staging server
+  - url: http://localhost:3000/api
+    description: Development server
+
+paths:
+  /proposals:
+    post:
+      summary: Create a new credit proposal
+      description: |
+        Creates a new credit proposal with customer data and loan conditions.
+        The proposal will be initialized with status 'aguardando_analise' (awaiting analysis).
+      operationId: createProposal
+      tags:
+        - Proposals
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProposalRequest'
+            examples:
+              basicProposal:
+                summary: Basic proposal example
+                value:
+                  customerData:
+                    name: "João Silva"
+                    cpf: "12345678901"
+                    email: "joao.silva@email.com"
+                    phone: "11999887766"
+                    monthlyIncome: 5000
+                  loanConditions:
+                    requestedAmount: 10000
+                    term: 24
+                    purpose: "Reforma residencial"
+                  storeId: "1"
+                  productId: "1"
+      responses:
+        '201':
+          description: Proposal created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProposalSuccessResponse'
+              examples:
+                success:
+                  summary: Successful proposal creation
+                  value:
+                    success: true
+                    data:
+                      id: "b3b5433f-0efe-4bbb-be01-411e37c262a9"
+                      status: "aguardando_analise"
+                      customerData:
+                        name: "João Silva"
+                        cpf: "12345678901"
+                        email: "joao.silva@email.com"
+                        phone: "11999887766"
+                        monthlyIncome: 5000
+                      loanConditions:
+                        requestedAmount: 10000
+                        term: 24
+                        purpose: "Reforma residencial"
+                      storeId: "1"
+                      productId: "1"
+                      createdAt: "2025-08-21T21:00:00.000Z"
+                      updatedAt: "2025-08-21T21:00:00.000Z"
+                    message: "Proposal created successfully"
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+              examples:
+                validationError:
+                  summary: Validation error example
+                  value:
+                    success: false
+                    error: "Validation error"
+                    details:
+                      - code: "invalid_type"
+                        expected: "string"
+                        received: "undefined"
+                        path: ["customerData", "name"]
+                        message: "Required"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    get:
+      summary: Get all proposals
+      description: |
+        Retrieves all credit proposals. Returns an array of proposals with pagination metadata.
+      operationId: getAllProposals
+      tags:
+        - Proposals
+      responses:
+        '200':
+          description: Proposals retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProposalListResponse'
+              examples:
+                success:
+                  summary: Successful proposals retrieval
+                  value:
+                    success: true
+                    data:
+                      - id: "b3b5433f-0efe-4bbb-be01-411e37c262a9"
+                        status: "aguardando_analise"
+                        customerData:
+                          name: "Cliente 1"
+                          cpf: "11111111111"
+                        loanConditions:
+                          requestedAmount: 10000
+                          term: 24
+                        createdAt: "2025-08-20T19:32:58.573Z"
+                        updatedAt: "2025-08-20T19:32:58.573Z"
+                    total: 1
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /proposals/{id}:
+    get:
+      summary: Get proposal by ID
+      description: |
+        Retrieves a specific credit proposal by its unique identifier.
+      operationId: getProposalById
+      tags:
+        - Proposals
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Unique identifier of the proposal
+          schema:
+            type: string
+            format: uuid
+          example: "b3b5433f-0efe-4bbb-be01-411e37c262a9"
+      responses:
+        '200':
+          description: Proposal found and returned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProposalSuccessResponse'
+              examples:
+                success:
+                  summary: Successful proposal retrieval
+                  value:
+                    success: true
+                    data:
+                      id: "b3b5433f-0efe-4bbb-be01-411e37c262a9"
+                      status: "aguardando_analise"
+                      customerData:
+                        name: "Cliente 1"
+                        cpf: "11111111111"
+                        email: "cliente1@teste.com"
+                        phone: "11999888777"
+                        monthlyIncome: 15000
+                      loanConditions:
+                        requestedAmount: 10000
+                        term: 24
+                      storeId: "1"
+                      productId: "1"
+                      createdAt: "2025-08-20T19:32:58.573Z"
+                      updatedAt: "2025-08-20T19:32:58.573Z"
+        '404':
+          description: Proposal not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                notFound:
+                  summary: Proposal not found
+                  value:
+                    success: false
+                    error: "Proposal not found"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /proposals/{id}/analyze:
+    post:
+      summary: Analyze a proposal
+      description: |
+        Submits a proposal for credit analysis. This endpoint triggers the business logic
+        to evaluate the proposal based on customer data and loan conditions.
+      operationId: analyzeProposal
+      tags:
+        - Proposal Workflow
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Unique identifier of the proposal to analyze
+          schema:
+            type: string
+            format: uuid
+          example: "b3b5433f-0efe-4bbb-be01-411e37c262a9"
+      responses:
+        '200':
+          description: Analysis completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProposalSuccessResponse'
+        '404':
+          description: Proposal not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    CreateProposalRequest:
+      type: object
+      required:
+        - customerData
+        - loanConditions
+      properties:
+        customerData:
+          $ref: '#/components/schemas/CustomerData'
+        loanConditions:
+          $ref: '#/components/schemas/LoanConditions'
+        partnerId:
+          type: string
+          format: uuid
+          description: ID of the partner/broker
+          example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+        storeId:
+          type: string
+          description: ID of the store/branch
+          example: "1"
+        productId:
+          type: string  
+          description: ID of the credit product
+          example: "1"
+
+    CustomerData:
+      type: object
+      required:
+        - name
+        - cpf
+      properties:
+        name:
+          type: string
+          minLength: 1
+          description: Full name of the customer
+          example: "João Silva Santos"
+        cpf:
+          type: string
+          pattern: '^[0-9]{11}$'
+          description: Customer's CPF (Brazilian tax ID) - 11 digits
+          example: "12345678901"
+        email:
+          type: string
+          format: email
+          description: Customer's email address
+          example: "joao.silva@email.com"
+        phone:
+          type: string
+          description: Customer's phone number
+          example: "11999887766"
+        birthDate:
+          type: string
+          format: date
+          description: Customer's birth date (ISO 8601 format)
+          example: "1985-03-15"
+        monthlyIncome:
+          type: number
+          minimum: 0
+          description: Customer's monthly income in BRL
+          example: 5000.00
+        rg:
+          type: string
+          description: Customer's RG (Brazilian ID document)
+          example: "123456789"
+        issuingBody:
+          type: string
+          description: RG issuing authority
+          example: "SSP/SP"
+        maritalStatus:
+          type: string
+          description: Customer's marital status
+          enum: [solteiro, casado, divorciado, viuvo, separado]
+          example: "solteiro"
+        nationality:
+          type: string
+          description: Customer's nationality
+          example: "Brasileira"
+        zipCode:
+          type: string
+          pattern: '^[0-9]{8}$'
+          description: ZIP code (CEP) - 8 digits
+          example: "01234567"
+        address:
+          type: string
+          description: Full address
+          example: "Rua das Flores, 123, Apt 45, Centro"
+        occupation:
+          type: string
+          description: Customer's profession/occupation
+          example: "Engenheiro de Software"
+
+    LoanConditions:
+      type: object
+      required:
+        - requestedAmount
+        - term
+      properties:
+        requestedAmount:
+          type: number
+          minimum: 0.01
+          description: Requested loan amount in BRL
+          example: 10000.00
+        term:
+          type: integer
+          minimum: 1
+          maximum: 84
+          description: Loan term in months
+          example: 24
+        purpose:
+          type: string
+          description: Purpose of the loan
+          example: "Reforma residencial"
+        collateral:
+          type: string
+          description: Collateral for the loan
+          example: "Imóvel próprio"
+        tacValue:
+          type: number
+          minimum: 0
+          description: TAC (Taxa de Abertura de Crédito) value in BRL
+          example: 150.00
+        iofValue:
+          type: number
+          minimum: 0  
+          description: IOF (Imposto sobre Operações Financeiras) value in BRL
+          example: 38.00
+        totalFinancedAmount:
+          type: number
+          minimum: 0
+          description: Total financed amount including fees
+          example: 10188.00
+        monthlyPayment:
+          type: number
+          minimum: 0
+          description: Monthly payment amount in BRL
+          example: 512.50
+        interestRate:
+          type: number
+          minimum: 0
+          maximum: 100
+          description: Annual interest rate as percentage
+          example: 2.99
+
+    ProposalResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier of the proposal
+          example: "b3b5433f-0efe-4bbb-be01-411e37c262a9"
+        status:
+          type: string
+          enum: 
+            - aguardando_analise
+            - em_analise
+            - aprovada
+            - rejeitada
+            - pendente
+            - formalizada
+            - paga
+          description: Current status of the proposal
+          example: "aguardando_analise"
+        customerData:
+          $ref: '#/components/schemas/CustomerData'
+        loanConditions:
+          $ref: '#/components/schemas/LoanConditions'
+        partnerId:
+          type: string
+          format: uuid
+          description: ID of the partner/broker
+        storeId:
+          type: string
+          description: ID of the store/branch
+        productId:
+          type: string
+          description: ID of the credit product
+        createdAt:
+          type: string
+          format: date-time
+          description: Proposal creation timestamp
+          example: "2025-08-21T21:00:00.000Z"
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp
+          example: "2025-08-21T21:00:00.000Z"
+        pendingReason:
+          type: string
+          description: Reason for pending status (if applicable)
+        observations:
+          type: string
+          description: Additional observations about the proposal
+        analysisResult:
+          type: object
+          description: Results from credit analysis (if completed)
+
+    ProposalSuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: '#/components/schemas/ProposalResponse'
+        message:
+          type: string
+          description: Success message
+          example: "Proposal created successfully"
+
+    ProposalListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProposalResponse'
+        total:
+          type: integer
+          description: Total number of proposals
+          example: 25
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+          description: Error message
+          example: "Internal server error"
+
+    ValidationErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+          example: "Validation error"
+        details:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: string
+                example: "invalid_type"
+              expected:
+                type: string
+                example: "string"
+              received:
+                type: string
+                example: "undefined"
+              path:
+                type: array
+                items:
+                  type: string
+                example: ["customerData", "name"]
+              message:
+                type: string
+                example: "Required"
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token authentication
+
+security:
+  - BearerAuth: []
+
+tags:
+  - name: Proposals
+    description: Operations related to credit proposal management
+  - name: Proposal Workflow
+    description: Operations for proposal status transitions and analysis
