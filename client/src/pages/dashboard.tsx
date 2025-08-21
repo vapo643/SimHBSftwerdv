@@ -155,7 +155,7 @@ const Dashboard: React.FC = () => {
   const [parceiroFilter, setParceiroFilter] = useState<string>("todos");
   const [viewMode, setViewMode] = useState<"cards" | "table">("cards");
 
-  // Fetch real proposals data
+  // Fetch real proposals data - only when authenticated
   const {
     data: propostasResponse,
     isLoading,
@@ -163,26 +163,17 @@ const Dashboard: React.FC = () => {
     refetch,
   } = useQuery<{ success: boolean; data: any[]; total: number }>({
     queryKey: ["/api/propostas"],
-    queryFn: async () => {
-      console.log("[Dashboard] Fetching /api/propostas");
-      const token = await (window as any).supabase?.auth?.getSession();
-      console.log("[Dashboard] Token available:", !!token?.data?.session?.access_token);
-      
-      const response = await fetch("/api/propostas", {
-        headers: {
-          Authorization: `Bearer ${token?.data?.session?.access_token || ''}`,
-        },
-      });
-      
-      console.log("[Dashboard] Response status:", response.status);
-      const data = await response.json();
-      console.log("[Dashboard] Response data:", data);
-      return data;
-    },
+    enabled: !!user, // Only fetch when user is authenticated
   });
   
-  // Log the raw response for debugging
-  console.log("[Dashboard] Raw propostasResponse:", propostasResponse);
+  // Log the query state for debugging
+  console.log("[Dashboard] Query state:", {
+    user: !!user,
+    userRole: user?.role,
+    isLoading,
+    error,
+    data: propostasResponse,
+  });
   
   // Extract propostas - dual-key transformation in apiClient ensures both formats work
   // The apiClient automatically adds camelCase aliases for all snake_case keys

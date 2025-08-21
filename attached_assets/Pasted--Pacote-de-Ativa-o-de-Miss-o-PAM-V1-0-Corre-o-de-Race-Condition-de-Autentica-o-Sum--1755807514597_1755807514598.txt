@@ -1,0 +1,43 @@
+### Pacote de Ativação de Missão (PAM) V1.0 (Correção de Race Condition de Autenticação)
+
+* **Sumário da Missão (O Quê):** Refatorar o hook `useQuery` na página do Dashboard (`dashboard.tsx`) para que ele aguarde a conclusão da inicialização da autenticação antes de tentar buscar os dados das propostas.
+* **Intenção Estratégica (O Porquê):** Eliminar a condição de corrida que causa erros `401 Unauthorized` na inicialização e impede que os dados sejam exibidos. Esta correção irá sincronizar o fluxo de dados com o fluxo de autenticação, restaurando a funcionalidade principal do Dashboard.
+* **Histórico Relevante (Consulta Obrigatória):** Os logs do console provam que a chamada de dados está a ocorrer antes de o token de autenticação estar disponível. A biblioteca `TanStack Query` possui uma solução nativa para este problema através da opção `enabled`.
+* **Modelo Mental (Como se Encaixa):** Aja como um Engenheiro de Frontend Sênior. Sua tarefa é modificar uma chamada de dados para torná-la condicional, com base no estado de outro sistema (o `AuthContext`).
+
+---
+
+**IMPLEMENTAR:**
+Sincronização da Busca de Dados com o Estado de Autenticação
+
+**CURRENT STATE:**
+O hook `useQuery` no arquivo `client/src/pages/dashboard.tsx` é executado incondicionalmente na primeira renderização, antes que o `useAuth` hook tenha confirmado a disponibilidade de um token de sessão, resultando numa falha de `401 Unauthorized`.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  O arquivo `client/src/pages/dashboard.tsx` é modificado.
+2.  O hook `useQuery` responsável por buscar `/api/propostas` agora utiliza a opção `enabled`.
+3.  O valor da opção `enabled` está vinculado ao estado de autenticação do `useAuth` hook (ex: `enabled: isAuthenticated && !isAuthLoading`). A query só deve ser executada quando o sistema confirmar que o usuário está autenticado e que o processo de carregamento inicial do auth terminou.
+4.  Como resultado, a chamada de API para `/api/propostas` só é disparada **após** a autenticação estar pronta, o erro `401` desaparece, e o Dashboard exibe corretamente a lista de propostas.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  **Componente Alvo:** O foco da sua modificação é o arquivo `client/src/pages/dashboard.tsx`.
+2.  **Use o Contexto de Autenticação:** Certifique-se de que o componente está a consumir o `useAuth` hook e a obter o estado de autenticação (ex: `isAuthenticated`, `isLoading`).
+3.  **Implemente a Opção `enabled`:** Adicione a propriedade `enabled: !!isAuthenticated` (ou uma lógica mais completa que também considere o estado `isLoading`) ao objeto de configuração do `useQuery` das propostas.
+4.  **Validação:** A prova de sucesso é recarregar a página do Dashboard e confirmar no console do navegador que o erro `401 Unauthorized` para `/api/propostas` não ocorre mais e que os logs `[Dashboard] Raw propostasResponse` agora contêm o array de propostas.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que o `useAuth` hook expõe um booleano como `isAuthenticated` que podemos usar para a condição `enabled`."]
+* **VALIDAÇÃO PENDENTE:** [A validação funcional completa requer confirmar que o dashboard carrega os dados corretamente para um usuário logado.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear o ficheiro e o hook exato a ser modificado.
+2.  Garantir que a lógica condicional na opção `enabled` está correta.
+3.  Executar `get_latest_lsp_diagnostics` para garantir 0 erros novos.
+4.  **Declarar Nível de Confiança (0 a 100%)**.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (revisão lógica do código e verificação do comportamento no navegador).
+7.  **Documentar Decisões Técnicas**.

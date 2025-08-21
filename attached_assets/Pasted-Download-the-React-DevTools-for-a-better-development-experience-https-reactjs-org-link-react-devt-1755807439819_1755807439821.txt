@@ -1,0 +1,91 @@
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+FeatureFlagContext.tsx:76 🚩 Feature Flags carregadas: {maintenance-mode: false, read-only-mode: false, novo-dashboard: false, pagamento-pix-instant: false, relatorios-avancados: false, …}
+content-script.js:22 Document already loaded, running initialization immediately
+content-script.js:4 Attempting to initialize AdUnit
+content-script.js:6 AdUnit initialized successfully
+webcomponents-ce.js:33 Uncaught Error: A custom element with name 'mce-autosize-textarea' has already been defined.
+    at Aa (webcomponents-ce.js:33:363)
+    at m.define (webcomponents-ce.js:33:133)
+    at overlay_bundle.js:148:5559
+    at D (overlay_bundle.js:44:680)
+    at overlay_bundle.js:159:392
+Aa @ webcomponents-ce.js:33
+m.define @ webcomponents-ce.js:33
+(anonymous) @ overlay_bundle.js:148
+D @ overlay_bundle.js:44
+(anonymous) @ overlay_bundle.js:159Understand this error
+AuthContext.tsx:170 🔐 [AUTH EVENT] SIGNED_IN {hasSession: true, tokenLength: 767}
+dashboard.tsx:185 [Dashboard] Raw propostasResponse: undefined
+dashboard.tsx:259 DEBUG - First 3 proposals values: []
+dashboard.tsx:167 [Dashboard] Fetching /api/propostas
+dashboard.tsx:169 [Dashboard] Token available: false
+apiClient.ts:208 🔐 [TOKEN MANAGER] Fresh token obtained, length: 767
+apiClient.ts:385 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/features', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.9B6OoomgUVHN-Xu6eF4X9nmudeNZGjjRALR6XotlP2Y', hasToken: true, isFormData: false}
+apiClient.ts:385 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.9B6OoomgUVHN-Xu6eF4X9nmudeNZGjjRALR6XotlP2Y', hasToken: true, isFormData: false}
+apiClient.ts:385 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…7is3g.janeway.replit.dev/api/alertas/notificacoes', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.9B6OoomgUVHN-Xu6eF4X9nmudeNZGjjRALR6XotlP2Y', hasToken: true, isFormData: false}
+apiClient.ts:385 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.9B6OoomgUVHN-Xu6eF4X9nmudeNZGjjRALR6XotlP2Y', hasToken: true, isFormData: false}
+dashboard.tsx:185 [Dashboard] Raw propostasResponse: undefined
+dashboard.tsx:259 DEBUG - First 3 proposals values: []
+AuthContext.tsx:170 🔐 [AUTH EVENT] INITIAL_SESSION {hasSession: true, tokenLength: 767}
+requests.js:1  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas 401 (Unauthorized)
+s.fetch @ requests.js:1
+(anonymous) @ traffic.js:1
+fetch @ traffic.js:1
+queryFn @ dashboard.tsx:171
+await in queryFn
+fetchFn @ @tanstack_react-query.js?v=7bd7f27f:840
+run @ @tanstack_react-query.js?v=7bd7f27f:494
+start @ @tanstack_react-query.js?v=7bd7f27f:536
+fetch @ @tanstack_react-query.js?v=7bd7f27f:926
+executeFetch_fn @ @tanstack_react-query.js?v=7bd7f27f:2211
+onSubscribe @ @tanstack_react-query.js?v=7bd7f27f:1898
+subscribe @ @tanstack_react-query.js?v=7bd7f27f:24
+(anonymous) @ @tanstack_react-query.js?v=7bd7f27f:3022
+subscribeToStore @ chunk-276SZO74.js?v=7bd7f27f:11984
+commitHookEffectListMount @ chunk-276SZO74.js?v=7bd7f27f:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=7bd7f27f:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=7bd7f27f:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=7bd7f27f:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=7bd7f27f:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=7bd7f27f:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=7bd7f27f:19447
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=7bd7f27f:18868
+flushSyncCallbacks @ chunk-276SZO74.js?v=7bd7f27f:9119
+commitRootImpl @ chunk-276SZO74.js?v=7bd7f27f:19432
+commitRoot @ chunk-276SZO74.js?v=7bd7f27f:19277
+finishConcurrentRender @ chunk-276SZO74.js?v=7bd7f27f:18805
+performConcurrentWorkOnRoot @ chunk-276SZO74.js?v=7bd7f27f:18718
+workLoop @ chunk-276SZO74.js?v=7bd7f27f:197
+flushWork @ chunk-276SZO74.js?v=7bd7f27f:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=7bd7f27f:384Understand this error
+dashboard.tsx:177 [Dashboard] Response status: 401
+dashboard.tsx:185 [Dashboard] Raw propostasResponse: undefined
+dashboard.tsx:259 DEBUG - First 3 proposals values: []
+dashboard.tsx:179 [Dashboard] Response data: {message: 'No token provided'}
+dashboard.tsx:185 [Dashboard] Raw propostasResponse: {message: 'No token provided'}
+dashboard.tsx:259 DEBUG - First 3 proposals values: []
+chunk-276SZO74.js?v=7bd7f27f:18625 [Violation] 'setTimeout' handler took 88ms
+AuthContext.tsx:170 🔐 [AUTH EVENT] SIGNED_IN {hasSession: true, tokenLength: 767}
+apiClient.ts:385 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.9B6OoomgUVHN-Xu6eF4X9nmudeNZGjjRALR6XotlP2Y', hasToken: true, isFormData: false}
+dashboard.tsx:185 [Dashboard] Raw propostasResponse: {message: 'No token provided'}
+dashboard.tsx:259 DEBUG - First 3 proposals values: []
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/alertas/notificacoes : {notificacoes: Array(0), totalNaoLidas: 0}
+apiClient.ts:437 [API Client] After dual-key transformation: {notificacoes: Array(0), totalNaoLidas: 0}
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/features : {flags: {…}, context: {…}}
+apiClient.ts:437 [API Client] After dual-key transformation: {flags: {…}, context: {…}}
+FeatureFlagContext.tsx:76 🚩 Feature Flags carregadas: {maintenance-mode: false, read-only-mode: false, novo-dashboard: false, pagamento-pix-instant: false, relatorios-avancados: false, …}
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me : {message: 'Debug endpoint - User profile from robust JWT middleware', user: {…}, timestamp: '2025-08-21T17:16:37.000-03:00'}
+apiClient.ts:437 [API Client] After dual-key transformation: {message: 'Debug endpoint - User profile from robust JWT middleware', user: {…}, timestamp: '2025-08-21T17:16:37.000-03:00'}
+AuthContext.tsx:102 🔐 [AUTH RESTORED] User profile loaded with valid token
+dashboard.tsx:185 [Dashboard] Raw propostasResponse: {message: 'No token provided'}
+dashboard.tsx:259 DEBUG - First 3 proposals values: []
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me : {message: 'Debug endpoint - User profile from robust JWT middleware', user: {…}, timestamp: '2025-08-21T17:16:38.000-03:00'}
+apiClient.ts:437 [API Client] After dual-key transformation: {message: 'Debug endpoint - User profile from robust JWT middleware', user: {…}, timestamp: '2025-08-21T17:16:38.000-03:00'}
+AuthContext.tsx:102 🔐 [AUTH RESTORED] User profile loaded with valid token
+dashboard.tsx:185 [Dashboard] Raw propostasResponse: {message: 'No token provided'}
+dashboard.tsx:259 DEBUG - First 3 proposals values: []
+apiClient.ts:433 [API Client] Raw JSON response from https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me : {message: 'Debug endpoint - User profile from robust JWT middleware', user: {…}, timestamp: '2025-08-21T17:16:39.000-03:00'}
+apiClient.ts:437 [API Client] After dual-key transformation: {message: 'Debug endpoint - User profile from robust JWT middleware', user: {…}, timestamp: '2025-08-21T17:16:39.000-03:00'}message: "Debug endpoint - User profile from robust JWT middleware"timestamp: "2025-08-21T17:16:39.000-03:00"user: {id: 'a65efc54-90cd-4b94-b971-c8a560104032', email: 'gabrielserri238@gmail.com', role: 'ADMINISTRADOR', full_name: 'Gabriel Serri', fullName: 'Gabriel Serri', …}[[Prototype]]: Object
+AuthContext.tsx:102 🔐 [AUTH RESTORED] User profile loaded with valid token
+dashboard.tsx:185 [Dashboard] Raw propostasResponse: {message: 'No token provided'}message: "No token provided"[[Prototype]]: Object
+dashboard.tsx:259 DEBUG - First 3 proposals values: 
