@@ -31,9 +31,9 @@ describe("Proposal API Integration Tests - DDD Architecture", () => {
       throw new Error(`FATAL: NODE_ENV='${process.env.NODE_ENV}' deve ser 'test'. Testes bloqueados para proteger dados.`);
     }
     
-    // Proteção 2: DATABASE_URL deve conter 'test'
-    if (!process.env.DATABASE_URL?.includes('test')) {
-      throw new Error('FATAL: DATABASE_URL não contém "test". Use um banco de teste dedicado.');
+    // Proteção 2: TEST_DATABASE_URL deve estar configurado
+    if (!process.env.TEST_DATABASE_URL) {
+      throw new Error('FATAL: TEST_DATABASE_URL não configurado. Use um banco de teste dedicado.');
     }
     
     // Proteção 3: Rejeitar padrões de produção

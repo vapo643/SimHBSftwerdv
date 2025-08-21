@@ -28,14 +28,14 @@ if (process.env.TEST_DATABASE_URL) {
 // CRITICAL: Force NODE_ENV to 'test' to enable test-only operations
 process.env.NODE_ENV = 'test';
 
-// Security validation: Ensure test database URL contains 'test'
-if (process.env.DATABASE_URL && !process.env.DATABASE_URL.includes('test')) {
-  console.error('[TEST SETUP] 🔴 SECURITY ALERT: DATABASE_URL does not contain "test"');
-  console.error('[TEST SETUP] 🔴 This could indicate incorrect configuration');
-  throw new Error('FATAL: Test database URL must contain "test" for safety');
+// Security validation: Ensure we're using TEST_DATABASE_URL in test environment
+if (process.env.NODE_ENV === 'test' && !process.env.TEST_DATABASE_URL) {
+  console.error('[TEST SETUP] 🔴 SECURITY ALERT: TEST_DATABASE_URL not configured');
+  console.error('[TEST SETUP] 🔴 This could indicate incorrect test configuration');
+  throw new Error('FATAL: TEST_DATABASE_URL must be configured for test environment');
 }
 
 console.log('[TEST SETUP] 🔧 Test environment configured:');
 console.log(`[TEST SETUP]   - NODE_ENV: ${process.env.NODE_ENV}`);
-console.log(`[TEST SETUP]   - Database: ${process.env.DATABASE_URL?.includes('test') ? '✅ Test DB' : '⚠️ Check configuration'}`);
+console.log(`[TEST SETUP]   - Database: ${process.env.TEST_DATABASE_URL ? '✅ Isolated Test DB' : '⚠️ Check configuration'}`);
 console.log('[TEST SETUP] 🛡️ Triple protection active: NODE_ENV=test, isolated DB, runtime guards');

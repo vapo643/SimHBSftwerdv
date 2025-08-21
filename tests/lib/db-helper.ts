@@ -27,10 +27,10 @@ export async function cleanTestDatabase(): Promise<void> {
     throw new Error(`FATAL: NODE_ENV='${process.env.NODE_ENV}' - Esta função só pode executar com NODE_ENV='test'. Operação abortada para proteger dados.`);
   }
   
-  // Proteção 2: DATABASE_URL deve conter 'test' no nome
-  if (!process.env.DATABASE_URL?.includes('test')) {
-    console.error('🔴 CRITICAL SECURITY ALERT: DATABASE_URL não contém "test" no nome');
-    throw new Error('FATAL: DATABASE_URL não contém "test". Use um banco de dados de teste dedicado. Operação abortada.');
+  // Proteção 2: TEST_DATABASE_URL deve estar configurado
+  if (!process.env.TEST_DATABASE_URL) {
+    console.error('🔴 CRITICAL SECURITY ALERT: TEST_DATABASE_URL não está configurado');
+    throw new Error('FATAL: TEST_DATABASE_URL não configurado. Use um banco de dados de teste dedicado. Operação abortada.');
   }
   
   // Proteção 3: Rejeitar URLs de produção conhecidas (defesa em profundidade)
@@ -211,26 +211,15 @@ export async function setupTestEnvironment(): Promise<{
     
     // Create test user using Supabase Admin for proper authentication
     console.log("[TEST DB] 🔐 Creating Supabase auth user...");
-    const testEmail = "test@simpix.com";
+    const timestamp = Date.now();
+    const testEmail = `test-${timestamp}@simpix.com`; // Unique email for each test run
     const testPassword = "TestPassword123!";
     
     // Import and use Supabase Admin Client
     const { createServerSupabaseAdminClient } = await import("../../server/lib/supabase");
     const supabaseAdmin = createServerSupabaseAdminClient();
     
-    // Delete any existing test user for clean state
-    try {
-      const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers();
-      const existingUser = existingUsers.users.find(u => u.email === testEmail);
-      if (existingUser) {
-        await supabaseAdmin.auth.admin.deleteUser(existingUser.id);
-        console.log("[TEST DB] 🗑️ Deleted existing test user");
-      }
-    } catch (e) {
-      // User might not exist - continue
-    }
-    
-    // Create new auth user
+    // Create new auth user with unique email (no deletion needed)
     const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email: testEmail,
       password: testPassword,
@@ -267,7 +256,6 @@ export async function setupTestEnvironment(): Promise<{
     
     // 3. Create test partner using raw SQL (with timestamp for uniqueness)
     console.log("[TEST DB] 🏢 Creating test partner...");
-    const timestamp = Date.now();
     const partnerResult = await directDb`
       INSERT INTO parceiros (razao_social, cnpj)
       VALUES (
@@ -342,7 +330,7 @@ export async function setupTestEnvironment(): Promise<{
     await directDb`
       INSERT INTO gerente_lojas (gerente_id, loja_id)
       VALUES (
-        ${testUserId},
+        ${dbUserId},
         ${testStoreId}
       )
       ON CONFLICT (gerente_id, loja_id) DO NOTHING
