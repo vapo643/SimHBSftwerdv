@@ -98,13 +98,16 @@ const FilaAnalise: React.FC = () => {
 
   // Fetch real proposals data - filtered based on role with PROPER SECURITY
   const {
-    data: propostas,
+    data: propostasResponse,
     isLoading,
     error,
-  } = useQuery<Proposta[]>({
+  } = useQuery<{ success: boolean; data: Proposta[]; total: number }>({
     queryKey: [queryUrl],
     enabled: !!user?.role, // Só fazer query se tiver role definido
   });
+  
+  // Extract the actual proposals array from the response
+  const propostas = propostasResponse?.data || [];
 
   // Fetch partners data
   const { data: parceiros } = useQuery<Array<{ id: number; razaoSocial: string }>>({

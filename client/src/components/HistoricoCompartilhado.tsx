@@ -102,11 +102,13 @@ const HistoricoCompartilhado: React.FC<HistoricoCompartilhadoProps> = ({ propost
             logs.map(
               (
                 log: {
+                  id?: string;
                   created_at: string;
                   descricao: string;
                   usuario_nome?: string;
                   tipo?: string;
                   detalhes?: string;
+                  observacao?: string;
                   status_novo?: string;
                   status_anterior?: string;
                   profiles?: { role?: string };

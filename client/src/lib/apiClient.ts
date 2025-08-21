@@ -430,9 +430,11 @@ export async function apiClient<T = any>(
       // Default JSON handling
       if (contentType && contentType.includes("application/json")) {
         const jsonData = await response.json();
+        console.log("[API Client] Raw JSON response from", fullUrl, ":", jsonData);
         // Apply dual-key transformation for /api/ endpoints
         if (fullUrl.includes('/api/')) {
           data = deepTransformDualCase(jsonData);
+          console.log("[API Client] After dual-key transformation:", data);
         } else {
           data = jsonData;
         }

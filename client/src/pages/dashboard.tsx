@@ -165,25 +165,31 @@ const Dashboard: React.FC = () => {
     queryKey: ["/api/propostas"],
   });
   
+  // Log the raw response for debugging
+  console.log("[Dashboard] Raw propostasResponse:", propostasResponse);
+  
   // Extract propostas - dual-key transformation in apiClient ensures both formats work
   // The apiClient automatically adds camelCase aliases for all snake_case keys
-  const propostas = (propostasResponse?.data || []).map((p: any) => ({
-    id: p.id,
-    status: p.status,
-    // Use camelCase properties directly (added by dual-key transformation)
-    nomeCliente: p.nomeCliente || p.cliente_nome, // Both work now
-    cpfCliente: p.cpfCliente || p.cliente_cpf,     // Both work now
-    valorSolicitado: p.valorSolicitado || p.valor,
-    prazo: p.prazo,
-    taxaJuros: p.taxaJuros || p.taxa_juros,
-    produtoId: p.produtoId || p.produto_id,
-    lojaId: p.lojaId || p.loja_id,
-    createdAt: p.createdAt || p.created_at,
-    valorParcela: p.valorParcela || p.valor_parcela,
-    // Add contextual status for compatibility
-    statusContextual: p.status,
-    parceiro: p.parceiro || { razaoSocial: 'Parceiro Padrão' }
-  }));
+  const propostas = (propostasResponse?.data || []).map((p: any) => {
+    console.log("[Dashboard] Processing proposal:", p);
+    return {
+      id: p.id,
+      status: p.status,
+      // Use camelCase properties directly (added by dual-key transformation)
+      nomeCliente: p.nomeCliente || p.clienteNome || p.cliente_nome, // Try all variations
+      cpfCliente: p.cpfCliente || p.clienteCpf || p.cliente_cpf,     // Try all variations
+      valorSolicitado: p.valorSolicitado || p.valor,
+      prazo: p.prazo,
+      taxaJuros: p.taxaJuros || p.taxaJuros || p.taxa_juros,
+      produtoId: p.produtoId || p.produto_id,
+      lojaId: p.lojaId || p.loja_id,
+      createdAt: p.createdAt || p.created_at,
+      valorParcela: p.valorParcela || p.valor_parcela,
+      // Add contextual status for compatibility
+      statusContextual: p.status,
+      parceiro: p.parceiro || { razaoSocial: 'Parceiro Padrão' }
+    };
+  });
 
   // Fetch user metrics if user is ATENDENTE
   const { data: metricas } = useQuery<{
