@@ -153,6 +153,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const propostasCoreRouter = (await import("./routes/propostas/core.js")).default;
   app.use("/api/propostas", propostasCoreRouter);
   
+  // DDD Credit Context Routes - Phase 1 Implementation
+  const { createCreditRoutes } = await import("./contexts/credit/presentation/routes.js");
+  app.use("/api/ddd", createCreditRoutes());
+  
   // Import and mount integration test routes
   const interIntegrationRouter = (await import("./routes/integracao/inter.js")).default;
   const clicksignIntegrationRouter = (await import("./routes/integracao/clicksign.js")).default;

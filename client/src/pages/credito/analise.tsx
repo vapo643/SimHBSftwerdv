@@ -30,7 +30,8 @@ const fetchProposta = async (id: string | undefined) => {
   try {
     const response = await api.get(`/api/propostas/${id}`);
     console.log("[Análise] Proposta carregada:", response.data);
-    return response.data;
+    // A API retorna {success: true, data: {...}}, precisamos apenas do data
+    return response.data?.data || response.data;
   } catch (error) {
     console.error("[Análise] Erro ao carregar proposta:", error);
     throw new Error("Proposta não encontrada");
