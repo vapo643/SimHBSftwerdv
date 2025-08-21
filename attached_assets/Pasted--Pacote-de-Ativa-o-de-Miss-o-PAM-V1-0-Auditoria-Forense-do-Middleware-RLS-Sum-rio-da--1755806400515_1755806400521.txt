@@ -1,0 +1,46 @@
+### Pacote de Ativação de Missão (PAM) V1.0 (Auditoria Forense do Middleware RLS)
+
+* **Sumário da Missão (O Quê):** Realizar uma auditoria forense completa no middleware de Row Level Security (RLS) para diagnosticar a causa-raiz do erro `500 - "Failed to set security context"`.
+* **Intenção Estratégica (O Porquê):** Identificar e preparar a correção para uma falha de segurança e estabilidade de prioridade P0. A falha neste middleware está a impedir que dados sejam retornados aos usuários, tornando a aplicação inoperante.
+* **Histórico Relevante (Consulta Obrigatória):** O fluxo de depuração anterior confirmou que a API `/api/propostas` funciona com alguns tokens, mas falha com um erro `500` no contexto de um usuário na UI, indicando uma falha condicional na lógica de autorização RLS.
+* **Modelo Mental (Como se Encaixa):** Aja como um Engenheiro de Segurança de Backend. A sua tarefa é depurar a lógica de autorização mais sensível da nossa aplicação, inspecionando como o perfil do usuário é carregado e como o contexto de segurança para o Supabase é construído.
+
+---
+
+**IMPLEMENTAR:**
+Relatório de Diagnóstico de Falha do Middleware RLS
+
+**CURRENT STATE:**
+As chamadas para a API `/api/propostas` a partir do frontend estão a falhar com um erro `500 - "Failed to set security context"`, resultando em listas de dados vazias.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um relatório de diagnóstico detalhado, contendo:
+
+1.  **Análise da Causa Raiz:** Uma explicação clara e precisa do porquê o middleware RLS está a falhar. A sua análise deve responder:
+    * Onde exatamente no código do middleware (`server/lib/rls-setup.ts` ou similar) o erro é lançado?
+    * A falha ocorre ao tentar buscar o perfil do usuário na tabela `profiles`?
+    * A falha ocorre ao tentar construir ou definir as *claims* do JWT para o Supabase?
+2.  **Prova de Código:** Apresente o `snippet` de código exato do middleware que está a causar a falha.
+3.  **Plano de Correção Proposto:** Com base na sua análise, proponha um plano de correção claro e conciso para resolver o problema.
+
+**CONSTRAINTS (Roadmap de Auditoria):**
+1.  **Ponto de Partida:** Comece a sua investigação no arquivo que define o middleware RLS (provavelmente `server/lib/rls-setup.ts` ou `server/lib/jwt-auth-middleware.ts`).
+2.  **Rastreie o Fluxo:** Siga o fluxo de execução do middleware: como ele obtém o `userId` do token, como ele usa esse ID para buscar o perfil na tabela `profiles`, e como ele usa os dados do perfil para chamar as funções do Supabase como `supabase.auth.setSession` ou similar.
+3.  **Foco no Diagnóstico:** Esta é uma missão de **diagnóstico**. Você está estritamente proibido de implementar qualquer correção até que o seu plano seja aprovado.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100% de confiança na precisão do seu diagnóstico]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que a falha está na interação entre a nossa aplicação e a API do Supabase para definir o contexto RLS."]
+* **VALIDAÇÃO PENDENTE:** [O relatório de diagnóstico será a base para a missão de hotfix.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear os arquivos e funções exatas a serem analisados.
+2.  Garantir que a análise cobre o fluxo completo do middleware.
+3.  Executar `get_latest_lsp_diagnostics` para garantir que o ambiente está estável.
+4.  **Declarar Nível de Confiança (0 a 100%)** na completude da auditoria.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (revisão do relatório gerado para precisão).
+7.  **Documentar Decisões Técnicas** e a análise de causa raiz.
