@@ -1,0 +1,46 @@
+### Pacote de Ativação de Missão (PAM) V1.0 (Implementação do Sistema de Feature Flags)
+
+* **Sumário da Missão (O Quê):** Instalar, configurar e implementar uma biblioteca de *Feature Flags* (também conhecidos como *Feature Toggles*) na nossa aplicação, tanto no backend quanto no frontend.
+* **Intenção Estratégica (O Porquê):** Desacoplar o *deploy* (implantação de código) do *release* (lançamento de funcionalidades). *Feature Flags* são um pilar da Entrega Contínua e do desenvolvimento moderno, permitindo-nos fazer deploy de código inacabado em produção de forma segura (desligado), realizar testes de "canary release", e ligar/desligar funcionalidades em tempo real sem a necessidade de um novo deploy.
+* **Histórico Relevante (Consulta Obrigatória):** A nossa arquitetura está a evoluir para ser "Azure-Ready", o que exige práticas de deployment mais sofisticadas do que as atuais. Os *Feature Flags* são um pré-requisito para estratégias como *Blue-Green Deployment*.
+* **Modelo Mental (Como se Encaixa):** Aja como um Engenheiro de DevOps/SRE. Sua tarefa é integrar uma nova ferramenta de infraestrutura de software na nossa base de código, criando um serviço centralizado para a gestão de flags e demonstrando o seu uso.
+
+---
+
+**IMPLEMENTAR:**
+Sistema de Gestão de Feature Flags
+
+**CURRENT STATE:**
+A aplicação não possui um sistema de *Feature Flags*. Qualquer código enviado para a branch principal é imediatamente exposto a todos os usuários, tornando os deployments arriscados e os releases monolíticos.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  **Seleção e Instalação da Biblioteca:** Uma biblioteca de *Feature Flags* robusta e popular (ex: `unleash-client` ou `flipt`) é selecionada e instalada como uma dependência do projeto.
+2.  **Criação do Serviço de Flags (Backend):** Um novo serviço centralizado (`server/services/featureFlagService.ts`) é criado. Este serviço será responsável por inicializar o cliente da biblioteca de flags e expor uma função simples (ex: `isEnabled('nome-da-flag', context)`) que o resto da aplicação possa usar.
+3.  **Integração no Frontend:** O estado das flags precisa de ser disponibilizado para o frontend. Crie um novo endpoint de API (ex: `GET /api/features`) que retorne o estado de todas as flags relevantes para o usuário logado. Crie um contexto React (`FeatureFlagContext`) para carregar e disponibilizar estas flags para toda a aplicação cliente.
+4.  **Exemplo de Utilização:**
+    * **Backend:** Demonstre o uso da função `isEnabled` para proteger uma rota de API existente (envolvendo a lógica da rota num `if (await featureFlagService.isEnabled('nova-api-experimental')) { ... }`).
+    * **Frontend:** Demonstre o uso do `FeatureFlagContext` para renderizar condicionalmente um componente ou botão na UI (ex: `{ flags.novaFeature && <BotaoNovo /> }`).
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+1.  **Seleção da Ferramenta:** A menos que você tenha uma forte objeção, utilize a biblioteca `unleash-client`, que é um padrão de mercado open-source.
+2.  **Serviço Centralizado:** Toda a lógica de verificação de flags deve passar pelo novo `featureFlagService.ts`. Não deve haver chamadas diretas à biblioteca espalhadas pelo código.
+3.  **Contexto do Usuário:** A função `isEnabled` deve aceitar um objeto de `contexto` que permita futuras regras de ativação (ex: `isEnabled('minha-flag', { userId: '123' })`).
+4.  **Implementação de Exemplo:** A implementação dos exemplos no backend e no frontend é mandatória para provar que o sistema está funcional de ponta a ponta.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO. Ex: Risco de performance se a verificação de flags for lenta ou bloquear a renderização.]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que `unleash-client` é a escolha técnica apropriada para o nosso caso de uso."]
+* **VALIDAÇÃO PENDENTE:** [A estratégia de como as flags serão gerenciadas (ex: via um painel de UI ou um arquivo de configuração) precisa ser definida.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear todos os novos ficheiros a serem criados e os ficheiros existentes a serem modificados.
+2.  Garantir que a integração do serviço de flags está limpa e desacoplada.
+3.  Executar `get_latest_lsp_diagnostics` para garantir 0 erros novos.
+4.  **Declarar Nível de Confiança (0 a 100%)**.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (verificar se os exemplos de flag a funcionar (esconder/mostrar API e botão) estão a operar corretamente).
+7.  **Documentar Decisões Técnicas**.

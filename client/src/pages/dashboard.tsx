@@ -40,6 +40,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from "@/contexts/AuthContext";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { FeatureFlagExample } from "@/components/FeatureFlagExample";
+import { useFeatureFlag } from "@/contexts/FeatureFlagContext";
 
 const getStatusColor = (status: string) => {
   switch (status.toUpperCase()) {
@@ -349,6 +351,11 @@ const Dashboard: React.FC = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Demonstração de Feature Flags (Apenas para Admins) */}
+        {user?.role === "ADMIN" && (
+          <FeatureFlagExample />
+        )}
 
         {/* Métricas de Performance para Atendentes */}
         {user?.role === "ATENDENTE" && metricas && (

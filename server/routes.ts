@@ -72,6 +72,7 @@ import { passwordSchema, validatePassword } from "./lib/password-validator";
 import { timingNormalizerMiddleware } from "./middleware/timing-normalizer";
 import timingSecurityRoutes from "./routes/timing-security";
 import documentosRoutes from "./routes/documentos";
+import featureFlagService from "./services/featureFlagService";
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -170,9 +171,118 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // Feature Flags endpoint - retorna flags para o usuário atual
+  app.get("/api/features", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+    try {
+      // Inicializa o serviço se necessário
+      await featureFlagService.init();
+      
+      // Contexto do usuário para avaliação de flags
+      const context = {
+        userId: req.user?.id,
+        userRole: req.user?.role,
+        sessionId: req.sessionID,
+        environment: process.env.NODE_ENV || 'development',
+        remoteAddress: getClientIP(req),
+      };
+      
+      // Lista de flags relevantes para o frontend
+      const frontendFlags = [
+        'maintenance-mode',
+        'read-only-mode',
+        'novo-dashboard',
+        'pagamento-pix-instant',
+        'relatorios-avancados',
+        'ab-test-onboarding',
+        'nova-api-experimental',
+      ];
+      
+      // Verifica todas as flags
+      const flags = await featureFlagService.checkMultiple(frontendFlags, context);
+      
+      res.json({
+        flags,
+        context: {
+          environment: context.environment,
+          userId: context.userId,
+          role: context.userRole,
+        },
+      });
+    } catch (error) {
+      console.error('Erro ao buscar feature flags:', error);
+      // Em caso de erro, retorna flags desabilitadas
+      res.json({
+        flags: {},
+        error: 'Failed to fetch feature flags',
+      });
+    }
+  });
+
   // FASE 0 - Sentry test endpoint (conforme PAM V1.0)
   app.get("/api/debug-sentry", function mainHandler(req, res) {
     throw new Error("Meu primeiro erro Sentry do Simpix!");
+  });
+
+  // EXEMPLO DE USO: Rota experimental protegida por feature flag
+  app.get("/api/experimental/analytics", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+    try {
+      // Verifica se a feature flag está habilitada
+      const isEnabled = await featureFlagService.isEnabled('nova-api-experimental', {
+        userId: req.user?.id,
+        userRole: req.user?.role,
+        environment: process.env.NODE_ENV,
+      });
+
+      if (!isEnabled) {
+        console.log('❌ Feature flag nova-api-experimental desabilitada para usuário:', req.user?.id);
+        return res.status(403).json({ 
+          error: 'Feature not available',
+          message: 'Esta funcionalidade ainda não está disponível para seu perfil',
+        });
+      }
+
+      console.log('✅ Feature flag nova-api-experimental habilitada para usuário:', req.user?.id);
+      
+      // Lógica experimental da nova API
+      const { createServerSupabaseAdminClient } = await import("./lib/supabase");
+      const supabase = createServerSupabaseAdminClient();
+      
+      // Exemplo: Analytics avançado (apenas quando feature flag está ativa)
+      const { data: analytics, error } = await supabase
+        .from('propostas')
+        .select('status, created_at, valor')
+        .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
+      
+      if (error) {
+        throw error;
+      }
+      
+      // Processamento experimental de analytics
+      const summary = {
+        total_propostas: analytics.length,
+        total_valor: analytics.reduce((sum, p) => sum + (parseFloat(p.valor) || 0), 0),
+        por_status: analytics.reduce((acc, p) => {
+          acc[p.status] = (acc[p.status] || 0) + 1;
+          return acc;
+        }, {} as Record<string, number>),
+        feature_flag_enabled: true,
+        experimental_version: '1.0.0-beta',
+      };
+      
+      res.json({
+        success: true,
+        data: summary,
+        experimental: true,
+        message: 'API experimental - dados podem mudar',
+      });
+      
+    } catch (error) {
+      console.error('Erro na API experimental:', error);
+      res.status(500).json({ 
+        error: 'Internal server error',
+        experimental: true,
+      });
+    }
   });
 
   // MOVED TO server/routes/integracao/ - Circuit breaker test endpoints
