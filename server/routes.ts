@@ -148,7 +148,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Routes below this line are managed in the monolith
   
-  // Import and mount propostas core routes
+  // Import and mount propostas core routes - REFACTORED WITH DDD
+  // TODO: Switch to core.refactored.js when fully tested
   const propostasCoreRouter = (await import("./routes/propostas/core.js")).default;
   app.use("/api/propostas", propostasCoreRouter);
   

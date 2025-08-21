@@ -1,0 +1,115 @@
+/**
+ * Propostas Routes - Refactored to use DDD Controller
+ * 
+ * Esta é a camada mais fina possível - apenas define rotas
+ * e delega toda a lógica para o ProposalController
+ */
+
+import { Router } from "express";
+import { jwtAuthMiddleware, AuthenticatedRequest } from "../../lib/jwt-auth-middleware.js";
+import { ProposalController } from "../../contexts/proposal/presentation/proposalController.js";
+import { Response } from "express";
+
+const router = Router();
+const controller = new ProposalController();
+
+// ===== ROTAS PRINCIPAIS =====
+
+// GET /api/propostas - Listar propostas
+router.get("/", jwtAuthMiddleware, (req, res) => controller.list(req as any, res));
+
+// GET /api/propostas/buscar-por-cpf/:cpf - Buscar por CPF (antes do /:id para evitar conflito)
+router.get("/buscar-por-cpf/:cpf", jwtAuthMiddleware, (req, res) => controller.getByCpf(req as any, res));
+
+// GET /api/propostas/:id - Buscar proposta por ID
+router.get("/:id", jwtAuthMiddleware, (req, res) => controller.getById(req as any, res));
+
+// POST /api/propostas - Criar nova proposta
+router.post("/", jwtAuthMiddleware, (req, res) => controller.create(req as any, res));
+
+// PUT /api/propostas/:id/submit - Submeter para análise
+router.put("/:id/submit", jwtAuthMiddleware, (req, res) => controller.submitForAnalysis(req as any, res));
+
+// PUT /api/propostas/:id/approve - Aprovar proposta
+router.put("/:id/approve", jwtAuthMiddleware, (req, res) => controller.approve(req as any, res));
+
+// PUT /api/propostas/:id/reject - Rejeitar proposta
+router.put("/:id/reject", jwtAuthMiddleware, (req, res) => controller.reject(req as any, res));
+
+// ===== ROTAS LEGACY (mantidas temporariamente para compatibilidade) =====
+
+// GET /:id/observacoes - Logs de auditoria (manter original por enquanto)
+router.get("/:id/observacoes", jwtAuthMiddleware, async (req, res) => {
+  try {
+    const propostaId = req.params.id;
+    const { createServerSupabaseAdminClient } = await import("../../lib/supabase.js");
+    const supabase = createServerSupabaseAdminClient();
+
+    const { data: logs, error } = await supabase
+      .from("proposta_logs")
+      .select(`
+        id,
+        observacao,
+        status_anterior,
+        status_novo,
+        created_at,
+        autor_id,
+        profiles!proposta_logs_autor_id_fkey (
+          full_name,
+          role
+        )
+      `)
+      .eq("proposta_id", propostaId)
+      .order("created_at", { ascending: true });
+
+    if (error) {
+      console.warn("Erro ao buscar logs de auditoria:", error);
+      return res.json({ logs: [] });
+    }
+
+    const transformedLogs = logs?.map(log => ({
+      id: log.id,
+      acao: log.status_novo === "aguardando_analise" 
+        ? "reenvio_atendente" 
+        : `mudanca_status_${log.status_novo}`,
+      detalhes: log.observacao,
+      status_anterior: log.status_anterior,
+      status_novo: log.status_novo,
+      data_acao: log.created_at,
+      autor_id: log.autor_id,
+      profiles: log.profiles,
+      observacao: log.observacao,
+      created_at: log.created_at,
+    })) || [];
+
+    res.json({
+      logs: transformedLogs,
+      total: transformedLogs.length,
+    });
+  } catch (error) {
+    console.error("Error fetching proposal audit logs:", error);
+    res.json({ logs: [] });
+  }
+});
+
+// PUT /:id/status - Legacy status change endpoint (manter por compatibilidade)
+router.put("/:id/status", jwtAuthMiddleware, async (req, res) => {
+  const { status } = req.body;
+  
+  // Mapear para os novos endpoints baseado no status
+  if (status === "aprovado") {
+    return controller.approve(req, res);
+  } else if (status === "rejeitado") {
+    return controller.reject(req, res);
+  } else if (status === "aguardando_analise") {
+    return controller.submitForAnalysis(req, res);
+  }
+  
+  // Para outros status, retornar erro por enquanto
+  return res.status(400).json({
+    success: false,
+    error: 'Status transition not yet implemented in DDD architecture'
+  });
+});
+
+export default router;
