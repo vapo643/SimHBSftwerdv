@@ -232,9 +232,10 @@ Sala de guerra virtual e canais Slack configurados
    - **Resultado:** Padrão Expand/Contract implementado com scripts automatizados
    - **Ferramentas:** Helper CLI `migrate.sh` para execução simplificada
 
-4. **Metric Cardinality Management** (Prova 92.2)
-   - **Impacto:** Custos elevados de observabilidade em escala
-   - **Recomendação:** Implementar estratégia de amostragem
+4. ~~**Metric Cardinality Management** (Prova 92.2)~~ ✅ **RESOLVIDO**
+   - **Status:** Implementado em `/architecture/05-performance/observability-strategy.md`
+   - **Resultado:** Tail-based sampling + controle de cardinalidade documentado
+   - **Economia:** Estimativa de 80% redução de custos vs sem estratégia
 
 ### **Criticidade BAIXA**
 5. **Política de Higienização** (Prova 67.1)

@@ -1,0 +1,43 @@
+### Pacote de Ativação de Missão (PAM) V1.0 (Estratégia de Gestão de Cardinalidade de Métricas)
+
+* **Sumário da Missão (O Quê):** Criar o documento `metric-cardinality-management.md`, detalhando a nossa estratégia para gerir a cardinalidade de métricas e a amostragem de *traces* para garantir que o nosso sistema de observabilidade seja performático e de custo sustentável em escala.
+* **Intenção Estratégica (O Porquê):** Prevenir um dos problemas mais comuns e caros em sistemas de monitoramento modernos: a "explosão de cardinalidade", que leva a custos exorbitantes e degradação da performance da própria plataforma de observabilidade. Uma estratégia clara aqui é fundamental para a sustentabilidade financeira da nossa operação na Azure.
+* **Histórico Relevante (Consulta Obrigatória):** A Doutrina Arquitetural da Fase 0 identificou a "Estratégia de Gerenciamento de Cardinalidade de Métricas" e a "Estratégia de Amostragem (Sampling) para Tracing" como subtópicos obrigatórios, que foram marcados como uma lacuna na auditoria de conformidade.
+* **Modelo Mental (Como se Encaixa):** Aja como um Engenheiro de Confiabilidade de Site (SRE) a desenhar a política de governança para o uso de métricas e *traces*. O foco não é na implementação, mas na definição das regras e padrões que os desenvolvedores deverão seguir.
+
+---
+
+**IMPLEMENTAR:**
+Documento de Estratégia de Gestão de Cardinalidade e Amostragem
+
+**CURRENT STATE:**
+A nossa implementação de observabilidade (DataDog) está planeada, mas não temos uma estratégia documentada para controlar a cardinalidade das métricas ou a amostragem de *traces*, o que representa um risco financeiro e de performance significativo.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um novo arquivo Markdown, `architecture/05-performance/observability-strategy.md`, é criado. O arquivo deve conter as seguintes seções:
+
+1.  **Contexto do Problema:** Uma breve explicação do que é "cardinalidade de métricas" e por que a sua gestão é crítica para o controlo de custos e performance.
+2.  **Estratégia de Métricas (Controlo de Cardinalidade):**
+    * **Princípios:** Definir os nossos princípios (ex: "Não usar IDs de alta cardinalidade como `user_id` ou `request_id` em *tags* de métricas").
+    * **Boas Práticas:** Listar exemplos de *tags* de baixa cardinalidade (ex: `endpoint`, `http_method`, `status_code`) e de alta cardinalidade a serem evitadas.
+3.  **Estratégia de Tracing (Amostragem):**
+    * **Tipo de Amostragem:** Definir a nossa estratégia de amostragem. Recomenda-se uma abordagem de **"Tail-Based Sampling"**, onde 100% dos *traces* são capturados, mas apenas uma amostra inteligente (ex: 10% dos `200 OK` e 100% dos `5xx Erros`) é retida para análise a longo prazo.
+    * **Justificativa:** Explicar por que esta abordagem nos dá visibilidade total sobre os erros, mantendo os custos sob controlo.
+4.  **Governança e Revisão:** Descrever um processo simples de como novas métricas com *tags* de alta cardinalidade devem ser propostas e revisadas pela equipa de arquitetura.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que a estratégia de 'Tail-Based Sampling' é a mais adequada para o nosso caso de uso, equilibrando visibilidade e custo."]
+* **VALIDAÇÃO PENDENTE:** [O documento gerado deve ser revisado e ratificado pelo Arquiteto Chefe.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear o ficheiro exato a ser criado.
+2.  Garantir que todas as 4 seções (Contexto, Métricas, Tracing, Governança) estão completas.
+3.  Executar `get_latest_lsp_diagnostics` para garantir que o ambiente está estável.
+4.  **Declarar Nível de Confiança (0 a 100%)**.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (revisão do documento Markdown gerado).
+7.  **Documentar Decisões Técnicas**.
