@@ -1,0 +1,53 @@
+### Pacote de Ativação de Missão (PAM) V1.0 (Criação do Processo de Gestão de Incidentes)
+
+* **Sumário da Missão (O Quê):** Gerar o documento `incident-management-process.md`, detalhando o nosso processo inicial de resposta a incidentes, incluindo níveis de severidade, canais de comunicação e runbooks básicos.
+* **Intenção Estratégica (O Porquê):** Estabelecer um plano de ação claro e previsível para quando as coisas falharem. Um processo de gestão de incidentes formalizado reduz o pânico, acelera o tempo de resolução (MTTR), minimiza o impacto no negócio e garante que aprendemos com cada falha através de post-mortems estruturados.
+* **Histórico Relevante (Consulta Obrigatória):** A nossa fundação de observabilidade (Logging, Sentry) já foi implementada. Esta missão irá documentar como nós, como equipa, reagiremos aos alertas e dados que essas ferramentas irão gerar.
+* **Modelo Mental (Como se Encaixa):** Aja como um Engenheiro de Confiabilidade de Site (SRE) a criar o primeiro Plano de Resposta a Incidentes (IRP) da empresa. O foco é na clareza, simplicidade e em ações concretas.
+
+---
+
+**IMPLEMENTAR:**
+Documento do Processo de Gestão de Incidentes
+
+**CURRENT STATE:**
+Não temos um processo formal para lidar com incidentes em produção, o que nos deixa vulneráveis a tempos de inatividade prolongados e a uma resposta desorganizada em caso de crise.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um novo arquivo Markdown, `architecture/08-operations/incident-management-process.md`, é criado. O arquivo deve conter, no mínimo, as seguintes seções:
+
+1.  **Níveis de Severidade (SEV):** Uma definição clara para os níveis de severidade de incidentes (SEV1, SEV2, SEV3).
+2.  **Canais de Comunicação:** Definição dos canais oficiais para a comunicação durante um incidente (ex: Sala de Guerra Virtual, Canal de Slack, Página de Status).
+3.  **Papéis e Responsabilidades:** Uma definição simples dos papéis durante um incidente (ex: Comandante do Incidente, Especialista Técnico).
+4.  **Ciclo de Vida do Incidente:** As fases de um incidente (Detecção -> Resposta -> Mitigação -> Resolução -> Post-Mortem).
+5.  **Runbooks Iniciais:** Um esboço de runbook para, pelo menos, dois cenários de falha críticos:
+    * "Banco de Dados Inacessível"
+    * "API Principal a Retornar Erros 5xx"
+6.  **Processo de Post-Mortem:** Uma declaração sobre a nossa cultura de post-mortems "blameless" (sem culpa).
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+1.  **Crie o Arquivo:** Crie o arquivo `architecture/08-operations/incident-management-process.md`.
+2.  **Preencha as Seções:** Utilize as informações abaixo como base para o conteúdo do documento:
+    * **SEV1:** Impacto crítico no negócio (ex: sistema financeiro offline, perda de dados). Requer resposta imediata 24/7.
+    * **SEV2:** Funcionalidade principal degradada ou indisponível. Requer resposta durante o horário comercial.
+    * **SEV3:** Problema de baixo impacto ou workaround disponível.
+    * **Canais:** Sala de Guerra (Google Meet), Canal de Slack (`#incidents`), Página de Status Externa.
+    * **Runbooks:** Para cada runbook, inclua seções de "Verificação Inicial", "Ações de Mitigação Imediata" e "Procedimentos de Escalonamento".
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que uma estrutura de resposta a incidentes simples é a melhor para o nosso estágio atual, podendo evoluir para um ICS completo no futuro."]
+* **VALIDAÇÃO PENDENTE:** [O documento gerado deve ser revisado e ratificado por toda a equipa de engenharia.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear o ficheiro exato a ser criado.
+2.  Garantir que todas as 6 seções obrigatórias são criadas no documento.
+3.  Executar `get_latest_lsp_diagnostics` para garantir que o ambiente está estável.
+4.  **Declarar Nível de Confiança (0 a 100%)**.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (revisão do documento Markdown gerado).
+7.  **Documentar Decisões Técnicas**.
