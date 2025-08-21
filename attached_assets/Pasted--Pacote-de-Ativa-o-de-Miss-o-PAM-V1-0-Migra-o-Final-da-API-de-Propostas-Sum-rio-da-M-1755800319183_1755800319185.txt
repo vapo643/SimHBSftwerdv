@@ -1,0 +1,46 @@
+### Pacote de Ativação de Missão (PAM) V1.0 (Migração Final da API de Propostas)
+
+* **Sumário da Missão (O Quê):** Realizar a migração final da API de Propostas, substituindo o arquivo de rotas legado (`core.ts`) pelo novo arquivo refatorado e estabilizado (`core.refactored.ts`) no orquestrador de rotas principal.
+* **Intenção Estratégica (O Porquê):** Ativar a nossa nova arquitetura de Propostas baseada em DDD, completando a primeira fatia vertical da nossa refatoração. Esta ação irá oficialmente colocar a nossa nova lógica de Agregado, Casos de Uso e Repositório em operação.
+* **Histórico Relevante (Consulta Obrigatória):** As missões anteriores criaram e estabilizaram com sucesso o arquivo `server/routes/propostas/core.refactored.ts`, que contém a nova implementação da API.
+* **Modelo Mental (Como se Encaixa):** Esta é uma operação de *cutover*. O Agente irá executar uma substituição de arquivos e atualizar a referência de importação no arquivo principal que monta todas as rotas da aplicação, efetivamente trocando o "motor antigo" pelo "motor novo".
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco:** A substituição pode causar uma falha de inicialização no servidor se o novo arquivo tiver alguma dependência não resolvida ou se a referência de importação for incorreta.
+    * **Contramedida:** A validação final mandatória é a reinicialização bem-sucedida do servidor, provando que o novo módulo foi integrado corretamente.
+
+---
+
+**IMPLEMENTAR:**
+Migração Final e Ativação da Nova API de Propostas
+
+**CURRENT STATE:**
+A aplicação ainda está a carregar o antigo arquivo de rotas de propostas (`core.ts`). O novo arquivo (`core.refactored.ts`) está pronto, estável e testado, mas inativo.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  O arquivo legado `server/routes/propostas/core.ts` é deletado.
+2.  O novo arquivo `server/routes/propostas/core.refactored.ts` é renomeado para `server/routes/propostas/core.ts`.
+3.  A aplicação reinicia sem erros, provando que o novo módulo foi integrado com sucesso e que a aplicação está 100% funcional com a nova arquitetura de Propostas.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  **Operação de Filesystem:** Execute as seguintes operações de filesystem na ordem exata:
+    * `rm server/routes/propostas/core.ts`
+    * `mv server/routes/propostas/core.refactored.ts server/routes/propostas/core.ts`
+2.  **Verificação do Orquestrador (Opcional, mas recomendado):** Inspecione o arquivo principal de rotas (`server/routes.ts`) para garantir que ele já importa corretamente de `./propostas/core`, tornando a substituição transparente.
+3.  **Validação Final Mandatória:** A sua prova de sucesso é a reinicialização bem-sucedida do servidor de aplicação. Reporte o status do servidor como prova final.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO. Risco de falha de inicialização.]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que o arquivo de rotas principal já está a importar o `core.ts` e que a substituição de arquivos será suficiente."]
+* **VALIDAÇÃO PENDENTE:** [Testes de integração completos para a API de Propostas são agora a próxima prioridade máxima após esta ativação.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear os ficheiros a serem deletados/renomeados.
+2.  Garantir que os comandos de `rm` e `mv` estão corretos.
+3.  Executar `get_latest_lsp_diagnostics` para garantir 0 erros.
+4.  **Declarar Nível de Confiança (0 a 100%)**.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (reiniciar o servidor e garantir que ele inicie sem erros).
+7.  **Documentar Decisões Técnicas**.
