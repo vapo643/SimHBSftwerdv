@@ -308,8 +308,9 @@ export async function setupTestEnvironment(): Promise<{
     const testCommercialTableId = commercialTableResult[0].id;
     
     // 6. Create profile linking auth.users to store with proper RBAC role
-    console.log("[TEST DB] 👤 Creating user profile...");
-    await directDb`
+    console.log(`[TEST DB] 👤 Creating user profile for testUserId: ${testUserId}...`);
+    
+    const profileInsertResult = await directDb`
       INSERT INTO profiles (id, role, loja_id, full_name)
       VALUES (
         ${testUserId},
@@ -321,9 +322,20 @@ export async function setupTestEnvironment(): Promise<{
         role = 'ATENDENTE',
         loja_id = EXCLUDED.loja_id,
         full_name = 'Integration Test User'
+      RETURNING id, role, loja_id, full_name
     `;
     
-    console.log("[TEST DB] ✅ Profile created with ATENDENTE role for RBAC permissions");
+    console.log(`[TEST DB] ✅ Profile insertion result:`, profileInsertResult[0]);
+    
+    // Verify the profile was created by querying it back
+    const verifyProfile = await directDb`
+      SELECT id, role, loja_id, full_name 
+      FROM profiles 
+      WHERE id = ${testUserId}
+    `;
+    
+    console.log(`[TEST DB] 🔍 Profile verification query result:`, verifyProfile[0]);
+    console.log(`[TEST DB] ✅ Profile created with ATENDENTE role for RBAC permissions`);
     
     // 7. Create gerente_lojas association for RLS
     console.log("[TEST DB] 🔗 Creating store manager association...");
@@ -341,6 +353,8 @@ export async function setupTestEnvironment(): Promise<{
     
     return {
       testUserId,
+      testEmail,
+      testPassword,
       testPartnerId,
       testStoreId,
       testProductId,

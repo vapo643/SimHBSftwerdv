@@ -11,13 +11,22 @@ import { supabase } from "./supabase";
  */
 export async function setRLSContext(userId: string, lojaId: number) {
   try {
+    console.log(`[RLS DEBUG] 🔧 Setting RLS context: userId=${userId}, lojaId=${lojaId}`);
+    
     // Set the current user's loja_id in the database session
     // This will be used by the get_current_user_loja_id() function
-    await db.execute(`SET app.current_user_loja_id = '${lojaId}';`);
+    const setCommand = `SET app.current_user_loja_id = '${lojaId}';`;
+    console.log(`[RLS DEBUG] 📝 Executing SQL: ${setCommand}`);
+    
+    await db.execute(setCommand);
 
-    console.log(`RLS context set: userId=${userId}, lojaId=${lojaId}`);
+    // Verify the context was set correctly
+    const verifyResult = await db.execute(`SHOW app.current_user_loja_id;`);
+    console.log(`[RLS DEBUG] ✅ RLS context verification:`, verifyResult);
+    
+    console.log(`[RLS DEBUG] ✅ RLS context successfully set: userId=${userId}, lojaId=${lojaId}`);
   } catch (error) {
-    console.error("Failed to set RLS context:", error);
+    console.error(`[RLS DEBUG] ❌ Failed to set RLS context for userId=${userId}, lojaId=${lojaId}:`, error);
     throw new Error("Failed to establish security context");
   }
 }
@@ -41,16 +50,21 @@ export async function rlsAuthMiddleware(
   next: NextFunction
 ) {
   try {
+    console.log(`[RLS MIDDLEWARE] 🔍 Processing request: ${req.method} ${req.url}`);
+    
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      console.log(`[RLS MIDDLEWARE] ❌ No valid auth header for ${req.method} ${req.url}`);
       return res.status(401).json({ message: "No token provided" });
     }
 
     const token = authHeader.split(" ")[1];
+    console.log(`[RLS MIDDLEWARE] 🎫 Token extracted (length: ${token.length}) for ${req.method} ${req.url}`);
     
     // PAM V1.0 RLS Fix: Test environment compatibility
     const isTestEnv = process.env.NODE_ENV === 'test';
+    console.log(`[RLS MIDDLEWARE] 🌍 Environment: ${isTestEnv ? 'TEST' : 'PRODUCTION'} (NODE_ENV=${process.env.NODE_ENV})`);
     
     if (isTestEnv) {
       // Test environment: Use JWT validation with RLS context
@@ -81,7 +95,8 @@ export async function rlsAuthMiddleware(
                 lojaId: defaultTestLojaId,
               };
               
-              console.log(`[RLS TEST] Context set for user ${testUser.id} with lojaId ${defaultTestLojaId}`);
+              console.log(`[RLS TEST] ✅ Context set for user ${testUser.id} with lojaId ${defaultTestLojaId}`);
+              console.log(`[RLS TEST] 📤 Calling next() to continue request processing`);
               next();
             } catch (rlsError) {
               console.error("[RLS TEST] Failed to set RLS context:", rlsError);
@@ -111,6 +126,8 @@ export async function rlsAuthMiddleware(
     }
 
     // Get user's loja_id from database (using profiles table)
+    console.log(`[RLS DEBUG] 🔍 Querying profiles for user: ${user.id}`);
+    
     const userRecord = await db
       .select({
         id: profiles.id,
@@ -122,7 +139,13 @@ export async function rlsAuthMiddleware(
       .where(eq(profiles.id, user.id))
       .limit(1);
 
+    console.log(`[RLS DEBUG] 📊 Query result - Found ${userRecord.length} profiles`);
+    if (userRecord.length > 0) {
+      console.log(`[RLS DEBUG] 📋 Profile data:`, JSON.stringify(userRecord[0], null, 2));
+    }
+
     if (!userRecord.length) {
+      console.log(`[RLS DEBUG] ❌ No profile found for user ${user.id}`);
       return res.status(401).json({ message: "User not found in system" });
     }
 

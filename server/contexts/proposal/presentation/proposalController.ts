@@ -31,29 +31,35 @@ export class ProposalController {
     try {
       const useCase = new CreateProposalUseCase(this.repository);
       
+      // DEBUG: Log request body for troubleshooting
+      console.log('[ProposalController.create] Raw request body:', JSON.stringify(req.body, null, 2));
+      console.log('[ProposalController.create] User context:', (req as any).user);
+      
       // Mapear body da requisição para DTO do caso de uso
       const dto = {
-        clienteNome: req.body.cliente_nome,
-        clienteCpf: req.body.cliente_cpf,
-        clienteRg: req.body.cliente_rg,
-        clienteEmail: req.body.cliente_email,
-        clienteTelefone: req.body.cliente_telefone,
-        clienteEndereco: req.body.cliente_endereco,
-        clienteCidade: req.body.cliente_cidade,
-        clienteEstado: req.body.cliente_estado || req.body.cliente_uf,
-        clienteCep: req.body.cliente_cep,
-        clienteDataNascimento: req.body.cliente_data_nascimento,
-        clienteRendaMensal: req.body.cliente_renda ? parseFloat(req.body.cliente_renda) : undefined,
-        clienteEmpregador: req.body.cliente_empregador || req.body.cliente_empresa_nome,
-        clienteTempoEmprego: req.body.cliente_tempo_emprego,
-        clienteDividasExistentes: req.body.cliente_dividas_existentes ? parseFloat(req.body.cliente_dividas_existentes) : undefined,
+        clienteNome: req.body.clienteNome,
+        clienteCpf: req.body.clienteCpf,
+        clienteRg: req.body.clienteRg,
+        clienteEmail: req.body.clienteEmail,
+        clienteTelefone: req.body.clienteTelefone,
+        clienteEndereco: req.body.clienteEndereco,
+        clienteCidade: req.body.clienteCidade,
+        clienteEstado: req.body.clienteEstado || req.body.clienteUf,
+        clienteCep: req.body.clienteCep,
+        clienteDataNascimento: req.body.clienteDataNascimento,
+        clienteRendaMensal: req.body.clienteRenda ? parseFloat(req.body.clienteRenda) : undefined,
+        clienteEmpregador: req.body.clienteEmpregador || req.body.clienteEmpresaNome,
+        clienteTempoEmprego: req.body.clienteTempoEmprego,
+        clienteDividasExistentes: req.body.clienteDividasExistentes ? parseFloat(req.body.clienteDividasExistentes) : undefined,
         valor: parseFloat(req.body.valor),
         prazo: parseInt(req.body.prazo),
-        taxaJuros: parseFloat(req.body.taxa_juros),
-        produtoId: req.body.produto_id,
-        lojaId: req.body.loja_id,
-        atendenteId: req.body.atendente_id || (req as any).user?.id
+        taxaJuros: parseFloat(req.body.taxaJuros),
+        produtoId: req.body.produtoId,
+        lojaId: req.body.lojaId,
+        atendenteId: req.body.atendenteId || (req as any).user?.id
       };
+      
+      console.log('[ProposalController.create] Mapped DTO:', JSON.stringify(dto, null, 2));
       
       const result = await useCase.execute(dto);
       

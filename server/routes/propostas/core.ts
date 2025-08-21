@@ -8,12 +8,16 @@
 import { Router } from "express";
 import { ProposalController } from "../../contexts/proposal/presentation/proposalController.js";
 
-// Middleware auth com RLS para propostas - PAM V1.0 RLS Fix
-const auth = (req: any, res: any, next: any) => {
-  // Import dinâmico do middleware RLS para evitar conflitos de tipos
-  import("../../lib/rls-setup.js").then(({ rlsAuthMiddleware }) => {
-    rlsAuthMiddleware(req, res, next);
-  }).catch(next);
+// Middleware auth com RLS para propostas - PAM V1.0 RLS Fix FINAL
+const auth = async (req: any, res: any, next: any) => {
+  try {
+    // Import dinâmico do middleware RLS - RETURN Promise não await
+    const { rlsAuthMiddleware } = await import("../../lib/rls-setup.js");
+    return rlsAuthMiddleware(req, res, next); // ← RETURN não AWAIT
+  } catch (error) {
+    console.error("[RLS WRAPPER] Error in auth middleware:", error);
+    next(error);
+  }
 };
 
 const router = Router();

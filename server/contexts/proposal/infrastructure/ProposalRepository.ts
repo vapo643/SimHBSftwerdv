@@ -47,11 +47,13 @@ export class ProposalRepository implements IProposalRepository {
         })
         .where(eq(propostas.id, data.id));
     } else {
-      // Create - gerar ID sequencial para compatibilidade com legado
+      // Create - gerar IDs sequenciais
       const sequentialId = await this.getNextSequentialId();
+      const numeroProposta = await this.getNextNumeroProposta();
       
       await db.insert(propostas).values({
-        id: sequentialId.toString(),
+        id: proposal.id, // UUID do domínio
+        numeroProposta: numeroProposta, // ID sequencial começando em 300001
         status: data.status,
         clienteNome: data.cliente_data.nome,
         clienteCpf: data.cliente_data.cpf,
@@ -77,6 +79,7 @@ export class ProposalRepository implements IProposalRepository {
         createdAt: data.created_at,
         updatedAt: data.updated_at
       });
+
     }
     
     // Processar eventos de domínio
@@ -230,6 +233,16 @@ export class ProposalRepository implements IProposalRepository {
       .from(propostas);
     
     return result[0].maxId + 1;
+  }
+  
+  async getNextNumeroProposta(): Promise<number> {
+    // Buscar o maior numero_proposta e incrementar
+    // Inicia em 300001 se não houver propostas
+    const result = await db
+      .select({ maxNumero: sql<number>`COALESCE(MAX(numero_proposta), 300000)` })
+      .from(propostas);
+    
+    return result[0].maxNumero + 1;
   }
   
   /**
