@@ -1,0 +1,593 @@
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+FeatureFlagContext.tsx:76 🚩 Feature Flags carregadas: {maintenance-mode: false, read-only-mode: false, novo-dashboard: false, pagamento-pix-instant: false, relatorios-avancados: false, …}
+content-script.js:22 Document already loaded, running initialization immediately
+content-script.js:4 Attempting to initialize AdUnit
+content-script.js:6 AdUnit initialized successfully
+webcomponents-ce.js:33 Uncaught Error: A custom element with name 'mce-autosize-textarea' has already been defined.
+    at Aa (webcomponents-ce.js:33:363)
+    at m.define (webcomponents-ce.js:33:133)
+    at overlay_bundle.js:148:5559
+    at D (overlay_bundle.js:44:680)
+    at overlay_bundle.js:159:392
+Aa @ webcomponents-ce.js:33
+m.define @ webcomponents-ce.js:33
+(anonymous) @ overlay_bundle.js:148
+D @ overlay_bundle.js:44
+(anonymous) @ overlay_bundle.js:159Understand this error
+content.js:208 {}
+AuthContext.tsx:170 🔐 [AUTH EVENT] SIGNED_IN {hasSession: true, tokenLength: 767}
+dashboard.tsx:217 DEBUG - First 3 proposals values: []
+apiClient.ts:166 🔐 [TOKEN MANAGER] Fresh token obtained, length: 767
+apiClient.ts:343 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/features', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.9B6OoomgUVHN-Xu6eF4X9nmudeNZGjjRALR6XotlP2Y', hasToken: true, isFormData: false}
+apiClient.ts:343 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.9B6OoomgUVHN-Xu6eF4X9nmudeNZGjjRALR6XotlP2Y', hasToken: true, isFormData: false}
+apiClient.ts:343 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1x…7is3g.janeway.replit.dev/api/alertas/notificacoes', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.9B6OoomgUVHN-Xu6eF4X9nmudeNZGjjRALR6XotlP2Y', hasToken: true, isFormData: false}
+apiClient.ts:343 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.9B6OoomgUVHN-Xu6eF4X9nmudeNZGjjRALR6XotlP2Y', hasToken: true, isFormData: false}
+apiClient.ts:343 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.9B6OoomgUVHN-Xu6eF4X9nmudeNZGjjRALR6XotlP2Y', hasToken: true, isFormData: false}
+dashboard.tsx:217 DEBUG - First 3 proposals values: []
+AuthContext.tsx:170 🔐 [AUTH EVENT] INITIAL_SESSION {hasSession: true, tokenLength: 767}
+dashboard.tsx:217 DEBUG - First 3 proposals values: []
+requests.js:1  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/features 401 (Unauthorized)
+s.fetch @ requests.js:1
+(anonymous) @ traffic.js:1
+fetch @ traffic.js:1
+fetchWithTimeout @ apiClient.ts:263
+apiClient @ apiClient.ts:371
+await in apiClient
+get @ apiClient.ts:532
+(anonymous) @ queryClient.ts:57
+fetchFn @ @tanstack_react-query.js?v=7bd7f27f:840
+run @ @tanstack_react-query.js?v=7bd7f27f:494
+start @ @tanstack_react-query.js?v=7bd7f27f:536
+fetch @ @tanstack_react-query.js?v=7bd7f27f:926
+executeFetch_fn @ @tanstack_react-query.js?v=7bd7f27f:2211
+onSubscribe @ @tanstack_react-query.js?v=7bd7f27f:1898
+subscribe @ @tanstack_react-query.js?v=7bd7f27f:24
+(anonymous) @ @tanstack_react-query.js?v=7bd7f27f:3022
+subscribeToStore @ chunk-276SZO74.js?v=7bd7f27f:11984
+commitHookEffectListMount @ chunk-276SZO74.js?v=7bd7f27f:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=7bd7f27f:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=7bd7f27f:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=7bd7f27f:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=7bd7f27f:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=7bd7f27f:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=7bd7f27f:19447
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=7bd7f27f:18868
+flushSyncCallbacks @ chunk-276SZO74.js?v=7bd7f27f:9119
+commitRootImpl @ chunk-276SZO74.js?v=7bd7f27f:19432
+commitRoot @ chunk-276SZO74.js?v=7bd7f27f:19277
+finishConcurrentRender @ chunk-276SZO74.js?v=7bd7f27f:18805
+performConcurrentWorkOnRoot @ chunk-276SZO74.js?v=7bd7f27f:18718
+workLoop @ chunk-276SZO74.js?v=7bd7f27f:197
+flushWork @ chunk-276SZO74.js?v=7bd7f27f:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=7bd7f27f:384Understand this error
+requests.js:1  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me 401 (Unauthorized)
+s.fetch @ requests.js:1
+(anonymous) @ traffic.js:1
+fetch @ traffic.js:1
+fetchWithTimeout @ apiClient.ts:263
+apiClient @ apiClient.ts:371
+await in apiClient
+get @ apiClient.ts:532
+fetchUserProfile @ AuthContext.tsx:95
+(anonymous) @ AuthContext.tsx:179
+(anonymous) @ @supabase_supabase-js.js?v=7bd7f27f:6688
+_notifyAllSubscribers @ @supabase_supabase-js.js?v=7bd7f27f:6686
+_recoverAndRefresh @ @supabase_supabase-js.js?v=7bd7f27f:6629
+await in _recoverAndRefresh
+_initialize @ @supabase_supabase-js.js?v=7bd7f27f:5300
+await in _initialize
+(anonymous) @ @supabase_supabase-js.js?v=7bd7f27f:5254
+(anonymous) @ @supabase_supabase-js.js?v=7bd7f27f:5932
+(anonymous) @ @supabase_supabase-js.js?v=7bd7f27f:5049Understand this error
+apiClient.ts:166 🔐 [TOKEN MANAGER] Fresh token obtained, length: 767
+requests.js:1  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/alertas/notificacoes 401 (Unauthorized)
+s.fetch @ requests.js:1
+(anonymous) @ traffic.js:1
+fetch @ traffic.js:1
+fetchWithTimeout @ apiClient.ts:263
+apiClient @ apiClient.ts:371
+await in apiClient
+get @ apiClient.ts:532
+(anonymous) @ queryClient.ts:57
+fetchFn @ @tanstack_react-query.js?v=7bd7f27f:840
+run @ @tanstack_react-query.js?v=7bd7f27f:494
+start @ @tanstack_react-query.js?v=7bd7f27f:536
+fetch @ @tanstack_react-query.js?v=7bd7f27f:926
+executeFetch_fn @ @tanstack_react-query.js?v=7bd7f27f:2211
+onSubscribe @ @tanstack_react-query.js?v=7bd7f27f:1898
+subscribe @ @tanstack_react-query.js?v=7bd7f27f:24
+(anonymous) @ @tanstack_react-query.js?v=7bd7f27f:3022
+subscribeToStore @ chunk-276SZO74.js?v=7bd7f27f:11984
+commitHookEffectListMount @ chunk-276SZO74.js?v=7bd7f27f:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=7bd7f27f:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=7bd7f27f:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=7bd7f27f:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=7bd7f27f:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=7bd7f27f:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=7bd7f27f:19447
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=7bd7f27f:18868
+flushSyncCallbacks @ chunk-276SZO74.js?v=7bd7f27f:9119
+commitRootImpl @ chunk-276SZO74.js?v=7bd7f27f:19432
+commitRoot @ chunk-276SZO74.js?v=7bd7f27f:19277
+finishConcurrentRender @ chunk-276SZO74.js?v=7bd7f27f:18805
+performConcurrentWorkOnRoot @ chunk-276SZO74.js?v=7bd7f27f:18718
+workLoop @ chunk-276SZO74.js?v=7bd7f27f:197
+flushWork @ chunk-276SZO74.js?v=7bd7f27f:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=7bd7f27f:384Understand this error
+requests.js:1  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas 401 (Unauthorized)
+s.fetch @ requests.js:1
+(anonymous) @ traffic.js:1
+fetch @ traffic.js:1
+fetchWithTimeout @ apiClient.ts:263
+apiClient @ apiClient.ts:371
+await in apiClient
+get @ apiClient.ts:532
+(anonymous) @ queryClient.ts:57
+fetchFn @ @tanstack_react-query.js?v=7bd7f27f:840
+run @ @tanstack_react-query.js?v=7bd7f27f:494
+start @ @tanstack_react-query.js?v=7bd7f27f:536
+fetch @ @tanstack_react-query.js?v=7bd7f27f:926
+executeFetch_fn @ @tanstack_react-query.js?v=7bd7f27f:2211
+onSubscribe @ @tanstack_react-query.js?v=7bd7f27f:1898
+subscribe @ @tanstack_react-query.js?v=7bd7f27f:24
+(anonymous) @ @tanstack_react-query.js?v=7bd7f27f:3022
+subscribeToStore @ chunk-276SZO74.js?v=7bd7f27f:11984
+commitHookEffectListMount @ chunk-276SZO74.js?v=7bd7f27f:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=7bd7f27f:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=7bd7f27f:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=7bd7f27f:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=7bd7f27f:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=7bd7f27f:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=7bd7f27f:19447
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=7bd7f27f:18868
+flushSyncCallbacks @ chunk-276SZO74.js?v=7bd7f27f:9119
+commitRootImpl @ chunk-276SZO74.js?v=7bd7f27f:19432
+commitRoot @ chunk-276SZO74.js?v=7bd7f27f:19277
+finishConcurrentRender @ chunk-276SZO74.js?v=7bd7f27f:18805
+performConcurrentWorkOnRoot @ chunk-276SZO74.js?v=7bd7f27f:18718
+workLoop @ chunk-276SZO74.js?v=7bd7f27f:197
+flushWork @ chunk-276SZO74.js?v=7bd7f27f:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=7bd7f27f:384Understand this error
+apiClient.ts:166 🔐 [TOKEN MANAGER] Fresh token obtained, length: 767
+requests.js:1  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me 401 (Unauthorized)
+s.fetch @ requests.js:1
+(anonymous) @ traffic.js:1
+fetch @ traffic.js:1
+fetchWithTimeout @ apiClient.ts:263
+apiClient @ apiClient.ts:371
+await in apiClient
+get @ apiClient.ts:532
+fetchUserProfile @ AuthContext.tsx:95
+(anonymous) @ AuthContext.tsx:162
+Promise.then
+(anonymous) @ AuthContext.tsx:159
+commitHookEffectListMount @ chunk-276SZO74.js?v=7bd7f27f:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=7bd7f27f:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=7bd7f27f:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=7bd7f27f:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=7bd7f27f:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=7bd7f27f:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=7bd7f27f:19447
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=7bd7f27f:18868
+flushSyncCallbacks @ chunk-276SZO74.js?v=7bd7f27f:9119
+commitRootImpl @ chunk-276SZO74.js?v=7bd7f27f:19432
+commitRoot @ chunk-276SZO74.js?v=7bd7f27f:19277
+finishConcurrentRender @ chunk-276SZO74.js?v=7bd7f27f:18805
+performConcurrentWorkOnRoot @ chunk-276SZO74.js?v=7bd7f27f:18718
+workLoop @ chunk-276SZO74.js?v=7bd7f27f:197
+flushWork @ chunk-276SZO74.js?v=7bd7f27f:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=7bd7f27f:384Understand this error
+apiClient.ts:166 🔐 [TOKEN MANAGER] Fresh token obtained, length: 767
+requests.js:1  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/features 401 (Unauthorized)
+s.fetch @ requests.js:1
+(anonymous) @ traffic.js:1
+fetch @ traffic.js:1
+fetchWithTimeout @ apiClient.ts:263
+apiClient @ apiClient.ts:415
+await in apiClient
+get @ apiClient.ts:532
+(anonymous) @ queryClient.ts:57
+fetchFn @ @tanstack_react-query.js?v=7bd7f27f:840
+run @ @tanstack_react-query.js?v=7bd7f27f:494
+start @ @tanstack_react-query.js?v=7bd7f27f:536
+fetch @ @tanstack_react-query.js?v=7bd7f27f:926
+executeFetch_fn @ @tanstack_react-query.js?v=7bd7f27f:2211
+onSubscribe @ @tanstack_react-query.js?v=7bd7f27f:1898
+subscribe @ @tanstack_react-query.js?v=7bd7f27f:24
+(anonymous) @ @tanstack_react-query.js?v=7bd7f27f:3022
+subscribeToStore @ chunk-276SZO74.js?v=7bd7f27f:11984
+commitHookEffectListMount @ chunk-276SZO74.js?v=7bd7f27f:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=7bd7f27f:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=7bd7f27f:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=7bd7f27f:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=7bd7f27f:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=7bd7f27f:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=7bd7f27f:19447
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=7bd7f27f:18868
+flushSyncCallbacks @ chunk-276SZO74.js?v=7bd7f27f:9119
+commitRootImpl @ chunk-276SZO74.js?v=7bd7f27f:19432
+commitRoot @ chunk-276SZO74.js?v=7bd7f27f:19277
+finishConcurrentRender @ chunk-276SZO74.js?v=7bd7f27f:18805
+performConcurrentWorkOnRoot @ chunk-276SZO74.js?v=7bd7f27f:18718
+workLoop @ chunk-276SZO74.js?v=7bd7f27f:197
+flushWork @ chunk-276SZO74.js?v=7bd7f27f:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=7bd7f27f:384Understand this error
+requests.js:1  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/alertas/notificacoes 401 (Unauthorized)
+s.fetch @ requests.js:1
+(anonymous) @ traffic.js:1
+fetch @ traffic.js:1
+fetchWithTimeout @ apiClient.ts:263
+apiClient @ apiClient.ts:415
+await in apiClient
+get @ apiClient.ts:532
+(anonymous) @ queryClient.ts:57
+fetchFn @ @tanstack_react-query.js?v=7bd7f27f:840
+run @ @tanstack_react-query.js?v=7bd7f27f:494
+start @ @tanstack_react-query.js?v=7bd7f27f:536
+fetch @ @tanstack_react-query.js?v=7bd7f27f:926
+executeFetch_fn @ @tanstack_react-query.js?v=7bd7f27f:2211
+onSubscribe @ @tanstack_react-query.js?v=7bd7f27f:1898
+subscribe @ @tanstack_react-query.js?v=7bd7f27f:24
+(anonymous) @ @tanstack_react-query.js?v=7bd7f27f:3022
+subscribeToStore @ chunk-276SZO74.js?v=7bd7f27f:11984
+commitHookEffectListMount @ chunk-276SZO74.js?v=7bd7f27f:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=7bd7f27f:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=7bd7f27f:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=7bd7f27f:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=7bd7f27f:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=7bd7f27f:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=7bd7f27f:19447
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=7bd7f27f:18868
+flushSyncCallbacks @ chunk-276SZO74.js?v=7bd7f27f:9119
+commitRootImpl @ chunk-276SZO74.js?v=7bd7f27f:19432
+commitRoot @ chunk-276SZO74.js?v=7bd7f27f:19277
+finishConcurrentRender @ chunk-276SZO74.js?v=7bd7f27f:18805
+performConcurrentWorkOnRoot @ chunk-276SZO74.js?v=7bd7f27f:18718
+workLoop @ chunk-276SZO74.js?v=7bd7f27f:197
+flushWork @ chunk-276SZO74.js?v=7bd7f27f:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=7bd7f27f:384Understand this error
+requests.js:1  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/propostas 401 (Unauthorized)
+s.fetch @ requests.js:1
+(anonymous) @ traffic.js:1
+fetch @ traffic.js:1
+fetchWithTimeout @ apiClient.ts:263
+apiClient @ apiClient.ts:415
+await in apiClient
+get @ apiClient.ts:532
+(anonymous) @ queryClient.ts:57
+fetchFn @ @tanstack_react-query.js?v=7bd7f27f:840
+run @ @tanstack_react-query.js?v=7bd7f27f:494
+start @ @tanstack_react-query.js?v=7bd7f27f:536
+fetch @ @tanstack_react-query.js?v=7bd7f27f:926
+executeFetch_fn @ @tanstack_react-query.js?v=7bd7f27f:2211
+onSubscribe @ @tanstack_react-query.js?v=7bd7f27f:1898
+subscribe @ @tanstack_react-query.js?v=7bd7f27f:24
+(anonymous) @ @tanstack_react-query.js?v=7bd7f27f:3022
+subscribeToStore @ chunk-276SZO74.js?v=7bd7f27f:11984
+commitHookEffectListMount @ chunk-276SZO74.js?v=7bd7f27f:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=7bd7f27f:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=7bd7f27f:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=7bd7f27f:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=7bd7f27f:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=7bd7f27f:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=7bd7f27f:19447
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=7bd7f27f:18868
+flushSyncCallbacks @ chunk-276SZO74.js?v=7bd7f27f:9119
+commitRootImpl @ chunk-276SZO74.js?v=7bd7f27f:19432
+commitRoot @ chunk-276SZO74.js?v=7bd7f27f:19277
+finishConcurrentRender @ chunk-276SZO74.js?v=7bd7f27f:18805
+performConcurrentWorkOnRoot @ chunk-276SZO74.js?v=7bd7f27f:18718
+workLoop @ chunk-276SZO74.js?v=7bd7f27f:197
+flushWork @ chunk-276SZO74.js?v=7bd7f27f:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=7bd7f27f:384Understand this error
+dashboard.tsx:217 DEBUG - First 3 proposals values: []
+requests.js:1  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me 401 (Unauthorized)
+s.fetch @ requests.js:1
+(anonymous) @ traffic.js:1
+fetch @ traffic.js:1
+fetchWithTimeout @ apiClient.ts:263
+apiClient @ apiClient.ts:415
+await in apiClient
+get @ apiClient.ts:532
+fetchUserProfile @ AuthContext.tsx:95
+(anonymous) @ AuthContext.tsx:179
+(anonymous) @ @supabase_supabase-js.js?v=7bd7f27f:6688
+_notifyAllSubscribers @ @supabase_supabase-js.js?v=7bd7f27f:6686
+_recoverAndRefresh @ @supabase_supabase-js.js?v=7bd7f27f:6629
+await in _recoverAndRefresh
+_initialize @ @supabase_supabase-js.js?v=7bd7f27f:5300
+await in _initialize
+(anonymous) @ @supabase_supabase-js.js?v=7bd7f27f:5254
+(anonymous) @ @supabase_supabase-js.js?v=7bd7f27f:5932
+(anonymous) @ @supabase_supabase-js.js?v=7bd7f27f:5049Understand this error
+AuthContext.tsx:109 Error fetching profile data: ApiError: Token inválido ou expirado
+    at apiClient (apiClient.ts:467:13)
+    at async fetchUserProfile (AuthContext.tsx:95:28)
+fetchUserProfile @ AuthContext.tsx:109
+await in fetchUserProfile
+(anonymous) @ AuthContext.tsx:179
+(anonymous) @ @supabase_supabase-js.js?v=7bd7f27f:6688
+_notifyAllSubscribers @ @supabase_supabase-js.js?v=7bd7f27f:6686
+_recoverAndRefresh @ @supabase_supabase-js.js?v=7bd7f27f:6629
+await in _recoverAndRefresh
+_initialize @ @supabase_supabase-js.js?v=7bd7f27f:5300
+await in _initialize
+(anonymous) @ @supabase_supabase-js.js?v=7bd7f27f:5254
+(anonymous) @ @supabase_supabase-js.js?v=7bd7f27f:5932
+(anonymous) @ @supabase_supabase-js.js?v=7bd7f27f:5049Understand this error
+dashboard.tsx:217 DEBUG - First 3 proposals values: []
+requests.js:1  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/debug/me 401 (Unauthorized)
+s.fetch @ requests.js:1
+(anonymous) @ traffic.js:1
+fetch @ traffic.js:1
+fetchWithTimeout @ apiClient.ts:263
+apiClient @ apiClient.ts:415
+await in apiClient
+get @ apiClient.ts:532
+fetchUserProfile @ AuthContext.tsx:95
+(anonymous) @ AuthContext.tsx:162
+Promise.then
+(anonymous) @ AuthContext.tsx:159
+commitHookEffectListMount @ chunk-276SZO74.js?v=7bd7f27f:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=7bd7f27f:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=7bd7f27f:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=7bd7f27f:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=7bd7f27f:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=7bd7f27f:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=7bd7f27f:19447
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=7bd7f27f:18868
+flushSyncCallbacks @ chunk-276SZO74.js?v=7bd7f27f:9119
+commitRootImpl @ chunk-276SZO74.js?v=7bd7f27f:19432
+commitRoot @ chunk-276SZO74.js?v=7bd7f27f:19277
+finishConcurrentRender @ chunk-276SZO74.js?v=7bd7f27f:18805
+performConcurrentWorkOnRoot @ chunk-276SZO74.js?v=7bd7f27f:18718
+workLoop @ chunk-276SZO74.js?v=7bd7f27f:197
+flushWork @ chunk-276SZO74.js?v=7bd7f27f:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=7bd7f27f:384Understand this error
+AuthContext.tsx:109 Error fetching profile data: ApiError: Token inválido ou expirado
+    at apiClient (apiClient.ts:467:13)
+    at async fetchUserProfile (AuthContext.tsx:95:28)
+fetchUserProfile @ AuthContext.tsx:109
+await in fetchUserProfile
+(anonymous) @ AuthContext.tsx:162
+Promise.then
+(anonymous) @ AuthContext.tsx:159
+commitHookEffectListMount @ chunk-276SZO74.js?v=7bd7f27f:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=7bd7f27f:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=7bd7f27f:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=7bd7f27f:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=7bd7f27f:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=7bd7f27f:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=7bd7f27f:19447
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=7bd7f27f:18868
+flushSyncCallbacks @ chunk-276SZO74.js?v=7bd7f27f:9119
+commitRootImpl @ chunk-276SZO74.js?v=7bd7f27f:19432
+commitRoot @ chunk-276SZO74.js?v=7bd7f27f:19277
+finishConcurrentRender @ chunk-276SZO74.js?v=7bd7f27f:18805
+performConcurrentWorkOnRoot @ chunk-276SZO74.js?v=7bd7f27f:18718
+workLoop @ chunk-276SZO74.js?v=7bd7f27f:197
+flushWork @ chunk-276SZO74.js?v=7bd7f27f:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=7bd7f27f:384Understand this error
+dashboard.tsx:217 DEBUG - First 3 proposals values: []
+apiClient.ts:343 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/features', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.9B6OoomgUVHN-Xu6eF4X9nmudeNZGjjRALR6XotlP2Y', hasToken: true, isFormData: false}
+requests.js:1  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/features 401 (Unauthorized)
+s.fetch @ requests.js:1
+(anonymous) @ traffic.js:1
+fetch @ traffic.js:1
+fetchWithTimeout @ apiClient.ts:263
+apiClient @ apiClient.ts:371
+await in apiClient
+get @ apiClient.ts:532
+(anonymous) @ queryClient.ts:57
+fetchFn @ @tanstack_react-query.js?v=7bd7f27f:840
+run @ @tanstack_react-query.js?v=7bd7f27f:494
+(anonymous) @ @tanstack_react-query.js?v=7bd7f27f:519
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=7bd7f27f:515
+Promise.catch
+run @ @tanstack_react-query.js?v=7bd7f27f:498
+start @ @tanstack_react-query.js?v=7bd7f27f:536
+fetch @ @tanstack_react-query.js?v=7bd7f27f:926
+executeFetch_fn @ @tanstack_react-query.js?v=7bd7f27f:2211
+onSubscribe @ @tanstack_react-query.js?v=7bd7f27f:1898
+subscribe @ @tanstack_react-query.js?v=7bd7f27f:24
+(anonymous) @ @tanstack_react-query.js?v=7bd7f27f:3022
+subscribeToStore @ chunk-276SZO74.js?v=7bd7f27f:11984
+commitHookEffectListMount @ chunk-276SZO74.js?v=7bd7f27f:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=7bd7f27f:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=7bd7f27f:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=7bd7f27f:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=7bd7f27f:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=7bd7f27f:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=7bd7f27f:19447
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=7bd7f27f:18868
+flushSyncCallbacks @ chunk-276SZO74.js?v=7bd7f27f:9119
+commitRootImpl @ chunk-276SZO74.js?v=7bd7f27f:19432
+commitRoot @ chunk-276SZO74.js?v=7bd7f27f:19277
+finishConcurrentRender @ chunk-276SZO74.js?v=7bd7f27f:18805
+performConcurrentWorkOnRoot @ chunk-276SZO74.js?v=7bd7f27f:18718
+workLoop @ chunk-276SZO74.js?v=7bd7f27f:197
+flushWork @ chunk-276SZO74.js?v=7bd7f27f:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=7bd7f27f:384Understand this error
+apiClient.ts:166 🔐 [TOKEN MANAGER] Fresh token obtained, length: 767
+requests.js:1  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/features 401 (Unauthorized)
+s.fetch @ requests.js:1
+(anonymous) @ traffic.js:1
+fetch @ traffic.js:1
+fetchWithTimeout @ apiClient.ts:263
+apiClient @ apiClient.ts:415
+await in apiClient
+get @ apiClient.ts:532
+(anonymous) @ queryClient.ts:57
+fetchFn @ @tanstack_react-query.js?v=7bd7f27f:840
+run @ @tanstack_react-query.js?v=7bd7f27f:494
+(anonymous) @ @tanstack_react-query.js?v=7bd7f27f:519
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=7bd7f27f:515
+Promise.catch
+run @ @tanstack_react-query.js?v=7bd7f27f:498
+start @ @tanstack_react-query.js?v=7bd7f27f:536
+fetch @ @tanstack_react-query.js?v=7bd7f27f:926
+executeFetch_fn @ @tanstack_react-query.js?v=7bd7f27f:2211
+onSubscribe @ @tanstack_react-query.js?v=7bd7f27f:1898
+subscribe @ @tanstack_react-query.js?v=7bd7f27f:24
+(anonymous) @ @tanstack_react-query.js?v=7bd7f27f:3022
+subscribeToStore @ chunk-276SZO74.js?v=7bd7f27f:11984
+commitHookEffectListMount @ chunk-276SZO74.js?v=7bd7f27f:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=7bd7f27f:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=7bd7f27f:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=7bd7f27f:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=7bd7f27f:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=7bd7f27f:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=7bd7f27f:19447
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=7bd7f27f:18868
+flushSyncCallbacks @ chunk-276SZO74.js?v=7bd7f27f:9119
+commitRootImpl @ chunk-276SZO74.js?v=7bd7f27f:19432
+commitRoot @ chunk-276SZO74.js?v=7bd7f27f:19277
+finishConcurrentRender @ chunk-276SZO74.js?v=7bd7f27f:18805
+performConcurrentWorkOnRoot @ chunk-276SZO74.js?v=7bd7f27f:18718
+workLoop @ chunk-276SZO74.js?v=7bd7f27f:197
+flushWork @ chunk-276SZO74.js?v=7bd7f27f:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=7bd7f27f:384Understand this error
+apiClient.ts:343 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/features', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.9B6OoomgUVHN-Xu6eF4X9nmudeNZGjjRALR6XotlP2Y', hasToken: true, isFormData: false}
+requests.js:1  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/features 401 (Unauthorized)
+s.fetch @ requests.js:1
+(anonymous) @ traffic.js:1
+fetch @ traffic.js:1
+fetchWithTimeout @ apiClient.ts:263
+apiClient @ apiClient.ts:371
+await in apiClient
+get @ apiClient.ts:532
+(anonymous) @ queryClient.ts:57
+fetchFn @ @tanstack_react-query.js?v=7bd7f27f:840
+run @ @tanstack_react-query.js?v=7bd7f27f:494
+(anonymous) @ @tanstack_react-query.js?v=7bd7f27f:519
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=7bd7f27f:515
+Promise.catch
+run @ @tanstack_react-query.js?v=7bd7f27f:498
+(anonymous) @ @tanstack_react-query.js?v=7bd7f27f:519
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=7bd7f27f:515
+Promise.catch
+run @ @tanstack_react-query.js?v=7bd7f27f:498
+start @ @tanstack_react-query.js?v=7bd7f27f:536
+fetch @ @tanstack_react-query.js?v=7bd7f27f:926
+executeFetch_fn @ @tanstack_react-query.js?v=7bd7f27f:2211
+onSubscribe @ @tanstack_react-query.js?v=7bd7f27f:1898
+subscribe @ @tanstack_react-query.js?v=7bd7f27f:24
+(anonymous) @ @tanstack_react-query.js?v=7bd7f27f:3022
+subscribeToStore @ chunk-276SZO74.js?v=7bd7f27f:11984
+commitHookEffectListMount @ chunk-276SZO74.js?v=7bd7f27f:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=7bd7f27f:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=7bd7f27f:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=7bd7f27f:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=7bd7f27f:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=7bd7f27f:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=7bd7f27f:19447
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=7bd7f27f:18868
+flushSyncCallbacks @ chunk-276SZO74.js?v=7bd7f27f:9119
+commitRootImpl @ chunk-276SZO74.js?v=7bd7f27f:19432
+commitRoot @ chunk-276SZO74.js?v=7bd7f27f:19277
+finishConcurrentRender @ chunk-276SZO74.js?v=7bd7f27f:18805
+performConcurrentWorkOnRoot @ chunk-276SZO74.js?v=7bd7f27f:18718
+workLoop @ chunk-276SZO74.js?v=7bd7f27f:197
+flushWork @ chunk-276SZO74.js?v=7bd7f27f:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=7bd7f27f:384Understand this error
+apiClient.ts:166 🔐 [TOKEN MANAGER] Fresh token obtained, length: 767
+requests.js:1  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/features 401 (Unauthorized)
+s.fetch @ requests.js:1
+(anonymous) @ traffic.js:1
+fetch @ traffic.js:1
+fetchWithTimeout @ apiClient.ts:263
+apiClient @ apiClient.ts:415
+await in apiClient
+get @ apiClient.ts:532
+(anonymous) @ queryClient.ts:57
+fetchFn @ @tanstack_react-query.js?v=7bd7f27f:840
+run @ @tanstack_react-query.js?v=7bd7f27f:494
+(anonymous) @ @tanstack_react-query.js?v=7bd7f27f:519
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=7bd7f27f:515
+Promise.catch
+run @ @tanstack_react-query.js?v=7bd7f27f:498
+(anonymous) @ @tanstack_react-query.js?v=7bd7f27f:519
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=7bd7f27f:515
+Promise.catch
+run @ @tanstack_react-query.js?v=7bd7f27f:498
+start @ @tanstack_react-query.js?v=7bd7f27f:536
+fetch @ @tanstack_react-query.js?v=7bd7f27f:926
+executeFetch_fn @ @tanstack_react-query.js?v=7bd7f27f:2211
+onSubscribe @ @tanstack_react-query.js?v=7bd7f27f:1898
+subscribe @ @tanstack_react-query.js?v=7bd7f27f:24
+(anonymous) @ @tanstack_react-query.js?v=7bd7f27f:3022
+subscribeToStore @ chunk-276SZO74.js?v=7bd7f27f:11984
+commitHookEffectListMount @ chunk-276SZO74.js?v=7bd7f27f:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=7bd7f27f:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=7bd7f27f:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=7bd7f27f:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=7bd7f27f:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=7bd7f27f:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=7bd7f27f:19447
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=7bd7f27f:18868
+flushSyncCallbacks @ chunk-276SZO74.js?v=7bd7f27f:9119
+commitRootImpl @ chunk-276SZO74.js?v=7bd7f27f:19432
+commitRoot @ chunk-276SZO74.js?v=7bd7f27f:19277
+finishConcurrentRender @ chunk-276SZO74.js?v=7bd7f27f:18805
+performConcurrentWorkOnRoot @ chunk-276SZO74.js?v=7bd7f27f:18718
+workLoop @ chunk-276SZO74.js?v=7bd7f27f:197
+flushWork @ chunk-276SZO74.js?v=7bd7f27f:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=7bd7f27f:384Understand this error
+apiClient.ts:343 [PASSO 3 - ENVIO] {url: 'https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/features', authorizationHeader: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6Ii9YS2RwUDA2a0R…sc2V9.9B6OoomgUVHN-Xu6eF4X9nmudeNZGjjRALR6XotlP2Y', hasToken: true, isFormData: false}
+requests.js:1  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/features 401 (Unauthorized)
+s.fetch @ requests.js:1
+(anonymous) @ traffic.js:1
+fetch @ traffic.js:1
+fetchWithTimeout @ apiClient.ts:263
+apiClient @ apiClient.ts:371
+await in apiClient
+get @ apiClient.ts:532
+(anonymous) @ queryClient.ts:57
+fetchFn @ @tanstack_react-query.js?v=7bd7f27f:840
+run @ @tanstack_react-query.js?v=7bd7f27f:494
+(anonymous) @ @tanstack_react-query.js?v=7bd7f27f:519
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=7bd7f27f:515
+Promise.catch
+run @ @tanstack_react-query.js?v=7bd7f27f:498
+(anonymous) @ @tanstack_react-query.js?v=7bd7f27f:519
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=7bd7f27f:515
+Promise.catch
+run @ @tanstack_react-query.js?v=7bd7f27f:498
+(anonymous) @ @tanstack_react-query.js?v=7bd7f27f:519
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=7bd7f27f:515
+Promise.catch
+run @ @tanstack_react-query.js?v=7bd7f27f:498
+start @ @tanstack_react-query.js?v=7bd7f27f:536
+fetch @ @tanstack_react-query.js?v=7bd7f27f:926
+executeFetch_fn @ @tanstack_react-query.js?v=7bd7f27f:2211
+onSubscribe @ @tanstack_react-query.js?v=7bd7f27f:1898
+subscribe @ @tanstack_react-query.js?v=7bd7f27f:24
+(anonymous) @ @tanstack_react-query.js?v=7bd7f27f:3022
+subscribeToStore @ chunk-276SZO74.js?v=7bd7f27f:11984
+commitHookEffectListMount @ chunk-276SZO74.js?v=7bd7f27f:16915
+commitPassiveMountOnFiber @ chunk-276SZO74.js?v=7bd7f27f:18156
+commitPassiveMountEffects_complete @ chunk-276SZO74.js?v=7bd7f27f:18129
+commitPassiveMountEffects_begin @ chunk-276SZO74.js?v=7bd7f27f:18119
+commitPassiveMountEffects @ chunk-276SZO74.js?v=7bd7f27f:18109
+flushPassiveEffectsImpl @ chunk-276SZO74.js?v=7bd7f27f:19490
+flushPassiveEffects @ chunk-276SZO74.js?v=7bd7f27f:19447
+performSyncWorkOnRoot @ chunk-276SZO74.js?v=7bd7f27f:18868
+flushSyncCallbacks @ chunk-276SZO74.js?v=7bd7f27f:9119
+commitRootImpl @ chunk-276SZO74.js?v=7bd7f27f:19432
+commitRoot @ chunk-276SZO74.js?v=7bd7f27f:19277
+finishConcurrentRender @ chunk-276SZO74.js?v=7bd7f27f:18805
+performConcurrentWorkOnRoot @ chunk-276SZO74.js?v=7bd7f27f:18718
+workLoop @ chunk-276SZO74.js?v=7bd7f27f:197
+flushWork @ chunk-276SZO74.js?v=7bd7f27f:176
+performWorkUntilDeadline @ chunk-276SZO74.js?v=7bd7f27f:384Understand this error
+apiClient.ts:166 🔐 [TOKEN MANAGER] Fresh token obtained, length: 767
+requests.js:1  GET https://874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev/api/features 401 (Unauthorized)

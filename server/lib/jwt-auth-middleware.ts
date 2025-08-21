@@ -155,10 +155,48 @@ export async function jwtAuthMiddleware(
     let data: any = null;
     let error: any = null;
 
-    // Development mode: Use JWT verification with local secret
-    if (process.env.NODE_ENV === 'development') {
+    // Auto-detect token type by checking JWT header
+    let tokenType: 'supabase' | 'local' = 'local';
+    try {
+      const tokenParts = token.split('.');
+      if (tokenParts.length === 3) {
+        const header = JSON.parse(Buffer.from(tokenParts[0], 'base64').toString());
+        // Supabase tokens have 'kid' (Key ID) in header
+        if (header.kid) {
+          tokenType = 'supabase';
+        }
+      }
+    } catch (e) {
+      // If header parsing fails, default to local
+      tokenType = 'local';
+    }
+
+    console.log("[JWT DEBUG] Auto-detected token type:", tokenType);
+
+    if (tokenType === 'supabase') {
+      // Use Supabase validation for Supabase tokens
       try {
-        console.log("[JWT DEBUG] Using development JWT validation");
+        console.log("[JWT DEBUG] Using Supabase token validation");
+        const { createServerSupabaseAdminClient } = await import("./supabase");
+        const supabase = createServerSupabaseAdminClient();
+        const supabaseResult = await supabase.auth.getUser(token);
+        
+        data = supabaseResult.data;
+        error = supabaseResult.error;
+        
+        if (data?.user) {
+          userId = data.user.id;
+          userEmail = data.user.email || "";
+        }
+      } catch (supabaseError: any) {
+        console.error("[JWT DEBUG] Supabase validation failed:", supabaseError.message);
+        error = { message: supabaseError.message };
+        data = null;
+      }
+    } else {
+      // Use local JWT validation for local tokens
+      try {
+        console.log("[JWT DEBUG] Using local JWT validation");
         const jwt = await import('jsonwebtoken');
         const JWT_SECRET = process.env.JWT_SECRET || 'development-secret-key';
         
@@ -176,26 +214,9 @@ export async function jwtAuthMiddleware(
         data = { user: { id: userId, email: userEmail } };
         error = null;
       } catch (jwtError: any) {
-        console.error("[JWT DEBUG] JWT verification failed:", jwtError.message);
+        console.error("[JWT DEBUG] Local JWT verification failed:", jwtError.message);
         error = { message: jwtError.message };
         data = null;
-      }
-    } else {
-      // Production mode: Use Supabase validation
-      console.log("[JWT DEBUG] Using production Supabase validation");
-      const { createServerSupabaseAdminClient } = await import("./supabase");
-      const supabase = createServerSupabaseAdminClient();
-      const supabaseResult = await supabase.auth.getUser(token);
-      
-      data = supabaseResult.data;
-      error = supabaseResult.error;
-      
-      if (data?.user) {
-        userId = data.user.id;
-        userEmail = data.user.email || "";
-      } else {
-        userId = undefined;
-        userEmail = undefined;
       }
     }
 
@@ -203,7 +224,7 @@ export async function jwtAuthMiddleware(
     if (error) {
       console.error("[JWT DEBUG] Falha na validação. Erro completo:", {
         message: error.message,
-        mode: process.env.NODE_ENV === 'development' ? 'JWT_LOCAL' : 'SUPABASE',
+        mode: tokenType.toUpperCase(),
         fullError: JSON.stringify(error, null, 2),
       });
     }
@@ -216,7 +237,7 @@ export async function jwtAuthMiddleware(
         hasUser: !!data?.user,
         userId: data?.user?.id,
         timestamp: new Date().toISOString(),
-        mode: 'JWT_LOCAL'
+        mode: tokenType.toUpperCase()
       });
     }
 
