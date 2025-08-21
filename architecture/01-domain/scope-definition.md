@@ -1,327 +1,243 @@
-# 📋 Definição de Escopo do Sistema - Simpix
-**Autor:** GEM 01 (Arquiteto)
-**Data:** 21/08/2025
-**Status:** Em Desenvolvimento
-**Versão:** 1.0
+# 📋 Definição de Escopo - MVP Simpix Credit Management System
+**Versão:** 1.0  
+**Data:** 21/08/2025  
+**Autor:** GEM 02 (Dev Specialist)  
+**Status:** Draft - Aguardando Ratificação
 
 ---
 
-## 🎯 ESCOPO DO MVP (80% Completo)
+## 1. Definição do MVP
 
-### IN-SCOPE (Incluído no MVP)
+### **Objetivo Principal**
+O MVP (Minimum Viable Product) do Simpix é um sistema de gestão de crédito completo que permite a digitalização end-to-end do processo de concessão de crédito, desde a proposta inicial até a formalização do contrato e acompanhamento dos pagamentos.
 
-#### Funcionalidades Core
-```yaml
-Gestão de Propostas:
-  - Criação de nova proposta
-  - Cálculo de TAC automático
-  - Simulação de financiamento
-  - Aprovação/rejeição
-  - Status tracking (24 estados FSM)
-  
-Gestão de Pagamentos:
-  - Geração de boletos (Banco Inter)
-  - Pagamento via PIX
-  - Controle de parcelas
-  - Reconciliação automática
-  - Webhooks de notificação
-  
-Gestão de Documentos:
-  - Geração de CCB (PDF)
-  - Assinatura digital (ClickSign)
-  - Armazenamento seguro
-  - Versionamento
-  - Templates customizáveis
-  
-Gestão de Usuários:
-  - Autenticação (Supabase Auth)
-  - RBAC (3 níveis)
-  - Perfis de parceiros/lojas
-  - Audit trail
-  - Session management
-  
-Dashboard e Analytics:
-  - Visão geral de propostas
-  - Métricas de conversão
-  - Status de pagamentos
-  - Relatórios básicos
-  - Filtros e buscas
-```
+### **Proposta de Valor**
+- **Para instituições financeiras e parceiros comerciais** que precisam gerenciar propostas de crédito
+- **O Simpix** é uma plataforma de gestão de crédito
+- **Que** automatiza o fluxo completo de análise, aprovação e formalização
+- **Diferentemente** de processos manuais ou sistemas fragmentados
+- **Nosso produto** oferece uma solução integrada com assinatura digital e processamento de pagamentos automatizado
 
-### OUT-OF-SCOPE (Excluído do MVP)
-
-```yaml
-Não Incluído:
-  - Aplicativo mobile
-  - Integração com outros bancos
-  - BI avançado/Data warehouse
-  - Multi-tenant architecture
-  - API pública/marketplace
-  - Machine learning/scoring
-  - Chatbot/atendimento
-  - Integração ERP/CRM
-  - Workflow customizável
-  - White-label
-```
+### **Métricas de Sucesso do MVP**
+- Redução de 70% no tempo médio de aprovação de propostas
+- Taxa de adoção digital > 80% pelos parceiros
+- Zero falhas de segurança em transações financeiras
+- Disponibilidade do sistema > 98%
 
 ---
 
-## 📊 ROADMAP PÓS-MVP
+## 2. Funcionalidades "In-Scope" (Dentro do Escopo)
 
-### Fase 1: Consolidação (Mês 1-2)
-```yaml
-Objetivos:
-  - Estabilização em produção
-  - Correção de bugs críticos
-  - Otimização de performance
-  - Documentação completa
-  
-Features:
-  - Cache layer completo
-  - Monitoring avançado
-  - Backup automatizado
-  - CI/CD pipeline
-```
+### **2.1 Gestão de Propostas de Crédito**
+- ✅ Criação de novas propostas com validação em tempo real
+- ✅ Fluxo de análise multi-etapas (dados cliente → condições → referências → documentos)
+- ✅ Sistema de aprovação hierárquica com workflow configurável
+- ✅ Status FSM com 24 estados distintos e transições auditadas
+- ✅ Histórico completo de alterações (audit log)
 
-### Fase 2: Expansão (Mês 3-4)
-```yaml
-Objetivos:
-  - Aumentar capacidade
-  - Novas integrações
-  - Melhorar UX
-  
-Features:
-  - Mobile responsive
-  - Novos métodos pagamento
-  - API webhooks
-  - Bulk operations
-  - Export/import data
-```
+### **2.2 Motor de Cálculo Financeiro**
+- ✅ Cálculo de TAC (Taxa de Abertura de Crédito)
+- ✅ Simulações de crédito com múltiplos cenários
+- ✅ Cálculo de IOF conforme legislação vigente
+- ✅ Geração de tabela de parcelas com diferentes modalidades
+- ✅ Cálculo de CET (Custo Efetivo Total) usando Newton-Raphson
 
-### Fase 3: Evolução (Mês 5-6)
-```yaml
-Objetivos:
-  - Diferenciação competitiva
-  - Automação avançada
-  - Intelligence layer
-  
-Features:
-  - ML scoring básico
-  - Workflow engine
-  - API pública
-  - Multi-idioma
-  - Custom reports
-```
+### **2.3 Integração Bancária - Banco Inter**
+- ✅ Geração automatizada de boletos bancários
+- ✅ Geração de PIX com QR Code
+- ✅ Recebimento de webhooks para notificação de pagamentos
+- ✅ Sincronização de status de pagamento em tempo real
+- ✅ Autenticação OAuth 2.0 com mTLS
 
----
+### **2.4 Formalização Digital - ClickSign**
+- ✅ Geração de contratos CCB (Cédula de Crédito Bancário) em PDF
+- ✅ Envio automatizado para assinatura eletrônica
+- ✅ Tracking de status de assinatura via webhook
+- ✅ Armazenamento seguro de contratos assinados
+- ✅ Validação HMAC de callbacks
 
-## 🔄 PROCESSO DE GESTÃO DE MUDANÇAS
+### **2.5 Dashboard e Analytics Básico**
+- ✅ Visão consolidada de propostas por status
+- ✅ Métricas de conversão do funil de vendas
+- ✅ Relatórios de pagamentos e inadimplência
+- ✅ Exportação de dados em CSV/PDF
+- ✅ Filtros avançados e busca por múltiplos critérios
 
-### Change Request Process
-```yaml
-1. Solicitação:
-   Template:
-     - Descrição da mudança
-     - Justificativa de negócio
-     - Impacto estimado
-     - Urgência/prioridade
-   
-2. Análise de Impacto:
-   Avaliar:
-     - Esforço desenvolvimento
-     - Impacto arquitetural
-     - Riscos técnicos
-     - Custo/benefício
-     - Dependencies
-   
-3. Aprovação:
-   Comitê:
-     - Product Owner
-     - Tech Lead
-     - Arquiteto
-   Critérios:
-     - Alinhamento estratégico
-     - ROI positivo
-     - Viabilidade técnica
-   
-4. Documentação:
-   Criar:
-     - ADR se arquitetural
-     - Update scope doc
-     - Update roadmap
-     - Comunicar time
-```
+### **2.6 Gestão de Acesso e Segurança**
+- ✅ Sistema RBAC (Role-Based Access Control) com 5 perfis
+- ✅ Autenticação via Supabase Auth com JWT
+- ✅ Auditoria completa de ações (quem, quando, o quê)
+- ✅ Criptografia de dados sensíveis
+- ✅ Rate limiting em duas camadas
+- ✅ Proteção CSRF e sanitização de inputs
 
-### Scope Creep Prevention
-```yaml
-Regras:
-  - Toda mudança passa pelo processo
-  - Sem exceções "só essa vez"
-  - Trade-offs explícitos
-  - Buffer de 20% para imprevistos
-  
-Métricas:
-  - Mudanças aprovadas/mês
-  - Impacto no timeline
-  - Desvio do escopo original
-```
+### **2.7 Infraestrutura Técnica Base**
+- ✅ API RESTful com documentação OpenAPI
+- ✅ Sistema de filas assíncronas (BullMQ)
+- ✅ Cache L2 para otimização de queries
+- ✅ Backup automático diário
+- ✅ Health checks e monitoramento básico
+- ✅ Logging estruturado com correlation IDs
 
 ---
 
-## 🎲 MAPEAMENTO DE PREMISSAS ARRISCADAS
+## 3. Funcionalidades "Out-of-Scope" (Fora do Escopo)
 
-### Hipóteses Críticas a Validar
+### **3.1 Aplicação Móvel**
+- ❌ Apps nativos iOS/Android
+- ❌ Progressive Web App (PWA)
+- ❌ Push notifications mobile
+- **Justificativa:** Foco inicial em desktop para operadores internos
 
-#### H1: Volume de Transações
-```yaml
-Premissa: 
-  Sistema suporta 50 propostas/dia
-  
-Risco:
-  Crescimento explosivo não previsto
-  
-Validação:
-  - Load testing
-  - Monitoring em produção
-  - Plano de scaling
-  
-Mitigação:
-  - Auto-scaling preparado
-  - Cache layer
-  - Queue para picos
-```
+### **3.2 Integrações Bancárias Adicionais**
+- ❌ Integração com Santander, Bradesco, Itaú, etc.
+- ❌ Open Banking/PIX automático multi-banco
+- ❌ Conciliação bancária automatizada
+- **Justificativa:** Complexidade e custo de múltiplas integrações
 
-#### H2: Integração Banco Inter
-```yaml
-Premissa:
-  API estável e disponível 99.9%
-  
-Risco:
-  Downtime ou mudanças breaking
-  
-Validação:
-  - SLA monitoring
-  - Integration tests
-  - Fallback mechanism
-  
-Mitigação:
-  - Circuit breaker
-  - Retry logic
-  - Manual fallback
-```
+### **3.3 Business Intelligence Avançado**
+- ❌ Data warehouse dedicado
+- ❌ Dashboards customizáveis pelo usuário
+- ❌ Machine Learning para scoring de crédito
+- ❌ Previsões e análises preditivas
+- **Justificativa:** Requer infraestrutura de dados madura
 
-#### H3: Compliance LGPD
-```yaml
-Premissa:
-  Implementação atual suficiente
-  
-Risco:
-  Multas por não conformidade
-  
-Validação:
-  - Auditoria externa
-  - Checklist LGPD
-  - Pen testing
-  
-Mitigação:
-  - Data classification
-  - Consent management
-  - Right to deletion
-```
+### **3.4 Arquitetura Multi-tenant**
+- ❌ Isolamento completo por tenant
+- ❌ Customização de fluxos por cliente
+- ❌ White-label da plataforma
+- ❌ Billing por uso/tenant
+- **Justificativa:** Complexidade arquitetural prematura
 
-#### H4: Adoção pelos Usuários
-```yaml
-Premissa:
-  Interface intuitiva suficiente
-  
-Risco:
-  Baixa adoção, alto churn
-  
-Validação:
-  - User testing
-  - NPS tracking
-  - Usage analytics
-  
-Mitigação:
-  - Onboarding flow
-  - Training materials
-  - Support channel
-```
+### **3.5 Features Avançadas**
+- ❌ Chatbot/Atendimento automatizado
+- ❌ Integração com bureaus de crédito (Serasa/SPC)
+- ❌ Módulo de cobrança judicial
+- ❌ Sistema de comissionamento
+- ❌ Portal self-service para clientes finais
 
 ---
 
-## 📈 MÉTRICAS DE SUCESSO DO MVP
+## 4. Processo de Gestão de Mudanças de Escopo
 
-### Technical Metrics
-```yaml
-Performance:
-  - Response time p95 < 200ms ✅
-  - Uptime > 99.9% ⚠️
-  - Error rate < 1% ✅
-  
-Scale:
-  - 50 concurrent users ✅
-  - 1000 proposals/day ready ⚠️
-  - 100GB storage capacity ✅
-```
+### **4.1 Requisição Formal**
+1. **Solicitação via ADR (Architecture Decision Record)**
+   - Template obrigatório em `architecture/decisions/`
+   - Justificativa de negócio clara
+   - Estimativa preliminar de impacto
 
-### Business Metrics
-```yaml
-Adoption:
-  - 10 active customers (target)
-  - 50 proposals/day (target)
-  - 80% conversion rate (target)
-  
-Quality:
-  - NPS > 50
-  - Support tickets < 5/day
-  - Bug reports < 10/week
-```
+### **4.2 Análise de Impacto**
+2. **Avaliação pelo Arquiteto Senior (GEM 01)**
+   - Análise técnica detalhada
+   - Impacto em timeline e recursos
+   - Riscos e dependências
+   - Trade-offs arquiteturais
 
----
+### **4.3 Aprovação**
+3. **Comitê de Produto**
+   - Revisão quinzenal de mudanças propostas
+   - Priorização baseada em valor vs esforço
+   - Decisão documentada e comunicada
+   - Atualização deste documento quando aprovado
 
-## ⚠️ RISCOS E DEPENDENCIES
-
-### Riscos Técnicos
-1. **Migração de dados**: Perda durante migração
-2. **Performance degradation**: Com crescimento
-3. **Security breach**: Dados sensíveis expostos
-4. **Integration failure**: APIs externas down
-
-### Dependencies Externas
-1. **Supabase**: Auth e database
-2. **Banco Inter**: Pagamentos
-3. **ClickSign**: Assinaturas
-4. **Replit**: Hosting atual
-
-### Riscos de Negócio
-1. **Regulatório**: Mudanças na legislação
-2. **Competição**: Novos entrantes
-3. **Mercado**: Redução de demanda
-4. **Financeiro**: Falta de funding
+### **4.4 Critérios de Aceitação**
+Para uma mudança de escopo ser considerada:
+- **Valor de Negócio:** ROI mensurável ou redução de risco crítico
+- **Viabilidade Técnica:** Sem breaking changes na arquitetura core
+- **Recursos Disponíveis:** Time e budget alocados
+- **Alinhamento Estratégico:** Consistente com visão de produto
 
 ---
 
-## 📝 DEFINIÇÃO DE "DONE"
+## 5. Mapeamento das Premissas Mais Arriscadas
 
-### Feature Complete
-- [ ] Código implementado
-- [ ] Testes escritos (unit + integration)
-- [ ] Code review aprovado
-- [ ] Documentação atualizada
-- [ ] Deploy em staging
-- [ ] QA approval
-- [ ] Product Owner acceptance
+### **🎯 Premissa #1: Adoção Digital pelos Parceiros**
+**Hipótese:** Os parceiros comerciais (lojas, correspondentes) adotarão o fluxo 100% digital, abandonando processos em papel.
 
-### Release Ready
-- [ ] All features complete
-- [ ] Performance validated
-- [ ] Security tested
-- [ ] Documentation complete
-- [ ] Rollback plan ready
-- [ ] Monitoring configured
-- [ ] Team trained
+**Indicadores de Validação:**
+- Taxa de adoção > 80% em 3 meses
+- Redução de suporte relacionado a papel > 90%
+- NPS dos parceiros > 70
+
+**Plano de Mitigação se Falhar:**
+- Manter processo híbrido (digital + papel) temporariamente
+- Programa de treinamento intensivo
+- Incentivos financeiros para early adopters
+
+### **🎯 Premissa #2: Eficácia da Pré-Aprovação Automática**
+**Hipótese:** Nossa lógica de pré-aprovação consegue reduzir o tempo de análise manual em 70% sem aumentar a taxa de inadimplência acima de 5%.
+
+**Indicadores de Validação:**
+- Tempo médio de aprovação < 30 minutos
+- Taxa de inadimplência < 5%
+- Taxa de false positives < 10%
+
+**Plano de Mitigação se Falhar:**
+- Ajuste gradual dos parâmetros de risco
+- Implementação de ML para scoring (Fase 2)
+- Revisão manual obrigatória para valores > R$ 10.000
+
+### **🎯 Premissa #3: Estabilidade das Integrações Externas**
+**Hipótese:** As APIs do Banco Inter e ClickSign manterão disponibilidade > 99% e não terão breaking changes frequentes.
+
+**Indicadores de Validação:**
+- Uptime das integrações > 99%
+- Frequência de breaking changes < 1/trimestre
+- Tempo de resolução de incidentes < 4 horas
+
+**Plano de Mitigação se Falhar:**
+- Circuit breakers com fallback local
+- Queue system para retry automático
+- Providers alternativos identificados (backup)
 
 ---
 
-*Documento vivo - Atualizado conforme evolução do projeto*
+## 6. Roadmap Pós-MVP
+
+### **Fase 1 (Mês 1-3): Estabilização**
+- Performance tuning e otimizações
+- Correção de bugs críticos
+- Melhorias de UX baseadas em feedback
+
+### **Fase 2 (Mês 4-6): Expansão**
+- Segunda integração bancária
+- App mobile (PWA)
+- Dashboard avançado
+
+### **Fase 3 (Mês 7-12): Escala**
+- Multi-tenancy
+- Machine Learning para scoring
+- Open Banking integration
+
+---
+
+## 7. Referências e Anexos
+
+- [C4 Architecture Diagrams](../09-c4-diagrams/README.md)
+- [Technical Architecture](../../replit.md)
+- [Database Schema](../../shared/schema.ts)
+- [API Documentation](../../docs/api/README.md)
+
+---
+
+## 8. Controle de Versões
+
+| Versão | Data | Autor | Mudanças |
+|--------|------|-------|----------|
+| 1.0 | 21/08/2025 | GEM 02 | Documento inicial criado |
+
+---
+
+## 9. Assinaturas e Aprovações
+
+**Status:** ⏳ AGUARDANDO REVISÃO
+
+| Papel | Nome | Data | Assinatura |
+|-------|------|------|------------|
+| Arquiteto Senior | GEM 01 | Pendente | Pendente |
+| Product Owner | - | Pendente | Pendente |
+| Tech Lead | - | Pendente | Pendente |
+
+---
+
+**FIM DO DOCUMENTO**

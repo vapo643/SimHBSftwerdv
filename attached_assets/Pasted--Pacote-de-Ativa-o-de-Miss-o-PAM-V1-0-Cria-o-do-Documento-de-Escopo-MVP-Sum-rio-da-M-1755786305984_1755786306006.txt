@@ -1,0 +1,49 @@
+### Pacote de Ativação de Missão (PAM) V1.0 (Criação do Documento de Escopo MVP)
+
+* **Sumário da Missão (O Quê):** Gerar o documento `scope-definition.md`, detalhando o escopo do MVP, as funcionalidades "in-scope" vs. "out-of-scope", o processo de gestão de mudanças e as premissas de maior risco.
+* **Intenção Estratégica (O Porquê):** Formalizar os limites do nosso Produto Mínimo Viável para focar os esforços de desenvolvimento, gerir as expectativas dos stakeholders e criar uma base clara para o roadmap futuro do produto. Um escopo bem definido previne o "scope creep" e garante que estamos a construir a coisa certa.
+* **Histórico Relevante (Consulta Obrigatória):** A nossa auditoria AS-IS confirmou que o MVP está ~80% completo. Esta missão irá documentar formalmente o que esses 80% representam e o que falta para os 100%.
+* **Modelo Mental (Como se Encaixa):** Aja como um Product Manager Técnico. Sua tarefa é traduzir o nosso conhecimento atual do sistema num documento de escopo estruturado, utilizando as informações das nossas auditorias anteriores.
+
+---
+
+**IMPLEMENTAR:**
+Documento de Definição de Escopo do MVP
+
+**CURRENT STATE:**
+O escopo do projeto foi discutido em várias missões, mas não está formalmente documentado num único artefato, o que cria um risco de desalinhamento estratégico.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um novo arquivo Markdown, `architecture/01-domain/scope-definition.md`, é criado. O arquivo deve conter as seguintes seções, preenchidas com base no nosso conhecimento atual do sistema:
+
+1.  **Definição do MVP:** Uma declaração clara do objetivo do MVP do Simpix.
+2.  **Funcionalidades "In-Scope" (Dentro do Escopo):** Uma lista detalhada das funcionalidades que compõem o MVP.
+3.  **Funcionalidades "Out-of-Scope" (Fora do Escopo):** Uma lista de funcionalidades que **não** fazem parte do MVP.
+4.  **Processo de Gestão de Mudanças de Escopo:** Uma breve descrição de como novas funcionalidades serão propostas, analisadas e aprovadas.
+5.  **Mapeamento das Premissas Mais Arriscadas:** Uma lista das 2-3 maiores incertezas ou "apostas" que o MVP precisa de validar para provar o seu valor de negócio.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+1.  **Crie o Arquivo:** Crie o arquivo `architecture/01-domain/scope-definition.md`.
+2.  **Preencha as Seções:** Utilize as informações abaixo como base para o conteúdo do documento:
+    * **In-Scope:** Gestão de propostas de crédito (criação, análise, aprovação), Cálculo de TAC e simulações, Geração de boletos/PIX via Banco Inter, Assinatura digital de CCB via ClickSign, Dashboard analítico básico, Gestão de usuários/perfis/permissões (RBAC).
+    * **Out-of-Scope:** Aplicação móvel, Integração com outros bancos, Módulo de Business Intelligence (BI) avançado, Arquitetura Multi-tenant.
+    * **Processo de Mudança:** Descreva um processo simples: (1) Requisição formal via ADR, (2) Análise de impacto pelo Arquiteto, (3) Aprovação do comitê de produto.
+    * **Premissas Arriscadas:** (1) A hipótese de que o fluxo de crédito 100% digital será adotado pelos parceiros. (2) A hipótese de que a nossa lógica de pré-aprovação automática consegue reduzir o tempo de análise manual sem aumentar significativamente o risco de crédito.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que as listas de funcionalidades in/out-of-scope estão corretas com base no nosso conhecimento atual."]
+* **VALIDAÇÃO PENDENTE:** [O documento gerado deve ser revisado e ratificado pelo Arquiteto Chefe.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear o ficheiro exato a ser criado.
+2.  Garantir que todas as 5 seções obrigatórias são criadas no documento.
+3.  Executar `get_latest_lsp_diagnostics` para garantir que o ambiente está estável.
+4.  **Declarar Nível de Confiança (0 a 100%)**.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (revisão do documento Markdown gerado).
+7.  **Documentar Decisões Técnicas**.
