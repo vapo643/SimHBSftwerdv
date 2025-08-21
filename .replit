@@ -44,36 +44,20 @@ localPort = 6379
 externalPort = 3000
 
 [[ports]]
-localPort = 34043
-externalPort = 6800
-
-[[ports]]
-localPort = 34655
+localPort = 34543
 externalPort = 6000
 
 [[ports]]
-localPort = 35641
-externalPort = 3002
+localPort = 39313
+externalPort = 6800
 
 [[ports]]
-localPort = 43567
-externalPort = 4200
-
-[[ports]]
-localPort = 44201
-externalPort = 5000
-
-[[ports]]
-localPort = 44305
-externalPort = 3001
-
-[[ports]]
-localPort = 45621
+localPort = 44545
 externalPort = 5173
 
 [[ports]]
-localPort = 45989
-externalPort = 3003
+localPort = 46857
+externalPort = 5000
 
 [agent]
 integrations = ["javascript_websocket==1.0.0", "javascript_openai==1.0.0", "javascript_supabase==1.0.0"]

@@ -8,11 +8,11 @@
 import { Router } from "express";
 import { ProposalController } from "../../contexts/proposal/presentation/proposalController.js";
 
-// Middleware auth inline simples que evita conflitos de tipo
+// Middleware auth com RLS para propostas - PAM V1.0 RLS Fix
 const auth = (req: any, res: any, next: any) => {
-  // Import dinâmico para evitar conflitos de tipos
-  import("../../lib/jwt-auth-middleware.js").then(({ jwtAuthMiddleware }) => {
-    jwtAuthMiddleware(req, res, next);
+  // Import dinâmico do middleware RLS para evitar conflitos de tipos
+  import("../../lib/rls-setup.js").then(({ rlsAuthMiddleware }) => {
+    rlsAuthMiddleware(req, res, next);
   }).catch(next);
 };
 
