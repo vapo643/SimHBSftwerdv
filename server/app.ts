@@ -12,8 +12,24 @@ import { urlTokenValidator } from "./middleware/url-token-validator";
 import { csrfProtection } from "./middleware/csrfProtection";
 import { strictCSP } from "./middleware/strictCSP";
 
+// FASE 0 - Observability imports
+import { requestLoggingMiddleware, logInfo } from "./lib/logger";
+import { initSentry, requestHandler, errorHandler } from "./lib/sentry";
+import healthRoutes from "./routes/health";
+
 export async function createApp() {
   const app = express();
+
+  // FASE 0 - Initialize Sentry error tracking
+  initSentry(app);
+  app.use(requestHandler());
+  
+  // FASE 0 - Request logging middleware  
+  app.use(requestLoggingMiddleware);
+  logInfo("📊 Observability layer initialized", {
+    sentry: !!process.env.SENTRY_DSN,
+    logging: true
+  });
 
   // Disable X-Powered-By header - OWASP ASVS V14.4.1
   app.disable("x-powered-by");
@@ -158,8 +174,17 @@ export async function createApp() {
     res.status(status).json({ message });
   });
 
+  // FASE 0 - Register health check routes first (no auth needed)
+  app.use('/api', healthRoutes);
+  logInfo("🏥 Health check endpoints registered", {
+    endpoints: ['/api/health', '/api/health/live', '/api/health/ready']
+  });
+  
   // Register routes
   registerRoutes(app);
+  
+  // FASE 0 - Sentry error handler (must be last)
+  app.use(errorHandler());
 
   return app;
 }
