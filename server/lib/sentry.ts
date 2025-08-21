@@ -8,6 +8,7 @@ import * as Sentry from "@sentry/node";
 import { nodeProfilingIntegration } from "@sentry/profiling-node";
 import { Express, Request, Response, NextFunction } from "express";
 import { logInfo, logError } from "./logger";
+import { config } from "./config";
 
 // Extend Express Request type
 declare global {
@@ -23,8 +24,13 @@ declare global {
 
 // Função principal de inicialização do Sentry (conforme PAM V1.0)
 export function initializeSentry() {
+  if (!config.observability.sentryDsn) {
+    logInfo("⚠️ Sentry DSN not configured - error tracking disabled");
+    return;
+  }
+  
   Sentry.init({
-    dsn: "https://7018ab54dbb88c9c5c6a00e41cb6ab2a@o4509882222641152.ingest.us.sentry.io/4509882232209408",
+    dsn: config.observability.sentryDsn,
     integrations: [
       nodeProfilingIntegration(),
     ],
@@ -40,7 +46,7 @@ export function initializeSentry() {
 
 // Configuração do Sentry (função legada, mantida para compatibilidade)
 export function initSentry(app: Express) {
-  const sentryDsn = process.env.SENTRY_DSN || "https://7018ab54dbb88c9c5c6a00e41cb6ab2a@o4509882222641152.ingest.us.sentry.io/4509882232209408";
+  const sentryDsn = config.observability.sentryDsn;
   
   try {
     Sentry.init({
@@ -106,7 +112,7 @@ export function initSentry(app: Express) {
     });
     
     logInfo("✅ Sentry initialized successfully", {
-      dsn: sentryDsn.substring(0, 20) + '...',
+      dsn: sentryDsn ? sentryDsn.substring(0, 20) + '...' : 'not configured',
       environment: process.env.NODE_ENV
     });
   } catch (error) {

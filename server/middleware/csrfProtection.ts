@@ -10,18 +10,14 @@
 import { Request, Response, NextFunction } from "express";
 import crypto from "crypto";
 import { AuthenticatedRequest } from "../lib/jwt-auth-middleware.js";
+import { config } from "../lib/config.js";
 
 interface CSRFRequest extends AuthenticatedRequest {
   csrfToken?: string;
 }
 
 export class CSRFProtection {
-  private static readonly CSRF_SECRET =
-    process.env.CSRF_SECRET ||
-    (() => {
-      console.error("⚠️ CSRF_SECRET not configured! Using secure random value.");
-      return require("crypto").randomBytes(32).toString("hex");
-    })();
+  private static readonly CSRF_SECRET = config.security.csrfSecret;
   private static readonly CSRF_COOKIE_NAME = "__Secure-CSRF-Token";
   private static readonly CSRF_HEADER_NAME = "X-CSRF-Token";
 
