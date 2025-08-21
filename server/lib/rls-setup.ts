@@ -62,12 +62,15 @@ export async function rlsAuthMiddleware(
     const token = authHeader.split(" ")[1];
     console.log(`[RLS MIDDLEWARE] 🎫 Token extracted (length: ${token.length}) for ${req.method} ${req.url}`);
     
-    // PAM V1.0 RLS Fix: Test environment compatibility
+    // PAM V1.0 RLS Fix: Development and Test environment compatibility
     const isTestEnv = process.env.NODE_ENV === 'test';
-    console.log(`[RLS MIDDLEWARE] 🌍 Environment: ${isTestEnv ? 'TEST' : 'PRODUCTION'} (NODE_ENV=${process.env.NODE_ENV})`);
+    const isDevelopmentEnv = process.env.NODE_ENV === 'development';
+    const useJwtAuth = isTestEnv || isDevelopmentEnv || process.env.USE_JWT_AUTH === 'true';
+    console.log(`[RLS MIDDLEWARE] 🌍 Environment: ${isTestEnv ? 'TEST' : isDevelopmentEnv ? 'DEVELOPMENT' : 'PRODUCTION'} (NODE_ENV=${process.env.NODE_ENV})`);
+    console.log(`[RLS MIDDLEWARE] 🔐 Using JWT Auth: ${useJwtAuth}`);
     
-    if (isTestEnv) {
-      // Test environment: Use JWT validation with RLS context
+    if (useJwtAuth) {
+      // Development/Test environment: Use JWT validation with RLS context
       try {
         const { jwtAuthMiddleware } = await import('./jwt-auth-middleware.js');
         

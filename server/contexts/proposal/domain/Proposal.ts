@@ -235,7 +235,12 @@ export class Proposal {
     // Verifica se tem 11 dígitos
     if (cleanCPF.length !== 11) return false;
     
-    // Verifica se todos os dígitos são iguais
+    // Em desenvolvimento, permite CPFs de teste (sequências repetidas)
+    if (process.env.NODE_ENV === 'development' && /^(\d)\1{10}$/.test(cleanCPF)) {
+      return true; // Permite CPFs como 11111111111 em desenvolvimento
+    }
+    
+    // Verifica se todos os dígitos são iguais (apenas em produção)
     if (/^(\d)\1{10}$/.test(cleanCPF)) return false;
     
     // Validação dos dígitos verificadores

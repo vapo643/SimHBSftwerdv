@@ -150,17 +150,60 @@ export async function jwtAuthMiddleware(
       return res.status(401).json({ message: "Token inválido" });
     }
 
-    // Validate token and extract user ID usando Service Role Key
-    const { createServerSupabaseAdminClient } = await import("./supabase");
-    const supabase = createServerSupabaseAdminClient();
-    const { data, error } = await supabase.auth.getUser(token);
+    let userId: string | undefined;
+    let userEmail: string | undefined;
+    let data: any = null;
+    let error: any = null;
 
-    // Log completo do erro do Supabase (CRUCIAL para diagnóstico)
+    // Development mode: Use JWT verification with local secret
+    if (process.env.NODE_ENV === 'development') {
+      try {
+        console.log("[JWT DEBUG] Using development JWT validation");
+        const jwt = await import('jsonwebtoken');
+        const JWT_SECRET = process.env.JWT_SECRET || 'development-secret-key';
+        
+        const decoded = jwt.default.verify(token, JWT_SECRET) as any;
+        console.log("[JWT DEBUG] JWT decoded successfully:", { 
+          userId: decoded.userId, 
+          email: decoded.email,
+          role: decoded.role 
+        });
+        
+        userId = decoded.userId;
+        userEmail = decoded.email || "";
+        
+        // Create mock data object for consistency
+        data = { user: { id: userId, email: userEmail } };
+        error = null;
+      } catch (jwtError: any) {
+        console.error("[JWT DEBUG] JWT verification failed:", jwtError.message);
+        error = { message: jwtError.message };
+        data = null;
+      }
+    } else {
+      // Production mode: Use Supabase validation
+      console.log("[JWT DEBUG] Using production Supabase validation");
+      const { createServerSupabaseAdminClient } = await import("./supabase");
+      const supabase = createServerSupabaseAdminClient();
+      const supabaseResult = await supabase.auth.getUser(token);
+      
+      data = supabaseResult.data;
+      error = supabaseResult.error;
+      
+      if (data?.user) {
+        userId = data.user.id;
+        userEmail = data.user.email || "";
+      } else {
+        userId = undefined;
+        userEmail = undefined;
+      }
+    }
+
+    // Log completo do erro (CRUCIAL para diagnóstico)
     if (error) {
-      console.error("[JWT DEBUG] Falha na validação Supabase. Erro completo:", {
+      console.error("[JWT DEBUG] Falha na validação. Erro completo:", {
         message: error.message,
-        status: error.status,
-        code: error.code,
+        mode: process.env.NODE_ENV === 'development' ? 'JWT_LOCAL' : 'SUPABASE',
         fullError: JSON.stringify(error, null, 2),
       });
     }
@@ -173,11 +216,11 @@ export async function jwtAuthMiddleware(
         hasUser: !!data?.user,
         userId: data?.user?.id,
         timestamp: new Date().toISOString(),
-        // Never log sensitive token data
+        mode: 'JWT_LOCAL'
       });
     }
 
-    if (error || !data.user) {
+    if (error || !data?.user || !userId || !userEmail) {
       console.error("[JWT DEBUG] ==== FIM DA VALIDAÇÃO JWT (FALHA) ====");
       securityLogger.logEvent({
         type: error?.message?.includes("expired")
@@ -192,10 +235,6 @@ export async function jwtAuthMiddleware(
       });
       return res.status(401).json({ message: "Token inválido ou expirado" });
     }
-
-    // Step b: Extract user ID
-    const userId = data.user.id;
-    const userEmail = data.user.email || "";
 
     // Step c: Query profiles table using direct DB connection (bypasses RLS)
     const { db } = await import("./supabase");
