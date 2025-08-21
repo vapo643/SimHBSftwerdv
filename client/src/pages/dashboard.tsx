@@ -157,13 +157,31 @@ const Dashboard: React.FC = () => {
 
   // Fetch real proposals data
   const {
-    data: propostas,
+    data: propostasResponse,
     isLoading,
     error,
     refetch,
-  } = useQuery<any[]>({
+  } = useQuery<{ success: boolean; data: any[]; total: number }>({
     queryKey: ["/api/propostas"],
   });
+  
+  // Extract and map the data array from the response
+  const propostas = (propostasResponse?.data || []).map((p: any) => ({
+    id: p.id,
+    status: p.status,
+    nomeCliente: p.cliente_nome,
+    cpfCliente: p.cliente_cpf,
+    valorSolicitado: p.valor,
+    prazo: p.prazo,
+    taxaJuros: p.taxa_juros,
+    produtoId: p.produto_id,
+    lojaId: p.loja_id,
+    createdAt: p.created_at,
+    valorParcela: p.valor_parcela,
+    // Add contextual status for compatibility
+    statusContextual: p.status,
+    parceiro: p.parceiro || { razaoSocial: 'Parceiro Padrão' }
+  }));
 
   // Fetch user metrics if user is ATENDENTE
   const { data: metricas } = useQuery<{
