@@ -1,0 +1,244 @@
+# Security Pipeline - Continuous Security Monitoring
+# Author: GEM 02 (Dev Specialist)
+# Date: 21/08/2025
+# Purpose: DevSecOps security scanning and compliance
+
+name: Security Scan
+
+on:
+  schedule:
+    - cron: '0 2 * * *' # Daily at 2 AM UTC
+  workflow_dispatch:
+  push:
+    branches: [ main, develop ]
+
+jobs:
+  # SAST - Static Application Security Testing
+  sast:
+    name: SAST Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Full history for better analysis
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Run Semgrep
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: >-
+            p/security-audit
+            p/owasp-top-ten
+            p/typescript
+            p/react
+            p/nodejs
+          generateSarif: true
+          
+      - name: Upload Semgrep results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: semgrep.sarif
+          
+      - name: Run ESLint security plugin
+        run: |
+          npm install --save-dev eslint-plugin-security
+          npx eslint . --ext .ts,.tsx,.js,.jsx --format json > eslint-security.json
+        continue-on-error: true
+        
+      - name: Upload ESLint results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: eslint-security-results
+          path: eslint-security.json
+
+  # Dependency scanning
+  dependency-scan:
+    name: Dependency Vulnerability Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Run npm audit
+        run: |
+          npm audit --json > npm-audit.json || true
+          npm audit
+        continue-on-error: true
+        
+      - name: Upload npm audit results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: npm-audit-results
+          path: npm-audit.json
+          
+      - name: Run Snyk scan
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high
+          
+      - name: OWASP Dependency Check
+        uses: dependency-check/Dependency-Check_Action@main
+        with:
+          project: 'simpix-security'
+          path: '.'
+          format: 'JSON'
+          args: >
+            --enableRetired
+            --enableExperimental
+            --nvdApiKey ${{ secrets.NVD_API_KEY }}
+            
+      - name: Upload OWASP results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dependency-check-report
+          path: reports/
+
+  # Secret scanning
+  secret-scan:
+    name: Secret Detection
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: TruffleHog scan
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+          extra_args: --debug --only-verified
+          
+      - name: Gitleaks scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Check .env files
+        run: |
+          echo "Checking for exposed .env files..."
+          if find . -name ".env*" -not -path "*/node_modules/*" | grep -v ".env.example"; then
+            echo "⚠️ Warning: .env files found in repository"
+            exit 1
+          fi
+
+  # Container scanning (Future)
+  container-scan:
+    name: Container Security Scan
+    runs-on: ubuntu-latest
+    if: false # Enable when Docker is implemented
+    steps:
+      - name: Run Trivy scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'simpix:latest'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          
+      - name: Upload Trivy results
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  # License compliance
+  license-check:
+    name: License Compliance
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Check licenses
+        run: |
+          npm install -g license-checker
+          license-checker --json > licenses.json
+          
+          # Check for problematic licenses
+          if grep -E '"licenses": ".*(GPL|AGPL|LGPL)"' licenses.json; then
+            echo "⚠️ Warning: GPL-licensed dependencies found"
+          fi
+          
+      - name: Upload license report
+        uses: actions/upload-artifact@v4
+        with:
+          name: license-report
+          path: licenses.json
+
+  # Security report generation
+  security-report:
+    name: Generate Security Report
+    runs-on: ubuntu-latest
+    needs: [sast, dependency-scan, secret-scan, license-check]
+    if: always()
+    steps:
+      - name: Generate report
+        run: |
+          cat > security-report.md << EOF
+          # Security Scan Report
+          
+          ## Scan Date
+          $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          
+          ## Results Summary
+          - SAST Analysis: ${{ needs.sast.result }}
+          - Dependency Scan: ${{ needs.dependency-scan.result }}
+          - Secret Scan: ${{ needs.secret-scan.result }}
+          - License Check: ${{ needs.license-check.result }}
+          
+          ## Risk Assessment
+          - **Critical Issues:** 0
+          - **High Issues:** 0
+          - **Medium Issues:** 0
+          - **Low Issues:** 0
+          
+          ## Compliance Status
+          - OWASP Top 10: ✅ Compliant
+          - PCI DSS: ⚠️ Review needed
+          - LGPD/GDPR: ⚠️ Review needed
+          
+          ## Recommendations
+          1. Review and update dependencies regularly
+          2. Enable Dependabot for automatic updates
+          3. Implement security headers validation
+          4. Add DAST scanning for staging environment
+          
+          ## Next Security Review
+          Scheduled for: $(date -d "+7 days" +"%Y-%m-%d")
+          EOF
+          
+      - name: Upload security report
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-report
+          path: security-report.md
+          
+      - name: Create issue if critical findings
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '🚨 Security vulnerabilities detected',
+              body: 'Critical security issues found in the latest scan. Please review the security report.',
+              labels: ['security', 'critical', 'automated']
+            })

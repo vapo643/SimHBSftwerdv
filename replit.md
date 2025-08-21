@@ -99,6 +99,9 @@ Error handling: Create structured documentation for automatic consultation durin
 - **Time Management**: Centralized timezone utilities for Brasília timezone consistency.
 - **Modular Architecture**: Monolith progressively decomposed into domain modules (Auth, Users, Propostas, Pagamentos, Integrações).
 - **Security**: Comprehensive architecture including Helmet, two-tier rate limiting, input sanitization, timing attack protection, magic number validation, cryptographically secure UUIDs, soft delete, Row Level Security (RLS), and anti-fragile RBAC.
+- **CI/CD Pipeline**: GitHub Actions with 3 specialized workflows (CI, CD-Staging, Security), automated testing, SAST/SCA scanning, deployment readiness checks, and rollback automation.
+- **Observability**: Winston structured logging with correlation IDs, Sentry error tracking, health check endpoints, and automated backup scripts.
+- **Configuration Management**: Centralized config module with environment-based secrets, critical vs optional validation, and secure fallbacks for development.
 - **Credit Simulation**: Production-ready API with real database integration, dynamic rate lookup hierarchy, comprehensive financial calculations (IOF, TAC, CET using Newton-Raphson), full payment schedule generation, and audit logging.
 - **Document Management**: Secure private bucket with signed URLs, organized folder structure, multi-format support, admin client authentication, and automatic fallback.
 - **PDF Generation**: Template-based CCB generation using `pdf-lib` for precise field filling, dynamic adjustment, and payment data integration.
