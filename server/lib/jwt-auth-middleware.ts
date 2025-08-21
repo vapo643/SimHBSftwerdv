@@ -10,6 +10,7 @@ export interface AuthenticatedRequest extends Request {
     full_name?: string | null;
     loja_id?: number | null;
   };
+  sessionID?: string; // Added for express-session compatibility
 }
 
 // Token blacklist para segurança aprimorada (SAMM Optimization)

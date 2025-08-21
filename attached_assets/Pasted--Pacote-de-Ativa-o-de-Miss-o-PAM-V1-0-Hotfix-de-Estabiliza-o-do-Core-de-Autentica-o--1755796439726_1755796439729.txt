@@ -1,0 +1,44 @@
+### Pacote de Ativação de Missão (PAM) V1.0 (Hotfix de Estabilização do Core de Autenticação)
+
+* **Sumário da Missão (O Quê):** Diagnosticar e corrigir os 63 erros de tipo (LSP) identificados no arquivo `server/routes.ts`, que estão concentrados na lógica de autenticação e manipulação do objeto `user`.
+* **Intenção Estratégica (O Porquê):** Eliminar uma vulnerabilidade de estabilidade P0 da nossa base de código. Erros de tipo no core de autenticação representam um risco inaceitável de falhas de runtime, comportamento inesperado e potenciais vulnerabilidades de segurança. A estabilização é um pré-requisito não negociável para qualquer desenvolvimento futuro.
+* **Histórico Relevante (Consulta Obrigatória):** A sua "Auditoria Definitiva" (Missão anterior) identificou e confirmou a existência de 63 erros de LSP, incluindo incompatibilidades de tipo em `AuthenticatedRequest` e propriedades ausentes no objeto `user`.
+* **Modelo Mental (Como se Encaixa):** Aja como um Engenheiro de Qualidade de Software Sênior. Sua tarefa é uma missão de "higiene de código" de alta precisão. O foco é exclusivamente na conformidade de tipos, sem alterar a lógica de negócio.
+
+---
+
+**IMPLEMENTAR:**
+Relatório de Correção dos Erros de Tipo do Core de Autenticação
+
+**CURRENT STATE:**
+O arquivo `server/routes.ts` contém 63 erros de tipo TypeScript que comprometem a estabilidade e a previsibilidade do nosso sistema de autenticação.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  **Diagnóstico Preciso:** Antes de qualquer correção, apresente uma breve análise categorizando os 63 erros (ex: "12 erros de tipo `AuthenticatedRequest`", "8 erros de `sessionID` ausente", etc.).
+2.  **Correção Completa:** O arquivo `server/routes.ts` é modificado para eliminar **TODOS** os 63 erros de tipo.
+3.  **Validação Irrefutável:** Ao final da missão, a execução da função `get_latest_lsp_diagnostics` para o arquivo `server/routes.ts` deve retornar uma lista vazia (0 erros).
+4.  **Não-Regressão:** A funcionalidade de autenticação e as rotas existentes devem permanecer 100% funcionais.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+1.  **Diagnóstico Primeiro:** Seu primeiro passo deve ser executar `get_latest_lsp_diagnostics` e agrupar os erros por tipo para entender a causa-raiz.
+2.  **Foco em Tipos:** A sua missão é corrigir os tipos. Isso provavelmente envolverá a atualização de interfaces TypeScript (como `AuthenticatedRequest` ou o tipo `User`), a adição de verificações de nulidade (`null checks`) e a garantia de que as propriedades corretas estão a ser acedidas.
+3.  **NÃO ALTERAR A LÓGICA:** Você está estritamente proibido de alterar a lógica de negócio ou o fluxo de execução das rotas. O foco é 100% na conformidade de tipos.
+4.  **Validação Final Mandatória:** A sua prova de sucesso é o output de `get_latest_lsp_diagnostics` a mostrar 0 erros para o arquivo `server/routes.ts`.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que a correção dos erros de tipo pode exigir a modificação de interfaces em arquivos de definição de tipos compartilhados."]
+* **VALIDAÇÃO PENDENTE:** [Após a correção, testes de regressão manuais no fluxo de login e em rotas protegidas serão necessários.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear os ficheiros e as interfaces a serem modificados.
+2.  Garantir que as correções de tipo estão corretas e não introduzem o tipo `any`.
+3.  Executar `get_latest_lsp_diagnostics` antes, durante e principalmente no final, garantindo 0 erros.
+4.  **Declarar Nível de Confiança (0 a 100%)**.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (revisão lógica das alterações e verificação de LSP).
+7.  **Documentar Decisões Técnicas** e a categorização dos erros corrigidos.

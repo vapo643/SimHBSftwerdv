@@ -172,7 +172,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Feature Flags endpoint - retorna flags para o usuário atual
-  app.get("/api/features", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+  app.get("/api/features", jwtAuthMiddleware as any, async (req: AuthenticatedRequest, res) => {
     try {
       // Inicializa o serviço se necessário
       await featureFlagService.init();
@@ -224,7 +224,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // EXEMPLO DE USO: Rota experimental protegida por feature flag
-  app.get("/api/experimental/analytics", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+  app.get("/api/experimental/analytics", jwtAuthMiddleware as any, async (req: AuthenticatedRequest, res) => {
     try {
       // Verifica se a feature flag está habilitada
       const isEnabled = await featureFlagService.isEnabled('nova-api-experimental', {
@@ -522,7 +522,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Test endpoint para verificar correções de bugs
-  app.get("/api/test-data-flow", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+  app.get("/api/test-data-flow", jwtAuthMiddleware as any, async (req: AuthenticatedRequest, res) => {
     try {
       const { createServerSupabaseAdminClient } = await import("./lib/supabase");
       const supabase = createServerSupabaseAdminClient();
@@ -612,7 +612,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Debug endpoint for RBAC validation
-  app.get("/api/debug/me", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+  app.get("/api/debug/me", jwtAuthMiddleware as any, async (req: AuthenticatedRequest, res) => {
     try {
       res.json({
         message: "Debug endpoint - User profile from robust JWT middleware",
@@ -635,7 +635,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // New endpoint for formalization proposals (filtered by status)
   app.get(
     "/api/propostas/formalizacao",
-    jwtAuthMiddleware,
+    jwtAuthMiddleware as any,
     async (req: AuthenticatedRequest, res) => {
       try {
         const { createServerSupabaseAdminClient } = await import("./lib/supabase");
@@ -771,7 +771,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Endpoint para gerar CCB automaticamente
   app.post(
     "/api/propostas/:id/gerar-ccb",
-    jwtAuthMiddleware,
+    jwtAuthMiddleware as any,
     async (req: AuthenticatedRequest, res) => {
       try {
         const { id } = req.params;
@@ -832,7 +832,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   );
 
   // Debug: Testar PDF simples e limpo
-  app.get("/api/debug/test-pdf", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+  app.get("/api/debug/test-pdf", jwtAuthMiddleware as any, async (req: AuthenticatedRequest, res) => {
     try {
       const PDFDocument = (await import("pdfkit")).default;
 
@@ -856,7 +856,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       doc.fontSize(16).text("DOCUMENTO DE TESTE");
       doc.moveDown();
       doc.fontSize(12).text("Este é um PDF de teste gerado pelo sistema.");
-      doc.text("Data: " + formatBrazilianDateTime(getBrasiliaDate(), "date"));
+      doc.text("Data: " + formatBrazilianDateTime(getBrasiliaDate()));
 
       doc.end();
 
@@ -874,7 +874,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Debug: Listar arquivos no bucket documents
-  app.get("/api/debug/storage-files", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+  app.get("/api/debug/storage-files", jwtAuthMiddleware as any, async (req: AuthenticatedRequest, res) => {
     try {
       const { createServerSupabaseAdminClient } = await import("./lib/supabase");
       const supabase = createServerSupabaseAdminClient();
@@ -904,7 +904,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get CCB signed URL
   app.get(
     "/api/propostas/:id/ccb-url",
-    jwtAuthMiddleware,
+    jwtAuthMiddleware as any,
     async (req: AuthenticatedRequest, res) => {
       try {
         const { id } = req.params;
@@ -1034,7 +1034,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get(
     "/api/propostas/:id",
-    jwtAuthMiddleware,
+    jwtAuthMiddleware as any,
     timingNormalizerMiddleware,
     async (req: AuthenticatedRequest, res) => {
       try {
@@ -1042,12 +1042,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const user = req.user;
 
         console.log(
-          `🔐 [PROPOSTA ACCESS] User ${user.id} (${user.role}) accessing proposta ${idParam}`
+          `🔐 [PROPOSTA ACCESS] User ${user?.id} (${user?.role}) accessing proposta ${idParam}`
         );
 
         // 🔧 CORREÇÃO: Usar mesma abordagem do endpoint de formalização que funciona
-        if (user.role === "ATENDENTE") {
-          console.log(`🔐 [ATENDENTE ACCESS] Using RLS query for user loja_id: ${user.loja_id}`);
+        if (user?.role === "ATENDENTE") {
+          console.log(`🔐 [ATENDENTE ACCESS] Using RLS query for user loja_id: ${user?.loja_id}`);
 
           // Usar Drizzle com RLS como no endpoint de formalização
           const { db } = await import("../server/lib/supabase");
@@ -1112,7 +1112,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
           if (!result || result.length === 0) {
             console.log(
-              `🔐 [ATENDENTE BLOCKED] User ${user.id} denied access to proposta ${idParam} - RLS policy blocked or not found`
+              `🔐 [ATENDENTE BLOCKED] User ${user?.id} denied access to proposta ${idParam} - RLS policy blocked or not found`
             );
             return res.status(403).json({
               message: "Você não tem permissão para acessar esta proposta",
@@ -1121,7 +1121,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
           const proposta = result[0];
           console.log(
-            `🔐 [ATENDENTE ALLOWED] User ${user.id} granted access to proposta ${idParam} from loja ${proposta.loja_id}`
+            `🔐 [ATENDENTE ALLOWED] User ${user?.id} granted access to proposta ${idParam} from loja ${proposta.loja_id}`
           );
 
           // Buscar documentos da proposta
@@ -1278,7 +1278,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
 
           console.log(
-            `🔐 [ADMIN/GERENTE/ANALISTA ACCESS] User ${user.id} (${user.role}) accessing proposta ${idParam}`
+            `🔐 [ADMIN/GERENTE/ANALISTA ACCESS] User ${user?.id} (${user?.role}) accessing proposta ${idParam}`
           );
 
           // 🔧 CORREÇÃO CRÍTICA: Aplicar mesma lógica de documentos do ATENDENTE
@@ -1402,7 +1402,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Endpoint específico para associar documentos a uma proposta
   app.post(
     "/api/propostas/:id/documentos",
-    jwtAuthMiddleware,
+    jwtAuthMiddleware as any,
     async (req: AuthenticatedRequest, res) => {
       try {
         const { id: propostaId } = req.params;
@@ -1475,7 +1475,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // PILAR 12 - PROGRESSIVE ENHANCEMENT
   // Rota para submissão de formulário tradicional (fallback)
   // ====================================
-  app.post("/nova-proposta", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+  app.post("/nova-proposta", jwtAuthMiddleware as any, async (req: AuthenticatedRequest, res) => {
     try {
       console.log("📝 Progressive Enhancement: Form submission received");
 
@@ -1591,7 +1591,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch(
     "/api/propostas/:id",
-    jwtAuthMiddleware,
+    jwtAuthMiddleware as any,
     requireManagerOrAdmin,
     async (req: AuthenticatedRequest, res) => {
       try {
@@ -1611,7 +1611,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get(
     "/api/propostas/status/:status",
-    jwtAuthMiddleware,
+    jwtAuthMiddleware as any,
     async (req: AuthenticatedRequest, res) => {
       try {
         const status = req.params.status;
@@ -1628,10 +1628,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const { getPropostaDocuments, uploadPropostaDocument } = await import("./routes/documents");
 
   // Document routes for proposals
-  app.get("/api/propostas/:id/documents", jwtAuthMiddleware, getPropostaDocuments);
+  app.get("/api/propostas/:id/documents", jwtAuthMiddleware as any, getPropostaDocuments);
   app.post(
     "/api/propostas/:id/documents",
-    jwtAuthMiddleware,
+    jwtAuthMiddleware as any,
     requireRoles(['ADMINISTRADOR', 'ANALISTA']),
     upload.single("file"),
     uploadPropostaDocument
@@ -1641,10 +1641,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const { togglePropostaStatus, getCcbAssinada } = await import("./routes/propostas");
 
   // Rota para alternar status entre ativa/suspensa
-  app.put("/api/propostas/:id/toggle-status", jwtAuthMiddleware, togglePropostaStatus);
+  app.put("/api/propostas/:id/toggle-status", jwtAuthMiddleware as any, togglePropostaStatus);
 
   // Rota para buscar CCB assinada
-  app.get("/api/propostas/:id/ccb", jwtAuthMiddleware, getCcbAssinada);
+  app.get("/api/propostas/:id/ccb", jwtAuthMiddleware as any, getCcbAssinada);
 
   // Emergency route to setup storage bucket (temporary - no auth for setup)
   app.post("/api/setup-storage", async (req, res) => {
@@ -1891,7 +1891,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   );
 
   // Simple GET endpoint for all commercial tables (for dropdowns)
-  app.get("/api/tabelas-comerciais", jwtAuthMiddleware, async (req: AuthenticatedRequest, res) => {
+  app.get("/api/tabelas-comerciais", jwtAuthMiddleware as any, async (req: AuthenticatedRequest, res) => {
     try {
       // Import database connection
       const { db } = await import("../server/lib/supabase");
@@ -3523,11 +3523,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       res.json({
-        id: req.user.id,
-        email: req.user.email,
-        role: req.user.role,
-        full_name: req.user.full_name,
-        loja_id: req.user.loja_id,
+        id: req.user!.id,
+        email: req.user!.email,
+        role: req.user!.role,
+        full_name: req.user!.full_name,
+        loja_id: req.user!.loja_id,
       });
     } catch (error) {
       console.error("Error fetching user profile:", error);

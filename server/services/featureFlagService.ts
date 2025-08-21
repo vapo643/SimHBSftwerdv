@@ -16,7 +16,7 @@ const logger = winston.createLogger({
 // Interface para o contexto do usuário
 export interface FeatureFlagContext {
   userId?: string;
-  userRole?: string;
+  userRole?: string | null; // Changed to accept null from AuthenticatedRequest
   sessionId?: string;
   properties?: Record<string, string>;
   environment?: string;
