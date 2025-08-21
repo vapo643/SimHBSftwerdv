@@ -7,9 +7,51 @@
  * @version 2.0.0
  * @created 2025-01-23
  * @updated 2025-01-23 - Added TokenManager, ApiConfig, RequestManager
+ * @updated 2025-08-21 - Added dual-key case transformation for snake_case/camelCase compatibility
  */
 
 import { getSupabase } from "./supabase";
+
+/**
+ * Transform snake_case keys to camelCase while preserving original keys (dual-key mode)
+ * This ensures compatibility with both backend (snake_case) and frontend (camelCase) conventions
+ */
+function snakeToCamel(str: string): string {
+  return str.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
+}
+
+function deepTransformDualCase(obj: any): any {
+  if (obj === null || obj === undefined) {
+    return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map(item => deepTransformDualCase(item));
+  }
+
+  if (typeof obj === 'object' && obj !== null) {
+    const result: any = {};
+    
+    for (const key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        const value = deepTransformDualCase(obj[key]);
+        
+        // Always preserve the original key
+        result[key] = value;
+        
+        // If the key contains underscore, also add camelCase version
+        if (key.includes('_')) {
+          const camelKey = snakeToCamel(key);
+          result[camelKey] = value;
+        }
+      }
+    }
+    
+    return result;
+  }
+
+  return obj;
+}
 
 export interface ApiClientOptions {
   method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
@@ -387,7 +429,13 @@ export async function apiClient<T = any>(
     } else {
       // Default JSON handling
       if (contentType && contentType.includes("application/json")) {
-        data = await response.json();
+        const jsonData = await response.json();
+        // Apply dual-key transformation for /api/ endpoints
+        if (fullUrl.includes('/api/')) {
+          data = deepTransformDualCase(jsonData);
+        } else {
+          data = jsonData;
+        }
       } else if (response.status === 204 || response.status === 205) {
         // No content responses
         data = null as T;
@@ -430,7 +478,13 @@ export async function apiClient<T = any>(
             } else {
               // Default JSON handling
               if (retryContentType && retryContentType.includes("application/json")) {
-                retryData = await retryResponse.json();
+                const retryJsonData = await retryResponse.json();
+                // Apply dual-key transformation for /api/ endpoints
+                if (fullUrl.includes('/api/')) {
+                  retryData = deepTransformDualCase(retryJsonData);
+                } else {
+                  retryData = retryJsonData;
+                }
               } else if (retryResponse.status === 204 || retryResponse.status === 205) {
                 retryData = null as T;
               } else {

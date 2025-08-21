@@ -165,19 +165,21 @@ const Dashboard: React.FC = () => {
     queryKey: ["/api/propostas"],
   });
   
-  // Extract and map the data array from the response
+  // Extract propostas - dual-key transformation in apiClient ensures both formats work
+  // The apiClient automatically adds camelCase aliases for all snake_case keys
   const propostas = (propostasResponse?.data || []).map((p: any) => ({
     id: p.id,
     status: p.status,
-    nomeCliente: p.cliente_nome,
-    cpfCliente: p.cliente_cpf,
-    valorSolicitado: p.valor,
+    // Use camelCase properties directly (added by dual-key transformation)
+    nomeCliente: p.nomeCliente || p.cliente_nome, // Both work now
+    cpfCliente: p.cpfCliente || p.cliente_cpf,     // Both work now
+    valorSolicitado: p.valorSolicitado || p.valor,
     prazo: p.prazo,
-    taxaJuros: p.taxa_juros,
-    produtoId: p.produto_id,
-    lojaId: p.loja_id,
-    createdAt: p.created_at,
-    valorParcela: p.valor_parcela,
+    taxaJuros: p.taxaJuros || p.taxa_juros,
+    produtoId: p.produtoId || p.produto_id,
+    lojaId: p.lojaId || p.loja_id,
+    createdAt: p.createdAt || p.created_at,
+    valorParcela: p.valorParcela || p.valor_parcela,
     // Add contextual status for compatibility
     statusContextual: p.status,
     parceiro: p.parceiro || { razaoSocial: 'Parceiro Padrão' }
