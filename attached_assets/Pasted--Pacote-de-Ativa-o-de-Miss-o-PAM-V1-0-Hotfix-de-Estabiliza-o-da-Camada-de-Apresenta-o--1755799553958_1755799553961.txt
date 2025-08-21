@@ -1,0 +1,44 @@
+### Pacote de Ativação de Missão (PAM) V1.0 (Hotfix de Estabilização da Camada de Apresentação)
+
+* **Sumário da Missão (O Quê):** Corrigir os 17 erros de tipo (LSP) restantes no arquivo `server/routes/propostas/core.refactored.ts`, que são causados por conflitos de tipo entre o `AuthenticatedRequest` e o `Request` padrão do Express.
+* **Intenção Estratégica (O Porquê):** Garantir a estabilidade e a correção de tipos da nossa nova camada de API. A eliminação de 100% dos erros de LSP é um pré-requisito não negociável antes que possamos considerar a refatoração concluída e prosseguir com os testes de integração e a migração final.
+* **Histórico Relevante (Consulta Obrigatória):** A sua missão anterior implementou a nova estrutura de `controller` e rotas, mas deixou para trás 17 erros de tipo relacionados com o middleware.
+* **Modelo Mental (Como se Encaixa):** Aja como um Engenheiro de Qualidade de Software Sênior. A sua tarefa é refinar a implementação, focando exclusivamente na conformidade de tipos para garantir a robustez do código.
+
+---
+
+**IMPLEMENTAR:**
+Correção dos Erros de Tipo do Middleware na API de Propostas
+
+**CURRENT STATE:**
+O arquivo `server/routes/propostas/core.refactored.ts` está funcional, mas contém 17 erros de tipo que comprometem a sua estabilidade e manutenibilidade a longo prazo.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  O arquivo `server/routes/propostas/core.refactored.ts` é modificado.
+2.  **Todos os 17 erros de LSP são eliminados.**
+3.  A solução implementada é robusta (evitar o uso excessivo de `as any`). A criação de *type guards* ou a extensão de tipos é preferível.
+4.  O script `./scripts/validate-dependencies.sh` continua a ser executado com sucesso, provando que as correções não violaram os nossos limites de contexto.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  **Diagnóstico Primeiro:** Execute `get_latest_lsp_diagnostics` no arquivo alvo para obter a lista exata dos erros.
+2.  **Solução Elegante:** Priorize a criação de *wrappers* de middleware ou *type guards* em vez de usar `as any` em todas as rotas. O objetivo é resolver a causa-raiz do conflito de tipos.
+3.  **Validação Dupla:** A sua prova de sucesso final é dupla:
+    * (a) O output de `get_latest_lsp_diagnostics` a mostrar **0 erros** para o arquivo.
+    * (b) O output do `./scripts/validate-dependencies.sh` a mostrar **zero violações**.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que a criação de um `type guard` para `AuthenticatedRequest` é a solução mais limpa e reutilizável."]
+* **VALIDAÇÃO PENDENTE:** [Após a correção, a missão de migração final (Sub-Passo 9.4c) será desbloqueada.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear o ficheiro exato a ser modificado.
+2.  Garantir que a solução para os erros de tipo é robusta e não apenas um *workaround*.
+3.  Executar `get_latest_lsp_diagnostics` no final para garantir 0 erros.
+4.  **Declarar Nível de Confiança (0 a 100%)**.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (executar a validação de dependências).
+7.  **Documentar Decisões Técnicas**.

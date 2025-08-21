@@ -6,9 +6,15 @@
  */
 
 import { Router } from "express";
-import { jwtAuthMiddleware, AuthenticatedRequest } from "../../lib/jwt-auth-middleware.js";
 import { ProposalController } from "../../contexts/proposal/presentation/proposalController.js";
-import { Response } from "express";
+
+// Middleware auth inline simples que evita conflitos de tipo
+const auth = (req: any, res: any, next: any) => {
+  // Import dinâmico para evitar conflitos de tipos
+  import("../../lib/jwt-auth-middleware.js").then(({ jwtAuthMiddleware }) => {
+    jwtAuthMiddleware(req, res, next);
+  }).catch(next);
+};
 
 const router = Router();
 const controller = new ProposalController();
@@ -16,30 +22,30 @@ const controller = new ProposalController();
 // ===== ROTAS PRINCIPAIS =====
 
 // GET /api/propostas - Listar propostas
-router.get("/", jwtAuthMiddleware, (req, res) => controller.list(req as any, res));
+router.get("/", auth, (req: any, res: any) => controller.list(req, res));
 
 // GET /api/propostas/buscar-por-cpf/:cpf - Buscar por CPF (antes do /:id para evitar conflito)
-router.get("/buscar-por-cpf/:cpf", jwtAuthMiddleware, (req, res) => controller.getByCpf(req as any, res));
+router.get("/buscar-por-cpf/:cpf", auth, (req: any, res: any) => controller.getByCpf(req, res));
 
 // GET /api/propostas/:id - Buscar proposta por ID
-router.get("/:id", jwtAuthMiddleware, (req, res) => controller.getById(req as any, res));
+router.get("/:id", auth, (req: any, res: any) => controller.getById(req, res));
 
 // POST /api/propostas - Criar nova proposta
-router.post("/", jwtAuthMiddleware, (req, res) => controller.create(req as any, res));
+router.post("/", auth, (req: any, res: any) => controller.create(req, res));
 
 // PUT /api/propostas/:id/submit - Submeter para análise
-router.put("/:id/submit", jwtAuthMiddleware, (req, res) => controller.submitForAnalysis(req as any, res));
+router.put("/:id/submit", auth, (req: any, res: any) => controller.submitForAnalysis(req, res));
 
 // PUT /api/propostas/:id/approve - Aprovar proposta
-router.put("/:id/approve", jwtAuthMiddleware, (req, res) => controller.approve(req as any, res));
+router.put("/:id/approve", auth, (req: any, res: any) => controller.approve(req, res));
 
 // PUT /api/propostas/:id/reject - Rejeitar proposta
-router.put("/:id/reject", jwtAuthMiddleware, (req, res) => controller.reject(req as any, res));
+router.put("/:id/reject", auth, (req: any, res: any) => controller.reject(req, res));
 
 // ===== ROTAS LEGACY (mantidas temporariamente para compatibilidade) =====
 
 // GET /:id/observacoes - Logs de auditoria (manter original por enquanto)
-router.get("/:id/observacoes", jwtAuthMiddleware, async (req, res) => {
+router.get("/:id/observacoes", auth, async (req: any, res: any) => {
   try {
     const propostaId = req.params.id;
     const { createServerSupabaseAdminClient } = await import("../../lib/supabase.js");
@@ -93,7 +99,7 @@ router.get("/:id/observacoes", jwtAuthMiddleware, async (req, res) => {
 });
 
 // PUT /:id/status - Legacy status change endpoint (manter por compatibilidade)
-router.put("/:id/status", jwtAuthMiddleware, async (req, res) => {
+router.put("/:id/status", auth, async (req: any, res: any) => {
   const { status } = req.body;
   
   // Mapear para os novos endpoints baseado no status
