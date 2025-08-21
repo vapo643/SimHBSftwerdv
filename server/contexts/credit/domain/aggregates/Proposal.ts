@@ -201,6 +201,33 @@ export class Proposal {
     return true;
   }
 
+  // Financial Calculations
+  public calculateMonthlyPayment(): number | null {
+    const { requestedAmount, term, interestRate } = this.loanConditions;
+    
+    // Se não tiver taxa de juros definida, retorna null
+    if (!interestRate || interestRate <= 0) {
+      return null;
+    }
+    
+    // Cálculo de parcela usando fórmula de juros compostos
+    const monthlyRate = interestRate / 100 / 12;
+    const numerator = requestedAmount * monthlyRate * Math.pow(1 + monthlyRate, term);
+    const denominator = Math.pow(1 + monthlyRate, term) - 1;
+    
+    return numerator / denominator;
+  }
+
+  public calculateTotalAmount(): number | null {
+    const monthlyPayment = this.calculateMonthlyPayment();
+    
+    if (!monthlyPayment) {
+      return null;
+    }
+    
+    return monthlyPayment * this.loanConditions.term;
+  }
+
   // Getters
   public getId(): string { return this.id; }
   public getStatus(): ProposalStatus { return this.status; }

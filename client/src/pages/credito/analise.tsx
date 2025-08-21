@@ -231,8 +231,8 @@ const AnaliseManualPage: React.FC = () => {
             <CardContent className="space-y-2">
               <p>
                 <strong>Valor Solicitado:</strong>{" "}
-                {proposta.valor_solicitado || proposta.valorSolicitado || proposta.condicoesData?.valor ? 
-                  `R$ ${proposta.valor_solicitado || proposta.valorSolicitado || proposta.condicoesData.valor}` : "N/A"}
+                {proposta.valor || proposta.valor_solicitado || proposta.valorSolicitado || proposta.condicoesData?.valor ? 
+                  `R$ ${(proposta.valor || proposta.valor_solicitado || proposta.valorSolicitado || proposta.condicoesData?.valor).toLocaleString('pt-BR')}` : "N/A"}
               </p>
               <p>
                 <strong>Prazo:</strong>{" "}

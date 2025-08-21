@@ -34,7 +34,7 @@ export class ProposalRepositoryImpl implements IProposalRepository {
     const results = await db
       .select()
       .from(propostas)
-      .where(eq(propostas.cliente_cpf, cpf));
+      .where(eq(propostas.clienteCpf, cpf));
     
     return results.map((r: any) => this.toDomainEntity(r));
   }
@@ -46,7 +46,7 @@ export class ProposalRepositoryImpl implements IProposalRepository {
     const results = await db
       .select()
       .from(propostas)
-      .where(eq(propostas.loja_id, parseInt(storeId)));
+      .where(eq(propostas.lojaId, parseInt(storeId)));
     
     return results.map((r: any) => this.toDomainEntity(r));
   }
@@ -58,7 +58,7 @@ export class ProposalRepositoryImpl implements IProposalRepository {
     const results = await db
       .select()
       .from(propostas)
-      .orderBy(propostas.created_at);
+      .orderBy(propostas.createdAt);
     
     return results.map((r: any) => this.toDomainEntity(r));
   }
@@ -90,7 +90,7 @@ export class ProposalRepositoryImpl implements IProposalRepository {
   async delete(id: string): Promise<void> {
     await db
       .update(propostas)
-      .set({ deleted_at: new Date() })
+      .set({ deletedAt: new Date() })
       .where(eq(propostas.id, id));
   }
 
@@ -120,7 +120,7 @@ export class ProposalRepositoryImpl implements IProposalRepository {
       .where(
         and(
           eq(propostas.status, status),
-          between(propostas.created_at, startDate, endDate)
+          between(propostas.createdAt, startDate, endDate)
         )
       );
     
@@ -144,7 +144,7 @@ export class ProposalRepositoryImpl implements IProposalRepository {
    */
   async getTotalAmountByStatus(status: string): Promise<number> {
     const result = await db
-      .select({ total: sql<number>`sum(valor_solicitado)` })
+      .select({ total: sql<number>`sum(valor)` })
       .from(propostas)
       .where(eq(propostas.status, status));
     
@@ -156,31 +156,31 @@ export class ProposalRepositoryImpl implements IProposalRepository {
    */
   private toDomainEntity(record: any): Proposal {
     const customerData = {
-      name: record.cliente_nome,
-      cpf: record.cliente_cpf,
-      email: record.cliente_email,
-      phone: record.cliente_telefone,
-      birthDate: record.cliente_data_nascimento,
-      monthlyIncome: record.cliente_renda,
-      rg: record.cliente_rg,
-      issuingBody: record.cliente_orgao_emissor,
-      maritalStatus: record.cliente_estado_civil,
-      nationality: record.cliente_nacionalidade,
-      zipCode: record.cliente_cep,
-      address: record.cliente_endereco,
-      occupation: record.cliente_ocupacao
+      name: record.clienteNome,
+      cpf: record.clienteCpf,
+      email: record.clienteEmail,
+      phone: record.clienteTelefone,
+      birthDate: record.clienteDataNascimento,
+      monthlyIncome: record.clienteRenda,
+      rg: record.clienteRg,
+      issuingBody: record.clienteOrgaoEmissor,
+      maritalStatus: record.clienteEstadoCivil,
+      nationality: record.clienteNacionalidade,
+      zipCode: record.clienteCep,
+      address: record.clienteEndereco,
+      occupation: record.clienteOcupacao
     };
     
     const loanConditions = {
-      requestedAmount: record.valor_solicitado,
+      requestedAmount: record.valor,
       term: record.prazo,
       purpose: record.finalidade,
       collateral: record.garantia,
-      tacValue: record.valor_tac,
-      iofValue: record.valor_iof,
-      totalFinancedAmount: record.valor_total_financiado,
-      monthlyPayment: record.valor_parcela,
-      interestRate: record.taxa_juros
+      tacValue: record.valorTac,
+      iofValue: record.valorIof,
+      totalFinancedAmount: record.valorTotalFinanciado,
+      monthlyPayment: record.valorParcela,
+      interestRate: record.taxaJuros
     };
     
     return Proposal.fromPersistence({
@@ -188,12 +188,12 @@ export class ProposalRepositoryImpl implements IProposalRepository {
       status: record.status,
       customerData,
       loanConditions,
-      partnerId: record.parceiro_id?.toString(),
-      storeId: record.loja_id?.toString(),
-      productId: record.produto_id?.toString(),
-      createdAt: record.created_at,
-      updatedAt: record.updated_at,
-      pendingReason: record.motivo_pendencia,
+      partnerId: record.parceiroId?.toString(),
+      storeId: record.lojaId?.toString(),
+      productId: record.produtoId?.toString(),
+      createdAt: record.createdAt,
+      updatedAt: record.updatedAt,
+      pendingReason: record.motivoPendencia,
       observations: record.observacoes
     });
   }
@@ -208,34 +208,34 @@ export class ProposalRepositoryImpl implements IProposalRepository {
     return {
       id: proposal.getId(),
       status: proposal.getStatus(),
-      cliente_nome: customerData.name,
-      cliente_cpf: customerData.cpf,
-      cliente_email: customerData.email,
-      cliente_telefone: customerData.phone,
-      cliente_data_nascimento: customerData.birthDate,
-      cliente_renda: customerData.monthlyIncome,
-      cliente_rg: customerData.rg,
-      cliente_orgao_emissor: customerData.issuingBody,
-      cliente_estado_civil: customerData.maritalStatus,
-      cliente_nacionalidade: customerData.nationality,
-      cliente_cep: customerData.zipCode,
-      cliente_endereco: customerData.address,
-      cliente_ocupacao: customerData.occupation,
-      valor_solicitado: loanConditions.requestedAmount,
+      clienteNome: customerData.name,
+      clienteCpf: customerData.cpf,
+      clienteEmail: customerData.email,
+      clienteTelefone: customerData.phone,
+      clienteDataNascimento: customerData.birthDate,
+      clienteRenda: customerData.monthlyIncome,
+      clienteRg: customerData.rg,
+      clienteOrgaoEmissor: customerData.issuingBody,
+      clienteEstadoCivil: customerData.maritalStatus,
+      clienteNacionalidade: customerData.nationality,
+      clienteCep: customerData.zipCode,
+      clienteEndereco: customerData.address,
+      clienteOcupacao: customerData.occupation,
+      valor: loanConditions.requestedAmount,
       prazo: loanConditions.term,
       finalidade: loanConditions.purpose,
       garantia: loanConditions.collateral,
-      valor_tac: loanConditions.tacValue,
-      valor_iof: loanConditions.iofValue,
-      valor_total_financiado: loanConditions.totalFinancedAmount,
-      valor_parcela: loanConditions.monthlyPayment,
-      taxa_juros: loanConditions.interestRate,
-      parceiro_id: proposal.getPartnerId() ? parseInt(proposal.getPartnerId()!) : null,
-      loja_id: proposal.getStoreId() ? parseInt(proposal.getStoreId()!) : null,
-      produto_id: proposal.getProductId() ? parseInt(proposal.getProductId()!) : null,
-      motivo_pendencia: proposal.getPendingReason(),
+      valorTac: loanConditions.tacValue,
+      valorIof: loanConditions.iofValue,
+      valorTotalFinanciado: loanConditions.totalFinancedAmount,
+      valorParcela: loanConditions.monthlyPayment,
+      taxaJuros: loanConditions.interestRate,
+      parceiroId: proposal.getPartnerId() ? parseInt(proposal.getPartnerId()!) : null,
+      lojaId: proposal.getStoreId() ? parseInt(proposal.getStoreId()!) : null,
+      produtoId: proposal.getProductId() ? parseInt(proposal.getProductId()!) : null,
+      motivoPendencia: proposal.getPendingReason(),
       observacoes: proposal.getObservations(),
-      updated_at: proposal.getUpdatedAt()
+      updatedAt: proposal.getUpdatedAt()
     };
   }
 }
