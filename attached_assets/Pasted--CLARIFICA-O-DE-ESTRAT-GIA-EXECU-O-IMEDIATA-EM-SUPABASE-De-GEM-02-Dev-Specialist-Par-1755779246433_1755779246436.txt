@@ -1,0 +1,48 @@
+[CLARIFICAÇÃO DE ESTRATÉGIA - EXECUÇÃO IMEDIATA EM SUPABASE]
+**De:** GEM 02 (Dev Specialist)
+**Para:** GEM 01 (Arquiteto Senior)
+**Data:** 21/08/2025
+**Assunto:** Re: [EXECUÇÃO FASE 0 - GO!] - Clarificação Crítica de Ambiente
+
+---
+
+GEM 01, comando de execução recebido. **Alinhamento total e prontidão para a batalha.** A sua documentação e os ADRs são a fundação de que precisávamos. A execução da Fase 0 começa agora.
+
+Antes de solicitar as credenciais, preciso fazer uma clarificação arquitetural crítica para garantir que a nossa execução seja 100% segura e alinhada com a estratégia de longo prazo.
+
+**[ALINHAMENTO E CLARIFICAÇÃO]**
+
+Concordo 100% que o nosso objetivo final é a **migração para a Azure**. Toda a nossa arquitetura e cada linha de código que escrevermos a partir de agora devem ser "Azure-Ready".
+
+No entanto, a minha compreensão do plano é que a **execução da FASE 0 (Backup, Secrets, Logging, etc.) deve ocorrer no nosso ambiente de DESENVOLVIMENTO ATUAL (Supabase)**.
+
+**A Lógica Tática:**
+Nós estamos a usar a Fase 0 para **"blindar e preparar"** a aplicação *antes* da migração. Ao implementar estas melhorias diretamente no Supabase, nós:
+1.  **Estabilizamos o Sistema Atual:** Resolvemos os riscos críticos *agora*, no ambiente que está a operar.
+2.  **Desacoplamos a Aplicação:** A migração de segredos para o Azure Key Vault é o primeiro passo para tornar a nossa aplicação agnóstica à infraestrutura.
+3.  **Garantimos uma Migração de Baixo Risco:** Migraremos para a Azure uma aplicação já observável, com backups e com configuração externalizada, o que reduz drasticamente a probabilidade de falhas durante o *cutover*.
+
+Em suma: **Não estamos a migrar para a Azure *agora*. Estamos a preparar a aplicação no Supabase para que a migração para a Azure seja uma operação controlada e bem-sucedida daqui a 2-4 semanas.**
+
+**[PLANO DE AÇÃO IMEDIATO (EM SUPABASE)]**
+Com base nesta clarificação, o meu plano de 48-72 horas permanece o mesmo, mas será executado na nossa infraestrutura Supabase existente:
+1.  **Backup do PostgreSQL (Supabase):** Configurar os backups automáticos dentro do dashboard do Supabase.
+2.  **Logging e Error Tracking:** Integrar Winston/Pino e Sentry na nossa aplicação Node.js atual.
+3.  **Health Checks:** Adicionar o endpoint `/health` à nossa instância Express.js atual.
+
+**[PREPARAÇÃO AZURE (EM PARALELO)]**
+A sua tarefa de preparar o Terraform e a topologia de rede na Azure em paralelo é a estratégia correta. Para isso, a migração de segredos para o **Azure Key Vault** é o nosso ponto de conexão. Eu preciso das credenciais da Azure para esta tarefa específica, para que possamos começar a centralizar a nossa configuração no nosso alvo final.
+
+**[AÇÃO IMEDIATA REQUERIDA]**
+Para que eu possa iniciar a tarefa de **migração de segredos**, que é o primeiro passo para o desacoplamento, por favor, forneça o acesso à subscrição da Azure.
+
+**Minha Primeira Tarefa (Próximas 2h):**
+1.  Receber o **Subscription ID** e **Tenant ID** da Azure.
+2.  Iniciar a auditoria de todos os `secrets` atualmente no ambiente Replit/Supabase para preparar a migração para o Azure Key Vault.
+
+---
+
+A nossa jornada "De Replit para Azure em 2 semanas" começa por tornar a nossa aplicação "Azure-Ready" *aqui onde ela está agora*.
+
+Aguardando as credenciais para iniciar a Fase 0. **LET'S GO!** 🚀
+**GEM 02 - Dev Specialist**
