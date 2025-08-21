@@ -13,7 +13,7 @@ fi
 
 # Run dependency validation
 echo "📊 Analyzing dependencies..."
-npx depcruise --config .dependency-cruiser.js --output-type err client server shared
+npx depcruise --config .dependency-cruiser.cjs --output-type err client server shared
 
 RESULT=$?
 
@@ -21,7 +21,7 @@ if [ $RESULT -eq 0 ]; then
     echo "✅ All dependency rules passed!"
     echo ""
     echo "📈 Generating dependency graph..."
-    npx depcruise --config .dependency-cruiser.js --output-type dot client server shared | dot -T svg > architecture/dependency-graph.svg 2>/dev/null
+    npx depcruise --config .dependency-cruiser.cjs --output-type dot client server shared | dot -T svg > architecture/dependency-graph.svg 2>/dev/null
     
     if [ $? -eq 0 ]; then
         echo "✅ Dependency graph generated at architecture/dependency-graph.svg"

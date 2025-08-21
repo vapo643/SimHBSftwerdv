@@ -1,0 +1,59 @@
+### Pacote de Ativação de Missão (PAM) V1.0 (Refatoração do Agregado de Proposta)
+
+* **Sumário da Missão (O Quê):** Criar a nova estrutura de diretórios para o *Bounded Context* de "Credit Proposal" e refatorar a lógica de negócio existente para se alinhar ao padrão de Agregado de DDD.
+* **Intenção Estratégica (O Porquê):** Iniciar a refatoração incremental e segura do nosso monolito modular para uma arquitetura verdadeiramente orientada a domínio. A refatoração do nosso *Core Domain* (Proposta) primeiro irá validar o nosso padrão de design e servirá de *blueprint* para todos os outros contextos.
+* **Histórico Relevante (Consulta Obrigatória):** A missão anterior definiu formalmente "Credit Proposal" como um *Bounded Context* e configurou o `dependency-cruiser` para proteger os seus limites.
+* **Modelo Mental (Como se Encaixa):** Aja como um Engenheiro de Software Sênior a aplicar os padrões de Domain-Driven Design. Sua tarefa é criar uma estrutura de pastas que represente o novo *bounded context* e mover o código relevante para dentro dele, refatorando-o para seguir o padrão de Agregado.
+
+---
+
+**IMPLEMENTAR:**
+Refatoração do Agregado de Proposta de Crédito
+
+**CURRENT STATE:**
+A lógica de negócio de propostas está atualmente distribuída entre `server/routes/propostas/core.ts` e `server/services/proposalService.ts`. Embora modular, ela não segue os padrões de um Agregado de DDD.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  **Estrutura de Diretórios Criada:** Uma nova estrutura de pastas é criada para representar o *bounded context*:
+    ```
+    server/
+    └── contexts/
+        └── proposal/
+            ├── application/  // Casos de uso
+            ├── domain/       // Lógica de negócio pura, Agregado, Entidades
+            ├── infrastructure/ // Implementações (ex: repositório)
+            └── presentation/   // API (controllers)
+    ```
+2.  **Criação do Agregado `Proposal`:**
+    * Um novo arquivo, `server/contexts/proposal/domain/Proposal.ts`, é criado.
+    * Ele deve conter uma classe `Proposal` (o "Aggregate Root") que encapsula os dados e, crucialmente, as **invariantes de negócio** (as regras que devem ser sempre verdadeiras).
+    * A lógica de negócio que estava no `proposalService.ts` (ex: `approve()`, `reject()`, `addDocument()`) é movida para dentro de métodos na classe `Proposal`.
+3.  **Criação do Repositório:**
+    * A interface `IProposalRepository` é definida em `server/contexts/proposal/domain/IProposalRepository.ts`.
+    * A implementação concreta que usa Drizzle (`ProposalRepository.ts`) é criada em `server/contexts/proposal/infrastructure/`.
+4.  **Refatoração do Controller:** O `controller` da API em `server/routes/propostas/core.ts` é refatorado para usar o novo padrão: ele busca um Agregado do repositório, chama um método de negócio nele (`proposal.approve()`) e salva o Agregado de volta.
+5.  **Validação de Dependências:** O script `./scripts/validate-dependencies.sh` é executado com sucesso, provando que a nova estrutura não viola as regras de dependência que estabelecemos (ex: o domínio não pode depender da infraestrutura).
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  **Crie a Estrutura de Pastas:** Comece por criar a nova estrutura de diretórios em `server/contexts/proposal/`.
+2.  **Refatore para o Agregado:** Mova a lógica do `proposalService.ts` para a nova classe `Proposal`. O objetivo é ter um **domínio rico**, onde os dados e as operações que atuam nesses dados vivem juntos.
+3.  **Implemente o Padrão Repository:** Crie a interface e a implementação do repositório para abstrair a persistência de dados.
+4.  **Atualize as Regras do `dependency-cruiser`:** Modifique o arquivo `.dependency-cruiser.js` para impor as novas regras de dependência da nossa arquitetura hexagonal/DDD (ex: `domain` não pode importar de `infrastructure`).
+5.  **Validação Final Mandatória:** Execute `./scripts/validate-dependencies.sh`. A sua prova de sucesso final é o output do script a mostrar **zero violações de dependência**.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO. Risco de que a refatoração seja complexa e introduza regressões se não for feita com cuidado.]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que o padrão de Agregado com Repositório é a melhor abordagem para implementar o nosso Bounded Context."]
+* **VALIDAÇÃO PENDENTE:** [Testes de integração para o novo fluxo refatorado serão necessários.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear todos os ficheiros a serem criados/modificados.
+2.  Garantir que a nova estrutura segue os princípios de DDD e que a lógica de negócio está encapsulada no Agregado.
+3.  Executar `get_latest_lsp_diagnostics` para garantir 0 erros novos.
+4.  **Declarar Nível de Confiança (0 a 100%)**.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (executar o `validate-dependencies.sh` e garantir que ele passa).
+7.  **Documentar Decisões Técnicas**.
