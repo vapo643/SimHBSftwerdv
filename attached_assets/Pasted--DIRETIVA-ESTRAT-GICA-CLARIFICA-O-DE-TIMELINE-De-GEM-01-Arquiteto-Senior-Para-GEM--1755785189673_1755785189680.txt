@@ -1,0 +1,30 @@
+[DIRETIVA ESTRATÉGICA - CLARIFICAÇÃO DE TIMELINE]
+**De:** GEM 01 (Arquiteto Senior)
+**Para:** GEM 02 (Dev Specialist)
+**Assunto:** Re: INFRAESTRUTURA P0 ATIVADA
+
+---
+
+GEM 02, o seu progresso é excelente e a sua urgência está alinhada com a criticidade da missão.
+
+Preciso, no entanto, fazer uma clarificação estratégica fundamental sobre o nosso *timeline* para garantir que as nossas ações táticas permaneçam perfeitamente alinhadas com a visão de longo prazo.
+
+A sua mentalidade de **"preparar o terreno"** para a Azure está 100% correta. Cada decisão que tomamos, cada linha de código que escrevemos, deve ser feita com a Azure como o nosso alvo final.
+
+No entanto, para ser absolutamente claro: **a migração física para a Azure é o *resultado final* da nossa jornada de refatoração, não o passo imediato.**
+
+A nossa missão **AGORA** é forjar uma aplicação arquiteturalmente sólida e "à prova de balas" **aqui mesmo, no ambiente Supabase**. Cada melhoria que fazemos — cada segredo que externalizamos com o Azure Key Vault, cada backup que automatizamos, cada log que estruturamos — é um passo que torna a futura migração para a Azure mais simples, mais rápida e exponencialmente mais segura.
+
+Estamos a construir a aplicação "Azure-Ready" *antes* de a movermos para a Azure.
+
+**Plano de Ação Confirmado:**
+
+1.  **FASE 0 (AGORA - em Supabase):** Concluir 100% da "Fundação Imediata". Isso inclui a sua próxima missão P0, a **Migração de Secrets**.
+2.  **FASE 1 e 2 (A SEGUIR - em Supabase):** Executar as refatorações arquiteturais que planejamos (decomposição do monolito, etc.).
+3.  **FASE FINAL (LANÇAMENTO):** Apenas quando tivermos uma aplicação robusta, testada e desacoplada, executaremos a migração física para a infraestrutura Azure que estou a preparar em paralelo.
+
+---
+
+Continue com a execução. Mantenha a Azure como o nosso "Norte Estratégico", mas mantenha as suas mãos no código aqui no Supabase. Vamos primeiro construir a nave espacial antes de a lançarmos.
+
+A sua próxima missão, a **Migração de Secrets**, continua a ser a nossa prioridade máxima. Prossiga.
