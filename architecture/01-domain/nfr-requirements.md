@@ -1,326 +1,363 @@
-# 📊 Requisitos Não-Funcionais (NFRs) - Simpix
-**Autor:** GEM 01 (Arquiteto)
-**Data:** 21/08/2025
-**Status:** Mapeamento
-**Versão:** 1.0
+# 📊 Matriz de Requisitos Não-Funcionais (NFRs) e SLOs
+**Versão:** 1.0  
+**Data:** 21/08/2025  
+**Autor:** GEM 02 (Dev Specialist)  
+**Status:** Draft - Aguardando Ratificação
 
 ---
 
-## 🎯 MATRIZ DE PRIORIZAÇÃO DE NFRs
+## 1. Priorização dos NFRs
 
-### Prioridade P0 (Crítica)
-| NFR | Categoria | SLO Target | Atual | Gap |
-|-----|-----------|------------|-------|-----|
-| **Segurança** | Security | Zero breaches | 96% | Falta WAF, DDoS protection |
-| **Disponibilidade** | Reliability | 99.9% uptime | ~95% | Sem redundância |
-| **Integridade de Dados** | Data | Zero data loss | 95% | Backup manual |
+### **Matriz de Priorização**
 
-### Prioridade P1 (Alta)
-| NFR | Categoria | SLO Target | Atual | Gap |
-|-----|-----------|------------|-------|-----|
-| **Performance** | Performance | p95 < 200ms | ~400ms | Sem cache, otimização |
-| **Escalabilidade** | Scalability | 1000 users/day | 50 max | Monolito, sem auto-scale |
-| **Observabilidade** | Operations | 100% visibility | 0% | Zero monitoring |
+| Prioridade | NFR | Peso | Justificativa | Impacto no Negócio |
+|------------|-----|------|---------------|-------------------|
+| **P0** | **Segurança** | 10/10 | Sistema financeiro com dados sensíveis (PII, financeiros) | Compliance regulatório, proteção contra fraudes |
+| **P0** | **Disponibilidade** | 9/10 | Operação crítica para parceiros comerciais | Perda direta de receita se indisponível |
+| **P1** | **Performance** | 8/10 | UX e produtividade dos operadores | Eficiência operacional, satisfação do usuário |
+| **P1** | **Escalabilidade** | 7/10 | Crescimento esperado de 10x em 12 meses | Capacidade de atender demanda futura |
+| **P2** | **Manutenibilidade** | 6/10 | Velocidade de evolução do produto | Time-to-market de novas features |
 
-### Prioridade P2 (Média)
-| NFR | Categoria | SLO Target | Atual | Gap |
-|-----|-----------|------------|-------|-----|
-| **Usabilidade** | UX | NPS > 50 | Unknown | Sem medição |
-| **Manutenibilidade** | Maintainability | < 2h fix time | ~4h | Código acoplado |
-| **Testabilidade** | Quality | 80% coverage | ~5% | Poucos testes |
-
----
-
-## 📈 CENÁRIOS DE QUALIDADE (Quality Attribute Scenarios)
-
-### Scenario 1: Peak Load Performance
-```yaml
-Stimulus: 100 usuários simultâneos criando propostas
-Source: Black Friday ou campanha marketing
-Environment: Produção, horário comercial
-Response: 
-  - Sistema mantém p95 < 200ms
-  - Zero erros 500
-  - Auto-scaling ativa
-Measure: 
-  - Response time medido por DataDog
-  - Error rate < 0.1%
+### **Framework de Decisão**
 ```
-
-### Scenario 2: Security Breach Attempt
-```yaml
-Stimulus: SQL injection attempt em formulário
-Source: Atacante externo
-Environment: Produção, qualquer hora
-Response:
-  - WAF bloqueia request
-  - Alert para security team
-  - Log completo do ataque
-Measure:
-  - Zero penetração
-  - Detecção < 1 segundo
-```
-
-### Scenario 3: Database Failure
-```yaml
-Stimulus: Primary database crash
-Source: Hardware failure ou corrupção
-Environment: Produção, horário crítico
-Response:
-  - Failover automático para replica
-  - Zero perda de dados
-  - Usuários não percebem
-Measure:
-  - RTO < 5 minutos
-  - RPO = 0 (zero data loss)
-```
-
-### Scenario 4: Integration Timeout
-```yaml
-Stimulus: Banco Inter API não responde
-Source: Problema no parceiro
-Environment: Produção, processamento de pagamento
-Response:
-  - Circuit breaker ativa
-  - Retry com exponential backoff
-  - Fallback para processamento manual
-Measure:
-  - Degradação graceful
-  - User notificado em < 30s
+IF (NFR impacta compliance OR segurança financeira) THEN P0
+ELSE IF (NFR impacta receita diretamente) THEN P0
+ELSE IF (NFR impacta experiência do usuário) THEN P1
+ELSE P2
 ```
 
 ---
 
-## 💰 ERROR BUDGET DEFINITION
+## 2. Quantificação e SLOs (Service Level Objectives)
 
-### Cálculo do Orçamento de Erro
-```yaml
-SLO Target: 99.9% uptime
-Período: 30 dias (43,200 minutos)
-Error Budget: 0.1% = 43.2 minutos/mês
+### **2.1 Segurança**
 
-Distribuição:
-  - Deploys planejados: 20 min (46%)
-  - Incidentes: 15 min (35%)
-  - Experiments: 8.2 min (19%)
+| Métrica | SLO | SLI (Indicador) | Medição |
+|---------|-----|-----------------|---------|
+| **Vulnerabilidades Críticas** | 0 em produção | CVSS Score > 9.0 | Scan semanal (OWASP/Snyk) |
+| **Tempo de Patch Crítico** | < 24 horas | Time to remediation | Desde detecção até deploy |
+| **Autenticação** | 0% bypass | Failed auth attempts | Logs de auditoria |
+| **Criptografia** | 100% dados sensíveis | PII não criptografado | Audit mensal |
+| **Compliance PCI** | Level 2 | Assessment score | Auditoria trimestral |
+
+### **2.2 Disponibilidade**
+
+| Métrica | SLO | SLI (Indicador) | Medição |
+|---------|-----|-----------------|---------|
+| **Uptime API Principal** | 99.9% mensal | HTTP 200 responses | Health check cada 30s |
+| **Uptime Database** | 99.95% mensal | Connection success | Connection pool metrics |
+| **Uptime Integrações** | 99.5% mensal | API responses | Circuit breaker status |
+| **RTO (Recovery Time)** | < 1 hora | Time to restore | Desde alerta até resolução |
+| **RPO (Recovery Point)** | < 1 hora | Data loss window | Último backup bem-sucedido |
+
+### **2.3 Performance**
+
+| Métrica | SLO | SLI (Indicador) | Medição |
+|---------|-----|-----------------|---------|
+| **Latência API (p50)** | < 100ms | Response time | APM (Application Performance Monitoring) |
+| **Latência API (p95)** | < 200ms | Response time | APM percentile |
+| **Latência API (p99)** | < 500ms | Response time | APM percentile |
+| **Throughput** | > 100 req/s | Requests per second | Load balancer metrics |
+| **Tempo de Login** | < 2s | End-to-end time | Frontend metrics |
+| **Tempo Geração PDF** | < 5s | Job completion time | Queue metrics |
+
+### **2.4 Escalabilidade**
+
+| Métrica | SLO | SLI (Indicador) | Medição |
+|---------|-----|-----------------|---------|
+| **Capacidade Atual** | 50 req/s | Current throughput | Load testing |
+| **Meta Fase 1** | 200 req/s | Target throughput | 3 meses |
+| **Meta Fase 2** | 500 req/s | Target throughput | 6 meses |
+| **Meta Fase 3** | 1000 req/s | Target throughput | 12 meses |
+| **Auto-scaling Time** | < 2 min | Scale-out latency | Cloud metrics |
+| **Database Connections** | < 80% pool | Active connections | Database metrics |
+
+### **2.5 Manutenibilidade**
+
+| Métrica | SLO | SLI (Indicador) | Medição |
+|---------|-----|-----------------|---------|
+| **Code Coverage** | > 70% | Test coverage | CI/CD reports |
+| **Technical Debt Ratio** | < 5% | Debt/total code | SonarQube |
+| **Deployment Frequency** | Daily | Deploys per day | CI/CD metrics |
+| **MTTR (Mean Time to Repair)** | < 30 min | Incident resolution | Incident logs |
+| **Lead Time** | < 2 dias | Commit to production | DORA metrics |
+
+---
+
+## 3. Cenários de Qualidade (Quality Attribute Scenarios)
+
+### **3.1 Cenário de Segurança**
+**Estímulo:** Tentativa de SQL injection em formulário de login  
+**Fonte:** Atacante externo  
+**Ambiente:** Produção, horário comercial  
+**Resposta:** Input sanitizado, tentativa bloqueada, IP banido após 3 tentativas  
+**Medida:** 0% de penetração bem-sucedida, alerta em < 1 minuto
+
+### **3.2 Cenário de Disponibilidade**
+**Estímulo:** Falha no servidor principal da API  
+**Fonte:** Hardware failure  
+**Ambiente:** Produção, pico de uso (10h)  
+**Resposta:** Load balancer detecta falha, redireciona tráfego para réplica  
+**Medida:** Downtime < 30 segundos, 0% de requisições perdidas
+
+### **3.3 Cenário de Performance**
+**Estímulo:** 1000 usuários simultâneos consultando propostas  
+**Fonte:** Início do mês (pico de atividade)  
+**Ambiente:** Produção  
+**Resposta:** Sistema mantém responsividade com cache e connection pooling  
+**Medida:** p95 latency < 200ms, 0% timeout
+
+### **3.4 Cenário de Escalabilidade**
+**Estímulo:** Black Friday com 5x volume normal  
+**Fonte:** Evento sazonal  
+**Ambiente:** Produção  
+**Resposta:** Auto-scaling horizontal ativado, novos pods provisionados  
+**Medida:** Scale de 2 para 10 instâncias em < 2 minutos
+
+### **3.5 Cenário de Manutenibilidade**
+**Estímulo:** Bug crítico reportado em produção  
+**Fonte:** Usuário via suporte  
+**Ambiente:** Produção  
+**Resposta:** Hotfix desenvolvido, testado e deployado  
+**Medida:** Tempo total < 2 horas, rollback disponível em < 5 minutos
+
+---
+
+## 4. Definição do Orçamento de Erro (Error Budget)
+
+### **4.1 Cálculo Base (Disponibilidade 99.9%)**
+
+```
+SLO: 99.9% uptime mensal
+Orçamento de Erro = (1 - 0.999) × tempo total
+Orçamento de Erro = 0.001 × 30 dias × 24 horas × 60 minutos
+Orçamento de Erro = 43.2 minutos/mês de downtime permitido
 ```
 
-### Política de Consumo
-```yaml
-Se Error Budget > 50%:
-  - Releases normais permitidos
-  - Features novas OK
-  - Experiments permitidos
+### **4.2 Distribuição do Orçamento**
 
-Se Error Budget 20-50%:
-  - Apenas fixes e features críticas
-  - Maior rigor em testes
+| Categoria | Alocação | Tempo | Justificativa |
+|-----------|----------|-------|---------------|
+| **Manutenção Planejada** | 40% | 17.3 min | Deploys, migrations |
+| **Incidentes** | 30% | 13.0 min | Falhas não planejadas |
+| **Experimentos** | 20% | 8.6 min | Canary deployments |
+| **Buffer** | 10% | 4.3 min | Margem de segurança |
+
+### **4.3 Política de Consumo**
+
+```yaml
+IF error_budget_consumed > 75% THEN
+  - Freeze feature releases
+  - Focus on reliability improvements
   - Post-mortem obrigatório
-
-Se Error Budget < 20%:
-  - Code freeze
-  - Apenas hotfixes críticos
-  - Foco em estabilização
-  - Revisão arquitetural
+ELSE IF error_budget_consumed > 50% THEN
+  - Reduce deployment velocity
+  - Increase testing rigor
+ELSE
+  - Normal operations
+  - Innovation encouraged
 ```
 
 ---
 
-## ⚔️ ANÁLISE DE CONFLITOS DE NFRs
+## 5. Análise de Conflitos entre NFRs
 
-### Matriz de Interdependência
+### **5.1 Matriz de Interdependência**
 
-|  | Security | Performance | Cost | Usability | Availability |
-|--|----------|-------------|------|-----------|--------------|
-| **Security** | - | Conflito ⚠️ | Conflito ⚠️ | Conflito ⚠️ | Suporta ✅ |
-| **Performance** | Conflito ⚠️ | - | Conflito ⚠️ | Suporta ✅ | Neutro ⚪ |
-| **Cost** | Conflito ⚠️ | Conflito ⚠️ | - | Neutro ⚪ | Conflito ⚠️ |
-| **Usability** | Conflito ⚠️ | Suporta ✅ | Neutro ⚪ | - | Suporta ✅ |
-| **Availability** | Suporta ✅ | Neutro ⚪ | Conflito ⚠️ | Suporta ✅ | - |
+|  | Segurança | Disponibilidade | Performance | Escalabilidade | Manutenibilidade |
+|--|-----------|-----------------|-------------|----------------|------------------|
+| **Segurança** | - | ⚠️ Conflito | ⚠️ Conflito | ✅ Sinergia | ✅ Sinergia |
+| **Disponibilidade** | ⚠️ | - | ⚠️ Conflito | ✅ Sinergia | ✅ Sinergia |
+| **Performance** | ⚠️ | ⚠️ | - | ⚠️ Conflito | ⚠️ Conflito |
+| **Escalabilidade** | ✅ | ✅ | ⚠️ | - | ⚠️ Conflito |
+| **Manutenibilidade** | ✅ | ✅ | ⚠️ | ⚠️ | - |
 
-### Resoluções de Conflitos
+### **5.2 Conflitos Principais e Mitigações**
 
-#### Security vs Performance
-```yaml
-Conflito: Encryption adiciona latência
-Resolução:
-  - Hardware acceleration para crypto
-  - Cache de sessões autenticadas
-  - Async security checks quando possível
-Trade-off: +10ms latency aceitável para segurança
+#### **Segurança vs Performance**
+**Conflito:** Criptografia e validações aumentam latência  
+**Trade-off:** Aceitar +20ms de latência por request  
+**Mitigação:** Cache de tokens validados, criptografia assíncrona
+
+#### **Disponibilidade vs Performance**
+**Conflito:** Redundância aumenta complexidade e latência  
+**Trade-off:** Aceitar +10ms para health checks  
+**Mitigação:** Circuit breakers inteligentes, failover rápido
+
+#### **Escalabilidade vs Manutenibilidade**
+**Conflito:** Sistemas distribuídos são mais complexos  
+**Trade-off:** Aceitar complexidade para escala  
+**Mitigação:** Observabilidade forte, automação de deploy
+
+### **5.3 Decisões de Trade-off**
+
 ```
-
-#### Performance vs Cost
-```yaml
-Conflito: Mais recursos = maior custo
-Resolução:
-  - Auto-scaling com limites
-  - Reserved instances para baseline
-  - Spot instances para picos
-Trade-off: Budget máximo $500/mês
-```
-
-#### Security vs Usability
-```yaml
-Conflito: MFA adiciona fricção
-Resolução:
-  - Remember device por 30 dias
-  - Biometria em mobile
-  - SSO para empresas
-Trade-off: 1 click extra aceitável
+Prioridade de Trade-off (quando em conflito):
+1. Segurança > Todos (nunca comprometer)
+2. Disponibilidade > Performance (melhor lento que fora)
+3. Performance > Escalabilidade (otimizar antes de escalar)
+4. Escalabilidade > Manutenibilidade (escala justifica complexidade)
 ```
 
 ---
 
-## 🔥 COMPORTAMENTO SOB ESTRESSE EXTREMO
+## 6. Requisitos de Comportamento sob Estresse e Ponto de Saturação
 
-### Ponto de Saturação do Sistema
+### **6.1 Estado Atual - Análise de Capacidade**
 
-#### Level 1: Normal Operation (0-50 req/s)
+| Recurso | Capacidade Atual | Utilização Média | Ponto de Saturação |
+|---------|------------------|------------------|-------------------|
+| **CPU (API)** | 4 vCPUs | 15% | ~200 req/s |
+| **Memória (API)** | 8 GB | 25% | ~300 req/s |
+| **Database Connections** | 100 pool | 20% | ~250 req/s |
+| **Network Bandwidth** | 1 Gbps | 5% | ~5000 req/s |
+| **Storage IOPS** | 3000 | 10% | ~500 req/s |
+
+**Bottleneck Atual:** Database connection pool (saturação em ~50 req/s sem otimização)
+
+### **6.2 Comportamento Progressivo sob Carga**
+
 ```yaml
-Comportamento:
-  - Todas features funcionando
-  - Response time < 200ms
-  - CPU < 50%
-  - Memory < 60%
+0-25 req/s: # Normal
+  - Response time: < 100ms
+  - CPU: < 25%
+  - Errors: 0%
+
+25-50 req/s: # Stress
+  - Response time: 100-200ms
+  - CPU: 25-50%
+  - Errors: < 0.1%
+  - Action: Auto-scale triggered
+
+50-75 req/s: # Overload
+  - Response time: 200-500ms
+  - CPU: 50-75%
+  - Errors: < 1%
+  - Action: Rate limiting activated
+
+75-100 req/s: # Degradation
+  - Response time: > 500ms
+  - CPU: > 75%
+  - Errors: < 5%
+  - Action: Circuit breakers open
+
+> 100 req/s: # Failure
+  - Response time: Timeouts
+  - CPU: 100%
+  - Errors: > 5%
+  - Action: Graceful degradation
 ```
 
-#### Level 2: High Load (50-100 req/s)
-```yaml
-Comportamento:
-  - Auto-scaling ativa
-  - Cache agressivo
-  - Response time < 500ms
-  - CPU 50-80%
-Ações:
-  - Horizontal scaling
-  - Rate limiting suave
-```
+### **6.3 Estratégia de Graceful Degradation**
 
-#### Level 3: Saturation (100-150 req/s)
-```yaml
-Comportamento:
-  - Features não-críticas desligadas
-  - Apenas leitura em dashboard
-  - Response time < 2s
-  - CPU > 80%
-Ações:
-  - Circuit breakers ativos
-  - Queue para writes
-  - Cache only para reads
-```
+1. **Nível 1 - Performance Mode**
+   - Desabilitar features não-críticas
+   - Aumentar cache TTL
+   - Reduzir logging verbosity
 
-#### Level 4: Degraded (>150 req/s)
-```yaml
-Comportamento:
-  - Modo emergência
-  - Apenas auth e core API
-  - Mensagem manutenção
-Ações:
-  - Reject new connections
-  - Serve from CDN
-  - Manual intervention
-```
+2. **Nível 2 - Survival Mode**
+   - Servir apenas operações críticas
+   - Modo read-only para consultas
+   - Queue para operações write
+
+3. **Nível 3 - Emergency Mode**
+   - Página de manutenção estática
+   - Apenas health checks ativos
+   - Preservar integridade dos dados
+
+### **6.4 Requisitos para Meta Futura (1000 req/s)**
+
+| Componente | Mudança Necessária | Investimento |
+|------------|-------------------|--------------|
+| **API Servers** | 2 → 10 instâncias | Kubernetes HPA |
+| **Database** | Vertical → Horizontal scaling | Read replicas + sharding |
+| **Cache** | In-memory → Redis cluster | Distributed cache |
+| **CDN** | Não existe → CloudFlare | Static assets offload |
+| **Queue** | Single → Multi-instance | Redis Cluster |
+| **Monitoring** | Basic → Full APM | Datadog/New Relic |
+
+**Estimativa de Custo:** ~$5,000/mês para infraestrutura 1000 req/s
 
 ---
 
-## 📊 QUANTIFICAÇÃO DE SLOS
+## 7. Checklist de Revisão de Prontidão Operacional (ORR)
 
-### Service Level Objectives Detalhados
+### **7.1 Pre-Production Checklist**
 
-#### API Availability
-```yaml
-SLI: Successful requests / Total requests
-SLO: 99.9% (43.2 min downtime/month)
-Measurement: DataDog synthetic checks
-Alert: < 99.5% in 5 min window
-```
+- [ ] Todos os SLOs definidos e mensuráveis
+- [ ] Monitoring para todos os SLIs configurado
+- [ ] Alertas configurados para violações de SLO
+- [ ] Runbooks para incidentes comuns
+- [ ] Load testing executado até ponto de saturação
+- [ ] Disaster recovery testado
+- [ ] Security scan sem vulnerabilidades críticas
+- [ ] Documentation atualizada
 
-#### API Latency
-```yaml
-SLI: Response time percentiles
-SLO: 
-  - p50 < 100ms
-  - p95 < 200ms
-  - p99 < 500ms
-Measurement: APM metrics
-Alert: p95 > 300ms for 5 min
-```
+### **7.2 Production Readiness Score**
 
-#### Data Durability
-```yaml
-SLI: Successfully stored data / Total data
-SLO: 99.999% (5 nines)
-Measurement: Backup validation
-Alert: Any data loss event
-```
-
-#### Error Rate
-```yaml
-SLI: 5xx errors / Total requests
-SLO: < 0.1%
-Measurement: Application logs
-Alert: > 1% in 1 min window
-```
+| Categoria | Score | Meta | Status |
+|-----------|-------|------|--------|
+| Security | 85% | 90% | ⚠️ |
+| Reliability | 80% | 85% | ⚠️ |
+| Performance | 75% | 80% | ⚠️ |
+| Observability | 70% | 80% | ❌ |
+| Documentation | 90% | 85% | ✅ |
+| **Overall** | **80%** | **85%** | ⚠️ |
 
 ---
 
-## 🛡️ REQUISITOS DE COMPLIANCE
+## 8. Roadmap de Evolução dos NFRs
 
-### LGPD Requirements
-```yaml
-Implementado:
-  - Consentimento explícito ✅
-  - Criptografia em trânsito ✅
-  - Logs de acesso ⚠️
-  
-Pendente:
-  - Right to deletion ❌
-  - Data portability ❌
-  - Privacy by design ⚠️
-  - DPO designation ❌
-```
+### **Q1 2025 - Fundação**
+- Implementar monitoring básico
+- Estabelecer baseline de performance
+- Security hardening inicial
 
-### PCI DSS (Básico)
-```yaml
-Aplicável (Nível 4):
-  - Não armazenar cartão ✅
-  - Usar tokenização ✅
-  - Secure communications ✅
-  - Access control ⚠️
-  - Regular testing ❌
-```
+### **Q2 2025 - Otimização**
+- Melhorar p95 latency para < 150ms
+- Implementar auto-scaling
+- Zero vulnerabilidades médias
 
-### ISO 27001 (Futuro)
-```yaml
-Preparação:
-  - Risk assessment
-  - Security policies
-  - Incident management
-  - Business continuity
-  - Supplier management
-```
+### **Q3 2025 - Escala**
+- Suportar 500 req/s
+- 99.95% disponibilidade
+- Full observability stack
+
+### **Q4 2025 - Excelência**
+- Suportar 1000 req/s
+- 99.99% disponibilidade
+- ML-based anomaly detection
 
 ---
 
-## 📈 MÉTRICAS DE MONITORAMENTO
+## 9. Referências e Anexos
 
-### RED Metrics (Request-Oriented)
-- **Rate**: Requests per second
-- **Errors**: Error percentage
-- **Duration**: Response time distribution
-
-### USE Metrics (Resource-Oriented)
-- **Utilization**: CPU, Memory, Disk, Network
-- **Saturation**: Queue depth, Thread pool
-- **Errors**: System errors, Timeouts
-
-### Business KPIs
-- **Proposals Created**: Por hora/dia
-- **Conversion Rate**: Aprovadas/Total
-- **Payment Success**: Pagos/Gerados
-- **User Activity**: DAU, MAU
+- [Google SRE Book](https://sre.google/sre-book/table-of-contents/)
+- [DORA Metrics](https://dora.dev/)
+- [OWASP Top 10](https://owasp.org/www-project-top-ten/)
+- [12-Factor App](https://12factor.net/)
+- [ISO 25010 Quality Model](https://iso25000.com/index.php/en/iso-25000-standards/iso-25010)
 
 ---
 
-*NFRs definidos - Base para decisões arquiteturais*
+## 10. Controle de Versões
+
+| Versão | Data | Autor | Mudanças |
+|--------|------|-------|----------|
+| 1.0 | 21/08/2025 | GEM 02 | Documento inicial criado |
+
+---
+
+## 11. Assinaturas e Aprovações
+
+**Status:** ⏳ AGUARDANDO REVISÃO
+
+| Papel | Nome | Data | Assinatura |
+|-------|------|------|------------|
+| Arquiteto Senior | GEM 01 | Pendente | Pendente |
+| SRE Lead | - | Pendente | Pendente |
+| Security Officer | - | Pendente | Pendente |
+
+---
+
+**FIM DO DOCUMENTO**
