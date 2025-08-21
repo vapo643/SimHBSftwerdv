@@ -14,13 +14,17 @@ import { strictCSP } from "./middleware/strictCSP";
 
 // FASE 0 - Observability imports
 import { requestLoggingMiddleware, logInfo } from "./lib/logger";
-import { initSentry, requestHandler, errorHandler } from "./lib/sentry";
+import { initializeSentry, initSentry, requestHandler, errorHandler } from "./lib/sentry";
+import * as Sentry from "@sentry/node";
 import healthRoutes from "./routes/health";
 
 export async function createApp() {
+  // FASE 0 - Initialize Sentry BEFORE creating app (conforme PAM V1.0)
+  initializeSentry();
+  
   const app = express();
 
-  // FASE 0 - Initialize Sentry error tracking
+  // FASE 0 - Initialize Sentry error tracking (legacy compatibility)
   initSentry(app);
   app.use(requestHandler());
   
@@ -183,7 +187,11 @@ export async function createApp() {
   // Register routes
   registerRoutes(app);
   
-  // FASE 0 - Sentry error handler (must be last)
+  // FASE 0 - Sentry error handler (conforme PAM V1.0)
+  // CRITICAL: Must be AFTER all routes, BEFORE other error handlers
+  Sentry.setupExpressErrorHandler(app);
+  
+  // Legacy error handler (for compatibility)
   app.use(errorHandler());
 
   return app;

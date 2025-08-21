@@ -170,6 +170,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // FASE 0 - Sentry test endpoint (conforme PAM V1.0)
+  app.get("/api/debug-sentry", function mainHandler(req, res) {
+    throw new Error("Meu primeiro erro Sentry do Simpix!");
+  });
+
   // MOVED TO server/routes/integracao/ - Circuit breaker test endpoints
 
   // RELATÓRIO FINAL - AUDITORIA DO PLANO DE TESTE END-TO-END

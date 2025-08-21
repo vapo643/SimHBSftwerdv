@@ -2,6 +2,7 @@
 // Author: GEM 02 (Dev Specialist)
 // Date: 21/08/2025
 // Critical Priority: P0
+// DSN Configured: 21/08/2025 13:10
 
 import * as Sentry from "@sentry/node";
 import { nodeProfilingIntegration } from "@sentry/profiling-node";
@@ -20,14 +21,26 @@ declare global {
   }
 }
 
-// Configuração do Sentry
+// Função principal de inicialização do Sentry (conforme PAM V1.0)
+export function initializeSentry() {
+  Sentry.init({
+    dsn: "https://7018ab54dbb88c9c5c6a00e41cb6ab2a@o4509882222641152.ingest.us.sentry.io/4509882232209408",
+    integrations: [
+      nodeProfilingIntegration(),
+    ],
+    tracesSampleRate: 1.0,
+    profilesSampleRate: 1.0,
+    profileLifecycle: 'trace',
+    enableLogs: true,
+    sendDefaultPii: true,
+  });
+  console.log("✅ Sentry SDK inicializado com sucesso.");
+  logInfo("✅ Sentry SDK initialized successfully - FASE 0 P0 Complete");
+}
+
+// Configuração do Sentry (função legada, mantida para compatibilidade)
 export function initSentry(app: Express) {
-  const sentryDsn = process.env.SENTRY_DSN;
-  
-  if (!sentryDsn) {
-    logInfo("⚠️ Sentry DSN not configured - error tracking disabled");
-    return;
-  }
+  const sentryDsn = process.env.SENTRY_DSN || "https://7018ab54dbb88c9c5c6a00e41cb6ab2a@o4509882222641152.ingest.us.sentry.io/4509882232209408";
   
   try {
     Sentry.init({
