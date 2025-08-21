@@ -29,8 +29,10 @@ const fetchProposta = async (id: string | undefined) => {
   if (!id) throw new Error("ID da proposta não fornecido.");
   try {
     const response = await api.get(`/api/propostas/${id}`);
+    console.log("[Análise] Proposta carregada:", response.data);
     return response.data;
   } catch (error) {
+    console.error("[Análise] Erro ao carregar proposta:", error);
     throw new Error("Proposta não encontrada");
   }
 };
@@ -177,44 +179,45 @@ const AnaliseManualPage: React.FC = () => {
             </CardHeader>
             <CardContent className="space-y-2">
               <p>
-                <strong>Nome:</strong> {proposta.clienteData?.nome || "N/A"}
+                <strong>Nome:</strong> {proposta.cliente_nome || proposta.clienteNome || proposta.clienteData?.nome || "N/A"}
               </p>
               <p>
-                <strong>CPF:</strong> {proposta.clienteData?.cpf || "N/A"}
+                <strong>CPF:</strong> {proposta.cliente_cpf || proposta.clienteCpf || proposta.clienteData?.cpf || "N/A"}
               </p>
               <p>
-                <strong>Email:</strong> {proposta.clienteData?.email || "N/A"}
+                <strong>Email:</strong> {proposta.cliente_email || proposta.clienteEmail || proposta.clienteData?.email || "N/A"}
               </p>
               <p>
-                <strong>Telefone:</strong> {proposta.clienteData?.telefone || "N/A"}
+                <strong>Telefone:</strong> {proposta.cliente_telefone || proposta.clienteTelefone || proposta.clienteData?.telefone || "N/A"}
               </p>
               <p>
-                <strong>Data de Nascimento:</strong> {proposta.clienteData?.dataNascimento || "N/A"}
+                <strong>Data de Nascimento:</strong> {proposta.cliente_data_nascimento || proposta.clienteDataNascimento || proposta.clienteData?.dataNascimento || "N/A"}
               </p>
               <p>
                 <strong>Renda Mensal:</strong>{" "}
-                {proposta.clienteData?.renda ? `R$ ${proposta.clienteData.renda}` : "N/A"}
+                {proposta.cliente_renda || proposta.clienteRenda || proposta.clienteData?.renda ? 
+                  `R$ ${proposta.cliente_renda || proposta.clienteRenda || proposta.clienteData.renda}` : "N/A"}
               </p>
               <p>
-                <strong>RG:</strong> {proposta.clienteData?.rg || "N/A"}
+                <strong>RG:</strong> {proposta.cliente_rg || proposta.clienteRg || proposta.clienteData?.rg || "N/A"}
               </p>
               <p>
-                <strong>Órgão Emissor:</strong> {proposta.clienteData?.orgaoEmissor || "N/A"}
+                <strong>Órgão Emissor:</strong> {proposta.cliente_orgao_emissor || proposta.clienteOrgaoEmissor || proposta.clienteData?.orgaoEmissor || "N/A"}
               </p>
               <p>
-                <strong>Estado Civil:</strong> {proposta.clienteData?.estadoCivil || "N/A"}
+                <strong>Estado Civil:</strong> {proposta.cliente_estado_civil || proposta.clienteEstadoCivil || proposta.clienteData?.estadoCivil || "N/A"}
               </p>
               <p>
-                <strong>Nacionalidade:</strong> {proposta.clienteData?.nacionalidade || "N/A"}
+                <strong>Nacionalidade:</strong> {proposta.cliente_nacionalidade || proposta.clienteNacionalidade || proposta.clienteData?.nacionalidade || "N/A"}
               </p>
               <p>
-                <strong>CEP:</strong> {proposta.clienteData?.cep || "N/A"}
+                <strong>CEP:</strong> {proposta.cliente_cep || proposta.clienteCep || proposta.clienteData?.cep || "N/A"}
               </p>
               <p>
-                <strong>Endereço:</strong> {proposta.clienteData?.endereco || "N/A"}
+                <strong>Endereço:</strong> {proposta.cliente_endereco || proposta.clienteEndereco || proposta.clienteData?.endereco || "N/A"}
               </p>
               <p>
-                <strong>Ocupação:</strong> {proposta.clienteData?.ocupacao || "N/A"}
+                <strong>Ocupação:</strong> {proposta.cliente_ocupacao || proposta.clienteOcupacao || proposta.clienteData?.ocupacao || "N/A"}
               </p>
             </CardContent>
           </Card>
@@ -227,30 +230,34 @@ const AnaliseManualPage: React.FC = () => {
             <CardContent className="space-y-2">
               <p>
                 <strong>Valor Solicitado:</strong>{" "}
-                {proposta.condicoesData?.valor ? `R$ ${proposta.condicoesData.valor}` : "N/A"}
+                {proposta.valor_solicitado || proposta.valorSolicitado || proposta.condicoesData?.valor ? 
+                  `R$ ${proposta.valor_solicitado || proposta.valorSolicitado || proposta.condicoesData.valor}` : "N/A"}
               </p>
               <p>
                 <strong>Prazo:</strong>{" "}
-                {proposta.condicoesData?.prazo ? `${proposta.condicoesData.prazo} meses` : "N/A"}
+                {proposta.prazo || proposta.condicoesData?.prazo ? 
+                  `${proposta.prazo || proposta.condicoesData.prazo} meses` : "N/A"}
               </p>
               <p>
-                <strong>Finalidade:</strong> {proposta.condicoesData?.finalidade || "N/A"}
+                <strong>Finalidade:</strong> {proposta.finalidade || proposta.condicoesData?.finalidade || "N/A"}
               </p>
               <p>
-                <strong>Garantia:</strong> {proposta.condicoesData?.garantia || "N/A"}
+                <strong>Garantia:</strong> {proposta.garantia || proposta.condicoesData?.garantia || "N/A"}
               </p>
               <p>
                 <strong>TAC:</strong>{" "}
-                {proposta.condicoesData?.valorTac ? `R$ ${proposta.condicoesData.valorTac}` : "N/A"}
+                {proposta.valor_tac || proposta.valorTac || proposta.condicoesData?.valorTac ? 
+                  `R$ ${proposta.valor_tac || proposta.valorTac || proposta.condicoesData.valorTac}` : "N/A"}
               </p>
               <p>
                 <strong>IOF:</strong>{" "}
-                {proposta.condicoesData?.valorIof ? `R$ ${proposta.condicoesData.valorIof}` : "N/A"}
+                {proposta.valor_iof || proposta.valorIof || proposta.condicoesData?.valorIof ? 
+                  `R$ ${proposta.valor_iof || proposta.valorIof || proposta.condicoesData.valorIof}` : "N/A"}
               </p>
               <p>
                 <strong>Valor Total Financiado:</strong>{" "}
-                {proposta.condicoesData?.valorTotalFinanciado
-                  ? `R$ ${proposta.condicoesData.valorTotalFinanciado}`
+                {proposta.valor_total_financiado || proposta.valorTotalFinanciado || proposta.condicoesData?.valorTotalFinanciado
+                  ? `R$ ${proposta.valor_total_financiado || proposta.valorTotalFinanciado || proposta.condicoesData.valorTotalFinanciado}`
                   : "N/A"}
               </p>
             </CardContent>
