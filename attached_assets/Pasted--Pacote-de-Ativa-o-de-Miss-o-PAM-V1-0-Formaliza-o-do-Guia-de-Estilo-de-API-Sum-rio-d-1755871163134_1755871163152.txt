@@ -1,0 +1,41 @@
+### Pacote de Ativação de Missão (PAM) V1.0 (Formalização do Guia de Estilo de API)
+
+* **Sumário da Missão (O Quê):** Gerar um Architecture Decision Record (ADR) que defina o nosso "Guia de Estilo de API" (`API Style Guide`) mandatório, cobrindo versionamento, idempotência e cacheabilidade, conforme os "Subtópicos Obrigatórios" do Ponto 34.
+* **Intenção Estratégica (O Porquê):** Eliminar a inconsistência entre os nossos endpoints de API. Um guia de estilo rigoroso e imposto por *linting* garante que a nossa API seja profissional, previsível e resiliente, o que é um pré-requisito para expor a nossa plataforma a parceiros externos no futuro.
+* **Histórico Relevante (Consulta Obrigatória):** As auditorias anteriores identificaram inconsistências no design dos nossos endpoints. O Ponto 33 já formalizou o uso do OpenAPI V3; esta missão irá detalhar as regras de design que essas especificações devem seguir.
+* **Modelo Mental (Como se Encaixa):** Aja como um Arquiteto de API a escrever as "leis" de design para a sua equipa. O foco é em criar regras claras, práticas e que possam ser validadas.
+
+---
+
+**IMPLEMENTAR:**
+ADR: Guia de Estilo de APIs RESTful
+
+**CURRENT STATE:**
+As nossas APIs, embora funcionais, não seguem um guia de estilo consistente, especialmente no que diz respeito a versionamento, idempotência e caching.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um novo arquivo Markdown, `architecture/07-decisions/adr-007-api-style-guide.md`, é criado. O arquivo deve conter um ADR completo, incluindo as seguintes seções:
+
+1.  **Decisão:** Uma declaração clara, por exemplo: "Adotaremos um Guia de Estilo de API rigoroso, cobrindo Versionamento via URL, Idempotência via `Idempotency-Key` e Cacheabilidade via `ETag`."
+2.  **Estratégia de Versionamento Mandatória:** A nossa estratégia de versionamento (ex: `/api/v1/...`).
+3.  **Garantias de Idempotência:** A especificação de que todas as requisições `POST` e `PATCH` que não sejam naturalmente idempotentes **DEVEM** suportar o cabeçalho `Idempotency-Key`.
+4.  **Estratégia de Cacheabilidade (HTTP Caching):** A nossa estratégia para o uso dos cabeçalhos `ETag` e `Cache-Control` em endpoints `GET` para otimizar a performance.
+5.  **Padronização de Cabeçalhos:** A exigência de que o cabeçalho `Correlation-ID` seja sempre propagado.
+6.  **Guia de Estilo (Anexo):** Uma seção de anexo que detalha o guia de estilo completo (convenções de nomenclatura para *paths* e *query params*, uso semântico de métodos HTTP, etc.).
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que o versionamento via URL é a abordagem mais simples e clara para o nosso caso de uso."]
+* **VALIDAÇÃO PENDENTE:** [O ADR gerado deve ser revisado e ratificado pelo Arquiteto Chefe.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear o ficheiro exato a ser criado.
+2.  Garantir que todas as seções obrigatórias do ADR são criadas.
+3.  Executar `get_latest_lsp_diagnostics` para garantir que o ambiente está estável.
+4.  **Declarar Nível de Confiança (0 a 100%)**.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (revisão do documento Markdown gerado).
+7.  **Documentar Decisões Técnicas**.
