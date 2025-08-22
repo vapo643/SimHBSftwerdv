@@ -1,10 +1,11 @@
 # Estratégia de Infrastructure as Code - Sistema Simpix
 
 **Documento Técnico:** Infrastructure as Code Strategy  
-**Versão:** 1.0  
+**Versão:** 1.1  
 **Data:** 22 de Agosto de 2025  
 **Status:** Oficial - Estratégia de IaC  
 **Aprovação:** Pendente Ratificação do Arquiteto Chefe e Equipe de Operações  
+**PAM:** V1.8 - Formalização da Estratégia de Infrastructure as Code  
 
 ---
 
@@ -1731,5 +1732,43 @@ const iacImplementationChecklist = {
 **Documento criado por:** GEM-07 AI Specialist System  
 **Data:** 2025-08-22  
 **Versão:** 1.0  
+**Status:** Aguardando ratificação do Arquiteto Chefe e Equipe de Operações  
+**Próxima revisão:** Q4 2025 (início da implementação)
+
+---
+
+## 📊 **DECLARAÇÃO DE INCERTEZA (PAM V1.8)**
+
+### Métricas de Confiança
+
+- **CONFIANÇA NA IMPLEMENTAÇÃO:** 95%
+- **RISCOS IDENTIFICADOS:** MÉDIO (curva de aprendizado Terraform e OPA)
+- **DECISÕES TÉCNICAS ASSUMIDAS:**
+  - Terraform é a ferramenta mais adequada para multi-cloud futuro
+  - GitOps com Flux é ideal para Azure Container Apps e GitHub Actions
+  - OPA oferece melhor flexibilidade para políticas que Sentinel
+  - Detecção de drift a cada hora é suficiente para ambientes de produção
+
+### Validação Pendente
+
+- Aprovação e ratificação pelo Arquiteto Chefe
+- Revisão pela Equipe de Operações
+- PoC com Terraform em Q4 2025
+- Treinamento da equipe em HCL e Rego
+- Teste de políticas OPA com casos reais
+
+### Riscos Não Mitigados
+
+1. **Complexidade de HCL:** Curva de aprendizado para desenvolvedores não familiarizados
+2. **Estado do Terraform:** Gerenciamento de estado pode ficar complexo em escala
+3. **Debugging de políticas:** Rego (OPA) pode ser difícil de debugar
+4. **Custo de ferramentas:** Terraform Cloud/Enterprise tem custo adicional se necessário
+
+---
+
+**Documento criado por:** GEM-07 AI Specialist System  
+**Atualizado por:** GEM-02 Dev Specialist (PAM V1.8)  
+**Data:** 2025-08-22  
+**Versão:** 1.1  
 **Status:** Aguardando ratificação do Arquiteto Chefe e Equipe de Operações  
 **Próxima revisão:** Q4 2025 (início da implementação)
