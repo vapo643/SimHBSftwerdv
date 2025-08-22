@@ -1,0 +1,43 @@
+### Pacote de Ativação de Missão (PAM) V1.7 (Formalização da Estratégia de Migração de Plataforma)
+
+* **Sumário da Missão (O Quê):** Gerar o documento `platform-migration-strategy.md`, detalhando o nosso plano de migração, a estratégia escolhida (um dos "6 R's da Migração para a Nuvem") e o nosso plano de contingência e rollback, com base nos "Subtópicos Obrigatórios" do Ponto 63.
+* **Intenção Estratégica (O Porquê):** Mitigar o risco da operação mais complexa do nosso roadmap. Um plano de migração detalhado e bem arquitetado é a diferença entre um *cutover* suave e um desastre com downtime prolongado. Este documento é a nossa apólice de seguro para a migração.
+* **Histórico Relevante (Consulta Obrigatória):** Toda a documentação da Fase 1 e 2 (ADRs, estratégias de dados, frontend, etc.) foi criada com o objetivo de tornar a aplicação "Azure-Ready". Esta missão define como faremos a transição final.
+* **Modelo Mental (Como se Encaixa):** Aja como um Arquiteto de Migração para a Nuvem. Sua tarefa é analisar a nossa aplicação atual e o nosso alvo (Azure) e desenhar o caminho mais seguro e eficiente para mover a aplicação de um para o outro.
+
+---
+
+**IMPLEMENTAR:**
+Documento de Estratégia de Migração de Plataforma
+
+**CURRENT STATE:**
+A nossa estratégia de migração existe como uma intenção, mas não temos um plano formal que detalhe a abordagem, as fases, os riscos e, crucialmente, os procedimentos de rollback.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um novo arquivo Markdown, `architecture/03-infrastructure/platform-migration-strategy.md`, é criado. O arquivo deve conter as seguintes seções, conforme o Ponto 63:
+
+1.  **Estratégia de Migração (Os "6 R's"):** Uma análise e decisão sobre a nossa estratégia principal. (Sugestão: A nossa abordagem é uma combinação de **Replatform** - mover para o Azure Container Apps, que é uma plataforma superior - e **Refactor**, que já estamos a fazer).
+2.  **Análise de Dependências:** Uma lista de todas as dependências que precisam ser migradas ou reconfiguradas (Banco de Dados PostgreSQL, Supabase Auth, Supabase Storage, Variáveis de Ambiente, DNS, etc.).
+3.  **Planejamento das Fases de Migração:** Um detalhamento do nosso plano de *cutover*, incluindo fases como:
+    * Provisionamento da Infraestrutura na Azure (via Terraform).
+    * Migração dos Dados (ex: usando o serviço de migração da Azure).
+    * Deploy em Staging na Azure para validação.
+    * O evento de *cutover* final (ex: atualização do DNS).
+4.  **Plano de Contingência e Rollback:** A seção mais crítica. O que faremos se algo correr mal durante o *cutover*? Descreva o procedimento de rollback (ex: "Apontar o DNS de volta para o ambiente Replit, que será mantido em modo read-only durante 48h após a migração").
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que uma estratégia de Replatform/Refactor é a mais adequada, em vez de um simples Rehost (lift-and-shift)."]
+* **VALIDAÇÃO PENDENTE:** [O documento gerado deve ser revisado e ratificado pelo Arquiteto Chefe e pela equipa de operações.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear o ficheiro exato a ser criado.
+2.  Garantir que todas as seções obrigatórias (6 R's, Dependências, Fases, Rollback) estão completas.
+3.  Executar `get_latest_lsp_diagnostics` para garantir que o ambiente está estável.
+4.  **Declarar Nível de Confiança (0 a 100%)**.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (revisão do documento Markdown gerado).
+7.  **Documentar Decisões Técnicas**.
