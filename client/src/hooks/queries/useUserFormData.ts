@@ -38,7 +38,7 @@ export function useUserFormData() {
     queryKey: queryKeys.system.metadata(),
     queryFn: async () => {
       const response = await api.get<SystemMetadata>("/api/admin/system/metadata");
-      return response.data;
+      return 'data' in response ? response.data : response as SystemMetadata;
     },
   });
 
@@ -51,7 +51,7 @@ export function useUserFormData() {
     queryKey: queryKeys.partners.list(),
     queryFn: async () => {
       const response = await api.get<Partner[]>("/api/parceiros");
-      return response.data;
+      return 'data' in response ? response.data : response as Partner[];
     },
   });
 
@@ -67,7 +67,7 @@ export function useUserFormData() {
     queryKey: queryKeys.stores.list(),
     queryFn: async () => {
       const response = await api.get<Store[]>("/api/admin/lojas");
-      return response.data;
+      return 'data' in response ? response.data : response as Store[];
     },
     enabled: shouldUseClientSideFiltering === true, // Only fetch if using client-side filtering
   });
@@ -76,11 +76,11 @@ export function useUserFormData() {
   const fetchStoresByPartner = async (partnerId: number): Promise<Store[]> => {
     if (shouldUseClientSideFiltering && allStores) {
       // Client-side filtering: filter from pre-loaded data
-      return allStores.filter(store => store.parceiroId === partnerId);
+      return allStores.filter((store: any) => store.parceiroId === partnerId);
     } else {
       // Server-side filtering: fetch on-demand
       const response = await api.get<Store[]>(`/api/admin/parceiros/${partnerId}/lojas`);
-      return response.data;
+      return 'data' in response ? response.data : response as Store[];
     }
   };
 
@@ -138,7 +138,7 @@ export function useStoresByPartner(partnerId: number | null, enabled = true) {
     queryFn: async () => {
       if (!partnerId) return [];
       const response = await api.get<Store[]>(`/api/admin/parceiros/${partnerId}/lojas`);
-      return response.data;
+      return 'data' in response ? response.data : response as Store[];
     },
     enabled: enabled && !!partnerId,
   });

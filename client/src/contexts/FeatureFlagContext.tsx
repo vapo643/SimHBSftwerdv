@@ -52,10 +52,16 @@ export function FeatureFlagProvider({ children }: { children: ReactNode }) {
 
   // Atualizar state local quando dados chegarem
   useEffect(() => {
-    if (data?.flags) {
+    if (data && typeof data === 'object' && 'flags' in data) {
       setFlags(prevFlags => ({
         ...prevFlags,
-        ...data.flags,
+        ...(data as any).flags,
+      }));
+    } else if (data && typeof data === 'object') {
+      // Se data é diretamente o objeto de flags
+      setFlags(prevFlags => ({
+        ...prevFlags,
+        ...(data as FeatureFlags),
       }));
     }
   }, [data]);
