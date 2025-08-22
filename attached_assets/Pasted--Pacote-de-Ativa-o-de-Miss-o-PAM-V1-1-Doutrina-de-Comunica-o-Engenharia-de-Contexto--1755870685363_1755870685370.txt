@@ -1,0 +1,49 @@
+### Pacote de Ativação de Missão (PAM) V1.1 (Doutrina de Comunicação - Engenharia de Contexto)
+
+* **Sumário da Missão (O Quê):** Formalizar a nossa **Doutrina de Comunicação e Integração**, estabelecendo as leis fundamentais para a interação entre os nossos Bounded Contexts e definindo o nosso padrão arquitetural para resiliência e escalabilidade.
+
+* **Intenção Estratégica (O "Porquê" - LEITURA OBRIGATÓRIA):** Nós estamos num ponto de inflexão arquitetural. Com os nossos Bounded Contexts agora definidos e protegidos (Ponto 9 e 20), o nosso maior risco já não é a degradação interna de um módulo, mas sim a forma como estes módulos interagem. Se não formos rigorosos, cada nova *feature* irá criar um acoplamento invisível e perigoso entre eles. O objetivo desta missão é prevenir o "Acoplamento Temporal" e evitar que o nosso "Monolito Modular", que escolhemos deliberadamente no ADR-002, se transforme num "Monólito Distribuído" no futuro — a pior de todas as arquiteturas. Este documento será a nossa principal arma para garantir que possamos, um dia, extrair um serviço (como o de Pagamentos) sem reescrever metade da aplicação.
+
+* **Histórico Relevante (Consulta Obrigatória - O Contexto):** Esta decisão não existe num vácuo. Ela é a consequência direta e lógica das nossas decisões anteriores:
+    * **Referência a ADR-002 (Estilo Arquitetural):** Nós escolhemos evoluir o Monolito Modular. Este novo ADR (Ponto 19) deve justificar como os padrões de comunicação escolhidos suportam essa evolução controlada e preparam o terreno para a nossa arquitetura Híbrida-alvo.
+    * **Referência a Ponto 9 (Modelagem DDD):** Nós definimos os limites dos nossos domínios. Agora, vamos definir as regras para "atravessar" esses limites.
+    * **Referência a Ponto 20 (Enforcement Automatizado):** Nós já provámos que levamos a sério a proteção dos limites a nível de código (`dependency-cruiser`). Esta nova doutrina é a camada lógica que se senta por cima dessa proteção técnica.
+
+* **Modelo Mental (Como se Encaixa):** Aja como um Arquiteto de Sistemas Distribuídos a desenhar as "leis de trânsito" para uma cidade de software em crescimento. O seu trabalho é criar as regras (síncrono vs. assíncrono), os sinais (granularidade das APIs) e as autoestradas (o nosso futuro barramento de eventos) que irão garantir que o tráfego de dados flua de forma eficiente e segura, sem congestionamentos ou colisões catastróficas, à medida que a cidade cresce.
+
+---
+
+**IMPLEMENTAR:**
+ADR: Doutrina de Padrões de Integração e Comunicação
+
+**CURRENT STATE:**
+As decisões sobre a comunicação entre os nossos Bounded Contexts são tomadas de forma ad-hoc, criando um risco crescente de acoplamento temporal e reduzindo a nossa resiliência.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um novo arquivo Markdown, `architecture/07-decisions/adr-006-integration-and-communication-patterns.md`, é criado. O arquivo deve conter um ADR completo, incluindo as seguintes seções, justificadas com base no nosso contexto:
+
+1.  **Decisão:** Uma declaração clara e inequívoca, por exemplo: "Adotaremos o princípio de **'Assíncrono por Padrão'** para a comunicação entre Bounded Contexts distintos. A comunicação síncrona será a exceção documentada, não a regra."
+2.  **Justificativa (Alinhada com o Contexto):** Uma justificação detalhada que faça referência explícita a como esta decisão suporta a nossa estratégia do **ADR-002 (Evoluir o Monolito Modular)** e a nossa necessidade de manter os limites dos **Bounded Contexts (Ponto 9)** fortes.
+3.  **Critérios para Uso (A "Árvore de Decisão"):** Uma tabela ou fluxograma claro que sirva como uma "árvore de decisão" para os desenvolvedores. Deve responder a perguntas como:
+    * "A operação precisa de uma resposta imediata para continuar o fluxo do usuário?" -> Se sim, considere Síncrono.
+    * "A operação pode ser executada em segundo plano sem impactar a experiência do usuário?" -> Se sim, use Assíncrono.
+    * "Os dois contextos podem operar de forma independente se um deles estiver offline?" -> Se sim, use Assíncrono.
+4.  **Definição da Granularidade da Comunicação (A Regra "Anti-Chatty API"):** Uma diretriz clara sobre o design de endpoints, por exemplo: "Cada endpoint de API deve representar uma unidade de trabalho de negócio completa. Evite endpoints que exijam que o cliente faça múltiplas chamadas sequenciais para completar uma única operação."
+5.  **Análise de Acoplamento Temporal (A Lição Técnica):** Uma breve explicação do que é o acoplamento temporal e como a nossa nova doutrina o minimiza, com um exemplo prático do nosso próprio sistema (ex: "Se o serviço de Propostas chamasse o serviço de Notificações de forma síncrona, uma falha no sistema de email impediria a criação de novas propostas. Ao usar um evento, a proposta é criada, e a notificação é enviada quando o sistema se recuperar.").
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que o princípio 'Assíncrono por Padrão' é a melhor estratégia de longo prazo para a nossa arquitetura."]
+* **VALIDAÇÃO PENDENTE:** [O ADR gerado deve ser revisado e ratificado pelo Arquiteto Chefe. A implementação da nossa primeira comunicação assíncrona via barramento de eventos validará esta estratégia na prática.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear o ficheiro exato a ser criado.
+2.  Garantir que todas as seções obrigatórias do ADR são criadas e **ricas em contexto**.
+3.  Executar `get_latest_lsp_diagnostics` para garantir que o ambiente está estável.
+4.  **Declarar Nível de Confiança (0 a 100%)**.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (revisão do documento Markdown gerado).
+7.  **Documentar Decisões Técnicas**.
