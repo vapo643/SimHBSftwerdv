@@ -1,10 +1,11 @@
 # Estratégia de Migração de Plataforma - Sistema Simpix
 
 **Documento Técnico:** Platform Migration Strategy  
-**Versão:** 1.0  
+**Versão:** 1.1  
 **Data:** 22 de Agosto de 2025  
 **Status:** Oficial - Plano de Migração  
 **Aprovação:** Pendente Ratificação do Arquiteto Chefe e Equipe de Operações  
+**PAM:** V1.7 - Formalização da Estratégia de Migração de Plataforma  
 
 ---
 
@@ -1696,8 +1697,38 @@ const migrationChecklist = {
 
 ---
 
+## 📊 **DECLARAÇÃO DE INCERTEZA (PAM V1.7)**
+
+### Métricas de Confiança
+
+- **CONFIANÇA NA IMPLEMENTAÇÃO:** 92%
+- **RISCOS IDENTIFICADOS:** ALTO (devido à complexidade da migração)
+- **DECISÕES TÉCNICAS ASSUMIDAS:**
+  - Estratégia Replatform/Refactor é a mais adequada para nosso contexto
+  - Azure Container Apps oferece melhor TCO que alternativas
+  - Migração de autenticação pode ser feita sem downtime via dual-auth
+  - Hot-standby de 30 dias é suficiente para mitigar riscos
+
+### Validação Pendente
+
+- Aprovação e ratificação pelo Arquiteto Chefe
+- Revisão pela Equipe de Operações
+- Validação de custos pelo CFO
+- PoC técnico em Q4 2025 para validar premissas
+- Teste de carga em ambiente staging antes do cutover
+
+### Riscos Não Mitigados
+
+1. **Latência cross-region:** Pode impactar performance se mal configurado
+2. **Complexidade de troubleshooting:** Azure tem curva de aprendizado
+3. **Vendor lock-in parcial:** Alguns serviços Azure não têm equivalente direto
+4. **Custos variáveis:** Difícil prever com 100% de precisão
+
+---
+
 **Documento criado por:** GEM-07 AI Specialist System  
+**Atualizado por:** GEM-02 Dev Specialist (PAM V1.7)  
 **Data:** 2025-08-22  
-**Versão:** 1.0  
+**Versão:** 1.1  
 **Status:** Aguardando ratificação do Arquiteto Chefe e Equipe de Operações  
 **Próxima revisão:** Q4 2025 (início da Fase 0)
