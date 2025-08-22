@@ -1,0 +1,46 @@
+### Pacote de Ativação de Missão (PAM) V1.0 (Auditoria de Conformidade da Fase 1)
+
+* **Sumário da Missão (O Quê):** Realizar uma auditoria de conformidade completa e sistemática, comparando a nossa base de código e a nossa documentação de arquitetura existentes contra a "Doutrina Arquitetural da Fase 1" para identificar quais pontos já foram concluídos e quais ainda estão pendentes.
+* **Intenção Estratégica (O Porquê):** Criar um "Balanço de Progresso" definitivo e baseado em evidências para a nossa Fase 1 de Desenvolvimento Contínuo. Este relatório nos dará uma visão clara do nosso estado atual e nos permitirá priorizar com precisão as próximas missões táticas para fechar as lacunas remanescentes.
+* **Histórico Relevante (Consulta Obrigatória):** Nós já executamos várias missões que implementaram partes da Fase 1 (ex: Ponto 9 - DDD, Ponto 28 - Diagramas, Ponto 33 - OpenAPI). Esta missão irá consolidar esse conhecimento e verificar a completude de **toda** a Fase 1.
+* **Modelo Mental (Como se Encaixa):** Aja como um Auditor de Conformidade Arquitetural. A sua fonte da verdade é a Doutrina da Fase 1. O seu trabalho é ser o detetive que encontra a prova (ou a ausência dela) para cada requisito no nosso repositório.
+
+---
+
+**IMPLEMENTAR:**
+Relatório de Auditoria de Conformidade da Doutrina Arquitetural da Fase 1
+
+**CURRENT STATE:**
+Nós implementamos vários pontos da Doutrina da Fase 1, mas não temos um relatório consolidado que mapeie o nosso progresso total e identifique de forma clara e inequívoca o que ainda falta fazer.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um relatório de auditoria detalhado em formato de tabela Markdown. A tabela deve ter três colunas:
+
+1.  **Ponto da Doutrina:** O número e o nome do ponto da Doutrina da Fase 1 (ex: "Ponto 1 - Objetivos de Negócio e Drivers").
+2.  **Status de Conformidade:** A sua avaliação do status de conclusão (`Completo`, `Parcialmente Completo`, `Pendente`).
+3.  **Evidência / Justificativa da Lacuna:**
+    * Se `Completo` ou `Parcialmente Completo`, forneça o caminho para o(s) arquivo(s) de documentação ou de código que servem como prova.
+    * Se `Pendente` ou `Parcialmente Completo`, descreva brevemente qual "Subtópico Obrigatório" principal ainda falta ser implementado.
+
+**CONSTRAINTS (Roadmap de Auditoria):**
+
+1.  **Fonte da Verdade:** Utilize o documento da "Doutrina Arquitetural da Fase 1" como o seu checklist mestre. Você deve auditar cada ponto, de 1 a 108.
+2.  **Busca Baseada em Evidências:** Para cada ponto, sua primeira ação deve ser procurar por um artefato correspondente no diretório `/architecture`. Por exemplo, para o "Ponto 12 - Estilo Arquitetural Principal", você deve procurar por um ADR (`adr-002-...`) que documente essa decisão. Para o "Ponto 99 - Padrões de Codificação", você deve procurar por arquivos de configuração de Linters (ex: `.eslintrc.js`).
+3.  **Análise Abrangente:** A sua análise não deve ser superficial. Para um ponto ser considerado `Completo`, você deve verificar se a maioria dos seus "Subtópicos Obrigatórios" foi abordada na documentação ou no código.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100% de confiança na COMPLETUDE da sua auditoria]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que a existência de um documento de arquitetura com o título correspondente é uma forte evidência de conformidade, mas irei inspecionar o seu conteúdo para confirmar."]
+* **VALIDAÇÃO PENDENTE:** [Este relatório de auditoria será a nossa nova "lista de tarefas" para completar a Fase 1.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear a Doutrina da Fase 1 e o diretório `/architecture` como as principais fontes de dados.
+2.  Garantir que a tabela final de conformidade é completa e que cada status é justificado com evidências.
+3.  Executar `get_latest_lsp_diagnostics` para garantir que o ambiente está estável.
+4.  **Declarar Nível de Confiança (0 a 100%)** na completude da auditoria.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (revisão do relatório gerado para precisão).
+7.  **Documentar Decisões Técnicas** e os critérios usados para avaliar a conformidade.
