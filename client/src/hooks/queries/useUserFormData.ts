@@ -38,8 +38,7 @@ export function useUserFormData() {
     queryKey: queryKeys.system.metadata(),
     queryFn: async () => {
       const response = await api.get<SystemMetadata>("/api/admin/system/metadata");
-      // Handle both direct response and ApiResponse wrapper
-      return 'data' in response ? response.data : response;
+      return response.data;
     },
   });
 
