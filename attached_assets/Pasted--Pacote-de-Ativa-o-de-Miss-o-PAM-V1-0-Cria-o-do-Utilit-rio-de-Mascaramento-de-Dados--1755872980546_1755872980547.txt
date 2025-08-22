@@ -1,0 +1,53 @@
+### Pacote de Ativação de Missão (PAM) V1.0 (Criação do Utilitário de Mascaramento de Dados)
+
+* **Sumário da Missão (O Quê):** Criar um novo módulo utilitário (`masking.ts`) contendo funções puras e testadas para mascarar diferentes tipos de dados PII (CPF, RG, Email, etc.).
+* **Intenção Estratégica (O Porquê):** Estabelecer uma "fonte da verdade" única, testada e confiável para a sanitização de PII. Ao criar um utilitário centralizado, garantimos que a lógica de mascaramento seja consistente em toda a aplicação e evitamos a duplicação de código, o que reduz a superfície de ataque.
+* **Histórico Relevante (Consulta Obrigatória):** A sua auditoria anterior (ADR-008) identificou a necessidade mandatória de mascarar dados PII em endpoints GET. Esta missão cria a ferramenta para cumprir essa exigência.
+* **Modelo Mental (Como se Encaixa):** Aja como um Engenheiro de Segurança focado em Test-Driven Development (TDD). Sua tarefa é primeiro escrever os testes que definem o comportamento esperado e, em seguida, escrever o código que faz os testes passar.
+
+---
+
+**IMPLEMENTAR:**
+Utilitário de Mascaramento de Dados PII (com Testes)
+
+**CURRENT STATE:**
+A aplicação não possui um mecanismo padronizado para mascarar dados PII, resultando na sua exposição em endpoints de API.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  Um novo arquivo de utilitário, `server/utils/masking.ts`, é criado.
+2.  Um novo arquivo de teste, `tests/unit/masking.test.ts`, é criado.
+3.  O `masking.ts` exporta, no mínimo, as seguintes funções puras:
+    * `maskCPF(cpf: string): string`
+    * `maskEmail(email: string): string`
+    * `maskRG(rg: string): string`
+    * `maskTelefone(telefone: string): string`
+4.  O `masking.test.ts` contém testes unitários (`vitest`) para cada uma destas funções, validando o seu comportamento com múltiplos exemplos.
+5.  A execução de `npx vitest run tests/unit/masking.test.ts` resulta na passagem de **TODOS** os testes.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+1.  **Crie o Arquivo de Teste PRIMEIRO:** Crie `tests/unit/masking.test.ts` e escreva os testes para as funções de mascaramento. Os testes devem falhar inicialmente.
+2.  **Implemente as Funções de Mascaramento:** Crie `server/utils/masking.ts` e implemente as funções para fazer os testes passar.
+3.  **Regras de Mascaramento:**
+    * **CPF (`123.456.789-00`):** Deve retornar `***.456.789-**` (mantém os 6 dígitos do meio).
+    * **Email (`exemplo@dominio.com`):** Deve retornar `e***@d***.com` (mantém o primeiro caractere do nome, o primeiro do domínio e a extensão).
+    * **RG (`12.345.678-9`):** Deve retornar `**.***.678-*` (mantém os 3 últimos dígitos do número principal).
+    * **Telefone (`(11) 98765-4321`):** Deve retornar `(**) *****-4321` (mantém os 4 últimos dígitos).
+4.  **Validação Final Mandatória:** A sua prova de sucesso é o output do `vitest` a mostrar que todos os testes para `masking.test.ts` passaram.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que as regras de mascaramento definidas são suficientes para a conformidade com a LGPD para dados em trânsito."]
+* **VALIDAÇÃO PENDENTE:** [Após a criação deste utilitário, a próxima missão será refatorar os endpoints da API para usá-lo.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear os dois ficheiros a serem criados (`masking.ts` e `masking.test.ts`).
+2.  Garantir que os testes unitários cobrem os cenários principais e que a lógica de mascaramento está correta.
+3.  Executar `get_latest_lsp_diagnostics` para garantir 0 erros novos.
+4.  **Declarar Nível de Confiança (0 a 100%)**.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (executar a suíte de testes e garantir que todos passem).
+7.  **Documentar Decisões Técnicas**.
