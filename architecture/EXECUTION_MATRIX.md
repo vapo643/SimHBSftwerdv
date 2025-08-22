@@ -2,6 +2,17 @@
 
 **Última Atualização:** 22 de Agosto de 2025 | **Conformidade Global:** 97% | **PAMs Executados:** 6/8
 
+## ⚠️ IMPORTANTE: Camada de Validação, NÃO Substituto!
+**Este Matrix é uma CAMADA ADICIONAL de segurança contextual. SEMPRE consulte as fontes primárias (ADRs, documentos, código) ANTES de validar aqui.**
+
+### ✅ Validation Checklist Obrigatório
+- [ ] ADRs originais consultados em profundidade
+- [ ] Documentos fonte verificados linha por linha
+- [ ] Dependências validadas no código real
+- [ ] Cross-check com Matrix executado
+- [ ] Discrepâncias identificadas e resolvidas
+- [ ] Contexto duplo confirmado antes de execução
+
 ## 🎯 Dashboard de Controle
 
 ### Status Global
