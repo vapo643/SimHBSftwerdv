@@ -52,11 +52,16 @@ export function FeatureFlagProvider({ children }: { children: ReactNode }) {
 
   // Atualizar state local quando dados chegarem
   useEffect(() => {
-    if (data?.flags) {
-      setFlags(prevFlags => ({
-        ...prevFlags,
-        ...data.flags,
-      }));
+    if (data) {
+      // Handle both direct response and ApiResponse wrapper
+      const flagsData = 'data' in data ? data.data : data;
+      
+      if (flagsData?.flags) {
+        setFlags(prevFlags => ({
+          ...prevFlags,
+          ...flagsData.flags,
+        }));
+      }
     }
   }, [data]);
 

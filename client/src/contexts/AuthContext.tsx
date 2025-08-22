@@ -98,9 +98,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
             timestamp: string;
           }>("/api/debug/me");
 
-          if (response.data.user) {
+          // Handle both direct response and ApiResponse wrapper
+          const userData = 'data' in response ? response.data : response;
+          
+          if (userData.user) {
             console.log("🔐 [AUTH RESTORED] User profile loaded with valid token");
-            setUser(response.data.user);
+            setUser(userData.user);
             setError(null);
           } else {
             throw new Error("Invalid user data received");
@@ -137,8 +140,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
           timestamp: string;
         }>("/api/debug/me");
 
-        if (response.data.user) {
-          setUser(response.data.user);
+        // Handle both direct response and ApiResponse wrapper
+        const userData = 'data' in response ? response.data : response;
+        
+        if (userData.user) {
+          setUser(userData.user);
           setError(null);
         }
       } else {
