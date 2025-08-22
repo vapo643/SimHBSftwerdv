@@ -1,0 +1,41 @@
+### Pacote de Ativação de Missão (PAM) V1.6 (Formalização da Estratégia de Comunicação FE-BE)
+
+* **Sumário da Missão (O Quê):** Gerar o documento `frontend-backend-communication-strategy.md`, detalhando a nossa doutrina para a comunicação entre o cliente e o servidor, com base nos "Subtópicos Obrigatórios" do Ponto 60 da nossa Doutrina Arquitetural.
+* **Intenção Estratégica (O Porquê):** Padronizar e blindar a camada de comunicação, garantindo que as nossas interações de rede sejam seguras, eficientes e tolerantes a falhas. Este documento definirá as nossas defesas contra ataques comuns (XSS, CSRF) e a nossa estratégia de resiliência.
+* **Histórico Relevante (Consulta Obrigatória):** A nossa base de código já utiliza `TanStack Query` para `retries` e `apiClient.ts` para as chamadas. Esta missão irá formalizar e expandir estas práticas, especialmente no que diz respeito à segurança.
+* **Modelo Mental (Como se Encaixa):** Aja como um Arquiteto de Segurança de Aplicações. Sua tarefa é definir as políticas de segurança e os padrões de resiliência que governam a "ponte" entre o navegador do usuário e o nosso servidor.
+
+---
+
+**IMPLEMENTAR:**
+Documento de Estratégia de Comunicação Frontend-Backend
+
+**CURRENT STATE:**
+A comunicação FE-BE é funcional, mas não temos uma estratégia documentada que defina formalmente as nossas políticas de segurança (CSP, HSTS), a necessidade de um BFF (Backend for Frontend) ou os nossos padrões de resiliência.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um novo arquivo Markdown, `architecture/02-technical/frontend-backend-communication-strategy.md`, é criado. O arquivo deve conter as seguintes seções, conforme o Ponto 60:
+
+1.  **Decisão sobre BFF (Backend for Frontend):** Uma análise e decisão formal sobre a necessidade (ou não) de um BFF para a nossa arquitetura atual, considerando os prós e contras.
+2.  **Padrões de Resiliência no Frontend:** Formalizar a nossa estratégia de resiliência, detalhando como utilizamos o `TanStack Query` para:
+    * **Retries Automáticos:** Com política de *exponential backoff*.
+    * **Timeouts:** Para prevenir requisições longas.
+3.  **Estratégia de Segurança HTTP (CSP, HSTS):** Definir a nossa política para a implementação de cabeçalhos de segurança HTTP rigorosos, especialmente a Content Security Policy (CSP), para mitigar ataques de XSS.
+4.  **Estratégia de Mitigação de XSS e CSRF:** Documentar as nossas defesas existentes e planejadas contra ataques de Cross-Site Scripting (XSS) e Cross-Site Request Forgery (CSRF).
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que para o nosso estágio atual, um BFF introduziria mais complexidade do que valor, e que podemos adiar essa decisão."]
+* **VALIDAÇÃO PENDENTE:** [O documento gerado deve ser revisado e ratificado pelo Arquiteto Chefe.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear o ficheiro exato a ser criado.
+2.  Garantir que todas as seções obrigatórias que definem a nossa estratégia de comunicação estão completas.
+3.  Executar `get_latest_lsp_diagnostics` para garantir que o ambiente está estável.
+4.  **Declarar Nível de Confiança (0 a 100%)**.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (revisão do documento Markdown gerado).
+7.  **Documentar Decisões Técnicas**.
