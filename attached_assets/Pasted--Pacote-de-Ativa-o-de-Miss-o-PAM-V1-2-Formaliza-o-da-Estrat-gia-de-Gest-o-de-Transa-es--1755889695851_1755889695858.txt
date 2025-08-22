@@ -1,0 +1,43 @@
+### Pacote de Ativação de Missão (PAM) V1.2 (Formalização da Estratégia de Gestão de Transações)
+
+* **Sumário da Missão (O Quê):** Gerar o documento `transaction-management-strategy.md`, detalhando a nossa estratégia para a gestão de transações distribuídas (Padrão Saga) e os requisitos de idempotência, conforme os "Subtópicos Obrigatórios" do Ponto 51.
+* **Intenção Estratégica (O Porquê):** Garantir a consistência dos dados em operações de negócio que abrangem múltiplos Bounded Contexts ou serviços. Em um sistema financeiro, a falha em garantir a atomicidade de ponta a ponta pode levar à corrupção de dados catastrófica. Este documento definirá a nossa arquitetura para a resiliência transacional.
+* **Histórico Relevante (Consulta Obrigatória):** A auditoria de conformidade identificou a ausência de uma estratégia formal de transações como uma lacuna de prioridade P0 (Crítica). A nossa modelagem de domínio (Ponto 9) já identificou os agregados que definirão os limites das transações locais.
+* **Modelo Mental (Como se Encaixa):** Aja como um Arquiteto de Sistemas Distribuídos. Sua tarefa é desenhar a "coreografia" ou a "orquestração" que garante que uma operação de negócio complexa (como um pagamento que envolve múltiplos sistemas) ou tenha sucesso por completo, ou falhe de forma segura, sem deixar dados inconsistentes para trás.
+
+---
+
+**IMPLEMENTAR:**
+Documento de Estratégia de Gestão de Transações
+
+**CURRENT STATE:**
+O sistema realiza operações que modificam dados em múltiplas tabelas, mas não temos uma estratégia formal documentada para garantir a consistência em fluxos de trabalho distribuídos ou de longa duração.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um novo arquivo Markdown, `architecture/02-technical/transaction-management-strategy.md`, é criado. O arquivo deve conter as seguintes seções, conforme o Ponto 51:
+
+1.  **Escopo das Transações ACID Locais:** Uma definição clara de que as transações ACID tradicionais devem ser confinadas aos limites de um único **Agregado (DDD)**.
+2.  **Design Detalhado do Padrão Saga:** A nossa decisão de adotar o padrão **Saga** para transações que abrangem múltiplos agregados ou serviços. A seção deve incluir:
+    * Uma escolha e justificativa entre **Coreografia** (baseada em eventos) e **Orquestração** (com um orquestrador central).
+    * O design de uma Saga de exemplo para um fluxo crítico (ex: "Processamento de Pagamento").
+3.  **Transações de Compensação (Compensating Transactions):** Para cada passo da Saga de exemplo, descrever a sua "transação de compensação" (a ação de rollback semântico).
+4.  **Requisitos de Idempotência:** A política mandatória de que todos os passos de uma Saga e os seus handlers de compensação devem ser **idempotentes**.
+5.  **Monitoramento e Alertas para Falhas em Sagas:** A nossa estratégia para monitorar o estado das Sagas e alertar a equipa de operações quando uma Saga falha e requer intervenção manual.
+6.  **Análise de Pontos de Não Retorno:** A identificação, na nossa Saga de exemplo, de quaisquer "pontos de não retorno" (operações que não podem ser compensadas, como o envio de um PIX).
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que o padrão Saga, na sua forma de Coreografia baseada em eventos, é a melhor abordagem para a nossa arquitetura de Monolito Modular, pois promove o desacoplamento."]
+* **VALIDAÇÃO PENDENTE:** [O documento gerado deve ser revisado e ratificado pelo Arquiteto Chefe.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear o ficheiro exato a ser criado.
+2.  Garantir que todas as 6 seções obrigatórias são criadas no documento.
+3.  Executar `get_latest_lsp_diagnostics` para garantir que o ambiente está estável.
+4.  **Declarar Nível de Confiança (0 a 100%)**.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (revisão do documento Markdown gerado).
+7.  **Documentar Decisões Técnicas**.
