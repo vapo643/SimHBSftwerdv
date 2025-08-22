@@ -1,0 +1,556 @@
+### Fase 1: Desenvolvimento Contínuo (O Durante | 2-6 meses)
+
+**Foco:** Integrar melhores práticas ao fluxo de desenvolvimento diário sem grande disrupção. Melhorias incrementais e refatorações de oportunidade.
+
+**I. Fundamentos Estratégicos e Requisitos**
+
+- **Ponto 1 - Objetivos de Negócio e Drivers:**
+    - *Justificativa:* Garantir que todo novo desenvolvimento esteja explicitamente alinhado aos OKRs e KPIs definidos, movendo da execução tática para a estratégica.
+
+Linha de Raciocínio: Qual é a visão de longo prazo (5-10 anos) e como a arquitetura habilita a Opcionalidade Estratégica (capacidade de pivotar, M&A)? Qual a tolerância a risco do negócio (Risk Appetite)? Como a arquitetura se alinha ao sistema socio-técnico (Alinhamento Socio-Técnico)? Como ela suporta o modelo de monetização e a vantagem competitiva sustentável? Analisar o impacto geopolítico e de mercado.
+
+Subtópicos Obrigatórios:
+
+Definição dos OKRs e KPIs quantificáveis.
+
+Personas de Usuários e Jobs To Be Done (JTBD).
+
+Análise do Cenário Competitivo e Definição da Vantagem Competitiva Sustentável.
+
+Mapa de Stakeholders e Matriz RACI.
+
+Mapeamento do Fluxo de Valor (Value Stream Mapping).
+
+Vida útil esperada e Critérios de Sucesso/Saída (Exit Criteria).
+
+Análise da Volatilidade do Domínio (Taxa de mudança esperada).
+
+Estratégias de Pivô Arquitetural (Plan B) e Análise de Flexibilidade Estratégica.
+
+Perfil de Tolerância a Risco do Negócio (Risk Appetite Statement).
+
+Análise de Impacto Socio-Técnico (Socio-Technical Impact Analysis).
+
+Análise de Fatores PESTEL (Político, Econômico, Social, Tecnológico, Ambiental, Legal) com impacto arquitetural.
+
+entre outros…
+
+- **Ponto 9 - Modelagem de Domínio (DDD):**
+    - *Justificativa:* Introduzir a Linguagem Ubíqua e identificar Bounded Contexts. Aplicar princípios de DDD em novas funcionalidades e refatorações incrementais.
+    
+    Linha de Raciocínio: A decisão mais crítica para o desacoplamento e alinhamento socio-técnico. Precisamos de mecanismos arquiteturais para impor os limites dos Bounded Contexts (Enforcement Automatizado), caso contrário, a modularidade se degradará.
+    
+    Subtópicos Obrigatórios:
+    
+    Linguagem Ubíqua e Identificação dos Domínios (Core/Suporte/Genéricos).
+    
+    Artefatos do Event Storming e Identificação dos Bounded Contexts.
+    
+    Criação do Mapa de Contextos (Context Map) e definição dos Padrões Estratégicos (ACL, OHS/PL).
+    
+    Definição rigorosa das Invariantes de Domínio (Domain Invariants).
+    
+    Estratégia para Enforcement Automatizado dos Limites de Contexto (ex: ArchUnit) integrada ao CI.
+    
+    Análise de Alinhamento Socio-Técnico (Socio-Technical Alignment Analysis).
+    
+
+**II. Macro-arquitetura e Padrões de Alto Nível**
+
+- **Ponto 12 - Estilo Arquitetural Principal:**
+    - *Justificativa:* Definir formalmente o estilo arquitetural alvo (ex: Monolito Modular bem estruturado) para guiar a evolução.
+
+Linha de Raciocínio: Escolha pragmática. Quantificar o custo da complexidade distribuída. Definir critérios de gatilho objetivos para evolução e usar Fitness Functions automatizadas para validação contínua.
+
+Subtópicos Obrigatórios:
+
+Análise comparativa detalhada (Trade-off Analysis Matrix).
+
+Plano de Evolução Controlada e Roadmap Arquitetural.
+
+ADR (Architecture Decision Record) detalhado.
+
+Definição dos Critérios de Gatilho (Trigger Criteria) para evolução.
+
+Definição das Fitness Functions iniciais (Automatizadas).
+
+Análise Quantitativa do Custo da Complexidade Distribuída (Distributed Complexity Cost Analysis).
+
+- **Ponto 19 - Padrões de Integração e Comunicação:**
+    - *Justificativa:* Definir critérios claros para comunicação síncrona vs. assíncrona e aplicá-los a todas as novas integrações.
+    
+    Linha de Raciocínio: "Assíncrono por padrão, Síncrono quando necessário" para minimizar o acoplamento temporal. Evitar APIs "tagarelas" (Chatty APIs).
+    
+    Subtópicos Obrigatórios:
+    
+    Critérios para uso de Comunicação Síncrona e Assíncrona.
+    
+    Definição da granularidade da comunicação (evitar Chatty APIs).
+    
+    Análise de Acoplamento Temporal (Temporal Coupling Analysis).
+    
+
+**III. Micro-arquitetura e Design de Componentes (Backend)**
+
+- **Ponto 20 - Design Interno dos Componentes:**
+    - *Justificativa:* Adotar um padrão interno (ex: Hexagonal/Clean) para todo novo código e iniciar o uso de validação automatizada (ArchUnit).
+    
+    Linha de Raciocínio: Isolar o Core de negócio (Hexagonal/Clean). O Modelo de Concorrência deve ser explicitamente definido (Threads, Reactive). Usar automação (ex: ArchUnit) integrada ao CI para impor a modularidade. Gerenciamento rigoroso de recursos (Pools).
+    
+    Subtópicos Obrigatórios:
+    
+    Seleção do padrão arquitetural interno e Regras de dependência (DIP).
+    
+    Template padronizado para novos serviços.
+    
+    Definição do Modelo de Concorrência interno (Threads, Actors, Coroutines, Reactive Streams).
+    
+    Ferramentas de Validação de Dependência Automatizada (ex: ArchUnit) integradas ao CI.
+    
+    Estratégia de Gerenciamento de Recursos (Resource Management) (Thread Pools, Connection Pools).
+    
+- **Ponto 21 - Lógica de Negócio e Fluxos de Trabalho:**
+    - *Justificativa:* Focar na proteção de invariantes e no design de Agregados (DDD) para novas funcionalidades, garantindo consistência.
+    
+    Linha de Raciocínio: Proteger as Invariantes. O design dos Agregados (DDD) define os limites transacionais exatos. Ciclos de vida complexos exigem Máquinas de Estado explícitas para gerenciar a complexidade do estado. Análise de Complexidade Ciclomática.
+    
+    Subtópicos Obrigatórios:
+    
+    Identificação das invariantes de negócio críticas.
+    
+    Design dos Agregados (Aggregates - DDD) e Modelagem de Consistência.
+    
+    Estratégia para Validação de Regras de Negócio.
+    
+    Definição de Máquinas de Estado (State Machines) para ciclos de vida complexos.
+    
+    Análise de Complexidade Ciclomática e Estratégia de Refatoração.
+    
+- **Ponto 25 - Padrões de Design (Design Patterns):**
+    - *Justificativa:* Incentivar o uso de padrões estabelecidos (ex: Repository, DI) no novo código durante o code review.
+    
+    Linha de Raciocínio: Foco em padrões que gerenciem complexidade, concorrência (Locking) e tratamento de erros de forma robusta. A Injeção de Dependência (DI) é fundamental para a testabilidade.
+    
+    Subtópicos Obrigatórios:
+    
+    Padrões GoF relevantes e Padrões de persistência (Repository, Unit of Work).
+    
+    Padrões para Gerenciamento de Concorrência (Locking Otimista/Pessimista).
+    
+    Padrões de Tratamento de Erros robustos.
+    
+    Padrões de Injeção de Dependência (DI) e Inversão de Controle (IoC).
+    
+- **Ponto 28 - Diagramas de Componentes (C4 Model - Nível 3):**
+    - *Justificativa:* Detalhar os componentes internos (Nível 3) conforme eles são construídos ou modificados.
+    
+    Linha de Raciocínio: Detalhar apenas os serviços críticos. O foco deve ser nas interfaces (Portas) e nos adaptadores, validando a adesão ao padrão interno (ex: Hexagonal).
+    
+    Subtópicos Obrigatórios:
+    
+    Mapeamento dos componentes internos e interações.
+    
+    Identificação das interfaces (Portas de Entrada/Saída) e Adaptadores.
+    
+- **Ponto 29 - Diagramas de Sequência/Fluxo:**
+    - *Justificativa:* Exigir diagramas de sequência para novas funcionalidades complexas para validar interações.
+    
+    Linha de Raciocínio: Essencial para analisar interações distribuídas. Focar nos cenários de falha (Unhappy Paths) para validar a resiliência e identificar o caminho crítico (Critical Path) para otimização de latência. Analisar pontos de falha distribuídos.
+    
+    Subtópicos Obrigatórios:
+    
+    Modelagem dos fluxos de autenticação/autorização e transações complexas.
+    
+    Modelagem detalhada dos fluxos de erro e recuperação (Unhappy Path).
+    
+    Análise de Latência Preditiva.
+    
+    Identificação de Chamadas Síncronas Críticas (Critical Path Analysis).
+    
+    Análise de Pontos de Falha Distribuídos (Distributed Failure Point Analysis).
+    
+
+**IV. Design de APIs, Interfaces e Comunicação**
+
+- **Ponto 30 - Protocolos de Comunicação:**
+    - *Justificativa:* Padronizar os protocolos e formatos de serialização utilizados no desenvolvimento contínuo.
+    
+    Linha de Raciocínio: Escolher o protocolo certo (REST/gRPC/GraphQL). Analisar a eficiência do protocolo (overhead) é crucial em escala. Padronizar a segurança (mTLS) para comunicação interna.
+    
+    Subtópicos Obrigatórios:
+    
+    Critérios definidos para REST vs. gRPC vs. GraphQL.
+    
+    Seleção do formato de serialização e Estratégia de Compressão.
+    
+    Padrões de Comunicação Cross-Origin (CORS).
+    
+    Estratégia de mTLS (Mutual TLS) mandatória para comunicação interna.
+    
+    Análise de Overhead de Protocolo (Protocol Overhead Analysis).
+    
+- **Ponto 33 - Contrato da API (API Contract):**
+    - *Justificativa:* Adotar abordagem "Design-First" com OpenAPI V3 para todas as novas APIs.
+    
+    Linha de Raciocínio: Design-First é mandatório. Os Testes de Contrato (Contract Testing - CDC) são essenciais para evolução independente e detectar quebras de compatibilidade no CI.
+    
+    Subtópicos Obrigatórios:
+    
+    Adoção do OpenAPI V3 / AsyncAPI.
+    
+    Processo de Governança (Design-First e Revisão).
+    
+    Estratégia de Geração Automática de Código (SDKs/Stubs).
+    
+    Estratégia de Testes de Contrato (Contract Testing) (ex: Pact, Consumer-Driven Contracts).
+    
+    Validação de Compatibilidade Retroativa (Backward Compatibility Validation) automatizada no CI.
+    
+- **Ponto 34 - Design de APIs RESTful (Padrões de Interface):**
+    - *Justificativa:* Aplicar o Guia de Estilo de API rigorosamente a novos endpoints, incluindo versionamento e idempotência.
+    
+    Linha de Raciocínio: Consistência rigorosa (API Style Guide imposto por Linting). A idempotência (Idempotency-Key) é mandatória para resiliência. A cacheabilidade (HTTP Caching) deve ser explicitamente projetada.
+    
+    Subtópicos Obrigatórios:
+    
+    Estratégia de Versionamento Mandatória.
+    
+    Uso Correto e Semântico de Métodos HTTP e Recursos.
+    
+    Padronização de Cabeçalhos (Correlation-ID).
+    
+    Garantias de Idempotência (Idempotency-Key obrigatório) e estratégia de armazenamento de chaves.
+    
+    Estratégia de Cacheabilidade (HTTP Caching: ETag, Cache-Control).
+    
+    Definição do Guia de Estilo de APIs (API Style Guide) detalhado e imposto por Linting.
+    
+- **Ponto 35 - Contrato de Dados (Payloads):**
+    - *Justificativa:* Implementar validação rigorosa e sanitização de entrada na borda para todas as novas APIs.
+    
+    Linha de Raciocínio: Estrutura rigorosa e validação na borda (Fail Fast/Sanitização de Entrada). A política de evolução do schema deve ser clara. Gerenciar PII nos payloads (Criptografia de Campo/Tokenização).
+    
+    Subtópicos Obrigatórios:
+    
+    Padrões de nomenclatura e formatos de dados (ISO 8601).
+    
+    Repositório centralizado de Schemas (JSON Schema).
+    
+    Estratégia de Validação de Payloads na borda (Sanitização de Entrada).
+    
+    Estratégia para lidar com campos sensíveis (PII) nos payloads (Criptografia de Campo/Tokenização).
+    
+    Política de Evolução de Schema e Compatibilidade (Schema Evolution Policy).
+    
+- **Ponto 36 - Comunicação de Resultados e Erros:**
+    - *Justificativa:* Adotar RFC 7807/9457 e Correlation IDs em todo novo código para melhorar a depuração e a DX das APIs.
+    
+    Linha de Raciocínio: Erros são a interface de depuração. RFC 7807 (Problem Details) é mandatório. Trace IDs são essenciais. Precisamos de estratégias para erros em lote.
+    
+    Subtópicos Obrigatórios:
+    
+    Mapeamento completo e semântico dos Códigos de Status HTTP.
+    
+    Implementação mandatória do padrão RFC 7807/9457.
+    
+    Catálogo de erros de negócio padronizado.
+    
+    Inclusão de IDs de Correlação (Trace IDs) em todas as respostas de erro.
+    
+    Estratégia para tratamento de erros em lote (Batch Error Handling).
+    
+- **Ponto 37 - Interação com Coleções:**
+    - *Justificativa:* Padronizar a paginação (preferencialmente Cursor-based) e a filtragem em todos os novos endpoints de coleção.
+    
+    Linha de Raciocínio: Paginação eficiente (Cursor-based) é mandatória para escala. Limites de tamanho de página são necessários para proteção contra DoS.
+    
+    Subtópicos Obrigatórios:
+    
+    Estratégia de paginação padrão (Cursor-based preferível).
+    
+    Sintaxe padrão para filtragem e ordenação.
+    
+    Estratégia para Sparse Fieldsets.
+    
+    Limites de Tamanho de Página (Page Size Limits) obrigatórios e não negociáveis.
+    
+
+**V. Arquitetura de Dados**
+
+- **Ponto 39 - Modelagem de Dados:**
+    - *Justificativa:* Garantir que novas modelagens sejam revisadas com foco nos padrões de acesso e estratégia de indexação no PostgreSQL.
+    
+    Linha de Raciocínio: Modelagem otimizada para Padrões de Acesso (Query-First Design). Estimativas de volumetria e estratégia de evolução do esquema. Considerar modelagem de dados temporais (Bi-temporalidade) para auditoria e análise histórica rigorosa.
+    
+    Subtópicos Obrigatórios:
+    
+    Modelo Conceitual, Lógico e Físico.
+    
+    Análise dos Padrões de Acesso a Dados (Data Access Patterns Analysis).
+    
+    Estratégia de Indexação detalhada e Justificativa para Normalização/Desnormalização.
+    
+    Estimativas de Volumetria de Dados (Data Volumetry Estimates).
+    
+    Estratégia de Evolução do Schema (Schema Evolution Strategy).
+    
+    Modelagem de Dados Temporais (Temporal/Bi-temporal Data Modeling) (se aplicável).
+    
+- **Ponto 51 - Gestão de Transações:**
+    - *Justificativa:* Garantir que o escopo das transações ACID esteja correto e implementar idempotência para operações críticas.
+    
+    Linha de Raciocínio: Padrão Saga para transações distribuídas. Exige design rigoroso das transações de compensação (rollback semântico) e idempotência absoluta. Análise detalhada das falhas da Saga e pontos de não retorno.
+    
+    Subtópicos Obrigatórios:
+    
+    Escopo das transações ACID locais (Agregados).
+    
+    Design detalhado das Sagas e Transações de Compensação.
+    
+    Requisitos de Idempotência para todas as etapas da Saga.
+    
+    Monitoramento e Alertas para Falhas em Sagas.
+    
+    Análise Detalhada de Falhas da Saga e Pontos de Não Retorno (Point of No Return Analysis).
+    
+
+**VI. Design de Frontend e Experiência do Usuário (UX/UI)**
+
+- **Ponto 56 - Arquitetura do Frontend Completa:**
+    - *Justificativa:* Definir a arquitetura de frontend alvo e estabelecer orçamentos de performance iniciais.
+    
+    Linha de Raciocínio: Otimizar para Core Web Vitals com Orçamentos de Performance rigorosos. Microfrontends exigem governança rigorosa de composição e dependências. Monitorar a performance real do usuário (RUM) continuamente. Otimizar o Caminho Crítico de Renderização.
+    
+    Subtópicos Obrigatórios:
+    
+    Seleção do Framework e Estratégia de Renderização (CSR, SSR, SSG, ISR).
+    
+    Estratégia Mobile (Nativo, Híbrido, PWA).
+    
+    Decisão sobre Microfrontends, modelo de composição e Estratégia de Orquestração/Governança.
+    
+    Definição do Orçamento de Performance (Performance Budgeting).
+    
+    Estratégia de Gerenciamento de Dependências e Monorepo.
+    
+    Estratégia de Monitoramento de Performance em Produção (RUM - Real User Monitoring).
+    
+    Otimização do Caminho Crítico de Renderização (Critical Rendering Path Optimization).
+    
+- **Ponto 59 - Gerenciamento de Estado no Cliente:**
+    - *Justificativa:* Padronizar a arquitetura de estado e estratégias de caching/sincronização no frontend.
+    
+    Linha de Raciocínio: Distinguir Estado de UI e Estado de Servidor Cacheado. O desafio é a sincronização, caching e invalidação eficientes (ex: React Query).
+    
+    Subtópicos Obrigatórios:
+    
+    Seleção da biblioteca e Definição da arquitetura de estado.
+    
+    Estratégia de Caching, Sincronização e Invalidação de Estado do Servidor.
+    
+    Estratégia de Persistência de Estado no Cliente (LocalStorage).
+    
+- **Ponto 60 - Comunicação Frontend-Backend:**
+    - *Justificativa:* Implementar medidas básicas de segurança no frontend (XSS/CSRF mitigation) e avaliar a necessidade de um BFF.
+    
+    Subtópicos Obrigatórios:
+    
+    Definição da necessidade de um BFF e Avaliação de GraphQL vs. REST.
+    
+    Padrões de Resiliência no Frontend.
+    
+    Estratégia Offline-First (se aplicável) e sincronização de dados.
+    
+    Implementação Rigorosa de Políticas de Segurança HTTP (CSP, HSTS, Feature Policy).
+    
+    Estratégia de Segurança do Frontend (XSS, CSRF Mitigation) detalhada.
+    
+
+**VII. Infraestrutura e Deployment (DevOps/Cloud/SRE)**
+
+- **Ponto 63 - Estratégia de Migração de Plataforma:**
+    - *Justificativa:* Executar a migração completa do Replit para a nova infraestrutura de nuvem definida na Fase 0.
+    
+    Linha de Raciocínio: Minimizar risco e downtime. Um plano de rollback detalhado e testado é essencial.
+    
+    Subtópicos Obrigatórios:
+    
+    Escolha da Estratégia de Migração (6 R's) e Análise de dependências.
+    
+    Planejamento das fases de migração e cutover.
+    
+    Plano de Contingência e Rollback da Migração detalhado e testado.
+    
+- **Ponto 69 - Infrastructure as Code (IaC):**
+    - *Justificativa:* Garantir que toda a nova infraestrutura seja provisionada via IaC (ex: Terraform), garantindo reprodutibilidade.
+    
+    Linha de Raciocínio: Tudo como Código. GitOps é o modelo operacional alvo. Precisamos de testes de IaC rigorosos, Policy as Code (OPA) para governança automatizada e detecção de desvios (Drift Detection) com remediação automática.
+    
+    Subtópicos Obrigatórios:
+    
+    Seleção da ferramenta de IaC (ex: Terraform) e Estrutura de repositórios.
+    
+    Adoção de práticas de GitOps (ex: ArgoCD, Flux).
+    
+    Estratégia de Testes de Infraestrutura (IaC Testing).
+    
+    Estratégia de Detecção de Drift (Drift Detection) e Remediação Automática.
+    
+    Implementação de Policy as Code (ex: OPA, Kyverno) para governança de infraestrutura.
+    
+- **Ponto 74 - Estratégias de Rollback:**
+    - *Justificativa:* Exigir que as migrações de DB sejam retrocompatíveis (Expand/Contract) e que haja procedimentos de rollback de aplicação.
+    
+    Linha de Raciocínio: Otimizar para MTTR. O maior desafio é o banco de dados: migrações de schema DEVEM ser retrocompatíveis (Expand/Contract pattern) e testadas automaticamente.
+    
+    Subtópicos Obrigatórios:
+    
+    Procedimentos de rollback automatizados para aplicação.
+    
+    Estratégia mandatória para Migrações de Banco de Dados Compatíveis (Backward-Compatible Schema Changes).
+    
+    Testes Automatizados de Compatibilidade de Migração de DB e Rollback.
+    
+
+**VIII. Qualidades Sistêmicas e Cross-Cutting Concerns (NFRs)**
+
+- **Ponto 80 - Segurança (Security by Design) e Privacidade:**
+    - *Justificativa:* Introduzir checklists de segurança (OWASP) e modelagem de ameaças básica no ciclo de desenvolvimento para novas funcionalidades.
+    
+    Linha de Raciocínio: Mentalidade Zero Trust. Modelagem de Ameaças contínua (Internas e Externas). A segurança da cadeia de suprimentos (SLSA) é crítica. Preparação para análise forense. Monitoramento contínuo da postura de segurança (CSPM). Preparação para Criptografia Pós-Quântica.
+    
+    Subtópicos Obrigatórios:
+    
+    Metodologia de Modelagem de Ameaças (STRIDE) e Checklist OWASP.
+    
+    Modelo de Autorização detalhado (RBAC/ABAC/ReBAC) e Princípio do Menor Privilégio.
+    
+    Estratégia de Criptografia.
+    
+    Modelagem de Ameaças Internas (Insider Threat Modeling).
+    
+    Prontidão para Análise Forense (Forensic Readiness).
+    
+    Implementação do Framework SLSA (Supply-chain Levels for Software Artifacts).
+    
+    Estratégia de Cloud Security Posture Management (CSPM).
+    
+    Roadmap para Criptografia Pós-Quântica (Post-Quantum Cryptography Roadmap).
+    
+- **Ponto 81 - Estratégia de Identidade Federada e SSO:**
+    - *Justificativa:* Padronizar os protocolos de autenticação (OIDC) e gerenciamento de sessão seguro.
+    
+    Linha de Raciocínio: Identidade é o novo perímetro. Autenticação forte (MFA/Passwordless). Gestão rigorosa de identidade M2M (mTLS/OAuth). Monitoramento de anomalias (Autenticação Adaptativa Baseada em Risco).
+    
+    Subtópicos Obrigatórios:
+    
+    Seleção do IdP e Protocolos (OIDC, SAML).
+    
+    Estratégia de MFA/Passwordless e Gerenciamento de Sessão Seguro.
+    
+    Estratégia de Autenticação Machine-to-Machine (M2M) (mTLS, OAuth Client Credentials).
+    
+    Políticas de Acesso Adaptativo Baseado em Risco (Risk-Based Adaptive Access Policies).
+    
+- **Ponto 88 - Confiabilidade e Resiliência (Reliability):**
+    - *Justificativa:* Implementar padrões de resiliência básicos (Retries com backoff, Timeouts) em todas as novas integrações externas.
+    
+    Linha de Raciocínio: Design for Failure (SRE). Prevenir falhas em cascata, isolar falhas (Bulkheads) e garantir degradação graciosa. Usar Load Shedding em sobrecarga extrema. Foco em MTBF. Buscar Antifragilidade (aprender e melhorar com a falha).
+    
+    Subtópicos Obrigatórios:
+    
+    Implementação dos Padrões de Resiliência (Circuit Breaker, Retries, Bulkheads).
+    
+    Design de Dead Letter Queues (DLQs) e Análise de SPOFs.
+    
+    Estratégia de Load Shedding (Descarte de Carga).
+    
+    Planos de Degradação Graciosa (Graceful Degradation Plans).
+    
+    Métricas de Confiabilidade (MTBF - Mean Time Between Failures).
+    
+    Estratégias de Antifragilidade (Antifragility Strategies).
+    
+
+**IX. Governança, Stacks e Documentação**
+
+- **Ponto 97 - Estratégia de Ambiente de Desenvolvimento Local (DX):**
+    - *Justificativa:* Padronizar o ambiente local (ex: Docker Compose/Dev Containers) para melhorar a produtividade e reduzir o "funciona na minha máquina".
+    
+    Linha de Raciocínio: A produtividade do desenvolvedor (Inner Loop) impacta o Time-to-Market. Foco em Engenharia de Eficácia do Desenvolvedor (DEE) e medição da experiência (DevEx/SPACE metrics).
+    
+    Subtópicos Obrigatórios:
+    
+    Ferramentas padronizadas para o ambiente local (Dev Containers).
+    
+    Estratégia para simular dependências externas localmente.
+    
+    Documentação de Onboarding Técnico.
+    
+    Estratégia de Engenharia de Eficácia do Desenvolvedor (DEE).
+    
+    Métricas de Eficácia do Desenvolvedor (DevEx/SPACE Metrics).
+    
+- **Ponto 99 - Padrões de Codificação e Guias de Estilo:**
+    - *Justificativa:* Configurar Linters/Formatters automatizados e bloqueantes no CI para todo novo código.
+    
+    Linha de Raciocínio: Consistência reduz a carga cognitiva. Padronização 100% automatizada (Linters/Formatters) e bloqueante no CI. Definir Quality Gates automatizados.
+    
+    Subtópicos Obrigatórios:
+    
+    Definição das convenções.
+    
+    Configuração de Linters e Formatters automatizados e bloqueantes no CI.
+    
+    Métricas de Qualidade de Código Estático.
+    
+    Definição de Quality Gates Automatizados (Automated Quality Gates).
+    
+- **Ponto 101 - Estratégia de Testes (Geral):**
+    - *Justificativa:* Definir a Pirâmide de Testes e estabelecer metas mínimas de cobertura para todo novo código entregue.
+    
+    Linha de Raciocínio: Construir confiança na qualidade. Pirâmide de Testes. Testes de Contrato são essenciais. Testes de Mutação validam a eficácia dos testes unitários. Considerar Testes em Produção (Testing in Production).
+    
+    Subtópicos Obrigatórios:
+    
+    Definição da Pirâmide de Testes e Metas de cobertura.
+    
+    Estratégia de Testes de Contrato (ex: Pact).
+    
+    Estratégia de Testes de Mutação (Mutation Testing).
+    
+    Estratégia de Testes em Produção (Testing in Production Strategy) (ex: Shadowing, Traffic Mirroring).
+    
+- **Ponto 103 - Estratégia de Testes de Segurança:**
+    - *Justificativa:* Integrar ferramentas de análise estática (SAST) e de dependências (SCA) no pipeline de CI.
+    
+    Linha de Raciocínio: DevSecOps integrado. Processo claro de triagem e remediação de vulnerabilidades (SLAs de Remediação). Treinamento contínuo (Security Champions).
+    
+    Subtópicos Obrigatórios:
+    
+    Integração de SAST, DAST e SCA no pipeline.
+    
+    Planejamento de Pentests regulares.
+    
+    Processo de Triagem e Remediação de Vulnerabilidades (SLA de Remediação).
+    
+    Treinamento de Segurança e Programa de Security Champions.
+    
+- **Ponto 108 - Governança, Documentação e Gestão de Mudanças (ADRs):**
+    - *Justificativa:* Adotar o uso de Architecture Decision Records (ADRs) para documentar formalmente todas as novas decisões arquiteturais significativas.
+    
+    Linha de Raciocínio: Governança colaborativa e automatizada. Registro do "porquê" (ADRs). Documentação como código (Docs as Code). Gestão do conhecimento estratégica. Medir a adoção dos padrões.
+    
+    Subtópicos Obrigatórios:
+    
+    Definição do Processo de Governança Arquitetural (ARB, RFCs).
+    
+    Registro formal e imutável das decisões via Architecture Decision Records (ADRs).
+    
+    Manutenção dos Diagramas Arquiteturais (Diagrams as Code).
+    
+    Estratégia de Gestão de Mudanças Organizacionais.
+    
+    Estratégia de Gestão do Conhecimento (Knowledge Management Strategy).
+    
+    Métricas de Adoção dos Padrões Arquiteturais (Architectural Standards Adoption Metrics).
