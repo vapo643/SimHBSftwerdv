@@ -1,0 +1,43 @@
+### Pacote de Ativação de Missão (PAM) V1.0 (Aplicação do Mascaramento de PII em APIs)
+
+* **Sumário da Missão (O Quê):** Auditar e refatorar todos os endpoints GET que retornam dados de clientes ou propostas, aplicando as funções de mascaramento do novo utilitário `masking.ts` para proteger os dados PII antes de serem enviados na resposta.
+* **Intenção Estratégica (O Porquê):** Neutralizar a vulnerabilidade de exposição de dados PII de prioridade P0, completando o nosso hotfix de segurança. Esta ação garante que a nossa aplicação esteja em conformidade com as melhores práticas de privacidade e segurança (LGPD).
+* **Histórico Relevante (Consulta Obrigatória):** A missão anterior criou e testou o utilitário `server/utils/masking.ts`. A auditoria `ADR-008` identificou que endpoints como `/api/clientes/cpf/:cpf` estão a expor dados PII em texto plano.
+* **Modelo Mental (Como se Encaixa):** Aja como um Engenheiro de Segurança a aplicar um patch de segurança. Sua tarefa é encontrar todos os "vazamentos" de dados e aplicar a "vedação" (as funções de mascaramento) antes que os dados saiam do servidor.
+
+---
+
+**IMPLEMENTAR:**
+Aplicação do Mascaramento de PII em Endpoints da API
+
+**CURRENT STATE:**
+Múltiplos endpoints GET da nossa API (ex: `/api/clientes/cpf/:cpf`, `/api/propostas/:id`) estão a retornar objetos que contêm dados PII (CPF, RG, email, telefone) em texto plano.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  Os `controllers` ou `services` responsáveis pelos endpoints GET que retornam dados de clientes/propostas são refatorados.
+2.  Antes de enviar o objeto na resposta (`res.json(...)`), a lógica agora aplica as funções de mascaramento apropriadas do utilitário `masking.ts` aos campos sensíveis.
+3.  Uma chamada de teste a um endpoint vulnerável (ex: `GET /api/clientes/cpf/:cpf`) agora retorna um payload JSON com os dados PII devidamente mascarados (ex: `"clienteCpf": "***.***.789-**"`).
+4.  A aplicação permanece funcional, com 0 erros de LSP.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  **Auditoria e Refatoração:** Comece por auditar os endpoints `GET` nos nossos módulos de rotas (`server/routes/...`) que retornam dados de `propostas` ou `clientes`. Para cada um que encontrar, aplique a refatoração.
+2.  **Reutilize o Utilitário:** Você DEVE importar e usar as funções do `server/utils/masking.ts`. A função `maskBatch()` que você criou é a candidata ideal para esta tarefa.
+3.  **Foco nos GETs:** A refatoração deve se concentrar nos endpoints `GET` que retornam dados. Não modifique endpoints `POST`/`PUT` nesta missão.
+4.  **Validação Final Mandatória:** A sua prova de sucesso será o output de um comando `curl` a um endpoint anteriormente vulnerável (ex: `/api/clientes/cpf/:cpf`), mostrando o payload de resposta com os dados PII agora devidamente mascarados.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que o mascaramento deve ser a última etapa antes de enviar a resposta, para não afetar a lógica de negócio interna."]
+* **VALIDAÇÃO PENDENTE:** [Nenhuma. A validação é a prova de `curl` mostrando os dados mascarados.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear os ficheiros e handlers de rota exatos a serem modificados.
+2.  Garantir que as funções do `masking.ts` são importadas e aplicadas corretamente.
+3.  Executar `get_latest_lsp_diagnostics` para garantir 0 erros novos.
+4.  **Declarar Nível de Confiança (0 a 100%)**.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (executar o `curl` de validação e reportar o output).
+7.  **Documentar Decisões Técnicas**.

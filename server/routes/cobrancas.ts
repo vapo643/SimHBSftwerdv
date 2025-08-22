@@ -14,6 +14,7 @@ import {
 import { eq, and, sql, desc, gte, lte, inArray, or, not } from "drizzle-orm";
 import { format, parseISO, differenceInDays, isAfter } from "date-fns";
 import { jwtAuthMiddleware } from "../lib/jwt-auth-middleware";
+import { maskCPF, maskEmail, maskRG, maskTelefone } from "../utils/masking";
 
 const router = Router();
 
@@ -261,9 +262,9 @@ router.get("/", async (req: any, res) => {
           id: proposta.id,
           numeroContrato: proposta.id.slice(0, 8).toUpperCase(),
           nomeCliente: proposta.clienteNome || "Sem nome",
-          cpfCliente: proposta.clienteCpf || "",
-          telefoneCliente: proposta.clienteTelefone || "",
-          emailCliente: proposta.clienteEmail || "",
+          cpfCliente: proposta.clienteCpf ? maskCPF(proposta.clienteCpf) : "",
+          telefoneCliente: proposta.clienteTelefone ? maskTelefone(proposta.clienteTelefone) : "",
+          emailCliente: proposta.clienteEmail ? maskEmail(proposta.clienteEmail) : "",
           enderecoCliente: proposta.clienteEndereco || "",
           cepCliente: proposta.clienteCep || "",
           valorTotal: Number(proposta.valorTotalFinanciado) || 0,
@@ -535,12 +536,12 @@ router.get("/:propostaId/ficha", async (req, res) => {
       });
 
     const ficha = {
-      // Dados do cliente
+      // Dados do cliente - COM MASCARAMENTO PII
       cliente: {
         nome: proposta.clienteNome,
-        cpf: proposta.clienteCpf,
-        email: proposta.clienteEmail,
-        telefone: proposta.clienteTelefone,
+        cpf: proposta.clienteCpf ? maskCPF(proposta.clienteCpf) : "",
+        email: proposta.clienteEmail ? maskEmail(proposta.clienteEmail) : "",
+        telefone: proposta.clienteTelefone ? maskTelefone(proposta.clienteTelefone) : "",
         dataNascimento: proposta.clienteDataNascimento,
         endereco: proposta.clienteEndereco,
         cep: proposta.clienteCep,

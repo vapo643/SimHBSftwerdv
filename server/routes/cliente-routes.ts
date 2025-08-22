@@ -3,6 +3,7 @@ import type { Request, Response } from "express";
 import { db } from "../lib/supabase";
 import { propostas } from "@shared/schema";
 import { eq, desc, sql } from "drizzle-orm";
+import { maskCPF, maskEmail, maskRG, maskTelefone } from "../utils/masking";
 
 const router = Router();
 
@@ -28,15 +29,15 @@ router.get("/clientes/cpf/:cpf", async (req: Request, res: Response) => {
       const clientData = {
         exists: true,
         data: {
-          // Dados básicos
+          // Dados básicos - COM MASCARAMENTO PII
           nome: "João da Silva Demonstração",
-          email: "joao.demo@email.com",
-          telefone: "(11) 99999-9999",
-          cpf: cleanCPF,
+          email: maskEmail("joao.demo@email.com"),
+          telefone: maskTelefone("(11) 99999-9999"),
+          cpf: maskCPF(cleanCPF),
           
-          // Dados pessoais
+          // Dados pessoais - COM MASCARAMENTO PII
           dataNascimento: "1990-01-15",
-          rg: "12.345.678-9",
+          rg: maskRG("12.345.678-9"),
           orgaoEmissor: "SSP",
           rgUf: "SP",
           rgDataEmissao: "2010-01-15",
@@ -57,12 +58,12 @@ router.get("/clientes/cpf/:cpf", async (req: Request, res: Response) => {
           ocupacao: "Analista de Sistemas",
           rendaMensal: "5000.00",
           
-          // Dados de pagamento
+          // Dados de pagamento - CONTAS BANCÁRIAS MASCARADAS
           metodoPagamento: "conta_bancaria",
           dadosPagamentoBanco: "Banco do Brasil",
-          dadosPagamentoAgencia: "1234-5",
-          dadosPagamentoConta: "12345-6",
-          dadosPagamentoDigito: "7",
+          dadosPagamentoAgencia: "****-5",
+          dadosPagamentoConta: "*****-6",
+          dadosPagamentoDigito: "*",
           dadosPagamentoPix: "",
           dadosPagamentoTipoPix: "",
           dadosPagamentoPixBanco: "",

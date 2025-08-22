@@ -16,6 +16,7 @@ import { gte, lte } from "drizzle-orm";
 import { eq, and, isNotNull, isNull, desc } from "drizzle-orm";
 import { createServerSupabaseAdminClient } from "../lib/supabase";
 import { securityLogger, SecurityEventType, getClientIP } from "../lib/security-logger";
+import { maskCPF, maskEmail, maskRG, maskTelefone } from "../utils/masking";
 
 const router = Router();
 
