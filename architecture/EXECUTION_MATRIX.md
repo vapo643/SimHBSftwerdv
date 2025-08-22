@@ -5,6 +5,9 @@
 ## ⚠️ IMPORTANTE: Camada de Validação, NÃO Substituto!
 **Este Matrix é uma CAMADA ADICIONAL de segurança contextual. SEMPRE consulte as fontes primárias (ADRs, documentos, código) ANTES de validar aqui.**
 
+## 🚨 PROTOCOLO CRÍTICO - FASE DE PLANEJAMENTO ARQUITETURAL
+**ESTAMOS NA FASE DE MAPEAMENTO E PLANEJAMENTO** - Toda documentação criada deve descrever o que **SERÁ FEITO** (estratégias, planos, ADRs), não o que foi feito. A execução virá após completar TODO o planejamento arquitetural. Ver protocolo completo em `replit.md`.
+
 ### ✅ Validation Checklist Obrigatório
 - [ ] ADRs originais consultados em profundidade
 - [ ] Documentos fonte verificados linha por linha

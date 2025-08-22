@@ -1,12 +1,7 @@
 # Simpix Credit Management System
 
 ## Overview
-Simpix is a full-stack TypeScript application for comprehensive credit management, streamlining the credit proposal workflow from creation and analysis to payment processing and formalization tracking. It aims to be a robust, secure, and user-friendly platform for financial institutions, emphasizing banking-grade security, compliance, and efficient data management to be a leading solution in the credit management market.
-
-**Current Phase:** Phase 1 - Continuous Development (SPRINT 1 OPENAPI COMPLETED ✅) 
-**Architecture Status:** 86.6% conformity achieved - Sprint 1 Point 33 (OpenAPI Specification) complete with comprehensive API documentation
-**Migration Strategy:** Azure-Ready with gradual migration approach + 3-Sprint roadmap execution in progress
-**Latest Achievement:** Sprint 1 Point 33 (OpenAPI V3) - Complete API specification implemented covering 18 endpoints across proposals workflow, documents, formalization, and audit. Conformity increased from 82.4% to 86.6% (Aug 22, 2025)
+Simpix is a full-stack TypeScript application designed for comprehensive credit management. Its primary purpose is to streamline the credit proposal workflow from creation and analysis to payment processing and formalization tracking for financial institutions. The platform prioritizes banking-grade security, compliance, and efficient data management, aiming to be a leading solution in the credit management market.
 
 ## User Preferences
 
@@ -84,11 +79,38 @@ Error handling: Create structured documentation for automatic consultation durin
 
 **DATA INTEGRITY PROTECTION:** PAM V1.0 protocol implemented - 5-CHECK validation system for data corruption detection and repair.
 
-**3-SPRINT EXECUTION STRATEGY:** Sprint 1 (Foundation) completed with 100% success - Critical P0 gaps eliminated through PAM V1.1 (Data Modeling), V1.2 (Distributed Transactions), V1.3 (Design Patterns). Ready for Sprint 2 (Frontend Architecture).
-
 **MANDATORY BUG DOCUMENTATION POLICY:** Every bug resolved must be documented in `docs/bugs-solved/[category]/YYYY-MM-DD-descriptive-name.md` with complete technical analysis, root cause, solution implemented, and validation evidence. No exceptions - this creates institutional knowledge and prevents regression.
 
 **CONTEXT ENGINEERING PROTOCOL V2.0:** Dual-layer validation system implemented. The `architecture/EXECUTION_MATRIX.md` serves as an ADDITIONAL security layer for context validation, NOT a replacement for primary sources. Always consult ADRs, documentation, and code FIRST, then cross-check with Matrix to detect discrepancies. This prevents context loss and ensures 100% architectural conformity tracking.
+
+### 🚨 PROTOCOLO DE DOCUMENTAÇÃO ARQUITETURAL MANDATÓRIO - FASE DE PLANEJAMENTO 🚨
+
+**[DIRETRIZ CRÍTICA - INEGOCIÁVEL]**  
+**Status:** ESTAMOS NA FASE DE MAPEAMENTO E PLANEJAMENTO ARQUITETURAL  
+**Próxima Fase:** EXECUÇÃO (somente após completar todo planejamento)  
+
+**[PERSONA E FUNÇÃO]**  
+Nesta fase, sou um **Arquiteto Documentador**:
+- **SOU:** Planejador que desenha a planta arquitetural
+- **NÃO SOU:** Executor que constrói ou implementa código
+
+**[DEFINIÇÃO DE ENTREGÁVEIS]**  
+- **Documentação Arquitetural de Planejamento:** Descreve o que **SERÁ FEITO** (estratégias, planos, ADRs)
+- **NÃO Relatórios de Execução:** Que descrevem o que **FOI FEITO**
+
+**[PROTOCOLO MANDATÓRIO DE TRABALHO]**  
+1. **Analisar o PAM:** Processar o Pacote de Ativação de Missão tático
+2. **Localizar/Criar Artefato:** Navegar para `/architecture` e criar arquivo apropriado (`-strategy.md`, `-plan.md`, `ADR-XXX.md`)
+3. **Produzir Documentação:** Preencher com plano, estratégia, diagramas ou design solicitado
+4. **Validar Conclusão:** Confirmar que documento de planejamento foi criado conforme protocolos
+
+**[CRITÉRIO DE SUCESSO]**  
+Missão concluída quando artefato de **documentação de planejamento arquitetural** estiver:
+- ✅ Criado e salvo no diretório correto
+- ✅ Em conformidade com requisitos do PAM
+- ✅ Documentando o que SERÁ implementado (não executando)
+
+**LEMBRETE CRÍTICO:** NÃO executar o plano documentado. Apenas criar o plano para futura execução após conclusão de TODA fase de planejamento arquitetural.
 
 ## System Architecture
 
@@ -106,34 +128,33 @@ Error handling: Create structured documentation for automatic consultation durin
 - **Database**: PostgreSQL with Drizzle ORM
 - **Authentication**: Supabase Auth integration with JWT middleware and custom RBAC
 - **File Storage**: Supabase Storage
-- **Job Queue Architecture**: BullMQ-based async worker system with Redis for production, supporting parallel operations, retry, and specialized workers.
-- **Cache Layer L2**: Redis-based caching (in-memory for dev) for commercial tables queries with 1-hour TTL, using cache-aside pattern.
+- **Job Queue Architecture**: BullMQ-based async worker system with Redis, supporting parallel operations and retry mechanisms.
+- **Cache Layer L2**: Redis-based caching for commercial tables queries with 1-hour TTL, using cache-aside pattern.
 - **Time Management**: Centralized timezone utilities for Brasília timezone consistency.
 - **Modular Architecture**: Monolith progressively decomposed into domain modules (Auth, Users, Propostas, Pagamentos, Integrações).
 - **Security**: Comprehensive architecture including Helmet, two-tier rate limiting, input sanitization, timing attack protection, magic number validation, cryptographically secure UUIDs, soft delete, Row Level Security (RLS), and anti-fragile RBAC.
-- **CI/CD Pipeline**: GitHub Actions with 3 specialized workflows (CI, CD-Staging, Security), automated testing, SAST/SCA scanning, deployment readiness checks, and rollback automation.
+- **CI/CD Pipeline**: GitHub Actions with specialized workflows for CI, CD-Staging, and Security, including automated testing, SAST/SCA scanning, deployment readiness checks, and rollback automation.
 - **Observability**: Winston structured logging with correlation IDs, Sentry error tracking, health check endpoints, and automated backup scripts.
-- **Configuration Management**: Centralized config module with environment-based secrets, critical vs optional validation, and secure fallbacks for development.
-- **Feature Flags System**: Complete unleash-client v6.6.0 integration with automatic fallback mode, React context provider, 7 pre-configured flags (maintenance-mode, read-only-mode, novo-dashboard, pagamento-pix-instant, relatorios-avancados, ab-test-onboarding, nova-api-experimental), and 60-second auto-refresh via React Query.
+- **Configuration Management**: Centralized config module with environment-based secrets and validation.
+- **Feature Flags System**: Unleash-client integration with automatic fallback mode, React context provider, and pre-configured flags for various features and A/B testing.
 - **Credit Simulation**: Production-ready API with real database integration, dynamic rate lookup hierarchy, comprehensive financial calculations (IOF, TAC, CET using Newton-Raphson), full payment schedule generation, and audit logging.
-- **Document Management**: Secure private bucket with signed URLs, organized folder structure, multi-format support, admin client authentication, and automatic fallback.
-- **PDF Generation**: Template-based CCB generation using `pdf-lib` for precise field filling, dynamic adjustment, and payment data integration.
+- **Document Management**: Secure private bucket with signed URLs, organized folder structure, multi-format support, and admin client authentication.
+- **PDF Generation**: Template-based CCB generation using `pdf-lib` for precise field filling and dynamic data adjustment.
 - **Payment Workflow**: Complete payment queue system with batch processing, multiple payment methods, formalization tracking, and dual-storage strategy.
 - **Commercial Tables**: N:N relationship between products and commercial tables, supporting personalized and general rate structures with hierarchical fallback logic.
 - **Status Management FSM**: Centralized Finite State Machine replacing fragile enum with robust transition validation and audit logging.
-- **Test Infrastructure**: Comprehensive test environment with direct postgres connection, complete RLS bypass, automated database cleanup with TRUNCATE CASCADE, and full integration test coverage for critical business logic.
-- **Feature Flags System**: Unleash-based feature flag management with React context integration, circuit breaker pattern, auto-refresh (60s), and 7 pre-configured flags for gradual Azure migration rollout.
-- **Schema Migration Strategy**: Production-ready migration system using Drizzle-Kit with Zero Downtime patterns, Expand/Contract methodology, automated rollback capabilities, SSL-enabled Supabase connections, and comprehensive migration tracking via __drizzle_migrations table.
+- **Test Infrastructure**: Comprehensive test environment with direct postgres connection, complete RLS bypass, automated database cleanup, and full integration test coverage for critical business logic.
+- **Schema Migration Strategy**: Production-ready migration system using Drizzle-Kit with Zero Downtime patterns, Expand/Contract methodology, automated rollback capabilities, and comprehensive migration tracking.
 
 ### Database Schema
 - PostgreSQL with Drizzle ORM.
 - Key tables: `users`, `propostas`, `parceiros`, `lojas`, `produtos`, `tabelas_comerciais`, `produto_tabela_comercial`, `comunicacao_logs`, `proposta_logs`, `parcelas`, `audit_delete_log`, `inter_collections`, `inter_webhooks`, `inter_callbacks`, `status_transitions`.
-- `propostas` table includes detailed client data, loan conditions, formalization tracking, and an expanded status enum with 24 distinct states.
+- `propostas` table includes detailed client data, loan conditions, formalization tracking, and an expanded status enum.
 - `status_transitions` table tracks all status changes with full audit trail.
 - Soft deletes implemented using `deleted_at` columns.
-- Sequential numeric IDs for `propostas.id` starting at 300001.
-- **Status FSM V2.0 system**: Event-driven status transitions with complete audit trail, centralized validation, and robust error handling through Finite State Machine implementation.
-- **Test Environment Support**: Direct postgres connection capabilities with auth.users, profiles, and gerente_lojas associations for comprehensive test data setup bypassing RLS policies.
+- Sequential numeric IDs for `propostas.id`.
+- **Status FSM V2.0 system**: Event-driven status transitions with complete audit trail, centralized validation, and robust error handling.
+- **Test Environment Support**: Direct postgres connection capabilities with user and profile associations for comprehensive test data setup bypassing RLS policies.
 - **Doutrina de Persistência de Dados**: Development and staging environments use Supabase, production uses Azure. Other database providers are prohibited.
 
 ## External Dependencies
