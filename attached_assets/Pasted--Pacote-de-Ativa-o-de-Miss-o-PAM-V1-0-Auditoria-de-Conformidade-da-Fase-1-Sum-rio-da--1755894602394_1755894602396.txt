@@ -1,0 +1,325 @@
+### Pacote de Ativação de Missão (PAM) V1.0 (Auditoria de Conformidade da Fase 1)
+
+* **Sumário da Missão (O Quê):** Realizar uma auditoria de conformidade completa, comparando a nossa "Doutrina Arquitetural da Fase 1" (fornecida abaixo) com os artefatos existentes no diretório `/architecture` para identificar quais pontos já foram documentados e quais subtópicos obrigatórios ainda estão pendentes.
+* **Intenção Estratégica (O Porquê):** Criar uma "fonte da verdade" definitiva sobre o nosso progresso na Fase 1. Este relatório de análise de lacunas (Gap Analysis) irá guiar o nosso planejamento estratégico, permitindo-nos focar os nossos esforços exatamente onde eles são necessários para completar a nossa fundação de desenvolvimento contínuo.
+* **Histórico Relevante (Consulta Obrigatória):** Nas missões anteriores, nós criamos vários documentos de arquitetura. Esta missão irá verificar quais pontos da nossa nova doutrina esses artefatos já satisfazem.
+* **Modelo Mental (Como se Encaixa):** Aja como um Auditor de Conformidade Arquitetural Sênior. A sua fonte da verdade é a "Doutrina da Fase 1" fornecida neste prompt. A sua área de investigação é o diretório `/architecture`. A sua tarefa é comparar os dois e produzir um relatório de conformidade.
+
+---
+
+**IMPLEMENTAR:**
+Relatório de Análise de Lacunas da Fase 1
+
+**CURRENT STATE:**
+Iniciamos a "Fase 1 - Desenvolvimento Contínuo" e já produzimos vários artefatos arquiteturais. No entanto, não temos um mapa claro que mostre o nosso progresso em relação à nova e completa "Doutrina da Fase 1".
+
+**EXPECTED (Estado Final de Sucesso):**
+Um relatório de auditoria detalhado em formato Markdown. O relatório deve ter a seguinte estrutura:
+
+1.  **Sumário Executivo:** Uma tabela de alto nível que lista cada "Ponto" principal da Fase 1 (ex: Ponto 1, Ponto 9, Ponto 12, etc.) e o seu status de conclusão (`CONCLUÍDO`, `PARCIALMENTE CONCLUÍDO`, ou `PENDENTE`).
+2.  **Análise Detalhada por Ponto:** Para cada "Ponto" da doutrina, você deve:
+    * Listar cada um dos seus "Subtópicos Obrigatórios".
+    * Para cada subtópico, fornecer um veredito (`CONCLUÍDO` ou `PENDENTE`).
+    * Se o veredito for `CONCLUÍDO`, você deve fornecer a **prova**: o nome do arquivo exato no diretório `/architecture` onde a documentação para aquele subtópico pode ser encontrada.
+
+---
+
+**DOUTRINA ARQUITETURAL DA FASE 1 (Sua Fonte da Verdade e Checklist)**
+
+<details>
+<summary><strong>Clique para expandir a Doutrina Completa da Fase 1</strong></summary>
+
+**Fase 1: Desenvolvimento Contínuo (O Durante | 2-6 meses)**
+Foco: Integrar melhores práticas ao fluxo de desenvolvimento diário sem grande disrupção. Melhorias incrementais e refatorações de oportunidade.
+
+**I. Fundamentos Estratégicos e Requisitos**
+
+* **Ponto 1 - Objetivos de Negócio e Drivers:**
+    * **Subtópicos Obrigatórios:**
+        * Definição dos OKRs e KPIs quantificáveis.
+        * Personas de Usuários e Jobs To Be Done (JTBD).
+        * Análise do Cenário Competitivo e Definição da Vantagem Competitiva Sustentável.
+        * Mapa de Stakeholders e Matriz RACI.
+        * Mapeamento do Fluxo de Valor (Value Stream Mapping).
+        * Vida útil esperada e Critérios de Sucesso/Saída (Exit Criteria).
+        * Análise da Volatilidade do Domínio (Taxa de mudança esperada).
+        * Estratégias de Pivô Arquitetural (Plan B) e Análise de Flexibilidade Estratégica.
+        * Perfil de Tolerância a Risco do Negócio (Risk Appetite Statement).
+        * Análise de Impacto Socio-Técnico (Socio-Technical Impact Analysis).
+        * Análise de Fatores PESTEL (Político, Econômico, Social, Tecnológico, Ambiental, Legal) com impacto arquitetural.
+
+* **Ponto 9 - Modelagem de Domínio (DDD):**
+    * **Subtópicos Obrigatórios:**
+        * Linguagem Ubíqua e Identificação dos Domínios (Core/Suporte/Genéricos).
+        * Artefatos do Event Storming e Identificação dos Bounded Contexts.
+        * Criação do Mapa de Contextos (Context Map) e definição dos Padrões Estratégicos (ACL, OHS/PL).
+        * Definição rigorosa das Invariantes de Domínio (Domain Invariants).
+        * Estratégia para Enforcement Automatizado dos Limites de Contexto (ex: ArchUnit) integrada ao CI.
+        * Análise de Alinhamento Socio-Técnico (Socio-Technical Alignment Analysis).
+
+**II. Macro-arquitetura e Padrões de Alto Nível**
+
+* **Ponto 12 - Estilo Arquitetural Principal:**
+    * **Subtópicos Obrigatórios:**
+        * Análise comparativa detalhada (Trade-off Analysis Matrix).
+        * Plano de Evolução Controlada e Roadmap Arquitetural.
+        * ADR (Architecture Decision Record) detalhado.
+        * Definição dos Critérios de Gatilho (Trigger Criteria) para evolução.
+        * Definição das Fitness Functions iniciais (Automatizadas).
+        * Análise Quantitativa do Custo da Complexidade Distribuída (Distributed Complexity Cost Analysis).
+
+* **Ponto 19 - Padrões de Integração e Comunicação:**
+    * **Subtópicos Obrigatórios:**
+        * Critérios para uso de Comunicação Síncrona e Assíncrona.
+        * Definição da granularidade da comunicação (evitar Chatty APIs).
+        * Análise de Acoplamento Temporal (Temporal Coupling Analysis).
+
+**III. Micro-arquitetura e Design de Componentes (Backend)**
+
+* **Ponto 20 - Design Interno dos Componentes:**
+    * **Subtópicos Obrigatórios:**
+        * Seleção do padrão arquitetural interno e Regras de dependência (DIP).
+        * Template padronizado para novos serviços.
+        * Definição do Modelo de Concorrência interno (Threads, Actors, Coroutines, Reactive Streams).
+        * Ferramentas de Validação de Dependência Automatizada (ex: ArchUnit) integradas ao CI.
+        * Estratégia de Gerenciamento de Recursos (Resource Management) (Thread Pools, Connection Pools).
+
+* **Ponto 21 - Lógica de Negócio e Fluxos de Trabalho:**
+    * **Subtópicos Obrigatórios:**
+        * Identificação das invariantes de negócio críticas.
+        * Design dos Agregados (Aggregates - DDD) e Modelagem de Consistência.
+        * Estratégia para Validação de Regras de Negócio.
+        * Definição de Máquinas de Estado (State Machines) para ciclos de vida complexos.
+        * Análise de Complexidade Ciclomática e Estratégia de Refatoração.
+
+* **Ponto 25 - Padrões de Design (Design Patterns):**
+    * **Subtópicos Obrigatórios:**
+        * Padrões GoF relevantes e Padrões de persistência (Repository, Unit of Work).
+        * Padrões para Gerenciamento de Concorrência (Locking Otimista/Pessimista).
+        * Padrões de Tratamento de Erros robustos.
+        * Padrões de Injeção de Dependência (DI) e Inversão de Controle (IoC).
+
+* **Ponto 28 - Diagramas de Componentes (C4 Model - Nível 3):**
+    * **Subtópicos Obrigatórios:**
+        * Mapeamento dos componentes internos e interações.
+        * Identificação das interfaces (Portas de Entrada/Saída) e Adaptadores.
+
+* **Ponto 29 - Diagramas de Sequência/Fluxo:**
+    * **Subtópicos Obrigatórios:**
+        * Modelagem dos fluxos de autenticação/autorização e transações complexas.
+        * Modelagem detalhada dos fluxos de erro e recuperação (Unhappy Path).
+        * Análise de Latência Preditiva.
+        * Identificação de Chamadas Síncronas Críticas (Critical Path Analysis).
+        * Análise de Pontos de Falha Distribuídos (Distributed Failure Point Analysis).
+
+**IV. Design de APIs, Interfaces e Comunicação**
+
+* **Ponto 30 - Protocolos de Comunicação:**
+    * **Subtópicos Obrigatórios:**
+        * Critérios definidos para REST vs. gRPC vs. GraphQL.
+        * Seleção do formato de serialização e Estratégia de Compressão.
+        * Padrões de Comunicação Cross-Origin (CORS).
+        * Estratégia de mTLS (Mutual TLS) mandatória para comunicação interna.
+        * Análise de Overhead de Protocolo (Protocol Overhead Analysis).
+
+* **Ponto 33 - Contrato da API (API Contract):**
+    * **Subtópicos Obrigatórios:**
+        * Adoção do OpenAPI V3 / AsyncAPI.
+        * Processo de Governança (Design-First e Revisão).
+        * Estratégia de Geração Automática de Código (SDKs/Stubs).
+        * Estratégia de Testes de Contrato (Contract Testing) (ex: Pact, Consumer-Driven Contracts).
+        * Validação de Compatibilidade Retroativa (Backward Compatibility Validation) automatizada no CI.
+
+* **Ponto 34 - Design de APIs RESTful (Padrões de Interface):**
+    * **Subtópicos Obrigatórios:**
+        * Estratégia de Versionamento Mandatória.
+        * Uso Correto e Semântico de Métodos HTTP e Recursos.
+        * Padronização de Cabeçalhos (Correlation-ID).
+        * Garantias de Idempotência (Idempotency-Key obrigatório) e estratégia de armazenamento de chaves.
+        * Estratégia de Cacheabilidade (HTTP Caching: ETag, Cache-Control).
+        * Definição do Guia de Estilo de APIs (API Style Guide) detalhado e imposto por Linting.
+
+* **Ponto 35 - Contrato de Dados (Payloads):**
+    * **Subtópicos Obrigatórios:**
+        * Padrões de nomenclatura e formatos de dados (ISO 8601).
+        * Repositório centralizado de Schemas (JSON Schema).
+        * Estratégia de Validação de Payloads na borda (Sanitização de Entrada).
+        * Estratégia para lidar com campos sensíveis (PII) nos payloads (Criptografia de Campo/Tokenização).
+        * Política de Evolução de Schema e Compatibilidade (Schema Evolution Policy).
+
+* **Ponto 36 - Comunicação de Resultados e Erros:**
+    * **Subtópicos Obrigatórios:**
+        * Mapeamento completo e semântico dos Códigos de Status HTTP.
+        * Implementação mandatória do padrão RFC 7807/9457.
+        * Catálogo de erros de negócio padronizado.
+        * Inclusão de IDs de Correlação (Trace IDs) em todas as respostas de erro.
+        * Estratégia para tratamento de erros em lote (Batch Error Handling).
+
+* **Ponto 37 - Interação com Coleções:**
+    * **Subtópicos Obrigatórios:**
+        * Estratégia de paginação padrão (Cursor-based preferível).
+        * Sintaxe padrão para filtragem e ordenação.
+        * Estratégia para Sparse Fieldsets.
+        * Limites de Tamanho de Página (Page Size Limits) obrigatórios e não negociáveis.
+
+**V. Arquitetura de Dados**
+
+* **Ponto 39 - Modelagem de Dados:**
+    * **Subtópicos Obrigatórios:**
+        * Modelo Conceitual, Lógico e Físico.
+        * Análise dos Padrões de Acesso a Dados (Data Access Patterns Analysis).
+        * Estratégia de Indexação detalhada e Justificativa para Normalização/Desnormalização.
+        * Estimativas de Volumetria de Dados (Data Volumetry Estimates).
+        * Estratégia de Evolução do Schema (Schema Evolution Strategy).
+        * Modelagem de Dados Temporais (Temporal/Bi-temporal Data Modeling) (se aplicável).
+
+* **Ponto 51 - Gestão de Transações:**
+    * **Subtópicos Obrigatórios:**
+        * Escopo das transações ACID locais (Agregados).
+        * Design detalhado das Sagas e Transações de Compensação.
+        * Requisitos de Idempotência para todas as etapas da Saga.
+        * Monitoramento e Alertas para Falhas em Sagas.
+        * Análise Detalhada de Falhas da Saga e Pontos de Não Retorno (Point of No Return Analysis).
+
+**VI. Design de Frontend e Experiência do Usuário (UX/UI)**
+
+* **Ponto 56 - Arquitetura do Frontend Completa:**
+    * **Subtópicos Obrigatórios:**
+        * Seleção do Framework e Estratégia de Renderização (CSR, SSR, SSG, ISR).
+        * Estratégia Mobile (Nativo, Híbrido, PWA).
+        * Decisão sobre Microfrontends, modelo de composição e Estratégia de Orquestração/Governança.
+        * Definição do Orçamento de Performance (Performance Budgeting).
+        * Estratégia de Gerenciamento de Dependências e Monorepo.
+        * Estratégia de Monitoramento de Performance em Produção (RUM - Real User Monitoring).
+        * Otimização do Caminho Crítico de Renderização (Critical Rendering Path Optimization).
+
+* **Ponto 59 - Gerenciamento de Estado no Cliente:**
+    * **Subtópicos Obrigatórios:**
+        * Seleção da biblioteca e Definição da arquitetura de estado.
+        * Estratégia de Caching, Sincronização e Invalidação de Estado do Servidor.
+        * Estratégia de Persistência de Estado no Cliente (LocalStorage).
+
+* **Ponto 60 - Comunicação Frontend-Backend:**
+    * **Subtópicos Obrigatórios:**
+        * Definição da necessidade de um BFF e Avaliação de GraphQL vs. REST.
+        * Padrões de Resiliência no Frontend.
+        * Estratégia Offline-First (se aplicável) e sincronização de dados.
+        * Implementação Rigorosa de Políticas de Segurança HTTP (CSP, HSTS, Feature Policy).
+        * Estratégia de Segurança do Frontend (XSS, CSRF Mitigation) detalhada.
+
+**VII. Infraestrutura e Deployment (DevOps/Cloud/SRE)**
+
+* **Ponto 63 - Estratégia de Migração de Plataforma:**
+    * **Subtópicos Obrigatórios:**
+        * Escolha da Estratégia de Migração (6 R's) e Análise de dependências.
+        * Planejamento das fases de migração e cutover.
+        * Plano de Contingência e Rollback da Migração detalhado e testado.
+
+* **Ponto 69 - Infrastructure as Code (IaC):**
+    * **Subtópicos Obrigatórios:**
+        * Seleção da ferramenta de IaC (ex: Terraform) e Estrutura de repositórios.
+        * Adoção de práticas de GitOps (ex: ArgoCD, Flux).
+        * Estratégia de Testes de Infraestrutura (IaC Testing).
+        * Estratégia de Detecção de Drift (Drift Detection) e Remediação Automática.
+        * Implementação de Policy as Code (ex: OPA, Kyverno) para governança de infraestrutura.
+
+* **Ponto 74 - Estratégias de Rollback:**
+    * **Subtópicos Obrigatórios:**
+        * Procedimentos de rollback automatizados para aplicação.
+        * Estratégia mandatória para Migrações de Banco de Dados Compatíveis (Backward-Compatible Schema Changes).
+        * Testes Automatizados de Compatibilidade de Migração de DB e Rollback.
+
+**VIII. Qualidades Sistêmicas e Cross-Cutting Concerns (NFRs)**
+
+* **Ponto 80 - Segurança (Security by Design) e Privacidade:**
+    * **Subtópicos Obrigatórios:**
+        * Metodologia de Modelagem de Ameaças (STRIDE) e Checklist OWASP.
+        * Modelo de Autorização detalhado (RBAC/ABAC/ReBAC) e Princípio do Menor Privilégio.
+        * Estratégia de Criptografia.
+        * Modelagem de Ameaças Internas (Insider Threat Modeling).
+        * Prontidão para Análise Forense (Forensic Readiness).
+        * Implementação do Framework SLSA (Supply-chain Levels for Software Artifacts).
+        * Estratégia de Cloud Security Posture Management (CSPM).
+        * Roadmap para Criptografia Pós-Quântica (Post-Quantum Cryptography Roadmap).
+
+* **Ponto 81 - Estratégia de Identidade Federada e SSO:**
+    * **Subtópicos Obrigatórios:**
+        * Seleção do IdP e Protocolos (OIDC, SAML).
+        * Estratégia de MFA/Passwordless e Gerenciamento de Sessão Seguro.
+        * Estratégia de Autenticação Machine-to-Machine (M2M) (mTLS, OAuth Client Credentials).
+        * Políticas de Acesso Adaptativo Baseado em Risco (Risk-Based Adaptive Access Policies).
+
+* **Ponto 88 - Confiabilidade e Resiliência (Reliability):**
+    * **Subtópicos Obrigatórios:**
+        * Implementação dos Padrões de Resiliência (Circuit Breaker, Retries, Bulkheads).
+        * Design de Dead Letter Queues (DLQs) e Análise de SPOFs.
+        * Estratégia de Load Shedding (Descarte de Carga).
+        * Planos de Degradação Graciosa (Graceful Degradation Plans).
+        * Métricas de Confiabilidade (MTBF - Mean Time Between Failures).
+        * Estratégias de Antifragilidade (Antifragility Strategies).
+
+**IX. Governança, Stacks e Documentação**
+
+* **Ponto 97 - Estratégia de Ambiente de Desenvolvimento Local (DX):**
+    * **Subtópicos Obrigatórios:**
+        * Ferramentas padronizadas para o ambiente local (Dev Containers).
+        * Estratégia para simular dependências externas localmente.
+        * Documentação de Onboarding Técnico.
+        * Estratégia de Engenharia de Eficácia do Desenvolvedor (DEE).
+        * Métricas de Eficácia do Desenvolvedor (DevEx/SPACE Metrics).
+
+* **Ponto 99 - Padrões de Codificação e Guias de Estilo:**
+    * **Subtópicos Obrigatórios:**
+        * Definição das convenções.
+        * Configuração de Linters e Formatters automatizados e bloqueantes no CI.
+        * Métricas de Qualidade de Código Estático.
+        * Definição de Quality Gates Automatizados (Automated Quality Gates).
+
+* **Ponto 101 - Estratégia de Testes (Geral):**
+    * **Subtópicos Obrigatórios:**
+        * Definição da Pirâmide de Testes e Metas de cobertura.
+        * Estratégia de Testes de Contrato (ex: Pact).
+        * Estratégia de Testes de Mutação (Mutation Testing).
+        * Estratégia de Testes em Produção (Testing in Production Strategy) (ex: Shadowing, Traffic Mirroring).
+
+* **Ponto 103 - Estratégia de Testes de Segurança:**
+    * **Subtópicos Obrigatórios:**
+        * Integração de SAST, DAST e SCA no pipeline.
+        * Planejamento de Pentests regulares.
+        * Processo de Triagem e Remediação de Vulnerabilidades (SLA de Remediação).
+        * Treinamento de Segurança e Programa de Security Champions.
+
+* **Ponto 108 - Governança, Documentação e Gestão de Mudanças (ADRs):**
+    * **Subtópicos Obrigatórios:**
+        * Definição do Processo de Governança Arquitetural (ARB, RFCs).
+        * Registro formal e imutável das decisões via Architecture Decision Records (ADRs).
+        * Manutenção dos Diagramas Arquiteturais (Diagrams as Code).
+        * Estratégia de Gestão de Mudanças Organizacionais.
+        * Estratégia de Gestão do Conhecimento (Knowledge Management Strategy).
+        * Métricas de Adoção dos Padrões Arquiteturais (Architectural Standards Adoption Metrics).
+
+</details>
+
+---
+**CONSTRAINTS (Roadmap de Auditoria):**
+
+1.  **Use a Doutrina como Checklist:** Percorra cada Ponto e cada Subtópico Obrigatório da doutrina fornecida acima.
+2.  **Investigue o Diretório `/architecture`:** Para cada subtópico, procure no diretório `/architecture` por um arquivo Markdown que satisfaça o requisito.
+3.  **Reporte com Precisão:** No seu relatório final, para cada subtópico, declare `CONCLUÍDO` e forneça o caminho do arquivo como prova, ou declare `PENDENTE` se nenhuma documentação correspondente for encontrada.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100% de confiança na COMPLETUDE da sua auditoria]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO. Ex: Risco de que um documento exista, mas não satisfaça completamente os requisitos do subtópico.]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que o nome dos arquivos no diretório de arquitetura é descritivo o suficiente para mapeá-los aos pontos da doutrina."]
+* **VALIDAÇÃO PENDENTE:** [Este relatório de análise de lacunas será a base para o nosso planejamento de sprints para completar a Fase 1.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear todos os pontos e subtópicos da Doutrina da Fase 1.
+2.  Garantir que a busca no diretório `/architecture` é exaustiva.
+3.  Executar `get_latest_lsp_diagnostics` para garantir que o ambiente está estável.
+4.  **Declarar Nível de Confiança (0 a 100%)**.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (revisão do relatório gerado para precisão).
+7.  **Documentar Decisões Técnicas**.
