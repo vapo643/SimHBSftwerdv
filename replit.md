@@ -114,6 +114,7 @@ Error handling: Create structured documentation for automatic consultation durin
 - **CI/CD Pipeline**: GitHub Actions with 3 specialized workflows (CI, CD-Staging, Security), automated testing, SAST/SCA scanning, deployment readiness checks, and rollback automation.
 - **Observability**: Winston structured logging with correlation IDs, Sentry error tracking, health check endpoints, and automated backup scripts.
 - **Configuration Management**: Centralized config module with environment-based secrets, critical vs optional validation, and secure fallbacks for development.
+- **Feature Flags System**: Complete unleash-client v6.6.0 integration with automatic fallback mode, React context provider, 7 pre-configured flags (maintenance-mode, read-only-mode, novo-dashboard, pagamento-pix-instant, relatorios-avancados, ab-test-onboarding, nova-api-experimental), and 60-second auto-refresh via React Query.
 - **Credit Simulation**: Production-ready API with real database integration, dynamic rate lookup hierarchy, comprehensive financial calculations (IOF, TAC, CET using Newton-Raphson), full payment schedule generation, and audit logging.
 - **Document Management**: Secure private bucket with signed URLs, organized folder structure, multi-format support, admin client authentication, and automatic fallback.
 - **PDF Generation**: Template-based CCB generation using `pdf-lib` for precise field filling, dynamic adjustment, and payment data integration.

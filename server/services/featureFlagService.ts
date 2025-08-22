@@ -129,6 +129,9 @@ class FeatureFlagService {
         unleash.on('error', (error) => {
           clearTimeout(timeout);
           logger.error('Unleash initialization error:', error);
+          logger.info('Switching to fallback mode due to Unleash connection error');
+          // Marca para usar fallback ao invés de tentar conectar repetidamente
+          process.env.UNLEASH_DISABLED = 'true';
           resolve(); // Não falha, usa fallback
         });
       });
@@ -174,9 +177,13 @@ class FeatureFlagService {
         return fallbackValue;
       }
 
-      // Verifica no Unleash
-      const enabled = unleashIsEnabled(flagName, fullContext);
-      logger.debug(`Flag ${flagName}: ${enabled}`, { context: fullContext });
+      // Verifica no Unleash (com contexto sanitizado)
+      const sanitizedContext = {
+        ...fullContext,
+        userRole: fullContext.userRole || undefined, // Convert null to undefined
+      };
+      const enabled = unleashIsEnabled(flagName, sanitizedContext);
+      logger.debug(`Flag ${flagName}: ${enabled}`, { context: sanitizedContext });
       return enabled;
       
     } catch (error) {
@@ -222,7 +229,12 @@ class FeatureFlagService {
         return { name: 'disabled', enabled: false };
       }
 
-      const variant = getVariant(flagName, fullContext);
+      // Sanitizar contexto para o Unleash
+      const sanitizedContext = {
+        ...fullContext,
+        userRole: fullContext.userRole || undefined, // Convert null to undefined
+      };
+      const variant = getVariant(flagName, sanitizedContext);
       logger.debug(`Variant for ${flagName}:`, variant);
       return variant;
       
