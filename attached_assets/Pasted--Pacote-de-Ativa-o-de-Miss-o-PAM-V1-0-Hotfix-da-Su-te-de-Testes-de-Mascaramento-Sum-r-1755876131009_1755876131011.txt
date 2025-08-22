@@ -1,0 +1,41 @@
+### Pacote de Ativação de Missão (PAM) V1.0 (Hotfix da Suíte de Testes de Mascaramento)
+
+* **Sumário da Missão (O Quê):** Diagnosticar e corrigir as 12 falhas restantes na suíte de testes unitários `tests/unit/pii-masking.test.ts` para atingir uma taxa de sucesso de 100%.
+* **Intenção Estratégica (O Porquê):** Garantir a confiabilidade absoluta da nossa ferramenta de segurança mais crítica antes da sua integração no sistema. A validação de 100% dos testes é um portão de qualidade não negociável para este componente.
+* **Histórico Relevante (Consulta Obrigatória):** A sua missão anterior criou com sucesso a estrutura do utilitário e 51 testes, mas 12 destes testes estão a falhar, indicando bugs na lógica de mascaramento ou nas próprias asserções dos testes.
+* **Modelo Mental (Como se Encaixa):** Aja como um Engenheiro de Qualidade em Automação (QA Engineer) a depurar uma suíte de testes. Sua tarefa é analisar os logs de falha, comparar o resultado obtido com o resultado esperado e corrigir o código (seja o da função ou o do teste) para garantir que ambos estejam alinhados e corretos.
+
+---
+
+**IMPLEMENTAR:**
+Correção e Validação Final da Suíte de Testes `pii-masking.test.ts`
+
+**CURRENT STATE:**
+A suíte de testes para o utilitário de mascaramento de PII está a falhar em 12 dos 51 cenários, com uma taxa de sucesso de apenas 76%.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  **Análise de Falhas:** A causa-raiz para cada um dos 12 testes falhos é identificada.
+2.  **Correção do Código:** O código no arquivo `shared/utils/pii-masking.ts` e/ou em `tests/unit/pii-masking.test.ts` é modificado para corrigir os bugs ou as asserções incorretas.
+3.  **Validação Final Irrefutável:** A execução do comando `npx vitest run tests/unit/pii-masking.test.ts` resulta num output que mostra **51/51 testes a passar (100% de sucesso)**.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  **Execute e Analise:** Comece por executar `npx vitest run tests/unit/pii-masking.test.ts --reporter=verbose` para obter os logs de erro detalhados de cada um dos 12 testes falhos.
+2.  **Depure e Corrija:** Para cada falha, compare o "Expected" (esperado) com o "Received" (recebido). Corrija a lógica da função de mascaramento em `pii-masking.ts` para que ela produza o output correto.
+3.  **Prova de Sucesso:** A sua prova final de sucesso para esta missão é o output do `vitest` a mostrar que todos os 51 testes passaram.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que as asserções nos testes estão corretas e que os bugs estão na implementação das funções de mascaramento."]
+* **VALIDAÇÃO PENDENTE:** [Nenhuma. O sucesso é definido pela passagem de 100% dos testes unitários.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear os ficheiros e funções exatas a serem corrigidos.
+2.  Garantir que a nova lógica passa em todos os cenários de teste.
+3.  Executar `get_latest_lsp_diagnostics` para garantir 0 erros novos.
+4.  **Declarar Nível de Confiança (0 a 100%)**.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (executar a suíte de testes completa e garantir que todos passem).
+7.  **Documentar Decisões Técnicas**.

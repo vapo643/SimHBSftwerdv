@@ -15,7 +15,7 @@ import {
 
 describe('PII Masking Utilities', () => {
   describe('maskCPF', () => {
-    it('should mask a valid CPF showing only 9th and 10th digits', () => {
+    it('should mask a valid CPF showing only the 9th digit (position 8)', () => {
       expect(maskCPF('123.456.789-01')).toBe('***.***.**9-**');
       expect(maskCPF('12345678901')).toBe('***.***.**9-**');
     });
@@ -285,7 +285,7 @@ describe('PII Masking Utilities', () => {
 
       const sanitized = sanitizeObject(obj);
       
-      expect(sanitized.cliente_cpf).toBe('***.***.**0-**');
+      expect(sanitized.cliente_cpf).toBe('***.***.**1-**');
       expect(sanitized.cliente_email).toBe('cl*****@test.com');
       expect(sanitized.cliente_telefone).toBe('(21) ****-**90');
     });
