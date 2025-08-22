@@ -1,0 +1,41 @@
+### Pacote de Ativação de Missão (PAM) V1.0 (Formalização da Estratégia de Validação Arquitetural)
+
+* **Sumário da Missão (O Quê):** Gerar um Architecture Decision Record (ADR) que defina a nossa estratégia e a ferramenta escolhida para o "Enforcement Automatizado dos Limites de Contexto", conforme o Ponto 20 da nossa Doutrina Arquitetural.
+* **Intenção Estratégica (O Porquê):** Garantir que a nossa arquitetura DDD seja auto-vigiada e resiliente à degradação. Ao integrar a validação arquitetural automatizada no nosso pipeline de CI, tornamos a violação dos nossos princípios de design uma falha de build, transformando a nossa arquitetura de um "desenho no papel" para uma "lei imposta por código".
+* **Histórico Relevante (Consulta Obrigatória):** A nossa missão de Modelagem de Domínio (Ponto 9) já estabeleceu os nossos Bounded Contexts e a necessidade de proteger os seus limites. A ferramenta `dependency-cruiser` já foi identificada como a escolha técnica correta para o nosso ecossistema TypeScript.
+* **Modelo Mental (Como se Encaixa):** Aja como um Arquiteto de Software a definir os "Quality Gates" (Portões de Qualidade) para a base de código. O foco é em definir as regras que irão manter a nossa arquitetura limpa e organizada de forma automática.
+
+---
+
+**IMPLEMENTAR:**
+ADR: Estratégia de Validação de Arquitetura Automatizada
+
+**CURRENT STATE:**
+Definimos os nossos Bounded Contexts, mas não temos um mecanismo automatizado para impedir que os desenvolvedores criem dependências incorretas entre eles (ex: o contexto de `Pagamentos` a importar diretamente do contexto de `Autenticação`).
+
+**EXPECTED (Estado Final de Sucesso):**
+Um novo arquivo Markdown, `architecture/07-decisions/adr-005-automated-architectural-enforcement.md`, é criado. O arquivo deve conter um ADR completo, incluindo as seguintes seções:
+
+1.  **Decisão:** Uma declaração clara, por exemplo: "Adotaremos a ferramenta **`dependency-cruiser`** para implementar a validação de arquitetura automatizada, integrada ao nosso pipeline de CI, para impor os limites dos nossos Bounded Contexts."
+2.  **Justificativa:** A justificação para a escolha (ferramenta padrão para TypeScript, previne a degradação da arquitetura, automatiza a governança, etc.).
+3.  **Regras de Dependência Iniciais (O "Core" da Estratégia):** A definição das primeiras e mais importantes regras de dependência que serão implementadas. Exemplo:
+    * **Regra 1 (Isolamento de Domínio):** Um *Bounded Context* (ex: `contexts/payment/`) **NÃO PODE** depender diretamente de outro *Bounded Context* (ex: `contexts/proposal/`). A comunicação deve ocorrer através de uma camada de API ou de um barramento de eventos.
+    * **Regra 2 (Princípio da Inversão de Dependência):** A camada de `Domain` **NÃO PODE** depender da camada de `Infrastructure`.
+4.  **Integração com o Pipeline de CI:** Um `snippet` de código de exemplo de como o comando de validação (`npx depcruise ...`) será adicionado como uma etapa obrigatória no nosso workflow do GitHub Actions (`.github/workflows/ci.yml`).
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que o `dependency-cruiser` é a ferramenta mais adequada e poderosa para impor as nossas regras de arquitetura em TypeScript."]
+* **VALIDAÇÃO PENDENTE:** [O ADR gerado deve ser revisado e ratificado pelo Arquiteto Chefe. A implementação real no código ocorrerá numa fase posterior.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear o ficheiro exato a ser criado.
+2.  Garantir que todas as seções obrigatórias do ADR são criadas.
+3.  Executar `get_latest_lsp_diagnostics` para garantir que o ambiente está estável.
+4.  **Declarar Nível de Confiança (0 a 100%)**.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (revisão do documento Markdown gerado).
+7.  **Documentar Decisões Técnicas**.
