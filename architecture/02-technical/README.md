@@ -13,11 +13,14 @@ Decisões técnicas e implementação:
 
 | Arquivo | Descrição | Status |
 |---------|-----------|--------|
-| patterns.md | Padrões arquiteturais utilizados | Pendente |
-| tech-stack.md | Tecnologias e justificativas | Pendente |
-| api-design.md | Princípios e contratos de API | Pendente |
-| data-strategy.md | Estratégia de dados e cache | Pendente |
-| testing-strategy.md | Abordagem de testes | Pendente |
+| api-architecture-strategy.md | Estratégia completa de APIs e contratos | ✅ Concluído |
+| data-modeling-strategy.md | Modelagem formal de dados | ✅ Concluído |
+| design-patterns-doctrine.md | Padrões arquiteturais aplicados | ✅ Concluído |
+| frontend-architecture-strategy.md | Estratégia de arquitetura frontend | ✅ Concluído |
+| frontend-backend-communication-strategy.md | Comunicação entre camadas | ✅ Concluído |
+| state-management-strategy.md | Gestão de estado no frontend | ✅ Concluído |
+| transaction-management-strategy.md | Gestão de transações distribuídas | ✅ Concluído |
+| skills-gap-analysis.md | Análise de lacunas técnicas | ✅ Concluído |
 
 ## Stack Atual
 
