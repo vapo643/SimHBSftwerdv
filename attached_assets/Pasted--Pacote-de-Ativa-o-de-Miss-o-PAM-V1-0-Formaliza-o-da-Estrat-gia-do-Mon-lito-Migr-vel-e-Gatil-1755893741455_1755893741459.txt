@@ -1,0 +1,56 @@
+### Pacote de Ativação de Missão (PAM) V1.0 (Formalização da Estratégia do Monólito Migrável e Gatilhos de Evolução)
+
+* **Sumário da Missão (O Quê):** Gerar um Architecture Decision Record (ADR) que formaliza a nossa estratégia de adotar um "Monólito Migrável" como o nosso estilo arquitetural principal, definindo os seus princípios de design e, crucialmente, os gatilhos (triggers) objetivos que irão ditar a nossa futura transição para Microserviços.
+* **Intenção Estratégica (O "Porquê"):** Criar uma "fonte da verdade" única que alinhe toda a equipa de engenharia. O objetivo é permitir-nos desenvolver com a velocidade de um monolito hoje, enquanto garantimos, por design, que estamos preparados para a escalabilidade dos microserviços amanhã. Este ADR é a nossa apólice de seguro contra o anti-padrão do "Monólito Distribuído".
+* **Histórico Relevante (Consulta Obrigatória):** A nossa Doutrina da Fase 1, especialmente o Ponto 9 (Modelagem DDD) e o Ponto 20 (Enforcement Automatizado), já estabeleceu a fundação para a modularidade. O ADR-002 já definiu o "Monolito Modular" como o nosso ponto de partida. Esta missão irá refinar essa decisão com um plano de evolução explícito.
+* **Modelo Mental (Como se Encaixa):** Aja como um Arquiteto de Sistemas pragmático e experiente. Sua tarefa não é apenas documentar a nossa decisão, mas criar um plano de voo realista, justificando os trade-offs e definindo os "sinais de alerta" (os gatilhos) que nos dirão quando é a hora de evoluir.
+
+---
+
+**IMPLEMENTAR:**
+ADR: Estratégia do Monólito Migrável
+
+**CURRENT STATE:**
+Decidimos usar um "Monolito Modular", mas não temos uma estratégia documentada que defina como este monolito deve ser construído para facilitar uma futura migração para microserviços, nem os critérios objetivos para quando essa migração deve ocorrer.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um novo arquivo Markdown, `architecture/07-decisions/adr-009-migratable-monolith-strategy.md`, é criado. O arquivo deve conter um ADR completo, com as seguintes seções:
+
+1.  **Decisão:** Uma declaração clara: "Adotaremos o padrão 'Monólito Migrável' como a nossa arquitetura principal. O desenvolvimento continuará num único repositório e com um único deploy, mas seguirá princípios de design rigorosos que garantam um baixo acoplamento e uma alta coesão entre os Bounded Contexts."
+
+2.  **Contexto e Justificativa (Racional de Negócio):**
+    * Inclua o nosso contexto de negócio: a nossa carga de trabalho atual é de aproximadamente **20 propostas/dia**.
+    * Inclua a nossa projeção de crescimento: **50 -> 100 -> 200 -> 800 -> 1000+ propostas/dia** à medida que novos parceiros forem integrados.
+    * Justifique a decisão: O monolito atual oferece a maior velocidade de desenvolvimento para o nosso volume atual, mas a arquitetura deve ser preparada de forma prudente e sustentável para o crescimento futuro.
+
+3.  **Princípios de Design do "Monólito Migrável" (As Regras do Jogo):**
+    * Detalhe os princípios de design que são **mandatórios** para todo o novo código:
+        * **Alta Modularidade:** Baseada nos Bounded Contexts já definidos (DDD - Ponto 9).
+        * **Comunicação Inter-Módulos:** A comunicação entre Bounded Contexts distintos **DEVE** ser preferencialmente **assíncrona** (via eventos) ou, se síncrona, ocorrer **APENAS** através de interfaces de API bem definidas, nunca por chamadas de função diretas ou queries de banco de dados cruzadas.
+        * **Base de Dados Única, Schemas Separados:** Manteremos um único banco de dados PostgreSQL nesta fase, mas os módulos devem operar como se tivessem schemas logicamente separados, sem `JOINs` entre Bounded Contexts distintos.
+        * **API Unificada:** Manteremos uma única API Gateway para o exterior, mas internamente, as rotas devem ser agrupadas por domínio.
+
+4.  **O Anti-Padrão a Evitar (O Inimigo):**
+    * Inclua uma seção que defina claramente o que é um **"Monólito Distribuído"** (múltiplos serviços fortemente acoplados que precisam ser implantados juntos) e explique como os nossos "Princípios de Design" acima irão ativamente prevenir que caiamos nesta armadilha.
+
+5.  **Gatilhos de Migração para Microserviços (Os Sinais de Alerta):**
+    * Esta é a seção mais crítica. Defina uma lista de **gatilhos objetivos e mensuráveis** que, quando atingidos, iniciarão formalmente o processo de extração do nosso primeiro microserviço. Divida-os em duas categorias:
+        * **Gatilhos Técnicos:** (Ex: O tempo de build do CI/CD excede 15 minutos; a contenção numa tabela específica do banco de dados causa degradação de performance em outros módulos; um módulo requer uma tecnologia de stack diferente do resto do monolito).
+        * **Gatilhos de Negócio/Equipa:** (Ex: A nossa equipa de engenharia cresce para mais de 3 equipas de squads independentes que precisam de fazer deploy de forma autônoma; um novo produto de negócio requer um SLA de disponibilidade ou um ciclo de release diferente do resto do sistema).
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que a comunicação assíncrona entre módulos dentro de um monolito pode ser simulada com um barramento de eventos in-memory inicialmente, antes de evoluir para uma solução como RabbitMQ/Kafka."]
+* **VALIDAÇÃO PENDENTE:** [O ADR gerado deve ser revisado e ratificado pelo Arquiteto Chefe como a nossa estratégia oficial de evolução.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear o ficheiro exato a ser criado.
+2.  Garantir que todas as 5 seções obrigatórias estão completas e ricas em contexto.
+3.  Executar `get_latest_lsp_diagnostics` para garantir que o ambiente está estável.
+4.  **Declarar Nível de Confiança (0 a 100%)**.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (revisão do documento Markdown gerado).
+7.  **Documentar Decisões Técnicas**.
