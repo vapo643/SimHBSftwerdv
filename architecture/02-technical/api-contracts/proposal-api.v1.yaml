@@ -10,7 +10,8 @@ info:
     - Domain Layer (Business Logic & Entities)
     - Infrastructure Layer (Data Persistence)
     
-    All endpoints follow a consistent response format and include comprehensive error handling.
+    All endpoints follow a consistent response format using RFC 7807 Problem Details for errors.
+    PII data is masked in GET responses according to ADR-008 security policies.
   version: 1.0.0
   contact:
     name: Simpix Development Team
@@ -24,11 +25,11 @@ servers:
     description: Production server
   - url: https://staging-api.simpix.com/api
     description: Staging server
-  - url: http://localhost:3000/api
+  - url: http://localhost:5000/api
     description: Development server
 
 paths:
-  /proposals:
+  /v1/proposals:
     post:
       summary: Create a new credit proposal
       description: |
@@ -76,7 +77,7 @@ paths:
                       status: "aguardando_analise"
                       customerData:
                         name: "João Silva"
-                        cpf: "12345678901"
+                        cpfMasked: "***.***.789-**"
                         email: "joao.silva@email.com"
                         phone: "11999887766"
                         monthlyIncome: 5000
@@ -94,30 +95,35 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ValidationErrorResponse'
+                $ref: '#/components/schemas/ProblemDetails'
               examples:
                 validationError:
                   summary: Validation error example
                   value:
-                    success: false
-                    error: "Validation error"
-                    details:
-                      - code: "invalid_type"
-                        expected: "string"
-                        received: "undefined"
-                        path: ["customerData", "name"]
-                        message: "Required"
+                    type: "https://docs.simpix.com/errors/validation-error"
+                    title: "Validation Error"
+                    status: 400
+                    detail: "O campo 'customerData.cpf' deve conter exatamente 11 dígitos numéricos."
+                    instance: "urn:uuid:123e4567-e89b-12d3-a456-426614174000"
+                    timestamp: "2025-08-22T13:15:30.123Z"
+                    path: "/api/v1/proposals"
+                    method: "POST"
+                    context:
+                      field: "customerData.cpf"
+                      providedValue: "123.456.789-0"
+                      expectedFormat: "11 dígitos numéricos"
         '500':
           description: Internal server error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ProblemDetails'
 
     get:
       summary: Get all proposals
       description: |
         Retrieves all credit proposals. Returns an array of proposals with pagination metadata.
+        PII data is masked in responses according to security policies.
       operationId: getAllProposals
       tags:
         - Proposals
@@ -138,7 +144,7 @@ paths:
                         status: "aguardando_analise"
                         customerData:
                           name: "Cliente 1"
-                          cpf: "11111111111"
+                          cpfMasked: "***.***.111-**"
                         loanConditions:
                           requestedAmount: 10000
                           term: 24
@@ -150,13 +156,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ProblemDetails'
 
-  /proposals/{id}:
+  /v1/proposals/{id}:
     get:
       summary: Get proposal by ID
       description: |
         Retrieves a specific credit proposal by its unique identifier.
+        PII data is masked in responses according to security policies.
       operationId: getProposalById
       tags:
         - Proposals
@@ -186,7 +193,7 @@ paths:
                       status: "aguardando_analise"
                       customerData:
                         name: "Cliente 1"
-                        cpf: "11111111111"
+                        cpfMasked: "***.***.111-**"
                         email: "cliente1@teste.com"
                         phone: "11999888777"
                         monthlyIncome: 15000
@@ -202,21 +209,27 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ProblemDetails'
               examples:
                 notFound:
                   summary: Proposal not found
                   value:
-                    success: false
-                    error: "Proposal not found"
+                    type: "https://docs.simpix.com/errors/not-found"
+                    title: "Resource Not Found"
+                    status: 404
+                    detail: "Proposal with ID 'b3b5433f-0efe-4bbb-be01-411e37c262a9' not found"
+                    instance: "urn:uuid:123e4567-e89b-12d3-a456-426614174000"
+                    timestamp: "2025-08-22T13:15:30.123Z"
+                    path: "/api/v1/proposals/b3b5433f-0efe-4bbb-be01-411e37c262a9"
+                    method: "GET"
         '500':
           description: Internal server error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ProblemDetails'
 
-  /proposals/{id}/submit:
+  /v1/proposals/{id}/submit:
     put:
       summary: Submit proposal for analysis
       description: |
@@ -224,7 +237,7 @@ paths:
         This endpoint follows FSM state transitions.
       operationId: submitProposalForAnalysis
       tags:
-        - Proposal Workflow
+        - Proposals - Workflow
       parameters:
         - name: id
           in: path
@@ -236,7 +249,7 @@ paths:
           example: "b3b5433f-0efe-4bbb-be01-411e37c262a9"
       responses:
         '200':
-          description: Proposal submitted for analysis successfully
+          description: Proposal submitted successfully
           content:
             application/json:
               schema:
@@ -246,29 +259,45 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ProblemDetails'
         '409':
-          description: Invalid status transition
+          description: Invalid state transition
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TransitionErrorResponse'
+                $ref: '#/components/schemas/ProblemDetails'
+              examples:
+                invalidTransition:
+                  summary: Invalid state transition
+                  value:
+                    type: "https://docs.simpix.com/errors/invalid-transition"
+                    title: "State Transition Error"
+                    status: 409
+                    detail: "Cannot transition from 'aprovada' to 'aguardando_analise'"
+                    instance: "urn:uuid:123e4567-e89b-12d3-a456-426614174000"
+                    timestamp: "2025-08-22T13:15:30.123Z"
+                    path: "/api/v1/proposals/b3b5433f-0efe-4bbb-be01-411e37c262a9/submit"
+                    method: "PUT"
+                    context:
+                      currentStatus: "aprovada"
+                      attemptedStatus: "aguardando_analise"
+                      allowedTransitions: ["formalizada", "rejeitada"]
         '500':
           description: Internal server error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ProblemDetails'
 
-  /proposals/{id}/approve:
+  /v1/proposals/{id}/approve:
     put:
-      summary: Approve a proposal
+      summary: Approve proposal
       description: |
-        Approves a credit proposal, transitioning its status to 'aprovada'.
-        Only users with ANALISTA or ADMINISTRADOR roles can approve proposals.
+        Approves a credit proposal by transitioning its status to 'aprovada'.
+        Requires appropriate permissions and valid FSM state.
       operationId: approveProposal
       tags:
-        - Proposal Workflow
+        - Proposals - Workflow
       parameters:
         - name: id
           in: path
@@ -277,19 +306,16 @@ paths:
           schema:
             type: string
             format: uuid
-          example: "b3b5433f-0efe-4bbb-be01-411e37c262a9"
       requestBody:
-        required: false
         content:
           application/json:
             schema:
               type: object
               properties:
-                observacoes:
+                observations:
                   type: string
-                  description: Optional approval notes
-                  example: "Aprovada conforme análise de risco"
-                metadata:
+                  description: Approval observations
+                approvalData:
                   type: object
                   description: Additional approval metadata
       responses:
@@ -304,35 +330,35 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ProblemDetails'
         '404':
           description: Proposal not found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ProblemDetails'
         '409':
-          description: Invalid status transition
+          description: Invalid state transition
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TransitionErrorResponse'
+                $ref: '#/components/schemas/ProblemDetails'
         '500':
           description: Internal server error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ProblemDetails'
 
-  /proposals/{id}/reject:
+  /v1/proposals/{id}/reject:
     put:
-      summary: Reject a proposal
+      summary: Reject proposal
       description: |
-        Rejects a credit proposal, transitioning its status to 'rejeitada'.
-        Only users with ANALISTA or ADMINISTRADOR roles can reject proposals.
+        Rejects a credit proposal by transitioning its status to 'rejeitada'.
+        Requires appropriate permissions and valid FSM state.
       operationId: rejectProposal
       tags:
-        - Proposal Workflow
+        - Proposals - Workflow
       parameters:
         - name: id
           in: path
@@ -341,7 +367,6 @@ paths:
           schema:
             type: string
             format: uuid
-          example: "b3b5433f-0efe-4bbb-be01-411e37c262a9"
       requestBody:
         required: true
         content:
@@ -349,18 +374,15 @@ paths:
             schema:
               type: object
               required:
-                - motivo
+                - reason
               properties:
-                motivo:
+                reason:
                   type: string
-                  description: Reason for rejection
-                  example: "Renda insuficiente para o valor solicitado"
-                observacoes:
+                  description: Rejection reason
+                  example: "Insufficient credit score"
+                observations:
                   type: string
-                  description: Additional rejection notes
-                metadata:
-                  type: object
-                  description: Additional rejection metadata
+                  description: Additional observations
       responses:
         '200':
           description: Proposal rejected successfully
@@ -368,44 +390,100 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProposalSuccessResponse'
-        '400':
-          description: Missing required rejection reason
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ValidationErrorResponse'
         '403':
           description: Insufficient permissions
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ProblemDetails'
         '404':
           description: Proposal not found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ProblemDetails'
         '409':
-          description: Invalid status transition
+          description: Invalid state transition
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TransitionErrorResponse'
+                $ref: '#/components/schemas/ProblemDetails'
         '500':
           description: Internal server error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ProblemDetails'
 
-  /proposals/buscar-por-cpf/{cpf}:
-    get:
-      summary: Search proposals by CPF
+  /v1/proposals/{id}/toggle-status:
+    put:
+      summary: Toggle proposal suspension status
       description: |
-        Retrieves all proposals associated with a specific CPF.
-        Returns a list of proposals for the given customer.
-      operationId: getProposalsByCpf
+        Toggles a proposal between active and suspended states.
+        Only available for proposals in specific statuses.
+      operationId: toggleProposalStatus
+      tags:
+        - Proposals - Workflow
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Unique identifier of the proposal
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                suspend:
+                  type: boolean
+                  description: True to suspend, false to activate
+                reason:
+                  type: string
+                  description: Reason for status change
+      responses:
+        '200':
+          description: Status toggled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProposalSuccessResponse'
+        '403':
+          description: Insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '404':
+          description: Proposal not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '409':
+          description: Invalid state transition
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+
+  /v1/proposals/buscar-por-cpf/{cpf}:
+    get:
+      summary: Find proposals by CPF
+      description: |
+        Searches for proposals associated with a specific CPF.
+        The CPF parameter is masked in logs for security.
+        Response contains masked PII data.
+      operationId: findProposalsByCpf
       tags:
         - Proposals
       parameters:
@@ -419,7 +497,7 @@ paths:
           example: "12345678901"
       responses:
         '200':
-          description: Proposals found successfully
+          description: Proposals found
           content:
             application/json:
               schema:
@@ -429,99 +507,26 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ValidationErrorResponse'
+                $ref: '#/components/schemas/ProblemDetails'
         '404':
           description: No proposals found for this CPF
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ProblemDetails'
         '500':
           description: Internal server error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ProblemDetails'
 
-  /proposals/{id}/toggle-status:
-    put:
-      summary: Toggle proposal status (suspend/reactivate)
-      description: |
-        Toggles proposal status between active and suspended states.
-        If proposal is active, it will be suspended. If suspended, it will be reactivated.
-      operationId: toggleProposalStatus
-      tags:
-        - Proposal Workflow
-      parameters:
-        - name: id
-          in: path
-          required: true
-          description: Unique identifier of the proposal
-          schema:
-            type: string
-            format: uuid
-          example: "b3b5433f-0efe-4bbb-be01-411e37c262a9"
-      responses:
-        '200':
-          description: Status toggled successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
-                  propostaId:
-                    type: string
-                    format: uuid
-                  statusAnterior:
-                    type: string
-                    example: "aguardando_analise"
-                  statusNovo:
-                    type: string
-                    example: "suspensa"
-                  message:
-                    type: string
-                    example: "Proposta suspensa com sucesso"
-        '400':
-          description: Invalid operation for current status
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '403':
-          description: Insufficient permissions
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '404':
-          description: Proposal not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '409':
-          description: Invalid status transition
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TransitionErrorResponse'
-        '500':
-          description: Internal server error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-
-  /proposals/{id}/documents:
+  /v1/proposals/{id}/documents:
     get:
       summary: List proposal documents
       description: |
-        Retrieves all documents associated with a proposal.
-        Returns a list of uploaded documents with their metadata.
-      operationId: getProposalDocuments
+        Retrieves all documents associated with a specific proposal.
+      operationId: listProposalDocuments
       tags:
         - Documents
       parameters:
@@ -532,7 +537,6 @@ paths:
           schema:
             type: string
             format: uuid
-          example: "b3b5433f-0efe-4bbb-be01-411e37c262a9"
       responses:
         '200':
           description: Documents retrieved successfully
@@ -544,31 +548,27 @@ paths:
                   success:
                     type: boolean
                     example: true
-                  documents:
+                  data:
                     type: array
                     items:
                       $ref: '#/components/schemas/DocumentInfo'
-                  total:
-                    type: integer
-                    example: 3
         '404':
           description: Proposal not found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ProblemDetails'
         '500':
           description: Internal server error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ProblemDetails'
 
     post:
-      summary: Upload proposal document
+      summary: Upload document to proposal
       description: |
-        Uploads a document for a proposal. Supported file types: PDF, JPG, PNG.
-        Maximum file size: 10MB.
+        Uploads a new document and associates it with a proposal.
       operationId: uploadProposalDocument
       tags:
         - Documents
@@ -580,7 +580,6 @@ paths:
           schema:
             type: string
             format: uuid
-          example: "b3b5433f-0efe-4bbb-be01-411e37c262a9"
       requestBody:
         required: true
         content:
@@ -594,16 +593,14 @@ paths:
                 file:
                   type: string
                   format: binary
-                  description: Document file to upload
+                  description: Document file (PDF, JPG, PNG)
                 documentType:
                   type: string
-                  enum: [cpf, rg, comprovante_renda, comprovante_residencia, outros]
-                  description: Type of document being uploaded
-                  example: "cpf"
+                  enum: [cpf, rg, comprovante_renda, comprovante_residencia, ccb, outros]
+                  description: Type of document
                 description:
                   type: string
                   description: Optional document description
-                  example: "Documento de CPF do cliente"
       responses:
         '201':
           description: Document uploaded successfully
@@ -615,43 +612,42 @@ paths:
                   success:
                     type: boolean
                     example: true
-                  document:
+                  data:
                     $ref: '#/components/schemas/DocumentInfo'
                   message:
                     type: string
                     example: "Document uploaded successfully"
         '400':
-          description: Invalid file or parameters
+          description: Invalid document or format
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ValidationErrorResponse'
+                $ref: '#/components/schemas/ProblemDetails'
         '404':
           description: Proposal not found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ProblemDetails'
         '413':
           description: File too large
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ProblemDetails'
         '500':
           description: Internal server error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ProblemDetails'
 
-  /proposals/{id}/ccb:
+  /v1/proposals/{id}/ccb:
     get:
-      summary: Download signed CCB document
+      summary: Download signed CCB
       description: |
-        Downloads the signed CCB (Cédula de Crédito Bancário) document for a proposal.
-        Returns a PDF file or a signed URL for download.
-      operationId: getSignedCcb
+        Downloads the signed CCB (Cédula de Crédito Bancário) for a formalized proposal.
+      operationId: downloadCcb
       tags:
         - Documents
       parameters:
@@ -662,145 +658,32 @@ paths:
           schema:
             type: string
             format: uuid
-          example: "b3b5433f-0efe-4bbb-be01-411e37c262a9"
       responses:
         '200':
-          description: CCB document or download URL
+          description: CCB file returned successfully
           content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
-                  url:
-                    type: string
-                    format: uri
-                    description: Signed URL for document download
-                  filename:
-                    type: string
-                    example: "ccb-signed-123.pdf"
-                  contentType:
-                    type: string
-                    example: "application/pdf"
             application/pdf:
               schema:
                 type: string
                 format: binary
         '404':
-          description: Proposal or CCB not found
+          description: CCB not found or not yet generated
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ProblemDetails'
         '500':
           description: Internal server error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ProblemDetails'
 
-  /proposals/{id}/observacoes:
-    get:
-      summary: Get proposal audit logs
-      description: |
-        Retrieves the complete audit trail for a proposal, including all status changes,
-        observations, and user interactions.
-      operationId: getProposalAuditLogs
-      tags:
-        - Audit
-      parameters:
-        - name: id
-          in: path
-          required: true
-          description: Unique identifier of the proposal
-          schema:
-            type: string
-            format: uuid
-          example: "b3b5433f-0efe-4bbb-be01-411e37c262a9"
-      responses:
-        '200':
-          description: Audit logs retrieved successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  logs:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/AuditLogEntry'
-                  total:
-                    type: integer
-                    example: 5
-        '404':
-          description: Proposal not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '500':
-          description: Internal server error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-
-  /proposals/{id}/formalizacao:
-    get:
-      summary: Get formalization status
-      description: |
-        Retrieves the complete formalization status including CCB generation,
-        electronic signature status, and payment slip generation.
-      operationId: getFormalizationStatus
-      tags:
-        - Formalization
-      parameters:
-        - name: id
-          in: path
-          required: true
-          description: Unique identifier of the proposal
-          schema:
-            type: string
-            format: uuid
-          example: "b3b5433f-0efe-4bbb-be01-411e37c262a9"
-      responses:
-        '200':
-          description: Formalization status retrieved successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
-                  proposal:
-                    $ref: '#/components/schemas/FormalizationStatus'
-                  timeline:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/FormalizationEvent'
-        '404':
-          description: Proposal not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '500':
-          description: Internal server error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-
-  /proposals/{id}/gerar-ccb:
+  /v1/proposals/{id}/gerar-ccb:
     post:
       summary: Generate CCB document
       description: |
-        Generates the CCB (Cédula de Crédito Bancário) document for an approved proposal.
-        This action can only be performed on approved proposals.
+        Generates a new CCB (Cédula de Crédito Bancário) for an approved proposal.
       operationId: generateCcb
       tags:
         - Formalization
@@ -812,9 +695,17 @@ paths:
           schema:
             type: string
             format: uuid
-          example: "b3b5433f-0efe-4bbb-be01-411e37c262a9"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                templateOverrides:
+                  type: object
+                  description: Optional template value overrides
       responses:
-        '200':
+        '201':
           description: CCB generated successfully
           content:
             application/json:
@@ -824,37 +715,84 @@ paths:
                   success:
                     type: boolean
                     example: true
-                  ccbPath:
-                    type: string
-                    description: Path to the generated CCB file
+                  data:
+                    type: object
+                    properties:
+                      ccbId:
+                        type: string
+                        description: Generated CCB identifier
+                      documentUrl:
+                        type: string
+                        description: URL to access the CCB
                   message:
                     type: string
                     example: "CCB generated successfully"
         '400':
-          description: Proposal not in valid status for CCB generation
+          description: Cannot generate CCB in current status
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ProblemDetails'
         '404':
           description: Proposal not found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ProblemDetails'
         '500':
           description: Internal server error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ProblemDetails'
 
-  /proposals/{id}/etapa-formalizacao:
+  /v1/proposals/{id}/formalizacao:
+    get:
+      summary: Get formalization status
+      description: |
+        Retrieves the current formalization status and progress of a proposal.
+      operationId: getFormalizationStatus
+      tags:
+        - Formalization
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Unique identifier of the proposal
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Formalization status retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/FormalizationStatus'
+        '404':
+          description: Proposal not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+
+  /v1/proposals/{id}/etapa-formalizacao:
     patch:
       summary: Update formalization step
       description: |
-        Updates the current formalization step for a proposal.
-        Used to track progress through the formalization workflow.
+        Updates the current formalization step/stage of a proposal.
       operationId: updateFormalizationStep
       tags:
         - Formalization
@@ -866,7 +804,6 @@ paths:
           schema:
             type: string
             format: uuid
-          example: "b3b5433f-0efe-4bbb-be01-411e37c262a9"
       requestBody:
         required: true
         content:
@@ -899,22 +836,130 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ValidationErrorResponse'
+                $ref: '#/components/schemas/ProblemDetails'
         '404':
           description: Proposal not found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ProblemDetails'
         '500':
           description: Internal server error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ProblemDetails'
+
+  /v1/proposals/{id}/audit-logs:
+    get:
+      summary: Get proposal audit logs
+      description: |
+        Retrieves complete audit trail for a proposal including all state transitions and modifications.
+      operationId: getProposalAuditLogs
+      tags:
+        - Audit
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Unique identifier of the proposal
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Audit logs retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AuditLogEntry'
+        '403':
+          description: Insufficient permissions to view audit logs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '404':
+          description: Proposal not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
 
 components:
   schemas:
+    # RFC 7807 Problem Details Schema (Mandatório para todos os erros)
+    ProblemDetails:
+      type: object
+      required:
+        - type
+        - title
+        - status
+        - detail
+        - instance
+      properties:
+        type:
+          type: string
+          format: uri
+          description: A URI reference that identifies the problem type
+          example: "https://docs.simpix.com/errors/validation-error"
+        title:
+          type: string
+          description: A short, human-readable summary of the problem type
+          example: "Validation Error"
+        status:
+          type: integer
+          description: The HTTP status code
+          example: 400
+        detail:
+          type: string
+          description: A human-readable explanation specific to this occurrence
+          example: "O campo 'clienteCpf' deve conter exatamente 11 dígitos numéricos."
+        instance:
+          type: string
+          format: uri
+          description: A URI reference that identifies the specific occurrence
+          example: "urn:uuid:123e4567-e89b-12d3-a456-426614174000"
+        timestamp:
+          type: string
+          format: date-time
+          description: Timestamp when the error occurred
+          example: "2025-08-22T13:15:30.123Z"
+        path:
+          type: string
+          description: The API path where the error occurred
+          example: "/api/v1/proposals"
+        method:
+          type: string
+          description: The HTTP method used
+          example: "POST"
+        traceId:
+          type: string
+          description: Distributed tracing identifier
+          example: "abc123def456"
+        context:
+          type: object
+          additionalProperties: true
+          description: Additional context specific to this error
+          example:
+            field: "customerData.cpf"
+            providedValue: "123.456.789-0"
+            expectedFormat: "11 dígitos numéricos"
+
     CreateProposalRequest:
       type: object
       required:
@@ -922,7 +967,7 @@ components:
         - loanConditions
       properties:
         customerData:
-          $ref: '#/components/schemas/CustomerData'
+          $ref: '#/components/schemas/CustomerDataInput'
         loanConditions:
           $ref: '#/components/schemas/LoanConditions'
         partnerId:
@@ -939,7 +984,8 @@ components:
           description: ID of the credit product
           example: "1"
 
-    CustomerData:
+    # Schema para entrada de dados (POST) - pode conter PII completo
+    CustomerDataInput:
       type: object
       required:
         - name
@@ -1005,6 +1051,68 @@ components:
           description: Customer's profession/occupation
           example: "Engenheiro de Software"
 
+    # Schema para saída de dados (GET) - PII mascarado
+    CustomerDataMasked:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Full name of the customer
+          example: "João Silva Santos"
+        cpfMasked:
+          type: string
+          description: Masked CPF for privacy
+          example: "***.***.789-**"
+        email:
+          type: string
+          format: email
+          description: Customer's email address
+          example: "joao.silva@email.com"
+        phone:
+          type: string
+          description: Customer's phone number
+          example: "11999887766"
+        birthDate:
+          type: string
+          format: date
+          description: Customer's birth date (ISO 8601 format)
+          example: "1985-03-15"
+        monthlyIncome:
+          type: number
+          minimum: 0
+          description: Customer's monthly income in BRL
+          example: 5000.00
+        rgMasked:
+          type: string
+          description: Masked RG for privacy
+          example: "**.***.**9-*"
+        issuingBody:
+          type: string
+          description: RG issuing authority
+          example: "SSP/SP"
+        maritalStatus:
+          type: string
+          description: Customer's marital status
+          enum: [solteiro, casado, divorciado, viuvo, separado]
+          example: "solteiro"
+        nationality:
+          type: string
+          description: Customer's nationality
+          example: "Brasileira"
+        zipCode:
+          type: string
+          pattern: '^[0-9]{8}$'
+          description: ZIP code (CEP) - 8 digits
+          example: "01234567"
+        addressMasked:
+          type: string
+          description: Masked address for privacy
+          example: "Rua das ******, ***, Apt **, Centro"
+        occupation:
+          type: string
+          description: Customer's profession/occupation
+          example: "Engenheiro de Software"
+
     LoanConditions:
       type: object
       required:
@@ -1057,7 +1165,8 @@ components:
           description: Annual interest rate as percentage
           example: 2.99
 
-    ProposalResponse:
+    # Response com PII mascarado para endpoints GET
+    ProposalResponseMasked:
       type: object
       properties:
         id:
@@ -1078,7 +1187,7 @@ components:
           description: Current status of the proposal
           example: "aguardando_analise"
         customerData:
-          $ref: '#/components/schemas/CustomerData'
+          $ref: '#/components/schemas/CustomerDataMasked'
         loanConditions:
           $ref: '#/components/schemas/LoanConditions'
         partnerId:
@@ -1118,7 +1227,7 @@ components:
           type: boolean
           example: true
         data:
-          $ref: '#/components/schemas/ProposalResponse'
+          $ref: '#/components/schemas/ProposalResponseMasked'
         message:
           type: string
           description: Success message
@@ -1133,73 +1242,11 @@ components:
         data:
           type: array
           items:
-            $ref: '#/components/schemas/ProposalResponse'
+            $ref: '#/components/schemas/ProposalResponseMasked'
         total:
           type: integer
           description: Total number of proposals
           example: 25
-
-    ErrorResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-          example: false
-        error:
-          type: string
-          description: Error message
-          example: "Internal server error"
-
-    ValidationErrorResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-          example: false
-        error:
-          type: string
-          example: "Validation error"
-        details:
-          type: array
-          items:
-            type: object
-            properties:
-              code:
-                type: string
-                example: "invalid_type"
-              expected:
-                type: string
-                example: "string"
-              received:
-                type: string
-                example: "undefined"
-              path:
-                type: array
-                items:
-                  type: string
-                example: ["customerData", "name"]
-              message:
-                type: string
-                example: "Required"
-
-    TransitionErrorResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-          example: false
-        message:
-          type: string
-          example: "Invalid status transition from 'aprovada' to 'aguardando_analise'"
-        error:
-          type: string
-          example: "INVALID_TRANSITION"
-        currentStatus:
-          type: string
-          example: "aprovada"
-        attemptedStatus:
-          type: string
-          example: "aguardando_analise"
 
     DocumentInfo:
       type: object
@@ -1222,32 +1269,71 @@ components:
         filename:
           type: string
           description: Original filename
-          example: "cpf-cliente.pdf"
-        path:
-          type: string
-          description: Storage path
-          example: "documents/proposals/123/cpf-cliente.pdf"
-        size:
+          example: "cpf_joao_silva.pdf"
+        fileSize:
           type: integer
           description: File size in bytes
-          example: 1024576
+          example: 204800
         mimeType:
           type: string
           description: MIME type of the document
           example: "application/pdf"
-        uploadedBy:
-          type: string
-          format: uuid
-          description: ID of the user who uploaded the document
         uploadedAt:
           type: string
           format: date-time
           description: Upload timestamp
           example: "2025-08-21T21:00:00.000Z"
-        description:
+        uploadedBy:
           type: string
-          description: Document description
-          example: "Documento de CPF do cliente"
+          description: User who uploaded the document
+          example: "user_123"
+
+    FormalizationStatus:
+      type: object
+      properties:
+        proposalId:
+          type: string
+          format: uuid
+          description: Associated proposal ID
+        currentStep:
+          type: string
+          enum: [aceite_solicitado, aceite_confirmado, ccb_gerada, assinatura_enviada, assinatura_concluida, boletos_gerados]
+          description: Current formalization step
+          example: "ccb_gerada"
+        completedSteps:
+          type: array
+          items:
+            type: string
+          description: List of completed steps
+          example: ["aceite_solicitado", "aceite_confirmado", "ccb_gerada"]
+        pendingSteps:
+          type: array
+          items:
+            type: string
+          description: List of pending steps
+          example: ["assinatura_enviada", "assinatura_concluida", "boletos_gerados"]
+        formalizationDate:
+          type: string
+          format: date-time
+          description: When formalization was completed (if applicable)
+        ccbDocument:
+          type: object
+          properties:
+            id:
+              type: string
+              description: CCB document ID
+            status:
+              type: string
+              enum: [pending, generated, signed, cancelled]
+              description: CCB status
+            generatedAt:
+              type: string
+              format: date-time
+              description: When CCB was generated
+            signedAt:
+              type: string
+              format: date-time
+              description: When CCB was signed
 
     AuditLogEntry:
       type: object
@@ -1255,160 +1341,77 @@ components:
         id:
           type: string
           format: uuid
-          description: Unique log entry identifier
-          example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
-        acao:
+          description: Unique audit log identifier
+        proposalId:
           type: string
-          description: Action performed
-          example: "mudanca_status_aprovada"
-        detalhes:
+          format: uuid
+          description: Associated proposal ID
+        eventType:
           type: string
-          description: Action details/observations
-          example: "Proposta aprovada após análise de crédito"
-        status_anterior:
+          enum: [status_change, data_update, document_upload, access_granted, security_violation]
+          description: Type of audit event
+          example: "status_change"
+        oldStatus:
           type: string
-          description: Previous status
-          example: "em_analise"
-        status_novo:
+          description: Previous status (for status changes)
+          example: "aguardando_analise"
+        newStatus:
           type: string
-          description: New status
+          description: New status (for status changes)
           example: "aprovada"
-        data_acao:
+        userId:
+          type: string
+          description: User who performed the action
+          example: "user_456"
+        userRole:
+          type: string
+          description: Role of the user
+          example: "ANALISTA"
+        ipAddress:
+          type: string
+          description: IP address of the request
+          example: "192.168.1.100"
+        userAgent:
+          type: string
+          description: User agent string
+          example: "Mozilla/5.0..."
+        changedFields:
+          type: array
+          items:
+            type: string
+          description: Fields that were modified
+          example: ["status", "observations"]
+        timestamp:
           type: string
           format: date-time
-          description: Action timestamp
-          example: "2025-08-21T21:00:00.000Z"
-        autor_id:
+          description: When the event occurred
+          example: "2025-08-22T13:15:30.123Z"
+        correlationId:
           type: string
           format: uuid
-          description: ID of the user who performed the action
-        profiles:
-          type: object
-          description: User profile information
-          properties:
-            full_name:
-              type: string
-              example: "João Silva"
-            role:
-              type: string
-              example: "ANALISTA"
-        observacao:
-          type: string
-          description: Additional observations
-        created_at:
-          type: string
-          format: date-time
-          description: Log creation timestamp
-
-    FormalizationStatus:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: Proposal ID
-        status:
-          type: string
-          description: Current proposal status
-          example: "aprovada"
-        ccb_gerado:
-          type: boolean
-          description: Whether CCB has been generated
-          example: true
-        caminho_ccb:
-          type: string
-          description: Path to the CCB file
-          example: "documents/ccb/proposta-123-ccb.pdf"
-        ccb_gerado_em:
-          type: string
-          format: date-time
-          description: CCB generation timestamp
-          example: "2025-08-21T21:00:00.000Z"
-        assinatura_eletronica_enviada:
-          type: boolean
-          description: Whether electronic signature was sent
-          example: true
-        assinatura_eletronica_concluida:
-          type: boolean
-          description: Whether electronic signature is completed
-          example: false
-        clicksign_document_id:
-          type: string
-          description: ClickSign document ID
-          example: "doc-abc123"
-        clicksign_envelope_id:
-          type: string
-          description: ClickSign envelope ID
-          example: "env-xyz789"
-        boletos_gerados:
-          type: boolean
-          description: Whether payment slips have been generated
-          example: false
-        quantidade_boletos_gerados:
-          type: integer
-          description: Number of payment slips generated
-          example: 0
-        todos_boletos_enviados:
-          type: boolean
-          description: Whether all payment slips have been sent
-          example: false
-
-    FormalizationEvent:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: Event ID
-        acao:
-          type: string
-          enum: [CCB_GERADO, ASSINATURA_ENVIADA, ASSINATURA_CONCLUIDA, BOLETOS_GERADOS]
-          description: Formalization action
-          example: "CCB_GERADO"
-        detalhes:
-          type: string
-          description: Event details
-          example: "CCB gerado com sucesso"
-        created_at:
-          type: string
-          format: date-time
-          description: Event timestamp
-          example: "2025-08-21T21:00:00.000Z"
+          description: Request correlation ID for tracing
+          example: "abc123def456"
 
   securitySchemes:
-    BearerAuth:
+    bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
       description: |
-        JWT-based authentication using Supabase Auth. 
-        Include the token in the Authorization header as 'Bearer {token}'.
-        
-        **Security Features:**
-        - Row Level Security (RLS) policies enforce data isolation
-        - Role-based access control (RBAC) with 4 roles: ATENDENTE, ANALISTA, GERENTE, ADMINISTRADOR
-        - Anti-fragile security architecture with timing attack protection
-        - Request rate limiting and input sanitization
-        - Comprehensive audit logging for all operations
-        
-        **Required Permissions by Endpoint:**
-        - Proposal creation/editing: ATENDENTE, GERENTE, ADMINISTRADOR
-        - Proposal approval/rejection: ANALISTA, ADMINISTRADOR  
-        - Document management: All authenticated users
-        - Formalization operations: ATENDENTE, GERENTE, ADMINISTRADOR
-        - Audit logs: All authenticated users (own data only)
+        JWT Bearer token for authentication.
+        Obtained via Supabase Auth login endpoint.
 
 security:
-  - BearerAuth: []
+  - bearerAuth: []
 
 tags:
   - name: Proposals
-    description: Operations related to credit proposal management
-  - name: Proposal Workflow
-    description: Operations for proposal status transitions and analysis
+    description: Core proposal management operations
+  - name: Proposals - Workflow
+    description: FSM state transition operations
   - name: Documents
-    description: Document upload, retrieval and management operations
+    description: Document management operations
   - name: Formalization
-    description: CCB generation, electronic signature, and payment slip operations
+    description: Loan formalization process
   - name: Audit
-    description: Audit trail and logging operations for compliance
+    description: Audit trail and logging operations
