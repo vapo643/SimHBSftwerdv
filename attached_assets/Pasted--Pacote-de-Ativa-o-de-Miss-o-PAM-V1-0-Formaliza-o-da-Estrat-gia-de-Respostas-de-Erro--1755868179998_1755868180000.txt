@@ -1,0 +1,49 @@
+### Pacote de Ativação de Missão (PAM) V1.0 (Formalização da Estratégia de Respostas de Erro)
+
+* **Sumário da Missão (O Quê):** Gerar um Architecture Decision Record (ADR) que defina a nossa estratégia e os padrões mandatórios para a formatação de respostas de erro em todas as APIs do sistema, com base na RFC 7807.
+* **Intenção Estratégica (O Porquê):** Padronizar a comunicação de erros em todo o sistema para melhorar drasticamente a experiência de desenvolvimento (DX), acelerar a depuração e permitir um tratamento de erros consistente e robusto no frontend e em clientes externos.
+* **Histórico Relevante (Consulta Obrigatória):** A auditoria de conformidade identificou a falta de um padrão de comunicação de erros como uma lacuna de prioridade P0 (Crítica).
+* **Modelo Mental (Como se Encaixa):** Aja como um Arquiteto de API a criar o guia de estilo (`style guide`) para todas as respostas de erro, garantindo que elas sejam previsíveis, úteis e consistentes.
+
+---
+
+**IMPLEMENTAR:**
+ADR: Estratégia de Comunicação de Erros (RFC 7807)
+
+**CURRENT STATE:**
+As respostas de erro da nossa API são inconsistentes, com diferentes endpoints a retornar diferentes formatos de payload, dificultando o tratamento de erros de forma padronizada no frontend.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um novo arquivo Markdown, `architecture/07-decisions/adr-004-api-error-handling-strategy.md`, é criado. O arquivo deve conter um ADR completo, incluindo as seguintes seções:
+
+1.  **Decisão:** Uma declaração clara, por exemplo: "Adotaremos o padrão **RFC 7807 (Problem Details for HTTP APIs)** como o formato mandatório para todas as respostas de erro da API com status `4xx` e `5xx`."
+2.  **Justificativa:** A justificação para a escolha (padrão da indústria, interoperabilidade, clareza para os consumidores da API).
+3.  **Estrutura do Payload de Erro:** A definição da estrutura JSON padrão para as respostas de erro, conforme a RFC 7807:
+    ```json
+    {
+      "type": "URL para a documentação do erro",
+      "title": "Título curto e legível do erro",
+      "status": 400,
+      "detail": "Explicação detalhada do erro.",
+      "instance": "Identificador único da ocorrência do erro (correlationId)"
+    }
+    ```
+4.  **Catálogo de Erros de Negócio:** Um esboço de um catálogo de erros de negócio comuns, mapeando erros internos para os `types` e `titles` públicos. (Ex: Erro de validação Zod -> `type: /errors/validation`, `title: Validation Error`).
+5.  **Implementação de Exemplo:** Um `snippet` de código mostrando como um `controller` Express deve construir e retornar uma resposta de erro usando este novo padrão.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que a RFC 7807 é o padrão mais robusto e adequado para o nosso caso de uso."]
+* **VALIDAÇÃO PENDENTE:** [O ADR gerado deve ser revisado e ratificado pelo Arquiteto Chefe. A implementação real no código ocorrerá numa fase posterior.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear o ficheiro exato a ser criado.
+2.  Garantir que todas as seções obrigatórias do ADR são criadas.
+3.  Executar `get_latest_lsp_diagnostics` para garantir que o ambiente está estável.
+4.  **Declarar Nível de Confiança (0 a 100%)**.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (revisão do documento Markdown gerado).
+7.  **Documentar Decisões Técnicas**.
