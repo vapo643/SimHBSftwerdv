@@ -1,0 +1,47 @@
+### Pacote de Ativação de Missão (PAM) V1.1 (Formalização da Estratégia de Ambiente de Desenvolvimento Local)
+
+* **Sumário da Missão (O Quê):** Gerar o documento `developer-experience-strategy.md`, detalhando a nossa estratégia para padronizar o ambiente de desenvolvimento local, com base nos "Subtópicos Obrigatórios" do Ponto 97 da nossa Doutrina Arquitetural.
+* **Intenção Estratégica (O Porquê):** Acelerar o *onboarding* de novos desenvolvedores, eliminar a inconsistência entre ambientes e melhorar a produtividade da equipa (Developer Experience - DX). Um ambiente de desenvolvimento padronizado e automatizado é um pilar fundamental de equipas de engenharia de alta performance.
+* **Histórico Relevante (Consulta Obrigatória):** A auditoria de conformidade identificou a falta de um ambiente de desenvolvimento padronizado como uma lacuna de prioridade P0 (Crítica).
+* **Modelo Mental (Como se Encaixa):** Aja como um Engenheiro de Plataforma (Platform Engineer). A sua tarefa é projetar a "experiência de desenvolvimento" ideal para a nossa equipa, focando em automação e consistência.
+
+---
+
+**[DIRETRIZ DE PESQUISA WEB (MANDATÓRIA)]**
+
+**Você está autorizado a utilizar a sua capacidade de pesquisa na web para consultar a documentação oficial e artigos de fontes confiáveis (ex: Microsoft, GitHub, VS Code, blogs de engenharia de renome) sobre "Dev Containers", "Mock Service Worker (MSW)" e o "Framework SPACE" para garantir que a sua proposta de estratégia seja de nível de produção.**
+
+---
+
+**IMPLEMENTAR:**
+Documento de Estratégia de Ambiente de Desenvolvimento Local (DX)
+
+**CURRENT STATE:**
+Cada desenvolvedor configura o seu ambiente de desenvolvimento local manualmente, o que leva a inconsistências, a um processo de *onboarding* lento e ao clássico problema "funciona na minha máquina".
+
+**EXPECTED (Estado Final de Sucesso):**
+Um novo arquivo Markdown, `architecture/09-governance/developer-experience-strategy.md`, é criado. O arquivo deve conter um ADR ou documento de estratégia, incluindo as seguintes seções:
+
+1.  **Decisão:** Uma declaração clara, por exemplo: "Adotaremos o padrão **Dev Containers** (usando `devcontainer.json`) como a nossa estratégia mandatória para a padronização do ambiente de desenvolvimento local."
+2.  **Justificativa:** A justificação para a escolha (reprodutibilidade, consistência, aceleração de *onboarding*, isolamento de dependências).
+3.  **Ferramentas Padronizadas:** A definição da nossa stack de desenvolvimento local que será incluída no Dev Container (ex: versões específicas de Node.js, PostgreSQL, Drizzle CLI, `zsh`, etc.).
+4.  **Estratégia para Simular Dependências Externas:** Como iremos simular as nossas dependências externas (Banco Inter, ClickSign) no ambiente local (ex: "Utilizaremos `msw` - Mock Service Worker - para mockar as APIs externas").
+5.  **Documentação de Onboarding Técnico:** Um esboço do nosso novo guia de *onboarding*, detalhando os passos para um novo desenvolvedor (instalar Docker, VS Code com a extensão de Dev Containers, clonar o repositório, e clicar em "Reopen in Container").
+6.  **Métricas de Eficácia do Desenvolvedor (DevEx/SPACE):** Uma definição inicial das métricas que usaremos para medir a nossa DX (ex: Tempo de Onboarding, Tempo de Build do CI, Frequência de Deploy), baseada no framework SPACE.
+
+---
+**DECLARAção DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que a tecnologia de Dev Containers é a mais adequada para o nosso ecossistema e que a equipa tem a capacidade de usar Docker."]
+* **VALIDAÇÃO PENDENTE:** [O ADR gerado deve ser revisado e ratificado pelo Arquiteto Chefe. A implementação real do `devcontainer.json` ocorrerá numa fase posterior.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear o ficheiro exato a ser criado.
+2.  Garantir que todas as seções obrigatórias do ADR/documento são criadas.
+3.  Executar `get_latest_lsp_diagnostics` para garantir que o ambiente está estável.
+4.  **Declarar Nível de Confiança (0 a 100%)**.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (revisão do documento Markdown gerado).
+7.  **Documentar Decisões Técnicas**.
