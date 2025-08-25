@@ -507,6 +507,40 @@ graph TD
 - **Shared Standards:** OpenAPI specs, event schemas
 - **Weekly Architecture Reviews:** Cross-team alignment
 
+### 6.3.5 Mapeamento Personas de Negócio → Entidades de Domínio
+
+#### **Resolução da Inconsistência Identificada em Auditoria**
+*Problema: Disconnect entre personas definidas em business-objectives-and-drivers.md e entidades técnicas do DDD*
+
+| Persona de Negócio | Bounded Context Principal | Agregado Raiz | Entidades Relacionadas | Jobs To Be Done Mapeados |
+|-------------------|-------------------------|---------------|----------------------|-------------------------|
+| **Analista de Crédito** | Credit Analysis Context | `Analise` | `Score`, `Decisao`, `PoliticaCredito` | Analisar propostas → ScoreService.calcularRisco() |
+| **Gerente de Loja** | Partner Management Context | `Parceiro` | `Loja`, `Comissao`, `TabelaComercial` | Monitorar performance → ParceiroService.gerarRelatorio() |
+| **Atendente de Aceite** | Contract Management Context | `Contrato` | `CCB`, `Assinatura`, `TermosContratuais` | Confirmar aceite → CCBGenerationService.processarAceite() |
+| **Administrador do Sistema** | Authentication & Authorization | `Usuario` | `Sessao`, `Permissao`, `Role` | Gerenciar usuários → RBACService.configurarPermissoes() |
+
+#### **Mapeamento de Capabilities Técnicas**
+```typescript
+// Exemplo: Analista de Crédito → Credit Analysis Context
+class AnaliseService {
+  // Job: "Analisar propostas de crédito de forma rápida e precisa"
+  async analisarProposta(propostaId: string): Promise<Decisao> {
+    // Pain: "Falta de informações consolidadas" 
+    const dadosConsolidados = await this.consolidarInformacoes(propostaId);
+    
+    // Gain: "Scores automáticos para apoio à decisão"
+    const score = await this.scoreService.calcularRisco(dadosConsolidados);
+    
+    // Job: "Aplicar políticas de crédito da instituição"
+    const politica = await this.politicaRepository.buscarVigente();
+    
+    return this.decisaoService.tomarDecisao(score, politica);
+  }
+}
+```
+
+*Nota do Arquiteto: Este mapeamento resolve a inconsistência identificada na auditoria Red Team, alinhando personas de negócio com implementação técnica.*
+
 ### 6.4 Evolução Organizacional Projetada
 
 #### **Crescimento para 50+ pessoas (Projeção 2026)**

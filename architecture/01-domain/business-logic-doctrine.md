@@ -14,6 +14,8 @@ Esta doutrina codifica as regras e padrões para implementação da lógica de n
 
 **Princípio Central:** *"A lógica de negócio deve ser transparente, testável e resiliente à mudança."*
 
+*Nota do Arquiteto: Esta doutrina foi refinada como resultado da remediação da Auditoria Red Team, incorporando especificações técnicas quantificáveis e alinhamento com framework de governança de riscos baseado em padrões da indústria financeira.*
+
 ---
 
 ## 1. 📐 Identificação das Invariantes de Negócio

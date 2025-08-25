@@ -19,10 +19,11 @@ O MVP (Minimum Viable Product) do Simpix é um sistema de gestão de crédito co
 - **Nosso produto** oferece uma solução integrada com assinatura digital e processamento de pagamentos automatizado
 
 ### **Métricas de Sucesso do MVP**
-- Redução de 70% no tempo médio de aprovação de propostas
+- Redução de 83% no tempo médio de análise de propostas (alinhado com KR1.1 do business-objectives-and-drivers.md: 24h → 4h)
 - Taxa de adoção digital > 80% pelos parceiros
 - Zero falhas de segurança em transações financeiras
-- Disponibilidade do sistema > 98%
+- Disponibilidade do sistema > 99.9% mensal (alinhado com SLO definido em nfr-requirements.md)
+- Meta de convergência: Atingir 99.9% até Q2 2025 (atual baseline: >98%)
 
 ---
 
