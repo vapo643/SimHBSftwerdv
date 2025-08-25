@@ -49,10 +49,10 @@ paths:
                 summary: Basic proposal example
                 value:
                   customerData:
-                    name: "João S."
-                    cpfMasked: "***.***.901-**"
-                    email: "j***@***.com"
-                    phone: "(11) ****-7766"
+                    name: "João Silva"
+                    cpf: "12345678901"
+                    email: "joao.silva@email.com"
+                    phone: "11999887766"
                     monthlyIncome: 5000
                   loanConditions:
                     requestedAmount: 10000
@@ -76,9 +76,9 @@ paths:
                       id: "b3b5433f-0efe-4bbb-be01-411e37c262a9"
                       status: "aguardando_analise"
                       customerData:
-                        name: "João S."
+                        name: "João Silva"
                         cpfMasked: "***.***.789-**"
-                        email: "j***@***.com"
+                        email: "joao.silva@email.com"
                         phone: "11999887766"
                         monthlyIncome: 5000
                       loanConditions:
@@ -93,7 +93,7 @@ paths:
         '400':
           description: Validation error
           content:
-            application/problem+json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
               examples:
@@ -115,7 +115,7 @@ paths:
         '500':
           description: Internal server error
           content:
-            application/problem+json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
 
@@ -276,7 +276,7 @@ paths:
         '500':
           description: Internal server error
           content:
-            application/problem+json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
 
@@ -314,9 +314,9 @@ paths:
                       id: "b3b5433f-0efe-4bbb-be01-411e37c262a9"
                       status: "aguardando_analise"
                       customerData:
-                        name: "Cliente S."
+                        name: "Cliente 1"
                         cpfMasked: "***.***.111-**"
-                        email: "c***@***.com"
+                        email: "cliente1@teste.com"
                         phone: "11999888777"
                         monthlyIncome: 15000
                       loanConditions:
@@ -329,7 +329,7 @@ paths:
         '404':
           description: Proposal not found
           content:
-            application/problem+json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
               examples:
@@ -347,7 +347,7 @@ paths:
         '500':
           description: Internal server error
           content:
-            application/problem+json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
 
@@ -379,13 +379,13 @@ paths:
         '404':
           description: Proposal not found
           content:
-            application/problem+json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
         '409':
           description: Invalid state transition
           content:
-            application/problem+json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
               examples:
@@ -407,7 +407,7 @@ paths:
         '500':
           description: Internal server error
           content:
-            application/problem+json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
 
@@ -457,25 +457,25 @@ paths:
         '403':
           description: Insufficient permissions
           content:
-            application/problem+json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
         '404':
           description: Proposal not found
           content:
-            application/problem+json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
         '409':
           description: Invalid state transition
           content:
-            application/problem+json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
         '500':
           description: Internal server error
           content:
-            application/problem+json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
 
@@ -525,25 +525,25 @@ paths:
         '403':
           description: Insufficient permissions
           content:
-            application/problem+json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
         '404':
           description: Proposal not found
           content:
-            application/problem+json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
         '409':
           description: Invalid state transition
           content:
-            application/problem+json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
         '500':
           description: Internal server error
           content:
-            application/problem+json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
 
@@ -586,25 +586,25 @@ paths:
         '403':
           description: Insufficient permissions
           content:
-            application/problem+json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
         '404':
           description: Proposal not found
           content:
-            application/problem+json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
         '409':
           description: Invalid state transition
           content:
-            application/problem+json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
         '500':
           description: Internal server error
           content:
-            application/problem+json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
 
@@ -682,19 +682,19 @@ paths:
         '403':
           description: Insufficient permissions
           content:
-            application/problem+json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
         '404':
           description: Proposal not found
           content:
-            application/problem+json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
         '409':
           description: Invalid state transition
           content:
-            application/problem+json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
         '429':
@@ -712,7 +712,7 @@ paths:
         '500':
           description: Internal server error
           content:
-            application/problem+json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
 
@@ -757,7 +757,7 @@ paths:
         '500':
           description: Internal server error
           content:
-            application/problem+json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
 
@@ -795,13 +795,13 @@ paths:
         '404':
           description: Proposal not found
           content:
-            application/problem+json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
         '500':
           description: Internal server error
           content:
-            application/problem+json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
 
@@ -866,7 +866,7 @@ paths:
         '404':
           description: Proposal not found
           content:
-            application/problem+json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
         '413':
@@ -878,7 +878,7 @@ paths:
         '500':
           description: Internal server error
           content:
-            application/problem+json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
 
@@ -915,7 +915,7 @@ paths:
         '500':
           description: Internal server error
           content:
-            application/problem+json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
 
@@ -976,13 +976,13 @@ paths:
         '404':
           description: Proposal not found
           content:
-            application/problem+json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
         '500':
           description: Internal server error
           content:
-            application/problem+json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
 
@@ -1018,13 +1018,13 @@ paths:
         '404':
           description: Proposal not found
           content:
-            application/problem+json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
         '500':
           description: Internal server error
           content:
-            application/problem+json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
 
@@ -1074,19 +1074,19 @@ paths:
         '400':
           description: Invalid step transition
           content:
-            application/problem+json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
         '404':
           description: Proposal not found
           content:
-            application/problem+json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
         '500':
           description: Internal server error
           content:
-            application/problem+json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
 
@@ -1124,19 +1124,19 @@ paths:
         '403':
           description: Insufficient permissions to view audit logs
           content:
-            application/problem+json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
         '404':
           description: Proposal not found
           content:
-            application/problem+json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
         '500':
           description: Internal server error
           content:
-            application/problem+json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
 
