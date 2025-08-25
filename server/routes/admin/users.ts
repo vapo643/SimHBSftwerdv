@@ -11,8 +11,8 @@ import { createUser } from "../../services/userService.js";
 
 const router = Router();
 
-// User Management Schema - imported from main routes for backward compatibility
-import { UserDataSchema } from "../../routes.js";
+// User Management Schema - imported from shared types
+import { UserDataSchema } from "../../../shared/types/user.js";
 
 // Helper function to get client IP
 function getClientIP(req: Request): string {

@@ -1,9 +1,7 @@
 import { createServerSupabaseAdminClient } from "../lib/supabase";
 import { z } from "zod";
 
-import { UserDataSchema } from "../routes";
-
-export type UserData = z.infer<typeof UserDataSchema>;
+import { UserDataSchema, UserData } from "../../shared/types/user";
 
 export async function createUser(userData: UserData) {
   const supabase = createServerSupabaseAdminClient();
