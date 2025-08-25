@@ -1,0 +1,48 @@
+### Pacote de Ativação de Missão (PAM) V1.0 (Formalização dos Padrões de Codificação)
+
+* **Sumário da Missão (O Quê):** Gerar o documento `coding-standards-guide.md`, detalhando a nossa doutrina para padrões de codificação, guias de estilo e a implementação de Quality Gates automatizados, com base nos "Subtópicos Obrigatórios" do Ponto 99.
+* **Intenção Estratégica (O Porquê):** Garantir a consistência, legibilidade e manutenibilidade da nossa base de código em escala. A padronização 100% automatizada e bloqueante no CI transforma a qualidade de uma "preferência" para uma "lei" não negociável.
+* **Histórico Relevante (Consulta Obrigatória):** A auditoria de conformidade identificou lacunas na formalização dos nossos padrões de codificação. Nós já temos `ESLint` e `Prettier` configurados; esta missão irá documentar formalmente essas configurações e definir os portões de qualidade.
+* **Modelo Mental (Como se Encaixa):** Aja como um Engenheiro de Qualidade de Software (Software Quality Engineer). A sua tarefa é definir as "leis de trânsito" do nosso código e os "radares" automáticos que irão fiscalizá-las.
+
+---
+
+**[DIRETRIZ DE PESQUISA WEB (MANDATÓRIA)]**
+
+**Você está autorizado a utilizar a sua capacidade de pesquisa na web para consultar a documentação oficial e artigos de fontes confiáveis (ex: Airbnb Style Guide, Google TypeScript Style Guide, documentação do `ESLint` e `Prettier`) sobre as melhores práticas de "padrões de codificação", "linters", "formatters" e "quality gates", para garantir que a nossa doutrina seja de nível de produção.**
+
+---
+
+**IMPLEMENTAR:**
+Documento de Doutrina de Padrões de Codificação e Quality Gates
+
+**CURRENT STATE:**
+Utilizamos `ESLint` e `Prettier`, mas não temos um guia de estilo centralizado que documente as nossas convenções, nem *quality gates* automáticos que bloqueiem *pull requests* que não cumpram os nossos padrões.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um novo arquivo Markdown, `architecture/09-governance/coding-standards-guide.md`, é criado. O arquivo deve conter as seguintes seções:
+
+1.  **Definição das Convenções:** Uma seção que documenta as nossas principais convenções de nomenclatura e estilo para TypeScript, React e Node.js.
+2.  **Configuração de Linters e Formatters:** Documentar as nossas configurações `eslintrc.js` e `.prettierrc` como a nossa "fonte da verdade", com uma explicação do "porquê" por trás das regras principais.
+3.  **Métricas de Qualidade de Código Estático:** Definir as métricas que iremos monitorar (ex: Complexidade Cognitiva, Maintainability Index, Profundidade de Herança).
+4.  **Definição de Quality Gates Automatizados:** A seção mais crítica. Descrever como iremos configurar o nosso pipeline do GitHub Actions para:
+    * **Bloquear Pull Requests** se o `lint` falhar.
+    * **Bloquear Pull Requests** se a cobertura de testes (`code coverage`) for inferior à nossa meta de 85%.
+    * **Bloquear Pull Requests** se a análise de segurança (Snyk/CodeQL) detetar vulnerabilidades de alta ou crítica severidade.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO. Ex: Risco de que os Quality Gates sejam demasiado restritivos inicialmente e abrandem o desenvolvimento.]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que bloquear PRs com base em cobertura de testes e vulnerabilidades é a melhor prática de DevSecOps para a nossa equipa."]
+* **VALIDAÇÃO PENDENTE:** [O documento gerado deve ser revisado e ratificado pelo Arquiteto Chefe.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear o ficheiro exato a ser criado.
+2.  Garantir que todas as 4 seções obrigatórias estão completas.
+3.  Executar `get_latest_lsp_diagnostics` para garantir que o ambiente está estável.
+4.  **Declarar Nível de Confiança (0 a 100%)**.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (revisão do documento Markdown gerado).
+7.  **Documentar Decisões Técnicas**.
