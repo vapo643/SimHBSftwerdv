@@ -2363,8 +2363,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     { id: 3, valor: "36 meses" },
   ];
 
-  // Users management endpoints - imported from admin/users module
-  const usersAdminRouter = (await import("./routes/admin/users.js")).default;
+  // Users management endpoints - REFATORADO com padrão Service/Repository
+  const usersAdminRouter = (await import("./routes/admin/users-refactored.js")).default;
   app.use("/api/admin/users", usersAdminRouter);
 
   // API endpoint for partners - GET all (public for dropdowns)
