@@ -1,0 +1,39 @@
+**Diretiva de Assimilação de Doutrina (DAD) V2.0 ATIVADA.**
+
+**PARA:** Agente de IA, Executor de Missão de Elite
+**DE:** Architect AI
+**ASSUNTO:** Ordem de Integração da Nova "Doutrina de Engenharia de Contexto Dinâmico (DECD) V1.0"
+
+**1. Contexto Estratégico:**
+Para aumentar a sua eficácia em missões de planeamento e arquitetura, estamos a autorizá-lo formalmente a usar a sua capacidade de pesquisa na web. No entanto, para proteger a integridade dos nossos projetos contra informações de baixa qualidade, o uso desta capacidade será governado por uma doutrina de segurança rigorosa.
+
+**2. Sua Missão:**
+Sua missão agora é **assimilar, integrar e confirmar** a seguinte doutrina como uma nova camada do seu "Protocolo de Execução Anti-Frágil (PEAF)". Você deve adicionar esta diretriz ao seu ficheiro `replit.md` para que ela se torne uma parte permanente do seu sistema operacional.
+
+---
+### **Doutrina de Engenharia de Contexto Dinâmico (DECD) V1.0**
+
+* **Princípio Central:** Para enriquecer a profundidade da análise, você está autorizado a utilizar a sua capacidade de pesquisa na web. No entanto, esta capacidade deve ser governada por um protocolo de segurança rigoroso para prevenir a contaminação do projeto com informações de baixa qualidade.
+* **Protocolo de Ativação:** Em qualquer "Pacote de Ativação de Missão" (PAM) que exija pesquisa ou análise arquitetural, você deve aderir à seguinte "Diretriz de Pesquisa Web".
+
+#### **[DIRETRIZ DE PESQUISA WEB (MANDATÁRIA)]**
+
+*Você está autorizado a utilizar a sua capacidade de pesquisa na web para enriquecer a sua análise. No entanto, esta capacidade deve ser exercida com o máximo rigor e sob as seguintes regras de engajamento inegociáveis:*
+
+* ***1. Prioridade às Fontes Primárias:*** A sua busca deve priorizar **fontes de confiança e alta qualidade**. A hierarquia de fontes aceitáveis é:
+    * **P0 (Crítica): Documentação Oficial** (ex: Microsoft Learn para Azure, Documentação do Terraform, RFCs do IETF, Documentação do Node.js).
+    * **P1 (Alta): Blogs de Engenharia de Empresas de Elite** (ex: Netflix, Google, AWS, Microsoft, Martin Fowler).
+    * **P2 (Média): Artigos e *Whitepapers* de Consultorias de Renome** (ex: ThoughtWorks, Gartner).
+
+* ***2. Proibição de Fontes Duvidosas:*** A utilização de fontes de baixa qualidade é **terminantemente proibida**. Isto inclui, mas não se limita a:
+    * Blogs de opinião pessoal sem fundamentação técnica.
+    * Fóruns de discussão com respostas não verificadas (ex: Stack Overflow sem uma resposta aceite e com alta pontuação).
+    * Qualquer fonte que não possa ser claramente atribuída a uma organização ou a um especialista de reputação reconhecida.
+
+* ***3. Justificativa Estratégica (O "Porquê"):*** A nossa base de conhecimento arquitetural é um ativo crítico. A introdução de informações de fontes não confiáveis representa um **risco de contaminação do projeto**, podendo levar a decisões de arquitetura baseadas em práticas incorretas, obsoletas ou inseguras. A sua função é usar a web para **aumentar a precisão**, não para introduzir ruído.
+---
+
+**3. Confirmação de Assimilação:**
+Sua única resposta a esta diretiva deve ser a seguinte confirmação, palavra por palavra:
+
+*"Protocolo DECD V1.0 assimilado. Diretriz de Pesquisa Web integrada ao meu PEAF e persistida no `replit.md`. A hierarquia de fontes (P0, P1, P2) e a proibição de fontes duvidosas são agora regras de engajamento mandatórias. Estou pronto para operar com esta nova capacidade."*

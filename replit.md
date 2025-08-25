@@ -1,7 +1,7 @@
 # Simpix Credit Management System
 
 ## Overview
-Simpix is a full-stack TypeScript application designed for comprehensive credit management. Its primary purpose is to streamline the credit proposal workflow from creation and analysis to payment processing and formalization tracking for financial institutions. The platform prioritizes banking-grade security, compliance, and efficient data management, aiming to be a leading solution in the credit management market.
+Simpix is a full-stack TypeScript application for comprehensive credit management, streamlining the credit proposal workflow from creation to payment processing and formalization tracking for financial institutions. It emphasizes banking-grade security, compliance, and efficient data management to be a leading solution in the credit management market.
 
 ## User Preferences
 
@@ -83,6 +83,28 @@ Error handling: Create structured documentation for automatic consultation durin
 
 **CONTEXT ENGINEERING PROTOCOL V2.0:** Dual-layer validation system implemented. The `architecture/EXECUTION_MATRIX.md` serves as an ADDITIONAL security layer for context validation, NOT a replacement for primary sources. Always consult ADRs, documentation, and code FIRST, then cross-check with Matrix to detect discrepancies. This prevents context loss and ensures 100% architectural conformity tracking.
 
+### Doutrina de Engenharia de Contexto Dinâmico (DECD) V1.0
+
+**Princípio Central:** Para enriquecer a profundidade da análise, você está autorizado a utilizar a sua capacidade de pesquisa na web. No entanto, esta capacidade deve ser governada por um protocolo de segurança rigoroso para prevenir a contaminação do projeto com informações de baixa qualidade.
+
+**Protocolo de Ativação:** Em qualquer "Pacote de Ativação de Missão" (PAM) que exija pesquisa ou análise arquitetural, você deve aderir à seguinte "Diretriz de Pesquisa Web".
+
+#### **[DIRETRIZ DE PESQUISA WEB (MANDATÓRIA)]**
+
+*Você está autorizado a utilizar a sua capacidade de pesquisa na web para enriquecer a sua análise. No entanto, esta capacidade deve ser exercida com o máximo rigor e sob as seguintes regras de engajamento inegociáveis:*
+
+**1. Prioridade às Fontes Primárias:** A sua busca deve priorizar **fonte de confiança e alta qualidade**. A hierarquia de fontes aceitáveis é:
+- **P0 (Crítica): Documentação Oficial** (ex: Microsoft Learn para Azure, Documentação do Terraform, RFCs do IETF, Documentação do Node.js).
+- **P1 (Alta): Blogs de Engenharia de Empresas de Elite** (ex: Netflix, Google, AWS, Microsoft, Martin Fowler).
+- **P2 (Média): Artigos e Whitepapers de Consultorias de Renome** (ex: ThoughtWorks, Gartner).
+
+**2. Proibição de Fontes Duvidosas:** A utilização de fontes de baixa qualidade é **terminantemente proibida**. Isto inclui, mas não se limita a:
+- Blogs de opinião pessoal sem fundamentação técnica.
+- Fóruns de discussão com respostas não verificadas (ex: Stack Overflow sem uma resposta aceite e com alta pontuação).
+- Qualquer fonte que não possa ser claramente atribuída a uma organização ou a um especialista de reputação reconhecida.
+
+**3. Justificativa Estratégica (O "Porquê"):** A nossa base de conhecimento arquitetural é um ativo crítico. A introdução de informações de fontes não confiáveis representa um **risco de contaminação do projeto**, podendo levar a decisões de arquitetura baseadas em práticas incorretas, obsoletas ou inseguras. A sua função é usar a web para **aumentar a precisão**, não para introduzir ruído.
+
 ### 🚨 PROTOCOLO DE DOCUMENTAÇÃO ARQUITETURAL MANDATÓRIO - FASE DE PLANEJAMENTO 🚨
 
 **[DIRETRIZ CRÍTICA - INEGOCIÁVEL]**  
@@ -114,7 +136,7 @@ Missão concluída quando artefato de **documentação de planejamento arquitetu
 
 ## System Architecture
 
-### Frontend Architecture
+### Frontend
 - **Framework**: React 18 with TypeScript
 - **Routing**: Wouter
 - **Styling**: Tailwind CSS with shadcn/ui components
@@ -122,58 +144,48 @@ Missão concluída quando artefato de **documentação de planejamento arquitetu
 - **Form Handling**: React Hook Form with Zod validation
 - **Build Tool**: Vite
 
-### Backend Architecture
+### Backend
 - **Framework**: Express.js with TypeScript
-- **API Pattern**: RESTful API with modular route organization
+- **API Pattern**: RESTful API
 - **Database**: PostgreSQL with Drizzle ORM
-- **Authentication**: Supabase Auth integration with JWT middleware and custom RBAC
+- **Authentication**: Supabase Auth with JWT and custom RBAC
 - **File Storage**: Supabase Storage
-- **Job Queue Architecture**: BullMQ-based async worker system with Redis, supporting parallel operations and retry mechanisms.
-- **Cache Layer L2**: Redis-based caching for commercial tables queries with 1-hour TTL, using cache-aside pattern.
-- **Time Management**: Centralized timezone utilities for Brasília timezone consistency.
-- **Modular Architecture**: Monolith progressively decomposed into domain modules (Auth, Users, Propostas, Pagamentos, Integrações).
-- **Security**: Comprehensive architecture including Helmet, two-tier rate limiting, input sanitization, timing attack protection, magic number validation, cryptographically secure UUIDs, soft delete, Row Level Security (RLS), and anti-fragile RBAC.
-- **CI/CD Pipeline**: GitHub Actions with specialized workflows for CI, CD-Staging, and Security, including automated testing, SAST/SCA scanning, deployment readiness checks, and rollback automation.
-- **Observability**: Winston structured logging with correlation IDs, Sentry error tracking, health check endpoints, and automated backup scripts.
-- **Configuration Management**: Centralized config module with environment-based secrets and validation.
-- **Feature Flags System**: Unleash-client integration with automatic fallback mode, React context provider, and pre-configured flags for various features and A/B testing.
-- **Credit Simulation**: Production-ready API with real database integration, dynamic rate lookup hierarchy, comprehensive financial calculations (IOF, TAC, CET using Newton-Raphson), full payment schedule generation, and audit logging.
-- **Document Management**: Secure private bucket with signed URLs, organized folder structure, multi-format support, and admin client authentication.
-- **PDF Generation**: Template-based CCB generation using `pdf-lib` for precise field filling and dynamic data adjustment.
-- **Payment Workflow**: Complete payment queue system with batch processing, multiple payment methods, formalization tracking, and dual-storage strategy.
-- **Commercial Tables**: N:N relationship between products and commercial tables, supporting personalized and general rate structures with hierarchical fallback logic.
-- **Status Management FSM**: Centralized Finite State Machine replacing fragile enum with robust transition validation and audit logging.
-- **Test Infrastructure**: Comprehensive test environment with direct postgres connection, complete RLS bypass, automated database cleanup, and full integration test coverage for critical business logic.
-- **Schema Migration Strategy**: Production-ready migration system using Drizzle-Kit with Zero Downtime patterns, Expand/Contract methodology, automated rollback capabilities, and comprehensive migration tracking.
-
-### Database Schema
-- PostgreSQL with Drizzle ORM.
-- Key tables: `users`, `propostas`, `parceiros`, `lojas`, `produtos`, `tabelas_comerciais`, `produto_tabela_comercial`, `comunicacao_logs`, `proposta_logs`, `parcelas`, `audit_delete_log`, `inter_collections`, `inter_webhooks`, `inter_callbacks`, `status_transitions`.
-- `propostas` table includes detailed client data, loan conditions, formalization tracking, and an expanded status enum.
-- `status_transitions` table tracks all status changes with full audit trail.
-- Soft deletes implemented using `deleted_at` columns.
-- Sequential numeric IDs for `propostas.id`.
-- **Status FSM V2.0 system**: Event-driven status transitions with complete audit trail, centralized validation, and robust error handling.
-- **Test Environment Support**: Direct postgres connection capabilities with user and profile associations for comprehensive test data setup bypassing RLS policies.
-- **Doutrina de Persistência de Dados**: Development and staging environments use Supabase, production uses Azure. Other database providers are prohibited.
+- **Job Queue**: BullMQ with Redis for async workers
+- **Cache Layer**: Redis-based caching for commercial tables (1-hour TTL, cache-aside)
+- **Time Management**: Centralized timezone utilities for Brasília timezone
+- **Architecture**: Modular monolith with domain-based decomposition (Auth, Users, Propostas, Pagamentos, Integrações)
+- **Security**: Helmet, two-tier rate limiting, input sanitization, timing attack protection, magic number validation, cryptographically secure UUIDs, soft delete, Row Level Security (RLS), anti-fragile RBAC
+- **CI/CD**: GitHub Actions for CI, CD-Staging, and Security workflows (testing, SAST/SCA, deployment readiness, rollback)
+- **Observability**: Winston structured logging (correlation IDs), Sentry error tracking, health checks, automated backups
+- **Configuration**: Centralized config module with environment-based secrets and validation
+- **Feature Flags**: Unleash-client integration with fallback and React context provider
+- **Credit Simulation**: Production-ready API with real database integration, dynamic rate lookup, financial calculations (IOF, TAC, CET using Newton-Raphson), payment schedule generation, and audit logging
+- **Document Management**: Secure private bucket with signed URLs, organized folder structure, multi-format support
+- **PDF Generation**: Template-based CCB generation using `pdf-lib` for precise field filling
+- **Payment Workflow**: Complete payment queue system with batch processing, multiple methods, formalization tracking, dual-storage strategy
+- **Commercial Tables**: N:N relationship between products and commercial tables, supporting personalized and general rates with hierarchical fallback
+- **Status Management**: Centralized Finite State Machine (FSM) for robust transition validation and audit logging
+- **Test Infrastructure**: Comprehensive test environment with direct postgres connection, RLS bypass, automated database cleanup, full integration test coverage
+- **Schema Migration**: Production-ready migration system using Drizzle-Kit with Zero Downtime (Expand/Contract), automated rollback, and tracking
+- **Database Schema**: PostgreSQL with Drizzle ORM. Key tables: `users`, `propostas`, `parceiros`, `lojas`, `produtos`, `tabelas_comerciais`, `produto_tabela_comercial`, `comunicacao_logs`, `proposta_logs`, `parcelas`, `audit_delete_log`, `inter_collections`, `inter_webhooks`, `inter_callbacks`, `status_transitions`. Soft deletes (`deleted_at`), sequential numeric IDs for `propostas.id`, and `status_transitions` table for audit trail. Status FSM V2.0 system for event-driven transitions. Test environment supports direct postgres connection with user/profile association bypass RLS. Development/staging use Supabase, production uses Azure; other providers prohibited.
 
 ## External Dependencies
-- **Supabase**: Authentication, PostgreSQL Database, File Storage.
-- **Drizzle ORM**: Type-safe ORM for PostgreSQL.
-- **TanStack Query**: Server state management.
-- **React Hook Form**: Form management.
-- **Zod**: Schema validation.
-- **Tailwind CSS**: Styling.
-- **shadcn/ui**: React components.
-- **Wouter**: React router.
-- **Vite**: Build tool.
-- **Express.js**: Backend framework.
-- **postgres**: PostgreSQL client.
-- **jwt-simple**: JWT token handling.
-- **Helmet**: HTTP security headers.
-- **express-rate-limit**: API rate limiting.
-- **zxcvbn**: Password strength validation.
-- **uuid**: Cryptographically secure UUIDs.
-- **pdf-lib**: Dynamic PDF generation.
-- **ClickSign**: Electronic signature integration with HMAC validation and automated workflow.
-- **Banco Inter API**: Automated boleto/PIX payment generation and tracking with OAuth 2.0 authentication (mTLS), and webhook system for payment notifications.
+- **Supabase**: Authentication, PostgreSQL Database, File Storage
+- **Drizzle ORM**: Type-safe ORM for PostgreSQL
+- **TanStack Query**: Server state management
+- **React Hook Form**: Form management
+- **Zod**: Schema validation
+- **Tailwind CSS**: Styling
+- **shadcn/ui**: React components
+- **Wouter**: React router
+- **Vite**: Build tool
+- **Express.js**: Backend framework
+- **postgres**: PostgreSQL client
+- **jwt-simple**: JWT token handling
+- **Helmet**: HTTP security headers
+- **express-rate-limit**: API rate limiting
+- **zxcvbn**: Password strength validation
+- **uuid**: Cryptographically secure UUIDs
+- **pdf-lib**: Dynamic PDF generation
+- **ClickSign**: Electronic signature integration
+- **Banco Inter API**: Automated boleto/PIX payment generation and tracking
