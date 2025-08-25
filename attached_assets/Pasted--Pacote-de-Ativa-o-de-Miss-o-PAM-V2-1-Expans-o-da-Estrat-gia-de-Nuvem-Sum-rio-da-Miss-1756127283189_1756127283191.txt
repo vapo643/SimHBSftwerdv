@@ -1,0 +1,41 @@
+### Pacote de Ativação de Missão (PAM) V2.1 (Expansão da Estratégia de Nuvem)
+
+* **Sumário da Missão (O Quê):** Expandir o nosso `ADR-001: Azure Landing Zone` existente para incluir os "Subtópicos Obrigatórios" restantes do Ponto 62 da nossa Doutrina Arquitetural, focando em Governança, Estratégia de Saída e a visão para uma Plataforma de Desenvolvedor Interna.
+* **Intenção Estratégica (O Porquê):** Elevar o nosso plano de nuvem de uma simples estrutura de "andaime" para uma arquitetura de governança completa. A formalização destes pontos garante que a nossa presença na Azure seja não apenas funcional, mas também segura, de custo controlado e estrategicamente alinhada a longo prazo.
+* **Histórico Relevante (Consulta Obrigatória):** O `ADR-001` atual já define a nossa estrutura de subscrição e Resource Groups. Esta missão irá construir sobre essa fundação.
+* **Modelo Mental (Como se Encaixa):** Aja como um Arquiteto de Nuvem Sênior a refinar a estratégia de governança da empresa. O foco é em planejamento de longo prazo, mitigação de riscos (como o *vendor lock-in*) e otimização da produtividade do desenvolvedor.
+
+---
+
+**IMPLEMENTAR:**
+Expansão do ADR da Azure Landing Zone
+
+**CURRENT STATE:**
+O `ADR-001` define a estrutura básica da nossa Landing Zone, mas não cobre os aspectos avançados de governança, estratégia de saída e a visão para uma plataforma de desenvolvedor.
+
+**EXPECTED (Estado Final de Sucesso):**
+O arquivo `architecture/07-decisions/adr-001-azure-landing-zone.md` é **modificado** para incluir as seguintes novas seções:
+
+1.  **Desenvolvimento de uma Estratégia de Saída (Exit Strategy):** Uma seção que analisa o nosso risco de *vendor lock-in* com a Azure e descreve estratégias de mitigação (ex: "Utilizar tecnologias de padrão aberto como Kubernetes/Container Apps e PostgreSQL; encapsular interações com serviços Azure em módulos `infrastructure` bem definidos para facilitar a substituição").
+2.  **Modelo de Governança de Nuvem (Cloud Governance Model):** Uma seção que detalha a nossa abordagem à governança, incluindo:
+    * **Controle de Custos (FinOps):** Como iremos usar *tags*, orçamentos e alertas da Azure.
+    * **Políticas de Segurança:** Como iremos usar o Azure Policy para impor regras de segurança (ex: "não permitir IPs públicos em máquinas virtuais").
+    * **Gestão de Identidade (RBAC):** O nosso modelo de papéis (Owner, Contributor, Reader) para os Resource Groups.
+3.  **Estratégia de Plataforma de Desenvolvedor Interna (IDP):** Uma seção que descreve a nossa visão de longo prazo para criar uma IDP, com "caminhos dourados" (*golden paths*) para os desenvolvedores, abstraindo a complexidade da nuvem.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que uma estratégia de `Exit` baseada em abstração de código é a mais pragmática para o nosso estágio."]
+* **VALIDAÇÃO PENDENTE:** [O documento expandido deve ser revisado e ratificado pelo Arquiteto Chefe.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear o ficheiro exato a ser modificado.
+2.  Garantir que as 3 novas seções obrigatórias são adicionadas ao ADR.
+3.  Executar `get_latest_lsp_diagnostics` para garantir que o ambiente está estável.
+4.  **Declarar Nível de Confiança (0 a 100%)**.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (revisão do documento Markdown gerado).
+7.  **Documentar Decisões Técnicas**.
