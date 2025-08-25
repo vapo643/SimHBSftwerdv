@@ -1,0 +1,38 @@
+### Pacote de Ativação de Missão (PAM) V1.0 (Conclusão dos Diagramas de Sequência)
+
+* **Sumário da Missão (O Quê):** Expandir a nossa documentação de Diagramas de Sequência para cobrir todos os "Subtópicos Obrigatórios" restantes do Ponto 29, focando nos fluxos críticos de Proposta e Pagamento e na modelagem de "unhappy paths".
+* **Intenção EstratÉgica (O Porquê):** Garantir que tenhamos uma compreensão visual completa não apenas de como o nosso sistema funciona, mas, mais importante, de como ele falha. A modelagem de "unhappy paths" e a análise de pontos de falha são cruciais para a construção de um sistema verdadeiramente resiliente.
+* **Histórico Relevante (Consulta Obrigatória):** A auditoria de conformidade identificou que o nosso diagrama de sequência de autenticação está completo, mas que faltam os diagramas para outros fluxos críticos e a análise de falhas.
+* **Modelo Mental (Como se Encaixa):** Aja como um Arquiteto de Confiabilidade (Reliability Architect). A sua tarefa é pensar como um pessimista: mapear todos os pontos onde o sistema pode quebrar e visualizar como ele deve se recuperar.
+
+---
+
+**IMPLEMENTAR:**
+Expansão e Conclusão da Documentação de Diagramas de Sequência
+
+**CURRENT STATE:**
+O arquivo `architecture/08-diagrams/sequence-diagram-authentication-flow.md` existe e está completo. No entanto, faltam os diagramas para outros fluxos de negócio e a análise aprofundada de cenários de falha.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  **Dois Novos Diagramas de Sequência são criados** em arquivos separados no diretório `architecture/08-diagrams/`:
+    * `sequence-diagram-proposal-flow.md`: Mapeando o fluxo de criação e aprovação de uma proposta.
+    * `sequence-diagram-payment-flow.md`: Mapeando o fluxo de geração de boletos e processamento de webhooks de pagamento.
+2.  **O Diagrama de Autenticação Existente é Atualizado:** O arquivo `sequence-diagram-authentication-flow.md` é enriquecido para incluir a modelagem detalhada de múltiplos **"Unhappy Paths"** (ex: senha incorreta, token expirado, perfil não encontrado).
+3.  **Análise de Pontos de Falha:** Cada um dos três documentos de diagrama deve agora incluir uma nova seção de **"Análise de Pontos de Falha Distribuídos"** e **"Análise de Latência Preditiva"**, identificando os riscos e as mitigações.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que a análise de latência pode ser baseada em estimativas informadas pela nossa stack tecnológica atual."]
+* **VALIDAÇÃO PENDENTE:** [Os diagramas gerados devem ser revisados e ratificados pelo Arquiteto Chefe.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear os dois ficheiros a serem criados e o ficheiro a ser modificado.
+2.  Garantir que os novos diagramas e as análises de falha estão completos e precisos.
+3.  Executar `get_latest_lsp_diagnostics` para garantir que o ambiente está estável.
+4.  **Declarar Nível de Confiança (0 a 100%)**.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (revisão dos documentos Markdown gerados).
+7.  **Documentar Decisões Técnicas**.
