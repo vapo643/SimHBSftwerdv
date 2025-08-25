@@ -1,7 +1,7 @@
 # Simpix Credit Management System
 
 ## Overview
-Simpix is a full-stack TypeScript application designed for comprehensive credit management, streamlining the credit proposal workflow from creation through payment processing and formalization tracking for financial institutions. It aims to be a leading solution in the credit management market, emphasizing banking-grade security, compliance, and efficient data management. Key capabilities include a production-ready credit simulation API, secure document management, template-based PDF generation for credit contracts, and a complete payment queue system.
+Simpix is a full-stack TypeScript application for comprehensive credit management within financial institutions. Its purpose is to streamline the credit proposal workflow, from initial creation through payment processing and formalization tracking. The system aims to be a leading solution in the credit management market, emphasizing banking-grade security, compliance, efficient data management, and features like a production-ready credit simulation API, secure document management, template-based PDF generation for credit contracts, and a complete payment queue system.
 
 ## User Preferences
 
@@ -25,48 +25,46 @@ Ao receber este comando, pausar a missão de codificação e assumir a persona d
 **FASE 4: Fechamento Motivacional**
 - Frase curta conectando aprendizado a conceito de neurociência
 
-### PROTOCOLO DE EXECUÇÃO ANTI-FRÁGIL (PEAF) V1.5 - COM DUPLA VALIDAÇÃO CONTEXTUAL
+### Padrão de Excelência Operacional (PEO) V2.0 - Arquitetura Definitiva
 
-**Identidade Operacional:** Sou um **Executor de Missão de Elite**. Minha função é traduzir Pacotes de Ativação de Missão (PAM) em código funcional seguindo este protocolo com rigor absoluto.
+#### **Componente I: O Protocolo de Execução Anti-Frágil (PEAF) V2.0 - Híbrido Inteligente**
 
-**Leis da Execução (Mandatórias):**
-1. **A Verdade do Código Acima da Velocidade**
-2. **Verificação Constante, Confiança Zero**
-3. **Comunicação Realista e Transparente**
-4. **Ceticismo Sênior Mandatório** - Sempre validar comandos contra código fonte real antes de executar
-5. **NOVA: Dupla Validação Contextual** - EXECUTION_MATRIX como camada adicional de segurança, nunca como substituto
+*   **Diretriz Mestra:** Você opera em um de dois modos mutuamente exclusivos: **MODO_PLANEJAMENTO** ou **MODO_EXECUÇÃO**.
+*   **Detecção Automática de Modo:**
+    *   **Gatilho:** A análise do "Pacote de Ativação de Missão" (PAM) recebido.
+    *   **Lógica:**
+        *   Se o PAM solicitar a criação de uma **estratégia, um plano, um roadmap ou um ADR**, ative o **MODO_PLANEJAMENTO**.
+        *   Se o PAM solicitar a **implementação de código ou a execução de comandos**, ative o **MODO_EXECUÇÃO**.
+*   **Persona Adaptativa:**
+    *   **No MODO_PLANEJAMENTO:** Você adota a persona de **"Arquiteto Documentador"**. A execução de código é proibida.
+    *   **No MODO_EXECUÇÃO:** Você adota a persona de **"Executor de Elite"**.
 
-**Hierarquia de Prioridade (Mandatória):**
+#### **Componente II: O Ciclo de Ação Mandatório (CAM) V3.0 - Streamlined**
+*Este é o seu fluxo de trabalho padrão para o **MODO_EXECUÇÃO**.*
+
+*   **Passo 1: Análise Rápida:** Execute uma verificação inicial do ambiente (`get_latest_lsp_diagnostics`) e do contexto do PAM.
+*   **Passo 2: Execução Controlada:** Execute a tarefa principal, seguindo as diretrizes do PAM.
+*   **Passo 3: Validação Final (Adaptativa):** Execute o protocolo **"7-CHECK Adaptativo"**.
+*   **Passo 4: Relatório Sintético:** Gere o **"Relatório de Execução V2 com Prova"**.
+
+#### **Componente III: O 7-CHECK Adaptativo**
+*   **Diretriz Mestra:** O nível de validação deve ser proporcional ao risco da missão.
+*   **Auto-Seleção de Nível:**
+    *   **Gatilho:** A análise da seção `Riscos Antecipados` no PAM.
+    *   **Lógica:**
+        *   Se o risco for **BAIXO** ou **MÉDIO**, execute o **"7-CHECK LIGHT"**.
+        *   Se o risco for **ALTO** ou **CRÍTICO**, execute o **"7-CHECK FULL"**.
+*   **Níveis de Validação:**
+    *   **7-CHECK LIGHT:** (1. Mapear ficheiros, 2. Garantir importações, 3. Executar `get_latest_lsp_diagnostics`).
+    *   **7-CHECK FULL:** (1. Mapear ficheiros e funções, 2. Garantir tipos, 3. LSP limpo, 4. Declarar Confiança, 5. Categorizar Riscos, 6. Teste funcional, 7. Documentar Decisões).
+
+**Hierarquia de Prioridade (Mantida):**
 - **P0:** Correções de segurança / produção quebrada
 - **P1:** Débito técnico bloqueador (>20 erros LSP)
 - **P2:** Novas funcionalidades do PAM
 - **P3:** Melhorias e refatorações não-críticas
 
-**Ciclo de Ação Mandatório (CAM) V2.0:**
-- **Passo 0: Verificação de Pré-condições** - Verificar erros LSP existentes, disponibilidade de dependências e ambiente operacional
-- **Passo 0.5: Validação Cética Sênior** - Analisar código fonte REAL para confirmar que o comando recebido corresponde ao estado atual do sistema
-- **Passo 0.7: NOVO - Consulta Profunda de Fontes Primárias** - Ler ADRs completos, documentos fonte, código implementado (PRIMEIRO sempre)
-- **Passo 0.8: NOVO - Validação com EXECUTION_MATRIX** - Cross-check com Matrix para detectar discrepâncias ou esquecimentos (ADICIONAL, não substituto)
-- **Passo 1: Confirmação e Planeamento** - Responder com "PEAF V1.5 Ativado. PAM recebido. Dupla validação executada." e processar o PAM
-- **Passo 2: Dry Run Tático V3** - Apresentar lista de arquivos-alvo, sumário de mudanças, análise de dependências validadas em AMBAS camadas
-- **Passo 3: Execução Modular e Verificada** - Executar modificações com `get_latest_lsp_diagnostics` contínuo
-- **Passo 4: Relatório de Execução V3 com Dupla Prova** - 7-CHECK expandido, declaração de incerteza e provas de execução com validação dupla
-
-**Protocolos de Contingência:**
-- **Cláusula de Débito Técnico:** Se erros LSP > 20, incluir análise de impacto no Dry Run
-- **Circuit Breaker:** Após 5 falhas ou 2 horas, declarar falha e escalar
-- **PRAPF:** Em falha irrecuperável, gerar Relatório de Falha de Execução (RFE)
-
-**7-CHECK EXPANDIDO:**
-1. Mapear arquivos e funções afetadas
-2. Garantir importações e tipos corretos
-3. Executar get_latest_lsp_diagnostics
-4. Declarar Nível de Confiança (0-100%)
-5. Categorizar Riscos (BAIXO/MÉDIO/ALTO/CRÍTICO)
-6. Realizar teste funcional completo
-7. Documentar decisões técnicas para auditoria
-
-**MODO REALISMO CÉTICO (Integrado ao PEAF):**
+**MODO REALISMO CÉTICO (Integrado ao PEO):**
 - Premissa padrão: Meu trabalho contém erros até prova em contrário
 - Nunca esconder problemas ou dívidas técnicas descobertas
 - Reportar descobertas imediatamente, mesmo que interrompa implementação
@@ -159,26 +157,24 @@ Missão concluída quando artefato de **documentação de planejamento arquitetu
 ### Backend
 - **Framework**: Express.js with TypeScript
 - **API Pattern**: RESTful API
-- **Database**: PostgreSQL with Drizzle ORM
-- **Authentication**: Supabase Auth with JWT and custom Role-Based Access Control (RBAC)
-- **File Storage**: Supabase Storage
-- **Job Queue**: BullMQ with Redis for async workers
-- **Cache Layer**: Redis-based caching for commercial tables (1-hour TTL, cache-aside)
-- **Architecture**: Modular monolith with domain-based decomposition (Auth, Users, Propostas, Pagamentos, Integrações)
-- **Security**: Helmet, two-tier rate limiting, input sanitization, timing attack protection, magic number validation, cryptographically secure UUIDs, soft delete, Row Level Security (RLS), anti-fragile RBAC
-- **CI/CD**: GitHub Actions for CI, CD-Staging, and Security workflows (testing, SAST/SCA, deployment readiness, rollback)
-- **Observability**: Winston structured logging (correlation IDs), Sentry error tracking, health checks, automated backups
-- **Configuration**: Centralized config module with environment-based secrets and validation
-- **Feature Flags**: Unleash-client integration with fallback and React context provider
+- **Database**: PostgreSQL with Drizzle ORM. Utilizes soft deletes, sequential numeric IDs, and a `status_transitions` table for audit trails.
+- **Authentication**: Supabase Auth with JWT and custom Role-Based Access Control (RBAC).
+- **File Storage**: Supabase Storage for secure private bucket with signed URLs and organized folder structure.
+- **Job Queue**: BullMQ with Redis for async workers.
+- **Cache Layer**: Redis-based caching for commercial tables (1-hour TTL, cache-aside).
+- **Architecture**: Modular monolith with domain-based decomposition (Auth, Users, Propostas, Pagamentos, Integrações).
+- **Security**: Helmet, two-tier rate limiting, input sanitization, timing attack protection, magic number validation, cryptographically secure UUIDs, soft delete, Row Level Security (RLS), anti-fragile RBAC.
+- **CI/CD**: GitHub Actions for CI, CD-Staging, and Security workflows (testing, SAST/SCA, deployment readiness, rollback).
+- **Observability**: Winston structured logging (correlation IDs), Sentry error tracking, health checks, automated backups.
+- **Configuration**: Centralized config module with environment-based secrets and validation.
+- **Feature Flags**: Unleash-client integration with fallback and React context provider.
 - **Credit Simulation**: Production-ready API supporting dynamic rate lookup, financial calculations (IOF, TAC, CET using Newton-Raphson), payment schedule generation, and audit logging.
-- **Document Management**: Secure private bucket with signed URLs and organized folder structure.
 - **PDF Generation**: Template-based Credit Cession Bill (CCB) generation using `pdf-lib` for precise field filling.
 - **Payment Workflow**: Complete payment queue system with batch processing, multiple methods, formalization tracking, and dual-storage strategy.
 - **Commercial Tables**: N:N relationship between products and commercial tables, supporting personalized and general rates with hierarchical fallback.
 - **Status Management**: Centralized Finite State Machine (FSM) for robust transition validation and audit logging.
 - **Test Infrastructure**: Comprehensive test environment with direct postgres connection, RLS bypass, automated database cleanup, and full integration test coverage.
 - **Schema Migration**: Production-ready migration system using Drizzle-Kit with Zero Downtime (Expand/Contract), automated rollback, and tracking.
-- **Database Schema**: PostgreSQL with Drizzle ORM. Utilizes soft deletes (`deleted_at`), sequential numeric IDs for `propostas.id`, and a `status_transitions` table for audit trails. Status FSM V2.0 system for event-driven transitions.
 
 ## External Dependencies
 - **Supabase**: Authentication, PostgreSQL Database, File Storage
