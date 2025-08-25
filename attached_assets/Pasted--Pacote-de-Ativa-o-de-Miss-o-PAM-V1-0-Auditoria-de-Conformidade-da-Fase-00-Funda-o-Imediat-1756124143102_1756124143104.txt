@@ -1,0 +1,185 @@
+### Pacote de Ativação de Missão (PAM) V1.0 (Auditoria de Conformidade da Fase 00 - Fundação Imediata)
+
+* **Sumário da Missão (O Quê):** Agindo como um Arquiteto de Qualidade e Conformidade Sênior, você deve realizar uma auditoria completa, comparando a nossa "Doutrina Arquitetural da Fase 00" (fornecida abaixo) com os artefatos existentes no diretório `/architecture` para identificar quais pontos já foram documentados e quais subtópicos obrigatórios ainda estão pendentes.
+* **Intenção Estratégica (O Porquê):** Criar uma "fonte da verdade" definitiva sobre o nosso progresso na documentação da nossa fundação arquitetural. Este relatório de análise de lacunas (Gap Analysis) irá guiar o nosso planejamento estratégico, permitindo-nos focar os nossos esforços exatamente onde eles são necessários para completar a nossa "planta" antes de qualquer execução de código.
+* **Histórico Relevante (Consulta Obrigatória):** Em missões anteriores, criamos vários documentos de arquitetura. Esta missão irá verificar quais pontos da nossa Doutrina da Fase 00 esses artefatos já satisfazem.
+* **Modelo Mental (Como se Encaixa):** Sua única tarefa é a análise e a documentação. Você não deve corrigir ou implementar nada. Seu único entregável é o relatório de conformidade. Sua fonte da verdade é a "Doutrina da Fase 00" fornecida neste prompt. A sua área de investigação é o diretório `/architecture`.
+
+---
+
+**IMPLEMENTAR:**
+Relatório de Análise de Lacunas da Fase 00
+
+**CURRENT STATE:**
+Iniciamos a formalização da nossa arquitetura e produzimos vários artefatos. No entanto, não temos um mapa claro que mostre o nosso progresso em relação à completa "Doutrina da Fase 00".
+
+**EXPECTED (Estado Final de Sucesso):**
+Um relatório de auditoria detalhado em formato Markdown. O relatório deve ter a seguinte estrutura:
+
+1.  **Sumário Executivo:** Uma tabela de alto nível que lista cada "Ponto" principal da Fase 00 (ex: Ponto 6, Ponto 7, Ponto 8, etc.) e o seu status de conclusão (`CONCLUÍDO`, `PARCIALMENTE CONCLUÍDO`, ou `PENDENTE`).
+2.  **Análise Detalhada por Ponto:** Para cada "Ponto" da doutrina, você deve:
+    * Listar cada um dos seus "Subtópicos Obrigatórios".
+    * Para cada subtópico, fornecer um veredito (`CONCLUÍDO` ou `PENDENTE`).
+    * Se o veredito for `CONCLUÍDO`, você deve fornecer a **prova**: o nome do arquivo exato no diretório `/architecture` onde a documentação para aquele subtópico pode ser encontrada. Se a prova não for encontrada, declare explicitamente: **"PROVA NÃO ENCONTRADA"**.
+
+---
+
+**DOUTRINA ARQUITETURAL DA FASE 00 (Sua Fonte da Verdade e Checklist)**
+
+<details>
+<summary><strong>Clique para expandir a Doutrina Completa da Fase 00</strong></summary>
+
+**Fase 0: Fundação Imediata (O Agora - Triage | Próximas 2-4 semanas)**
+Foco: "Estancar o sangramento". Mitigar riscos críticos imediatos. Estabelecer visibilidade mínima, segurança fundamental e migrar para uma infraestrutura controlada e viável.
+
+**I. Fundamentos Estratégicos e Requisitos**
+
+* **Ponto 6 - Definição dos Limites do Sistema (Scope):**
+    * **Subtópicos Obrigatórios:**
+        * Definição clara do MVP, "In-Scope" e "Out-of-Scope".
+        * Roadmap de alto nível (Pós-MVP).
+        * Processo de Gerenciamento de Mudanças de Escopo (Scope Change Management) Formal.
+        * Mapeamento das Premissas Mais Arriscadas (Riskiest Assumptions Mapping) a serem validadas pelo MVP.
+* **Ponto 7 - Requisitos Arquiteturalmente Significativos (RAS):**
+    * **Subtópicos Obrigatórios:**
+        * Priorização dos NFRs (Matriz de Priorização) e Quantificação (SLOs).
+        * Cenários de Qualidade (Quality Attribute Scenarios) documentados.
+        * Definição do Orçamento de Erro (Error Budget).
+        * Análise de Conflitos e Matriz de Interdependência de NFRs.
+        * Requisitos de Comportamento sob Estresse Extremo e Ponto de Saturação (System Saturation Point).
+* **Ponto 8 - Restrições (Constraints):**
+    * **Subtópicos Obrigatórios:**
+        * Restrições documentadas (Técnicas, Orçamentárias, Prazo, Legais).
+        * Análise das competências da equipe (Skills Gap Analysis).
+        * Restrições de Integração com Sistemas Legados.
+        * Plano de Ação para Mitigação de Restrições Críticas.
+        * Classificação das Restrições (Duras vs. Suaves).
+        * Análise de Impacto das Restrições na Arquitetura (Constraint Impact Analysis).
+
+**II. Macro-arquitetura e Padrões de Alto Nível**
+
+* **Ponto 18 - Diagramas de Arquitetura (Visão Macro):**
+    * **Subtópicos Obrigatórios:**
+        * Diagrama de Contexto (C4 Nível 1) e Contêineres (C4 Nível 2).
+        * Diagrama de Deployment (Visão Física/Infraestrutura).
+        * Adoção de Ferramentas para "Diagrams as Code" (ex: Structurizr).
+        * Vistas Arquiteturais Adicionais (Modelo 4+1, ex: Vista de Segurança, Vista de Operações, Vista de Dados).
+
+**V. Arquitetura de Dados**
+
+* **Ponto 41 - Estratégia de Persistência (Gestão de Schema):**
+    * **Subtópicos Obrigatórios:**
+        * Definição do padrão de isolamento e Regras de acesso (apenas via API/Eventos).
+        * Estratégia para consultas multi-serviço (API Composition, CQRS).
+        * Estratégia de Gerenciamento de Schema e Migrações (ex: Flyway, Liquibase).
+        * Padrões para Evolução de Schema sem Downtime (Zero Downtime Schema Migration) (ex: Expand/Contract).
+* **Ponto 45 - Classificação de Dados:**
+    * **Subtópicos Obrigatórios:**
+        * Níveis de sensibilidade definidos e Mapeamento de PII/PHI.
+        * Tagging automatizado de recursos.
+        * Ferramentas de Descoberta Automática de Dados Sensíveis.
+        * Estratégia de Prevenção de Perda de Dados (DLP - Data Loss Prevention) integrada.
+
+**VII. Infraestrutura e Deployment (DevOps/Cloud/SRE)**
+
+* **Ponto 62 - Estratégia de Nuvem:**
+    * **Subtópicos Obrigatórios:**
+        * Seleção do Provedor de Nuvem Primário e Estratégia Multi-Cloud/Hybrid.
+        * Desenvolvimento de uma Estratégia de Saída (Exit Strategy).
+        * Definição da Estrutura de Contas/Organizações na Nuvem (Landing Zone).
+        * Modelo de Governança de Nuvem (Cloud Governance Model).
+        * Estratégia de Plataforma de Desenvolvedor Interna (Internal Developer Platform - IDP).
+* **Ponto 67 - Estratégia de Ambientes:**
+    * **Subtópicos Obrigatórios:**
+        * Definição do propósito e políticas de acesso.
+        * Estratégia para Ambientes Efêmeros.
+        * Política de Higienização de Dados e Controle de Custo.
+        * Estratégia de Infraestrutura Imutável (Immutable Infrastructure Strategy).
+* **Ponto 71 - Gerenciamento de Configuração:**
+    * **Subtópicos Obrigatórios:**
+        * Seleção da ferramenta para armazenamento de configurações externas.
+        * Implementação de plataforma de Feature Flags/Toggles.
+        * Estratégia de atualização dinâmica de configuração.
+        * Auditoria e Versionamento de Configurações.
+        * Governança e Ciclo de Vida dos Feature Flags (Technical Debt Management for Flags).
+* **Ponto 72 - Pipelines de CI/CD:**
+    * **Subtópicos Obrigatórios:**
+        * Seleção da ferramenta de CI/CD e Definição dos estágios.
+        * Métricas DORA a serem monitoradas.
+        * Implementação de Segurança da Cadeia de Suprimentos (SLSA framework, SBOM).
+        * Estratégia de Gerenciamento de Artefatos.
+        * Hardening do Sistema de CI/CD e Plano de Segurança do Pipeline (Pipeline Security Plan).
+* **Ponto 76 - Estratégia de Backup e Restore:**
+    * **Subtópicos Obrigatórios:**
+        * Frequência de backup e política de retenção.
+        * Estratégia de Imutabilidade de Backups.
+        * Testes de Restauração Automatizados e Regulares.
+        * Estratégia de Backup Cross-Region/Cross-Account (Isolamento).
+        * Definição do SLA de Tempo de Restauração (Restore Time SLA).
+
+**VIII. Qualidades Sistêmicas e Cross-Cutting Concerns (NFRs)**
+
+* **Ponto 82 - Gestão de Chaves e Segredos:**
+    * **Subtópicos Obrigatórios:**
+        * Ferramenta de Gerenciamento de Segredos (ex: Vault) e Políticas de Rotação.
+        * Integração no ambiente de execução (Dynamic Secrets).
+        * Estratégia de Criptografia de Envelope (Envelope Encryption) usando KMS/HSM.
+        * Plano de Recuperação de Desastres para o Gerenciador de Segredos (Secrets Manager DR Plan).
+* **Ponto 92 - Excelência Operacional - Observabilidade (o11y):**
+    * **Subtópicos Obrigatórios:**
+        * Seleção do Stack de Ferramentas (APM) e Logging Estruturado.
+        * Implementação de Tracing Distribuído (OpenTelemetry) e Correlation IDs obrigatórios.
+        * Estratégia de Amostragem (Sampling) para Tracing.
+        * Estratégia de Gerenciamento de Cardinalidade de Métricas (Metric Cardinality Management).
+        * Implementação de Continuous Profiling em Produção.
+        * Gestão de Custos de Observabilidade (Observability Cost Management).
+        * Checklist de Revisão de Prontidão Operacional (Operational Readiness Review - ORR).
+* **Ponto 93 - Gestão de Incidentes:**
+    * **Subtópicos Obrigatórios:**
+        * Planejamento de Resposta a Incidentes (IRP) e Severidade (SEV).
+        * Criação de Runbooks e Playbooks.
+        * Estratégia de Suporte e Escalonamento (On-Call Rotation).
+        * Processo de Post-Mortem (Blameless) e RCA.
+        * Definição de Alertas Acionáveis baseados em SLOs.
+        * Definição do Sistema de Comando de Incidentes (ICS - Incident Command System).
+        * Treinamento e Simulação de Resposta a Incidentes (Incident Response Drills).
+
+**IX. Governança, Stacks e Documentação**
+
+* **Ponto 96 - Stack Tecnológica Completa:**
+    * **Subtópicos Obrigatórios:**
+        * Lista detalhada de tecnologias aprovadas e Tech Radar.
+        * Processo de Governança de Stack.
+        * Estratégia de Depreciação/Obsolescência Tecnológica (Technology Lifecycle Management).
+        * Definição dos Princípios Arquiteturais (Architectural Principles).
+* **Ponto 100 - Estratégia de Branching e Release Management:**
+    * **Subtópicos Obrigatórios:**
+        * Escolha do modelo de branching (Trunk-Based preferível).
+        * Processo de gerenciamento de releases e Versionamento Semântico (SemVer).
+        * Definição do Processo de Hotfix.
+
+</details>
+
+---
+**CONSTRAINTS (Roadmap de Auditoria):**
+
+1.  **Use a Doutrina como Checklist:** Percorra cada Ponto e cada Subtópico Obrigatório da doutrina fornecida acima.
+2.  **Investigue o Diretório `/architecture`:** Para cada subtópico, procure no diretório `/architecture` por um arquivo Markdown que satisfaça o requisito.
+3.  **Reporte com Precisão:** No seu relatório final, para cada subtópico, declare `CONCLUÍDO` e forneça o caminho do arquivo como prova, ou declare `PENDENTE` se nenhuma documentação correspondente for encontrada.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100% de confiança na COMPLETUDE da sua auditoria]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO. Ex: Risco de que um documento exista, mas não satisfaça completamente os requisitos do subtópico.]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que o nome dos arquivos no diretório de arquitetura é descritivo o suficiente para mapeá-los aos pontos da doutrina."]
+* **VALIDAÇÃO PENDENTE:** [Este relatório de análise de lacunas será a base para o nosso planejamento de sprints para completar a Fase 00.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear todos os pontos e subtópicos da Doutrina da Fase 00.
+2.  Garantir que a busca no diretório `/architecture` é exaustiva.
+3.  Executar `get_latest_lsp_diagnostics` para garantir que o ambiente está estável.
+4.  **Declarar Nível de Confiança (0 a 100%)**.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (revisão do relatório gerado para precisão).
+7.  **Documentar Decisões Técnicas**.
