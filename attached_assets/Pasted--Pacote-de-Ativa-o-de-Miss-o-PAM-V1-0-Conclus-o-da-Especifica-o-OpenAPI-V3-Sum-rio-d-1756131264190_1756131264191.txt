@@ -1,0 +1,43 @@
+### Pacote de Ativação de Missão (PAM) V1.0 (Conclusão da Especificação OpenAPI V3)
+
+* **Sumário da Missão (O Quê):** Expandir e completar a nossa especificação OpenAPI V3 (`proposal-api.v1.yaml`), garantindo que **TODOS** os endpoints, schemas e respostas da nossa API de Propostas estejam formalmente documentados, com base nos "Subtópicos Obrigatórios" do Ponto 33.
+* **Intenção Estratégica (O Porquê):** Eliminar uma lacuna de prioridade P0. Uma API sem um contrato completo e confiável é um risco para a integração de parceiros e para a nossa própria agilidade de desenvolvimento. A conclusão desta especificação é um pré-requisito para a geração automática de SDKs e para a implementação de testes de contrato.
+* **Histórico Relevante (Consulta Obrigatória):** A nossa auditoria de conformidade revelou que o nosso `proposal-api.v1.yaml` está apenas 30% completo, faltando a documentação da maioria dos endpoints e schemas.
+* **Modelo Mental (Como se Encaixa):** Aja como um Engenheiro de API a finalizar a documentação técnica. O seu trabalho é garantir que a especificação OpenAPI seja um reflexo 100% fiel e completo do comportamento da nossa API implementada.
+
+---
+
+**IMPLEMENTAR:**
+Conclusão da Especificação OpenAPI V3 para a API de Propostas
+
+**CURRENT STATE:**
+A especificação `architecture/02-technical/api-contracts/proposal-api.v1.yaml` existe, mas está incompleta, documentando apenas uma fração dos nossos endpoints e schemas.
+
+**EXPECTED (Estado Final de Sucesso):**
+O arquivo `architecture/02-technical/api-contracts/proposal-api.v1.yaml` é modificado e se torna um documento completo que:
+1.  **Documenta TODOS os Endpoints:** Inclui todos os endpoints de `GET`, `POST`, `PUT`, `DELETE` do nosso Bounded Context de Propostas.
+2.  **Define TODOS os Schemas:** Contém as definições na seção `components/schemas` para todos os DTOs (Data Transfer Objects) de entrada e saída, incluindo schemas para payloads de erro (conforme o nosso ADR-004 sobre RFC 7807).
+3.  **Especifica TODAS as Respostas:** Para cada endpoint, documenta todos os códigos de status de resposta possíveis (`200`, `201`, `400`, `401`, `403`, `404`, `500`), cada um com o seu schema de resposta correspondente.
+4.  **É 100% Válido:** A especificação final passa na validação de um linter de OpenAPI V3.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+1.  **Use o Código como Fonte da Verdade:** A sua principal fonte de informação para esta missão é o código-fonte da nossa API refatorada (`server/contexts/proposal/...`). A especificação deve ser um reflexo exato da implementação.
+2.  **Seja Exaustivo:** Não deixe nenhum endpoint ou schema de fora. O objetivo é a completude de 100%.
+3.  **Validação:** Ao concluir, valide a sintaxe do seu arquivo YAML usando um validador de OpenAPI online ou uma ferramenta de CLI.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que a documentação completa de todos os endpoints e schemas pode ser realizada em uma única missão."]
+* **VALIDAÇÃO PENDENTE:** [A especificação gerada deve ser revisada e ratificada pelo Arquiteto Chefe.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear todos os endpoints e schemas do Bounded Context de Propostas.
+2.  Garantir que a especificação OpenAPI está completa e sintaticamente correta.
+3.  Executar `get_latest_lsp_diagnostics` para garantir que o ambiente está estável.
+4.  **Declarar Nível de Confiança (0 a 100%)**.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (revisão da especificação YAML gerada).
+7.  **Documentar Decisões Técnicas**.
