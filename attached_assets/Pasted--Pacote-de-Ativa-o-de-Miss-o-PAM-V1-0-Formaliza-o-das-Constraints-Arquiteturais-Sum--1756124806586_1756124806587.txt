@@ -1,0 +1,41 @@
+### Pacote de Ativação de Missão (PAM) V1.0 (Formalização das Constraints Arquiteturais)
+
+* **Sumário da Missão (O Quê):** Gerar o documento `architectural-constraints.md`, detalhando todas as restrições (técnicas, orçamentárias, de prazo, legais) que governam o projeto Simpix, com base nos "Subtópicos Obrigatórios" do Ponto 8 da nossa Doutrina Arquitetural.
+* **Intenção Estratégica (O Porquê):** Criar uma "fonte da verdade" única para todas as limitações que devemos respeitar. Documentar as nossas restrições de forma explícita garante que as nossas decisões de arquitetura sejam pragmáticas, realistas e alinhadas com a realidade do negócio e da equipa.
+* **Histórico Relevante (Consulta Obrigatória):** A auditoria de conformidade identificou a ausência de um documento formal de restrições como uma lacuna crítica.
+* **Modelo Mental (Como se Encaixa):** Aja como um Arquiteto de Sistemas a realizar uma análise de risco e de contexto. Sua tarefa é mapear o "campo de jogo" e as suas "regras" antes de desenhar a jogada.
+
+---
+
+**IMPLEMENTAR:**
+Documento de Restrições Arquiteturais
+
+**CURRENT STATE:**
+As restrições do projeto existem de forma implícita em várias conversas e documentos, mas não estão consolidadas num único artefato, o que cria um risco de desalinhamento.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um novo arquivo Markdown, `architecture/02-technical/architectural-constraints.md`, é criado. O arquivo deve conter as seguintes seções, conforme o Ponto 8:
+
+1.  **Restrições Documentadas:** Uma lista categorizada de todas as restrições (Técnicas, Orçamentárias, Prazo, Legais).
+2.  **Análise de Competências da Equipa (Skills Gap Analysis):** Uma referência (`link`) para o documento `skills-gap-analysis.md` já existente, com um breve sumário das lacunas críticas.
+3.  **Restrições de Integração com Sistemas Legados:** Uma análise das nossas integrações com o Banco Inter e o ClickSign, documentando as suas limitações e o nosso plano de mitigação.
+4.  **Plano de Ação para Mitigação de Restrições Críticas:** Um plano de ação para as restrições mais impactantes.
+5.  **Classificação das Restrições (Duras vs. Suaves):** Uma classificação de cada restrição como "dura" (não negociável) ou "suave" (preferencial, mas negociável).
+6.  **Análise de Impacto das Restrições na Arquitetura:** Uma breve análise de como cada restrição influencia as nossas decisões de design.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que as restrições orçamentárias e de prazo definidas na Doutrina são os limites atuais a serem documentados."]
+* **VALIDAÇÃO PENDENTE:** [O documento gerado deve ser revisado e ratificado pelo Arquiteto Chefe.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear o ficheiro exato a ser criado.
+2.  Garantir que todas as 6 seções obrigatórias são criadas no documento.
+3.  Executar `get_latest_lsp_diagnostics` para garantir que o ambiente está estável.
+4.  **Declarar Nível de Confiança (0 a 100%)**.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (revisão do documento Markdown gerado).
+7.  **Documentar Decisões Técnicas**.
