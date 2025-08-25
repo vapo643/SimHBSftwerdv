@@ -1,0 +1,42 @@
+### [INÍCIO DO TEMPLATE DE DEBATE - INTERAÇÃO #: 3/15+]
+
+**MISSÃO:** Operação Planta Impecável - FASE 2 (Refinamento Arquitetural)
+**FASE ATUAL DO DEBATE:** FASE 1, Thread 1.2: Estilo Arquitetural e Estratégia Cloud
+**PERSONA DO AGENTE (GEM 07):** Reative a sua persona de **Arquiteto Auditor Chefe (Red Team)**. A sua função é identificar criticamente as falhas, ambiguidades e desalinhamentos dos artefatos em foco com a nossa Doutrina Âncora. O seu sucesso é medido pela profundidade da sua autocrítica. O padrão é "Impecável".
+**ARTEFATO(S) EM FOCO:**
+- `architecture/02-technical/technology-stack.md`
+- `architecture/02-technical/architectural-constraints.md`
+- `architecture/07-decisions/adr-002-primary-architectural-style.md`
+- `architecture/07-decisions/adr-001-azure-landing-zone.md`
+
+**DOUTRINA ÂNCORA (VERDADE FUNDAMENTAL):**
+A sua auditoria DEVE ser rigorosamente baseada nos princípios do seguinte KB (que você já possui em contexto):
+- `V2 GUIA DEFINITIVO DO REPLIT.COM.pdf` (especialmente os capítulos sobre Vendor Lock-in e Estratégia de Nuvem)
+- `Blueprint do Arquiteto de Código Automatizado.pdf`
+
+---
+**TAREFAS DE AUDITORIA CRÍTICA:**
+
+Analise os artefatos em foco e responda às seguintes perguntas de auditoria. Seja exaustivo, cético e específico.
+
+1.  **ALINHAMENTO DOUTRINÁRIO (O Teste do Padrão Ouro):**
+    * Onde os artefatos em foco (especialmente o `adr-001-azure-landing-zone.md`) violam os princípios de mitigação de "Vendor Lock-in" discutidos na Doutrina Âncora?
+    * **OBRIGATÓRIO:** Cite a seção exata do KB e a seção do artefato que estão em conflito.
+
+2.  **PROFUNDIDADE E ACIONABILIDADE (O Teste do Engenheiro):**
+    * A "Análise Quantitativa do Custo da Complexidade Distribuída" no `adr-002` é baseada em uma metodologia clara ou é uma estimativa superficial?
+    * Se você fosse o engenheiro responsável por implementar a "Landing Zone" amanhã, quais seriam as 2 perguntas mais críticas que faria devido à ambiguidade no `adr-001`?
+
+3.  **COESÃO SISTÊMICA (O Teste de Alinhamento):**
+    * Existe alguma contradição entre as `architectural-constraints.md` (ex: orçamento de R$2k/mês) e a complexidade da "Landing Zone" proposta no `adr-001`? O plano é realista dentro das nossas restrições?
+    * A decisão pelo "Monólito Modular" no `adr-002` está refletida de forma consistente na estratégia de `technology-stack.md`?
+
+4.  **ANÁLISE ADVERSARIAL E TRADE-OFFS (O Advogado do Diabo):**
+    * Qual é a suposição mais fraca ou o maior risco na nossa decisão de evoluir o "Monólito Modular" em vez de partir para microserviços imediatamente, considerando a nossa projeção de crescimento?
+    * Os "Critérios de Gatilho" definidos no `adr-002` são realmente objetivos e mensuráveis, ou são vagos e permitem procrastinar a decisão de evoluir?
+
+5.  **PROPOSTA DE REFINAMENTO (Prova de Trabalho):**
+    * Forneça uma lista priorizada de melhorias para estes quatro documentos. Apresente a mudança mais crítica (ex: refinar um "Critério de Gatilho" para ser mais quantitativo) num formato de `bloco de código markdown` reescrito ou `diff conceitual`.
+
+---
+### [FIM DO TEMPLATE DE DEBATE]
