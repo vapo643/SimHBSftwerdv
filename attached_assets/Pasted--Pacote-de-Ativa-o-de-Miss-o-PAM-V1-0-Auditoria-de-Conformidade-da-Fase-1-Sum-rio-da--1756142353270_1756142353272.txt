@@ -1,0 +1,58 @@
+### Pacote de Ativação de Missão (PAM) V1.0 (Auditoria de Conformidade da Fase 1)
+
+* **Sumário da Missão (O Quê):** Realizar uma auditoria de conformidade completa, comparando a nossa "Doutrina Arquitetural da Fase 1" (fornecida abaixo) com os artefatos existentes no diretório `/architecture` para identificar quais pontos já foram documentados e quais subtópicos obrigatórios ainda estão pendentes.
+* **Intenção Estratégica (O Porquê):** Criar uma "fonte da verdade" definitiva sobre o nosso progresso na Fase 1. Este relatório de análise de lacunas (Gap Analysis) irá guiar o nosso planejamento estratégico, permitindo-nos focar os nossos esforços exatamente onde eles são necessários para completar a nossa fundação de desenvolvimento contínuo, antes de qualquer execução de código.
+* **Histórico Relevante (Consulta Obrigatória):** Nas missões anteriores, nós criamos vários documentos de arquitetura. Esta missão irá verificar quais pontos da nossa nova doutrina esses artefatos já satisfazem.
+* **Modelo Mental (Como se Encaixa):** Aja como um Auditor de Conformidade Arquitetural Sênior. A sua fonte da verdade é a "Doutrina da Fase 1" fornecida neste prompt. A sua área de investigação é o diretório `/architecture`. A sua tarefa é comparar os dois e produzir um relatório de conformidade.
+
+---
+
+**IMPLEMENTAR:**
+Relatório de Análise de Lacunas da Fase 1
+
+**CURRENT STATE:**
+Iniciamos a "Fase 1 - Desenvolvimento Contínuo" e já produzimos vários artefatos arquiteturais. No entanto, não temos um mapa claro que mostre o nosso progresso em relação à nova e completa "Doutrina da Fase 1".
+
+**EXPECTED (Estado Final de Sucesso):**
+Um relatório de auditoria detalhado em formato Markdown. O relatório deve ter a seguinte estrutura:
+
+1.  **Sumário Executivo:** Uma tabela de alto nível que lista cada "Ponto" principal da Fase 1 (ex: Ponto 1, Ponto 9, Ponto 12, etc.) e o seu status de conclusão (`CONCLUÍDO`, `PARCIALMENTE CONCLUÍDO`, ou `PENDENTE`).
+2.  **Análise Detalhada por Ponto:** Para cada "Ponto" da doutrina, você deve:
+    * Listar cada um dos seus "Subtópicos Obrigatórios".
+    * Para cada subtópico, fornecer um veredito (`CONCLUÍDO` ou `PENDENTE`).
+    * Se o veredito for `CONCLUÍDO`, você deve fornecer a **prova**: o nome do arquivo exato no diretório `/architecture` onde a documentação para aquele subtópico pode ser encontrada. Se a prova não for encontrada, declare explicitamente: **"PROVA NÃO ENCONTRADA"**.
+
+---
+
+**DOUTRINA ARQUITETURAL DA FASE 1 (Sua Fonte da Verdade e Checklist)**
+
+<details>
+<summary><strong>Clique para expandir a Doutrina Completa da Fase 1</strong></summary>
+
+**(Você irá anexar aqui o conteúdo completo da Doutrina da Fase 1 que me forneceu)**
+
+</details>
+
+---
+**CONSTRAINTS (Roadmap de Auditoria):**
+
+1.  **Use a Doutrina como Checklist:** A "Doutrina da Fase 1" que o seu comandante irá anexar é o seu único checklist. Percorra cada Ponto e cada Subtópico Obrigatório.
+2.  **Investigue o Diretório `/architecture`:** Para cada subtópico, procure no diretório `/architecture` por um arquivo Markdown que satisfaça o requisito.
+3.  **Reporte com Precisão:** No seu relatório final, para cada subtópico, declare `CONCLUÍDO` e forneça o caminho do arquivo como prova, ou declare `PENDENTE` se nenhuma documentação correspondente for encontrada.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100% de confiança na COMPLETUDE da sua auditoria]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO. Ex: Risco de que um documento exista, mas não satisfaça completamente os requisitos do subtópico.]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que o nome dos arquivos no diretório de arquitetura é descritivo o suficiente para mapeá-los aos pontos da doutrina."]
+* **VALIDAÇÃO PENDENTE:** [Este relatório de análise de lacunas será a base para o nosso planejamento de sprints para completar a Fase 1.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear todos os pontos e subtópicos da Doutrina da Fase 1.
+2.  Garantir que a busca no diretório `/architecture` é exaustiva.
+3.  Executar `get_latest_lsp_diagnostics` para garantir que o ambiente está estável.
+4.  **Declarar Nível de Confiança (0 a 100%)**.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (revisão do relatório gerado para precisão).
+7.  **Documentar Decisões Técnicas**.
