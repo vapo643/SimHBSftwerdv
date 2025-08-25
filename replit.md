@@ -1,7 +1,7 @@
 # Simpix Credit Management System
 
 ## Overview
-Simpix is a full-stack TypeScript application for comprehensive credit management. It streamlines the credit proposal workflow from creation through payment processing and formalization tracking for financial institutions. The project aims to be a leading solution in the credit management market, emphasizing banking-grade security, compliance, and efficient data management. Key capabilities include a production-ready credit simulation API, secure document management, template-based PDF generation for credit contracts, and a complete payment queue system.
+Simpix is a full-stack TypeScript application designed for comprehensive credit management, streamlining the credit proposal workflow from creation through payment processing and formalization tracking for financial institutions. It aims to be a leading solution in the credit management market, emphasizing banking-grade security, compliance, and efficient data management. Key capabilities include a production-ready credit simulation API, secure document management, template-based PDF generation for credit contracts, and a complete payment queue system.
 
 ## User Preferences
 
@@ -164,7 +164,6 @@ Missão concluída quando artefato de **documentação de planejamento arquitetu
 - **File Storage**: Supabase Storage
 - **Job Queue**: BullMQ with Redis for async workers
 - **Cache Layer**: Redis-based caching for commercial tables (1-hour TTL, cache-aside)
-- **Time Management**: Centralized timezone utilities for Brasília timezone
 - **Architecture**: Modular monolith with domain-based decomposition (Auth, Users, Propostas, Pagamentos, Integrações)
 - **Security**: Helmet, two-tier rate limiting, input sanitization, timing attack protection, magic number validation, cryptographically secure UUIDs, soft delete, Row Level Security (RLS), anti-fragile RBAC
 - **CI/CD**: GitHub Actions for CI, CD-Staging, and Security workflows (testing, SAST/SCA, deployment readiness, rollback)
