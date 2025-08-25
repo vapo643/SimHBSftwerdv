@@ -1,0 +1,40 @@
+### Pacote de Ativação de Missão (PAM) V2.2 (Formalização da Estratégia de mTLS)
+
+* **Sumário da Missão (O Quê):** Gerar um Architecture Decision Record (ADR) que defina a nossa estratégia mandatória para a implementação de **Mutual TLS (mTLS)** para toda a comunicação interna (service-to-service), com base no "Subtópico Obrigatório" do Ponto 30.
+* **Intenção Estratégica (O Porquê):** Implementar um pilar fundamental da nossa arquitetura de segurança **"Zero Trust"**. Ao garantir que os nossos próprios serviços internos verifiquem criptograficamente a identidade uns dos outros antes de comunicar, nós eliminamos a possibilidade de ataques de movimento lateral dentro da nossa própria rede.
+* **Histórico Relevante (Consulta Obrigatória):** A auditoria de conformidade identificou a ausência de uma estratégia formal de mTLS como uma lacuna. A nossa decisão de usar Azure Container Apps (ADR-001) nos dá acesso a ferramentas como Dapr ou service meshes que podem facilitar esta implementação.
+* **Modelo Mental (Como se Encaixa):** Aja como um Arquiteto de Segurança de Nuvem. A sua tarefa é projetar o "sistema de bilhetes de identidade criptográficos" para os nossos serviços, garantindo que apenas comunicações autenticadas e autorizadas possam ocorrer dentro da nossa infraestrutura.
+
+---
+
+**IMPLEMENTAR:**
+ADR: Estratégia de mTLS para Comunicação Service-to-Service
+
+**CURRENT STATE:**
+A comunicação interna entre os nossos futuros serviços (ou mesmo entre os módulos do nosso monolito) não possui uma camada de autenticação e criptografia dedicada, assumindo que a rede interna é "confiável", o que viola o princípio de Zero Trust.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um novo arquivo Markdown, `architecture/02-technical/mtls-service-mesh-strategy.md`, é criado. O arquivo deve conter um ADR completo, incluindo as seguintes seções:
+
+1.  **Decisão:** Uma declaração clara, por exemplo: "Adotaremos o mTLS como padrão mandatório para toda a comunicação síncrona service-to-service dentro da nossa infraestrutura Azure. A implementação será preferencialmente abstraída através de um Service Mesh (ex: Istio, Linkerd) ou das capacidades nativas do Dapr no Azure Container Apps."
+2.  **Justificativa:** A justificação para a decisão (princípio de Zero Trust, prevenção de ataques de spoofing e man-in-the-middle, conformidade com padrões de segurança).
+3.  **Arquitetura de Implementação:** Um diagrama de alto nível e uma descrição de como o mTLS será implementado. Detalhar como a plataforma (ex: Service Mesh) irá gerir o *sidecar proxy* que intercepta o tráfego e lida com o *handshake* TLS.
+4.  **Gestão do Ciclo de Vida de Certificados (PKI):** Descrever a nossa estratégia para a Infraestrutura de Chave Pública (PKI). Como os certificados serão emitidos, distribuídos, rotacionados e revogados de forma automática para cada serviço.
+5.  **Roadmap de Implementação:** Um plano faseado para a implementação do mTLS, começando pelo ambiente de Staging.
+
+---
+**DECLARAção DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO. Ex: Risco de sobrecarga de performance ou complexidade operacional introduzida pelo Service Mesh.]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que a abstração via Service Mesh é superior à implementação manual de mTLS no código de cada serviço."]
+* **VALIDAÇÃO PENDENTE:** [O ADR gerado deve ser revisado e ratificado pelo Arquiteto Chefe e pela equipa de segurança.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear o ficheiro exato a ser criado.
+2.  Garantir que todas as seções obrigatórias do ADR estão completas.
+3.  Executar `get_latest_lsp_diagnostics` para garantir que o ambiente está estável.
+4.  **Declarar Nível de Confiança (0 a 100%)**.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (revisão do documento Markdown gerado).
+7.  **Documentar Decisões Técnicas**.
