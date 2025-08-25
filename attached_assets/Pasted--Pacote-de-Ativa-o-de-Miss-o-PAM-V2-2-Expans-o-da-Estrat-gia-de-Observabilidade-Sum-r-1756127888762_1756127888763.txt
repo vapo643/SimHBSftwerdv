@@ -1,0 +1,40 @@
+### Pacote de Ativação de Missão (PAM) V2.2 (Expansão da Estratégia de Observabilidade)
+
+* **Sumário da Missão (O Quê):** Expandir a nossa documentação de observabilidade para incluir os "Subtópicos Obrigatórios" restantes do Ponto 92 da nossa Doutrina Arquitetural, focando na Gestão de Cardinalidade de Métricas, Continuous Profiling e Gestão de Custos.
+* **Intenção Estratégica (O Porquê):** Garantir que a nossa estratégia de observabilidade seja não apenas funcional, mas também financeiramente sustentável e tecnicamente performática em escala. Uma estratégia que não controla a cardinalidade de métricas e os custos pode rapidamente tornar-se mais cara do que a própria infraestrutura que monitoriza.
+* **Histórico Relevante (Consulta Obrigatória):** A nossa documentação da Fase 00 já estabeleceu o stack de ferramentas (APM, Logging Estruturado) e a implementação de Tracing Distribuído. Esta missão irá adicionar as políticas de governança avançada a essa fundação.
+* **Modelo Mental (Como se Encaixa):** Aja como um Engenheiro de Confiabilidade de Site (SRE) Sênior a definir as políticas que garantem que a nossa visibilidade do sistema não leve à falência da empresa. O foco é em eficiência, controlo de custos e otimização.
+
+---
+
+**IMPLEMENTAR:**
+Expansão do Documento de Estratégia de Observabilidade
+
+**CURRENT STATE:**
+Temos uma base de observabilidade documentada, mas faltam as estratégias cruciais para a gestão de custos, cardinalidade de métricas e profiling contínuo.
+
+**EXPECTED (Estado Final de Sucesso):**
+O documento de estratégia de observabilidade existente (ou um novo, `observability-strategy-advanced.md`) é **modificado** ou criado para incluir as seguintes novas seções:
+
+1.  **Estratégia de Gerenciamento de Cardinalidade de Métricas (Metric Cardinality Management):** Uma seção que define a nossa política para evitar a "explosão de cardinalidade", com exemplos claros de *tags* de alta cardinalidade a serem evitadas (`user_id`, `request_id`) e *tags* de baixa cardinalidade a serem incentivadas (`endpoint`, `status_code`).
+2.  **Estratégia de Amostragem (Sampling) para Tracing:** Detalhar a nossa abordagem para amostragem de *traces* (ex: "Adotar Tail-Based Sampling, retendo 100% dos traces com erro e 10% dos traces com sucesso").
+3.  **Implementação de Continuous Profiling em Produção:** Descrever a nossa estratégia para usar *profilers* contínuos para identificar gargalos de CPU e memória em tempo real no ambiente de produção.
+4.  **Gestão de Custos de Observabilidade (Observability Cost Management):** Definir como iremos monitorizar e controlar os custos da nossa stack de observabilidade (ex: "Estabelecer orçamentos por ambiente no DataDog e criar alertas quando 80% do orçamento for atingido").
+5.  **Checklist de Revisão de Prontidão Operacional (ORR):** Um checklist que será usado para validar que qualquer novo serviço ou *feature* tem a observabilidade necessária antes de ir para produção.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que a estratégia de Tail-Based Sampling é a mais adequada para equilibrar visibilidade e custo para o nosso caso de uso."]
+* **VALIDAÇÃO PENDENTE:** [O documento expandido deve ser revisado e ratificado pelo Arquiteto Chefe.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear o ficheiro exato a ser modificado/criado.
+2.  Garantir que as 5 novas seções obrigatórias são adicionadas.
+3.  Executar `get_latest_lsp_diagnostics` para garantir que o ambiente está estável.
+4.  **Declarar Nível de Confiança (0 a 100%)**.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (revisão do documento Markdown gerado).
+7.  **Documentar Decisões Técnicas**.
