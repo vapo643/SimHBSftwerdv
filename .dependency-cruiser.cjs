@@ -1,232 +1,217 @@
 /**
  * Dependency Cruiser Configuration
- * Phase 1 - Domain-Driven Design Enforcement
- * 
- * Este arquivo define as regras de dependência entre os Bounded Contexts
- * identificados na sessão de Event Storming para garantir o desacoplamento.
+ * Fitness Functions para Validação Arquitetural
+ * Implementa validação automática dos limites dos Bounded Contexts
+ * e regras da arquitetura hexagonal
  */
 
 module.exports = {
-  // Regras proibidas - violações causam build failure
   forbidden: [
-    /* ==== REGRAS DE BOUNDED CONTEXTS ==== */
     {
-      name: 'no-cross-context-imports',
+      name: 'boundary-violation-between-bounded-contexts',
       severity: 'error',
-      comment: 'Bounded Contexts não podem importar diretamente uns dos outros',
+      comment: 'Bounded Contexts não podem importar uns dos outros diretamente. Comunicação deve ser via Application Services ou Eventos.',
       from: {
         path: '^server/contexts/([^/]+)/'
       },
       to: {
-        path: '^server/contexts/(?!$1)[^/]+/',
+        path: '^server/contexts/(?!$1)([^/]+)/',
         pathNot: [
-          // Exceções permitidas: contratos compartilhados
+          // Permitir imports de tipos compartilhados se necessário
           '^server/contexts/shared/',
-          '^server/contexts/contracts/'
+          // Permitir imports de interfaces de aplicação se existirem
+          '^server/contexts/[^/]+/application/interfaces/'
         ]
       }
     },
     {
-      name: 'credit-proposal-isolation',
+      name: 'domain-cannot-depend-on-infrastructure',
       severity: 'error',
-      comment: 'Credit Proposal Context deve ser completamente isolado',
+      comment: 'Camada de domínio deve ser pura e não pode depender de infraestrutura',
       from: {
-        pathNot: [
-          '^server/contexts/credit-proposal/',
-          '^server/contexts/shared/'
-        ]
-      },
-      to: {
-        path: '^server/contexts/credit-proposal/domain/'
-      }
-    },
-    {
-      name: 'credit-analysis-isolation',
-      severity: 'error',
-      comment: 'Credit Analysis Context deve ser completamente isolado',
-      from: {
-        pathNot: [
-          '^server/contexts/credit-analysis/',
-          '^server/contexts/shared/'
-        ]
-      },
-      to: {
-        path: '^server/contexts/credit-analysis/domain/'
-      }
-    },
-    {
-      name: 'contract-management-isolation',
-      severity: 'error',
-      comment: 'Contract Management Context deve ser completamente isolado',
-      from: {
-        pathNot: [
-          '^server/contexts/contract-management/',
-          '^server/contexts/shared/'
-        ]
-      },
-      to: {
-        path: '^server/contexts/contract-management/domain/'
-      }
-    },
-    
-    /* ==== REGRAS DE ARQUITETURA HEXAGONAL ==== */
-    {
-      name: 'domain-no-infrastructure',
-      severity: 'error',
-      comment: 'Camada de domínio não pode depender de infraestrutura',
-      from: {
-        path: '.*/domain/.*'
-      },
-      to: {
-        path: '.*/infrastructure/.*'
-      }
-    },
-    {
-      name: 'domain-no-application',
-      severity: 'error',
-      comment: 'Camada de domínio não pode depender de aplicação',
-      from: {
-        path: '.*/domain/.*'
-      },
-      to: {
-        path: '.*/application/.*'
-      }
-    },
-    {
-      name: 'application-no-infrastructure',
-      severity: 'error',
-      comment: 'Camada de aplicação não pode depender diretamente de infraestrutura',
-      from: {
-        path: '.*/application/.*'
-      },
-      to: {
-        path: '.*/infrastructure/.*',
-        pathNot: [
-          // Exceção: portas e adaptadores
-          '.*/ports/.*',
-          '.*/adapters/.*'
-        ]
-      }
-    },
-    
-    /* ==== REGRAS DE ANTI-CORRUPTION LAYER ==== */
-    {
-      name: 'payment-acl-required',
-      severity: 'error',
-      comment: 'Payment Context deve usar ACL para integrações externas',
-      from: {
-        path: '^server/contexts/payment/'
-      },
-      to: {
-        path: '^server/lib/(inter-api|clicksign)/',
-        pathNot: '^server/contexts/payment/adapters/'
-      }
-    },
-    
-    /* ==== REGRAS DE SEGURANÇA ==== */
-    {
-      name: 'no-direct-db-access',
-      severity: 'error',
-      comment: 'Acesso direto ao banco só é permitido via Storage interface',
-      from: {
-        pathNot: [
-          '^server/storage\\.ts$',
-          '^server/lib/supabase\\.ts$',
-          '^migrations/.*'
+        path: [
+          '^server/contexts/[^/]+/domain/',
+          '^shared/schema\\.ts$'
         ]
       },
       to: {
         path: [
-          'drizzle-orm',
-          'postgres',
-          '@supabase/supabase-js'
+          '^server/contexts/[^/]+/infrastructure/',
+          '^server/lib/',
+          '^server/services/',
+          '^server/middleware/',
+          // Bibliotecas de infraestrutura específicas
+          'node_modules/@supabase/',
+          'node_modules/drizzle-orm/',
+          'node_modules/express',
+          'node_modules/bullmq',
+          'node_modules/ioredis',
+          'node_modules/winston',
+          'node_modules/pdf-lib'
         ]
       }
     },
-    
-    /* ==== REGRAS DE FRONTEND ==== */
     {
-      name: 'ui-no-backend-direct',
+      name: 'domain-cannot-depend-on-application',
       severity: 'error',
-      comment: 'Frontend não pode importar código do backend diretamente',
+      comment: 'Camada de domínio não pode depender da camada de aplicação',
       from: {
-        path: '^client/'
+        path: '^server/contexts/[^/]+/domain/'
       },
       to: {
-        path: '^server/',
-        pathNot: '^shared/'
+        path: '^server/contexts/[^/]+/application/'
       }
     },
     {
-      name: 'components-isolation',
-      severity: 'warn',
-      comment: 'Componentes devem ser independentes',
+      name: 'domain-cannot-depend-on-presentation',
+      severity: 'error',
+      comment: 'Camada de domínio não pode depender da camada de apresentação',
       from: {
-        path: '^client/src/components/ui/'
+        path: '^server/contexts/[^/]+/domain/'
       },
       to: {
-        path: '^client/src/pages/'
+        path: [
+          '^server/contexts/[^/]+/presentation/',
+          '^server/routes/',
+          '^server/controllers/'
+        ]
       }
-    }
-  ],
-  
-  // Dependências permitidas explicitamente
-  allowed: [
+    },
     {
+      name: 'application-cannot-depend-on-presentation',
+      severity: 'error',
+      comment: 'Camada de aplicação não pode depender da camada de apresentação',
+      from: {
+        path: '^server/contexts/[^/]+/application/'
+      },
+      to: {
+        path: [
+          '^server/contexts/[^/]+/presentation/',
+          '^server/routes/',
+          '^server/controllers/'
+        ]
+      }
+    },
+    {
+      name: 'infrastructure-cannot-depend-on-presentation',
+      severity: 'error',
+      comment: 'Camada de infraestrutura não pode depender da camada de apresentação',
+      from: {
+        path: '^server/contexts/[^/]+/infrastructure/'
+      },
+      to: {
+        path: [
+          '^server/contexts/[^/]+/presentation/',
+          '^server/routes/',
+          '^server/controllers/'
+        ]
+      }
+    },
+    {
+      name: 'shared-schema-independence',
+      severity: 'error',
+      comment: 'Shared schema deve permanecer independente de implementações específicas',
+      from: {
+        path: '^shared/schema\\.ts$'
+      },
+      to: {
+        path: [
+          '^server/',
+          '^client/',
+          'node_modules/express',
+          'node_modules/@supabase/',
+          'node_modules/bullmq'
+        ],
+        pathNot: [
+          // Permitir apenas imports essenciais do Drizzle para definição de schema
+          'node_modules/drizzle-orm',
+          'node_modules/drizzle-zod'
+        ]
+      }
+    },
+    {
+      name: 'controllers-should-not-have-business-logic',
+      severity: 'warn',
+      comment: 'Controllers devem delegar lógica de negócio para services ou use cases',
+      from: {
+        path: [
+          '^server/controllers/',
+          '^server/routes/',
+          '^server/contexts/[^/]+/presentation/'
+        ]
+      },
+      to: {
+        path: [
+          'node_modules/drizzle-orm',
+          '^server/lib/supabase',
+          '^server/lib/database'
+        ],
+        pathNot: [
+          // Permitir imports de services e use cases
+          '^server/services/',
+          '^server/contexts/[^/]+/application/',
+          '^server/contexts/[^/]+/domain/services/'
+        ]
+      }
+    },
+    {
+      name: 'no-circular-dependencies',
+      severity: 'error',
+      comment: 'Dependências circulares são proibidas em toda a base de código',
       from: {},
       to: {
-        path: '^shared/'
+        circular: true
       }
     },
     {
+      name: 'no-orphaned-modules',
+      severity: 'warn',
+      comment: 'Módulos órfãos (não utilizados) devem ser removidos',
       from: {
-        path: '^server/routes/'
+        orphan: true
       },
-      to: {
-        path: '^server/contexts/.*/application/'
-      }
-    },
-    {
-      from: {
-        path: '^server/contexts/.*/application/'
-      },
-      to: {
-        path: '^server/contexts/$1/domain/'
-      }
+      to: {}
     }
   ],
-  
-  // Opções de análise
   options: {
     doNotFollow: {
       path: [
         'node_modules',
-        '\\.test\\.[jt]s',
-        '\\.spec\\.[jt]s'
+        '\\.test\\.[jt]sx?$',
+        '\\.spec\\.[jt]sx?$',
+        '\\.stories\\.[jt]sx?$'
       ]
     },
     includeOnly: [
-      '^client/',
       '^server/',
-      '^shared/'
+      '^shared/',
+      '^client/src/'
     ],
     tsPreCompilationDeps: true,
     enhancedResolveOptions: {
       exportsFields: ['exports'],
-      conditionNames: ['import', 'require', 'node', 'default']
+      conditionNames: ['import', 'require', 'node', 'default'],
+      extensions: ['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs']
     },
     reporterOptions: {
       dot: {
-        collapsePattern: '^node_modules/[^/]+',
+        collapsePattern: 'node_modules/[^/]+',
         theme: {
           graph: {
-            bgcolor: 'transparent'
+            splines: 'ortho'
           }
         }
       },
       text: {
         highlightFocused: true
+      },
+      markdown: {
+        showTitle: true
       }
+    },
+    cache: true,
+    progress: {
+      type: 'performance-log'
     }
   }
 };

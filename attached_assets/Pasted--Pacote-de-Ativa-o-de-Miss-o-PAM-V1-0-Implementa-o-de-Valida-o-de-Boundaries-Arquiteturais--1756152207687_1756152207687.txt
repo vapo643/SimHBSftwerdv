@@ -1,0 +1,40 @@
+### Pacote de Ativação de Missão (PAM) V1.0 (Implementação de Validação de Boundaries Arquiteturais)
+
+* **Sumário da Missão (O Quê):** Implementar e configurar a ferramenta `dependency-cruiser` para criar "fitness functions" que validem automaticamente os limites dos nossos Bounded Contexts e as regras da nossa arquitetura hexagonal.
+* **Intenção Estratégica (O Porquê):** Provar (ou refutar), com código, a nossa hipótese arquitetural de que possuímos um "Monolito Modular". Esta validação automatizada é o único meio de garantir que os nossos limites de domínio são reais e não apenas uma convenção, o que é um pré-requisito não negociável para qualquer plano de migração.
+* **Histórico Relevante (Consulta Obrigatória):** A auditoria do Red Team (Vulnerabilidade RT-003) identificou a ausência de validação de *boundaries* como uma falha de alta severidade. O Ponto 20 da nossa Doutrina Arquitetural exige esta capacidade.
+* **Modelo Mental (Como se Encaixa):** Aja como um Engenheiro de Qualidade de Software Sênior a implementar "guard rails" (barreiras de proteção) no nosso pipeline de CI. A sua tarefa é traduzir as nossas regras de arquitetura (ex: "o domínio não pode depender da infraestrutura") em regras de código que o pipeline possa executar.
+
+---
+
+**IMPLEMENTAR:**
+Pipeline de Validação de Arquitetura Automatizada
+
+**CURRENT STATE:**
+A nossa arquitetura "Monolito Modular" é uma hipótese baseada na organização de pastas, mas não é validada por nenhuma ferramenta automatizada, o que cria um risco de acoplamento oculto.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  A ferramenta `dependency-cruiser` é instalada como uma dependência de desenvolvimento.
+2.  Um arquivo de configuração (`.dependency-cruiser.js` ou similar) é criado com as regras de validação arquitetural iniciais.
+3.  Um novo script `npm run validate:architecture` é adicionado ao `package.json` para executar a validação.
+4.  As regras de validação implementadas devem, no mínimo, proibir:
+    * **Violação de Bounded Context:** Código dentro de um Bounded Context (ex: `server/contexts/payment/`) **NÃO PODE** importar diretamente código de outro Bounded Context (ex: `server/contexts/proposal/`).
+    * **Violação da Regra de Dependência:** Código na camada de `domain` **NÃO PODE** importar código da camada de `infrastructure`.
+5.  **Prova de Sucesso:** A execução do script `npm run validate:architecture` no estado atual do código. O seu relatório final deve conter o **output completo** deste script, que nos mostrará o nosso verdadeiro estado de acoplamento.
+
+---
+**DECLARAção DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO. O risco é que a análise revele um alto grau de acoplamento que exija uma refatoração significativa.]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que o `dependency-cruiser` é a ferramenta mais adequada para esta tarefa no nosso ecossistema TypeScript."]
+* **VALIDAÇÃO PENDENTE:** [O resultado desta missão irá ditar todo o nosso plano de remediação e migração.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear os ficheiros a serem criados/modificados (`package.json`, `.dependency-cruiser.js`).
+2.  Garantir que as regras de dependência estão corretamente definidas.
+3.  Executar `get_latest_lsp_diagnostics` para garantir 0 erros novos.
+4.  **Declarar Nível de Confiança (0 a 100%)**.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (executar o script `npm run validate:architecture` e reportar o output).
+7.  **Documentar Decisões Técnicas**.
