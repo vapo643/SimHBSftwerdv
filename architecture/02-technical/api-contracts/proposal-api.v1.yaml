@@ -122,11 +122,133 @@ paths:
     get:
       summary: Get all proposals
       description: |
-        Retrieves all credit proposals. Returns an array of proposals with pagination metadata.
+        Retrieves credit proposals with optional filtering, pagination, and sorting.
         PII data is masked in responses according to security policies.
+        
+        **Filtros suportados:**
+        - Por status (múltiplos valores)
+        - Por CPF do cliente
+        - Por loja ou produto
+        - Por período de criação
+        - Por valor do empréstimo
+        
+        **Controle de acesso:**
+        - ATENDENTE: Vê apenas suas próprias propostas
+        - ANALISTA/ADMIN: Vê todas as propostas (com filtros)
       operationId: getAllProposals
       tags:
         - Proposals
+      parameters:
+        - name: status
+          in: query
+          description: "Filtrar por status (pode ser múltiplo)"
+          schema:
+            type: array
+            items:
+              type: string
+              enum: 
+                - aguardando_analise
+                - em_analise
+                - aprovada
+                - rejeitada
+                - pendente
+                - formalizada
+                - paga
+          style: form
+          explode: true
+          examples:
+            single:
+              summary: "Status único"
+              value: ["aguardando_analise"]
+            multiple:
+              summary: "Múltiplos status"
+              value: ["aguardando_analise", "em_analise"]
+        - name: cpf
+          in: query
+          description: "Filtrar por CPF do cliente (11 dígitos)"
+          schema:
+            type: string
+            pattern: '^[0-9]{11}$'
+          example: "12345678901"
+        - name: loja_id
+          in: query
+          description: "Filtrar por ID da loja"
+          schema:
+            type: string
+          example: "1"
+        - name: atendente_id
+          in: query
+          description: "Filtrar por ID do atendente (apenas para ADMIN/ANALISTA)"
+          schema:
+            type: string
+          example: "user-123"
+        - name: produto_id
+          in: query
+          description: "Filtrar por ID do produto"
+          schema:
+            type: string
+          example: "1"
+        - name: data_inicio
+          in: query
+          description: "Data inicial para filtro (inclusive)"
+          schema:
+            type: string
+            format: date
+          example: "2025-01-01"
+        - name: data_fim
+          in: query
+          description: "Data final para filtro (inclusive)"
+          schema:
+            type: string
+            format: date
+          example: "2025-12-31"
+        - name: valor_minimo
+          in: query
+          description: "Valor mínimo do empréstimo"
+          schema:
+            type: number
+            minimum: 0
+          example: 1000.00
+        - name: valor_maximo
+          in: query
+          description: "Valor máximo do empréstimo"
+          schema:
+            type: number
+            minimum: 0
+          example: 50000.00
+        - name: limit
+          in: query
+          description: "Limite de resultados por página"
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          example: 20
+        - name: offset
+          in: query
+          description: "Número de registros para pular"
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+          example: 0
+        - name: order_by
+          in: query
+          description: "Campo para ordenação"
+          schema:
+            type: string
+            enum: ["created_at", "updated_at", "valor", "cliente_nome"]
+            default: "created_at"
+          example: "created_at"
+        - name: order_direction
+          in: query
+          description: "Direção da ordenação"
+          schema:
+            type: string
+            enum: ["asc", "desc"]
+            default: "desc"
+          example: "desc"
       responses:
         '200':
           description: Proposals retrieved successfully
@@ -307,17 +429,24 @@ paths:
             type: string
             format: uuid
       requestBody:
+        required: true
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                observations:
-                  type: string
-                  description: Approval observations
-                approvalData:
-                  type: object
-                  description: Additional approval metadata
+              $ref: '#/components/schemas/ApproveProposalRequest'
+            examples:
+              basicApproval:
+                summary: "Aprovação básica"
+                value:
+                  observations: "Proposta aprovada após análise detalhada do perfil do cliente"
+                  analysisResult:
+                    score: 750
+                    risk: "baixo"
+                    recommendations: ["Cliente com bom histórico", "Renda compatível com valor solicitado"]
+              simpleApproval:
+                summary: "Aprovação simples"
+                value:
+                  observations: "Cliente com excelente histórico de crédito e renda comprovada"
       responses:
         '200':
           description: Proposal approved successfully
@@ -372,17 +501,20 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required:
-                - reason
-              properties:
-                reason:
-                  type: string
-                  description: Rejection reason
-                  example: "Insufficient credit score"
-                observations:
-                  type: string
-                  description: Additional observations
+              $ref: '#/components/schemas/RejectProposalRequest'
+            examples:
+              creditScoreRejection:
+                summary: "Rejeição por score"
+                value:
+                  observations: "Proposta rejeitada devido a score de crédito insuficiente"
+                  rejectionReason: "score_insuficiente"
+                  rejectionDetails: "Score atual: 420. Mínimo requerido: 500"
+              incomeRejection:
+                summary: "Rejeição por renda"
+                value:
+                  observations: "Renda mensal insuficiente para o valor solicitado"
+                  rejectionReason: "renda_incompativel"
+                  rejectionDetails: "Comprometimento de renda excede 30% do limite permitido"
       responses:
         '200':
           description: Proposal rejected successfully
@@ -469,6 +601,114 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+
+  /v1/proposals/{id}/submit:
+    put:
+      summary: Submit proposal for analysis
+      description: |
+        Submits a proposal for credit analysis by transitioning its status to 'em_analise'.
+        The proposal must be in 'aguardando_analise' status.
+        Requires appropriate permissions.
+      operationId: submitForAnalysis
+      tags:
+        - Proposals - Workflow
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Unique identifier of the proposal
+          schema:
+            type: string
+            format: uuid
+          example: "b3b5433f-0efe-4bbb-be01-411e37c262a9"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmitForAnalysisRequest'
+            examples:
+              automaticAnalysis:
+                summary: "Análise automática"
+                value:
+                  priority: "normal"
+                  analysisType: "automatica"
+              priorityAnalysis:
+                summary: "Análise prioritária"
+                value:
+                  priority: "alta"
+                  analysisType: "hibrida"
+                  additionalNotes: "Cliente VIP - análise prioritária solicitada"
+      responses:
+        '200':
+          description: Proposal submitted for analysis successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProposalSuccessResponse'
+          headers:
+            X-Rate-Limit-Limit:
+              description: "Request limit per hour"
+              schema:
+                type: integer
+              example: 1000
+            X-Rate-Limit-Remaining:
+              description: "Requests remaining in current period"
+              schema:
+                type: integer
+              example: 999
+            X-Rate-Limit-Reset:
+              description: "Unix timestamp when rate limit resets"
+              schema:
+                type: integer
+              example: 1735142400
+            X-Correlation-ID:
+              description: "Request correlation ID for tracing"
+              schema:
+                type: string
+                format: uuid
+              example: "abc123def456"
+        '400':
+          description: Invalid request or proposal in wrong status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '403':
+          description: Insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '404':
+          description: Proposal not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '409':
+          description: Invalid state transition
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RateLimitResponse'
+          headers:
+            Retry-After:
+              description: "Seconds to wait before retrying"
+              schema:
+                type: integer
+              example: 60
         '500':
           description: Internal server error
           content:
@@ -963,26 +1203,128 @@ components:
     CreateProposalRequest:
       type: object
       required:
-        - customerData
-        - loanConditions
+        - clienteNome
+        - clienteCpf
+        - clienteEmail
+        - valor
+        - prazo
+        - taxaJuros
+        - produtoId
+        - lojaId
       properties:
-        customerData:
-          $ref: '#/components/schemas/CustomerDataInput'
-        loanConditions:
-          $ref: '#/components/schemas/LoanConditions'
-        partnerId:
+        # Dados básicos do cliente (obrigatórios)
+        clienteNome:
           type: string
-          format: uuid
-          description: ID of the partner/broker
-          example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
-        storeId:
+          minLength: 2
+          maxLength: 100
+          description: "Nome completo do cliente"
+          example: "João da Silva Santos"
+        clienteCpf:
           type: string
-          description: ID of the store/branch
+          pattern: '^[0-9]{11}$'
+          description: "CPF do cliente (apenas números, 11 dígitos)"
+          example: "12345678901"
+        clienteEmail:
+          type: string
+          format: email
+          description: "Email do cliente"
+          example: "joao.silva@email.com"
+        
+        # Dados opcionais do cliente
+        clienteRg:
+          type: string
+          description: "RG do cliente"
+          example: "123456789"
+        clienteTelefone:
+          type: string
+          description: "Telefone do cliente"
+          example: "(11) 99999-9999"
+        clienteEndereco:
+          type: string
+          description: "Endereço completo do cliente"
+          example: "Rua das Flores, 123, Apto 45"
+        clienteCidade:
+          type: string
+          description: "Cidade do cliente"
+          example: "São Paulo"
+        clienteEstado:
+          type: string
+          description: "Estado/UF do cliente"
+          example: "SP"
+        clienteUf:
+          type: string
+          description: "UF do cliente (alias para clienteEstado)"
+          example: "SP"
+        clienteCep:
+          type: string
+          pattern: '^[0-9]{8}$'
+          description: "CEP do cliente (8 dígitos)"
+          example: "01234567"
+        clienteDataNascimento:
+          type: string
+          format: date
+          description: "Data de nascimento do cliente (YYYY-MM-DD)"
+          example: "1985-03-15"
+        clienteRenda:
+          type: string
+          description: "Renda mensal do cliente como string para parsing"
+          example: "5000.00"
+        clienteRendaMensal:
+          type: number
+          minimum: 0
+          description: "Renda mensal do cliente como número"
+          example: 5000.00
+        clienteEmpregador:
+          type: string
+          description: "Nome do empregador"
+          example: "Empresa XYZ Ltda"
+        clienteEmpresaNome:
+          type: string
+          description: "Nome da empresa (alias para clienteEmpregador)"
+          example: "Empresa XYZ Ltda"
+        clienteTempoEmprego:
+          type: string
+          description: "Tempo de emprego atual"
+          example: "2 anos"
+        clienteDividasExistentes:
+          type: string
+          description: "Valor das dívidas existentes como string para parsing"
+          example: "1500.00"
+        
+        # Dados do empréstimo (obrigatórios)
+        valor:
+          type: number
+          minimum: 0.01
+          description: "Valor solicitado do empréstimo"
+          example: 10000.00
+        prazo:
+          type: integer
+          minimum: 1
+          maximum: 84
+          description: "Prazo do empréstimo em meses"
+          example: 24
+        taxaJuros:
+          type: number
+          minimum: 0
+          maximum: 100
+          description: "Taxa de juros mensal"
+          example: 2.99
+        
+        # Identificadores (obrigatórios)
+        produtoId:
+          type: string
+          description: "ID do produto de crédito"
           example: "1"
-        productId:
-          type: string  
-          description: ID of the credit product
+        lojaId:
+          type: string
+          description: "ID da loja/filial"
           example: "1"
+        
+        # Identificadores opcionais
+        atendenteId:
+          type: string
+          description: "ID do atendente (opcional, pode ser inferido do JWT)"
+          example: "user-123"
 
     # Schema para entrada de dados (POST) - pode conter PII completo
     CustomerDataInput:
@@ -1391,6 +1733,243 @@ components:
           format: uuid
           description: Request correlation ID for tracing
           example: "abc123def456"
+
+    # ========== NOVOS SCHEMAS PARA AÇÕES DE PROPOSTA ==========
+    
+    ApproveProposalRequest:
+      type: object
+      required:
+        - observations
+      properties:
+        observations:
+          type: string
+          description: "Observações sobre a aprovação"
+          minLength: 10
+          maxLength: 1000
+          example: "Proposta aprovada após análise detalhada do perfil do cliente"
+        analysisResult:
+          type: object
+          description: "Resultado detalhado da análise creditícia"
+          properties:
+            score:
+              type: number
+              minimum: 0
+              maximum: 1000
+              description: "Score de crédito"
+              example: 750
+            risk:
+              type: string
+              enum: ["baixo", "medio", "alto"]
+              description: "Nível de risco"
+              example: "baixo"
+            recommendations:
+              type: array
+              items:
+                type: string
+              description: "Recomendações da análise"
+              example: ["Cliente com bom histórico", "Renda compatível com valor solicitado"]
+
+    RejectProposalRequest:
+      type: object
+      required:
+        - observations
+        - rejectionReason
+      properties:
+        observations:
+          type: string
+          description: "Observações sobre a rejeição"
+          minLength: 10
+          maxLength: 1000
+          example: "Proposta rejeitada devido a score de crédito insuficiente"
+        rejectionReason:
+          type: string
+          enum: 
+            - score_insuficiente
+            - renda_incompativel 
+            - documentacao_pendente
+            - historico_negativo
+            - politica_interna
+            - outros
+          description: "Motivo específico da rejeição"
+          example: "score_insuficiente"
+        rejectionDetails:
+          type: string
+          description: "Detalhes adicionais sobre a rejeição"
+          maxLength: 500
+          example: "Score atual: 420. Mínimo requerido: 500"
+
+    SubmitForAnalysisRequest:
+      type: object
+      properties:
+        priority:
+          type: string
+          enum: ["baixa", "normal", "alta", "urgente"]
+          default: "normal"
+          description: "Prioridade da análise"
+          example: "normal"
+        analysisType:
+          type: string
+          enum: ["automatica", "manual", "hibrida"]
+          default: "automatica"
+          description: "Tipo de análise solicitada"
+          example: "automatica"
+        additionalNotes:
+          type: string
+          description: "Notas adicionais para a análise"
+          maxLength: 500
+          example: "Cliente preferencial - análise prioritária"
+
+    ProposalQueryFilters:
+      type: object
+      properties:
+        status:
+          type: array
+          items:
+            type: string
+            enum: 
+              - aguardando_analise
+              - em_analise
+              - aprovada
+              - rejeitada
+              - pendente
+              - formalizada
+              - paga
+          description: "Filtro por status"
+          example: ["aguardando_analise", "em_analise"]
+        clienteCpf:
+          type: string
+          pattern: '^[0-9]{11}$'
+          description: "Filtro por CPF do cliente"
+          example: "12345678901"
+        lojaId:
+          type: string
+          description: "Filtro por ID da loja"
+          example: "1"
+        produtoId:
+          type: string
+          description: "Filtro por ID do produto"
+          example: "1"
+        dataInicio:
+          type: string
+          format: date
+          description: "Data inicial para filtro (inclusive)"
+          example: "2025-01-01"
+        dataFim:
+          type: string
+          format: date
+          description: "Data final para filtro (inclusive)"
+          example: "2025-12-31"
+        valorMinimo:
+          type: number
+          minimum: 0
+          description: "Valor mínimo do empréstimo"
+          example: 1000.00
+        valorMaximo:
+          type: number
+          minimum: 0
+          description: "Valor máximo do empréstimo"
+          example: 50000.00
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 20
+          description: "Limite de resultados por página"
+          example: 20
+        offset:
+          type: integer
+          minimum: 0
+          default: 0
+          description: "Número de registros para pular"
+          example: 0
+        orderBy:
+          type: string
+          enum: ["createdAt", "updatedAt", "valor", "clienteNome"]
+          default: "createdAt"
+          description: "Campo para ordenação"
+          example: "createdAt"
+        orderDirection:
+          type: string
+          enum: ["asc", "desc"]
+          default: "desc"
+          description: "Direção da ordenação"
+          example: "desc"
+
+    # ========== RATE LIMITING SCHEMAS ==========
+    
+    RateLimitResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: "Mensagem sobre limite de taxa"
+          example: "Rate limit exceeded. Try again later."
+        retryAfter:
+          type: integer
+          description: "Segundos até próxima tentativa permitida"
+          example: 60
+        limit:
+          type: integer
+          description: "Limite máximo de requests por período"
+          example: 1000
+        remaining:
+          type: integer
+          description: "Requests restantes no período atual"
+          example: 0
+        resetTime:
+          type: string
+          format: date-time
+          description: "Quando o limite será resetado"
+          example: "2025-08-25T17:00:00.000Z"
+
+    # ========== WEBHOOK SCHEMAS ==========
+    
+    WebhookProposalStatusChanged:
+      type: object
+      required:
+        - eventType
+        - timestamp
+        - data
+      properties:
+        eventType:
+          type: string
+          enum: ["proposal.status.changed"]
+          description: "Tipo do evento webhook"
+          example: "proposal.status.changed"
+        timestamp:
+          type: string
+          format: date-time
+          description: "Timestamp do evento"
+          example: "2025-08-25T16:30:00.000Z"
+        webhookId:
+          type: string
+          format: uuid
+          description: "ID único do webhook"
+          example: "wh_123e4567-e89b-12d3-a456-426614174000"
+        data:
+          type: object
+          properties:
+            proposalId:
+              type: string
+              format: uuid
+              description: "ID da proposta"
+              example: "b3b5433f-0efe-4bbb-be01-411e37c262a9"
+            oldStatus:
+              type: string
+              description: "Status anterior"
+              example: "aguardando_analise"
+            newStatus:
+              type: string
+              description: "Novo status"
+              example: "aprovada"
+            changedBy:
+              type: string
+              description: "Usuário que alterou o status"
+              example: "analista_123"
+            observations:
+              type: string
+              description: "Observações sobre a mudança"
+              example: "Aprovação automática"
 
   securitySchemes:
     bearerAuth:
