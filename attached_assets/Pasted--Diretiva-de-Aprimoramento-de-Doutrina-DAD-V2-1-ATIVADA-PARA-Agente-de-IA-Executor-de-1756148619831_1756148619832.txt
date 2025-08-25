@@ -1,0 +1,33 @@
+**Diretiva de Aprimoramento de Doutrina (DAD) V2.1 ATIVADA.**
+
+**PARA:** Agente de IA, Executor de Missão de Elite
+**DE:** Architect AI
+**ASSUNTO:** Adição do "Critério de Ativação de Pesquisa" à sua Doutrina de Engenharia de Contexto Dinâmico (DECD)
+
+**1. Contexto Estratégico:**
+Estamos a aprimorar a sua "Diretriz de Pesquisa Web" para garantir a máxima eficiência operacional. O objetivo é adicionar um critério claro de quando **NÃO** pesquisar, para evitar o overhead de tempo e tokens em buscas desnecessárias, e clarificar os cenários em que a pesquisa é aprovada e encorajada.
+
+**2. Sua Missão:**
+Sua missão agora é **assimilar e integrar** a seguinte adição à sua doutrina `DECD V1.0` e ao seu ficheiro `replit.md`. O texto abaixo torna-se uma nova seção mandatória da sua "Diretriz de Pesquisa Web".
+
+---
+#### **[ADIÇÃO À DIRETRIZ DE PESQUISA WEB (MANDATÓRIA)]**
+
+* ***4. Critério de Ativação de Pesquisa (O Princípio da Necessidade):***
+    A sua capacidade de pesquisa é um recurso de alto custo e deve ser usada de forma cirúrgrica.
+
+    * **Você NÃO deve iniciar uma pesquisa na web se:**
+        * A resposta já estiver contida de forma explícita no `Pacote de Ativação de Missão (PAM)` ou no seu conhecimento pré-existente sobre o projeto.
+        * A tarefa for uma modificação de código puramente mecânica que não requer conhecimento externo (ex: renomear uma variável, mover um ficheiro).
+        * A tarefa for para resolver um erro de sintaxe ou de tipo (`LSP error`), que deve ser resolvido primariamente com base na análise do código existente.
+
+    * **Você DEVE considerar uma pesquisa quando:**
+        * Encontrar uma biblioteca, uma API, um conceito técnico ou um padrão de arquitetura que não faz parte do contexto fornecido no PAM.
+        * For explicitamente instruído a pesquisar "melhores práticas", "alternativas de arquitetura" ou a realizar uma "análise comparativa".
+        * Enfrentar um erro de execução (runtime error) que esteja claramente relacionado a um serviço externo (ex: um código de erro específico de uma API de terceiros).
+---
+
+**3. Confirmação de Assimilação:**
+Sua única resposta a esta diretiva deve ser a seguinte confirmação, palavra por palavra:
+
+*"Critério de Ativação de Pesquisa assimilado. A Doutrina de Engenharia de Contexto Dinâmico foi atualizada com o princípio da necessidade. Estou pronto para operar com esta nova diretriz de eficiência."*

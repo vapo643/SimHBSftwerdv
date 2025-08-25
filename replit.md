@@ -1,7 +1,7 @@
 # Simpix Credit Management System
 
 ## Overview
-Simpix is a full-stack TypeScript application for comprehensive credit management, streamlining the credit proposal workflow from creation to payment processing and formalization tracking for financial institutions. It emphasizes banking-grade security, compliance, and efficient data management to be a leading solution in the credit management market.
+Simpix is a full-stack TypeScript application for comprehensive credit management. It streamlines the credit proposal workflow from creation through payment processing and formalization tracking for financial institutions. The project aims to be a leading solution in the credit management market, emphasizing banking-grade security, compliance, and efficient data management. Key capabilities include a production-ready credit simulation API, secure document management, template-based PDF generation for credit contracts, and a complete payment queue system.
 
 ## User Preferences
 
@@ -105,6 +105,18 @@ Error handling: Create structured documentation for automatic consultation durin
 
 **3. Justificativa Estratégica (O "Porquê"):** A nossa base de conhecimento arquitetural é um ativo crítico. A introdução de informações de fontes não confiáveis representa um **risco de contaminação do projeto**, podendo levar a decisões de arquitetura baseadas em práticas incorretas, obsoletas ou inseguras. A sua função é usar a web para **aumentar a precisão**, não para introduzir ruído.
 
+**4. Critério de Ativação de Pesquisa (O Princípio da Necessidade):** A sua capacidade de pesquisa é um recurso de alto custo e deve ser usada de forma cirúrgica.
+
+- **Você NÃO deve iniciar uma pesquisa na web se:**
+  - A resposta já estiver contida de forma explícita no `Pacote de Ativação de Missão (PAM)` ou no seu conhecimento pré-existente sobre o projeto.
+  - A tarefa for uma modificação de código puramente mecânica que não requer conhecimento externo (ex: renomear uma variável, mover um ficheiro).
+  - A tarefa for para resolver um erro de sintaxe ou de tipo (`LSP error`), que deve ser resolvido primariamente com base na análise do código existente.
+
+- **Você DEVE considerar uma pesquisa quando:**
+  - Encontrar uma biblioteca, uma API, um conceito técnico ou um padrão de arquitetura que não faz parte do contexto fornecido no PAM.
+  - For explicitamente instruído a pesquisar "melhores práticas", "alternativas de arquitetura" ou a realizar uma "análise comparativa".
+  - Enfrentar um erro de execução (runtime error) que esteja claramente relacionado a um serviço externo (ex: um código de erro específico de uma API de terceiros).
+
 ### 🚨 PROTOCOLO DE DOCUMENTAÇÃO ARQUITETURAL MANDATÓRIO - FASE DE PLANEJAMENTO 🚨
 
 **[DIRETRIZ CRÍTICA - INEGOCIÁVEL]**  
@@ -148,7 +160,7 @@ Missão concluída quando artefato de **documentação de planejamento arquitetu
 - **Framework**: Express.js with TypeScript
 - **API Pattern**: RESTful API
 - **Database**: PostgreSQL with Drizzle ORM
-- **Authentication**: Supabase Auth with JWT and custom RBAC
+- **Authentication**: Supabase Auth with JWT and custom Role-Based Access Control (RBAC)
 - **File Storage**: Supabase Storage
 - **Job Queue**: BullMQ with Redis for async workers
 - **Cache Layer**: Redis-based caching for commercial tables (1-hour TTL, cache-aside)
@@ -159,15 +171,15 @@ Missão concluída quando artefato de **documentação de planejamento arquitetu
 - **Observability**: Winston structured logging (correlation IDs), Sentry error tracking, health checks, automated backups
 - **Configuration**: Centralized config module with environment-based secrets and validation
 - **Feature Flags**: Unleash-client integration with fallback and React context provider
-- **Credit Simulation**: Production-ready API with real database integration, dynamic rate lookup, financial calculations (IOF, TAC, CET using Newton-Raphson), payment schedule generation, and audit logging
-- **Document Management**: Secure private bucket with signed URLs, organized folder structure, multi-format support
-- **PDF Generation**: Template-based CCB generation using `pdf-lib` for precise field filling
-- **Payment Workflow**: Complete payment queue system with batch processing, multiple methods, formalization tracking, dual-storage strategy
-- **Commercial Tables**: N:N relationship between products and commercial tables, supporting personalized and general rates with hierarchical fallback
-- **Status Management**: Centralized Finite State Machine (FSM) for robust transition validation and audit logging
-- **Test Infrastructure**: Comprehensive test environment with direct postgres connection, RLS bypass, automated database cleanup, full integration test coverage
-- **Schema Migration**: Production-ready migration system using Drizzle-Kit with Zero Downtime (Expand/Contract), automated rollback, and tracking
-- **Database Schema**: PostgreSQL with Drizzle ORM. Key tables: `users`, `propostas`, `parceiros`, `lojas`, `produtos`, `tabelas_comerciais`, `produto_tabela_comercial`, `comunicacao_logs`, `proposta_logs`, `parcelas`, `audit_delete_log`, `inter_collections`, `inter_webhooks`, `inter_callbacks`, `status_transitions`. Soft deletes (`deleted_at`), sequential numeric IDs for `propostas.id`, and `status_transitions` table for audit trail. Status FSM V2.0 system for event-driven transitions. Test environment supports direct postgres connection with user/profile association bypass RLS. Development/staging use Supabase, production uses Azure; other providers prohibited.
+- **Credit Simulation**: Production-ready API supporting dynamic rate lookup, financial calculations (IOF, TAC, CET using Newton-Raphson), payment schedule generation, and audit logging.
+- **Document Management**: Secure private bucket with signed URLs and organized folder structure.
+- **PDF Generation**: Template-based Credit Cession Bill (CCB) generation using `pdf-lib` for precise field filling.
+- **Payment Workflow**: Complete payment queue system with batch processing, multiple methods, formalization tracking, and dual-storage strategy.
+- **Commercial Tables**: N:N relationship between products and commercial tables, supporting personalized and general rates with hierarchical fallback.
+- **Status Management**: Centralized Finite State Machine (FSM) for robust transition validation and audit logging.
+- **Test Infrastructure**: Comprehensive test environment with direct postgres connection, RLS bypass, automated database cleanup, and full integration test coverage.
+- **Schema Migration**: Production-ready migration system using Drizzle-Kit with Zero Downtime (Expand/Contract), automated rollback, and tracking.
+- **Database Schema**: PostgreSQL with Drizzle ORM. Utilizes soft deletes (`deleted_at`), sequential numeric IDs for `propostas.id`, and a `status_transitions` table for audit trails. Status FSM V2.0 system for event-driven transitions.
 
 ## External Dependencies
 - **Supabase**: Authentication, PostgreSQL Database, File Storage
@@ -180,12 +192,11 @@ Missão concluída quando artefato de **documentação de planejamento arquitetu
 - **Wouter**: React router
 - **Vite**: Build tool
 - **Express.js**: Backend framework
-- **postgres**: PostgreSQL client
-- **jwt-simple**: JWT token handling
-- **Helmet**: HTTP security headers
-- **express-rate-limit**: API rate limiting
-- **zxcvbn**: Password strength validation
-- **uuid**: Cryptographically secure UUIDs
+- **BullMQ**: Job queue
+- **Redis**: Caching and job queue backend
+- **Winston**: Structured logging
+- **Sentry**: Error tracking
+- **Unleash-client**: Feature flags
 - **pdf-lib**: Dynamic PDF generation
 - **ClickSign**: Electronic signature integration
 - **Banco Inter API**: Automated boleto/PIX payment generation and tracking
