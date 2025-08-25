@@ -1,0 +1,53 @@
+### Pacote de Ativação de Missão (PAM) V1.0 (Briefing de Ratificação do Sprint 1)
+
+* **Sumário da Missão (O Quê):** Consolidar e apresentar os pontos de decisão chave dos 5 novos documentos de arquitetura criados no Sprint 1, formatando-os para a revisão e ratificação final do Arquiteto Chefe.
+* **Intenção Estratégica (O Porquê):** Facilitar uma revisão de alta velocidade e garantir o alinhamento e a aprovação formal da nossa fundação arquitetural. A ratificação é o portão de qualidade final que transforma a documentação em doutrina oficial.
+* **Histórico Relevante (Consulta Obrigatória):** A sua missão anterior foi a criação bem-sucedida de 5 documentos P0: `architectural-constraints.md`, `technology-stack.md`, `environments-strategy.md`, `branching-strategy.md`, e `config-management-strategy.md`.
+* **Modelo Mental (Como se Encaixa):** Aja como um Arquiteto de Soluções a apresentar um resumo executivo para o CTO. Sua tarefa é extrair a essência de cada documento e apresentá-la de forma clara e concisa para uma decisão de "Aprovar/Rejeitar".
+
+---
+
+**IMPLEMENTAR:**
+Briefing Executivo para Ratificação dos Documentos do Sprint 1
+
+**CURRENT STATE:**
+Cinco documentos arquiteturais críticos foram criados, mas as suas decisões-chave precisam ser consolidadas e formalmente aprovadas pelo Arquiteto Chefe.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um novo arquivo Markdown, `architecture/99-collaboration/sprint-1-ratification-briefing.md`, é criado. O arquivo deve conter um resumo executivo para cada um dos 5 documentos, seguido de uma pergunta de ratificação.
+
+**CONSTRAINTS (Estrutura do Briefing Mandatório):**
+
+Para cada um dos 5 documentos, crie uma seção com a seguinte estrutura:
+
+**1. Documento:** `[Nome do Documento]`
+   * **Decisão-Chave 1:** [Resuma a principal decisão do documento em uma frase.]
+   * **Decisão-Chave 2:** [Resuma a segunda principal decisão do documento.]
+   * **Para Ratificação:** [Formule uma pergunta direta de "Sim/Não" para o Arquiteto Chefe.]
+
+**Exemplo para o Ponto 100 - Branching Strategy:**
+---
+**Documento:** `architecture/02-technical/branching-strategy.md`
+* **Decisão-Chave 1:** Adotamos o modelo "Git Flow Simplificado" com as branches `main` (produção) e `develop` (integração) como eixos centrais.
+* **Decisão-Chave 2:** As mensagens de commit devem seguir o padrão "Conventional Commits" e serão validadas automaticamente no CI.
+* **Para Ratificação:** Arquiteto Chefe, você ratifica o "Git Flow Simplificado" e o "Conventional Commits" como a nossa doutrina oficial de versionamento? (Sim/Não)
+---
+
+**Sua tarefa é criar esta estrutura para TODOS os 5 documentos criados no Sprint 1.**
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que consigo extrair as 2 decisões mais importantes de cada documento de 500+ linhas."]
+* **VALIDAÇÃO PENDENTE:** [A resposta do Arquiteto Chefe a este briefing irá desbloquear o Sprint 2.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear os 5 arquivos de documentação a serem sumarizados.
+2.  Garantir que o briefing extrai as decisões mais importantes de cada um.
+3.  Executar `get_latest_lsp_diagnostics` para garantir que o ambiente está estável.
+4.  **Declarar Nível de Confiança (0 a 100%)**.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (revisão do documento de briefing gerado).
+7.  **Documentar Decisões Técnicas**.
