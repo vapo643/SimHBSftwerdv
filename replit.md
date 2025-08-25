@@ -1,7 +1,7 @@
 # Simpix Credit Management System
 
 ## Overview
-Simpix is a full-stack TypeScript application for comprehensive credit management within financial institutions. Its purpose is to streamline the credit proposal workflow, from initial creation through payment processing and formalization tracking. The system aims to be a leading solution in the credit management market, emphasizing banking-grade security, compliance, efficient data management, and features like a production-ready credit simulation API, secure document management, template-based PDF generation for credit contracts, and a complete payment queue system.
+Simpix is a full-stack TypeScript application for comprehensive credit management in financial institutions. Its purpose is to streamline the credit proposal workflow, from creation through payment processing and formalization tracking. Key capabilities include a production-ready credit simulation API, secure document management, template-based PDF generation for credit contracts, and a complete payment queue system. The project prioritizes banking-grade security, compliance, and efficient data management, aiming to be a leading solution in the credit management market.
 
 ## User Preferences
 
@@ -146,34 +146,38 @@ Missão concluída quando artefato de **documentação de planejamento arquitetu
 
 ## System Architecture
 
-### Frontend
-- **Framework**: React 18 with TypeScript
+The system is a full-stack TypeScript application with a modular monolith architecture.
+
+**Frontend:**
+- **Framework**: React 18
+- **Language**: TypeScript
 - **Routing**: Wouter
 - **Styling**: Tailwind CSS with shadcn/ui components
-- **State Management**: TanStack Query for server state, `useReducer` for complex local state
-- **Form Handling**: React Hook Form with Zod validation
+- **State Management**: TanStack Query for server state; `useReducer` for complex local state.
+- **Form Handling**: React Hook Form with Zod validation.
 - **Build Tool**: Vite
 
-### Backend
-- **Framework**: Express.js with TypeScript
+**Backend:**
+- **Framework**: Express.js
+- **Language**: TypeScript
 - **API Pattern**: RESTful API
-- **Database**: PostgreSQL with Drizzle ORM. Utilizes soft deletes, sequential numeric IDs, and a `status_transitions` table for audit trails.
+- **Database**: PostgreSQL with Drizzle ORM, featuring soft deletes, sequential numeric IDs, and audit trails.
 - **Authentication**: Supabase Auth with JWT and custom Role-Based Access Control (RBAC).
-- **File Storage**: Supabase Storage for secure private bucket with signed URLs and organized folder structure.
-- **Job Queue**: BullMQ with Redis for async workers.
-- **Cache Layer**: Redis-based caching for commercial tables (1-hour TTL, cache-aside).
+- **File Storage**: Supabase Storage for secure private buckets.
+- **Job Queue**: BullMQ with Redis for asynchronous workers.
+- **Cache Layer**: Redis-based cache for commercial tables (1-hour TTL, cache-aside strategy).
 - **Architecture**: Modular monolith with domain-based decomposition (Auth, Users, Propostas, Pagamentos, Integrações).
-- **Security**: Helmet, two-tier rate limiting, input sanitization, timing attack protection, magic number validation, cryptographically secure UUIDs, soft delete, Row Level Security (RLS), anti-fragile RBAC.
-- **CI/CD**: GitHub Actions for CI, CD-Staging, and Security workflows (testing, SAST/SCA, deployment readiness, rollback).
-- **Observability**: Winston structured logging (correlation IDs), Sentry error tracking, health checks, automated backups.
-- **Configuration**: Centralized config module with environment-based secrets and validation.
-- **Feature Flags**: Unleash-client integration with fallback and React context provider.
+- **Security**: Helmet, two-tier rate limiting, input sanitization, timing attack protection, magic number validation, cryptographically secure UUIDs, Row Level Security (RLS), and anti-fragile RBAC.
+- **CI/CD**: GitHub Actions for CI, CD-Staging, and Security workflows.
+- **Observability**: Winston for structured logging, Sentry for error tracking, health checks, automated backups.
+- **Configuration**: Centralized configuration module.
+- **Feature Flags**: Unleash-client integration with fallback.
 - **Credit Simulation**: Production-ready API supporting dynamic rate lookup, financial calculations (IOF, TAC, CET using Newton-Raphson), payment schedule generation, and audit logging.
-- **PDF Generation**: Template-based Credit Cession Bill (CCB) generation using `pdf-lib` for precise field filling.
+- **PDF Generation**: Template-based Credit Cession Bill (CCB) generation using `pdf-lib`.
 - **Payment Workflow**: Complete payment queue system with batch processing, multiple methods, formalization tracking, and dual-storage strategy.
 - **Commercial Tables**: N:N relationship between products and commercial tables, supporting personalized and general rates with hierarchical fallback.
 - **Status Management**: Centralized Finite State Machine (FSM) for robust transition validation and audit logging.
-- **Test Infrastructure**: Comprehensive test environment with direct postgres connection, RLS bypass, automated database cleanup, and full integration test coverage.
+- **Test Infrastructure**: Comprehensive test environment with direct PostgreSQL connection, RLS bypass, automated database cleanup, and full integration test coverage.
 - **Schema Migration**: Production-ready migration system using Drizzle-Kit with Zero Downtime (Expand/Contract), automated rollback, and tracking.
 
 ## External Dependencies
@@ -183,7 +187,7 @@ Missão concluída quando artefato de **documentação de planejamento arquitetu
 - **React Hook Form**: Form management
 - **Zod**: Schema validation
 - **Tailwind CSS**: Styling
-- **shadcn/ui**: React components
+- **shadcn/ui**: React components library
 - **Wouter**: React router
 - **Vite**: Build tool
 - **Express.js**: Backend framework

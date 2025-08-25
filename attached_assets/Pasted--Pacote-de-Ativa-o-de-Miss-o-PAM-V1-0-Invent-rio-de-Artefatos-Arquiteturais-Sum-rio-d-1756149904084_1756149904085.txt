@@ -1,0 +1,49 @@
+### Pacote de Ativação de Missão (PAM) V1.0 (Inventário de Artefatos Arquiteturais)
+
+* **Sumário da Missão (O Quê):** Auditar o diretório `/architecture` e gerar um inventário completo e organizado de todos os artefatos de documentação arquitetural existentes.
+* **Intenção Estratégica (O Porquê):** Consolidar todo o nosso conhecimento arquitetural num único ponto de referência para que a nossa subsequente análise e debate de qualidade (Fase 2) seja completa e baseada em dados precisos. Este inventário é o "mapa" que usaremos para a próxima fase da nossa operação.
+* **Histórico Relevante (Consulta Obrigatória):** Nas missões anteriores, nós criamos dezenas de documentos de arquitetura, ADRs e estratégias. Esta missão irá catalogá-los de forma sistemática.
+* **Modelo Mental (Como se Encaixa):** Aja como um Bibliotecário de Arquitetura. Sua tarefa é inspecionar as nossas "prateleiras" (diretórios) e criar um catálogo preciso de todos os "livros" (documentos) que possuímos.
+
+---
+
+**IMPLEMENTAR:**
+Relatório de Inventário de Ativos de Documentação Arquitetural
+
+**CURRENT STATE:**
+Possuímos uma vasta gama de documentos de arquitetura distribuídos na estrutura de pastas `/architecture`, mas não temos um inventário único e consolidado.
+
+**EXPECTED (Estado Final de Sucesso):**
+Um novo arquivo Markdown, `architecture/99-collaboration/architectural-artifacts-inventory.md`, é criado. O arquivo deve conter:
+1.  **Sumário Executivo:** Um resumo que quantifica o número total de documentos encontrados.
+2.  **Inventário por Categoria:** Uma lista de todos os arquivos de documentação (`.md`), organizada de acordo com a nossa estrutura de pastas oficial:
+    * `01-domain/`
+    * `02-technical/`
+    * `03-infrastructure/`
+    * `04-security/`
+    * `05-performance/`
+    * `06-roadmap/`
+    * `07-decisions/`
+    * `08-diagrams/`
+    * `99-collaboration/`
+
+**CONSTRAINTS (Roadmap de Auditoria):**
+1.  **Comando de Busca:** Utilize comandos de terminal (ex: `find architecture -type f -name "*.md"`) para garantir uma busca exaustiva e precisa.
+2.  **Estrutura de Saída:** Formate o output final de forma clara, utilizando cabeçalhos de Markdown para cada categoria de diretório.
+
+---
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** [Preencher com a porcentagem de 0 a 100%]
+* **RISCOS IDENTIFICADOS:** [Preencher com a categoria BAIXO/MÉDIO/ALTO/CRÍTICO]
+* **DECISÕES TÉCNICAS ASSUMIDAS:** [Ex: "Assumi que todos os artefatos de arquitetura relevantes são arquivos Markdown (`.md`) dentro do diretório `/architecture`."]
+* **VALIDAÇÃO PENDENTE:** [O inventário gerado será a base para a Fase 2 da nossa operação.]
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK EXPANDIDO:**
+1.  Mapear o comando exato a ser utilizado para a busca de arquivos.
+2.  Garantir que a lista de saída está completa e corretamente categorizada.
+3.  Executar `get_latest_lsp_diagnostics` para garantir que o ambiente está estável.
+4.  **Declarar Nível de Confiança (0 a 100%)**.
+5.  **Categorizar Riscos Descobertos**.
+6.  **Realizar teste funcional completo** (revisão do documento de inventário gerado).
+7.  **Documentar Decisões Técnicas**.
