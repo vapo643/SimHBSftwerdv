@@ -1,19 +1,23 @@
 /**
- * API de Segurança - Projeto Cérbero
- *
- * Endpoints para o dashboard de segurança e sistema autônomo
+ * Security API Routes - REFACTORED
+ * Controller layer using service pattern
+ * PAM V1.0 - Clean architecture implementation
  */
 
 import { Router, Request, Response } from "express";
-import { getSecurityScanner } from "../lib/autonomous-security-scanner";
-import { getVulnerabilityDetector } from "../lib/vulnerability-detector";
-import { getDependencyScanner } from "../lib/dependency-scanner";
-import { getSemgrepScanner } from "../lib/semgrep-scanner";
-import { db } from "../lib/supabase";
-import { security_logs } from "../../shared/schema";
-import { sql } from "drizzle-orm";
-import { jwtAuthMiddleware } from "../lib/jwt-auth-middleware";
-import { requireAdmin, requireManagerOrAdmin } from "../lib/role-guards";
+import { securityService } from "../services/securityService.js";
+import { jwtAuthMiddleware } from "../lib/jwt-auth-middleware.js";
+import { requireAdmin, requireManagerOrAdmin } from "../lib/role-guards.js";
+
+interface AuthenticatedRequest extends Request {
+  user?: {
+    id: string;
+    email: string;
+    role: string | null;
+    full_name?: string | null;
+    loja_id?: number | null;
+  };
+}
 
 const router = Router();
 
@@ -22,412 +26,357 @@ router.use(jwtAuthMiddleware);
 
 /**
  * GET /api/security/metrics
- * Métricas de segurança em tempo real
+ * Security metrics for dashboard
  */
 router.get("/metrics", async (req: Request, res: Response) => {
   try {
     const timeRange = (req.query.timeRange as string) || "1h";
-
-    // Return mock metrics data for dashboard functionality
-    const mockMetrics = {
-      totalRequests: 1247,
-      suspiciousRequests: 23,
-      blockedRequests: 8,
-      uniqueIPs: 156,
-      averageResponseTime: 245, // ms
-      errorRate: 1.8, // percentage
-      anomalyScore: 15, // percentage
-      blockedIPs: 5,
-      trend: generateTrendData([], timeRange),
-      // Additional metrics for dashboard
-      attacks: {
-        sql: 12,
-        xss: 8,
-        bruteforce: 15,
-        pathTraversal: 3,
-      },
-      blocked: {
-        sql: 11,
-        xss: 7,
-        bruteforce: 13,
-        pathTraversal: 3,
-      },
-    };
-
-    res.json(mockMetrics);
-  } catch (error) {
-    console.error("Erro ao obter métricas:", error);
-    res.status(500).json({ error: "Erro ao obter métricas" });
+    const metrics = await securityService.getSecurityMetrics(timeRange);
+    res.json(metrics);
+  } catch (error: any) {
+    console.error("[SECURITY_API] Error getting metrics:", error);
+    res.status(500).json({ 
+      error: "Erro ao obter métricas de segurança",
+      details: error.message 
+    });
   }
 });
 
 /**
  * GET /api/security/vulnerabilities
- * Lista de vulnerabilidades detectadas
+ * Get detected vulnerabilities
  */
 router.get("/vulnerabilities", async (req: Request, res: Response) => {
   try {
-    // Return mock data for dashboard functionality
-    const vulnerabilities = [
-      {
-        id: "vuln-001",
-        type: "SQL Injection",
-        severity: "HIGH" as const,
-        endpoint: "/api/auth/login",
-        description: "Potential SQL injection vulnerability detected in authentication endpoint",
-        detectedAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
-        falsePositiveScore: 0.1,
-      },
-      {
-        id: "vuln-002",
-        type: "XSS",
-        severity: "MEDIUM" as const,
-        endpoint: "/api/users/profile",
-        description: "Cross-site scripting vulnerability in user profile input",
-        detectedAt: new Date(Date.now() - 5 * 60 * 60 * 1000), // 5 hours ago
-        falsePositiveScore: 0.2,
-      },
-      {
-        id: "vuln-003",
-        type: "Insecure Dependencies",
-        severity: "CRITICAL" as const,
-        description: "Critical security vulnerability found in lodash@4.17.20",
-        detectedAt: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 day ago
-        falsePositiveScore: 0.05,
-      },
-    ];
-
-    // Filter and sort by severity
-    const filtered = vulnerabilities
-      .filter(v => v.falsePositiveScore < 0.5)
-      .sort((a, b) => {
-        const severityOrder = { CRITICAL: 4, HIGH: 3, MEDIUM: 2, LOW: 1 };
-        return (severityOrder as any)[b.severity] - (severityOrder as any)[a.severity];
-      });
-
-    res.json(filtered);
-  } catch (error) {
-    console.error("Erro ao obter vulnerabilidades:", error);
-    res.status(500).json({ error: "Erro ao obter vulnerabilidades" });
+    const vulnerabilities = await securityService.getVulnerabilities();
+    res.json(vulnerabilities);
+  } catch (error: any) {
+    console.error("[SECURITY_API] Error getting vulnerabilities:", error);
+    res.status(500).json({ 
+      error: "Erro ao obter vulnerabilidades",
+      details: error.message 
+    });
   }
 });
 
 /**
  * GET /api/security/anomalies
- * Anomalias detectadas por ML
+ * Get ML-detected anomalies
  */
 router.get("/anomalies", async (req: Request, res: Response) => {
   try {
-    // Return mock anomaly data
-    const anomalies = [
-      {
-        id: "anom-001",
-        type: "Unusual Login Pattern",
-        confidence: 0.85,
-        description: "Multiple failed login attempts from different IP addresses within 5 minutes",
-        timestamp: new Date(Date.now() - 30 * 60 * 1000), // 30 minutes ago
-      },
-      {
-        id: "anom-002",
-        type: "API Rate Spike",
-        confidence: 0.92,
-        description: "Unusual spike in API requests from single IP address",
-        timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
-      },
-      {
-        id: "anom-003",
-        type: "Data Access Pattern",
-        confidence: 0.78,
-        description: "Unexpected database query patterns detected",
-        timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000), // 4 hours ago
-      },
-    ];
-
-    // Filter recent anomalies with high confidence
-    const filtered = anomalies
-      .filter(a => new Date(a.timestamp).getTime() > Date.now() - 86400000) // Last 24h
-      .filter(a => a.confidence > 0.7);
-
-    res.json(filtered);
-  } catch (error) {
-    console.error("Erro ao obter anomalias:", error);
-    res.status(500).json({ error: "Erro ao obter anomalias" });
+    const anomalies = await securityService.getAnomalies();
+    res.json(anomalies);
+  } catch (error: any) {
+    console.error("[SECURITY_API] Error getting anomalies:", error);
+    res.status(500).json({ 
+      error: "Erro ao obter anomalias",
+      details: error.message 
+    });
   }
 });
 
 /**
  * GET /api/security/dependency-scan
- * Resultados do OWASP Dependency-Check
+ * OWASP dependency check results
  */
 router.get("/dependency-scan", async (req: Request, res: Response) => {
   try {
-    // Return mock dependency scan data
-    const mockData = {
-      lastScan: new Date(Date.now() - 60 * 60 * 1000), // 1 hour ago
-      totalVulnerabilities: 12,
-      bySeverity: {
-        CRITICAL: 2,
-        HIGH: 3,
-        MEDIUM: 5,
-        LOW: 2,
-      },
-      vulnerabilities: [
-        {
-          cve: "CVE-2023-26136",
-          dependency: "tough-cookie@4.0.0",
-          description: "Prototype pollution vulnerability in tough-cookie",
-          severity: "CRITICAL",
-          cvssScore: 9.8,
-          version: "4.0.0",
-        },
-        {
-          cve: "CVE-2023-26115",
-          dependency: "word-wrap@1.2.3",
-          description: "ReDoS vulnerability in word-wrap",
-          severity: "HIGH",
-          cvssScore: 7.5,
-          version: "1.2.3",
-        },
-        {
-          cve: "CVE-2023-28155",
-          dependency: "request@2.88.2",
-          description: "SSRF vulnerability in request library",
-          severity: "MEDIUM",
-          cvssScore: 6.1,
-          version: "2.88.2",
-        },
-      ],
-    };
-
-    res.json(mockData);
-  } catch (error) {
-    console.error("Erro ao obter scan de dependências:", error);
-    res.status(500).json({ error: "Erro ao obter scan de dependências" });
+    const scanResults = await securityService.getDependencyScanResults();
+    res.json(scanResults);
+  } catch (error: any) {
+    console.error("[SECURITY_API] Error getting dependency scan:", error);
+    res.status(500).json({ 
+      error: "Erro ao obter resultados do scan de dependências",
+      details: error.message 
+    });
   }
 });
 
 /**
  * GET /api/security/semgrep-findings
- * Resultados da análise SAST
+ * SAST analysis results
  */
 router.get("/semgrep-findings", async (req: Request, res: Response) => {
   try {
-    // Return mock Semgrep findings data
-    const mockFindings = [
-      {
-        id: "semgrep-001",
-        rule: "javascript.express.security.audit.express-cookie-session-no-httponly",
-        severity: "HIGH",
-        file: "server/routes/auth.ts",
-        line: 45,
-        column: 12,
-        message: "Cookie session without httpOnly flag detected",
-        category: "Security",
-        fixSuggestion: "Add httpOnly: true to cookie session configuration",
-      },
-      {
-        id: "semgrep-002",
-        rule: "javascript.express.security.audit.express-raw-body-parser",
-        severity: "MEDIUM",
-        file: "server/index.ts",
-        line: 28,
-        column: 8,
-        message: "Raw body parser detected without size limit",
-        category: "Security",
-        fixSuggestion: "Add size limit to bodyParser.raw() configuration",
-      },
-      {
-        id: "semgrep-003",
-        rule: "javascript.express.security.audit.express-cors-allow-all",
-        severity: "CRITICAL",
-        file: "server/app.ts",
-        line: 15,
-        column: 5,
-        message: "CORS configured to allow all origins",
-        category: "Security",
-        fixSuggestion: "Restrict CORS origins to specific domains",
-      },
-    ];
-
-    res.json(mockFindings);
-  } catch (error) {
-    console.error("Erro ao obter findings do Semgrep:", error);
-    res.status(500).json({ error: "Erro ao obter findings" });
+    const findings = await securityService.getSemgrepFindings();
+    res.json(findings);
+  } catch (error: any) {
+    console.error("[SECURITY_API] Error getting Semgrep findings:", error);
+    res.status(500).json({ 
+      error: "Erro ao obter resultados da análise SAST",
+      details: error.message 
+    });
   }
 });
 
 /**
  * POST /api/security/scan
- * Executar scan manual
+ * Execute security scan
  */
 router.post("/scan", requireAdmin, async (req: Request, res: Response) => {
   try {
-    const { type } = req.body;
+    const authReq = req as AuthenticatedRequest;
+    const { type } = authReq.body;
 
-    switch (type) {
-      case "vulnerability":
-        const vulnScanner = getSecurityScanner();
-        // Executar scan
-        res.json({ message: "Scan de vulnerabilidades iniciado" });
-        break;
-
-      case "dependency":
-        const depScanner = getDependencyScanner();
-        depScanner.runScan();
-        res.json({ message: "Scan de dependências iniciado" });
-        break;
-
-      case "code":
-        const codeScanner = getSemgrepScanner();
-        codeScanner.runScan();
-        res.json({ message: "Análise de código iniciada" });
-        break;
-
-      default:
-        res.status(400).json({ error: "Tipo de scan inválido" });
+    if (!type) {
+      return res.status(400).json({ 
+        error: "Tipo de scan é obrigatório",
+        validTypes: ["vulnerability", "dependency", "code"]
+      });
     }
-  } catch (error) {
-    console.error("Erro ao iniciar scan:", error);
-    res.status(500).json({ error: "Erro ao iniciar scan" });
+
+    const validTypes = ["vulnerability", "dependency", "code"];
+    if (!validTypes.includes(type)) {
+      return res.status(400).json({ 
+        error: "Tipo de scan inválido",
+        validTypes 
+      });
+    }
+
+    const result = await securityService.executeScan(type);
+
+    if (result.success) {
+      res.json({ 
+        success: true, 
+        message: result.message,
+        scanType: type 
+      });
+    } else {
+      res.status(500).json({ 
+        error: result.message,
+        scanType: type 
+      });
+    }
+  } catch (error: any) {
+    console.error("[SECURITY_API] Error executing scan:", error);
+    res.status(500).json({ 
+      error: "Erro ao executar scan de segurança",
+      details: error.message 
+    });
   }
 });
 
 /**
  * GET /api/security/alerts/active
- * Alertas ativos
+ * Get active security alerts
  */
 router.get("/alerts/active", async (req: Request, res: Response) => {
   try {
-    // Buscar alertas não resolvidos
-    const alerts = await db
-      .select()
-      .from(security_logs)
-      .where(
-        sql`
-        severity IN ('HIGH', 'CRITICAL') 
-        AND created_at > NOW() - INTERVAL '24 hours'
-        AND NOT EXISTS (
-          SELECT 1 FROM security_alerts_resolved 
-          WHERE security_alerts_resolved.log_id = security_logs.id
-        )
-      `
-      )
-      .orderBy(sql`created_at DESC`)
-      .limit(50);
-
-    res.json(alerts);
-  } catch (error) {
-    console.error("Erro ao obter alertas:", error);
-    res.status(500).json({ error: "Erro ao obter alertas" });
+    const limit = parseInt(req.query.limit as string) || 50;
+    const alerts = await securityService.getActiveAlerts();
+    
+    // Apply limit if specified
+    const limitedAlerts = limit ? alerts.slice(0, limit) : alerts;
+    
+    res.json({
+      success: true,
+      data: limitedAlerts,
+      total: alerts.length,
+      showing: limitedAlerts.length,
+    });
+  } catch (error: any) {
+    console.error("[SECURITY_API] Error getting active alerts:", error);
+    res.status(500).json({ 
+      error: "Erro ao obter alertas ativos",
+      details: error.message 
+    });
   }
 });
 
 /**
  * POST /api/security/alerts/:id/resolve
- * Resolver alerta
+ * Resolve security alert
  */
 router.post("/alerts/:id/resolve", requireAdmin, async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
-    const { reason } = req.body;
-    const userId = (req as any).user.id;
+    const authReq = req as AuthenticatedRequest;
+    const { id } = authReq.params;
+    const { reason } = authReq.body;
+    const userId = authReq.user?.id;
 
-    // Marcar como resolvido (implementar tabela se necessário)
-    // await db.insert(security_alerts_resolved).values({
-    //   log_id: id,
-    //   resolved_by: userId,
-    //   resolved_at: new Date(),
-    //   reason
-    // });
+    if (!userId) {
+      return res.status(401).json({ error: "Usuário não autenticado" });
+    }
 
-    res.json({ message: "Alerta resolvido" });
-  } catch (error) {
-    console.error("Erro ao resolver alerta:", error);
-    res.status(500).json({ error: "Erro ao resolver alerta" });
+    if (!id) {
+      return res.status(400).json({ error: "ID do alerta é obrigatório" });
+    }
+
+    const resolved = await securityService.resolveAlert(id, userId, reason);
+
+    if (resolved) {
+      res.json({ 
+        success: true,
+        message: "Alerta resolvido com sucesso",
+        alertId: id 
+      });
+    } else {
+      res.status(404).json({ 
+        error: "Alerta não encontrado ou não pôde ser resolvido",
+        alertId: id 
+      });
+    }
+  } catch (error: any) {
+    console.error("[SECURITY_API] Error resolving alert:", error);
+    res.status(500).json({ 
+      error: "Erro ao resolver alerta",
+      details: error.message 
+    });
   }
 });
 
 /**
  * GET /api/security/report
- * Relatório completo de segurança
+ * Generate comprehensive security report
  */
 router.get("/report", requireAdmin, async (req: Request, res: Response) => {
   try {
-    const scanner = getSecurityScanner();
-    const vulnDetector = getVulnerabilityDetector();
-    const depScanner = getDependencyScanner();
-    const codeScanner = getSemgrepScanner();
-
-    const report = {
-      generatedAt: new Date(),
-      summary: {
-        overallScore: calculateOverallScore(),
-        totalVulnerabilities: 0,
-        totalAnomalies: 0,
-        totalDependencyIssues: 0,
-        totalCodeIssues: 0,
-      },
-      vulnerabilities: {
-        // Dados do scanner
-      },
-      anomalies: vulnDetector.getAnomalyReport(),
-      dependencies: depScanner.getSummaryReport(),
-      codeAnalysis: codeScanner.getSummaryReport(),
-      recommendations: generateRecommendations(),
-    };
-
-    res.json(report);
-  } catch (error) {
-    console.error("Erro ao gerar relatório:", error);
-    res.status(500).json({ error: "Erro ao gerar relatório" });
+    const report = await securityService.generateSecurityReport();
+    
+    res.json({
+      success: true,
+      data: report,
+    });
+  } catch (error: any) {
+    console.error("[SECURITY_API] Error generating security report:", error);
+    res.status(500).json({ 
+      error: "Erro ao gerar relatório de segurança",
+      details: error.message 
+    });
   }
 });
 
-// Funções auxiliares
-function getTimeRangeDate(timeRange: string): Date {
-  const now = new Date();
-  switch (timeRange) {
-    case "1h":
-      return new Date(now.getTime() - 60 * 60 * 1000);
-    case "24h":
-      return new Date(now.getTime() - 24 * 60 * 60 * 1000);
-    case "7d":
-      return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-    case "30d":
-      return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-    default:
-      return new Date(now.getTime() - 60 * 60 * 1000);
-  }
-}
+/**
+ * GET /api/security/dashboard
+ * Get security dashboard data
+ */
+router.get("/dashboard", async (req: Request, res: Response) => {
+  try {
+    const timeRange = (req.query.timeRange as string) || "24h";
+    
+    // Get all dashboard data in parallel
+    const [metrics, vulnerabilities, anomalies, alerts] = await Promise.all([
+      securityService.getSecurityMetrics(timeRange),
+      securityService.getVulnerabilities(),
+      securityService.getAnomalies(),
+      securityService.getActiveAlerts(),
+    ]);
 
-function generateTrendData(logs: any[], timeRange: string): any[] {
-  // Gerar dados de tendência para gráficos
-  const intervals = timeRange === "1h" ? 12 : 24; // 5min ou 1h intervals
-  const trend = [];
+    const dashboard = {
+      metrics,
+      vulnerabilities: vulnerabilities.slice(0, 5), // Top 5 for dashboard
+      anomalies: anomalies.slice(0, 5), // Top 5 for dashboard
+      alerts: alerts.slice(0, 10), // Top 10 for dashboard
+      summary: {
+        totalVulnerabilities: vulnerabilities.length,
+        criticalVulnerabilities: vulnerabilities.filter(v => v.severity === "CRITICAL").length,
+        totalAnomalies: anomalies.length,
+        activeAlerts: alerts.length,
+        securityScore: metrics.securityScore || 85,
+      },
+    };
 
-  for (let i = 0; i < intervals; i++) {
-    trend.push({
-      time: `T-${intervals - i}`,
-      securityScore: Math.floor(Math.random() * 20) + 80,
-      threats: Math.floor(Math.random() * 10),
+    res.json({
+      success: true,
+      data: dashboard,
+    });
+  } catch (error: any) {
+    console.error("[SECURITY_API] Error getting dashboard data:", error);
+    res.status(500).json({ 
+      error: "Erro ao carregar dashboard de segurança",
+      details: error.message 
     });
   }
+});
 
-  return trend;
-}
+/**
+ * GET /api/security/status
+ * Get overall security status
+ */
+router.get("/status", async (req: Request, res: Response) => {
+  try {
+    const [metrics, vulnerabilities, alerts] = await Promise.all([
+      securityService.getSecurityMetrics("24h"),
+      securityService.getVulnerabilities(),
+      securityService.getActiveAlerts(),
+    ]);
 
-function calculateOverallScore(): number {
-  // Calcular score geral baseado em múltiplos fatores
-  return 85; // Placeholder
-}
+    const criticalIssues = vulnerabilities.filter(v => v.severity === "CRITICAL").length;
+    const highIssues = vulnerabilities.filter(v => v.severity === "HIGH").length;
+    
+    let status = "healthy";
+    let message = "Sistema operando normalmente";
+    
+    if (criticalIssues > 0) {
+      status = "critical";
+      message = `${criticalIssues} vulnerabilidade(s) crítica(s) detectada(s)`;
+    } else if (highIssues > 3 || alerts.length > 10) {
+      status = "warning";
+      message = "Problemas de segurança requerem atenção";
+    }
 
-function generateRecommendations(): string[] {
-  return [
-    "Atualizar dependências com vulnerabilidades críticas",
-    "Implementar autenticação multifator",
-    "Revisar políticas de CORS",
-    "Aumentar cobertura de testes de segurança",
-  ];
-}
+    res.json({
+      success: true,
+      data: {
+        status,
+        message,
+        timestamp: new Date(),
+        metrics: {
+          totalVulnerabilities: vulnerabilities.length,
+          criticalVulnerabilities: criticalIssues,
+          highVulnerabilities: highIssues,
+          activeAlerts: alerts.length,
+          securityScore: metrics.securityScore || 85,
+        },
+      },
+    });
+  } catch (error: any) {
+    console.error("[SECURITY_API] Error getting security status:", error);
+    res.status(500).json({ 
+      error: "Erro ao obter status de segurança",
+      details: error.message 
+    });
+  }
+});
+
+/**
+ * POST /api/security/test-alert
+ * Test alert system (admin only)
+ */
+router.post("/test-alert", requireAdmin, async (req: Request, res: Response) => {
+  try {
+    const authReq = req as AuthenticatedRequest;
+    const { severity = "MEDIUM", message = "Alert de teste" } = authReq.body;
+    const userId = authReq.user?.id;
+
+    const validSeverities = ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
+    if (!validSeverities.includes(severity)) {
+      return res.status(400).json({ 
+        error: "Severity inválida",
+        validSeverities 
+      });
+    }
+
+    // This would typically create a test alert via the security service
+    // For now, we'll just return a success response
+    res.json({ 
+      success: true,
+      message: "Alerta de teste criado",
+      testAlert: {
+        severity,
+        message,
+        createdBy: userId,
+        timestamp: new Date(),
+      }
+    });
+  } catch (error: any) {
+    console.error("[SECURITY_API] Error creating test alert:", error);
+    res.status(500).json({ 
+      error: "Erro ao criar alerta de teste",
+      details: error.message 
+    });
+  }
+});
 
 export default router;
