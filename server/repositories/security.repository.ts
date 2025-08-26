@@ -6,13 +6,13 @@
 
 import { BaseRepository } from "./base.repository.js";
 import { db } from "../lib/supabase.js";
-import { security_logs } from "@shared/schema";
+import { securityLogs } from "@shared/schema/security";
 import { sql, eq, and, desc, gte } from "drizzle-orm";
 import { getBrasiliaTimestamp } from "../lib/timezone.js";
 
 export class SecurityRepository extends BaseRepository<any> {
   constructor() {
-    super(security_logs as any);
+    super(securityLogs as any);
   }
 
   /**
@@ -24,26 +24,26 @@ export class SecurityRepository extends BaseRepository<any> {
     try {
       const [totalRequests] = await db
         .select({ count: sql<number>`count(*)` })
-        .from(security_logs)
-        .where(gte(security_logs.createdAt, startDate.toISOString()));
+        .from(securityLogs)
+        .where(gte(securityLogs.created_at, startDate.toISOString()));
 
       const [suspiciousRequests] = await db
         .select({ count: sql<number>`count(*)` })
-        .from(security_logs)
+        .from(securityLogs)
         .where(
           and(
-            gte(security_logs.createdAt, startDate.toISOString()),
-            sql`${security_logs.severity} IN ('HIGH', 'CRITICAL')`
+            gte(securityLogs.created_at, startDate.toISOString()),
+            sql`${securityLogs.severity} IN ('HIGH', 'CRITICAL')`
           )
         );
 
       const [blockedRequests] = await db
         .select({ count: sql<number>`count(*)` })
-        .from(security_logs)
+        .from(securityLogs)
         .where(
           and(
-            gte(security_logs.createdAt, startDate.toISOString()),
-            eq(security_logs.action, "BLOCKED")
+            gte(securityLogs.created_at, startDate.toISOString()),
+            eq(securityLogs.event_type, "BLOCKED")
           )
         );
 
@@ -72,18 +72,18 @@ export class SecurityRepository extends BaseRepository<any> {
     try {
       const alerts = await db
         .select()
-        .from(security_logs)
+        .from(securityLogs)
         .where(
           sql`
           severity IN ('HIGH', 'CRITICAL') 
           AND created_at > NOW() - INTERVAL '24 hours'
           AND NOT EXISTS (
             SELECT 1 FROM security_alerts_resolved 
-            WHERE security_alerts_resolved.log_id = security_logs.id
+            WHERE security_alerts_resolved.log_id = securityLogs.id
           )
         `
         )
-        .orderBy(desc(security_logs.createdAt))
+        .orderBy(desc(securityLogs.created_at))
         .limit(limit);
 
       return alerts;
@@ -109,7 +109,7 @@ export class SecurityRepository extends BaseRepository<any> {
   }): Promise<any | undefined> {
     try {
       const result = await db
-        .insert(security_logs)
+        .insert(securityLogs)
         .values({
           eventType: event.eventType,
           severity: event.severity,
@@ -142,33 +142,33 @@ export class SecurityRepository extends BaseRepository<any> {
     offset?: number;
   }): Promise<any[]> {
     try {
-      let query = db.select().from(security_logs);
+      let query = db.select().from(securityLogs);
       
       const conditions = [];
 
       if (filters.startDate) {
-        conditions.push(gte(security_logs.createdAt, filters.startDate.toISOString()));
+        conditions.push(gte(securityLogs.created_at, filters.startDate.toISOString()));
       }
 
       if (filters.endDate) {
-        conditions.push(sql`${security_logs.createdAt} <= ${filters.endDate.toISOString()}`);
+        conditions.push(sql`${securityLogs.created_at} <= ${filters.endDate.toISOString()}`);
       }
 
       if (filters.severity && filters.severity.length > 0) {
-        conditions.push(sql`${security_logs.severity} IN (${sql.raw(
+        conditions.push(sql`${securityLogs.severity} IN (${sql.raw(
           filters.severity.map(s => `'${s}'`).join(',')
         )})`);
       }
 
       if (filters.eventType) {
-        conditions.push(eq(security_logs.eventType, filters.eventType));
+        conditions.push(eq(securityLogs.event_type, filters.eventType));
       }
 
       if (conditions.length > 0) {
         query = query.where(and(...conditions));
       }
 
-      query = query.orderBy(desc(security_logs.createdAt));
+      query = query.orderBy(desc(securityLogs.created_at));
 
       if (filters.limit) {
         query = query.limit(filters.limit);
@@ -193,16 +193,16 @@ export class SecurityRepository extends BaseRepository<any> {
       // For now, we'll mark it by updating the security log
       // In a full implementation, you might use a separate security_alerts_resolved table
       const result = await db
-        .update(security_logs)
+        .update(securityLogs)
         .set({
-          details: sql`COALESCE(${security_logs.details}, '{}')::jsonb || ${JSON.stringify({
+          details: sql`COALESCE(${securityLogs.details}, '{}')::jsonb || ${JSON.stringify({
             resolved: true,
             resolvedBy,
             resolvedAt: getBrasiliaTimestamp(),
             reason,
           })}::jsonb`,
         })
-        .where(eq(security_logs.id, alertId))
+        .where(eq(securityLogs.id, alertId))
         .returning();
 
       return result.length > 0;
@@ -227,18 +227,18 @@ export class SecurityRepository extends BaseRepository<any> {
       // Get total events
       const [totalEvents] = await db
         .select({ count: sql<number>`count(*)` })
-        .from(security_logs)
-        .where(gte(security_logs.createdAt, startDate.toISOString()));
+        .from(securityLogs)
+        .where(gte(securityLogs.created_at, startDate.toISOString()));
 
       // Get events by severity
       const severityResults = await db
         .select({
-          severity: security_logs.severity,
+          severity: securityLogs.severity,
           count: sql<number>`count(*)`
         })
-        .from(security_logs)
-        .where(gte(security_logs.createdAt, startDate.toISOString()))
-        .groupBy(security_logs.severity);
+        .from(securityLogs)
+        .where(gte(securityLogs.created_at, startDate.toISOString()))
+        .groupBy(securityLogs.severity);
 
       const eventsBySeverity = severityResults.reduce((acc, row) => {
         acc[row.severity] = row.count;
@@ -248,12 +248,12 @@ export class SecurityRepository extends BaseRepository<any> {
       // Get events by type
       const typeResults = await db
         .select({
-          eventType: security_logs.eventType,
+          eventType: securityLogs.event_type,
           count: sql<number>`count(*)`
         })
-        .from(security_logs)
-        .where(gte(security_logs.createdAt, startDate.toISOString()))
-        .groupBy(security_logs.eventType);
+        .from(securityLogs)
+        .where(gte(securityLogs.created_at, startDate.toISOString()))
+        .groupBy(securityLogs.event_type);
 
       const eventsByType = typeResults.reduce((acc, row) => {
         acc[row.eventType] = row.count;
@@ -284,8 +284,8 @@ export class SecurityRepository extends BaseRepository<any> {
     try {
       return await db
         .select()
-        .from(security_logs)
-        .orderBy(desc(security_logs.createdAt))
+        .from(securityLogs)
+        .orderBy(desc(securityLogs.created_at))
         .limit(limit);
     } catch (error) {
       console.error("[SECURITY_REPO] Error getting recent events:", error);
@@ -321,9 +321,9 @@ export class SecurityRepository extends BaseRepository<any> {
       cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
 
       const result = await db
-        .delete(security_logs)
-        .where(sql`${security_logs.createdAt} < ${cutoffDate.toISOString()}`)
-        .returning({ id: security_logs.id });
+        .delete(securityLogs)
+        .where(sql`${securityLogs.created_at} < ${cutoffDate.toISOString()}`)
+        .returning({ id: securityLogs.id });
 
       return result.length;
     } catch (error) {

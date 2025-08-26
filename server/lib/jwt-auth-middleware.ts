@@ -1,7 +1,22 @@
 import { Request, Response, NextFunction } from "express";
 // Import dinâmico para usar função correta com Service Role Key
 import { securityLogger, SecurityEventType, getClientIP } from "./security-logger";
-import { AuthenticatedRequest } from "../../shared/types/express";
+// Importação direta da interface personalizada
+export interface AuthenticatedRequest extends Request {
+  user?: {
+    id: string;
+    username?: string;
+    email?: string;
+    role?: string | null;
+    full_name?: string | null;
+    loja_id?: number | null;
+  };
+  sessionID?: string;
+  file?: Express.Multer.File;
+  files?: Express.Multer.File[] | { [fieldname: string]: Express.Multer.File[] };
+}
+
+// Interface já definida acima
 
 // Token blacklist para segurança aprimorada (SAMM Optimization)
 const tokenBlacklist = new Set<string>();

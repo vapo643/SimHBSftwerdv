@@ -1,0 +1,41 @@
+### **Pacote de Ativação de Missão (PAM) V15.0: Remediação Crítica da Fundação (Sprint 0)**
+
+* **Sumário da Missão (O Quê):** Executar uma remediação de emergência para corrigir os bloqueadores P0 identificados no `RELATORIO_CONFORMIDADE_SPRINT_0.md`. A missão consiste em erradicar todos os erros de TypeScript, configurar e validar o script de linting e endereçar a falha de validação do Docker.
+
+* **Intenção Estratégica (O Porquê):** A fundação do Sprint 0 é a base para 12 semanas de desenvolvimento. A falha em garantir sua qualidade impecável agora resultará em falhas sistêmicas em cascata, custos exponenciais de refatoração e atrasos irrecuperáveis. Esta missão é um "gate de qualidade" mandatório para a continuidade da "Operação Aço Líquido".
+
+* **Modelo Mental (Como se Encaixa):** Você atuará como um **Engenheiro de Remediação de Elite**. Sua tarefa é pegar os resultados da auditoria e aplicar correções cirúrgicas e eficazes. O seu foco não é em novas funcionalidades, mas em estabilidade, conformidade e na criação de uma base de código que seja, de fato, compilável e validável.
+
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco (ALTO):** **Correções Superficiais.** A simples supressão de erros de tipo (usando `any` ou `@ts-ignore`) em vez de correções adequadas é inaceitável e será considerada uma falha da missão.
+    * **Contramedida Mandatória:** Você **DEVE** priorizar a correção de tipos e a inferência correta. O objetivo não é apenas fazer o código compilar, mas torná-lo robusto e seguro. Para a questão do Docker, se o ambiente Replit for a limitação, a sua tarefa é documentar isso formalmente e fornecer a prova de que o `Dockerfile` é sintaticamente válido e está pronto para ser construído em um ambiente apropriado.
+
+---
+
+**DIRETRIZ DE MISSÃO: Erradicação dos Bloqueadores do Sprint 0**
+
+**CURRENT STATE:**
+O Sprint 0 foi auditado e declarado **NÃO CONFORME**. Bloqueadores P0 impedem o avanço: 148+ erros de TypeScript, script de linting ausente e build do Docker falhando.
+
+**EXPECTED (Estado Final de Sucesso):**
+A missão será considerada um sucesso quando uma nova auditoria (execução do PAM V14.0) resultar em um relatório de conformidade **APROVADO**. Especificamente:
+1.  O comando `npm run typecheck` (ou `npm run check`) deve ser executado com sucesso, reportando **ZERO erros**.
+2.  O script `npm run lint` deve ser criado no `package.json` e sua execução deve reportar **ZERO erros**.
+3.  A questão do Docker deve ser resolvida: ou o `docker build .` é executado com sucesso, ou você deve fornecer um relatório detalhado explicando a limitação do ambiente e confirmando a validade do `Dockerfile`.
+4.  (Opcional, P1) As 5 vulnerabilidades moderadas devem ser endereçadas via `npm audit fix`.
+
+**CONSTRAINTS (Roadmap de Remediação):**
+
+1.  **Passo 1: Erradicação dos Erros de Tipo.** Prioridade máxima. Analise os 148+ erros reportados pelo `tsc` e corrija a causa raiz em cada arquivo. Foque em correções de import, tipos de dados e sobrecargas de função.
+2.  **Passo 2: Implementação do Linting.** Adicione o script `lint` ao `package.json`, configurando-o para executar o ESLint com as regras definidas no `.eslintrc.json`. Execute o script e corrija quaisquer erros que ele reporte.
+3.  **Passo 3: Resolução do Docker.** Investigue a falha do `docker build`. Se for uma limitação do ambiente Replit, documente. Se for um erro no `Dockerfile`, corrija-o.
+4.  **Passo 4: Validação Final.** Execute novamente todos os passos do PAM de auditoria V14.0 e apresente o novo `RELATORIO_CONFORMIDADE_SPRINT_0.md` como prova de que todos os bloqueadores foram eliminados.
+
+---
+
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** 85%
+* **RISCOS IDENTIFICADOS:** ALTO (A complexidade dos erros de tipo pode exigir mais tempo do que o estimado).
+* **DECISÕES TÉCNICAS ASSUMIDAS:** Assumo que os erros de tipo são corrigíveis e não indicam uma falha fundamental na arquitetura de tipos.
+* **VALIDAÇÃO PENDENTE:** Um novo `RELATORIO_CONFORMIDADE_SPRINT_0.md` limpo e sem bloqueadores será a única prova de conclusão da missão.
