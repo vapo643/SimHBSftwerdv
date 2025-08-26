@@ -1,0 +1,61 @@
+### **Pacote de Ativação de Missão (PAM) V14.1: Auditoria Final e Prova de Conformidade Absoluta (Sprint 0)**
+
+* **Sumário da Missão (O Quê):** Executar uma auditoria final e fornecer a **prova de trabalho irrefutável** de que TODAS as User Stories do Sprint 0 ("EP0-001", "EP0-002", "EP0-003") atendem rigorosamente à "Definition of Done (DoD)" estabelecida no "Roadmap Mestre de Implementação".
+
+* **Intenção Estratégica (O Porquê):** O Sprint 0 é a fundação sobre a qual todo o sistema será construído. A falha em validar sua qualidade impecável agora resultaria em falhas sistêmicas em cascata. Esta missão de auditoria é o gate de qualidade mandatório para a continuidade da "Operação Aço Líquido". Não haverá avanço para o Sprint 1 sem esta prova.
+
+* **Modelo Mental (Como se Encaixa):** Você atuará como um **Engenheiro de Qualidade e Segurança (QA/SecOps)**. Sua tarefa é executar os scripts de validação, os scans de segurança e os testes definidos em nosso DoD e compilar os resultados brutos em um relatório de conformidade. Você é o gatekeeper final da qualidade para o Sprint 0.
+
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco (CRÍTICO):** **Prova Incompleta ou Falsificada.** Apresentar relatórios com saídas de comando truncadas (`head`, `tail`), editadas ou que não representem o estado real de todo o projeto será considerado uma falha total da missão.
+    * **Contramedida Mandatória:** O seu relatório final **DEVE** conter a saída **literal e completa** de todos os comandos de verificação. A transparência radical é inegociável. A ausência de "prova de trabalho" será considerada uma falha.
+
+---
+**[DIRETRIZ DE PESQUISA WEB (MANDATÓRIA)]**
+
+*Você está autorizado a utilizar a sua capacidade de pesquisa na web para enriquecer a sua análise (ex: consultar a documentação mais recente do Snyk, Semgrep ou `npm audit` para interpretar os resultados dos scans). Esta capacidade deve ser exercida com o máximo rigor, priorizando fontes oficiais (P0).*
+
+---
+
+**DIRETRIZ DE MISSÃO: Auditoria Completa e Prova de Trabalho do Sprint 0**
+
+**CURRENT STATE:**
+O Agente Executor reportou a conclusão das tarefas e remediações do Sprint 0. Esta auditoria visa validar essas alegações.
+
+**EXPECTED (Estado Final de Sucesso):**
+Você deve produzir um único artefato em Markdown chamado **`RELATORIO_FINAL_CONFORMIDADE_SPRINT_0.md`**. Este relatório deve conter as seções abaixo, preenchidas com as **saídas literais e completas** dos comandos:
+
+1.  **`Auditoria do Épico EP0-001: Ambiente e CI/CD DevSecOps`**
+    * **Prova para S0-001 (Qualidade de Código):**
+        * A saída **completa** do comando `npm run lint`. (Se o script não existir, reporte a falha).
+        * A saída **completa** do comando `npm run typecheck` (ou `npm run check`), que deve reportar **ZERO erros**.
+    * **Prova para S0-002 (Security Gates):**
+        * A saída **completa** do scan SAST (Semgrep) executado pelo pipeline `ci.yml`.
+        * A saída **completa** do scan SCA (Snyk) executado pelo pipeline `ci.yml`.
+
+2.  **`Auditoria do Épico EP0-002: Mitigação de Dívida Técnica Crítica`**
+    * **Prova para S0-003 (Vulnerabilidade Drizzle-Kit):**
+        * A saída **completa** do comando `npm audit`. O relatório deve mostrar a ausência de vulnerabilidades de nível `HIGH` ou `CRITICAL`.
+
+3.  **`Auditoria do Épico EP0-003: Skeleton Arquitetural e Portabilidade`**
+    * **Prova para S0-004 (Estrutura Monolito Modular):**
+        * A saída do comando `ls -R src/modules/` para confirmar a estrutura de diretórios dos Bounded Contexts.
+    * **Prova para S0-005 (Containerização):**
+        * A saída **completa** do comando `docker build .`. Se o comando não estiver disponível, documente a limitação do ambiente e apresente a validação de que o `Dockerfile` é sintaticamente correto.
+
+**CONSTRAINTS (Protocolo de Auditoria - Inegociável):**
+
+1.  **Passo 1: Executar Validações de Qualidade.** Rode os comandos `npm run lint` e `npm run typecheck` e capture suas saídas completas.
+2.  **Passo 2: Executar Scans de Segurança.** Acione o workflow `ci.yml` (ou os scripts de segurança individuais) e capture a saída completa das etapas de SAST e SCA.
+3.  **Passo 3: Auditar Vulnerabilidades.** Execute `npm audit` e capture a saída completa.
+4.  **Passo 4: Validar Artefatos Arquiteturais.** Confirme a estrutura de diretórios com `ls -R` e execute o build do Docker.
+5.  **Passo 5: Compilar Relatório.** Junte todas as evidências capturadas no artefato `RELATORIO_FINAL_CONFORMIDADE_SPRINT_0.md`.
+
+---
+
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** 90%
+* **RISCOS IDENTIFICADOS:** ALTO.
+* **DECISÕES TÉCNICAS ASSUMIDAS:** Assumo que os scripts e o pipeline de CI estão corretamente configurados para fornecer as provas necessárias.
+* **VALIDAÇÃO PENDENTE:** O `RELATORIO_FINAL_CONFORMIDADE_SPRINT_0.md` completo e com todas as evidências será a única prova de conclusão do Sprint 0. Não haverá avanço para o Sprint 1 sem esta prova irrefutável.
