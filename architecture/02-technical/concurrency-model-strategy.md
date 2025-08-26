@@ -419,9 +419,7 @@ interface ClusterConfig {
 
 class ClusterManager {
   private readonly config: ClusterConfig = {
-    maxWorkers: process.env.NODE_ENV === 'production' 
-      ? os.cpus().length 
-      : Math.max(2, Math.floor(os.cpus().length / 2)), // Dev: menos workers
+    maxWorkers: this.calculateOptimalWorkers(), // Dynamic calculation based on workload
     respawnThreshold: 10,           // Max 10 respawns por worker
     gracefulShutdownTimeout: 30000, // 30s para graceful shutdown
     healthCheckInterval: 10000      // Health check a cada 10s
@@ -429,6 +427,37 @@ class ClusterManager {
   
   private workerRespawnCount = new Map<number, number>();
   private isShuttingDown = false;
+  
+  private calculateOptimalWorkers(): number {
+    const cpuCores = os.cpus().length;
+    const memoryGB = os.totalmem() / (1024 ** 3);
+    const workloadType = this.analyzeWorkloadCharacteristics();
+    
+    // Formula: I/O bound = cores * 2 + 1, CPU bound = cores
+    const baseWorkers = workloadType.ioRatio > 0.7 
+      ? cpuCores * 2 + 1 
+      : cpuCores;
+      
+    // Memory constraint: 512MB per worker + 2GB system reserve
+    const memoryWorkers = Math.floor((memoryGB - 2) / 0.5);
+    
+    // Environment adjustment
+    const envMultiplier = process.env.NODE_ENV === 'production' ? 1.0 : 0.5;
+    
+    const optimalWorkers = Math.min(baseWorkers, memoryWorkers, 32); // Cap at 32
+    const adjustedWorkers = Math.max(2, Math.floor(optimalWorkers * envMultiplier));
+    
+    console.log(`[CLUSTER] Optimal workers calculated: ${adjustedWorkers} (base: ${baseWorkers}, memory limit: ${memoryWorkers}, env: ${process.env.NODE_ENV})`);
+    return adjustedWorkers;
+  }
+  
+  private analyzeWorkloadCharacteristics(): { ioRatio: number; cpuRatio: number } {
+    // Simpix workload analysis: High I/O (DB, APIs), Low CPU (business logic)
+    return {
+      ioRatio: 0.8,  // 80% I/O operations (PostgreSQL, Supabase, Banco Inter APIs)
+      cpuRatio: 0.2  // 20% CPU operations (PDF generation, calculations)
+    };
+  }
   
   start(): void {
     if (cluster.isPrimary) {

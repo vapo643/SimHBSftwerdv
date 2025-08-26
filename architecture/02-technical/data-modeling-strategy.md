@@ -127,8 +127,10 @@ erDiagram
 
 | **Princípio** | **Aplicação no Simpix** | **Benefício** |
 |---------------|--------------------------|---------------|
-| **Single Source of Truth** | Tabela `propostas` como entidade central | Consistência de dados |
-| **Desnormalização Controlada** | Dados do cliente embedded na proposta | Performance em queries frequentes |
+| **Event Sourcing Pattern** | `command_events` como store imutável de mudanças de estado | Auditoria completa e reconstrução de estado |
+| **CQRS Separation** | `write_models` para comandos, `read_projections` para queries | Otimização independente de escrita/leitura |
+| **Single Source of Truth** | `event_store` como única fonte de verdade para mudanças | Consistência temporal e causal |
+| **Read Model Denormalization** | `read_projections` materializadas para performance | Queries otimizadas sem impacto em writes |
 | **Multi-Tenancy por Loja** | `loja_id` em todas as entidades críticas | Isolamento e segurança |
 | **Audit Trail Completo** | Logs de status, comunicação e mudanças | Compliance e rastreabilidade |
 | **Soft Delete Universal** | Campo `deleted_at` em todas as tabelas | Recuperação e auditoria |

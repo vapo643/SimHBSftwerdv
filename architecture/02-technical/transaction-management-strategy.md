@@ -65,45 +65,44 @@ interface PagamentoAggregate {
 ### 1.2 Implementação ACID com Drizzle
 
 ```typescript
-// Exemplo: Operação ACID dentro de um agregado
-async function criarPropostaCompleta(dados: CriarPropostaRequest): Promise<string> {
-  return await db.transaction(async (trx) => {
-    // 1. Criar proposta (ROOT ENTITY)
-    const [proposta] = await trx
-      .insert(propostas)
-      .values({
-        lojaId: dados.lojaId,
-        clienteNome: dados.clienteNome,
-        valor: dados.valor,
-        status: 'aguardando_analise'
-      })
-      .returning();
-
-    // 2. Gerar cronograma de parcelas (CHILD ENTITIES)
-    const parcelasData = calcularCronogramaParcelas(dados.valor, dados.prazo);
-    await trx
-      .insert(parcelas)
-      .values(parcelasData.map(p => ({
-        ...p,
-        propostaId: proposta.id
-      })));
-
-    // 3. Registrar transição inicial de status (AUDIT TRAIL)
-    await trx
-      .insert(statusTransitions)
-      .values({
-        propostaId: proposta.id,
-        fromStatus: null,
-        toStatus: 'aguardando_analise',
-        triggeredBy: 'api',
-        userId: dados.userId
-      });
-
-    // 4. Validar invariantes antes do commit
-    await validarInvariantesAgregado(trx, proposta.id);
+// Transaction limited to single aggregate root
+class PropostaAggregate {
+  async criar(dados: CriarPropostaRequest): Promise<PropostaCreatedEvent> {
+    const evento = new PropostaCreatedEvent({
+      aggregateId: uuid(),
+      dados,
+      timestamp: new Date()
+    });
     
-    return proposta.id;
-  });
+    // Single atomic operation within aggregate boundary
+    await db.transaction(async (trx) => {
+      // Store event in event store (single table write)
+      await trx.insert(commandEvents).values({
+        aggregateId: evento.aggregateId,
+        eventType: 'PropostaCreated',
+        eventData: evento.dados,
+        version: 1,
+        timestamp: evento.timestamp
+      });
+      
+      // Validate aggregate invariants
+      await this.validateInvariants(evento.dados);
+    });
+    
+    // Publish event for read model projections
+    await this.eventBus.publish(evento);
+    
+    return evento;
+  }
+  
+  private async validateInvariants(dados: any): Promise<void> {
+    if (dados.valor <= 0) {
+      throw new Error('Valor deve ser positivo');
+    }
+    if (dados.prazo < 6 || dados.prazo > 60) {
+      throw new Error('Prazo deve estar entre 6 e 60 meses');
+    }
+  }
 }
 ```
 
