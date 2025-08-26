@@ -1,0 +1,54 @@
+### **Pacote de Ativação de Missão (PAM) V4.0: Correção Definitiva da Regressão de Rotas (Operação Fênix - P1.3)**
+
+* **Sumário da Missão (O Quê):** Realizar uma análise de causa raiz profunda sobre a regressão que torna a função `getPropostaDocuments` `undefined` no arquivo `server/routes.ts` e implementar uma correção permanente que sobreviva a reinstalações de dependências.
+
+* **Intenção Estratégica (O Porquê):** O "smoke test" provou seu valor ao detectar a reintrodução de um erro P0. Isso indica uma fragilidade fundamental na forma como os módulos de rotas são exportados e importados, provavelmente exacerbada pela refatoração em massa. Uma correção que não sobrevive a um `npm install` não é uma correção. Esta missão (P1) visa eliminar essa instabilidade crônica.
+
+* **Modelo Mental (Como se Encaixa):** Você atuará como um Engenheiro de Qualidade focado em estabilidade. A falha recorrente sugere um problema além de um simples erro de digitação. As hipóteses incluem:
+    1.  **Dependências Circulares:** O módulo `documents.ts` (ou um de seus imports) pode estar, indiretamente, tentando importar algo que depende do `routes.ts`, criando um ciclo que resulta em um objeto de módulo parcialmente carregado (`{}`).
+    2.  **Ordem de Execução do Módulo:** A ordem em que o Node.js está resolvendo e executando os módulos pode estar causando a falha.
+    3.  **Conflito de Nomes de Exportação:** Pode haver um conflito entre `export default` e `export` nomeado que se manifesta de forma intermitente.
+
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco (CRÍTICO):** **Correção Superficial.** Aplicar a mesma correção que falhou anteriormente (ex: ajustar a sintaxe do import) sem entender a causa raiz levará a outra regressão.
+    * **Contramedida Mandatória:** Sua primeira tarefa é o **diagnóstico**. Antes de escrever qualquer código de correção, você deve apresentar um relatório de causa raiz. Sua correção deve ser acompanhada de uma explicação de por que ela é robusta contra futuras reinstalações.
+
+---
+
+**IMPLEMENTAR: Estabilização do Módulo de Rotas de Documentos**
+
+**CURRENT STATE:**
+O sistema está operacional porque as rotas de documentos em `server/routes.ts` estão comentadas. Descomentá-las reintroduz o erro `TypeError: Route.get() requires a callback function but got a [object Undefined]`.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  As rotas de documentos em `server/routes.ts` devem ser reativadas (descomentadas).
+2.  A aplicação deve iniciar e operar normalmente com todas as rotas ativas.
+3.  O "smoke test" (`health.test.ts`) deve passar.
+4.  Um novo teste de integração, `server/tests/documents.test.ts`, deve ser criado para fazer uma requisição `GET` ao endpoint `/api/propostas/:id/documents` (com um ID de teste válido e autenticação) e verificar se ele retorna um status `200` ou `404` (indicando que a rota está funcional), e não um `500`.
+5.  O relatório final deve incluir a causa raiz identificada e a justificativa para a correção implementada.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+1.  **Passo 1: Replicar a Falha.** Reative as rotas de documentos em `server/routes.ts` e confirme que o erro de inicialização retorna.
+2.  **Passo 2: Diagnóstico da Causa Raiz.** Investigue as hipóteses (dependências circulares, ordem de execução). Use logs (`console.log`) nos módulos `documents.ts` e `routes.ts` para entender a ordem de carregamento. Analise o `import` e `export` de todos os arquivos na cadeia de dependência.
+3.  **Passo 3: Relatório de Causa Raiz.** Antes de corrigir, apresente um breve relatório com sua conclusão sobre a causa raiz.
+4.  **Passo 4: Implementação da Correção.** Aplique a correção definitiva baseada no seu diagnóstico.
+5.  **Passo 5: Validação da Correção.**
+    * Execute `npm run dev` para confirmar que o servidor inicia corretamente.
+    * Execute o "smoke test" (`npx vitest run server/tests/health.test.ts`).
+    * Crie e execute o novo teste de integração `server/tests/documents.test.ts`.
+6.  **Passo 6: Relatório Final.** Apresente o relatório final da missão.
+
+---
+
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** 80% (A natureza recorrente do erro indica uma complexidade oculta).
+* **RISCOS IDENTIFICADOS:** CRÍTICO (Uma correção falha pode quebrar o sistema novamente).
+* **DECISÕES TÉCNICAS ASSUMIDAS:** Assumo que a falha pode ser resolvida com a refatoração da lógica de import/export e não requer uma mudança arquitetural maior.
+* **VALIDAÇÃO PENDENTE:** O sucesso da suíte de testes, incluindo o novo `documents.test.ts`, será a prova final da missão.
+
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK (ADAPTATIVO - Nível FULL):**
+Ao concluir esta missão de **execução**, você **DEVE** executar e reportar o resultado do `7-CHECK FULL`, pois o risco foi classificado como **CRÍTICO**.

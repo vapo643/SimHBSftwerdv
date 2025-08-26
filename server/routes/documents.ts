@@ -1,1 +1,81 @@
-import { Router, Request, Response } from "express"; import { documentService } from "../services/genericService"; const router = Router(); // Export functions expected by routes.ts export const getPropostaDocuments = async (req: Request, res: Response) => { try { const result = await documentService.executeOperation("get_proposta_documents", { id: req.params.id }); res.json(result); } catch (error: any) { res.status(500).json({ success: false, error: error.message }); } }; export const uploadPropostaDocument = async (req: Request, res: Response) => { try { const result = await documentService.executeOperation("upload_proposta_document", { ...req.body, file: req.file }); res.json(result); } catch (error: any) { res.status(500).json({ success: false, error: error.message }); } }; router.get("/", async (req, res) => { try { const result = await documentService.executeOperation("list", req.query); res.json(result); } catch (error: any) { res.status(500).json({ success: false, error: error.message }); } }); export default router;
+/**
+ * Documents Routes - RESTORED FROM ORIGINAL
+ * Controller layer using service pattern 
+ * PAM V4.0 - Fixed corruption from mass refactoring
+ */
+
+import { Request, Response } from "express";
+import { documentService } from "../services/genericService";
+
+interface AuthenticatedRequest extends Request {
+  userId?: string;
+  user?: any;
+  file?: any;
+}
+
+/**
+ * GET /api/propostas/:id/documents
+ * Get all documents for a proposal
+ */
+export const getPropostaDocuments = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { id: propostaId } = req.params;
+
+    if (!propostaId) {
+      return res.status(400).json({ 
+        message: "ID da proposta é obrigatório" 
+      });
+    }
+
+    // Using genericService with proper operation mapping
+    const result = await documentService.executeOperation("get_proposta_documents", { 
+      id: parseInt(propostaId) 
+    });
+    
+    res.json(result);
+  } catch (error: any) {
+    console.error("[DOCUMENTS_CONTROLLER] Error fetching proposal documents:", error);
+    
+    const statusCode = error.message === "Proposta não encontrada" ? 404 : 500;
+    res.status(statusCode).json({
+      message: error.message || "Erro interno do servidor ao buscar documentos",
+    });
+  }
+};
+
+/**
+ * POST /api/propostas/:id/documents  
+ * Upload a document for a proposal
+ */
+export const uploadPropostaDocument = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { id: propostaId } = req.params;
+
+    if (!propostaId) {
+      return res.status(400).json({ 
+        message: "ID da proposta é obrigatório" 
+      });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ 
+        message: "Arquivo é obrigatório" 
+      });
+    }
+
+    // Using genericService with proper operation mapping
+    const result = await documentService.executeOperation("upload_proposta_document", {
+      propostaId: parseInt(propostaId),
+      file: req.file,
+      ...req.body
+    });
+
+    res.json(result);
+  } catch (error: any) {
+    console.error("[DOCUMENTS_CONTROLLER] Error uploading document:", error);
+    
+    res.status(500).json({
+      message: error.message || "Erro interno do servidor ao fazer upload do documento",
+    });
+  }
+};

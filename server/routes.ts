@@ -1602,11 +1602,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
-  // Import document routes - TEMPORARILY DISABLED FOR TEST VALIDATION
-  // const { getPropostaDocuments, uploadPropostaDocument } = await import("./routes/documents");
+  // Import document routes - REACTIVATED FOR DIAGNOSIS
+  const { getPropostaDocuments, uploadPropostaDocument } = await import("./routes/documents");
 
-  // Document routes for proposals - TEMPORARILY DISABLED FOR TEST VALIDATION  
-  // app.get("/api/propostas/:id/documents", jwtAuthMiddleware as any, getPropostaDocuments);
+  // Document routes for proposals - REACTIVATED FOR DIAGNOSIS  
+  app.get("/api/propostas/:id/documents", jwtAuthMiddleware as any, getPropostaDocuments);
   // app.post(
   //   "/api/propostas/:id/documents",
   //   jwtAuthMiddleware as any,
