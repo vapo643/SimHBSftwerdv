@@ -44,11 +44,11 @@ localPort = 6379
 externalPort = 3000
 
 [[ports]]
-localPort = 34587
+localPort = 39475
 externalPort = 3002
 
 [[ports]]
-localPort = 40995
+localPort = 42173
 externalPort = 3001
 
 [agent]
