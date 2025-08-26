@@ -60,9 +60,9 @@ export class PropostaRepository extends BaseRepository<Proposta> {
         .where(eq(propostas.id, propostaId))
         .limit(1);
 
-      return proposta as Proposta || null;
+      return (proposta as any) || null;
     } catch (error) {
-      throw new Error(`Failed to fetch proposta: ${error.message}`);
+      throw new Error(`Failed to fetch proposta: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 

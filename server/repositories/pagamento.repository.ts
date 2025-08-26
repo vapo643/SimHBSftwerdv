@@ -25,7 +25,7 @@ import { getBrasiliaTimestamp } from "../lib/timezone.js";
 
 export class PagamentoRepository extends BaseRepository<typeof propostas> {
   constructor() {
-    super(propostas);
+    super("propostas");
   }
 
   /**
@@ -38,37 +38,22 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
     userId?: string;
     userRole?: string;
   }): Promise<any[]> {
-    let query = db
-      .select({
-        proposta: propostas,
-        loja: lojas,
-        produto: produtos,
-        boleto: interCollections,
-      })
-      .from(propostas)
-      .leftJoin(lojas, eq(propostas.loja, lojas.nome))
-      .leftJoin(produtos, eq(propostas.produto, produtos.nome))
-      .leftJoin(interCollections, eq(propostas.id, interCollections.propostaId))
-      .where(
+    // Build conditions array
+    const conditions = [
+      sql`${propostas.deletedAt} IS NULL`,
+      // Proposals that have signed CCB or Inter Bank collections
+      or(
         and(
-          sql`${propostas.deletedAt} IS NULL`,
-          // Proposals that have signed CCB or Inter Bank collections
-          or(
-            and(
-              eq(propostas.ccbGerado, true),
-              eq(propostas.assinaturaEletronicaConcluida, true)
-            ),
-            sql`${interCollections.codigoSolicitacao} IS NOT NULL`
-          )
-        )
-      );
+          eq(propostas.ccbGerado, true),
+          eq(propostas.assinaturaEletronicaConcluida, true)
+        ),
+        sql`${interCollections.codigoSolicitacao} IS NOT NULL`
+      )
+    ];
 
     // Apply status filter
     if (filters.status && filters.status !== "todos") {
-      query = query.where(and(
-        sql`${propostas.deletedAt} IS NULL`,
-        eq(propostas.status, filters.status)
-      ));
+      conditions.push(eq(propostas.status, filters.status));
     }
 
     // Apply date period filter
@@ -101,25 +86,34 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
           endDate = new Date();
       }
 
-      query = query.where(and(
-        sql`${propostas.deletedAt} IS NULL`,
-        gte(propostas.createdAt, startDate.toISOString()),
-        lte(propostas.createdAt, endDate.toISOString())
-      ));
+      conditions.push(
+        gte(propostas.createdAt, startDate),
+        lte(propostas.createdAt, endDate)
+      );
     }
 
     // Exclude paid proposals unless specifically requested
     if (!filters.incluirPagos) {
-      query = query.where(and(
-        sql`${propostas.deletedAt} IS NULL`,
-        or(
-          sql`${propostas.statusPagamento} IS NULL`,
-          sql`${propostas.statusPagamento} != 'pago'`
-        )
+      conditions.push(or(
+        sql`${propostas.status} IS NULL`,
+        sql`${propostas.status} != 'pago'`
       ));
     }
 
-    query = query.orderBy(desc(propostas.updatedAt));
+    // Build single query with consolidated conditions
+    const query = db
+      .select({
+        proposta: propostas,
+        loja: lojas,
+        produto: produtos,
+        boleto: interCollections,
+      })
+      .from(propostas)
+      .leftJoin(lojas, eq(propostas.lojaId, lojas.id))
+      .leftJoin(produtos, eq(propostas.produtoId, produtos.id))
+      .leftJoin(interCollections, eq(propostas.id, interCollections.propostaId))
+      .where(and(...conditions))
+      .orderBy(desc(propostas.updatedAt));
 
     return await query;
   }
@@ -181,8 +175,8 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
         boleto: interCollections,
       })
       .from(propostas)
-      .leftJoin(lojas, eq(propostas.loja, lojas.nome))
-      .leftJoin(produtos, eq(propostas.produto, produtos.nome))
+      .leftJoin(lojas, eq(propostas.lojaId, lojas.id))
+      .leftJoin(produtos, eq(propostas.produtoId, produtos.id))
       .leftJoin(interCollections, eq(propostas.id, interCollections.propostaId))
       .where(and(eq(propostas.id, proposalId), sql`${propostas.deletedAt} IS NULL`))
       .limit(1);
@@ -213,17 +207,16 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
     const result = await db
       .update(propostas)
       .set({
-        numeroContrato: data.numeroContrato,
-        valorFinanciado: data.valorFinanciado,
-        valorLiquido: data.valorLiquido,
-        valorIOF: data.valorIOF,
-        valorTAC: data.valorTAC,
-        contaBancaria: JSON.stringify(data.contaBancaria),
+        valorTotalFinanciado: String(data.valorFinanciado),
+        valorLiquidoLiberado: String(data.valorLiquido),
+        valorIof: String(data.valorIOF),
+        valorTac: String(data.valorTAC),
+        condicoesData: JSON.stringify({contaBancaria: data.contaBancaria}),
         formaPagamento: data.formaPagamento,
-        observacoesPagamento: data.observacoes,
-        statusPagamento: "processando",
-        usuarioId: data.userId,
-        updatedAt: getBrasiliaTimestamp(),
+        observacoes: data.observacoes,
+        status: "PAGAMENTO_PENDENTE",
+        userId: data.userId,
+        updatedAt: new Date(),
       })
       .where(eq(propostas.id, data.propostaId))
       .returning();
@@ -242,9 +235,9 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
     const result = await db
       .update(propostas)
       .set({
-        statusPagamento: status,
-        usuarioId: userId,
-        updatedAt: getBrasiliaTimestamp(),
+        status: status,
+        userId: userId,
+        updatedAt: new Date(),
       })
       .where(eq(propostas.id, proposalId))
       .returning();
@@ -264,8 +257,8 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
       .update(propostas)
       .set({
         status,
-        usuarioId: userId,
-        updatedAt: getBrasiliaTimestamp(),
+        userId: userId,
+        updatedAt: new Date(),
       })
       .where(eq(propostas.id, proposalId))
       .returning();
@@ -288,8 +281,9 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
       .insert(statusContextuais)
       .values({
         ...data,
-        timestamp: getBrasiliaTimestamp(),
-        createdAt: getBrasiliaTimestamp(),
+        atualizadoEm: new Date(),
+        atualizadoPor: data.usuarioId,
+        status: data.statusNovo,
       })
       .returning();
 
@@ -305,7 +299,31 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
     status?: string[];
     loja?: string;
   }): Promise<any[]> {
-    let query = db
+    // Build conditions array
+    const conditions = [sql`${propostas.deletedAt} IS NULL`];
+
+    // Apply date range filter
+    if (filters.dataInicio && filters.dataFim) {
+      const startDate = new Date(filters.dataInicio);
+      const endDate = new Date(filters.dataFim);
+      conditions.push(
+        gte(propostas.createdAt, startDate),
+        lte(propostas.createdAt, endDate)
+      );
+    }
+
+    // Apply status filter
+    if (filters.status && filters.status.length > 0) {
+      conditions.push(inArray(propostas.status, filters.status));
+    }
+
+    // Apply store filter
+    if (filters.loja) {
+      conditions.push(eq(propostas.lojaId, parseInt(filters.loja)));
+    }
+
+    // Build single query with consolidated conditions
+    const query = db
       .select({
         proposta: propostas,
         loja: lojas,
@@ -313,37 +331,11 @@ export class PagamentoRepository extends BaseRepository<typeof propostas> {
         boleto: interCollections,
       })
       .from(propostas)
-      .leftJoin(lojas, eq(propostas.loja, lojas.nome))
-      .leftJoin(produtos, eq(propostas.produto, produtos.nome))
+      .leftJoin(lojas, eq(propostas.lojaId, lojas.id))
+      .leftJoin(produtos, eq(propostas.produtoId, produtos.id))
       .leftJoin(interCollections, eq(propostas.id, interCollections.propostaId))
-      .where(sql`${propostas.deletedAt} IS NULL`);
-
-    // Apply date range filter
-    if (filters.dataInicio && filters.dataFim) {
-      query = query.where(and(
-        sql`${propostas.deletedAt} IS NULL`,
-        gte(propostas.createdAt, filters.dataInicio),
-        lte(propostas.createdAt, filters.dataFim)
-      ));
-    }
-
-    // Apply status filter
-    if (filters.status && filters.status.length > 0) {
-      query = query.where(and(
-        sql`${propostas.deletedAt} IS NULL`,
-        inArray(propostas.status, filters.status)
-      ));
-    }
-
-    // Apply store filter
-    if (filters.loja) {
-      query = query.where(and(
-        sql`${propostas.deletedAt} IS NULL`,
-        eq(propostas.loja, filters.loja)
-      ));
-    }
-
-    query = query.orderBy(desc(propostas.updatedAt));
+      .where(and(...conditions))
+      .orderBy(desc(propostas.updatedAt));
 
     return await query;
   }

@@ -12,19 +12,19 @@ import type { PropostaDocumento } from "@shared/schema";
 
 export class DocumentsRepository extends BaseRepository<typeof propostaDocumentos> {
   constructor() {
-    super(propostaDocumentos);
+    super("proposta_documentos");
   }
 
   /**
    * Get all documents for a proposal
    */
-  async getProposalDocuments(propostaId: number): Promise<PropostaDocumento[]> {
+  async getProposalDocuments(propostaId: string): Promise<PropostaDocumento[]> {
     try {
       return await db
         .select()
         .from(propostaDocumentos)
-        .where(eq(propostaDocumentos.proposta_id, propostaId))
-        .orderBy(desc(propostaDocumentos.created_at));
+        .where(eq(propostaDocumentos.propostaId, propostaId))
+        .orderBy(desc(propostaDocumentos.createdAt));
     } catch (error) {
       console.error("[DOCUMENTS_REPO] Error getting proposal documents:", error);
       return [];
@@ -34,7 +34,7 @@ export class DocumentsRepository extends BaseRepository<typeof propostaDocumento
   /**
    * Get proposal by ID
    */
-  async getProposalById(propostaId: number): Promise<any | null> {
+  async getProposalById(propostaId: string): Promise<any | null> {
     try {
       const [proposta] = await db
         .select()
@@ -53,7 +53,7 @@ export class DocumentsRepository extends BaseRepository<typeof propostaDocumento
    * Create a document record
    */
   async createDocument(documentData: {
-    proposta_id: number;
+    proposta_id: string;
     nome_arquivo: string;
     url: string;
     tipo: string;
@@ -63,12 +63,12 @@ export class DocumentsRepository extends BaseRepository<typeof propostaDocumento
       const [document] = await db
         .insert(propostaDocumentos)
         .values({
-          proposta_id: documentData.proposta_id,
-          nome_arquivo: documentData.nome_arquivo,
+          propostaId: documentData.proposta_id,
+          nomeArquivo: documentData.nome_arquivo,
           url: documentData.url,
           tipo: documentData.tipo,
           tamanho: documentData.tamanho,
-          created_at: new Date().toISOString(),
+          createdAt: new Date(),
         })
         .returning();
 

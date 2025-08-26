@@ -25,14 +25,14 @@ export class SecurityRepository extends BaseRepository<any> {
       const [totalRequests] = await db
         .select({ count: sql<number>`count(*)` })
         .from(securityLogs)
-        .where(gte(securityLogs.created_at, startDate.toISOString()));
+        .where(gte(securityLogs.created_at, startDate));
 
       const [suspiciousRequests] = await db
         .select({ count: sql<number>`count(*)` })
         .from(securityLogs)
         .where(
           and(
-            gte(securityLogs.created_at, startDate.toISOString()),
+            gte(securityLogs.created_at, startDate),
             sql`${securityLogs.severity} IN ('HIGH', 'CRITICAL')`
           )
         );
@@ -42,7 +42,7 @@ export class SecurityRepository extends BaseRepository<any> {
         .from(securityLogs)
         .where(
           and(
-            gte(securityLogs.created_at, startDate.toISOString()),
+            gte(securityLogs.created_at, startDate),
             eq(securityLogs.event_type, "BLOCKED")
           )
         );
@@ -111,15 +111,13 @@ export class SecurityRepository extends BaseRepository<any> {
       const result = await db
         .insert(securityLogs)
         .values({
-          eventType: event.eventType,
+          event_type: event.eventType,
+          description: event.details?.description || event.eventType || "Security event",
           severity: event.severity,
-          ipAddress: event.ipAddress,
-          userId: event.userId,
-          userAgent: event.userAgent,
-          endpoint: event.endpoint,
-          statusCode: event.statusCode,
-          success: event.success ?? true,
-          details: event.details,
+          ip_address: event.ipAddress,
+          user_id: event.userId,
+          user_agent: event.userAgent,
+          metadata: event.details,
         })
         .returning();
 
@@ -147,11 +145,11 @@ export class SecurityRepository extends BaseRepository<any> {
       const conditions = [];
 
       if (filters.startDate) {
-        conditions.push(gte(securityLogs.created_at, filters.startDate.toISOString()));
+        conditions.push(gte(securityLogs.created_at, filters.startDate));
       }
 
       if (filters.endDate) {
-        conditions.push(sql`${securityLogs.created_at} <= ${filters.endDate.toISOString()}`);
+        conditions.push(sql`${securityLogs.created_at} <= ${filters.endDate}`);
       }
 
       if (filters.severity && filters.severity.length > 0) {
@@ -165,17 +163,17 @@ export class SecurityRepository extends BaseRepository<any> {
       }
 
       if (conditions.length > 0) {
-        query = query.where(and(...conditions));
+        query = query.where(and(...conditions)) as any;
       }
 
-      query = query.orderBy(desc(securityLogs.created_at));
+      query = query.orderBy(desc(securityLogs.created_at)) as any;
 
       if (filters.limit) {
-        query = query.limit(filters.limit);
+        query = query.limit(filters.limit) as any;
       }
 
       if (filters.offset) {
-        query = query.offset(filters.offset);
+        query = query.offset(filters.offset) as any;
       }
 
       return await query;
@@ -195,7 +193,7 @@ export class SecurityRepository extends BaseRepository<any> {
       const result = await db
         .update(securityLogs)
         .set({
-          details: sql`COALESCE(${securityLogs.details}, '{}')::jsonb || ${JSON.stringify({
+          metadata: sql`COALESCE(${securityLogs.metadata}, '{}')::jsonb || ${JSON.stringify({
             resolved: true,
             resolvedBy,
             resolvedAt: getBrasiliaTimestamp(),
@@ -228,7 +226,7 @@ export class SecurityRepository extends BaseRepository<any> {
       const [totalEvents] = await db
         .select({ count: sql<number>`count(*)` })
         .from(securityLogs)
-        .where(gte(securityLogs.created_at, startDate.toISOString()));
+        .where(gte(securityLogs.created_at, startDate));
 
       // Get events by severity
       const severityResults = await db
@@ -237,7 +235,7 @@ export class SecurityRepository extends BaseRepository<any> {
           count: sql<number>`count(*)`
         })
         .from(securityLogs)
-        .where(gte(securityLogs.created_at, startDate.toISOString()))
+        .where(gte(securityLogs.created_at, startDate))
         .groupBy(securityLogs.severity);
 
       const eventsBySeverity = severityResults.reduce((acc, row) => {
@@ -248,15 +246,15 @@ export class SecurityRepository extends BaseRepository<any> {
       // Get events by type
       const typeResults = await db
         .select({
-          eventType: securityLogs.event_type,
+          event_type: securityLogs.event_type,
           count: sql<number>`count(*)`
         })
         .from(securityLogs)
-        .where(gte(securityLogs.created_at, startDate.toISOString()))
+        .where(gte(securityLogs.created_at, startDate))
         .groupBy(securityLogs.event_type);
 
       const eventsByType = typeResults.reduce((acc, row) => {
-        acc[row.eventType] = row.count;
+        acc[row.event_type] = row.count;
         return acc;
       }, {} as Record<string, number>);
 

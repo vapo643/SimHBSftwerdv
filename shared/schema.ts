@@ -292,6 +292,7 @@ export const propostas = pgTable("propostas", {
   // Auditoria
   userId: text("user_id"),
   createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
   deletedAt: timestamp("deleted_at"), // Soft delete column
 });
 
