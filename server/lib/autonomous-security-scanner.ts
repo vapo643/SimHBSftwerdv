@@ -173,13 +173,14 @@ export class AutonomousSecurityScanner {
 
       // Interceptar response
       const originalSend = res.send;
+      const self = this;
       res.send = function (data: any) {
         res.locals.responseTime = Date.now() - startTime;
         res.locals.responseSize = Buffer.byteLength(data);
 
         // Analisar requisição/resposta
         setImmediate(() => {
-          this.analyzeRequestResponse(req, res, reqData);
+          self.analyzeRequestResponse(req, res, reqData);
         });
 
         return originalSend.call(this, data);
@@ -574,7 +575,7 @@ export class AutonomousSecurityScanner {
 
       // Log de segurança
       securityLogger.logEvent({
-        type: SecurityEventType.SUSPICIOUS_ACTIVITY,
+        type: SecurityEventType.SECURITY_ALERT,
         severity: vuln.severity,
         endpoint: vuln.endpoint,
         ipAddress: reqData.ip,
@@ -607,9 +608,9 @@ export class AutonomousSecurityScanner {
 
       // Adicionar novos padrões detectados
       for (const pattern of patterns) {
-        if (!this.attackPatterns.has(pattern.signature)) {
+        if (pattern.signature && !this.attackPatterns.has(pattern.signature)) {
           this.attackPatterns.set(pattern.signature, pattern);
-          console.log(`🧠 [ML] Novo padrão de ataque aprendido: ${pattern.type}`);
+          console.log(`🧠 [ML] Novo padrão de ataque aprendido: ${pattern.type || 'Unknown'}`);
         }
       }
     }, 300000); // A cada 5 minutos

@@ -65,6 +65,7 @@ interface Proposta {
   finalidade: string;
   garantia: string;
   status: string;
+  statusContextual?: string;
   documentos: string[] | null;
   createdAt: string;
   score?: number;
@@ -86,7 +87,7 @@ export default function AnaliseManual() {
     isLoading,
     error,
     isError,
-  } = useQuery<Proposta>({
+  } = useQuery({
     queryKey: ['/api/propostas', propostaId],
     enabled: !!propostaId,
     retry: (failureCount, error) => {
@@ -96,15 +97,7 @@ export default function AnaliseManual() {
       }
       return failureCount < 2;
     },
-    onError: (error: any) => {
-      console.error('Failed to fetch proposta:', error);
-      toast({
-        title: 'Erro ao carregar proposta',
-        description: error.message || 'Não foi possível carregar os dados da proposta.',
-        variant: 'destructive',
-      });
-    },
-  });
+  }) as { data: Proposta | undefined; isLoading: boolean; error: any; isError: boolean; };
 
   const {
     register,
@@ -118,8 +111,10 @@ export default function AnaliseManual() {
 
   const updateProposta = useMutation({
     mutationFn: async (data: DecisionForm) => {
-      const response = await apiRequest('PATCH', `/api/propostas/${propostaId}`, data);
-      return response.json();
+      return await apiRequest(`/api/propostas/${propostaId}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      });
     },
     onSuccess: () => {
       toast({
@@ -602,7 +597,7 @@ export default function AnaliseManual() {
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                   <div>
                     <Label htmlFor="status">Decisão</Label>
-                    <Select onValueChange={(value) => setValue('status', value as unknown)}>
+                    <Select onValueChange={(value) => setValue('status', value as 'aprovado' | 'rejeitado' | 'solicitar_info')}>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecione uma decisão" />
                       </SelectTrigger>
@@ -738,21 +733,21 @@ export default function AnaliseManual() {
                     <CheckCircle className="h-8 w-8 text-green-600" />
                   </div>
                   <p className="text-sm font-medium text-gray-700">Score</p>
-                  <p className="text-2xl font-bold text-green-600">{creditAnalysis.score}</p>
+                  <p className="text-2xl font-bold text-green-600">{creditAnalysis?.score}</p>
                 </div>
                 <div className="text-center">
                   <div className="mx-auto mb-2 flex h-16 w-16 items-center justify-center rounded-full bg-yellow-100">
                     <AlertTriangle className="h-8 w-8 text-yellow-600" />
                   </div>
                   <p className="text-sm font-medium text-gray-700">Risco</p>
-                  <p className="text-2xl font-bold text-yellow-600">{creditAnalysis.risco}</p>
+                  <p className="text-2xl font-bold text-yellow-600">{creditAnalysis?.risco}</p>
                 </div>
                 <div className="text-center">
                   <div className="mx-auto mb-2 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100">
                     <Percent className="h-8 w-8 text-blue-600" />
                   </div>
                   <p className="text-sm font-medium text-gray-700">Taxa Sugerida</p>
-                  <p className="text-2xl font-bold text-blue-600">{creditAnalysis.taxa}%</p>
+                  <p className="text-2xl font-bold text-blue-600">{creditAnalysis?.taxaSugerida}%</p>
                 </div>
               </div>
             </CardContent>
@@ -769,7 +764,7 @@ export default function AnaliseManual() {
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <div>
                   <Label htmlFor="status">Decisão</Label>
-                  <Select onValueChange={(value) => setValue('status', value as unknown)}>
+                  <Select onValueChange={(value) => setValue('status', value as 'aprovado' | 'rejeitado' | 'solicitar_info')}>
                     <SelectTrigger>
                       <SelectValue placeholder="Selecione uma decisão" />
                     </SelectTrigger>

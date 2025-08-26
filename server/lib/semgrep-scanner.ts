@@ -7,7 +7,8 @@
 
 import { exec } from 'child_process';
 import { promisify } from 'util';
-import * as fs from 'fs/promises';
+import * as fsPromises from 'fs/promises';
+import * as fs from 'fs';
 import * as path from 'path';
 import { EventEmitter } from 'events';
 
@@ -198,11 +199,11 @@ rules:
    */
   private async createCustomRulesFile() {
     const rulesDir = path.join(process.cwd(), '.semgrep');
-    await fs.mkdir(rulesDir, { recursive: true });
+    await fsPromises.mkdir(rulesDir, { recursive: true });
 
     // Salvar cada conjunto de regras
-    for (const [name, rules] of this.customRules) {
-      await fs.writeFile(path.join(rulesDir, `${name}.yml`), rules);
+    for (const [name, rules] of Array.from(this.customRules)) {
+      await fsPromises.writeFile(path.join(rulesDir, `${name}.yml`), rules);
     }
   }
 
@@ -247,7 +248,7 @@ rules:
       });
 
       // Processar resultados
-      const results = JSON.parse(await fs.readFile(resultsPath, 'utf-8'));
+      const results = JSON.parse(await fsPromises.readFile(resultsPath, 'utf-8'));
 
       const findings = this.parseFindings(results);
       const scanDuration = Date.now() - startTime;
@@ -280,7 +281,7 @@ rules:
       );
 
       // Limpar arquivo temporário
-      await fs.unlink(resultsPath).catch(() => {});
+      await fsPromises.unlink(resultsPath).catch(() => {});
 
       return result;
     } catch (error) {
@@ -426,7 +427,8 @@ rules:
     directories.forEach((dir) => {
       const fullPath = path.join(process.cwd(), dir);
 
-      fs.watch(fullPath, { recursive: true }, async (eventType, filename) => {
+      // Criar callback separadamente para evitar problemas de tipagem
+      const watchCallback = (eventType: string, filename?: string) => {
         if (filename && (filename.endsWith('.ts') || filename.endsWith('.tsx'))) {
           console.log(`📝 [SEMGREP] Arquivo modificado: ${filename}`);
 
@@ -435,10 +437,16 @@ rules:
 
           this.scanTimeout = setTimeout(() => {
             console.log('🔍 [SEMGREP] Executando scan incremental...');
-            this.runIncrementalScan(path.join(fullPath, filename));
+            this.runIncrementalScan(path.join(fullPath, filename || ''));
           }, 5000);
         }
-      });
+      };
+
+      try {
+        fs.watch(fullPath, { recursive: true }, watchCallback);
+      } catch (error) {
+        console.warn(`⚠️ [SEMGREP] Não foi possível monitorar diretório: ${fullPath}`, error);
+      }
     });
   }
 

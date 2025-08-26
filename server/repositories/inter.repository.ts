@@ -16,11 +16,11 @@ import {
   type Proposta,
 } from '@shared/schema';
 import { eq, and, gte, lte, or, inArray, desc, asc } from 'drizzle-orm';
-import { getBrasiliaTimestamp } from '../lib/timezone.js';
+import { getBrasiliaTimestamp, getBrasiliaDate } from '../lib/timezone.js';
 
 export class InterRepository extends BaseRepository<typeof interCollections> {
   constructor() {
-    super(interCollections);
+    super('inter_collections');
   }
 
   /**
@@ -71,7 +71,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
     limit?: number;
     offset?: number;
   }): Promise<InterCollection[]> {
-    let query = db.select().from(interCollections);
+    let query = db.select().from(interCollections) as any;
     const conditions = [];
 
     if (params.dataInicial && params.dataFinal) {
@@ -97,17 +97,17 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
     }
 
     if (conditions.length > 0) {
-      query = query.where(and(...conditions));
+      query = query.where(and(...conditions)) as any;
     }
 
-    query = query.orderBy(desc(interCollections.createdAt));
+    query = query.orderBy(desc(interCollections.createdAt)) as any;
 
     if (params.limit) {
-      query = query.limit(params.limit);
+      query = query.limit(params.limit) as any;
     }
 
     if (params.offset) {
-      query = query.offset(params.offset);
+      query = query.offset(params.offset) as any;
     }
 
     return await query;
@@ -117,14 +117,14 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
    * Create a new collection
    */
   async createCollection(data: Partial<InterCollection>): Promise<InterCollection> {
-    const timestamp = getBrasiliaTimestamp();
+    const timestamp = getBrasiliaDate();
     const collectionData = {
       ...data,
       createdAt: timestamp,
       updatedAt: timestamp,
     };
 
-    const result = await db.insert(interCollections).values(collectionData).returning();
+    const result = await db.insert(interCollections).values([collectionData]).returning();
 
     return result[0];
   }
@@ -140,7 +140,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
       .update(interCollections)
       .set({
         ...data,
-        updatedAt: getBrasiliaTimestamp(),
+        updatedAt: getBrasiliaDate(),
       })
       .where(eq(interCollections.id, id))
       .returning();
@@ -159,7 +159,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
       .update(interCollections)
       .set({
         ...data,
-        updatedAt: getBrasiliaTimestamp(),
+        updatedAt: getBrasiliaDate(),
       })
       .where(eq(interCollections.codigoSolicitacao, codigoSolicitacao))
       .returning();
@@ -174,8 +174,8 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
     const result = await db
       .update(interCollections)
       .set({
-        deletedAt: getBrasiliaTimestamp(),
-        updatedAt: getBrasiliaTimestamp(),
+        deletedAt: getBrasiliaDate(),
+        updatedAt: getBrasiliaDate(),
       })
       .where(eq(interCollections.id, id))
       .returning();
@@ -204,7 +204,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
       .update(propostas)
       .set({
         status,
-        updatedAt: getBrasiliaTimestamp(),
+        updatedAt: getBrasiliaDate(),
         usuarioId: userId,
       })
       .where(eq(propostas.id, proposalId))
@@ -218,19 +218,20 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
    */
   async createObservationHistory(data: {
     propostaId: string;
-    tipoObservacao: string;
-    observacao: string;
-    usuarioNome: string;
-    usuarioId?: string;
-    metadata?: any;
+    mensagem: string;
+    criadoPor: string;
+    tipoAcao?: string;
+    dadosAcao?: any;
   }): Promise<any> {
     const result = await db
       .insert(historicoObservacoesCobranca)
-      .values({
-        ...data,
-        dataObservacao: getBrasiliaTimestamp(),
-        createdAt: getBrasiliaTimestamp(),
-      })
+      .values([{
+        propostaId: data.propostaId,
+        mensagem: data.mensagem,
+        criadoPor: data.criadoPor,
+        tipoAcao: data.tipoAcao,
+        dadosAcao: data.dadosAcao,
+      }])
       .returning();
 
     return result[0];
@@ -241,19 +242,22 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
    */
   async createStatusContextual(data: {
     propostaId: string;
-    statusAnterior: string;
-    statusNovo: string;
     contexto: string;
-    metadata?: any;
-    usuarioId?: string;
+    status: string;
+    statusAnterior?: string;
+    atualizadoPor?: string;
+    observacoes?: string;
   }): Promise<any> {
     const result = await db
       .insert(statusContextuais)
-      .values({
-        ...data,
-        timestamp: getBrasiliaTimestamp(),
-        createdAt: getBrasiliaTimestamp(),
-      })
+      .values([{
+        propostaId: data.propostaId,
+        contexto: data.contexto,
+        status: data.status,
+        statusAnterior: data.statusAnterior,
+        atualizadoPor: data.atualizadoPor,
+        observacoes: data.observacoes,
+      }])
       .returning();
 
     return result[0];
@@ -277,7 +281,7 @@ export class InterRepository extends BaseRepository<typeof interCollections> {
     // Mark collection as being processed for payment
     return await this.updateCollection(id, {
       situacao: 'MARCADO_RECEBIDO',
-      updatedAt: getBrasiliaTimestamp(),
+      updatedAt: getBrasiliaDate(),
     });
   }
 

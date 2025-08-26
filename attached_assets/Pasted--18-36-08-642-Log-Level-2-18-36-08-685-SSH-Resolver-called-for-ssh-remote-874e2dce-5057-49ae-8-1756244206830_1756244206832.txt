@@ -1,0 +1,64 @@
+[18:36:08.642] Log Level: 2
+[18:36:08.685] SSH Resolver called for "ssh-remote+874e2dce-5057-49ae-8fb5-21491c9977ba@874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev:22", attempt 1
+[18:36:08.690] remote.SSH.useLocalServer = false
+[18:36:08.690] remote.SSH.useExecServer = true
+[18:36:08.691] remote.SSH.bindHost = {}
+[18:36:08.691] remote.SSH.showLoginTerminal = false
+[18:36:08.691] remote.SSH.remotePlatform = {}
+[18:36:08.691] remote.SSH.path = undefined
+[18:36:08.692] remote.SSH.configFile = undefined
+[18:36:08.692] remote.SSH.useFlock = true
+[18:36:08.692] remote.SSH.lockfilesInTmp = false
+[18:36:08.692] remote.SSH.localServerDownload = auto
+[18:36:08.692] remote.SSH.remoteServerListenOnSocket = false
+[18:36:08.693] remote.SSH.defaultExtensions = []
+[18:36:08.693] remote.SSH.defaultExtensionsIfInstalledLocally = []
+[18:36:08.693] remote.SSH.loglevel = 2
+[18:36:08.693] remote.SSH.enableDynamicForwarding = true
+[18:36:08.694] remote.SSH.enableRemoteCommand = false
+[18:36:08.694] remote.SSH.serverPickPortsFromRange = {}
+[18:36:08.694] remote.SSH.serverInstallPath = {}
+[18:36:08.694] remote.SSH.permitPtyAllocation = false
+[18:36:08.694] remote.SSH.preferredLocalPortRange = undefined
+[18:36:08.695] remote.SSH.useCurlAndWgetConfigurationFiles = false
+[18:36:08.695] remote.SSH.experimental.chat = false
+[18:36:08.695] remote.SSH.experimental.enhancedSessionLogs = false
+[18:36:08.695] remote.SSH.httpProxy = {}
+[18:36:08.695] remote.SSH.httpsProxy = {}
+[18:36:08.716] VS Code version: 1.103.2
+[18:36:08.716] Remote-SSH version: remote-ssh@0.120.0
+[18:36:08.716] win32 x64
+[18:36:08.728] SSH Resolver called for host: 874e2dce-5057-49ae-8fb5-21491c9977ba@874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev
+[18:36:08.728] Setting up SSH remote "874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev"
+[18:36:08.748] Using commit id "6f17636121051a53c88d3e605c491d22af2ba755" and quality "stable" for server
+[18:36:08.749] Extensions to install: 
+[18:36:08.762] Install and start server if needed
+[18:36:11.865] Checking ssh with "C:\Program Files\Google\Chrome\Application\ssh.exe -V"
+[18:36:11.874] Got error from ssh: spawn C:\Program Files\Google\Chrome\Application\ssh.exe ENOENT
+[18:36:11.874] Checking ssh with "C:\WINDOWS\system32\ssh.exe -V"
+[18:36:11.876] Got error from ssh: spawn C:\WINDOWS\system32\ssh.exe ENOENT
+[18:36:11.876] Checking ssh with "C:\WINDOWS\ssh.exe -V"
+[18:36:11.877] Got error from ssh: spawn C:\WINDOWS\ssh.exe ENOENT
+[18:36:11.877] Checking ssh with "C:\WINDOWS\System32\Wbem\ssh.exe -V"
+[18:36:11.878] Got error from ssh: spawn C:\WINDOWS\System32\Wbem\ssh.exe ENOENT
+[18:36:11.879] Checking ssh with "C:\WINDOWS\System32\WindowsPowerShell\v1.0\ssh.exe -V"
+[18:36:11.880] Got error from ssh: spawn C:\WINDOWS\System32\WindowsPowerShell\v1.0\ssh.exe ENOENT
+[18:36:11.880] Checking ssh with "C:\WINDOWS\System32\OpenSSH\ssh.exe -V"
+[18:36:12.047] > OpenSSH_for_Windows_9.5p1, LibreSSL 3.8.2
+
+[18:36:12.057] Remote command length: 5051/8192 characters
+[18:36:12.057] Running script with connection command: "C:\WINDOWS\System32\OpenSSH\ssh.exe" -T -D 62538 -p 22 "874e2dce-5057-49ae-8fb5-21491c9977ba@874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev" powershell
+[18:36:12.059] Generated SSH command: 'type "C:\Users\gabri\AppData\Local\Temp\vscode-linux-multi-line-command-874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev-748713068.sh" | "C:\WINDOWS\System32\OpenSSH\ssh.exe" -T -D 62538 -p 22 "874e2dce-5057-49ae-8fb5-21491c9977ba@874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev" powershell'
+[18:36:12.060] Using connect timeout of 17 seconds
+[18:36:12.060] Terminal shell path: C:\WINDOWS\System32\cmd.exe
+[18:36:12.366] > 
+[18:36:12.366] Got some output, clearing connection timeout
+[18:36:13.561] > Welcome to the Replit SSH Proxy.Visit https://docs.replit.com/replit-workspace/ssh to learn more about SSH on Replit.
+[18:36:13.572] > 874e2dce-5057-49ae-8fb5-21491c9977ba@874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev's password: 
+[18:36:13.572] Showing password prompt
+[18:36:24.135] Got password response
+[18:36:24.138] "install" wrote data to terminal: "****************************************************************************************************"
+[18:36:24.197] > 
+[18:36:24.329] > Permission denied, please try again.
+[18:36:24.358] > 874e2dce-5057-49ae-8fb5-21491c9977ba@874e2dce-5057-49ae-8fb5-21491c9977ba-00-1xresvzm7is3g.janeway.replit.dev's password: 
+[18:36:24.358] Showing password prompt

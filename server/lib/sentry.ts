@@ -48,7 +48,7 @@ export function initSentry(app: Express) {
 
   try {
     Sentry.init({
-      dsn: sentryDsn,
+      dsn: sentryDsn || undefined,
       environment: process.env.NODE_ENV || 'development',
       release: process.env.APP_VERSION || '1.0.0',
       integrations: [
@@ -144,10 +144,17 @@ export function sentryTransactionMiddleware(req: Request, res: Response, next: N
   });
 
   if (transaction) {
-    Sentry.getCurrentScope().setSpan(transaction);
+    // Atualizar para API atual do Sentry v8
+    const transactionName = `${req.method} ${req.route?.path || req.path}`;
+    Sentry.getCurrentScope().setContext('transaction', { name: transactionName });
 
     res.on('finish', () => {
-      transaction.setHttpStatus(res.statusCode);
+      transaction.setAttribute('http.status_code', res.statusCode.toString());
+      if (res.statusCode >= 400) {
+        transaction.setStatus({ code: 2, message: 'Error' }); // UNKNOWN status
+      } else {
+        transaction.setStatus({ code: 1, message: 'OK' }); // OK status
+      }
       transaction.end();
     });
   }

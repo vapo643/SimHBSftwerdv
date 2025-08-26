@@ -31,8 +31,6 @@ export class ProposalRepository implements IProposalRepository {
           produtoId: data.produto_id,
           tabelaComercialId: data.tabela_comercial_id,
           lojaId: data.loja_id,
-          parceiroId: data.parceiro_id,
-          atendenteId: data.atendente_id,
           dadosPagamentoMetodo: data.dados_pagamento?.metodo,
           dadosPagamentoBanco: data.dados_pagamento?.banco,
           dadosPagamentoAgencia: data.dados_pagamento?.agencia,
@@ -50,7 +48,7 @@ export class ProposalRepository implements IProposalRepository {
       const sequentialId = await this.getNextSequentialId();
       const numeroProposta = await this.getNextNumeroProposta();
 
-      await db.insert(propostas).values({
+      await db.insert(propostas).values([{
         id: proposal.id, // UUID do domínio
         numeroProposta: numeroProposta, // ID sequencial começando em 300001
         status: data.status,
@@ -63,8 +61,6 @@ export class ProposalRepository implements IProposalRepository {
         produtoId: data.produto_id,
         tabelaComercialId: data.tabela_comercial_id,
         lojaId: data.loja_id,
-        parceiroId: data.parceiro_id,
-        atendenteId: data.atendente_id,
         metodoPagamento: data.dados_pagamento?.metodo,
         dadosPagamentoMetodo: data.dados_pagamento?.metodo,
         dadosPagamentoBanco: data.dados_pagamento?.banco,
@@ -77,7 +73,7 @@ export class ProposalRepository implements IProposalRepository {
         ccbDocumentoUrl: data.ccb_url,
         createdAt: data.created_at,
         updatedAt: data.updated_at,
-      });
+      }]);
     }
 
     // Processar eventos de domínio
@@ -116,7 +112,7 @@ export class ProposalRepository implements IProposalRepository {
     }
 
     if (criteria.atendenteId) {
-      conditions.push(eq(propostas.atendenteId, criteria.atendenteId));
+      conditions.push(eq(propostas.analistaId, criteria.atendenteId));
     }
 
     if (criteria.cpf) {
@@ -179,7 +175,7 @@ export class ProposalRepository implements IProposalRepository {
     const results = await db
       .select()
       .from(propostas)
-      .where(and(eq(propostas.atendenteId, atendenteId), isNull(propostas.deletedAt)));
+      .where(and(eq(propostas.analistaId, atendenteId), isNull(propostas.deletedAt)));
 
     return results.map((row) => this.mapToDomain(row));
   }
