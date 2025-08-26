@@ -1,0 +1,65 @@
+### **Pacote de Ativação de Missão (PAM) V14.0: Auditoria de Conformidade e Prova de Trabalho (Sprint 0)**
+
+* **Sumário da Missão (O Quê):** Executar uma auditoria completa e fornecer as evidências de conformidade para todas as User Stories do Sprint 0 ("EP0-001", "EP0-002", "EP0-003"), validando que a fundação do projeto atende rigorosamente à "Definition of Done (DoD)" estabelecida no "Roadmap Mestre de Implementação".
+
+* **Intenção Estratégica (O Porquê):** O Sprint 0 é a fundação sobre a qual todo o sistema será construído. Falhas, vulnerabilidades ou inconsistências nesta fase inicial se propagarão e amplificarão ao longo do desenvolvimento, resultando em "bombas de custos e erros". Esta missão de auditoria garante que a nossa base é de nível empresarial, segura e verdadeiramente pronta antes de construirmos sobre ela.
+
+* **Modelo Mental (Como se Encaixa):** Você atuará como um **Engenheiro de Qualidade e Segurança (QA/SecOps)**. Sua tarefa é executar os scripts de validação, os scans de segurança e os testes definidos em nosso DoD e compilar os resultados brutos em um relatório de conformidade. Você é o gatekeeper da qualidade para o Sprint 0.
+
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco (ALTO):** **Falso Positivo de Qualidade.** O agente pode reportar sucesso com base em configurações incompletas ou scans que não foram executados com o rigor necessário.
+    * **Contramedida Mandatória:** O seu relatório final **DEVE** conter a saída literal e não editada dos comandos de verificação. A ausência de "prova de trabalho" será considerada uma falha da missão. Para a vulnerabilidade DT-001, uma simples declaração não é suficiente; é necessária a saída de um `npm audit` que comprove a mitigação ou a aceitação formal do risco.
+
+---
+**[DIRETRIZ DE PESQUISA WEB (MANDATÓRIA)]**
+
+*Você está autorizado a utilizar a sua capacidade de pesquisa na web para enriquecer a sua análise (ex: consultar a documentação mais recente do Snyk ou Semgrep para interpretar os resultados do scan). No entanto, esta capacidade deve ser exercida com o máximo rigor e sob as seguintes regras de engajamento inegociáveis:*
+
+* ***1. Prioridade às Fontes Primárias:*** A sua busca deve priorizar **fontes de confiança e alta qualidade** (P0: Documentação Oficial, P1: Blogs de Engenharia de Elite).
+* ***2. Proibição de Fontes Duvidosas:*** A utilização de fontes de baixa qualidade é **terminantemente proibida**.
+* ***3. Justificativa Estratégica (O "Porquê"):*** A sua função é usar a web para **aumentar a precisão da auditoria**, não para introduzir ruído.
+
+---
+
+**DIRETRIZ DE MISSÃO: Auditoria Completa e Prova de Trabalho do Sprint 0**
+
+**CURRENT STATE:**
+O Agente Executor reportou a conclusão das tarefas do Sprint 0. No entanto, faltam as evidências irrefutáveis que comprovem a conformidade com a DoD do projeto.
+
+**EXPECTED (Estado Final de Sucesso):**
+Você deve produzir um único artefato em Markdown chamado **`RELATORIO_CONFORMIDADE_SPRINT_0.md`**. Este relatório deve conter seções dedicadas para cada Épico do Sprint 0, com as provas de conformidade para cada User Story, conforme a DoD. O relatório deve conter as seguintes seções, preenchidas com as saídas literais dos comandos:
+
+1.  **`Auditoria do Épico EP0-001: Ambiente e CI/CD DevSecOps`**
+    * **Prova para S0-001 (Qualidade de Código):**
+        * A saída **completa** do comando `npm run lint`.
+        * A saída **completa** do comando `npm run typecheck`.
+    * **Prova para S0-002 (Security Gates):**
+        * A saída **completa** do scan SAST (Semgrep) executado pelo pipeline `ci.yml`.
+        * A saída **completa** do scan SCA (Snyk) executado pelo pipeline `ci.yml`.
+
+2.  **`Auditoria do Épico EP0-002: Mitigação de Dívida Técnica Crítica`**
+    * **Prova para S0-003 (Vulnerabilidade Drizzle-Kit):**
+        * A saída **completa** do comando `npm audit` que analisa especificamente a vulnerabilidade DT-001 em `drizzle-kit`. Se uma correção não for possível, apresente a análise de impacto e a recomendação formal para a aceitação do risco.
+
+3.  **`Auditoria do Épico EP0-003: Skeleton Arquitetural e Portabilidade`**
+    * **Prova para S0-004 (Estrutura Monolito Modular):**
+        * Uma confirmação de que os 5 Bounded Contexts (`auth`, `users`, `propostas`, `pagamentos`, `formalizacao`) foram criados na estrutura de diretórios `src/modules/`.
+    * **Prova para S0-005 (Containerização):**
+        * A saída **completa** do comando `docker build .` mostrando a construção bem-sucedida da imagem, incluindo a verificação de segurança (non-root user).
+
+**CONSTRAINTS (Protocolo de Auditoria - Inegociável):**
+
+1.  **Passo 1: Executar Validações de Qualidade.** Rode os comandos `npm run lint` e `npm run typecheck` e capture suas saídas completas.
+2.  **Passo 2: Executar Scans de Segurança.** Acione o workflow `ci.yml` (ou os scripts de segurança individuais) e capture a saída completa das etapas de SAST e SCA.
+3.  **Passo 3: Auditar Vulnerabilidade P0.** Execute `npm audit` e filtre a saída para a vulnerabilidade específica do `drizzle-kit`. Analise e reporte.
+4.  **Passo 4: Validar Artefatos Arquiteturais.** Confirme a estrutura de diretórios e execute o build do Docker.
+5.  **Passo 5: Compilar Relatório.** Junte todas as evidências capturadas no artefato `RELATORIO_CONFORMIDADE_SPRINT_0.md`.
+
+---
+
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** 90%
+* **RISCOS IDENTIFICADOS:** ALTO.
+* **DECISÕES TÉCNICAS ASSUMIDAS:** Assumo que os scripts (`lint`, `typecheck`, etc.) e o pipeline de CI estão corretamente configurados, conforme reportado na execução anterior.
+* **VALIDAÇÃO PENDENTE:** O `RELATORIO_CONFORMIDADE_SPRINT_0.md` completo e com todas as evidências será a única prova de conclusão do Sprint 0. Não haverá avanço para o Sprint 1 sem esta prova.

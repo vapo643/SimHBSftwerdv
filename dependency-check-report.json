@@ -1,8 +1,8 @@
 {
-  "reportDate": "2025-07-31T16:58:05.353393Z",
+  "reportDate": "2025-08-26T20:50:17.530405Z",
   "projectInfo": {
     "name": "Simpix Credit Management System",
-    "reportDate": "2025-07-31T16:58:05.353402Z",
+    "reportDate": "2025-08-26T20:50:17.530417Z",
     "credits": {
       "NVD": "This product uses data from the NVD API but is not endorsed or certified by the NVD."
     }
@@ -64,7 +64,7 @@
       "vulnerabilities": []
     },
     {
-      "fileName": "node_modules/@neondatabase/serverless",
+      "fileName": "node_modules/@radix-ui/react-accordion",
       "vulnerabilities": []
     }
   ]
