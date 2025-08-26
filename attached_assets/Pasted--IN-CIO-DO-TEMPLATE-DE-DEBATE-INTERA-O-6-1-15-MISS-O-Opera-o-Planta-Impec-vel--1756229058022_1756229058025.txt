@@ -1,0 +1,36 @@
+**[INÍCIO DO TEMPLATE DE DEBATE - INTERAÇÃO #: 6.1/15+]**
+
+**MISSÃO:** Operação Planta Impecável - FASE 2 (Remediação do Thread 2.3)
+
+**PERSONA DO AGENTE (GEM 07):** Você deve operar como um **Arquiteto de Remediação de Elite**. A sua função é pegar as falhas críticas identificadas na sua própria auditoria (Red Team) e implementar as soluções propostas com precisão cirúrgica, transformando os artefatos defeituosos em documentos que atendam ao padrão "Impecável".
+
+**ARTEFATO(S) EM FOCO:**
+- `architecture/05-performance/reliability-resilience-strategy.md`
+- `architecture/05-performance/observability-stack.md`
+- `architecture/05-performance/observability-strategy.md`
+- `architecture/03-infrastructure/backup-restore-strategy.md`
+
+**DOUTRINA ÂNCORA (VERDADE FUNDAMENTAL):**
+A sua implementação DEVE ser rigorosamente baseada nos seguintes KBs.
+* `KB_ Guia de Estilo de Design de APIs V1.0.pdf`
+* `KB_ Compêndio de Padrões de Arquitetura de Nuvem V1.0.pdf`
+
+---
+
+**DIRETRIZ DE IMPLEMENTAÇÃO:**
+
+Implemente as propostas de refinamento de prioridade **P0, P1 e P2**, exatamente como detalhado no seu relatório de auditoria anterior, para corrigir as violações arquiteturais fundamentais no Thread 2.3.
+
+**ROADMAP DE EXECUÇÃO:**
+
+1.  **Refinamento P0: Hardening da Estratégia de Backup (SEV-1).** Modifique o `architecture/03-infrastructure/backup-restore-strategy.md`.
+    * Adicione a Seção 3.4, "Proteção Contra Ameaças Internas (Insider Threats)", especificando o requisito mandatório de uso de **Azure Immutable Storage (WORM)**.
+    * Corrija a Seção 2.1, "RTO e RPO", para refletir os valores realistas alinhados com as capacidades do Azure: **RTO < 4 horas** e **RPO < 15 minutos**.
+
+2.  **Refinamento P1: Introdução de Chaos Engineering.** Modifique o `architecture/05-performance/reliability-resilience-strategy.md`.
+    * Adicione a Seção 4.5, "Validação Proativa com Chaos Engineering", detalhando a prática de "Game Days" quinzenais, a adoção do **Azure Chaos Studio** e o experimento piloto de falha de zona de disponibilidade.
+
+3.  **Refinamento P2: Especificação de Health Checks Acionáveis.** Modifique o `architecture/05-performance/reliability-resilience-strategy.md`.
+    * Adicione a Seção 2.3, "Implementação de Health Checks Detalhados", com as especificações técnicas claras para **Liveness Probe (`/api/health/live`)** e **Readiness Probe (`/api/health/ready`)**, incluindo a lógica de cada um e a ação esperada do orquestrador.
+
+4.  **Validação Final:** Após implementar todas as mudanças, reavalie os 4 artefatos contra o framework C.A.R.D.S. e apresente um novo scorecard, justificando a melhoria em cada critério. O objetivo é atingir um score geral mínimo de **85%** para obter a aprovação.
