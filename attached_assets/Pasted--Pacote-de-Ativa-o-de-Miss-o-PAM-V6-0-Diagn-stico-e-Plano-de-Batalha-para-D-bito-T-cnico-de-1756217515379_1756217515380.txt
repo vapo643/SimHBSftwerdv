@@ -1,0 +1,49 @@
+### **Pacote de Ativação de Missão (PAM) V6.0: Diagnóstico e Plano de Batalha para Débito Técnico de Tipagem (Operação Fênix - P1.5)**
+
+* **Sumário da Missão (O Quê):** Conduzir uma análise forense para identificar a causa raiz da discrepância entre o `LSP` e o `TSC` e, com base nesse diagnóstico, criar um roadmap estratégico para a eliminação sistemática das centenas de erros de tipo relacionados a `AuthenticatedRequest` vs. tipos Express padrão.
+
+* **Intenção Estratégica (O Porquê):** A base de código está funcionalmente operacional, mas tecnicamente instável. A presença massiva de erros de tipo (`any` implícitos, conflitos de interface) anula os benefícios de segurança e manutenibilidade do TypeScript. Ignorar este débito técnico garante a ocorrência de erros de runtime em produção. Esta missão visa criar um plano para restaurar a integridade do sistema de tipos, que é uma pré-condição para qualquer desenvolvimento futuro.
+
+* **Modelo Mental (Como se Encaixa):** Você atuará em dois modos. Primeiro, como **Diagnóstico de Ferramentas**, investigando os arquivos de configuração (`tsconfig.json`, `eslint.config.js`, `.replit`) para encontrar por que o LSP está silencioso enquanto o TSC reporta erros. Segundo, como **Arquiteto de Refatoração**, você irá projetar um plano para corrigir o padrão de erro sistemático, provavelmente criando ou ajustando um tipo `AuthenticatedRequest` global e aplicando-o de forma incremental.
+
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco (CRÍTICO):** **Solução de Força Bruta.** Tentar corrigir todos os erros de uma só vez sem um plano levará a uma cascata de novas falhas e à quebra do sistema.
+    * **Contramedida Mandatória:** A sua entrega final **DEVE SER UM PLANO**, não uma implementação. O plano deve ser faseado, priorizando a correção dos tipos base antes de aplicá-los nos 159 controllers, para minimizar o "raio de explosão" da mudança.
+
+---
+
+**DIRETRIZ DE MISSÃO: Diagnóstico e Planejamento (NÃO EXECUÇÃO DE CORREÇÃO EM MASSA)**
+
+**CURRENT STATE:**
+O sistema está operacional. `get_latest_lsp_diagnostics` reporta 0 erros. `npx tsc --noEmit` reporta centenas de erros de tipo, primariamente conflitos entre um tipo customizado `AuthenticatedRequest` e os tipos padrão `@types/express`.
+
+**EXPECTED (Estado Final de Sucesso):**
+Você **DEVE** produzir um artefato de documentação em formato Markdown chamado **`DEBT_REMEDIATION_PLAN.md`**. Este documento deve conter duas seções:
+
+1.  **`1. Diagnóstico da Discrepância LSP/TSC`**: Uma análise técnica explicando por que as duas ferramentas de verificação apresentam resultados diferentes, apontando para os arquivos de configuração relevantes.
+2.  **`2. Roadmap de Remediação de Tipagem`**: Um plano de ação faseado para corrigir os erros de tipo. O plano deve incluir:
+    * **Fase A: Definição do Tipo Canônico:** O código proposto para um tipo `AuthenticatedRequest` global e robusto, a ser localizado em um arquivo central (ex: `shared/types/express.ts`).
+    * **Fase B: Plano de Rollout Incremental:** Uma estratégia para aplicar este novo tipo aos controllers de forma controlada, sugerindo um grupo de controllers (ex: 5 a 10) para uma implementação piloto.
+    * **Fase C: Estratégia de Validação:** Como o sucesso de cada fase será medido (ex: `npx tsc --noEmit` deve mostrar uma redução no número de erros após a fase piloto).
+
+**CONSTRAINTS (Protocolo de Planejamento):**
+
+1.  **Passo 1: Investigação de Configuração.** Analise os arquivos `tsconfig.json`, `eslint.config.js` e qualquer configuração relevante do Replit para encontrar a causa da discrepância entre LSP e TSC.
+2.  **Passo 2: Análise do Padrão de Erro.** Analise a saída de `npx tsc --noEmit` para confirmar que o padrão de erro principal é o conflito `AuthenticatedRequest`.
+3.  **Passo 3: Arquitetura da Solução de Tipo.** Projete o tipo `AuthenticatedRequest` ideal que resolva o conflito, provavelmente estendendo a interface `Request` do Express para incluir as propriedades customizadas (ex: `user`, `tenantId`).
+4.  **Passo 4: Criação do Plano.** Construa o documento `DEBT_REMEDIATION_PLAN.md` conforme as especificações da seção `EXPECTED`.
+5.  **Passo 5: Entrega do Plano.** Salve o arquivo em `/docs/refactoring/DEBT_REMEDIATION_PLAN.md` e reporte a conclusão da missão de planejamento.
+
+---
+
+**DECLARAÇÃO DE INCERTEZA (OBRIGATório):**
+
+* **CONFIANÇA NO PLANO:** 90%
+* **RISCOS IDENTIFICADOS:** MÉDIO-ALTO (A refatoração de tipos em larga escala, se mal executada, pode introduzir regressões).
+* **DECISÕES TÉCNICAS ASSUMIDAS:** Assumo que a criação de um tipo global e a sua aplicação incremental é a abordagem correta e mais segura para resolver este débito técnico.
+* **VALIDAÇÃO PENDENTE:** O `DEBT_REMEDIATION_PLAN.md` será auditado por mim antes que a execução de qualquer parte do plano seja autorizada.
+
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK (ADAPTATIVO - Nível FULL):**
+Ao concluir esta missão de **planejamento**, você **DEVE** executar e reportar o resultado do `7-CHECK FULL`.
