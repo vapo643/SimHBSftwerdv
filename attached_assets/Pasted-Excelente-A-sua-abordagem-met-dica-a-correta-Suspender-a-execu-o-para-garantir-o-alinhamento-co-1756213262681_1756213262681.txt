@@ -1,0 +1,47 @@
+Excelente. A sua abordagem metódica é a correta. Suspender a execução para garantir o alinhamento completo do contexto é o pilar da nossa **Doutrina de Execução Híbrida**. Antes de prosseguir com a "Missão de Refatoração" ou iniciar o "Debate Técnico", é imperativo que eu tenha uma visão de 360 graus do estado atual do projeto.
+
+Com base na minha análise inicial do codebase e dos artefatos fornecidos, identifiquei as áreas onde preciso de contexto adicional. Minha função é ser o guardião da base de código; para isso, preciso de todos os fatos. A ausência de qualquer uma das informações abaixo representa um risco inaceitável para a continuidade da missão.
+
+Para otimizar a nossa colaboração, estruturei minhas necessidades em um sumário. Por favor, gere os relatórios correspondentes a cada um dos seguintes pontos. Esta documentação formará o **"Dossiê de Continuidade do Projeto"** e será a única fonte da verdade para as nossas próximas interações.
+
+---
+
+### **Sumário de Dossiê de Contexto Requerido (Para Continuidade da Missão Simpix)**
+
+**Objetivo:** Obter um estado mental completo do projeto, da missão de refatoração em andamento e dos planos arquiteturais futuros para garantir uma auditoria precisa e um planejamento de execução sem falhas.
+
+#### **Seção 1: Relatório da Missão de Refatoração Ativa**
+
+* **1.1. Pacote de Ativação de Missão (PAM) Original:**
+    * **Descrição:** Forneça o prompt/comando exato que foi entregue ao Agente de IA para iniciar a "missão de refatoração de problemas arquiteturais" que você mencionou. Preciso entender a diretriz original que ele está seguindo.
+
+* **1.2. Relatório de Progresso e Estado Atual do Agente:**
+    * **Descrição:** Apresente os últimos logs, o `diff` das alterações de código propostas ou já aplicadas, e qualquer relatório de conclusão (parcial ou final) fornecido pelo Agente. Preciso saber o que foi modificado e qual o estado atual do código-fonte.
+
+* **1.3. Análise de Causa Raiz (RCA) do Problema Arquitetural:**
+    * **Descrição:** Forneça a documentação ou o resumo da análise que concluiu pela necessidade desta refatoração. Qual era a falha arquitetural específica? Qual o seu impacto no negócio ou na manutenibilidade?
+
+#### **Seção 2: Artefatos de Planejamento da Re-arquitetura**
+
+* **2.1. Documentação de Planejamento:**
+    * **Descrição:** Envie os documentos de "planejamento de re arquitetura" que você mencionou. Isso deve incluir quaisquer **Architectural Decision Records (ADRs)**, roadmaps estratégicos ou diagramas que descrevam a arquitetura alvo.
+
+* **2.2. O "Guia do Debate":**
+    * **Descrição:** Forneça o "guia do debate". Compreender a estrutura e os objetivos desta futura interação me permitirá preparar a análise técnica necessária para que o debate seja produtivo e decisivo.
+
+#### **Seção 3: Relatório de Estado de Qualidade (Baseline Atual)**
+
+* **3.1. Diagnóstico do Language Server Protocol (LSP):**
+    * **Descrição:** Execute o comando `get_latest_lsp_diagnostics` em todo o projeto e forneça o output completo. Preciso de uma baseline da saúde sintática e de tipos do código *após* as modificações do agente.
+
+* **3.2. Relatório de Execução da Suíte de Testes:**
+    * **Descrição:** Execute a suíte de testes completa (unitários, integração e E2E) e forneça o resultado. É crucial verificar se a refatoração introduziu alguma regressão.
+
+* **3.3. Relatório de Análise de Vulnerabilidades:**
+    * **Descrição:** Execute as ferramentas de varredura de segurança (ex: `npm audit`, Snyk) e forneça o sumário das vulnerabilidades encontradas.
+
+---
+
+A posse deste dossiê completo é uma pré-condição inegociável para a próxima fase. Assim que estes relatórios forem fornecidos, concluirei minha auditoria forense e estaremos prontos para iniciar o debate técnico com a máxima precisão.
+
+Estou em prontidão.
