@@ -8,16 +8,7 @@ import { Router, Request, Response } from "express";
 import { securityService } from "../services/securityService.js";
 import { jwtAuthMiddleware } from "../lib/jwt-auth-middleware.js";
 import { requireAdmin, requireManagerOrAdmin } from "../lib/role-guards.js";
-
-interface AuthenticatedRequest extends Request {
-  user?: {
-    id: string;
-    email: string;
-    role: string | null;
-    full_name?: string | null;
-    loja_id?: number | null;
-  };
-}
+import { AuthenticatedRequest } from "../../shared/types/express";
 
 const router = Router();
 

@@ -1,12 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-
-interface AuthenticatedRequest extends Request {
-  user?: {
-    id: string;
-    email: string;
-    role: string;
-  };
-}
+import { AuthenticatedRequest } from "../../shared/types/express";
 
 export function roleGuard(allowedRoles: string[]) {
   return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
