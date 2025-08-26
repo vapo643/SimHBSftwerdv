@@ -1,0 +1,51 @@
+### **Pacote de Ativação de Missão (PAM) V2.1: Plano de Migração de Dependência Obsoleta (Operação Fênix - P1.2)**
+
+* **Sumário da Missão (O Quê):** Criar um plano de migração detalhado e faseado para substituir a dependência obsoleta e vulnerável `@esbuild-kit/core-utils` (e seus pacotes relacionados) pela sua sucessora oficial, `tsx`.
+
+* **Intenção Estratégica (O Porquê):** As tentativas de remendar a dependência `@esbuild-kit` provaram ser fúteis e desestabilizaram o sistema, causando uma falha crítica. A única solução de engenharia correta é a migração para a ferramenta sucessora, `tsx`. Esta ação irá erradicar a vulnerabilidade de segurança em sua origem e alinhar o projeto com as melhores práticas atuais, eliminando uma fonte de dívida técnica.
+
+* **Modelo Mental (Como se Encaixa):** Você atuará como um **Arquiteto de Migração**. Sua função não é executar o código, mas sim projetar o "plano de batalha" para a migração. Você irá analisar o uso atual de `@esbuild-kit` no nosso projeto (provavelmente em scripts de build e execução), consultar a documentação de `tsx` e produzir um roadmap passo a passo que um desenvolvedor possa seguir para realizar a migração com risco mínimo.
+
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco (CRÍTICO):** **Incompatibilidade de API.** A API de `tsx` pode ser significativamente diferente da de `@esbuild-kit`, exigindo refatoração nos nossos scripts de `package.json` e arquivos de configuração do Vite.
+    * **Contramedida Mandatória:** Seu plano **DEVE** incluir um passo de "Análise de Impacto" que identifique todos os arquivos e scripts que atualmente invocam `@esbuild-kit`. O plano deve detalhar as alterações de sintaxe necessárias para cada um desses pontos de contato.
+
+---
+
+**DIRETRIZ DE MISSÃO: Planejamento de Migração (NÃO EXECUÇÃO)**
+
+**CURRENT STATE:**
+O projeto depende do pacote obsoleto e vulnerável `@esbuild-kit/core-utils`. Tentativas de `npm audit fix --force` corromperam o ambiente.
+
+**EXPECTED (Estado Final de Sucesso):**
+Você **DEVE** produzir um artefato de documentação em formato Markdown chamado **`PLANO_DE_MIGRACAO_TSX.md`**. Este documento **NÃO DEVE CONTER** um `diff` de código implementado, mas sim um **ROADMAP** para a implementação. O plano deve conter, no mínimo, as seguintes seções:
+
+1.  **`1. Análise de Impacto`**: Lista de todos os arquivos e scripts (`package.json`) que atualmente utilizam ou invocam `@esbuild-kit`.
+2.  **`2. Plano de Execução Faseado`**: Um roadmap passo a passo detalhado, incluindo:
+    * Comandos para remover os pacotes antigos (`@esbuild-kit/*`).
+    * Comandos para instalar o novo pacote (`tsx`).
+    * Alterações de código necessárias nos scripts do `package.json` para substituir as chamadas antigas pelas novas.
+    * Alterações de configuração necessárias em `vite.config.ts` ou `tsconfig.json`, se houver.
+3.  **`3. Estratégia de Validação`**: Como verificaremos o sucesso da migração (ex: "Executar `npm run dev` e confirmar que o servidor inicia", "Executar `npm test` e confirmar que os testes passam").
+4.  **`4. Plano de Rollback`**: O procedimento para reverter as alterações em caso de falha catastrófica (ex: "Reverter o commit do `package.json` e executar `npm install`").
+
+**CONSTRAINTS (Protocolo de Planejamento - Inegociável):**
+
+1.  **Passo 1: Reconhecimento.** Execute uma busca global (`rg`) no codebase para encontrar todas as ocorrências de `@esbuild-kit`.
+2.  **Passo 2: Pesquisa (Autorizada).** Utilize sua capacidade de pesquisa web para encontrar a documentação oficial de `tsx` e seu guia de migração (se existir). **Priorize a documentação oficial (P0)**.
+3.  **Passo 3: Arquitetura da Solução.** Com base na sua análise e pesquisa, construa o `PLANO_DE_MIGRACAO_TSX.md` conforme as especificações da seção `EXPECTED`.
+4.  **Passo 4: Entrega do Plano.** Salve o arquivo em `/docs/migrations/PLANO_DE_MIGRACAO_TSX.md` e reporte a conclusão da missão de planejamento.
+
+---
+
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** 95%
+* **RISCOS IDENTIFICADOS:** CRÍTICO.
+* **DECISÕES TÉCNICAS ASSUMIDAS:** Assumo que a migração para `tsx` é a solução definitiva e que sua documentação é suficiente para formular um plano robusto.
+* **VALIDAÇÃO PENDENTE:** O `PLANO_DE_MIGRACAO_TSX.md` será rigorosamente auditado por mim antes que qualquer execução seja autorizada.
+
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK (ADAPTATIVO - Nível FULL):**
+Ao concluir esta missão de **planejamento**, você **DEVE** executar e reportar o resultado do `7-CHECK FULL`, pois o risco da migração subsequente foi classificado como **CRÍTICO**.
