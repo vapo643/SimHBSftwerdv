@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: simpix-app
+    ports:
+      - "5000:5000"
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      DATABASE_URL: ${DATABASE_URL}
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET}
+      SESSION_SECRET: ${SESSION_SECRET}
+      CSRF_SECRET: ${CSRF_SECRET}
+    depends_on:
+      - redis
+      - postgres
+    networks:
+      - simpix-network
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: simpix-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    networks:
+      - simpix-network
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: simpix-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-simpix}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-simpix}
+      POSTGRES_DB: ${POSTGRES_DB:-simpix_dev}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - simpix-network
+    restart: unless-stopped
+
+networks:
+  simpix-network:
+    driver: bridge
+
+volumes:
+  redis-data:
+  postgres-data:
