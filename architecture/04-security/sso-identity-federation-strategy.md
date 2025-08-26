@@ -291,8 +291,19 @@ OIDC Configuration:
     
   token_lifetimes:
     id_token: 3600       # 1 hour
-    access_token: 900    # 15 minutes
-    refresh_token: 2592000 # 30 days
+    access_token: 300    # 5 minutes (KB compliant)
+    refresh_token: 604800 # 7 days maximum
+    
+  security_enhancements:
+    pkce: 
+      required: true
+      challenge_method: "S256"
+    refresh_token_rotation:
+      enabled: true
+      grace_period: 30 # seconds
+    token_binding:
+      device_fingerprint: true
+      ip_validation: true
 ```
 
 ### 2. SAML 2.0 - Suporte Enterprise

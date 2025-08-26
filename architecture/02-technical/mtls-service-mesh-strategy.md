@@ -361,11 +361,25 @@ interface RootCAConfig {
 
 const rootCAStrategy: RootCAConfig = {
   provider: 'Azure Key Vault',
-  keyType: 'ECDSA-P384',  // Melhor performance + segurança
+  keyType: 'ECDSA-P521-HYBRID-KYBER768',  // Quantum-resistant
   validity: '10 years',
   hsm: 'Hardware Security Module',
   location: 'Brazil South',
   backup: 'Cross-region replication'
+};
+
+// Root CA Security Enhancements
+const rootCASecurityConfig = {
+  hsm_type: 'Azure Dedicated HSM',
+  split_knowledge: true,
+  dual_control: true,
+  ceremony_witnesses: 3,
+  
+  certificate_transparency: {
+    monitoring: true,
+    ct_logs: ['google_argon', 'cloudflare_nimbus'],
+    alert_threshold: 'new_cert_in_5_minutes'
+  }
 };
 
 // Certificate Policy para Root CA

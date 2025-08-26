@@ -249,14 +249,26 @@ Role Hierarchy:
   super_admin:
     inherits: []
     description: "Full system access"
-    permissions: ["*"]
+    permissions: [
+      "users:read", "users:write", 
+      "users:delete:with_approval",
+      "audit:read:all", "settings:write:with_dual_control",
+      "backup:restore:with_approval"
+    ]
+    constraints:
+      dual_control_required: true
+      audit_everything: true
+      session_timeout: 1800 # 30 minutes
     
   admin:
     inherits: [manager]
     description: "Administrative access"
     permissions:
-      - users:*
-      - settings:*
+      - users:read
+      - users:write
+      - users:delete:with_approval
+      - settings:read
+      - settings:write
       - audit:read
       
   manager:
