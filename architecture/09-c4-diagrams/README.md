@@ -24,10 +24,10 @@ Esta documentação utiliza o **C4 Model** (Context, Container, Component, Code)
    - Tecnologias utilizadas
    - Comunicação entre containers
 
-3. **Level 3 - Component Diagram** *(Em construção)*
-   - Componentes dentro de cada container
-   - Responsabilidades detalhadas
-   - Interfaces e dependências
+3. **[Level 3 - Component Diagram](./c4-level3-proposal-context.md)** *(DDD Compliant)*
+   - Componentes DDD (Presentation → Application → Domain ← Infrastructure)
+   - Bounded Context internal structure
+   - Repository Pattern e Domain Services
 
 4. **Level 4 - Code Diagram** *(Planejado)*
    - Classes e módulos principais

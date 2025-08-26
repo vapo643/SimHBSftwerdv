@@ -15,6 +15,13 @@ Este diagrama documenta o fluxo completo de pagamento no sistema Simpix, desde a
 
 **Modelo Mental:** Arquiteto de Confiabilidade - Mapeamento pessimista de falhas em integrações bancárias críticas.
 
+⚠️ **CENÁRIOS DE FALHA CRÍTICOS INCLUSOS:**
+- Webhook HMAC key rotation (Banco Inter)
+- Database connection pool exhaustion
+- Circuit breaker activation
+- Dual-key signature validation
+- Timeout cascades
+
 ---
 
 ## 📊 Diagrama de Sequência - Fluxo de Pagamento Completo
@@ -35,6 +42,30 @@ sequenceDiagram
     participant LOG as Logger<br/>(Winston)
 
     Note over U, LOG: 🟢 HAPPY PATH - Boleto Gerado e Pago
+    
+    %% 🚨 CRITICAL FAILURE SCENARIO: Webhook HMAC Key Rotation
+    
+    rect rgb(255, 245, 245)
+        Note over BANK, PG: 🚨 CENÁRIO DE FALHA CRÍTICA: Key Rotation Durante Produção
+        
+        BANK->>WEBHOOK: POST /webhooks/payment<br/>❌ NEW HMAC signature (rotated key)
+        WEBHOOK->>WEBHOOK: Validate signature with OLD key
+        WEBHOOK-->>BANK: ❌ 401 Unauthorized<br/>"Invalid signature"
+        WEBHOOK->>LOG: ⚠️ Security warning: Signature validation failed
+        
+        Note over WEBHOOK: 🔄 MITIGATION: Dual-Key Validation Strategy
+        
+        BANK->>WEBHOOK: POST /webhooks/payment (retry #1)
+        WEBHOOK->>WEBHOOK: 1. Try OLD key → FAIL ❌
+        WEBHOOK->>WEBHOOK: 2. Try NEW key → SUCCESS ✅
+        WEBHOOK->>QUEUE: Enqueue payment processing normally
+        WEBHOOK-->>BANK: ✅ 200 OK "Payment processed"
+        
+        WEBHOOK->>LOG: 📊 KEY_ROTATION_DETECTED event emitted
+        WEBHOOK->>WEBHOOK: Update stored HMAC key in cache
+        
+        Note over PG, LOG: 🛡️ CONTINUITY: Revenue flow protected during key rotation
+    end
 
     %% 1. Iniciar Geração de Boletos
     U->>API: 1. POST /api/propostas/{id}/generate-boletos

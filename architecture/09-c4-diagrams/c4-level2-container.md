@@ -89,9 +89,13 @@ graph TB
 
 ### **Backend Containers**
 
-| Container | Tecnologia | Responsabilidades | Portas |
-|-----------|------------|-------------------|---------|
-| **REST API** | Express + TypeScript | - Autenticação/Autorização<br/>- Business logic<br/>- Validação de dados<br/>- Integração com externos | :5000 |
+| Container | Tecnologia | Bounded Context | Portas |
+|-----------|------------|-----------------|---------|
+| **API Gateway** | Express + TypeScript | Cross-cutting concerns | :5000 |
+| **Proposal Service** | Node.js + TypeScript | Credit Proposal Context | :3001 |
+| **Analysis Service** | Node.js + TypeScript | Credit Analysis Context | :3002 |
+| **Contract Service** | Node.js + TypeScript | Contract Management Context | :3003 |
+| **Payment Service** | Node.js + TypeScript | Payment Processing Context | :3004 |
 | **Workers** | BullMQ + Redis | - Geração de PDFs<br/>- Sincronização de pagamentos<br/>- Processamento assíncrono<br/>- Retry logic | N/A |
 
 **Segurança Implementada:**

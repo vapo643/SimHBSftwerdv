@@ -12,6 +12,12 @@
 
 Este diagrama documenta o fluxo completo de autenticação no sistema Simpix, desde a entrada de credenciais pelo usuário até o estabelecimento do contexto de segurança no backend. Inclui tanto o **Happy Path** (autenticação bem-sucedida) quanto o **Unhappy Path** (falha na autenticação).
 
+⚠️ **CENÁRIOS DE FALHA CRÍTICOS:**
+- JWT token expiry cascades
+- Supabase service outage
+- Role permission conflicts  
+- Session hijacking protection
+
 ---
 
 ## 📊 Diagrama de Sequência - Fluxo de Autenticação
