@@ -9,8 +9,9 @@ import { clickSignWebhookService } from "../services/clickSignWebhookService.js"
 import { clickSignSecurityService } from "../services/clickSignSecurityService.js";
 import { interBankService } from "../services/interBankService.js";
 import { storage } from "../storage.js";
-import { jwtAuthMiddleware, type AuthenticatedRequest } from "../lib/jwt-auth-middleware.js";
+import { jwtAuthMiddleware } from "../lib/jwt-auth-middleware.js";
 import { getBrasiliaTimestamp } from "../lib/timezone.js";
+import { AuthenticatedRequest } from "../../shared/types/express";
 // STATUS V2.0: Import do serviço de auditoria
 import { logStatusTransition } from "../services/auditService.js";
 // PAM V1.0: Import para status contextual

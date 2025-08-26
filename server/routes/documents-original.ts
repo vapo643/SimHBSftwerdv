@@ -6,12 +6,7 @@
 
 import { Request, Response } from "express";
 import { documentsService } from "../services/documentsService.js";
-
-interface AuthenticatedRequest extends Request {
-  userId?: string;
-  user?: any;
-  file?: any;
-}
+import { AuthenticatedRequest } from "../../shared/types/express";
 
 /**
  * GET /api/propostas/:id/documents

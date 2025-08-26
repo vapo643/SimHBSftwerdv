@@ -7,7 +7,7 @@
  */
 
 import { Request, Response } from "express";
-import { AuthenticatedRequest } from "../lib/jwt-auth-middleware";
+import { AuthenticatedRequest } from "../../shared/types/express";
 import { propostaService } from "../services/propostaService";
 
 /**

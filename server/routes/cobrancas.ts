@@ -7,10 +7,7 @@
 import { Router, Request, Response } from "express";
 import { cobrancasService } from "../services/cobrancasService.js";
 import { jwtAuthMiddleware } from "../lib/jwt-auth-middleware.js";
-
-interface AuthenticatedRequest extends Request {
-  user?: any;
-}
+import { AuthenticatedRequest } from "../../shared/types/express";
 
 const router = Router();
 

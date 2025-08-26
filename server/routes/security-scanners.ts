@@ -7,14 +7,7 @@ import { Router, Request, Response } from "express";
 import { promises as fs } from "fs";
 import { join } from "path";
 import { jwtAuthMiddleware } from "../lib/jwt-auth-middleware";
-
-interface AuthenticatedRequest extends Request {
-  user?: {
-    id: string;
-    email: string;
-    role: string;
-  };
-}
+import { AuthenticatedRequest } from "../../shared/types/express";
 
 const router = Router();
 

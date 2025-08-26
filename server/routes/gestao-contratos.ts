@@ -6,6 +6,7 @@
 
 import { Router, Request, Response } from "express";
 import { proposalService } from "../services/proposalService.js";
+import { AuthenticatedRequest } from "../../shared/types/express";
 
 const router = Router();
 
@@ -13,7 +14,7 @@ const router = Router();
  * GET /api/gestao-contratos
  * List contracts
  */
-router.get("/", async (req: Request, res: Response) => {
+router.get("/", async (req: AuthenticatedRequest, res: Response) => {
   try {
     const result = await proposalService.executeOperation("list_contracts", req.query);
     res.json(result);
@@ -29,7 +30,7 @@ router.get("/", async (req: Request, res: Response) => {
  * POST /api/gestao-contratos/:id/update
  * Update contract
  */
-router.post("/:id/update", async (req: Request, res: Response) => {
+router.post("/:id/update", async (req: AuthenticatedRequest, res: Response) => {
   try {
     const result = await proposalService.executeOperation("update_contract", {
       id: req.params.id,

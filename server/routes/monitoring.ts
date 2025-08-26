@@ -6,6 +6,7 @@
 
 import { Router, Request, Response } from "express";
 import { monitoringService } from "../services/monitoringService.js";
+import { AuthenticatedRequest } from "../../shared/types/express";
 
 const router = Router();
 
@@ -13,7 +14,7 @@ const router = Router();
  * GET /api/monitoring/stats
  * Get database statistics
  */
-router.get("/stats", async (req: Request, res: Response) => {
+router.get("/stats", async (req: AuthenticatedRequest, res: Response) => {
   try {
     const stats = await monitoringService.getDatabaseStats();
     res.json({ success: true, data: stats });
@@ -30,7 +31,7 @@ router.get("/stats", async (req: Request, res: Response) => {
  * GET /api/monitoring/tables
  * Get table statistics
  */
-router.get("/tables", async (req: Request, res: Response) => {
+router.get("/tables", async (req: AuthenticatedRequest, res: Response) => {
   try {
     const stats = await monitoringService.getTableStats();
     res.json({ success: true, data: stats });
@@ -47,7 +48,7 @@ router.get("/tables", async (req: Request, res: Response) => {
  * GET /api/monitoring/indexes
  * Get index usage statistics
  */
-router.get("/indexes", async (req: Request, res: Response) => {
+router.get("/indexes", async (req: AuthenticatedRequest, res: Response) => {
   try {
     const usage = await monitoringService.getIndexUsage();
     res.json({ success: true, data: usage });

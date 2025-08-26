@@ -6,8 +6,9 @@
 
 import express from "express";
 import { interService } from "../services/interService.js";
-import { jwtAuthMiddleware, type AuthenticatedRequest } from "../lib/jwt-auth-middleware.js";
+import { jwtAuthMiddleware } from "../lib/jwt-auth-middleware.js";
 import { getBrasiliaTimestamp } from "../lib/timezone.js";
+import { AuthenticatedRequest } from "../../shared/types/express";
 import { z } from "zod";
 
 const router = express.Router();

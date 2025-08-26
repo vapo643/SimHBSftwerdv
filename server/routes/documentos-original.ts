@@ -8,10 +8,7 @@ import { Router, Request, Response } from "express";
 import { documentsService } from "../services/documentsService.js";
 import { jwtAuthMiddleware } from "../lib/jwt-auth-middleware.js";
 import { requireAnyRole } from "../lib/role-guards.js";
-
-interface AuthenticatedRequest extends Request {
-  user?: any;
-}
+import { AuthenticatedRequest } from "../../shared/types/express";
 
 const router = Router();
 
