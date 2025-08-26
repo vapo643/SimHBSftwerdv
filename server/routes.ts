@@ -40,7 +40,7 @@ import clicksignIntegrationRoutes from "./routes/clicksign-integration.js";
 import interRoutes from "./routes/inter.js";
 import interWebhookRouter from "./routes/webhooks/inter";
 import interRealtimeRouter from "./routes/inter-realtime";
-import { setupSecurityRoutes } from "./routes/security.js";
+import securityRoutes from "./routes/security.js";
 import emailChangeRoutes from "./routes/email-change";
 import cobrancasRoutes from "./routes/cobrancas";
 import monitoringRoutes from "./routes/monitoring";

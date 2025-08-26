@@ -1,1 +1,1 @@
-export default {};
+import { Router } from "express"; import { ccbTestService } from "../services/genericService.js"; const router = Router(); router.post("/test-coordinates", async (req, res) => { try { const result = await ccbTestService.executeOperation("test_coordinates", req.body); res.json(result); } catch (error: any) { res.status(500).json({ success: false, error: error.message }); } }); export default router;

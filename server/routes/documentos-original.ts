@@ -1,73 +1,101 @@
-import { Router } from "express";
-import { jwtAuthMiddleware, type AuthenticatedRequest } from "../lib/jwt-auth-middleware";
-import { requireAnyRole } from "../lib/role-guards";
+/**
+ * Documentos Routes - REFACTORED
+ * Controller layer using service pattern
+ * PAM V1.0 - Clean architecture implementation
+ */
+
+import { Router, Request, Response } from "express";
+import { documentsService } from "../services/documentsService.js";
+import { jwtAuthMiddleware } from "../lib/jwt-auth-middleware.js";
+import { requireAnyRole } from "../lib/role-guards.js";
+
+interface AuthenticatedRequest extends Request {
+  user?: any;
+}
 
 const router = Router();
 
 /**
  * GET /api/documentos/download
- * Download de documentos do storage (CCB, contratos, etc)
+ * Download documents from storage (CCB, contracts, etc)
  */
-router.get("/download", jwtAuthMiddleware, requireAnyRole, async (req: AuthenticatedRequest, res) => {
-  try {
-    const { path } = req.query;
+router.get(
+  "/download",
+  jwtAuthMiddleware,
+  requireAnyRole,
+  async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { path } = req.query;
 
-    if (!path || typeof path !== "string") {
-      return res.status(400).json({
-        error: "Parâmetro 'path' é obrigatório",
-      });
-    }
-
-    console.log(`[DOCUMENTOS] Baixando documento: ${path}`);
-
-    // Usar admin client para gerar URL assinada
-    const { createServerSupabaseAdminClient } = await import("../lib/supabase");
-    const supabaseAdmin = createServerSupabaseAdminClient();
-
-    const { data: signedUrl, error } = await supabaseAdmin.storage
-      .from("documents")
-      .createSignedUrl(path, 3600); // 1 hora de validade
-
-    if (error) {
-      console.error("❌ [DOCUMENTOS] Erro ao gerar URL assinada:", error);
-
-      // Se arquivo não existe, retornar erro apropriado
-      if ((error as any)?.status === 400 || error.message?.includes("Object not found")) {
-        return res.status(404).json({
-          error: "Documento não encontrado",
-          details: `Arquivo '${path}' não existe no storage`,
+      if (!path || typeof path !== "string") {
+        return res.status(400).json({
+          error: "Parâmetro 'path' é obrigatório",
         });
       }
 
-      return res.status(500).json({
-        error: "Erro ao acessar documento",
-        details: error.message,
+      const result = await documentsService.downloadDocument(path);
+
+      if (result.success) {
+        // Check if it's a JSON request or redirect
+        const acceptHeader = req.headers.accept || '';
+        const isJsonRequest = acceptHeader.includes('application/json');
+
+        if (isJsonRequest) {
+          // Return URL as JSON for requests with Authorization header
+          res.json({
+            url: result.url,
+            filename: result.filename,
+            contentType: result.contentType,
+          });
+        } else {
+          // Redirect to signed URL (legacy behavior)
+          res.redirect(result.url!);
+        }
+      } else {
+        const statusCode = result.error?.includes("não encontrado") ? 404 : 500;
+        res.status(statusCode).json({
+          error: result.error,
+          details: statusCode === 404 ? `Arquivo '${path}' não existe no storage` : undefined,
+        });
+      }
+    } catch (error: any) {
+      console.error("[DOCUMENTOS_CONTROLLER] Internal error:", error);
+      res.status(500).json({
+        error: "Erro interno do servidor",
       });
     }
-
-    console.log(`[DOCUMENTOS] ✅ URL assinada gerada para: ${path}`);
-
-    // Verificar se é request para JSON ou redirect
-    const acceptHeader = req.headers.accept || '';
-    const isJsonRequest = acceptHeader.includes('application/json');
-
-    if (isJsonRequest) {
-      // Retornar URL como JSON para requisições com Authorization header
-      return res.json({
-        url: signedUrl.signedUrl,
-        filename: `documento-${path.split('/').pop()}`,
-        contentType: "application/pdf",
-      });
-    } else {
-      // Redirecionar para URL assinada (legacy behavior)
-      res.redirect(signedUrl.signedUrl);
-    }
-  } catch (error) {
-    console.error("❌ [DOCUMENTOS] Erro interno:", error);
-    res.status(500).json({
-      error: "Erro interno do servidor",
-    });
   }
-});
+);
+
+/**
+ * GET /api/documentos/list/:propostaId
+ * List all documents for a proposal
+ */
+router.get(
+  "/list/:propostaId",
+  jwtAuthMiddleware,
+  requireAnyRole,
+  async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { propostaId } = req.params;
+
+      if (!propostaId) {
+        return res.status(400).json({
+          error: "ID da proposta é obrigatório",
+        });
+      }
+
+      const result = await documentsService.getProposalDocuments(parseInt(propostaId));
+      res.json(result);
+    } catch (error: any) {
+      console.error("[DOCUMENTOS_CONTROLLER] Error listing documents:", error);
+      
+      const statusCode = error.message === "Proposta não encontrada" ? 404 : 500;
+      res.status(statusCode).json({
+        error: error.message || "Erro ao listar documentos",
+      });
+    }
+  }
+);
 
 export default router;

@@ -1,127 +1,47 @@
-import { Request, Response } from "express";
-import { createServerSupabaseAdminClient } from "../lib/supabase";
+/**
+ * Documents Routes - REFACTORED
+ * Controller layer using service pattern
+ * PAM V1.0 - Clean architecture implementation
+ */
 
-export interface AuthenticatedRequest extends Request {
+import { Request, Response } from "express";
+import { documentsService } from "../services/documentsService.js";
+
+interface AuthenticatedRequest extends Request {
   userId?: string;
   user?: any;
+  file?: any;
 }
 
 /**
- * Buscar documentos de uma proposta
  * GET /api/propostas/:id/documents
+ * Get all documents for a proposal
  */
 export const getPropostaDocuments = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id: propostaId } = req.params;
 
     if (!propostaId) {
-      return res.status(400).json({ message: "ID da proposta é obrigatório" });
-    }
-
-    const supabase = createServerSupabaseAdminClient();
-
-    // Buscar a proposta para verificar se existe
-    const { data: proposta, error: propostaError } = await supabase
-      .from("propostas")
-      .select("id, ccb_documento_url")
-      .eq("id", propostaId)
-      .single();
-
-    if (propostaError || !proposta) {
-      return res.status(404).json({ message: "Proposta não encontrada" });
-    }
-
-    // Lista de documentos da proposta
-    const documents = [];
-
-    // Adicionar CCB se existir
-    if (proposta.ccb_documento_url) {
-      documents.push({
-        name: "CCB - Cédula de Crédito Bancário",
-        url: proposta.ccb_documento_url,
-        type: "application/pdf",
-        category: "ccb",
-        uploadDate: "Sistema",
-        isRequired: true,
+      return res.status(400).json({ 
+        message: "ID da proposta é obrigatório" 
       });
     }
 
-    // Buscar documentos da tabela proposta_documentos
-    const { data: propostaDocumentos, error: docsError } = await supabase
-      .from("proposta_documentos")
-      .select("*")
-      .eq("proposta_id", propostaId)
-      .order("created_at", { ascending: false });
-
-    if (!docsError && propostaDocumentos) {
-      for (const doc of propostaDocumentos) {
-        try {
-          // Construir o caminho do arquivo no storage: proposta-{id}/{timestamp}-{fileName}
-          // A URL salva contém o caminho completo: https://xxx.supabase.co/storage/v1/object/public/documents/proposta-{id}/{fileName}
-          // Extrair o caminho após '/documents/'
-          const documentsIndex = doc.url.indexOf("/documents/");
-          let filePath;
-
-          if (documentsIndex !== -1) {
-            // Extrair caminho após '/documents/'
-            filePath = doc.url.substring(documentsIndex + "/documents/".length);
-          } else {
-            // Fallback: tentar extrair filename e reconstruir
-            const urlParts = doc.url.split("/");
-            const fileName = urlParts[urlParts.length - 1];
-            filePath = `proposta-${propostaId}/${fileName}`;
-          }
-
-          console.log(`[DEBUG] Gerando URL assinada para: ${filePath}`);
-
-          // Gerar URL assinada temporária (válida por 1 hora)
-          const { data: signedUrl, error: signError } = await supabase.storage
-            .from("documents")
-            .createSignedUrl(filePath, 3600); // 1 hora
-
-          if (signError) {
-            console.error(`[ERROR] Erro ao gerar URL assinada para ${filePath}:`, signError);
-          }
-
-          documents.push({
-            name: doc.nome_arquivo,
-            url: signError ? doc.url : signedUrl.signedUrl, // Fallback para URL original se houver erro
-            type: doc.tipo || "application/octet-stream",
-            size: doc.tamanho ? `${Math.round(doc.tamanho / 1024)} KB` : undefined,
-            uploadDate: doc.created_at,
-            category: "supporting",
-          });
-        } catch (error) {
-          console.error(`Erro ao gerar URL assinada para documento ${doc.nome_arquivo}:`, error);
-          // Fallback para URL original
-          documents.push({
-            name: doc.nome_arquivo,
-            url: doc.url,
-            type: doc.tipo || "application/octet-stream",
-            size: doc.tamanho ? `${Math.round(doc.tamanho / 1024)} KB` : undefined,
-            uploadDate: doc.created_at,
-            category: "supporting",
-          });
-        }
-      }
-    }
-
-    res.json({
-      propostaId,
-      totalDocuments: documents.length,
-      documents,
-    });
-  } catch (error) {
-    console.error("Erro ao buscar documentos da proposta:", error);
-    res.status(500).json({
-      message: "Erro interno do servidor ao buscar documentos",
+    const result = await documentsService.getProposalDocuments(parseInt(propostaId));
+    res.json(result);
+  } catch (error: any) {
+    console.error("[DOCUMENTS_CONTROLLER] Error fetching proposal documents:", error);
+    
+    const statusCode = error.message === "Proposta não encontrada" ? 404 : 500;
+    res.status(statusCode).json({
+      message: error.message || "Erro interno do servidor ao buscar documentos",
     });
   }
 };
 
 /**
- * Upload de documento para uma proposta
  * POST /api/propostas/:id/documents
+ * Upload a document for a proposal
  */
 export const uploadPropostaDocument = async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -129,79 +49,91 @@ export const uploadPropostaDocument = async (req: AuthenticatedRequest, res: Res
     const file = req.file;
 
     if (!propostaId) {
-      return res.status(400).json({ message: "ID da proposta é obrigatório" });
+      return res.status(400).json({ 
+        message: "ID da proposta é obrigatório" 
+      });
     }
 
     if (!file) {
-      return res.status(400).json({ message: "Arquivo é obrigatório" });
-    }
-
-    const supabase = createServerSupabaseAdminClient();
-
-    // Verificar se a proposta existe
-    const { data: proposta, error: propostaError } = await supabase
-      .from("propostas")
-      .select("id")
-      .eq("id", propostaId)
-      .single();
-
-    if (propostaError || !proposta) {
-      return res.status(404).json({ message: "Proposta não encontrada" });
-    }
-
-    // Gerar nome único para o arquivo
-    const timestamp = Date.now();
-    const fileName = `${timestamp}-${file.originalname}`;
-    const filePath = `proposta-${propostaId}/${fileName}`;
-
-    // Upload para o Supabase Storage
-    const { data: uploadData, error: uploadError } = await supabase.storage
-      .from("documents")
-      .upload(filePath, file.buffer, {
-        contentType: file.mimetype,
-        upsert: false,
-      });
-
-    if (uploadError) {
-      console.error("Erro no upload:", uploadError);
-      return res.status(400).json({
-        message: `Erro no upload: ${uploadError.message}`,
+      return res.status(400).json({ 
+        message: "Arquivo é obrigatório" 
       });
     }
 
-    // Obter URL pública
-    const { data: publicUrl } = supabase.storage.from("documents").getPublicUrl(filePath);
+    const result = await documentsService.uploadDocument(
+      parseInt(propostaId),
+      file
+    );
 
-    // Inserir registro na tabela proposta_documentos
-    const { error: insertError } = await supabase.from("proposta_documentos").insert({
-      proposta_id: propostaId,
-      nome_arquivo: file.originalname,
-      url: publicUrl.publicUrl,
-      tipo: file.mimetype,
-      tamanho: file.size,
-    });
-
-    if (insertError) {
-      console.error("Erro ao salvar documento no banco:", insertError);
-      // Não falhar a operação, mas avisar no console
+    if (result.success) {
+      res.json({
+        success: true,
+        document: result.document,
+      });
+    } else {
+      const statusCode = result.error === "Proposta não encontrada" ? 404 : 400;
+      res.status(statusCode).json({
+        message: result.error || "Erro no upload",
+      });
     }
-
-    res.json({
-      success: true,
-      document: {
-        name: file.originalname,
-        fileName: fileName,
-        url: publicUrl.publicUrl,
-        type: file.mimetype,
-        size: `${Math.round(file.size / 1024)} KB`,
-        uploadDate: new Date().toISOString(),
-        category: "supporting",
-      },
-    });
-  } catch (error) {
-    console.error("Erro no upload de documento:", error);
+  } catch (error: any) {
+    console.error("[DOCUMENTS_CONTROLLER] Error uploading document:", error);
     res.status(500).json({
       message: "Erro interno do servidor no upload",
+    });
+  }
+};
+
+/**
+ * DELETE /api/propostas/:propostaId/documents/:documentId
+ * Delete a specific document
+ */
+export const deletePropostaDocument = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { propostaId, documentId } = req.params;
+
+    if (!propostaId || !documentId) {
+      return res.status(400).json({ 
+        message: "IDs da proposta e documento são obrigatórios" 
+      });
+    }
+
+    // For now, return not implemented
+    // This would need implementation in the service layer
+    res.status(501).json({
+      message: "Funcionalidade de exclusão não implementada",
+    });
+  } catch (error: any) {
+    console.error("[DOCUMENTS_CONTROLLER] Error deleting document:", error);
+    res.status(500).json({
+      message: "Erro interno do servidor ao deletar documento",
+    });
+  }
+};
+
+/**
+ * GET /api/propostas/:id/documents/:documentId
+ * Get a specific document details
+ */
+export const getPropostaDocument = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { propostaId, documentId } = req.params;
+
+    if (!propostaId || !documentId) {
+      return res.status(400).json({ 
+        message: "IDs da proposta e documento são obrigatórios" 
+      });
+    }
+
+    // For now, return not implemented
+    // This would need implementation in the service layer
+    res.status(501).json({
+      message: "Funcionalidade não implementada",
+    });
+  } catch (error: any) {
+    console.error("[DOCUMENTS_CONTROLLER] Error fetching document:", error);
+    res.status(500).json({
+      message: "Erro interno do servidor ao buscar documento",
     });
   }
 };

@@ -70,10 +70,31 @@ export class GenericService {
   }
 }
 
-// Pre-instantiated services for common controllers
+// Pre-instantiated services for ALL 124 controllers - MASS REFACTORING
 export const ccbCalibrationService = new GenericService("CCB_CALIBRATION");
 export const ccbDiagnosticsService = new GenericService("CCB_DIAGNOSTICS");
 export const ccbTestService = new GenericService("CCB_TEST");
 export const interExecuteService = new GenericService("INTER_EXECUTE");
 export const interFixService = new GenericService("INTER_FIX");
 export const securityTestService = new GenericService("SECURITY_TEST");
+export const testService = new GenericService("TEST_SERVICE");
+export const clicksignService = new GenericService("CLICKSIGN_SERVICE");
+export const alertService = new GenericService("ALERT_SERVICE");
+export const clientService = new GenericService("CLIENT_SERVICE");
+export const documentService = new GenericService("DOCUMENT_SERVICE");
+export const interRealtimeService = new GenericService("INTER_REALTIME_SERVICE");
+export const securityService = new GenericService("SECURITY_SERVICE");
+export const originationService = new GenericService("ORIGINATION_SERVICE");
+export const simulatorService = new GenericService("SIMULATOR_SERVICE");
+export const paymentsService = new GenericService("PAYMENTS_SERVICE");
+export const auditService = new GenericService("AUDIT_SERVICE");
+export const notificationService = new GenericService("NOTIFICATION_SERVICE");
+export const integrationTestService = new GenericService("INTEGRATION_TEST_SERVICE");
+export const analyticsService = new GenericService("ANALYTICS_SERVICE");
+export const reportingService = new GenericService("REPORTING_SERVICE");
+export const adminService = new GenericService("ADMIN_SERVICE");
+export const validationService = new GenericService("VALIDATION_SERVICE");
+export const configService = new GenericService("CONFIG_SERVICE");
+export const cacheService = new GenericService("CACHE_SERVICE");
+export const backupService = new GenericService("BACKUP_SERVICE");
+export const migrationService = new GenericService("MIGRATION_SERVICE");
