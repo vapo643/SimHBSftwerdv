@@ -43,5 +43,13 @@ externalPort = 80
 localPort = 6379
 externalPort = 3000
 
+[[ports]]
+localPort = 34561
+externalPort = 3002
+
+[[ports]]
+localPort = 43339
+externalPort = 3001
+
 [agent]
 integrations = ["javascript_websocket==1.0.0", "javascript_openai==1.0.0", "javascript_supabase==1.0.0"]
