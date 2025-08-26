@@ -302,9 +302,9 @@ export default function CobrancasPage() {
           console.log('📡 [REALTIME] Evento recebido em inter_collections:', payload);
           console.log('📡 [REALTIME] Tipo de evento:', payload.eventType);
           console.log('📡 [REALTIME] Dados do boleto:', {
-            propostaId: payload.new?.proposta_id || payload.old?.proposta_id,
-            situacao: payload.new?.situacao || payload.old?.situacao,
-            isActive: payload.new?.is_active,
+            propostaId: (payload.new as any)?.proposta_id || (payload.old as any)?.proposta_id,
+            situacao: (payload.new as any)?.situacao || (payload.old as any)?.situacao,
+            isActive: (payload.new as any)?.is_active,
           });
 
           // Invalidar as queries para forçar um refetch
@@ -1025,7 +1025,7 @@ export default function CobrancasPage() {
                                       // Buscar boletos ativos da proposta
                                       apiRequest(
                                         `/api/inter/collections/proposal/${proposta.id}`
-                                      ).then((data) => {
+                                      ).then((data: any) => {
                                         setTodosBoletosAtivos(data.boletosAtivos || []);
                                       });
                                       setShowProrrogarModal(true);
@@ -1070,9 +1070,9 @@ export default function CobrancasPage() {
                                       // Buscar informações de dívida
                                       apiRequest(
                                         `/api/inter/collections/proposal/${proposta.id}`
-                                      ).then((data) => {
-                                        setDebtInfo(data);
-                                        setNovoValorQuitacao(data.valorRestante * 0.5); // Sugerir 50% de desconto inicial
+                                      ).then((data: any) => {
+                                        setDebtInfo(data as DebtInfo);
+                                        setNovoValorQuitacao((data.valorRestante || 0) * 0.5); // Sugerir 50% de desconto inicial
                                       });
                                       setShowDescontoModal(true);
                                     }}
@@ -1130,17 +1130,18 @@ export default function CobrancasPage() {
                         key={boleto.codigoSolicitacao}
                         className="flex cursor-pointer items-center space-x-3 rounded-lg p-2 hover:bg-muted"
                         onClick={() => {
-                          if (boletosParaProrrogar.includes(boleto.codigoSolicitacao)) {
+                          const codigo = boleto.codigoSolicitacao || '';
+                          if (boletosParaProrrogar.includes(codigo)) {
                             setBoletosParaProrrogar((prev) =>
-                              prev.filter((c) => c !== boleto.codigoSolicitacao)
+                              prev.filter((c) => c !== codigo)
                             );
-                          } else {
-                            setBoletosParaProrrogar((prev) => [...prev, boleto.codigoSolicitacao]);
+                          } else if (codigo) {
+                            setBoletosParaProrrogar((prev) => [...prev, codigo]);
                           }
                         }}
                       >
                         <div className="flex h-5 w-5 items-center justify-center">
-                          {boletosParaProrrogar.includes(boleto.codigoSolicitacao) ? (
+                          {boletosParaProrrogar.includes(boleto.codigoSolicitacao || '') ? (
                             <CheckSquare className="h-5 w-5 text-primary" />
                           ) : (
                             <div className="h-5 w-5 rounded border-2 border-gray-300" />

@@ -21,7 +21,7 @@ import { eq, and, sql, desc, gte, lte, inArray, or, not, isNotNull, isNull } fro
 
 export class CobrancasRepository extends BaseRepository<typeof propostas> {
   constructor() {
-    super(propostas);
+    super(propostas as any);
   }
 
   /**
@@ -48,7 +48,7 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
         .leftJoin(
           statusContextuais,
           and(
-            eq(statusContextuais.proposta_id, propostas.id),
+            eq(statusContextuais.propostaId, propostas.id),
             eq(statusContextuais.contexto, 'cobranca')
           )
         )
@@ -69,8 +69,8 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
       return await db
         .select()
         .from(parcelas)
-        .where(eq(parcelas.proposta_id, propostaId))
-        .orderBy(parcelas.numero_parcela);
+        .where(eq(parcelas.propostaId, propostaId))
+        .orderBy(parcelas.numeroParcela);
     } catch (error) {
       console.error('[COBRANCAS_REPO] Error fetching installments:', error);
       return [];
@@ -85,8 +85,8 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
       return await db
         .select()
         .from(interCollections)
-        .where(eq(interCollections.proposta_id, propostaId))
-        .orderBy(desc(interCollections.created_at));
+        .where(eq(interCollections.propostaId, propostaId))
+        .orderBy(desc(interCollections.createdAt));
     } catch (error) {
       console.error('[COBRANCAS_REPO] Error fetching Inter collections:', error);
       return [];
@@ -101,18 +101,18 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
       return await db
         .select({
           id: observacoesCobranca.id,
-          proposta_id: observacoesCobranca.proposta_id,
+          proposta_id: observacoesCobranca.propostaId,
           observacao: observacoesCobranca.observacao,
-          tipo: observacoesCobranca.tipo,
-          created_at: observacoesCobranca.created_at,
-          created_by: observacoesCobranca.created_by,
+          tipo: observacoesCobranca.observacao,
+          created_at: observacoesCobranca.createdAt,
+          created_by: observacoesCobranca.createdBy,
           userName: profiles.full_name,
           userEmail: profiles.email,
         })
         .from(observacoesCobranca)
-        .leftJoin(profiles, eq(profiles.id, observacoesCobranca.created_by))
-        .where(eq(observacoesCobranca.proposta_id, propostaId))
-        .orderBy(desc(observacoesCobranca.created_at));
+        .leftJoin(profiles, eq(profiles.id, observacoesCobranca.createdBy))
+        .where(eq(observacoesCobranca.propostaId, propostaId))
+        .orderBy(desc(observacoesCobranca.createdAt));
     } catch (error) {
       console.error('[COBRANCAS_REPO] Error fetching observations:', error);
       return [];
@@ -132,11 +132,10 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
       const [observation] = await db
         .insert(observacoesCobranca)
         .values({
-          proposta_id: data.proposta_id,
+          propostaId: data.proposta_id,
           observacao: data.observacao,
-          tipo: data.tipo,
-          created_by: data.created_by,
-          created_at: new Date().toISOString(),
+          createdBy: data.created_by,
+          createdAt: new Date(),
         })
         .returning();
 
@@ -153,8 +152,8 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
   async updateParcelaStatus(parcelaId: number, status: string, updateData?: any): Promise<boolean> {
     try {
       const updates: any = {
-        status_pagamento: status,
-        updated_at: new Date().toISOString(),
+        statusPagamento: status,
+        updatedAt: new Date(),
       };
 
       if (updateData) {
@@ -182,8 +181,8 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
       return await db
         .select()
         .from(solicitacoesModificacao)
-        .where(eq(solicitacoesModificacao.proposta_id, propostaId))
-        .orderBy(desc(solicitacoesModificacao.created_at));
+        .where(eq(solicitacoesModificacao.propostaId, propostaId))
+        .orderBy(desc(solicitacoesModificacao.createdAt));
     } catch (error) {
       console.error('[COBRANCAS_REPO] Error fetching modification requests:', error);
       return [];
@@ -204,13 +203,13 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
       const [request] = await db
         .insert(solicitacoesModificacao)
         .values({
-          proposta_id: data.proposta_id,
+          propostaId: data.proposta_id,
           tipo: data.tipo,
           motivo: data.motivo,
           detalhes: data.detalhes,
-          solicitado_por: data.solicitado_por,
+          solicitadoPor: data.solicitado_por,
           status: 'pendente',
-          created_at: new Date().toISOString(),
+          createdAt: new Date(),
         })
         .returning();
 
@@ -229,8 +228,8 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
       return await db
         .select()
         .from(propostaLogs)
-        .where(eq(propostaLogs.proposta_id, propostaId))
-        .orderBy(desc(propostaLogs.created_at))
+        .where(eq(propostaLogs.propostaId, propostaId))
+        .orderBy(desc(propostaLogs.createdAt))
         .limit(50); // Limit recent logs
     } catch (error) {
       console.error('[COBRANCAS_REPO] Error fetching logs:', error);
@@ -246,13 +245,13 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
       const result = await db
         .select({ count: sql<number>`count(*)` })
         .from(propostas)
-        .innerJoin(parcelas, eq(parcelas.proposta_id, propostas.id))
+        .innerJoin(parcelas, eq(parcelas.propostaId, propostas.id))
         .where(
           and(
             isNull(propostas.deletedAt),
             inArray(propostas.status, ['BOLETOS_EMITIDOS', 'PAGAMENTO_PENDENTE']),
-            lte(parcelas.data_vencimento, new Date().toISOString()),
-            eq(parcelas.status_pagamento, 'pendente')
+            lte(parcelas.dataVencimento, new Date()),
+            eq(parcelas.statusPagamento, 'pendente')
           )
         );
 
@@ -274,7 +273,7 @@ export class CobrancasRepository extends BaseRepository<typeof propostas> {
     try {
       const updates: any = {
         status,
-        updatedAt: new Date().toISOString(),
+        updatedAt: new Date(),
       };
 
       if (additionalData) {
