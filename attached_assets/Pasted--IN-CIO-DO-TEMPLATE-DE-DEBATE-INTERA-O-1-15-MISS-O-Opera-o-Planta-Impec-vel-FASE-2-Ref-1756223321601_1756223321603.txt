@@ -1,0 +1,125 @@
+[INÍCIO DO TEMPLATE DE DEBATE - INTERAÇÃO #: 1/15+]
+
+MISSÃO: Operação Planta Impecável - FASE 2 (Refinamento Arquitetural)
+FASE ATUAL DO DEBATE: FASE 1, Thread 1.1: Domínio e Negócio
+
+PERSONA DO AGENTE (GEM 07): Você deve operar como um Arquiteto Auditor Chefe (Red Team). A sua função não é defender o trabalho original, mas sim identificar criticamente as suas falhas, ambiguidades e desalinhamentos com a nossa Doutrina Âncora. O seu sucesso é medido pela profundidade da sua autocrítica. O padrão é "Impecável".
+
+ARTEFATO(S) EM FOCO:
+
+architecture/01-domain/business-objectives-and-drivers.md
+
+architecture/01-domain/ddd-domain-modeling-master.md
+
+architecture/01-domain/scope-definition.md
+
+architecture/01-domain/nfr-requirements.md
+
+DOUTRINA ÂNCORA (VERDADE FUNDAMENTAL):
+A sua auditoria DEVE ser rigorosamente baseada nos seguintes KBs (já no seu contexto).
+
+KB_ Guia de Estilo de Design de APIs V1.0.pdf
+
+KB_ Compêndio de Padrões de Arquitetura de Nuvem V1.0.pdf
+
+TAREFAS DE AUDITORIA CRÍTICA:
+
+1. ALINHAMENTO DOUTRINÁRIO (O Teste do Padrão Ouro)
+Ponto de Falha #1: Desconexão entre Estratégia de Negócio e Modelo de Domínio.
+
+Conflito: O artefato business-objectives-and-drivers.md define quatro personas de usuário detalhadas (Analista de Crédito, Gerente de Loja, etc.) com "Jobs To Be Done" específicos. No entanto, o ddd-domain-modeling-master.md não estabelece uma conexão explícita entre essas personas e os agregados ou serviços de domínio responsáveis por executar esses "jobs". Isso cria uma lacuna de rastreabilidade, tornando impossível validar se a arquitetura técnica realmente serve às necessidades do negócio.
+
+Ponto de Falha #2: Invariantes de Domínio sem Estratégia de Garantia (Enforcement).
+
+Conflito: O ddd-domain-modeling-master.md lista 24 invariantes de domínio críticas (ex: INV-CP-006: "Apenas 1 proposta ativa por CPF simultaneamente"). Contudo, o documento falha em especificar como essas regras inquebráveis serão garantidas. Serão constraints de banco de dados (que evitam race conditions) ou validações na camada de aplicação (que são mais fáceis de contornar)? Esta ambiguidade é um risco de integridade de dados.
+
+2. PROFUNDIDADE E ACIONABILIDADE (O Teste do Engenheiro)
+As seções a seguir são superficiais e geram ambiguidades críticas que impediriam uma implementação:
+
+Ambiguidade #1: Definição de "Baixo Risco"
+
+Artefato: business-objectives-and-drivers.md, Seção 3.2.
+
+Texto: "Capacidade de processar 85% das propostas de baixo risco em menos de 5 minutos".
+
+Perguntas Críticas:
+
+Qual é a definição técnica e quantificável de "baixo risco"? É um score de crédito acima de um threshold X? É uma combinação de regras que podem ser configuradas?
+
+Qual é o comportamento esperado do sistema se o "motor de regras" falhar ou exceder o SLA de 5 minutos? A proposta deve ser movida para uma fila manual ou rejeitada?
+
+Ambiguidade #2: Implementação dos Padrões de Integração
+
+Artefato: ddd-domain-modeling-master.md, Seção 3.
+
+Texto: O Context Map visualiza relações como "Customer/Supplier" e "ACL".
+
+Perguntas Críticas:
+
+Qual é o mecanismo de comunicação real entre o Credit Proposal Context e o Credit Analysis Context? É uma chamada de API síncrona, um evento assíncrono via BullMQ, ou uma chamada de função direta dentro do monolito?
+
+Como o Anti-Corruption Layer (ACL) para o Banco Inter é implementado tecnicamente? É uma classe Adapter dedicada? Quais são as estratégias de retry e circuit breaker definidas para essa integração?
+
+3. COESÃO SISTÊMICA (O Teste de Alinhamento)
+Inconsistência #1: Discrepância na Meta de Capacidade.
+
+Conflito: O business-objectives-and-drivers.md estabelece uma visão de "100.000 propostas mensais". O nfr-requirements.md define um SLO de "1000 req/s".
+
+Análise: 100.000 propostas por mês equivalem a aproximadamente 0.04 requisições por segundo, assumindo uma distribuição uniforme. Há uma discrepância de ordem de 25.000x entre o objetivo de negócio e a capacidade técnica planejada. Ou o NFR está superdimensionado, incorrendo em custos desnecessários, ou a análise de negócio subestima drasticamente os picos de carga.
+
+4. ANÁLISE ADVERSARIAL E TRADE-OFFS (O Advogado do Diabo)
+Suposição Mais Fraca: A Necessidade de 8 Bounded Contexts para o MVP.
+
+Risco: A modelagem DDD com 8 Bounded Contexts distintos (Credit Proposal, Credit Analysis, Contract Management, Payment Processing, etc.) para um MVP é uma potencial armadilha de over-engineering.
+
+Cenário de Falha (Complexidade Acidental): A comunicação entre esses contextos (seja por APIs ou eventos) introduz uma latência e complexidade operacional significativas. Em um cenário de alta carga, a depuração de uma única transação que atravessa múltiplos contextos se torna um pesadelo, aumentando o MTTR (Mean Time to Repair) e violando o SLO de Disponibilidade. O trade-off de adotar uma complexidade tão alta no início não está justificado contra os objetivos do MVP definidos no scope-definition.md.
+
+5. PROPOSTA DE REFINAMENTO (Prova de Trabalho)
+As seguintes melhorias são mandatórias para que este Thread atinja o padrão "Impecável":
+
+P0: Alinhar Personas ao Modelo de Domínio.
+
+Ação: Adicionar uma nova seção (6.3.5) ao ddd-domain-modeling-master.md para mapear explicitamente cada Persona de Negócio a um Bounded Context e a um Agregado Raiz.
+
+Exemplo Conceitual:
+
+Diff
+
++ ### 6.3.5 Mapeamento Personas de Negócio → Entidades de Domínio
++
++ | Persona de Negócio | Bounded Context Principal | Agregado Raiz | Jobs To Be Done Mapeados |
++ |---|---|---|---|
++ | **Analista de Crédito** | Credit Analysis Context | `Analise` | Analisar propostas → ScoreService.calcularRisco() |
++ | **Gerente de Loja** | Partner Management Context | `Parceiro` | Monitorar performance → ParceiroService.gerarRelatorio() |
+P1: Definir Estratégia de Garantia de Invariantes.
+
+Ação: Adicionar uma nova seção (4.2) ao ddd-domain-modeling-master.md que detalhe a estratégia técnica para garantir as invariantes.
+
+Exemplo Conceitual:
+
+Diff
+
++ ### 4.2 Validação Automatizada de Invariantes
++
++ #### Estratégia Híbrida:
++ 1. **Nível de Banco de Dados:** Para invariantes de consistência de dados (ex: unicidade), usar `UNIQUE INDEX` do PostgreSQL para máxima proteção contra race conditions.
++ 2. **Nível de Agregado:** Para regras de negócio complexas, implementar `Validation Guards` no método `validate()` do `AggregateRoot` em TypeScript.
++
++ #### Exemplo de Implementação (INV-CP-006):
++ ```sql
++ -- Proteção contra propostas ativas duplicadas para o mesmo CPF
++ CREATE UNIQUE INDEX CONCURRENTLY idx_proposta_ativa_cpf
++ ON propostas (cliente_cpf)
++ WHERE status IN ('aguardando_analise', 'em_analise', 'aprovada');
++ ```
+P2: Especificar Implementação de SLIs.
+
+Ação: Expandir a tabela de SLOs em nfr-requirements.md para incluir uma coluna "Implementação Técnica".
+
+Exemplo Conceitual:
+
+Diff
+
++ | Métrica | SLO | SLI (Indicador) | Medição | **Implementação Técnica** |
++ |---|---|---|---|---|
++ | Latência API (p95) | < 200ms | Response time | APM percentile | `histogram_quan

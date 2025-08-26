@@ -52,14 +52,137 @@ ELSE P2
 
 ### **2.3 Performance**
 
-| Métrica | SLO | SLI (Indicador) | Medição |
-|---------|-----|-----------------|---------|
-| **Latência API (p50)** | < 100ms | Response time | APM (Application Performance Monitoring) |
-| **Latência API (p95)** | < 200ms | Response time | APM percentile |
-| **Latência API (p99)** | < 500ms | Response time | APM percentile |
-| **Throughput** | > 100 req/s | Requests per second | Load balancer metrics |
-| **Tempo de Login** | < 2s | End-to-end time | Frontend metrics |
-| **Tempo Geração PDF** | < 5s | Job completion time | Queue metrics |
+#### **Matriz SLO/SLI com Implementação Técnica (Resolução Crítica P2)**
+*Resolução da Auditoria Red Team: SLOs definidos sem especificação de implementação dos SLIs*
+
+| Métrica | SLO | SLI (Indicador) | Medição | **Implementação Técnica** | **Query/Endpoint Específico** | **Alerting Threshold** |
+|---------|-----|-----------------|---------|---------------------------|------------------------------|------------------------|
+| **Latência API (p50)** | < 100ms | Response time | APM percentile | `histogram_quantile(0.5, http_request_duration_seconds)` | `/metrics` - Prometheus | > 100ms por 3min |
+| **Latência API (p95)** | < 200ms | Response time | APM percentile | `histogram_quantile(0.95, http_request_duration_seconds)` | `/metrics` - Prometheus | > 200ms por 5min |
+| **Latência API (p99)** | < 500ms | Response time | APM percentile | `histogram_quantile(0.99, http_request_duration_seconds)` | `/metrics` - Prometheus | > 500ms por 2min |
+| **Throughput** | > 100 req/s | Requests per second | Load balancer | `rate(http_requests_total[1m])` | `/metrics` - Prometheus | < 100 req/s por 2min |
+| **Error Rate** | < 1% | HTTP 5xx responses | Error ratio | `rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m])` | `/metrics` - Prometheus | > 1% por 5min |
+| **Tempo de Login** | < 2s | End-to-end time | Frontend timing | `performance.timing.loadEventEnd - navigationStart` | Frontend telemetry | > 2s por user session |
+| **Tempo Geração PDF** | < 5s | Job completion time | BullMQ metrics | `pdf_generation_duration_seconds` | BullMQ dashboard | > 5s por job |
+
+#### **Configuração Prometheus - Performance SLIs**
+```yaml
+# prometheus.yml - Performance Rules
+groups:
+  - name: performance_slis
+    rules:
+      # Latência P95 - SLI Crítico
+      - alert: HighLatencyP95
+        expr: histogram_quantile(0.95, http_request_duration_seconds) > 0.2
+        for: 5m
+        labels:
+          severity: warning
+          slo: latency_p95
+        annotations:
+          summary: "API latency P95 above SLO threshold"
+          description: "P95 latency is {{ $value }}s, exceeding 200ms threshold"
+          
+      # Throughput - SLI Crítico  
+      - alert: LowThroughput
+        expr: rate(http_requests_total[1m]) < 100
+        for: 2m
+        labels:
+          severity: critical
+          slo: throughput
+        annotations:
+          summary: "API throughput below SLO threshold"
+          description: "Current throughput: {{ $value }} req/s, minimum required: 100 req/s"
+          
+      # Error Rate - SLI Crítico
+      - alert: HighErrorRate
+        expr: |
+          (
+            rate(http_requests_total{status=~"5.."}[5m]) / 
+            rate(http_requests_total[5m])
+          ) > 0.01
+        for: 5m
+        labels:
+          severity: critical
+          slo: error_rate
+        annotations:
+          summary: "Error rate above SLO threshold"
+          description: "Error rate: {{ $value | humanizePercentage }}, threshold: 1%"
+```
+
+#### **Grafana Dashboard - Performance SLIs**
+```json
+{
+  "dashboard": {
+    "title": "Simpix Performance SLIs",
+    "panels": [
+      {
+        "title": "API Latency Distribution (P50, P95, P99)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.5, http_request_duration_seconds)",
+            "legendFormat": "P50"
+          },
+          {
+            "expr": "histogram_quantile(0.95, http_request_duration_seconds)", 
+            "legendFormat": "P95 (SLO: 200ms)"
+          },
+          {
+            "expr": "histogram_quantile(0.99, http_request_duration_seconds)",
+            "legendFormat": "P99"
+          }
+        ],
+        "yAxes": [{"unit": "s", "max": 1}],
+        "thresholds": [{"value": 0.2, "colorMode": "critical"}]
+      },
+      {
+        "title": "Request Throughput vs SLO",
+        "type": "singlestat",
+        "targets": [
+          {
+            "expr": "rate(http_requests_total[1m])",
+            "legendFormat": "Current RPS"
+          }
+        ],
+        "thresholds": "80,100",
+        "colors": ["red", "yellow", "green"]
+      }
+    ]
+  }
+}
+```
+
+#### **Frontend Performance Monitoring**
+```typescript
+// Frontend SLI Collection - Real User Monitoring
+class PerformanceMonitor {
+  static trackPageLoad(): void {
+    window.addEventListener('load', () => {
+      const timing = performance.timing;
+      const loadTime = timing.loadEventEnd - timing.navigationStart;
+      
+      // Send to analytics - Login SLI
+      if (window.location.pathname === '/login') {
+        this.sendMetric('login_duration_ms', loadTime);
+        
+        // SLO Violation Check
+        if (loadTime > 2000) {
+          this.sendAlert('login_slo_violation', { duration: loadTime });
+        }
+      }
+    });
+  }
+  
+  private static sendMetric(name: string, value: number): void {
+    fetch('/api/metrics', {
+      method: 'POST',
+      body: JSON.stringify({ metric: name, value, timestamp: Date.now() })
+    });
+  }
+}
+```
+
+*Nota do Arquiteto: Esta implementação resolve a ambiguidade crítica identificada na auditoria, fornecendo especificações técnicas precisas para todos os SLIs de performance.*
 
 ### **2.4 Escalabilidade**
 

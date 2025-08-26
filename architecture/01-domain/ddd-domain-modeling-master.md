@@ -267,9 +267,41 @@ graph TD
 
 ### 4.2 Validação Automatizada de Invariantes
 
-#### **Estratégia de Implementação**
+#### **Estratégia Híbrida de Enforcement (Resolução Crítica P1)**
+*Resolução da Auditoria Red Team: Invariantes definidas sem estratégia de garantia*
+
+**Implementação em Duas Camadas:**
+
+##### **Camada 1: Database Constraints (Máxima Proteção)**
+```sql
+-- INV-CP-006: Apenas 1 proposta ativa por CPF simultaneamente
+-- Proteção contra race conditions a nível de banco
+CREATE UNIQUE INDEX CONCURRENTLY idx_proposta_ativa_cpf 
+ON propostas (cliente_cpf) 
+WHERE status IN ('aguardando_analise', 'em_analise', 'aprovada');
+
+-- INV-CA-005: Analista não pode aprovar próprias propostas (segregação)
+ALTER TABLE decisoes 
+ADD CONSTRAINT ck_decisao_segregacao 
+CHECK (analista_id != proposta_criador_id);
+
+-- INV-CM-001: CCB só pode ser gerada para propostas aprovadas
+ALTER TABLE contratos 
+ADD CONSTRAINT ck_contrato_proposta_aprovada 
+CHECK (proposta_status = 'aprovada');
+
+-- INV-PP-001: Soma das parcelas = valor financiado + juros + IOF + TAC
+ALTER TABLE parcelas 
+ADD CONSTRAINT ck_parcelas_soma_correta 
+CHECK (
+  (SELECT SUM(valor) FROM parcelas WHERE contrato_id = contratos.id) 
+  = (valor_financiado + total_juros + valor_iof + valor_tac)
+);
+```
+
+##### **Camada 2: Application Layer Guards (Regras Complexas)**
 ```typescript
-// Exemplo de Invariant Guard Implementation
+// Invariant Guard Implementation - Architectural Pattern
 abstract class AggregateRoot<T> {
   protected invariants: InvariantRule<T>[] = [];
   
@@ -282,19 +314,91 @@ abstract class AggregateRoot<T> {
       throw new DomainInvariantViolationError(violations);
     }
   }
+  
+  // Template method para garantir validação em todas as mudanças
+  protected applyChange(event: DomainEvent): void {
+    this.validate(); // PRE-condition
+    this.handleEvent(event);
+    this.validate(); // POST-condition
+  }
 }
 
+// Implementação Específica para Proposta
 class Proposta extends AggregateRoot<Proposta> {
   constructor() {
     super();
     this.invariants = [
-      new PropostaValorPositivoRule(),
-      new PropostaCPFValidoRule(),
-      new PropostaPrazoValidoRule()
+      new PropostaValorPositivoRule(),     // INV-CP-001
+      new PropostaCPFValidoRule(),         // INV-CP-002
+      new PropostaPrazoValidoRule(),       // INV-CP-005
+      new PropostaUnicidadeCPFRule()       // INV-CP-006 (backup app-level)
     ];
   }
 }
+
+// Exemplo de Regra Complexa (Score + Política)
+class ScoreAprovacaoRule implements InvariantRule<Analise> {
+  isSatisfiedBy(analise: Analise): boolean {
+    const { score, politica, valor } = analise;
+    
+    // INV-CA-002: Aprovação requer score >= 600 (configurável)
+    if (score.valor < politica.scoreMinimo) return false;
+    
+    // INV-CA-004: Valor aprovado <= valor solicitado
+    if (analise.valorAprovado > valor.solicitado) return false;
+    
+    return true;
+  }
+  
+  get violationMessage(): string {
+    return "Score insuficiente ou valor aprovado excede solicitado";
+  }
+}
 ```
+
+##### **Camada 3: Integration Testing (Validation)**
+```typescript
+// Teste Automatizado de Invariantes - CI/CD Integration
+describe('Domain Invariants Compliance', () => {
+  test('INV-CP-006: CPF único ativo - Database Level', async () => {
+    const cpf = '12345678901';
+    
+    // Primeira proposta criada com sucesso
+    const proposta1 = await criarProposta({ cpf, status: 'aguardando_analise' });
+    expect(proposta1.id).toBeDefined();
+    
+    // Segunda proposta com mesmo CPF deve falhar
+    await expect(
+      criarProposta({ cpf, status: 'em_analise' })
+    ).rejects.toThrow('duplicate key value violates unique constraint');
+  });
+  
+  test('INV-CA-002: Score mínimo - Application Level', () => {
+    const analise = new Analise({ score: 550, politica: { scoreMinimo: 600 } });
+    
+    expect(() => analise.aprovar()).toThrow(DomainInvariantViolationError);
+  });
+});
+```
+
+##### **Estratégia de Monitoramento de Invariantes**
+```yaml
+# Alertas Prometheus para Violações
+- alert: InvariantViolationDetected
+  expr: increase(domain_invariant_violations_total[5m]) > 0
+  for: 0m
+  labels:
+    severity: critical
+  annotations:
+    summary: "Domain invariant violation detected"
+    description: "Invariant {{ $labels.invariant_name }} violated {{ $value }} times"
+
+# Métricas de Saúde das Invariantes
+- domain_invariant_checks_total{invariant="INV-CP-006", result="success"}
+- domain_invariant_violations_total{invariant="INV-CA-002", context="credit-analysis"}
+```
+
+*Nota do Arquiteto: Esta estratégia híbrida resolve o ponto crítico identificado na auditoria, garantindo invariantes tanto em cenários normais quanto de concorrência alta.*
 
 ---
 
