@@ -1,0 +1,33 @@
+**[INÍCIO DO TEMPLATE DE DEBATE - INTERAÇÃO #: 3.1/15+]**
+
+**MISSÃO:** Operação Planta Impecável - FASE 2 (Remediação do Thread 1.3)
+
+**PERSONA DO AGENTE (GEM 07):** Você deve operar como um **Arquiteto de Remediação de Elite**. A sua função é pegar as falhas críticas identificadas na sua própria auditoria (Red Team) e implementar as soluções propostas com precisão cirúrgica, transformando os artefatos defeituosos em documentos que atendam ao padrão "Impecável".
+
+**ARTEFATO(S) EM FOCO:**
+- `architecture/02-technical/api-architecture-strategy.md`
+- `architecture/02-technical/frontend-backend-communication-strategy.md`
+- `architecture/07-decisions/adr-007-api-style-guide.md`
+
+**DOUTRINA ÂNCORA (VERDADE FUNDAMENTAL):**
+A sua implementação DEVE ser rigorosamente baseada nos seguintes KBs.
+* `KB_ Guia de Estilo de Design de APIs V1.0.pdf`
+* `KB_ Compêndio de Padrões de Arquitetura de Nuvem V1.0.pdf`
+
+---
+
+**DIRETRIZ DE IMPLEMENTAÇÃO:**
+
+Implemente as propostas de refinamento **P0, P1, P2 e P3**, exatamente como detalhado no seu relatório de auditoria anterior, para corrigir as falhas sistêmicas no Thread 1.3.
+
+**ROADMAP DE EXECUÇÃO:**
+
+1.  **Refinamento P0: RFC 7807 Enforcement.** Modifique o `api-architecture-strategy.md` para remover a estratégia de status codes simplista e substituí-la por uma política mandatória de conformidade com a RFC 7807, incluindo a estrutura `ProblemDetails` completa (type, title, status, detail, instance, timestamp, correlationId) como o padrão de erro para toda a API.
+
+2.  **Refinamento P1: Idempotency Security Hardening.** Modifique o `adr-007-api-style-guide.md`. Primeiro, altere a regra de idempotência para `PATCH` em operações financeiras de "RECOMENDADO" para **"OBRIGATÓRIO"**. Em seguida, substitua o exemplo de código superficial por sua implementação `SecureIdempotencyService`, que inclui rate limiting por cliente e validação do formato da chave.
+
+3.  **Refinamento P2: BFF Gateway Hybrid Strategy.** Modifique o `frontend-backend-communication-strategy.md`. Substitua a decisão "NÃO ADOTADO" pela sua estratégia `HYBRID_API_GATEWAY`, detalhando a implementação seletiva com Azure API Management para APIs públicas e a camada de agregação para endpoints de alto tráfego.
+
+4.  **Refinamento P3: Correlation ID Security.** Modifique o `adr-007-api-style-guide.md`, substituindo a geração de UUIDv4 simples pela sua implementação `SecureCorrelationService`, que utiliza `crypto.randomUUID()` e uma assinatura HMAC para garantir a segurança e a integridade da cadeia de correlação.
+
+5.  **Validação Final:** Após implementar todas as mudanças, reavalie os 3 artefatos contra o framework C.A.R.D.S. e apresente um novo scorecard, justificando a melhoria em cada critério. O objetivo é atingir um score geral mínimo de **85%** para obter a aprovação.

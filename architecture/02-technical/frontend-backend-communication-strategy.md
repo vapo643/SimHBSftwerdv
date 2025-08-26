@@ -72,51 +72,184 @@ interface BFFAnalysis {
 }
 ```
 
-### 1.2 Decisão Formal
+### 1.2 Decisão Formal - Hybrid API Gateway Strategy
 
 ```typescript
 // ====================================
-// DECISÃO ARQUITETURAL - BFF
+// DECISÃO ARQUITETURAL - HYBRID API GATEWAY
 // ====================================
 
-const bffDecision = {
-  decision: 'NOT_ADOPTED', // ❌ BFF NÃO ADOTADO
+const gatewayStrategy = {
+  decision: 'HYBRID_API_GATEWAY', // ✅ Gateway Híbrido Adotado
   
-  rationale: {
-    primaryReasons: [
-      'Aplicação monolítica com API bem estruturada',
-      'Time pequeno (5 desenvolvedores)',
-      'Baixa complexidade de agregação de dados',
-      'Fase de crescimento - priorizar simplicidade'
+  implementation: {
+    // Usar Azure API Management para endpoints públicos
+    public_apis: {
+      gateway: 'Azure API Management',
+      purpose: 'APIs expostas para parceiros externos e clientes',
+      features: [
+        'OAuth 2.0 / OpenID Connect validation',
+        'Rate limiting granular (por cliente, por endpoint)', 
+        'Request/Response transformation',
+        'API versioning automático',
+        'Developer portal para documentação',
+        'Analytics e métricas avançadas',
+        'Circuit breaker patterns',
+        'Geographic load balancing'
+      ],
+      endpoints: [
+        '/api/v1/proposals',
+        '/api/v1/payments', 
+        '/api/v1/webhooks',
+        '/api/v1/health'
+      ],
+      cost: 'Tier Standard: ~$250/mês (10M calls)',
+      deployment: 'Shared gateway instance'
+    },
+    
+    // Direct connection para APIs internas/admin
+    internal_apis: {
+      gateway: 'Direct Express.js',
+      purpose: 'APIs internas para dashboard e administração',
+      features: [
+        'JWT validation middleware',
+        'RBAC enforcement',
+        'Request correlation',
+        'Basic rate limiting'
+      ],
+      endpoints: [
+        '/api/v1/admin/*',
+        '/api/v1/reports/*',
+        '/api/v1/internal/*',
+        '/api/v1/stats/*'
+      ],
+      rationale: 'Menor latência para operações internas, menor custo'
+    },
+    
+    // Camada de agregação seletiva para high-traffic
+    aggregation_layer: {
+      trigger_conditions: [
+        'Mais de 5 API calls para renderizar uma tela',
+        'Latência P95 > 800ms em mobile',
+        'Bandwidth usage > 1MB per page load'
+      ],
+      implementation: 'Express.js middleware endpoints',
+      examples: [
+        '/api/v1/dashboard/aggregate',   // User + proposals + stats + notifications
+        '/api/v1/overview/batch',        // Financial overview + recent activity
+        '/api/v1/proposals/enriched'     // Proposal + client + documents + history
+      ],
+      caching: 'Redis com TTL baseado em criticidade dos dados'
+    }
+  },
+  
+  architecture_flow: {
+    external_partners: 'Client → Azure API Gateway → Express API',
+    internal_dashboard: 'Client → Express API (direct)',
+    high_traffic_pages: 'Client → Express Aggregation → Multiple Services',
+    admin_operations: 'Client → Express API (direct with RBAC)'
+  },
+  
+  migration_strategy: {
+    phase_1: {
+      timeline: 'Q4 2025 (4 semanas)',
+      scope: 'Configurar Azure API Management',
+      tasks: [
+        'Provisionar Azure API Management Standard',
+        'Importar OpenAPI specs existentes',
+        'Configurar OAuth provider (Supabase)',
+        'Setup básico de rate limiting',
+        'Implementar health checks'
+      ]
+    },
+    
+    phase_2: {
+      timeline: 'Q1 2026 (6 semanas)', 
+      scope: 'Migrar endpoints públicos críticos',
+      tasks: [
+        'Migrar /api/v1/proposals para gateway',
+        'Migrar /api/v1/payments para gateway',
+        'Configurar transformation policies',
+        'Implementar circuit breakers',
+        'Load testing e performance tuning'
+      ]
+    },
+    
+    phase_3: {
+      timeline: 'Q2 2026 (4 semanas)',
+      scope: 'Implementar camada de agregação',
+      tasks: [
+        'Identificar endpoints de agregação necessários',
+        'Implementar /dashboard/aggregate',
+        'Configurar cache Redis para agregação',
+        'Otimizar queries para reduzir latência'
+      ]
+    }
+  },
+  
+  monitoring_and_metrics: {
+    azure_api_management: [
+      'Request rate por cliente',
+      'Latência P50/P95/P99 por endpoint',
+      'Error rate e status codes',
+      'Bandwidth usage',
+      'API quota consumption'
     ],
     
-    currentMitigations: [
-      'TanStack Query para cache e agregação no cliente',
-      'GraphQL-like query patterns com includes',
-      'Endpoints específicos para casos complexos',
-      'View models no backend quando necessário'
+    internal_apis: [
+      'Response time distribution',
+      'RBAC violations e security events',
+      'Cache hit/miss ratios',
+      'Database connection pool usage'
+    ],
+    
+    aggregation_layer: [
+      'Aggregation efficiency (calls saved)',
+      'Cache effectiveness',
+      'Data freshness metrics',
+      'Bandwidth reduction achieved'
     ]
   },
   
-  triggerCriteria: {
-    // Reavaliar BFF quando QUALQUER critério for atingido
-    conditions: [
-      'Múltiplos frontends (mobile, desktop, partners)',
-      'Latência de agregação > 500ms consistentemente',
-      'Mais de 5 chamadas API para renderizar uma tela',
-      'Time frontend >= 10 desenvolvedores',
-      'Migração para microserviços iniciada'
-    ],
+  cost_analysis: {
+    current_state: {
+      infrastructure: '$0 (direct API calls)',
+      bandwidth: '~$50/mês (estimated)',
+      developer_time: '2h/semana troubleshooting integration issues'
+    },
     
-    estimatedTimeline: 'Q3 2026'
+    hybrid_implementation: {
+      azure_api_management: '$250/mês (Standard tier)',
+      additional_redis: '$30/mês (cache layer)',
+      bandwidth_savings: '-$20/mês (aggregation efficiency)',
+      developer_productivity: '+4h/semana (self-service portal)',
+      
+      net_cost: '+$260/mês',
+      roi_justification: [
+        'Partner integration acceleration (faster onboarding)',
+        'Reduced support tickets from API consumers',
+        'Built-in security and compliance features',
+        'Automatic scaling e load balancing',
+        'Developer portal reduces documentation overhead'
+      ]
+    }
   },
   
-  preparationStrategy: {
-    // Preparar terreno para futura adoção
-    'api-versioning': 'Manter versionamento rigoroso',
-    'dto-patterns': 'Usar DTOs para não expor entidades',
-    'aggregation-layer': 'Isolar lógica de agregação',
-    'monitoring': 'Métricas de performance por endpoint'
+  security_enhancements: {
+    api_gateway_layer: [
+      'DDoS protection automático',
+      'IP allowlisting/blocklisting',
+      'Request size limiting',
+      'SQL injection e XSS filtering',
+      'Certificate management automático'
+    ],
+    
+    internal_layer: [
+      'JWT validation com timing attack protection',
+      'RBAC enforcement granular',
+      'Request correlation para audit trails',
+      'Rate limiting adaptativo baseado em load'
+    ]
   }
 };
 ```

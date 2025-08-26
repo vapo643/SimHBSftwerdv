@@ -88,42 +88,191 @@ const apiDomains = {
 
 ### 1.2 Padrões de Design Implementados
 
-#### HTTP Status Codes Strategy
+#### RFC 7807 Problem Details Strategy
 
 ```typescript
 // ====================================
-// CÓDIGOS DE STATUS PADRONIZADOS
+// RFC 7807 CONFORMIDADE OBRIGATÓRIA
 // ====================================
 
 /**
- * Success Responses (2xx)
+ * Problem Details Interface - RFC 7807 Compliant
+ * MANDATÓRIO para todos os responses de erro (4xx, 5xx)
  */
-const successCodes = {
-  200: 'OK - Operação realizada com sucesso',
-  201: 'Created - Recurso criado com sucesso',
-  204: 'No Content - Operação realizada, sem body'
+interface ProblemDetails {
+  type: string;           // URI que identifica o tipo de problema
+  title: string;          // Resumo legível humano do tipo de problema
+  status: number;         // Status HTTP code
+  detail: string;         // Explicação específica da ocorrência
+  instance: string;       // URI identificando a ocorrência específica
+  timestamp: string;      // ISO 8601 timestamp
+  correlationId: string;  // Para rastreabilidade
+  // Extensões específicas do domínio permitidas
+  [key: string]: any;
+}
+
+/**
+ * Exemplos de Problem Details por Categoria
+ */
+const problemTypes = {
+  // VALIDATION ERRORS (400)
+  validationError: {
+    type: "https://api.simpix.app/problems/validation-error",
+    title: "Request Validation Failed",
+    status: 400,
+    detail: "The request body contains invalid data",
+    example: {
+      type: "https://api.simpix.app/problems/validation-error",
+      title: "Request Validation Failed",
+      status: 400,
+      detail: "The 'amount' field must be a positive number greater than 0",
+      instance: "/api/v1/proposals",
+      timestamp: "2025-08-26T16:30:00Z",
+      correlationId: "550e8400-e29b-41d4-a716-446655440000",
+      errors: [
+        {
+          field: "amount",
+          message: "Must be greater than 0",
+          code: "INVALID_AMOUNT",
+          value: -1000
+        }
+      ]
+    }
+  },
+
+  // AUTHENTICATION ERRORS (401)
+  authenticationError: {
+    type: "https://api.simpix.app/problems/authentication-required",
+    title: "Authentication Required",
+    status: 401,
+    detail: "Valid authentication credentials are required",
+    example: {
+      type: "https://api.simpix.app/problems/authentication-required",
+      title: "Authentication Required",
+      status: 401,
+      detail: "JWT token is missing, expired, or invalid",
+      instance: "/api/v1/proposals",
+      timestamp: "2025-08-26T16:30:00Z",
+      correlationId: "550e8400-e29b-41d4-a716-446655440000",
+      hint: "Include 'Authorization: Bearer <token>' header"
+    }
+  },
+
+  // AUTHORIZATION ERRORS (403)
+  authorizationError: {
+    type: "https://api.simpix.app/problems/insufficient-privileges",
+    title: "Insufficient Privileges",
+    status: 403,
+    detail: "The authenticated user lacks required permissions",
+    example: {
+      type: "https://api.simpix.app/problems/insufficient-privileges",
+      title: "Insufficient Privileges", 
+      status: 403,
+      detail: "Role 'ATENDENTE' cannot approve proposals",
+      instance: "/api/v1/proposals/300123/approve",
+      timestamp: "2025-08-26T16:30:00Z",
+      correlationId: "550e8400-e29b-41d4-a716-446655440000",
+      requiredRole: "ANALISTA",
+      currentRole: "ATENDENTE"
+    }
+  },
+
+  // BUSINESS LOGIC ERRORS (409, 422)
+  businessLogicError: {
+    type: "https://api.simpix.app/problems/business-rule-violation",
+    title: "Business Rule Violation",
+    status: 422,
+    detail: "The operation violates business constraints",
+    example: {
+      type: "https://api.simpix.app/problems/business-rule-violation",
+      title: "Business Rule Violation",
+      status: 422,
+      detail: "Cannot transition from 'APROVADA' to 'RASCUNHO'",
+      instance: "/api/v1/proposals/300123/status",
+      timestamp: "2025-08-26T16:30:00Z",
+      correlationId: "550e8400-e29b-41d4-a716-446655440000",
+      currentStatus: "APROVADA",
+      attemptedStatus: "RASCUNHO",
+      allowedTransitions: ["AGUARDANDO_ASSINATURA", "SUSPENSA"]
+    }
+  },
+
+  // RATE LIMITING (429)
+  rateLimitError: {
+    type: "https://api.simpix.app/problems/rate-limit-exceeded",
+    title: "Rate Limit Exceeded",
+    status: 429,
+    detail: "API rate limit exceeded for this endpoint",
+    example: {
+      type: "https://api.simpix.app/problems/rate-limit-exceeded",
+      title: "Rate Limit Exceeded",
+      status: 429,
+      detail: "You have exceeded 100 requests per hour for payment operations",
+      instance: "/api/v1/payments",
+      timestamp: "2025-08-26T16:30:00Z",
+      correlationId: "550e8400-e29b-41d4-a716-446655440000",
+      limit: 100,
+      remaining: 0,
+      resetTime: "2025-08-26T17:30:00Z"
+    }
+  },
+
+  // SERVER ERRORS (500)
+  internalServerError: {
+    type: "https://api.simpix.app/problems/internal-error",
+    title: "Internal Server Error",
+    status: 500,
+    detail: "An unexpected error occurred while processing the request",
+    example: {
+      type: "https://api.simpix.app/problems/internal-error",
+      title: "Internal Server Error",
+      status: 500,
+      detail: "Database connection failed during proposal creation",
+      instance: "/api/v1/proposals",
+      timestamp: "2025-08-26T16:30:00Z",
+      correlationId: "550e8400-e29b-41d4-a716-446655440000",
+      // NÃO expor detalhes internos em produção
+      ...(process.env.NODE_ENV === 'development' && {
+        trace: "Error: Connection timeout at pg.connect..."
+      })
+    }
+  }
 } as const;
 
 /**
- * Client Error Responses (4xx)
+ * Implementação de Middleware RFC 7807
  */
-const clientErrorCodes = {
-  400: 'Bad Request - Erro de validação de entrada',
-  401: 'Unauthorized - Token de acesso requerido',
-  403: 'Forbidden - Sem permissão para acessar recurso',
-  404: 'Not Found - Recurso não encontrado',
-  409: 'Conflict - Transição de estado inválida (FSM)',
-  413: 'Payload Too Large - Arquivo muito grande',
-  429: 'Too Many Requests - Rate limit atingido'
-} as const;
+class ProblemDetailsHandler {
+  static createResponse(
+    type: string,
+    title: string,
+    status: number,
+    detail: string,
+    instance: string,
+    correlationId: string,
+    extensions?: Record<string, any>
+  ): ProblemDetails {
+    return {
+      type,
+      title,
+      status,
+      detail,
+      instance,
+      timestamp: new Date().toISOString(),
+      correlationId,
+      ...extensions
+    };
+  }
 
-/**
- * Server Error Responses (5xx)
- */
-const serverErrorCodes = {
-  500: 'Internal Server Error - Erro interno do servidor',
-  503: 'Service Unavailable - Serviço temporariamente indisponível'
-} as const;
+  static sendProblemResponse(
+    res: Response,
+    problem: ProblemDetails
+  ): void {
+    res.status(problem.status)
+       .header('Content-Type', 'application/problem+json')
+       .json(problem);
+  }
+}
 ```
 
 #### Security Architecture

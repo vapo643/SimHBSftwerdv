@@ -123,33 +123,164 @@ Body: {
 |--------------|----------------------------|-------------------|
 | **POST /payments** | ✅ OBRIGATÓRIO | Previne cobrança duplicada |
 | **POST /proposals** | ✅ OBRIGATÓRIO | Evita propostas duplicadas |
-| **PATCH /proposals/{id}** | ⚠️ RECOMENDADO | Proteção contra race conditions |
+| **PATCH /proposals/{id}** | ✅ OBRIGATÓRIO | Operações financeiras críticas requerem idempotência |
+| **PATCH /payments/{id}** | ✅ OBRIGATÓRIO | Mudanças de status de pagamento críticas |
 | **POST /webhooks** | ✅ OBRIGATÓRIO | Evita processamento duplicado |
 | **GET /***  | ❌ NÃO APLICÁVEL | Operação read-only |
 | **DELETE /***  | ✅ NATURALMENTE IDEMPOTENTE | DELETE é idempotente por definição |
 
-### 3.4 Armazenamento e TTL
+### 3.4 Armazenamento Seguro e Rate Limiting
 
 ```typescript
-interface IdempotencyRecord {
+interface SecureIdempotencyRecord {
   key: string;                // UUID do cliente
-  requestHash: string;        // Hash do body da requisição
+  clientId: string;           // ID do cliente (para rate limiting)
+  requestHash: string;        // SHA-256 hash do body da requisição
   response: any;              // Response cached
   statusCode: number;         // HTTP status original
   createdAt: Date;
   expiresAt: Date;           // TTL de 24 horas
+  signature: string;          // HMAC para validação de integridade
 }
 
-// Implementação no Redis
-class IdempotencyService {
+// Implementação Segura no Redis com Rate Limiting
+class SecureIdempotencyService {
   private readonly TTL = 24 * 60 * 60; // 24 horas em segundos
+  private readonly DAILY_LIMIT = 10000; // 10k operações por dia por cliente
+  private readonly hmacSecret = process.env.IDEMPOTENCY_HMAC_SECRET!;
   
-  async store(key: string, response: any, statusCode: number) {
-    await redis.setex(
-      `idempotency:${key}`,
-      this.TTL,
-      JSON.stringify({ response, statusCode, timestamp: Date.now() })
-    );
+  async validateAndStore(
+    clientId: string,
+    idempotencyKey: string, 
+    requestHash: string,
+    response: any,
+    statusCode: number
+  ): Promise<void> {
+    // 1. Rate limit por cliente
+    const dailyKey = `idempotency:limit:${clientId}:${this.getCurrentDateKey()}`;
+    const dailyCount = await redis.incr(dailyKey);
+    
+    if (dailyCount === 1) {
+      // Primeira operação do dia - configurar TTL de 24h
+      await redis.expire(dailyKey, this.TTL);
+    }
+    
+    if (dailyCount > this.DAILY_LIMIT) {
+      throw new TooManyRequestsError(
+        `Daily idempotency limit exceeded: ${this.DAILY_LIMIT} operations per day`
+      );
+    }
+    
+    // 2. Validar formato da chave
+    if (!this.isValidUUID(idempotencyKey)) {
+      throw new BadRequestError('Invalid idempotency key format - must be UUIDv4');
+    }
+    
+    // 3. Verificar duplicação existente
+    const namespacedKey = `idempotency:${clientId}:${idempotencyKey}`;
+    const existingRecord = await redis.get(namespacedKey);
+    
+    if (existingRecord) {
+      const parsed = JSON.parse(existingRecord);
+      
+      // Verificar se o request body é idêntico
+      if (parsed.requestHash !== requestHash) {
+        throw new ConflictError(
+          'Idempotency key reused with different request payload'
+        );
+      }
+      
+      // Retornar response cached
+      return {
+        response: parsed.response,
+        statusCode: parsed.statusCode,
+        fromCache: true
+      };
+    }
+    
+    // 4. Gerar assinatura HMAC para integridade
+    const signature = this.generateSignature(clientId, idempotencyKey, requestHash);
+    
+    // 5. Armazenar com dados de segurança
+    const record: SecureIdempotencyRecord = {
+      key: idempotencyKey,
+      clientId,
+      requestHash,
+      response,
+      statusCode,
+      createdAt: new Date(),
+      expiresAt: new Date(Date.now() + this.TTL * 1000),
+      signature
+    };
+    
+    await redis.setex(namespacedKey, this.TTL, JSON.stringify(record));
+    
+    return {
+      response,
+      statusCode,
+      fromCache: false
+    };
+  }
+  
+  private generateSignature(clientId: string, key: string, requestHash: string): string {
+    return crypto
+      .createHmac('sha256', this.hmacSecret)
+      .update(`${clientId}:${key}:${requestHash}`)
+      .digest('hex');
+  }
+  
+  private isValidUUID(uuid: string): boolean {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(uuid);
+  }
+  
+  private getCurrentDateKey(): string {
+    return new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+  }
+  
+  // Método para limpeza automática de chaves expiradas
+  async cleanupExpiredKeys(): Promise<void> {
+    // Executado por cron job diário
+    const pattern = 'idempotency:*:*';
+    const keys = await redis.keys(pattern);
+    
+    for (const key of keys) {
+      const record = await redis.get(key);
+      if (record) {
+        const parsed = JSON.parse(record);
+        if (new Date(parsed.expiresAt) < new Date()) {
+          await redis.del(key);
+        }
+      }
+    }
+  }
+}
+
+// Exceções específicas para idempotência
+class TooManyRequestsError extends Error {
+  statusCode = 429;
+  
+  constructor(message: string) {
+    super(message);
+    this.name = 'TooManyRequestsError';
+  }
+}
+
+class ConflictError extends Error {
+  statusCode = 409;
+  
+  constructor(message: string) {
+    super(message);
+    this.name = 'ConflictError';
+  }
+}
+
+class BadRequestError extends Error {
+  statusCode = 400;
+  
+  constructor(message: string) {
+    super(message);
+    this.name = 'BadRequestError';
   }
 }
 ```
@@ -243,32 +374,243 @@ function etagMiddleware(req, res, next) {
 | **X-Rate-Limit-***  | Response | ✅ OBRIGATÓRIO | RFC 6585 |
 | **Idempotency-Key** | Request | ⚠️ CONDICIONAL | UUID v4 |
 
-### 5.2 Propagação de Correlation ID
+### 5.2 Secure Correlation ID Strategy
 
 ```typescript
-// Middleware para garantir propagação
-function correlationMiddleware(req, res, next) {
-  // Usar existing ou gerar novo
-  const correlationId = req.headers['x-correlation-id'] || uuid.v4();
-  
-  // Propagar para todos os serviços downstream
-  req.correlationId = correlationId;
-  res.set('X-Correlation-ID', correlationId);
-  
-  // Adicionar ao contexto de logging
-  logger.addContext({ correlationId });
-  
-  next();
+// ====================================
+// SECURE CORRELATION SERVICE
+// ====================================
+
+interface SecureCorrelationRecord {
+  id: string;              // Base correlation ID
+  depth: number;           // Nível na cadeia de chamadas
+  parentId?: string;       // ID da chamada pai (para trace tree)
+  serviceChain: string[];  // Lista de serviços na cadeia
+  timestamp: string;       // ISO 8601 timestamp
+  signature: string;       // HMAC para validação de integridade
+  isExternal: boolean;     // Flag para chamadas de terceiros
 }
 
-// Exemplo de propagação para serviços externos
-async function callExternalService(data) {
-  return axios.post('https://external-api.com/endpoint', data, {
-    headers: {
-      'X-Correlation-ID': getCurrentCorrelationId()
+class SecureCorrelationService {
+  private readonly hmacSecret = process.env.CORRELATION_HMAC_SECRET!;
+  private readonly MAX_DEPTH = 10; // Proteção contra loops infinitos
+  private readonly MAX_CHAIN_LENGTH = 20; // Máximo de serviços na cadeia
+  
+  /**
+   * Gerar correlation ID seguro com assinatura HMAC
+   */
+  generateSecureCorrelationId(
+    serviceId: string,
+    depth: number = 0,
+    parentId?: string
+  ): SecureCorrelationRecord {
+    // Validar profundidade para evitar loops
+    if (depth > this.MAX_DEPTH) {
+      throw new SecurityError(`Correlation depth exceeded maximum: ${this.MAX_DEPTH}`);
     }
-  });
+    
+    // Gerar ID único usando crypto.randomUUID()
+    const baseId = crypto.randomUUID();
+    const timestamp = new Date().toISOString();
+    
+    const record: SecureCorrelationRecord = {
+      id: baseId,
+      depth,
+      parentId,
+      serviceChain: parentId ? this.extendServiceChain(parentId, serviceId) : [serviceId],
+      timestamp,
+      signature: '',
+      isExternal: this.isExternalService(serviceId)
+    };
+    
+    // Validar tamanho da cadeia
+    if (record.serviceChain.length > this.MAX_CHAIN_LENGTH) {
+      throw new SecurityError(`Service chain exceeded maximum length: ${this.MAX_CHAIN_LENGTH}`);
+    }
+    
+    // Gerar assinatura HMAC para integridade
+    record.signature = this.generateSignature(record);
+    
+    return record;
+  }
+  
+  /**
+   * Validar correlation ID recebido
+   */
+  validateCorrelationId(correlationHeader: string): SecureCorrelationRecord {
+    try {
+      const record = JSON.parse(Buffer.from(correlationHeader, 'base64').toString());
+      
+      // Validar estrutura obrigatória
+      if (!record.id || !record.signature || !record.timestamp) {
+        throw new SecurityError('Invalid correlation structure');
+      }
+      
+      // Validar assinatura HMAC
+      const expectedSignature = this.generateSignature({
+        ...record,
+        signature: '' // Excluir signature do cálculo
+      });
+      
+      if (!crypto.timingSafeEqual(
+        Buffer.from(record.signature, 'hex'),
+        Buffer.from(expectedSignature, 'hex')
+      )) {
+        throw new SecurityError('Correlation signature validation failed');
+      }
+      
+      // Validar timestamp (não aceitar muito antigo ou futuro)
+      const age = Date.now() - new Date(record.timestamp).getTime();
+      if (age < 0 || age > 24 * 60 * 60 * 1000) { // 24 horas
+        throw new SecurityError('Correlation timestamp out of acceptable range');
+      }
+      
+      // Validar profundidade
+      if (record.depth > this.MAX_DEPTH) {
+        throw new SecurityError('Correlation depth validation failed');
+      }
+      
+      return record;
+      
+    } catch (error) {
+      throw new SecurityError(`Correlation validation failed: ${error.message}`);
+    }
+  }
+  
+  /**
+   * Middleware Express para correlação segura
+   */
+  secureCorrelationMiddleware() {
+    return (req: Request, res: Response, next: NextFunction) => {
+      let correlationRecord: SecureCorrelationRecord;
+      
+      try {
+        const incomingCorrelation = req.headers['x-correlation-id'];
+        
+        if (incomingCorrelation && typeof incomingCorrelation === 'string') {
+          // Validar correlation existente
+          const parentRecord = this.validateCorrelationId(incomingCorrelation);
+          
+          // Gerar novo correlation para este serviço
+          correlationRecord = this.generateSecureCorrelationId(
+            'simpix-api',
+            parentRecord.depth + 1,
+            parentRecord.id
+          );
+          
+        } else {
+          // Iniciar nova cadeia
+          correlationRecord = this.generateSecureCorrelationId('simpix-api');
+        }
+        
+        // Serializar para header (base64 encoded JSON)
+        const correlationHeader = Buffer.from(JSON.stringify(correlationRecord)).toString('base64');
+        
+        // Adicionar ao request e response
+        req.correlationId = correlationRecord.id;
+        req.correlationRecord = correlationRecord;
+        res.set('X-Correlation-ID', correlationHeader);
+        
+        // Adicionar ao contexto de logging
+        logger.addContext({
+          correlationId: correlationRecord.id,
+          depth: correlationRecord.depth,
+          serviceChain: correlationRecord.serviceChain.join(' → '),
+          isExternal: correlationRecord.isExternal
+        });
+        
+        next();
+        
+      } catch (error) {
+        logger.warn('Correlation validation failed, generating new chain', { error: error.message });
+        
+        // Fallback: gerar nova cadeia em caso de falha de validação
+        correlationRecord = this.generateSecureCorrelationId('simpix-api');
+        const correlationHeader = Buffer.from(JSON.stringify(correlationRecord)).toString('base64');
+        
+        req.correlationId = correlationRecord.id;
+        req.correlationRecord = correlationRecord;
+        res.set('X-Correlation-ID', correlationHeader);
+        
+        logger.addContext({ correlationId: correlationRecord.id });
+        next();
+      }
+    };
+  }
+  
+  /**
+   * Helper para propagação para serviços externos
+   */
+  async callExternalService(
+    url: string,
+    data: any,
+    currentCorrelation: SecureCorrelationRecord
+  ): Promise<any> {
+    // Gerar correlation para chamada externa
+    const externalCorrelation = this.generateSecureCorrelationId(
+      this.extractServiceFromUrl(url),
+      currentCorrelation.depth + 1,
+      currentCorrelation.id
+    );
+    
+    const correlationHeader = Buffer.from(JSON.stringify(externalCorrelation)).toString('base64');
+    
+    return axios.post(url, data, {
+      headers: {
+        'X-Correlation-ID': correlationHeader,
+        'X-Service-Chain': externalCorrelation.serviceChain.join(',')
+      }
+    });
+  }
+  
+  private generateSignature(record: Omit<SecureCorrelationRecord, 'signature'>): string {
+    const payload = `${record.id}:${record.depth}:${record.timestamp}:${record.serviceChain.join(',')}`;
+    return crypto
+      .createHmac('sha256', this.hmacSecret)
+      .update(payload)
+      .digest('hex');
+  }
+  
+  private extendServiceChain(parentId: string, serviceId: string): string[] {
+    // Em produção, buscar parentId no cache para pegar cadeia completa
+    // Por simplicidade, retornar nova cadeia
+    return ['parent-service', serviceId];
+  }
+  
+  private isExternalService(serviceId: string): boolean {
+    const internalServices = ['simpix-api', 'simpix-worker', 'simpix-auth'];
+    return !internalServices.includes(serviceId);
+  }
+  
+  private extractServiceFromUrl(url: string): string {
+    try {
+      const hostname = new URL(url).hostname;
+      // Mapear domínios conhecidos para nomes de serviço
+      const serviceMap: Record<string, string> = {
+        'api.bancointer.com.br': 'banco-inter',
+        'api.clicksign.com': 'clicksign',
+        'webhook.site': 'webhook-test'
+      };
+      
+      return serviceMap[hostname] || `external-${hostname.split('.')[0]}`;
+    } catch {
+      return 'unknown-external';
+    }
+  }
 }
+
+// Exception para erros de segurança de correlation
+class SecurityError extends Error {
+  statusCode = 400;
+  
+  constructor(message: string) {
+    super(message);
+    this.name = 'SecurityError';
+  }
+}
+
+// Instância singleton
+export const secureCorrelationService = new SecureCorrelationService();
 ```
 
 ### 5.3 Rate Limiting Headers
