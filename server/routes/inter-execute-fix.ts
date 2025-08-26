@@ -5,7 +5,7 @@
  */
 
 import { Router, Request, Response } from "express";
-import { interExecuteService } from "../services/genericService.js";
+import { interExecuteService } from "../services/genericService";
 
 const router = Router();
 

@@ -5,7 +5,7 @@
  */
 
 import { Router, Request, Response } from "express";
-import { securityTestService } from "../services/genericService.js";
+import { securityTestService } from "../services/genericService";
 
 const router = Router();
 

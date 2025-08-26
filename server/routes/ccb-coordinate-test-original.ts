@@ -5,7 +5,7 @@
  */
 
 import { Router, Request, Response } from "express";
-import { ccbTestService } from "../services/genericService.js";
+import { ccbTestService } from "../services/genericService";
 
 const router = Router();
 
