@@ -1,40 +1,41 @@
 /**
- * Inter Fix Test Routes - REFACTORED
- * Controller for Inter fix test operations
+ * CCB Test Routes - REFACTORED
+ * Controller for CCB test operations
  * PAM V1.0 - Clean architecture implementation
  */
 
 import { Router, Request, Response } from "express";
-import { interFixService } from "../services/genericService.js";
+import { ccbTestService } from "../services/genericService.js";
 
 const router = Router();
 
 /**
- * POST /api/inter-fix-test/run
- * Run Inter fix tests
+ * POST /api/ccb-test/run
+ * Run CCB tests
  */
 router.post("/run", async (req: Request, res: Response) => {
   try {
-    const result = await interFixService.executeOperation("test_fix", req.body);
+    const result = await ccbTestService.executeOperation("run_test", req.body);
     res.json(result);
   } catch (error: any) {
-    console.error("[INTER_FIX_TEST] Error:", error);
+    console.error("[CCB_TEST] Error:", error);
     res.status(500).json({
       success: false,
-      error: error.message || "Fix test failed",
+      error: error.message || "Test execution failed",
     });
   }
 });
 
 /**
- * GET /api/inter-fix-test/status
- * Get fix test status
+ * GET /api/ccb-test/status
+ * Get test status
  */
 router.get("/status", async (req: Request, res: Response) => {
   try {
-    const status = await interFixService.getStatus();
+    const status = await ccbTestService.getStatus();
     res.json(status);
   } catch (error: any) {
+    console.error("[CCB_TEST] Status check failed:", error);
     res.status(500).json({
       success: false,
       error: error.message || "Status check failed",

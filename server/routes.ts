@@ -37,7 +37,7 @@ import multer from "multer";
 import originationRoutes from "./routes/origination.routes";
 import { clickSignRouter } from "./routes/clicksign.js";
 import clicksignIntegrationRoutes from "./routes/clicksign-integration.js";
-import { interRoutes } from "./routes/inter.js";
+import interRoutes from "./routes/inter.js";
 import interWebhookRouter from "./routes/webhooks/inter";
 import interRealtimeRouter from "./routes/inter-realtime";
 import { setupSecurityRoutes } from "./routes/security.js";

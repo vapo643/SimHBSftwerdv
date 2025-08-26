@@ -1,126 +1,114 @@
 /**
- * Rotas de Monitoramento do Banco de Dados
+ * Monitoring Routes - REFACTORED
+ * Controller layer using service pattern
+ * PAM V1.0 - Clean architecture implementation
  */
 
-import { Router } from "express";
-import {
-  getDatabaseStats,
-  getTableStats,
-  getIndexUsage,
-  getActiveConnections,
-  checkDatabaseHealth,
-  generateMonitoringReport,
-} from "../utils/dbMonitoring";
+import { Router, Request, Response } from "express";
+import { monitoringService } from "../services/monitoringService.js";
 
 const router = Router();
 
 /**
  * GET /api/monitoring/stats
- * Retorna estatísticas gerais do banco
+ * Get database statistics
  */
-router.get("/stats", async (req, res) => {
+router.get("/stats", async (req: Request, res: Response) => {
   try {
-    const stats = await getDatabaseStats();
+    const stats = await monitoringService.getDatabaseStats();
     res.json({ success: true, data: stats });
-  } catch (error) {
-    console.error("Erro ao buscar estatísticas:", error);
+  } catch (error: any) {
+    console.error("[MONITORING] Error fetching stats:", error);
     res.status(500).json({
       success: false,
-      error: "Erro ao buscar estatísticas do banco",
+      error: error.message || "Error fetching database statistics",
     });
   }
 });
 
 /**
  * GET /api/monitoring/tables
- * Retorna estatísticas das tabelas
+ * Get table statistics
  */
-router.get("/tables", async (req, res) => {
+router.get("/tables", async (req: Request, res: Response) => {
   try {
-    const stats = await getTableStats();
+    const stats = await monitoringService.getTableStats();
     res.json({ success: true, data: stats });
-  } catch (error) {
-    console.error("Erro ao buscar estatísticas das tabelas:", error);
+  } catch (error: any) {
+    console.error("[MONITORING] Error fetching table stats:", error);
     res.status(500).json({
       success: false,
-      error: "Erro ao buscar estatísticas das tabelas",
+      error: error.message || "Error fetching table statistics",
     });
   }
 });
 
 /**
  * GET /api/monitoring/indexes
- * Retorna uso de índices
+ * Get index usage statistics
  */
-router.get("/indexes", async (req, res) => {
+router.get("/indexes", async (req: Request, res: Response) => {
   try {
-    const usage = await getIndexUsage();
+    const usage = await monitoringService.getIndexUsage();
     res.json({ success: true, data: usage });
-  } catch (error) {
-    console.error("Erro ao buscar uso de índices:", error);
+  } catch (error: any) {
+    console.error("[MONITORING] Error fetching index usage:", error);
     res.status(500).json({
       success: false,
-      error: "Erro ao buscar uso de índices",
+      error: error.message || "Error fetching index usage",
     });
   }
 });
 
 /**
  * GET /api/monitoring/connections
- * Retorna conexões ativas
+ * Get active database connections
  */
-router.get("/connections", async (req, res) => {
+router.get("/connections", async (req: Request, res: Response) => {
   try {
-    const connections = await getActiveConnections();
+    const connections = await monitoringService.getActiveConnections();
     res.json({ success: true, data: connections });
-  } catch (error) {
-    console.error("Erro ao buscar conexões:", error);
+  } catch (error: any) {
+    console.error("[MONITORING] Error fetching connections:", error);
     res.status(500).json({
       success: false,
-      error: "Erro ao buscar conexões ativas",
+      error: error.message || "Error fetching active connections",
     });
   }
 });
 
 /**
  * GET /api/monitoring/health
- * Verifica saúde do banco
+ * Check database health
  */
-router.get("/health", async (req, res) => {
+router.get("/health", async (req: Request, res: Response) => {
   try {
-    const health = await checkDatabaseHealth();
-    const statusCode =
-      health.status === "healthy"
-        ? 200
-        : health.status === "warning"
-          ? 200
-          : health.status === "critical"
-            ? 503
-            : 500;
-
+    const health = await monitoringService.checkHealth();
+    const statusCode = health.status === "healthy" ? 200 : 
+                       health.status === "degraded" ? 503 : 500;
     res.status(statusCode).json({ success: true, data: health });
-  } catch (error) {
-    console.error("Erro ao verificar saúde:", error);
+  } catch (error: any) {
+    console.error("[MONITORING] Error checking health:", error);
     res.status(500).json({
       success: false,
-      error: "Erro ao verificar saúde do banco",
+      error: error.message || "Error checking database health",
     });
   }
 });
 
 /**
  * GET /api/monitoring/report
- * Gera relatório completo de monitoramento
+ * Generate comprehensive monitoring report
  */
-router.get("/report", async (req, res) => {
+router.get("/report", async (req: Request, res: Response) => {
   try {
-    const report = await generateMonitoringReport();
+    const report = await monitoringService.generateReport();
     res.json({ success: true, data: report });
-  } catch (error) {
-    console.error("Erro ao gerar relatório:", error);
+  } catch (error: any) {
+    console.error("[MONITORING] Error generating report:", error);
     res.status(500).json({
       success: false,
-      error: "Erro ao gerar relatório de monitoramento",
+      error: error.message || "Error generating monitoring report",
     });
   }
 });
