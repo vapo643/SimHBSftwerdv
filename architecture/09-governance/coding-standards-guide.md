@@ -1,9 +1,9 @@
 # Guia de Padrões de Codificação e Quality Gates - Sistema Simpix
 
-**Versão:** 1.0  
-**Data:** 25/08/2025  
+**Versão:** 1.1 P0-REMEDIATED  
+**Data:** 26/08/2025  
 **Autor:** Engenheiro de Qualidade de Software (Software Quality Engineer)  
-**Status:** Baseline  
+**Status:** Thread 3.2 P0 Remediation Complete  
 **Criticidade:** P0 - Qualidade como Lei
 
 ---
@@ -159,6 +159,7 @@ module.exports = {
     'airbnb/hooks',
     'plugin:@typescript-eslint/recommended',
     'plugin:@typescript-eslint/recommended-requiring-type-checking',
+    'plugin:security/recommended-legacy', // OWASP 2025 compliance
     'prettier', // Must be last
   ],
   parser: '@typescript-eslint/parser',
@@ -168,7 +169,7 @@ module.exports = {
     sourceType: 'module',
     project: './tsconfig.json',
   },
-  plugins: ['react', '@typescript-eslint', 'import'],
+  plugins: ['react', '@typescript-eslint', 'import', 'security'],
   rules: {
     // TypeScript
     '@typescript-eslint/explicit-function-return-type': 'warn',
@@ -201,6 +202,20 @@ module.exports = {
       'newlines-between': 'always',
       alphabetize: { order: 'asc', caseInsensitive: true }
     }],
+    
+    // Security (OWASP 2025 Compliance)
+    'security/detect-object-injection': 'error',
+    'security/detect-non-literal-regexp': 'error', 
+    'security/detect-unsafe-regex': 'error',
+    'security/detect-buffer-noassert': 'error',
+    'security/detect-child-process': 'warn',
+    'security/detect-disable-mustache-escape': 'error',
+    'security/detect-eval-with-expression': 'error',
+    'security/detect-no-csrf-before-method-override': 'error',
+    'security/detect-non-literal-fs-filename': 'warn',
+    'security/detect-non-literal-require': 'warn',
+    'security/detect-possible-timing-attacks': 'warn',
+    'security/detect-pseudoRandomBytes': 'error',
     
     // General
     'no-console': ['warn', { allow: ['warn', 'error'] }],
@@ -249,10 +264,13 @@ module.exports = {
 }
 ```
 
-**Integração ESLint + Prettier:**
+**Integração ESLint + Prettier + Security (OWASP 2025):**
 ```bash
 npm install -D eslint-config-prettier eslint-plugin-prettier
+npm install -D eslint-plugin-security@^2.0.0  # MANDATÓRIO: v2.0+ para OWASP 2025
 ```
+
+**⚠️ CRITICAL SECURITY NOTE:** O `eslint-plugin-security` v2.0+ é **OBRIGATÓRIO** para conformidade OWASP 2025. Versões anteriores não incluem as detecções de vulnerabilidades mais recentes.
 
 ### **2.3 Pre-commit Hooks (Husky + lint-staged)**
 
@@ -337,7 +355,140 @@ module.exports = {
 };
 ```
 
-### **3.3 Análise de Complexidade**
+### **3.3 SonarQube Quality Gates Configuration (MANDATÓRIO 2025)**
+
+**⚠️ COMPLIANCE CRITICAL:** Todo repositório Simpix **DEVE** incluir um arquivo `sonar-project.properties` configurado conforme os padrões SonarQube 2025 para compliance bancária e auditoria Red Team.
+
+**`sonar-project.properties` (OBRIGATÓRIO):**
+```properties
+# === CONFIGURAÇÃO MANDATÓRIA SIMPIX 2025 ===
+sonar.projectKey=simpix-credit-management
+sonar.organization=simpix-banking
+sonar.sources=src
+sonar.tests=src
+sonar.test.inclusions=**/*.test.ts,**/*.test.tsx,**/*.spec.ts,**/*.spec.tsx
+sonar.javascript.lcov.reportPaths=coverage/lcov.info
+sonar.typescript.lcov.reportPaths=coverage/lcov.info
+
+# === QUALITY GATES MANDATÓRIOS (NÃO NEGOCIÁVEIS) ===
+sonar.qualitygate.wait=true
+
+# COVERAGE THRESHOLD - Banking Grade (80%+)
+sonar.coverage.exclusions=**/*.test.ts,**/*.test.tsx,**/*.config.*,**/types/**
+sonar.coverage.minimum=80.0
+
+# SECURITY HOTSPOTS - Zero Tolerance Policy
+sonar.security.hotspots.threshold=0
+sonar.security.exclude.pattern=**/node_modules/**,**/coverage/**
+
+# TECHNICAL DEBT RATIO - Maximum 5% (Industry Standard)
+sonar.technical.debt.ratio.threshold=5.0
+
+# MAINTAINABILITY INDEX - Minimum 20 (Enterprise Grade)
+sonar.maintainability.rating=A
+
+# DUPLICATED LINES - Maximum 3% (Best Practice)
+sonar.cpd.exclusions=**/*.test.ts,**/*.test.tsx,**/*.d.ts
+
+# === EXCLUSÕES DE ANÁLISE ===
+sonar.exclusions=**/node_modules/**,**/coverage/**,**/dist/**,**/*.config.js,**/*.config.ts
+
+# === RULES CUSTOMIZAÇÃO ESPECÍFICA ===
+sonar.issue.ignore.multicriteria=e1,e2,e3
+# E1: Ignorar complexidade em arquivos de configuração
+sonar.issue.ignore.multicriteria.e1.ruleKey=typescript:S3776
+sonar.issue.ignore.multicriteria.e1.resourceKey=**/*.config.*
+# E2: Ignorar TODO comments em desenvolvimento
+sonar.issue.ignore.multicriteria.e2.ruleKey=typescript:S1135
+sonar.issue.ignore.multicriteria.e2.resourceKey=src/dev/**
+# E3: Ignorar console.log em arquivos de teste
+sonar.issue.ignore.multicriteria.e3.ruleKey=typescript:S2232
+sonar.issue.ignore.multicriteria.e3.resourceKey=**/*.test.*
+```
+
+**CI/CD Integration (GitHub Actions):**
+```yaml
+# .github/workflows/sonarqube-analysis.yml
+name: SonarQube Analysis
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  sonarqube:
+    name: SonarQube Quality Gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Shallow clones disabled for better analysis
+      
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run tests with coverage
+        run: npm run test:coverage
+      
+      - name: SonarQube Scan
+        uses: sonarqube-quality-gate-action@master
+        with:
+          scanMetadataReportFile: target/sonar/report-task.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      
+      - name: Quality Gate Status Check
+        run: |
+          if [ "${{ steps.sonarqube.outputs.quality-gate-status }}" != "PASSED" ]; then
+            echo "❌ SonarQube Quality Gate FAILED"
+            echo "📊 View detailed report: ${{ steps.sonarqube.outputs.quality-gate-url }}"
+            exit 1
+          fi
+          echo "✅ SonarQube Quality Gate PASSED"
+```
+
+**Validação de Compliance:**
+```bash
+# Script de verificação local (desenvolvimento)
+#!/bin/bash
+# scripts/validate-sonar-compliance.sh
+
+echo "🔍 Validating SonarQube compliance..."
+
+# Verificar se arquivo de configuração existe
+if [ ! -f "sonar-project.properties" ]; then
+  echo "❌ CRITICAL: sonar-project.properties not found"
+  echo "📋 Run: cp templates/sonar-project.properties.template sonar-project.properties"
+  exit 1
+fi
+
+# Verificar coverage mínimo
+COVERAGE_THRESHOLD=$(grep "sonar.coverage.minimum" sonar-project.properties | cut -d'=' -f2)
+if (( $(echo "$COVERAGE_THRESHOLD < 80.0" | bc -l) )); then
+  echo "❌ CRITICAL: Coverage threshold below 80% (found: $COVERAGE_THRESHOLD%)"
+  exit 1
+fi
+
+# Verificar security hotspots
+SECURITY_THRESHOLD=$(grep "sonar.security.hotspots.threshold" sonar-project.properties | cut -d'=' -f2)
+if [ "$SECURITY_THRESHOLD" -ne 0 ]; then
+  echo "❌ CRITICAL: Security hotspots threshold must be 0 (found: $SECURITY_THRESHOLD)"
+  exit 1
+fi
+
+echo "✅ SonarQube compliance validated"
+```
+
+### **3.4 Análise de Complexidade**
 
 **ESLint Complexity Rules:**
 ```javascript
