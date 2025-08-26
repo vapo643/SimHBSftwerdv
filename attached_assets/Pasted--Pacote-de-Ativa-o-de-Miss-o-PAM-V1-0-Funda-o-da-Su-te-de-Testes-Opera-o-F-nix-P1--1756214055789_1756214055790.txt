@@ -1,0 +1,51 @@
+### **Pacote de Ativação de Missão (PAM) V1.0: Fundação da Suíte de Testes (Operação Fênix - P1)**
+
+* **Sumário da Missão (O Quê):** Configurar a infraestrutura de testes automatizados no projeto utilizando o framework Vitest e criar um "smoke test" de integração inicial para verificar programaticamente a saúde do servidor.
+
+* **Intenção Estratégica (O Porquê):** O Dossiê de Continuidade confirmou que o projeto **não possui NENHUMA infraestrutura de testes automatizados**. Esta é uma falha de engenharia crítica. Sem testes, não podemos validar regressões, garantir a qualidade das futuras implementações ou ter qualquer confiança na estabilidade do sistema. Esta missão (P1) é o próximo passo mandatório para tirar o sistema do estado de "risco crítico".
+
+* **Modelo Mental (Como se Encaixa):** Você irá modificar o arquivo `package.json` para adicionar os scripts de teste. Em seguida, criará um novo arquivo de teste no diretório `tests/` (ou similar) que fará uma requisição HTTP ao próprio servidor para validar que ele está online e respondendo corretamente. Este é o primeiro pilar da nossa rede de segurança de qualidade.
+
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco (ALTO):** **Configuração Incorreta.** Uma configuração de teste mal feita pode gerar falsos positivos ou falsos negativos, criando uma falsa sensação de segurança. A configuração deve ser precisa e seguir os padrões do Vitest para projetos baseados em Vite/TypeScript.
+    * **Contramedida Mandatória:** Você deve basear sua configuração na documentação oficial do Vitest. O "smoke test" deve validar não apenas o status `200 OK`, mas também o conteúdo da resposta do endpoint de health check, se houver.
+
+---
+
+**IMPLEMENTAR: Configuração do Vitest e Criação do Smoke Test**
+
+**CURRENT STATE:**
+O projeto está em execução, mas o arquivo `package.json` não contém scripts para executar testes. Não existe uma suíte de testes configurada.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  O arquivo `package.json` deve ser modificado para incluir um novo script: `"test": "vitest"`.
+2.  As dependências de desenvolvimento necessárias (`vitest`, `@vitest/ui`, `supertest`) devem ser adicionadas ao `package.json`.
+3.  Um novo arquivo de teste, `server/tests/health.test.ts`, deve ser criado.
+4.  Este arquivo de teste deve conter um único caso de teste que:
+    * Inicia o servidor Express da aplicação.
+    * Usa `supertest` para fazer uma requisição `GET` ao endpoint `/api/health`.
+    * Verifica se a resposta tem o status `200`.
+    * Verifica se o corpo da resposta contém `{ status: 'ok' }`.
+5.  O script `npm test` deve executar com sucesso, passando o "smoke test".
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+1.  **Passo 1: Instalação de Dependências.** Modifique o `package.json` para adicionar `vitest`, `@vitest/ui` e `supertest` às `devDependencies`. Execute `npm install`.
+2.  **Passo 2: Configuração de Script.** Adicione o script `"test": "vitest"` à seção `scripts` do `package.json`.
+3.  **Passo 3: Criação da Estrutura de Teste.** Crie o diretório `server/tests/` se ele não existir. Dentro dele, crie o arquivo `health.test.ts`.
+4.  **Passo 4: Implementação do Smoke Test.** Escreva o código do teste em `health.test.ts` utilizando `vitest` e `supertest` para validar o endpoint `/api/health` conforme a seção `EXPECTED`.
+5.  **Passo 5: Execução e Validação.** Execute `npm test` e confirme que o teste passa sem erros.
+
+---
+
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** 90%
+* **RISCOS IDENTIFICADOS:** ALTO (A falha em estabelecer uma base de testes sólida perpetua o estado de risco do projeto).
+* **DECISÕES TÉCNICAS ASSUMIDAS:** Assumo que o endpoint `/api/health` existe e responde com o formato esperado. Se não existir, você deverá criá-lo como parte da missão.
+* **VALIDAÇÃO PENDENTE:** O resultado da execução do `npm test` e o código do `health.test.ts` serão validados por mim (2° - Desenvolvedor Full-Stack V10).
+
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK (ADAPTATIVO - NÍVEL FULL):**
+Ao concluir esta missão, você **DEVE** executar e reportar o resultado do `7-CHECK FULL`, pois o risco foi classificado como **ALTO**.
