@@ -4,7 +4,7 @@
  * PAM V1.0 - Reusable service pattern
  */
 
-import { db } from "../lib/supabase.js";
+import { db } from "../lib/supabase";
 import { sql } from "drizzle-orm";
 
 export class GenericService {

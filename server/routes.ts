@@ -3763,6 +3763,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use("/api/security/mcp", securityMCPRoutes);
 
   // Register Security routes - OWASP Compliance Monitoring
+  const { setupSecurityRoutes } = await import("./routes/security-original");
   setupSecurityRoutes(app);
 
   // Registrar rotas de monitoramento de segurança em tempo real
