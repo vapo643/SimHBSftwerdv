@@ -1,5 +1,5 @@
 import { Response, NextFunction } from "express";
-import { AuthenticatedRequest } from "./jwt-auth-middleware";
+import { AuthenticatedRequest } from "../../shared/types/express";
 
 /**
  * Guard que requer permissões de ADMINISTRADOR

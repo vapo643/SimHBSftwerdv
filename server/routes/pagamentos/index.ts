@@ -5,7 +5,8 @@
  */
 
 import { Router } from "express";
-import { jwtAuthMiddleware, type AuthenticatedRequest } from "../../lib/jwt-auth-middleware.js";
+import { jwtAuthMiddleware } from "../../lib/jwt-auth-middleware.js";
+import { AuthenticatedRequest } from "../../../shared/types/express";
 import { pagamentoService } from "../../services/pagamentoService.js";
 import { z } from "zod";
 import multer from "multer";

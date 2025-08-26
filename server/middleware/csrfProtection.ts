@@ -9,7 +9,7 @@
 
 import { Request, Response, NextFunction } from "express";
 import crypto from "crypto";
-import { AuthenticatedRequest } from "../lib/jwt-auth-middleware.js";
+import { AuthenticatedRequest } from "../../shared/types/express";
 import { config } from "../lib/config.js";
 
 interface CSRFRequest extends AuthenticatedRequest {

@@ -1,5 +1,5 @@
 import { Response, NextFunction } from "express";
-import { AuthenticatedRequest } from "./jwt-auth-middleware";
+import { AuthenticatedRequest } from "../../shared/types/express";
 
 /**
  * Mapeamento de rotas por role segundo documento de permissões

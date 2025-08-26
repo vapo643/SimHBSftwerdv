@@ -1,17 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 // Import dinâmico para usar função correta com Service Role Key
 import { securityLogger, SecurityEventType, getClientIP } from "./security-logger";
-
-export interface AuthenticatedRequest extends Request {
-  user?: {
-    id: string;
-    email: string;
-    role: string | null;
-    full_name?: string | null;
-    loja_id?: number | null;
-  };
-  sessionID?: string; // Added for express-session compatibility
-}
+import { AuthenticatedRequest } from "../../shared/types/express";
 
 // Token blacklist para segurança aprimorada (SAMM Optimization)
 const tokenBlacklist = new Set<string>();
