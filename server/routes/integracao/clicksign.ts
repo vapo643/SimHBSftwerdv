@@ -1,5 +1,5 @@
 import { Router } from "express";
-import type { AuthenticatedRequest } from "../../lib/jwt-auth-middleware";
+import type { AuthenticatedRequest } from "../../../shared/types/express";
 
 const router = Router();
 

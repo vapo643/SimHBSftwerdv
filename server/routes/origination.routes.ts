@@ -1,5 +1,6 @@
 import { Router } from "express";
-import { jwtAuthMiddleware, AuthenticatedRequest } from "../lib/jwt-auth-middleware";
+import { jwtAuthMiddleware } from "../lib/jwt-auth-middleware";
+import { AuthenticatedRequest } from "../../shared/types/express";
 import { db } from "../lib/supabase";
 import { eq, and, isNull } from "drizzle-orm";
 import {

@@ -1,6 +1,7 @@
 // OWASP Assessment API Routes
 import { Router } from "express";
-import { jwtAuthMiddleware, AuthenticatedRequest } from "../lib/jwt-auth-middleware.js";
+import { jwtAuthMiddleware } from "../lib/jwt-auth-middleware.js";
+import { AuthenticatedRequest } from "../../shared/types/express";
 import { OWASPAssessmentService } from "../services/owaspAssessmentService.js";
 import { SAMMUrlProcessor } from "../services/sammUrlProcessor.js";
 import { OwaspCheatSheetService } from "../services/owaspCheatSheetService.js";

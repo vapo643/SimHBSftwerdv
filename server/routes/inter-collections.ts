@@ -1,5 +1,6 @@
 import { Router } from "express";
-import { jwtAuthMiddleware, type AuthenticatedRequest } from "../lib/jwt-auth-middleware";
+import { jwtAuthMiddleware } from "../lib/jwt-auth-middleware";
+import type { AuthenticatedRequest } from "../../shared/types/express";
 import { requireAnyRole } from "../lib/role-guards";
 import { interBankService } from "../services/interBankService";
 import { db } from "../lib/supabase";
