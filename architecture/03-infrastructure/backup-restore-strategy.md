@@ -10,10 +10,11 @@
 
 ### Princípios de Backup
 ```yaml
-3-2-1 Rule:
-  - 3 cópias dos dados
-  - 2 diferentes mídias
-  - 1 offsite backup
+3-2-1 Rule (Conformidade Obrigatória):
+  - 3 cópias dos dados (Primary + 2 backups)
+  - 2 diferentes mídias (Azure Database + Azure Blob Storage)
+  - 1 offsite backup (Azure Geo-Redundant Storage)
+  - WORM compliance (Write-Once, Read-Many) para proteção contra insider threats
   
 Imutabilidade:
   - Backups write-once
@@ -154,7 +155,7 @@ Ação:
   4. Validar restauração
   5. Reabilitar acesso
   
-RTO Target: 1 hora
+RTO Target: < 4 horas  # Realista com Azure Geo-Restore
 ```
 
 ### Cenário 2: Delete Acidental
@@ -186,7 +187,7 @@ Ação:
   4. Validar aplicação
   5. Comunicar usuários
   
-RTO Target: 2 horas
+RTO Target: < 4 horas  # Realista com Azure Geo-Restore
 ```
 
 ---
@@ -196,16 +197,16 @@ RTO Target: 2 horas
 ### Recovery Objectives
 ```yaml
 Development:
-  RTO: 4 horas
+  RTO: 8 horas
   RPO: 24 horas
   
 Staging:
-  RTO: 2 horas
+  RTO: 4 horas
   RPO: 12 horas
   
 Production:
-  RTO: 1 hora
-  RPO: 15 minutos
+  RTO: < 4 horas  # Alinhado com Azure Geo-Restore
+  RPO: < 15 minutos  # Alinhado com Azure Point-in-Time Restore
 ```
 
 ### Testes Obrigatórios
@@ -249,13 +250,20 @@ Audit:
   - Alert on unusual activity
 ```
 
+### 3.4 Proteção Contra Ameaças Internas (Insider Threats)
+
+**Requisito:** Todos os backups de produção DEVERÃO ser armazenados em uma conta de armazenamento Azure configurada com **Immutability Policies (WORM)**.
+**Implementação:** Utilizar `Azure Blob Storage` com versionamento e `time-based retention policies` para impedir a deleção ou modificação de backups, mesmo por contas com privilégios de administrador, por um período de 30 dias.
+
 ### Ransomware Protection
 ```yaml
 Estratégias:
-  - Immutable backups
+  - Azure Immutable Storage (WORM - Write-Once, Read-Many)
+  - Defense in Depth contra administradores comprometidos
   - Offline copies
   - Cross-account isolation
   - MFA for restore
+  - Time-based retention (30 dias mínimo)
 ```
 
 ---

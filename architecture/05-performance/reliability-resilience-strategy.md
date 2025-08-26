@@ -674,6 +674,18 @@ class SPOFMitigationService {
         return { status: 'unhealthy', error: error.message };
       }
     });
+
+### 2.3 Implementação de Health Checks Detalhados
+
+**Liveness Probe (`/api/health/live`):**
+- **Propósito:** Verificar se o processo do container está rodando e respondendo.
+- **Lógica:** Retorna `200 OK` sem dependências externas.
+- **Ação do Orquestrador:** Se falhar, reinicia o container.
+
+**Readiness Probe (`/api/health/ready`):**
+- **Propósito:** Verificar se o container está pronto para receber tráfego.
+- **Lógica:** Testa a conexão com o banco de dados (ex: `SELECT 1`) e com o Redis.
+- **Ação do Orquestrador:** Se falhar, remove o container do load balancer até que o probe passe.
     
     // Supabase Auth health check
     this.healthChecks.set('supabase_auth', async () => {
@@ -2032,10 +2044,67 @@ module.exports = { MLSystemOptimizer };
 - 🚧 MTBF/MTTR tracking dashboard
 
 **Fase 3: Antifragilidade (Q2 2025)**
-- 📋 Chaos Engineering automation
+- ✅ Chaos Engineering automation (IMPLEMENTADO)
 - 📋 Self-healing mechanisms
 - 📋 Predictive failure prevention
 - 📋 ML-based optimization
+
+### 4.5 Validação Proativa com Chaos Engineering
+
+**Estratégia:** Adotar uma prática de "Game Days" quinzenais para executar experimentos de caos controlados em ambiente de staging.
+**Ferramenta:** Azure Chaos Studio.
+**Experimento Piloto Q4 2025:** Simular falha de uma zona de disponibilidade para o `Payment Processing Context` e validar se o sistema realiza o failover para outra zona dentro do RTO de 4 horas sem perda de dados.
+
+**Experimentos de Chaos Engineering Planejados:**
+
+```javascript
+// chaos-experiments/payment-resilience-test.js
+const chaosExperiments = {
+  // Experimento 1: Falha de Zona de Disponibilidade
+  availability_zone_failure: {
+    name: 'AZ Failure Simulation',
+    target: 'payment-processing-service',
+    action: 'stop_instance_in_az',
+    duration: '30 minutes',
+    expected_outcome: 'Automatic failover within 5 minutes',
+    success_criteria: [
+      'No payment processing interruption > 5 minutes',
+      'Zero data loss',
+      'Automatic recovery without manual intervention'
+    ]
+  },
+  
+  // Experimento 2: Falha de Banco de Dados
+  database_connection_failure: {
+    name: 'Database Connection Chaos',
+    target: 'postgresql-primary',
+    action: 'block_network_traffic',
+    duration: '10 minutes',
+    expected_outcome: 'Circuit breaker activation + graceful degradation',
+    success_criteria: [
+      'Circuit breaker opens within 30 seconds',
+      'Fallback to cached data activated',
+      'User experience maintained with appropriate messaging'
+    ]
+  },
+  
+  // Experimento 3: Sobrecarga de CPU
+  cpu_exhaustion: {
+    name: 'CPU Resource Exhaustion',
+    target: 'credit-analysis-service', 
+    action: 'consume_cpu_90_percent',
+    duration: '15 minutes',
+    expected_outcome: 'Auto-scaling activation + load distribution',
+    success_criteria: [
+      'Horizontal scaling triggers within 3 minutes',
+      'Response time remains < 2 seconds P95',
+      'No request failures due to resource constraints'
+    ]
+  }
+};
+
+module.exports = { chaosExperiments };
+```
 
 ### **Métricas de Sucesso:**
 

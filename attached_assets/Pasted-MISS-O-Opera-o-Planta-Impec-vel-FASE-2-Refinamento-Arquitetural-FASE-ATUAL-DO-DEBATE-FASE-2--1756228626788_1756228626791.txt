@@ -1,0 +1,128 @@
+MISSÃO: Operação Planta Impecável - FASE 2 (Refinamento Arquitetural)
+FASE ATUAL DO DEBATE: FASE 2, Thread 2.3: Resiliência e Observabilidade
+
+PERSONA DO AGENTE (GEM 07): Você deve operar como um Arquiteto Auditor Chefe (Red Team). A sua função não é defender o trabalho original, mas sim identificar criticamente as suas falhas, ambiguidades e desalinhamentos com a nossa Doutrina Âncora. O seu sucesso é medido pela profundidade da sua autocrítica. O padrão é "Impecável".
+
+ARTEFATO(S) EM FOCO:
+
+architecture/05-performance/reliability-resilience-strategy.md
+
+architecture/05-performance/observability-stack.md
+
+architecture/05-performance/observability-strategy.md
+
+architecture/03-infrastructure/backup-restore-strategy.md
+
+DOUTRINA ÂNCORA (VERDADE FUNDAMENTAL):
+A sua auditoria DEVE ser rigorosamente baseada nos seguintes KBs (já no seu contexto).
+
+KB_ Guia de Estilo de Design de APIs V1.0.pdf
+
+KB_ Compêndio de Padrões de Arquitetura de Nuvem V1.0.pdf
+
+TAREFAS DE AUDITORIA CRÍTICA:
+
+Analise os artefatos em foco e responda às seguintes perguntas de auditoria. Seja exaustivo, cético e específico.
+
+1. ALINHAMENTO DOUTRINÁRIO (O Teste do Padrão Ouro)
+Violação P0: Estratégia de Backup Incompleta e Não Conforme.
+
+Conflito: O documento backup-restore-strategy.md falha em especificar a proteção contra ameaças internas e a conformidade com o padrão 3-2-1, que são pilares da resiliência de dados na Doutrina de Nuvem.
+
+Violação Específica: O documento não menciona o uso de Azure Immutable Storage ou WORM (Write-Once, Read-Many) para proteger backups contra deleção maliciosa por um administrador comprometido, uma violação direta do princípio de "Defense in Depth" do KB de Arquitetura de Nuvem.
+
+Violação P1: Observabilidade Reativa, Não Preditiva.
+
+Conflito: A observability-strategy.md foca em logs, métricas e traços (os "três pilares"), mas ignora completamente a necessidade de eventos e testes de caos, conforme defendido no KB de Arquitetura de Nuvem para sistemas antifrágeis.
+
+Violação Específica: A estratégia não define um plano para Chaos Engineering (ex: uso do Azure Chaos Studio) para validar proativamente a resiliência do sistema, tratando a observabilidade como uma ferramenta forense em vez de preditiva.
+
+2. PROFUNDIDADE E ACIONABILIDADE (O Teste do Engenheiro)
+Ambiguidade Crítica #1: Implementação de "Health Checks".
+
+Artefato: reliability-resilience-strategy.md.
+
+Texto: "Implementar health checks detalhados para cada serviço."
+
+Perguntas Críticas:
+
+Qual é a diferença técnica entre um liveness probe (o container está rodando?) e um readiness probe (o container está pronto para aceitar tráfego?) em nossa implementação de Kubernetes/Container Apps?
+
+Como o health check validará a saúde das dependências downstream (Banco de Dados, ClickSign API)? Ele testará apenas a conexão ou a capacidade de executar uma transação sintética?
+
+Ambiguidade Crítica #2: Estratégia de "Distributed Tracing".
+
+Artefato: observability-stack.md.
+
+Texto: "Utilizar OpenTelemetry para distributed tracing."
+
+Perguntas Críticas:
+
+Qual será a nossa estratégia de amostragem (sampling) para os traços? Head-based, tail-based ou 100% de ingestão? Como essa decisão impacta nosso budget de R$4.800/mês?
+
+Como os Correlation IDs gerados na camada de API serão propagados através da fila BullMQ para os workers assíncronos, garantindo a visibilidade ponta-a-ponta de uma transação?
+
+3. COESÃO SISTÊMICA (O Teste de Alinhamento)
+Inconsistência #1: RTO/RPO vs. Custo.
+
+Conflito: O backup-restore-strategy.md define um RTO (Recovery Time Objective) de "< 15 minutos" e um RPO (Recovery Point Objective) de "5 minutos". No entanto, o ADR-001-cloud-provider-azure.md (remediado) projeta custos para Azure Database for PostgreSQL com backups pontuais padrão, cuja restauração pode levar horas, não minutos, e o RPO é tipicamente de 15 minutos ou mais. Os objetivos de resiliência são incompatíveis com a infraestrutura e o orçamento definidos.
+
+4. ANÁLISE ADVERSARIAL E TRADE-OFFS (O Advogado do Diabo)
+Suposição Mais Fraca: Alertas são Suficientes para Ação.
+
+Risco: A observability-strategy.md assume que a geração de alertas (ex: "Latência > 500ms") levará a uma remediação eficaz.
+
+Cenário de Falha (Alarme Fatigue): Em um evento de carga sazonal, o sistema gera 300 alertas de latência em uma hora. A equipe de plantão, sobrecarregada, ignora um alerta crítico de "falha de escrita no Event Store" no meio do ruído. Uma transação de pagamento é perdida permanentemente porque o alerta não foi diferenciado como sendo de "criticidade de negócio" vs. "degradação de performance". O trade-off entre o volume de alertas e a sua acionabilidade não foi abordado.
+
+5. PROPOSTA DE REFINAMENTO (Prova de Trabalho)
+P0: Hardening da Estratégia de Backup (SEV-1).
+
+Ação: Modificar o backup-restore-strategy.md para incluir proteção contra ameaças internas e alinhar com o RTO/RPO realista.
+
+Exemplo Conceitual:
+
+Diff
+
++ ### 3.4 Proteção Contra Ameaças Internas (Insider Threats)
++
++ **Requisito:** Todos os backups de produção DEVERÃO ser armazenados em uma conta de armazenamento Azure configurada com **Immutability Policies (WORM)**.
++ **Implementação:** Utilizar `Azure Blob Storage` com versionamento e `time-based retention policies` para impedir a deleção ou modificação de backups, mesmo por contas com privilégios de administrador, por um período de 30 dias.
++
++ ### 2.1 RTO e RPO (Revisados e Realistas)
++
+- **RTO (Recovery Time Objective):** < 15 minutos
+- **RPO (Recovery Point Objective):** 5 minutos
++ **RTO (Recovery Time Objective):** < 4 horas (Alinhado com Azure Geo-Restore)
++ **RPO (Recovery Point Objective):** < 15 minutos (Alinhado com Azure Point-in-Time Restore)
+P1: Introdução de Chaos Engineering.
+
+Ação: Adicionar uma seção sobre Chaos Engineering à reliability-resilience-strategy.md.
+
+Exemplo Conceitual:
+
+Diff
+
++ ### 4.5 Validação Proativa com Chaos Engineering
++
++ **Estratégia:** Adotar uma prática de "Game Days" quinzenais para executar experimentos de caos controlados em ambiente de staging.
++ **Ferramenta:** Azure Chaos Studio.
++ **Experimento Piloto Q4 2025:** Simular falha de uma zona de disponibilidade para o `Payment Processing Context` e validar se o sistema realiza o failover para outra zona dentro do RTO de 4 horas sem perda de dados.
+P2: Especificação de Health Checks Acionáveis.
+
+Ação: Detalhar a implementação de health checks no reliability-resilience-strategy.md.
+
+Exemplo Conceitual:
+
+Diff
+
++ ### 2.3 Implementação de Health Checks Detalhados
++
++ **Liveness Probe (`/api/health/live`):**
++ - **Propósito:** Verificar se o processo do container está rodando e respondendo.
++ - **Lógica:** Retorna `200 OK` sem dependências externas.
++ - **Ação do Orquestrador:** Se falhar, reinicia o container.
++
++ **Readiness Probe (`/api/health/ready`):**
++ - **Propósito:** Verificar se o container está pronto para receber tráfego.
++ - **Lógica:** Testa a conexão com o banco de dados (ex: `SELECT 1`) e com o Redis.
++ - **Ação do Orquestrador:** Se falhar, remove o container do load balancer até que o probe passe.
