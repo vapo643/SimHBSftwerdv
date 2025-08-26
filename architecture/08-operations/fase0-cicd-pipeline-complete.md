@@ -132,6 +132,108 @@ develop:
 
 ---
 
+## 🔒 SECURITY GATES (Banking-Grade DevSecOps)
+
+### **Configuração de Security Gates por Estágio:**
+
+#### **Build Stage - Security Gates:**
+```yaml
+security_gates:
+  build_stage:
+    dependency_vulnerability:
+      tool: "snyk + npm-audit + owasp-dependency-check"
+      threshold: "zero_critical_high"
+      blocking: true
+      timeout: "10 minutes"
+    
+    container_scanning:
+      tool: "trivy + docker-bench + hadolint"
+      policies: ["no_root_user", "no_secrets_in_layers", "minimal_attack_surface"]
+      threshold: "zero_critical"
+      blocking: true
+      sbom_generation: "cyclone-spdx"
+```
+
+#### **Pre-Production Stage - Advanced Security:**
+```yaml
+security_gates:
+  pre_prod_stage:
+    penetration_testing:
+      tool: "owasp-zap + nuclei + custom-scripts"
+      scope: ["api_endpoints", "authentication", "authorization", "data_validation"]
+      baseline: "security_baseline_v2.json"
+      threshold: "zero_high_severity"
+      blocking: true
+      
+    compliance_validation:
+      frameworks: ["sox_404", "pci_dss_v4", "iso27001", "lgpd"]
+      checks:
+        - audit_trail_verification
+        - data_encryption_at_rest
+        - secure_communication_tls13
+        - access_control_rbac
+        - incident_response_procedures
+      blocking: true
+      compliance_report: "automated"
+```
+
+#### **Production Deployment - Final Security Validation:**
+```yaml
+security_gates:
+  production_stage:
+    runtime_security:
+      tool: "falco + sysdig + osquery"
+      policies: ["runtime_behavior_monitoring", "anomaly_detection"]
+      
+    banking_compliance:
+      regulatory_approval: "required_for_financial_changes"
+      change_advisory_board: "automated_notification"
+      rollback_plan: "pre_approved_automated"
+      
+    monitoring_integration:
+      siem: "splunk_integration"
+      threat_intelligence: "misp_feeds"
+      alerting: "pagerduty_critical_path"
+```
+
+### **Banking-Specific Security Requirements:**
+
+#### **Four-Eyes Principle (Dual Control):**
+```yaml
+approval_workflow:
+  financial_code_changes:
+    required_reviewers: 2
+    approval_roles: ["senior_developer", "security_champion"]
+    compliance_officer: "required_for_payment_logic"
+    
+  production_deployment:
+    required_approvals: 3
+    roles: ["tech_lead", "security_officer", "compliance_manager"]
+    time_window: "business_hours_only"
+    emergency_override: "cto_approval_required"
+```
+
+#### **Regulatory Compliance Automation:**
+```yaml
+compliance_automation:
+  sox_compliance:
+    change_documentation: "automated_from_commits"
+    approval_evidence: "stored_immutably"
+    audit_trail: "blockchain_based_ledger"
+    
+  pci_dss_validation:
+    payment_data_flows: "automatically_mapped"
+    encryption_verification: "runtime_checks"
+    access_logging: "comprehensive_audit"
+    
+  lgpd_privacy:
+    pii_detection: "automated_scanning"
+    data_lineage: "tracked_automatically"
+    consent_management: "integration_verified"
+```
+
+---
+
 ## 🚦 PRÓXIMOS PASSOS
 
 ### **Imediato:**
@@ -162,11 +264,15 @@ develop:
 - ✅ Time to Restore - Automated rollback
 - ✅ Change Failure Rate - Post-deploy validation
 
-### **Security Compliance:**
+### **Security Compliance (Banking-Grade):**
 - ✅ SAST - Semgrep configured
 - ✅ SCA - Dependency scanning
 - ✅ Secret Detection - Multiple tools
 - ✅ SBOM - Via OWASP Dependency Check
+- ✅ **Dependency Vulnerability Scanning** - Zero critical vulnerabilities
+- ✅ **Container Security Scanning** - Trivy + Snyk
+- ✅ **Penetration Testing** - Automated DAST via OWASP ZAP
+- ✅ **Compliance Validation** - SOX/PCI DSS/ISO27001 checks
 
 ### **12-Factor App:**
 - ✅ Codebase - Git tracked

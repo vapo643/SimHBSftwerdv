@@ -506,7 +506,7 @@ kubectl apply -f emergency-rate-limit.yaml
 | Time to Detect (TTD) | < 5 min | < 15 min | < 1 hora |
 | Time to Respond (TTR) | < 15 min | < 30 min | < 4 horas |
 | Time to Mitigate (TTM) | < 1 hora | < 2 horas | < 8 horas |
-| Time to Resolve (MTTR) | < 2 horas | < 4 horas | < 24 horas |
+| Time to Resolve (MTTR) | < 1 hora | < 4 horas | < 24 horas |
 
 ### 8.2 Métricas de Qualidade
 
@@ -517,6 +517,7 @@ kubectl apply -f emergency-rate-limit.yaml
 | Post-mortems completos | 100% para SEV1/2 | Semanal |
 | Action items fechados | > 80% em 30 dias | Mensal |
 | False positive rate | < 20% | Semanal |
+| **Taxa de Automação de Resposta** | **> 80%** | **Semanal** |
 
 ### 8.3 Dashboard de Incidentes
 
@@ -532,7 +533,137 @@ kubectl apply -f emergency-rate-limit.yaml
 
 ---
 
-## 9. Ferramentas e Integrações
+## 9. Infraestrutura de Auto-Healing (AI-Powered)
+
+### 9.1 Estratégia de Auto-Recuperação
+
+**Objetivo:** Reduzir intervenção manual através de automação inteligente baseada em IA para detectar, diagnosticar e remediar incidentes automaticamente.
+
+**Cobertura:** 80%+ dos incidentes SEV2/SEV3, 40%+ SEV1 com aprovação humana.
+
+### 9.2 Interface de Automação de Incidentes
+
+```typescript
+interface IncidentAutomation {
+  detection: {
+    type: 'ai_anomaly_detection';
+    sources: ['metrics', 'logs', 'traces', 'user_behavior'];
+    confidence_threshold: 0.85;
+    false_positive_rate: '<5%';
+  };
+  
+  triage: {
+    type: 'automated_severity_classification';
+    ml_model: 'severity_predictor_v2';
+    factors: ['impact_scope', 'business_criticality', 'recovery_complexity'];
+    escalation_rules: 'confidence_based';
+  };
+  
+  response: {
+    type: 'circuit_breaker_activation';
+    strategies: ['service_isolation', 'traffic_shaping', 'graceful_degradation'];
+    approval_required: 'sev1_only';
+    timeout: '30_seconds';
+  };
+  
+  recovery: {
+    type: 'intelligent_rollback_decision';
+    analysis: ['deployment_correlation', 'change_impact', 'recovery_time_prediction'];
+    safety_checks: ['data_integrity', 'user_session_preservation'];
+    rollback_strategies: ['blue_green', 'canary_rollback', 'feature_flag_toggle'];
+  };
+  
+  learning: {
+    type: 'ml_pattern_recognition';
+    feedback_loop: 'post_incident_analysis';
+    model_training: 'continuous';
+    knowledge_base: 'incident_patterns_db';
+  };
+}
+```
+
+### 9.3 Cenários de Auto-Healing Implementados
+
+#### **Cenário 1: Database Connection Pool Exhaustion**
+```yaml
+trigger:
+  - metric: "db_connection_pool_usage > 90%"
+  - duration: "2 minutes"
+actions:
+  - auto_scaling:
+      target: "read_replicas"
+      min_replicas: 2
+      max_replicas: 5
+  - connection_cleanup:
+      terminate_idle: "timeout > 300s"
+      kill_long_running: "duration > 10min"
+  - alert_suppression:
+      suppress_similar: "15 minutes"
+```
+
+#### **Cenário 2: API Error Rate Spike**
+```yaml
+trigger:
+  - metric: "api_error_rate_5xx > 10%"
+  - duration: "3 minutes"
+actions:
+  - circuit_breaker:
+      activate: "failing_service"
+      fallback: "cached_response"
+  - auto_scaling:
+      horizontal: "+50% pods"
+      timeout: "5 minutes"
+  - traffic_shaping:
+      rate_limit: "aggressive"
+      priority_traffic: "premium_users"
+```
+
+#### **Cenário 3: Memory Leak Detection**
+```yaml
+trigger:
+  - metric: "memory_usage_trend > 15%/hour"
+  - duration: "30 minutes"
+actions:
+  - pod_restart:
+      strategy: "rolling"
+      preserve_sessions: true
+  - resource_increase:
+      memory_limit: "+50%"
+      temporary: "24 hours"
+  - monitoring_enhanced:
+      heap_dump: "automatic"
+      profiling: "enabled"
+```
+
+### 9.4 Governança e Segurança
+
+#### **Aprovação Automática vs Manual**
+| Severidade | Ação | Aprovação | Timeout |
+|------------|------|-----------|---------|
+| SEV3 | Restart pods, scaling | Automática | - |
+| SEV2 | Circuit breakers, rollback | Automática | 5 min |
+| SEV1 | Database failover | Manual + Automática | 2 min |
+| SEV1 | Data migration | Manual apenas | - |
+
+#### **Fail-Safe Mechanisms**
+- **Dead Man's Switch:** Auto-healing para se ação não resolver em 10 min
+- **Blast Radius Control:** Máximo 1 componente por vez
+- **Human Override:** Comando `pause-automation` disponível 24/7
+- **Audit Trail:** Todas as ações registradas com justificativa IA
+
+### 9.5 Métricas de Auto-Healing
+
+| Métrica | Meta | Frequência |
+|---------|------|------------|
+| **Incidents Auto-Resolved** | > 80% (SEV2/3) | Semanal |
+| **False Auto-Action Rate** | < 5% | Diária |
+| **Human Intervention Required** | < 20% (SEV2/3) | Semanal |
+| **Auto-Healing MTTR** | < 5 min (SEV2/3) | Tempo real |
+| **Cost Avoidance** | > R$ 50k/mês | Mensal |
+
+---
+
+## 10. Ferramentas e Integrações
 
 ### 9.1 Stack de Observabilidade
 
