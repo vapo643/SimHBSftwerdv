@@ -1177,40 +1177,40 @@ export default function Pagamentos() {
                   <CardContent>
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 text-sm">
-                        {verificacoes.ccbAssinada ? (
+                        {(verificacoes as any).ccbAssinada ? (
                           <CheckCircle className="h-4 w-4 text-green-600" />
                         ) : (
                           <XCircle className="h-4 w-4 text-red-600" />
                         )}
                         <span
-                          className={verificacoes.ccbAssinada ? 'text-green-700' : 'text-red-700'}
+                          className={(verificacoes as any).ccbAssinada ? 'text-green-700' : 'text-red-700'}
                         >
                           CCB Assinada e Localizada
                         </span>
                       </div>
                       <div className="flex items-center gap-2 text-sm">
-                        {verificacoes.boletosGerados ? (
+                        {(verificacoes as any).boletosGerados ? (
                           <CheckCircle className="h-4 w-4 text-green-600" />
                         ) : (
                           <XCircle className="h-4 w-4 text-red-600" />
                         )}
                         <span
                           className={
-                            verificacoes.boletosGerados ? 'text-green-700' : 'text-red-700'
+                            (verificacoes as any).boletosGerados ? 'text-green-700' : 'text-red-700'
                           }
                         >
                           Boletos Registrados no Inter
                         </span>
                       </div>
                       <div className="flex items-center gap-2 text-sm">
-                        {verificacoes.titularidadeConta ? (
+                        {(verificacoes as any).titularidadeConta ? (
                           <CheckCircle className="h-4 w-4 text-green-600" />
                         ) : (
                           <AlertCircle className="h-4 w-4 text-yellow-600" />
                         )}
                         <span
                           className={
-                            verificacoes.titularidadeConta ? 'text-green-700' : 'text-yellow-700'
+                            (verificacoes as any).titularidadeConta ? 'text-green-700' : 'text-yellow-700'
                           }
                         >
                           Titularidade da Conta
@@ -1228,7 +1228,7 @@ export default function Pagamentos() {
                       <CardTitle className="text-base">Documentação</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      {verificacoes.documentosCcb?.urlCcb ? (
+                      {(verificacoes as any).documentosCcb?.urlCcb ? (
                         <Button
                           variant="outline"
                           size="sm"
@@ -1326,13 +1326,13 @@ export default function Pagamentos() {
                               <strong>Titular:</strong> {selectedPagamento.contaBancaria.titular}
                             </p>
                           </>
-                        ) : verificacoes.dadosPagamento?.destino?.pix ? (
+                        ) : (verificacoes as any).dadosPagamento?.destino?.pix ? (
                           <>
                             <p>
                               <strong>Tipo:</strong> PIX
                             </p>
                             <p>
-                              <strong>Chave:</strong> {verificacoes.dadosPagamento.destino.pix}
+                              <strong>Chave:</strong> {(verificacoes as any).dadosPagamento.destino.pix}
                             </p>
                           </>
                         ) : (
@@ -1422,8 +1422,8 @@ export default function Pagamentos() {
                 }}
                 disabled={
                   !paymentPassword ||
-                  !verificacoes?.ccbAssinada ||
-                  !verificacoes?.boletosGerados ||
+                  !(verificacoes as any)?.ccbAssinada ||
+                  !(verificacoes as any)?.boletosGerados ||
                   confirmarDesembolsoMutation.isPending
                 }
               >

@@ -1153,11 +1153,11 @@ export default function CobrancasPage() {
                             {new Intl.NumberFormat('pt-BR', {
                               style: 'currency',
                               currency: 'BRL',
-                            }).format(boleto.valor)}
+                            }).format(boleto.valor ?? 0)}
                           </p>
                           <p className="text-xs text-muted-foreground">
                             Vencimento atual:{' '}
-                            {new Date(boleto.dataVencimento).toLocaleDateString('pt-BR')}
+                            {new Date(boleto.dataVencimento ?? new Date()).toLocaleDateString('pt-BR')}
                           </p>
                         </div>
                       </div>
@@ -1285,7 +1285,7 @@ export default function CobrancasPage() {
                               {new Intl.NumberFormat('pt-BR', {
                                 style: 'currency',
                                 currency: 'BRL',
-                              }).format(debtInfo.valorPago)}
+                              }).format(debtInfo.valorPago ?? 0)}
                             </p>
                           </div>
                           <div>
@@ -1294,7 +1294,7 @@ export default function CobrancasPage() {
                               {new Intl.NumberFormat('pt-BR', {
                                 style: 'currency',
                                 currency: 'BRL',
-                              }).format(debtInfo.valorRestante)}
+                              }).format(debtInfo.valorRestante ?? 0)}
                             </p>
                           </div>
                           <div>
@@ -1304,11 +1304,11 @@ export default function CobrancasPage() {
                         </div>
                       </div>
 
-                      {debtInfo.boletosAtivos?.length > 0 && (
+                      {(debtInfo.boletosAtivos?.length ?? 0) > 0 && (
                         <div className="rounded-lg border p-4">
                           <h4 className="mb-2 font-medium">Boletos Ativos</h4>
                           <div className="max-h-40 space-y-2 overflow-y-auto">
-                            {debtInfo.boletosAtivos.map((b: any, idx: number) => (
+                            {(debtInfo.boletosAtivos ?? []).map((b: any, idx: number) => (
                               <div
                                 key={idx}
                                 className="flex justify-between rounded bg-muted p-2 text-sm"
@@ -1369,7 +1369,7 @@ export default function CobrancasPage() {
                       {new Intl.NumberFormat('pt-BR', {
                         style: 'currency',
                         currency: 'BRL',
-                      }).format(debtInfo.valorRestante)}
+                      }).format(debtInfo.valorRestante ?? 0)}
                     </p>
                   </div>
 
@@ -1416,10 +1416,10 @@ export default function CobrancasPage() {
                         {new Intl.NumberFormat('pt-BR', {
                           style: 'currency',
                           currency: 'BRL',
-                        }).format(debtInfo.valorRestante - novoValorQuitacao)}
+                        }).format((debtInfo.valorRestante ?? 0) - novoValorQuitacao)}
                       </p>
                       <p className="text-xs text-green-600">
-                        ({((1 - novoValorQuitacao / debtInfo.valorRestante) * 100).toFixed(1)}% de
+                        ({((1 - novoValorQuitacao / (debtInfo.valorRestante ?? 1)) * 100).toFixed(1)}% de
                         desconto)
                       </p>
                     </div>
@@ -1464,7 +1464,7 @@ export default function CobrancasPage() {
                             {new Intl.NumberFormat('pt-BR', {
                               style: 'currency',
                               currency: 'BRL',
-                            }).format(debtInfo.valorRestante - novoValorQuitacao)}
+                            }).format((debtInfo.valorRestante ?? 0) - novoValorQuitacao)}
                           </li>
                         </ul>
                       </div>
@@ -1480,7 +1480,7 @@ export default function CobrancasPage() {
                           {new Intl.NumberFormat('pt-BR', {
                             style: 'currency',
                             currency: 'BRL',
-                          }).format(debtInfo.valorRestante)}
+                          }).format(debtInfo.valorRestante ?? 0)}
                         </p>
                       </div>
                       <div>
@@ -1498,7 +1498,7 @@ export default function CobrancasPage() {
                           {new Intl.NumberFormat('pt-BR', {
                             style: 'currency',
                             currency: 'BRL',
-                          }).format(debtInfo.valorRestante - novoValorQuitacao)}
+                          }).format((debtInfo.valorRestante ?? 0) - novoValorQuitacao)}
                         </p>
                       </div>
                       <div>
@@ -1556,8 +1556,8 @@ export default function CobrancasPage() {
                 <Button
                   onClick={() => {
                     descontoQuitacaoMutation.mutate({
-                      propostaId: selectedPropostaId,
-                      desconto: debtInfo.valorRestante - novoValorQuitacao,
+                      propostaId: selectedPropostaId ?? '',
+                      desconto: (debtInfo?.valorRestante ?? 0) - novoValorQuitacao,
                       novasParcelas,
                     });
                   }}
@@ -1759,7 +1759,7 @@ export default function CobrancasPage() {
                               />
                             </div>
                             <div className="flex gap-2">
-                              <Select value={statusObservacao} onValueChange={setStatusObservacao}>
+                              <Select value={statusObservacao} onValueChange={(value: string) => setStatusObservacao(value as any)}>
                                 <SelectTrigger className="w-[250px]">
                                   <SelectValue placeholder="Selecione o status" />
                                 </SelectTrigger>
@@ -1828,7 +1828,7 @@ export default function CobrancasPage() {
                                           {obs.tipoContato}
                                         </Badge>
                                         <span className="text-xs text-muted-foreground">
-                                          {format(new Date(obs.createdAt), "dd/MM/yyyy 'às' HH:mm")}
+                                          {format(new Date(obs.createdAt ?? new Date()), "dd/MM/yyyy 'às' HH:mm")}
                                         </span>
                                       </div>
                                       <p className="mt-2 text-sm">{obs.observacao}</p>

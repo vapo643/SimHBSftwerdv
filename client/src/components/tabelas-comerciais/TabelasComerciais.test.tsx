@@ -3,6 +3,10 @@ import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import TabelasComerciais from '@/pages/configuracoes/tabelas';
 
+declare global {
+  var jest: any;
+}
+
 // Mock do DashboardLayout
 jest.mock('@/components/DashboardLayout', () => {
   return function MockDashboardLayout({

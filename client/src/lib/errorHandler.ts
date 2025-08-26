@@ -58,7 +58,7 @@ const httpCodeToErrorCode: Record<number, string> = {
  * Handler centralizado para erros da API
  * Converte erros técnicos em mensagens amigáveis ao usuário
  */
-export const handleApiError = (error: unknown) => {
+export const handleApiError = (error: any) => {
   // Log técnico para desenvolvedores (apenas em desenvolvimento)
   if (process.env.NODE_ENV === 'development') {
     console.error('Technical Error Details:', error);
@@ -122,8 +122,8 @@ export const handleApiError = (error: unknown) => {
  * Helper para validar resposta da API
  */
 export const validateApiResponse = (response: unknown) => {
-  if (!response || response.error) {
-    throw new Error(response?.error?.message || 'Resposta inválida da API');
+  if (!response || (response as any).error) {
+    throw new Error((response as any)?.error?.message || 'Resposta inválida da API');
   }
   return response;
 };

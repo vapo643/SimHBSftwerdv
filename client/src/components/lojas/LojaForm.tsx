@@ -67,7 +67,7 @@ const LojaForm: React.FC<LojaFormProps> = ({
     queryFn: async () => {
       const { api } = await import('@/lib/apiClient');
       const response = await api.get<Parceiro[]>('/api/parceiros');
-      return response.data;
+      return (response as any).data || response;
     },
   });
 
