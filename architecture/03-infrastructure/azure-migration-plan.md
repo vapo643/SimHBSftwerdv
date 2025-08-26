@@ -140,36 +140,157 @@ Status: PLANNED
 
 ---
 
+## 🔄 **ESTRATÉGIA DE DEPLOYMENT: BLUE-GREEN**
+
+### 4.1 **Azure Container Apps - Blue-Green Configuration**
+
+```yaml
+# Blue-Green Deployment Strategy
+containerApps:
+  configuration:
+    activeRevisionsMode: "multiple"
+    
+  revisions:
+    blue:
+      suffix: "blue"
+      trafficWeight: 100
+      replicas: 2
+    green:
+      suffix: "green" 
+      trafficWeight: 0
+      replicas: 2
+      
+  deployment:
+    strategy: "blue-green"
+    healthCheck:
+      path: "/health"
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      failureThreshold: 3
+    
+    trafficSplitting:
+      phases:
+        - weight: 0    # Initial - green gets no traffic
+        - weight: 10   # Canary - 10% traffic after health checks
+        - weight: 50   # Progressive - 50% traffic after 10min
+        - weight: 100  # Full - 100% traffic after 30min
+      
+  rollback:
+    automatic: true
+    conditions:
+      errorRate: "> 5%"
+      latencyP99: "> 800ms"
+      healthCheckFailures: 3
+    maxRollbackTime: "5m"
+    strategy: "immediate"
+```
+
+### 4.2 **Deployment Workflow**
+
+```bash
+#!/bin/bash
+# Blue-Green Deployment Script
+
+echo "🔄 Iniciando Blue-Green Deployment..."
+
+# 1. Deploy Green Revision
+az containerapp revision copy \
+  --name simpix-api \
+  --resource-group rg-simpix-prod \
+  --from-revision blue \
+  --to-revision green
+
+# 2. Health Check Validation
+echo "⏳ Validating Green revision health..."
+for i in {1..10}; do
+  health_status=$(curl -f https://simpix-green.azurecontainerapps.io/health)
+  if [[ $health_status == "healthy" ]]; then
+    echo "✅ Green revision healthy"
+    break
+  fi
+  sleep 30
+done
+
+# 3. Progressive Traffic Shifting
+echo "🔀 Shifting traffic progressively..."
+
+# 10% to green
+az containerapp revision set-traffic \
+  --name simpix-api \
+  --resource-group rg-simpix-prod \
+  --revision-weight blue=90,green=10
+
+sleep 600  # Wait 10 minutes
+
+# 50% to green
+az containerapp revision set-traffic \
+  --name simpix-api \
+  --resource-group rg-simpix-prod \
+  --revision-weight blue=50,green=50
+
+sleep 1200  # Wait 20 minutes
+
+# 100% to green (full cutover)
+az containerapp revision set-traffic \
+  --name simpix-api \
+  --resource-group rg-simpix-prod \
+  --revision-weight green=100
+
+echo "✅ Blue-Green deployment completed successfully!"
+```
+
+---
+
 ## 💰 ESTIMATIVA DE CUSTOS AZURE
 
-### Recursos Mensais
+### Recursos Mensais (CORRIGIDO)
 ```yaml
 Container Apps:
-  - 2 vCPU, 4GB RAM: $50
-  - Requests: $10
+  - 2 vCPU, 4GB RAM (2 revisions): $100
+  - Requests + Traffic Manager: $25
   
 PostgreSQL Flexible:
   - B2s (2 vCore, 4GB): $60
   - Storage 32GB: $5
-  - Backup: $5
+  - Backup Geo-redundant: $15
   
 Redis Cache:
   - C0 Basic (250MB): $20
   
 Storage Account:
   - 100GB + transactions: $10
+  - Egress data transfer: $45
   
 Key Vault:
-  - Operations: $5
+  - Operations + HSM: $25
   
 Application Gateway:
-  - Basic: $30
+  - Standard v2 + WAF: $85
   
 DataDog:
-  - APM + Logs: $100
+  - APM + Logs + Infrastructure: $150
   
-TOTAL: ~$295/mês
+Network Security:
+  - DDoS Protection: $30
+  - VPN Gateway: $35
+  
+TOTAL REALÍSTICO: ~$605/mês
 ```
+
+### ⚠️ **CORREÇÃO DE ESTIMATIVA CRÍTICA**
+
+**Estimativa Original:** $295/mês ❌  
+**Estimativa Corrigida:** $605/mês ✅  
+**Diferença:** +$310/mês (+105% de aumento)
+
+**Custos Omitidos Anteriormente:**
+- Egress data transfer: $45/mês
+- Application Gateway v2 + WAF: +$55/mês
+- Backup geo-redundante: +$10/mês
+- DDoS Protection: $30/mês
+- Dual revision overhead: +$50/mês
+- DataDog infrastructure monitoring: +$50/mês
+- Key Vault HSM: +$20/mês
 
 ### Comparação
 - **Atual (Replit + Supabase):** $20/mês

@@ -52,10 +52,18 @@ terraform {
   }
   
   backend "azurerm" {
-    resource_group_name  = "simpix-terraform-state"
-    storage_account_name = "simpixterraformstate"
-    container_name      = "tfstate"
-    key                 = "prod.terraform.tfstate"
+    resource_group_name   = "simpix-terraform-state-prod"
+    storage_account_name  = "simpixprodtfstate001"
+    container_name       = "terraform-state"
+    key                  = "prod.terraform.tfstate"
+    
+    # --- SECURITY HARDENING MANDATORY ---
+    use_oidc             = true
+    use_azuread_auth     = true
+    snapshot             = true
+    
+    # Network Security
+    # storage_account_ip_rules = ["203.0.113.1/32"]  # GitHub Actions IPs
   }
 }
 ```
@@ -286,6 +294,12 @@ output "resource_group_id" {
   description = "The ID of the resource group"
   value       = azurerm_resource_group.main.id
   sensitive   = false
+}
+
+output "key_vault_uri" {
+  description = "The URI of the Azure Key Vault"
+  value       = azurerm_key_vault.main.vault_uri
+  sensitive   = true
 }
 
 # 5. LOCALS FOR COMPUTED VALUES
@@ -635,6 +649,60 @@ func TestNetworkingModule(t *testing.T) {
     
     vnet := azure.GetVirtualNetwork(t, resourceGroupName, vnetName, "")
     assert.Equal(t, "10.0.0.0/16", vnet.AddressSpace.AddressPrefixes[0])
+}
+
+// CRITICAL: Security Compliance Tests
+func TestSecurityGroupsCompliance(t *testing.T) {
+    t.Parallel()
+    
+    terraformOptions := &terraform.Options{
+        TerraformDir: "../modules/networking",
+        Vars: map[string]interface{}{
+            "project":     "test",
+            "environment": "test",
+            "location":    "brazilsouth",
+        },
+    }
+    
+    defer terraform.Destroy(t, terraformOptions)
+    terraform.InitAndApply(t, terraformOptions)
+    
+    // Validate OWASP compliance
+    nsgRules := terraform.Output(t, terraformOptions, "nsg_rules")
+    assert.True(t, validateOWASPRules(nsgRules))
+    
+    // Validate no public database access
+    subnetConfig := terraform.Output(t, terraformOptions, "database_subnet_config")
+    assert.False(t, hasPublicDatabaseAccess(subnetConfig))
+    
+    // Validate encryption in transit
+    appConfig := terraform.Output(t, terraformOptions, "app_configuration")
+    assert.True(t, validateTLSMinVersion(appConfig, "1.3"))
+}
+
+func TestDisasterRecoveryCapabilities(t *testing.T) {
+    t.Parallel()
+    
+    terraformOptions := &terraform.Options{
+        TerraformDir: "../modules/database",
+        Vars: map[string]interface{}{
+            "project":     "test",
+            "environment": "test",
+            "location":    "brazilsouth",
+        },
+    }
+    
+    defer terraform.Destroy(t, terraformOptions)
+    terraform.InitAndApply(t, terraformOptions)
+    
+    // Test cross-region backup restore
+    dbConfig := terraform.Output(t, terraformOptions, "database_config")
+    assert.True(t, canRestoreFromGeoBackup(dbConfig))
+    
+    // Test RTO compliance (< 1 hour)
+    backupSnapshot := terraform.Output(t, terraformOptions, "backup_snapshot")
+    restoreTime := measureRestoreTime(backupSnapshot)
+    assert.LessOrEqual(t, restoreTime, time.Hour)
 }
 
 // INTEGRATION TEST - Cross-Module Dependencies

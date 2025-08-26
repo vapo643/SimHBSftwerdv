@@ -156,6 +156,12 @@ STORAGE_ACCESS_KEY=minioadmin
 STORAGE_SECRET_KEY=minioadmin123
 STORAGE_BUCKET=simpix-local
 
+# Key Vault Integration (Local Mock)
+AZURE_KEY_VAULT_URL=http://localhost:3000/mock/keyvault
+AZURE_CLIENT_ID=local-mock-client
+AZURE_CLIENT_SECRET=local-mock-secret
+AZURE_TENANT_ID=local-mock-tenant
+
 # Email (MailHog)
 SMTP_HOST=localhost
 SMTP_PORT=1025
@@ -441,14 +447,30 @@ interface StagingDataStrategy {
   
   dataSubsets: {
     users: {
-      strategy: 'anonymized',
-      sample: '10%',  // 10% of production users
+      strategy: 'deterministic_sampling',
+      sample: {
+        strategy: 'stratified_sampling_by_hash',
+        hash_key: 'user_id',
+        salt: 'simpix_salt_2025_Q3',
+        algorithm: 'sha256',
+        modulo: 10,
+        remainder: [0]  // Always same 10%
+      },
       piiMasking: {
-        name: 'faker.name()',
-        email: 'hash(email) + @example.com',
-        phone: 'XXX-XXX-' + last4,
-        cpf: 'XXX.XXX.XXX-' + checksum,
-        address: 'faker.address()'
+        library: 'faker-js@8.4.1',
+        seed_strategy: 'deterministic_from_pii_hash',
+        algorithms: {
+          name: 'faker.name({ seed: sha256(original_name + salt) })',
+          email: 'sha256(email + salt).substring(0,8) + "@maskeduser.example.com"',
+          phone: 'preserve_area_code + masked_digits',
+          cpf: 'preserve_checksum_mask(cpf)',
+          address: 'faker.address({ seed: sha256(original_address + salt) })'
+        },
+        validation: {
+          referential_integrity: 'preserved',
+          deterministic: 'guaranteed',
+          reversible: false
+        }
       }
     };
     
@@ -477,15 +499,39 @@ interface StagingDataStrategy {
     preRefresh: [
       'backup_current_staging',
       'validate_source_connectivity',
-      'check_disk_space'
+      'check_disk_space',
+      'validate_deterministic_hash_functions'
     ];
     
     postRefresh: [
       'verify_row_counts',
       'test_sample_queries',
       'validate_pii_masking',
-      'run_smoke_tests'
+      'run_smoke_tests',
+      'verify_referential_integrity',
+      'validate_deterministic_sampling'
     ];
+    
+    deterministicSamplingValidation: {
+      sql: `
+        -- Validate same 10% users selected across refreshes
+        WITH current_sample AS (
+          SELECT user_id FROM staging.users
+        ),
+        expected_sample AS (
+          SELECT user_id FROM production.users 
+          WHERE abs(hashtext(user_id::text || 'simpix_salt_2025_Q3')::bigint) % 10 = 0
+        )
+        SELECT 
+          (SELECT COUNT(*) FROM current_sample) = (SELECT COUNT(*) FROM expected_sample) AS count_match,
+          NOT EXISTS (
+            SELECT user_id FROM current_sample
+            EXCEPT 
+            SELECT user_id FROM expected_sample
+          ) AS exact_match;
+      `,
+      expected: { count_match: true, exact_match: true }
+    };
   };
 }
 ```
