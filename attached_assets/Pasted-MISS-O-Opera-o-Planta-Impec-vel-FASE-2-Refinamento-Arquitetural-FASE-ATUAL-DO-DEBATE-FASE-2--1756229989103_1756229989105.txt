@@ -1,0 +1,144 @@
+MISSÃO: Operação Planta Impecável - FASE 2 (Refinamento Arquitetural)
+FASE ATUAL DO DEBATE: FASE 2, Thread 2.4: Infraestrutura e Migração
+
+PERSONA DO AGENTE (GEM 07): Você deve operar como um Arquiteto Auditor Chefe (Red Team). A sua função não é defender o trabalho original, mas sim identificar criticamente as suas falhas, ambiguidades e desalinhamentos com a nossa Doutrina Âncora. O seu sucesso é medido pela profundidade da sua autocrítica. O padrão é "Impecável".
+
+ARTEFATO(S) EM FOCO:
+
+architecture/03-infrastructure/azure-migration-plan.md
+
+architecture/03-infrastructure/infrastructure-as-code-strategy.md
+
+architecture/03-infrastructure/environments-strategy.md
+
+DOUTRINA ÂNCORA (VERDADE FUNDAMENTAL):
+A sua auditoria DEVE ser rigorosamente baseada nos seguintes KBs (já no seu contexto).
+
+KB_ Guia de Estilo de Design de APIs V1.0.pdf
+
+KB_ Compêndio de Padrões de Arquitetura de Nuvem V1.0.pdf
+
+[DIRETRIZ DE PESQUISA WEB (MANDATÓRIA)]
+
+Você está autorizado a utilizar a sua capacidade de pesquisa na web para enriquecer a sua análise. No entanto, esta capacidade deve ser exercida com o máximo rigor e sob as seguintes regras de engajamento inegociáveis:
+
+1. Prioridade às Fontes Primárias: A sua busca deve priorizar fontes de confiança e alta qualidade. A hierarquia de fontes aceitáveis é:
+
+P0 (Crítica): Documentação Oficial (ex: Microsoft Learn para Azure, Documentação do Terraform, RFCs do IETF).
+
+P1 (Alta): Blogs de Engenharia de Empresas de Elite (ex: Netflix, Google, AWS, Microsoft, Martin Fowler).
+
+P2 (Média): Artigos e Whitepapers de Consultorias de Renome (ex: ThoughtWorks, Gartner).
+
+2. Proibição de Fontes Duvidosas: A utilização de fontes de baixa qualidade é terminantemente proibida.
+
+3. Justificativa Estratégica (O "Porquê"): A nossa base de conhecimento arquitetural é um ativo crítico. A introdução de informações de fontes não confiáveis representa um risco de contaminação do projeto. A sua função é usar a web para aumentar a precisão, não para introduzir ruído.
+
+TAREFAS DE AUDITORIA CRÍTICA:
+
+Analise os artefatos em foco e responda às seguintes perguntas de auditoria. Seja exaustivo, cético e específico.
+
+1. ALINHAMENTO DOUTRINÁRIO (O Teste do Padrão Ouro)
+Violação P0: Gerenciamento de Estado (State Management) Inseguro no IaC.
+
+Conflito: O artefato infrastructure-as-code-strategy.md define uma configuração de backend Terraform que armazena o arquivo de estado (.tfstate) em um Azure Storage Account sem as proteções de segurança mandatórias. O estado do Terraform pode conter segredos em texto plano.
+
+Violação Específica: A configuração do backend omite completamente a configuração de versionamento, backup, criptografia e autenticação segura (OIDC/Azure AD), violando diretamente as melhores práticas de segurança da Microsoft para gerenciamento de estado do Terraform.
+
+2. PROFUNDIDADE E ACIONABILIDADE (O Teste do Engenheiro)
+Ambiguidade Crítica #1: Estratégia de Atualização de Dados de Teste.
+
+Artefato: environments-strategy.md.
+
+Texto: A seção "Data Management Strategy" define uma amostragem de 10% e mascaramento de PII, mas de forma superficial.
+
+Perguntas Críticas:
+
+Como a amostragem de 10% dos usuários será determinística? Se a base de dados for atualizada, como garantimos que o mesmo subconjunto de usuários seja selecionado para manter a consistência dos testes de regressão?
+
+Qual o algoritmo de hash e a biblioteca específica (faker.js qual versão?) a ser usada para o mascaramento de PII? Como garantimos que o mascaramento preserve a integridade referencial entre tabelas?
+
+Ambiguidade Crítica #2: Testes de Contrato de Infraestrutura.
+
+Artefato: infrastructure-as-code-strategy.md.
+
+Texto: A seção de testes menciona "contract tests" que validam "output.vnet_id != ''".
+
+Perguntas Críticas:
+
+Esta validação é trivial. Quais são os testes de contrato reais que verificarão as regras críticas do Network Security Group (NSG), a ausência de acesso público ao banco de dados e a versão mínima do TLS?
+
+Como os testes de conectividade entre os diferentes módulos Terraform (ex: App Service pode se comunicar com o Banco de Dados) serão executados?
+
+3. COESÃO SISTÊMICA (O Teste de Alinhamento)
+Inconsistência #1: Orquestração de Segredos.
+
+Conflito: O azure-migration-plan.md corretamente identifica a necessidade de usar o Azure Key Vault para gerenciar segredos. No entanto, a infrastructure-as-code-strategy.md define um backend Terraform que não faz referência ou se integra ao Key Vault para obter segredos em tempo de execução, sugerindo uma quebra no fluxo de gerenciamento de segredos.
+
+4. ANÁLISE ADVERSARIAL E TRADE-OFFS (O Advogado do Diabo)
+Suposição Mais Fraca: Estimativa de Custos da Migração.
+
+Risco: A estimativa de custos de $295/mês no azure-migration-plan.md é perigosamente otimista e ignora custos operacionais significativos. Ela omite custos de transferência de dados (egress), o custo de um Application Gateway com WAF (essencial para segurança) e os custos de armazenamento geo-redundante para backups, que são requisitos de nossos NFRs.
+
+Cenário de Falha (Choque de Custos): Após a migração, os custos reais da Azure chegam a $1500/mês, 5x acima do planejado. Isso quebra o orçamento do projeto, força uma re-arquitetura de emergência para cortar custos, atrasa o roadmap e destrói a credibilidade da equipe de engenharia perante os stakeholders.
+
+5. PROPOSTA DE REFINAMENTO (Prova de Trabalho)
+P0: Hardening do Gerenciamento de Estado do Terraform (SEV-1).
+
+Ação: Modificar infrastructure-as-code-strategy.md para implementar um backend Terraform seguro.
+
+Exemplo Conceitual:
+
+Diff
+
+- backend "azurerm" {
+-   resource_group_name  = "simpix-terraform-state"
+-   storage_account_name = "simpixterraformstate"
+-   container_name      = "tfstate"
+-   key                 = "prod.terraform.tfstate"
+- }
++ backend "azurerm" {
++   resource_group_name   = "simpix-terraform-state-prod"
++   storage_account_name  = "simpixprodtfstate001"
++   container_name       = "terraform-state"
++   key                  = "prod.terraform.tfstate"
++   # --- SECURITY HARDENING MANDATORY ---
++   use_oidc             = true
++   use_azuread_auth     = true
++   snapshot             = true
++ }
+P1: Padrão de Deployment Blue-Green para Container Apps.
+
+Ação: Adicionar ao azure-migration-plan.md a estratégia de deployment.
+
+Exemplo Conceitual:
+
+Diff
+
++ ### 4.3 Estratégia de Deployment: Blue-Green com Azure Container Apps
++
++ **activeRevisionsMode:** "multiple"
++ **Traffic Splitting:** A nova versão ("green") receberá 0% do tráfego inicialmente. Após a validação de health checks, o tráfego será progressivamente aumentado (10%, 50%, 100%) ao longo de 60 minutos.
++ **Rollback:** O rollback para a revisão anterior ("blue") será automático se a taxa de erro da nova revisão exceder 5% ou a latência p99 exceder 800ms por 5 minutos.
+P2: Especificação de Atualização de Dados Determinística.
+
+Ação: Detalhar a estratégia de dados em environments-strategy.md.
+
+Exemplo Conceitual:
+
+Diff
+
+- sample: '10%'
+- name: 'faker.name()'
+- email: 'hash(email) + @example.com'
++ sample: {
++   strategy: 'stratified_sampling_by_hash',
++   hash_key: 'user_id',
++   salt: 'simpix_salt_2025_Q3',
++   modulo: 10
++ }
++ piiMasking: {
++   library: 'faker-js@8.4.1',
++   seed_strategy: 'deterministic_from_pii_hash',
++   algorithm: 'sha256'
++ }
