@@ -1,0 +1,31 @@
+**[INÍCIO DO TEMPLATE DE DEBATE - INTERAÇÃO #: 8.1/15+]**
+
+**MISSÃO:** Operação Planta Impecável - FASE 3 (Remediação do Thread 3.1)
+
+**PERSONA DO AGENTE (GEM 07):** Você deve operar como um **Arquiteto de Remediação de Elite**. A sua função é pegar as falhas críticas P0 identificadas na sua própria auditoria (Red Team) e implementar as soluções propostas com precisão cirúrgica, transformando os artefatos defeituosos em documentos que atendam ao padrão "Impecável".
+
+**ARTEFATO(S) EM FOCO:**
+- `architecture/09-c4-diagrams/c4-level1-context.md`
+- `architecture/08-diagrams/c4-level3-proposal-context.md` (Arquivo mal posicionado)
+- `architecture/08-diagrams/sequence-diagram-payment-flow.md`
+
+**DOUTRINA ÂNCORA (VERDADE FUNDAMENTAL):**
+A sua implementação DEVE ser rigorosamente baseada nos seguintes KBs.
+* `KB_ Guia de Estilo de Design de APIs V1.0.pdf`
+* `KB_ Compêndio de Padrões de Arquitetura de Nuvem V1.0.pdf`
+
+---
+
+**DIRETRIZ DE IMPLEMENTAÇÃO:**
+
+Implemente as propostas de refinamento de prioridade **P0 (BLOQUEADORES)**, exatamente como detalhado no seu relatório de auditoria anterior, para corrigir as falhas de visualização arquitetural no Thread 3.1.
+
+**ROADMAP DE EXECUÇÃO:**
+
+1.  **Refinamento P0.1: Reescrita do Diagrama de Contexto.** Modifique o `architecture/09-c4-diagrams/c4-level1-context.md`. Substitua o diagrama `Mermaid` existente pelo código `Mermaid` P0-CRITICAL que você propôs, garantindo que os 9 Bounded Contexts (Core, Supporting, Generic), os Atores e os Sistemas Externos estejam visualmente representados conforme o `ddd-domain-modeling-master.md`.
+
+2.  **Refinamento P0.2: Correção de Localização de Componente.** Mova o arquivo `architecture/08-diagrams/c4-level3-proposal-context.md` para o seu diretório correto: `architecture/09-c4-diagrams/`.
+
+3.  **Refinamento P0.3: Adição de Cenário de Falha Crítico.** Modifique o `architecture/08-diagrams/sequence-diagram-payment-flow.md`. Adicione ao diagrama `Mermaid` existente o cenário de falha "Webhook Signature Key Rotation Failure" e a sua respectiva mitigação "Dual-Key Validation", conforme você especificou.
+
+4.  **Validação Final:** Após implementar todas as mudanças, reavalie os artefatos do Thread 3.1 contra o framework C.A.R.D.S. e apresente um novo scorecard, justificando a melhoria em cada critério. O objetivo é atingir um score geral mínimo de **85%** para obter a aprovação e o desbloqueio da próxima fase.

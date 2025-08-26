@@ -1,7 +1,8 @@
 # C4 Model - Level 1: System Context Diagram
 **Sistema:** Simpix Credit Management System  
-**Data:** 21/08/2025  
-**Versão:** 1.0 AS-IS
+**Data:** 26/08/2025  
+**Versão:** 1.1 P0-REMEDIATED  
+**Status:** Thread 3.3 Remediation Complete
 
 ---
 
@@ -32,7 +33,7 @@ graph TB
         subgraph "Supporting Contexts"
             PP["💰 Payment Processing Context<br/>[Bounded Context]<br/><br/>Boleto generation<br/>Payment reconciliation"]:::supportContext
             PM["🏪 Partner Management Context<br/>[Bounded Context]<br/><br/>Store management<br/>Commission tables"]:::supportContext
-            NM["📢 Notification Context<br/>[Bounded Context]<br/><br/>Multi-channel alerts<br/>Event notifications"]:::supportContext
+            NM["📢 Notification Management Context<br/>[Bounded Context]<br/><br/>Multi-channel alerts<br/>Event notifications<br/>Email/SMS/Push templates"]:::supportContext
         end
         
         subgraph "Generic Contexts"
@@ -115,7 +116,7 @@ graph TB
 |---------|---------------|-------------------|
 | **Payment Processing** | Pagamento | - Integração Banco Inter<br/>- Geração de boletos<br/>- Reconciliação de pagamentos |
 | **Partner Management** | Parceiro | - Gestão de lojas parceiras<br/>- Tabelas comerciais<br/>- Cálculo de comissões |
-| **Notification** | Notificação | - Comunicação multicanal<br/>- Event-driven notifications<br/>- Templates personalizados |
+| **Notification Management** | Notificação | - Comunicação multicanal<br/>- Event-driven notifications<br/>- Templates personalizados<br/>- Email/SMS/Push delivery |
 
 #### **Generic Contexts (Commodities)**
 | Context | Aggregate Root | Responsabilidades |
