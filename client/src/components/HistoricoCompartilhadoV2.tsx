@@ -179,7 +179,7 @@ const HistoricoCompartilhadoV2: React.FC<HistoricoCompartilhadoV2Props> = ({
 
                 return (
                   <div
-                    key={`${log.id}-${index}`}
+                    key={`${index}-${log.created_at || 'unknown'}`}
                     className={`flex items-start gap-3 p-3 ${bgColor} ${borderColor} rounded-lg`}
                   >
                     <div className={`h-2 w-2 ${dotColor} mt-2 flex-shrink-0 rounded-full`}></div>
@@ -201,15 +201,15 @@ const HistoricoCompartilhadoV2: React.FC<HistoricoCompartilhadoV2Props> = ({
                           ? new Date(log.created_at).toLocaleString("pt-BR")
                           : "Data não disponível"}
                       </p>
-                      {log.profiles?.full_name && (
+                      {log.profiles && (log.profiles as any).fullName && (
                         <p className="mt-1 text-sm text-gray-300">
-                          <strong>Por:</strong> {log.profiles.full_name} (
+                          <strong>Por:</strong> {(log.profiles as any).fullName} (
                           {log.profiles.role || "Usuário"})
                         </p>
                       )}
 
                       {/* Destacar observação do ATENDENTE */}
-                      {log.observacao && (
+                      {(log as any).observacao && (
                         <div
                           className={`mt-2 rounded border-l-2 p-2 text-sm ${
                             isAtendente
@@ -223,7 +223,7 @@ const HistoricoCompartilhadoV2: React.FC<HistoricoCompartilhadoV2Props> = ({
                             </span>
                           )}
                           <div className={isAtendente ? "mt-1 italic" : "mt-1"}>
-                            "{log.observacao}"
+                            "{(log as any).observacao}"
                           </div>
                         </div>
                       )}

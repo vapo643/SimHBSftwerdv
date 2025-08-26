@@ -7,7 +7,7 @@
 
 import { SecurityEventType, securityLogger, SecurityEvent } from "./security-logger";
 import { db } from "./supabase";
-import { security_logs } from "../../shared/schema";
+import { securityLogs } from "../../shared/schema/security";
 import { and, gte, eq, sql, desc } from "drizzle-orm";
 import { getBrasiliaTimestamp } from "./timezone";
 
@@ -122,14 +122,14 @@ export class SecurityMonitor {
     // Check failed logins per IP
     const failedLoginsByIp = await db
       .select({
-        ip_address: security_logs.ip_address,
+        ip_address: securityLogs.ip_address,
         count: sql<number>`count(*)::int`,
       })
-      .from(security_logs)
+      .from(securityLogs)
       .where(
-        and(eq(security_logs.event_type, "LOGIN_FAILED"), gte(security_logs.created_at, oneHourAgo))
+        and(eq(securityLogs.event_type, "LOGIN_FAILED"), gte(securityLogs.created_at, oneHourAgo))
       )
-      .groupBy(security_logs.ip_address);
+      .groupBy(securityLogs.ip_address);
 
     for (const record of failedLoginsByIp) {
       if (record.count >= ALERT_THRESHOLDS.FAILED_LOGINS_PER_IP_PER_HOUR) {
@@ -156,17 +156,17 @@ export class SecurityMonitor {
 
     const rateLimitViolations = await db
       .select({
-        ip_address: security_logs.ip_address,
+        ip_address: securityLogs.ip_address,
         count: sql<number>`count(*)::int`,
       })
-      .from(security_logs)
+      .from(securityLogs)
       .where(
         and(
-          eq(security_logs.event_type, "RATE_LIMIT_EXCEEDED"),
-          gte(security_logs.created_at, oneHourAgo)
+          eq(securityLogs.event_type, "RATE_LIMIT_EXCEEDED"),
+          gte(securityLogs.created_at, oneHourAgo)
         )
       )
-      .groupBy(security_logs.ip_address);
+      .groupBy(securityLogs.ip_address);
 
     for (const record of rateLimitViolations) {
       if (record.count >= ALERT_THRESHOLDS.RATE_LIMIT_VIOLATIONS_PER_IP_PER_HOUR) {
@@ -200,18 +200,18 @@ export class SecurityMonitor {
 
       const recentAccess = await db
         .select({
-          user_id: security_logs.user_id,
-          user_email: security_logs.user_email,
+          user_id: securityLogs.user_id,
+          user_email: securityLogs.user_id,
           count: sql<number>`count(*)::int`,
         })
-        .from(security_logs)
+        .from(securityLogs)
         .where(
           and(
-            eq(security_logs.event_type, "DATA_ACCESS"),
-            gte(security_logs.created_at, fiveMinutesAgo)
+            eq(securityLogs.event_type, "DATA_ACCESS"),
+            gte(securityLogs.created_at, fiveMinutesAgo)
           )
         )
-        .groupBy(security_logs.user_id, security_logs.user_email);
+        .groupBy(securityLogs.user_id, securityLogs.user_id);
 
       for (const record of recentAccess) {
         if (record.count > 10) {
@@ -241,19 +241,19 @@ export class SecurityMonitor {
 
     const largeDataRequests = await db
       .select({
-        user_id: security_logs.user_id,
-        user_email: security_logs.user_email,
+        user_id: securityLogs.user_id,
+        user_email: securityLogs.user_id,
         total_size: sql<number>`sum((details->>'size')::int)::int`,
       })
-      .from(security_logs)
+      .from(securityLogs)
       .where(
         and(
-          eq(security_logs.event_type, "DATA_EXPORT"),
-          gte(security_logs.created_at, oneHourAgo),
+          eq(securityLogs.event_type, "DATA_EXPORT"),
+          gte(securityLogs.created_at, oneHourAgo),
           sql`details->>'size' IS NOT NULL`
         )
       )
-      .groupBy(security_logs.user_id, security_logs.user_email);
+      .groupBy(securityLogs.user_id, securityLogs.user_id);
 
     for (const record of largeDataRequests) {
       const sizeMB = record.total_size / (1024 * 1024);
@@ -281,18 +281,18 @@ export class SecurityMonitor {
     // Check for multiple concurrent sessions
     const activeSessions = await db
       .select({
-        user_id: security_logs.user_id,
-        user_email: security_logs.user_email,
+        user_id: securityLogs.user_id,
+        user_email: securityLogs.user_id,
         session_count: sql<number>`count(distinct details->>'session_id')::int`,
       })
-      .from(security_logs)
+      .from(securityLogs)
       .where(
         and(
-          eq(security_logs.event_type, "LOGIN_SUCCESS"),
-          gte(security_logs.created_at, new Date(Date.now() - 86400000)) // Last 24 hours
+          eq(securityLogs.event_type, "LOGIN_SUCCESS"),
+          gte(securityLogs.created_at, new Date(Date.now() - 86400000)) // Last 24 hours
         )
       )
-      .groupBy(security_logs.user_id, security_logs.user_email);
+      .groupBy(securityLogs.user_id, securityLogs.user_id);
 
     for (const record of activeSessions) {
       if (record.session_count > ALERT_THRESHOLDS.MAX_CONCURRENT_SESSIONS_PER_USER) {

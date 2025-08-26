@@ -81,7 +81,7 @@ const DadosClienteForm: React.FC<DadosClienteFormProps> = ({ register, control, 
             name="estadoCivil"
             control={control}
             render={({ field }) => (
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} defaultValue={field.value as string}>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione..." />
                 </SelectTrigger>

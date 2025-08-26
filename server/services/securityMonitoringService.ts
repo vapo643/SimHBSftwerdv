@@ -1,7 +1,8 @@
-import { db } from "../db";
-import { securityLogs, propostas, users, loginAttempts } from "../../shared/schema";
+import { db } from "../lib/supabase";
+import { securityLogs, loginAttempts } from "../../shared/schema/security";
+import { propostas, users } from "../../shared/schema";
 import { eq, gte, and, count, desc, sql } from "drizzle-orm";
-import { getBrasiliaTimestamp } from "../lib/date-utils";
+import { getBrasiliaTimestamp } from "../lib/timezone";
 
 interface SecurityMetrics {
   threats: {
@@ -131,27 +132,27 @@ class SecurityMonitoringService {
         .limit(1);
 
       // Calculate metrics
-      const threatMap = new Map(threatLogs.map(t => [t.event_type, t.count]));
-      const recentThreatMap = new Map(recentThreatLogs.map(t => [t.event_type, t.count]));
+      const threatMap = new Map(threatLogs.map((t: any) => [t.event_type, t.count]));
+      const recentThreatMap = new Map(recentThreatLogs.map((t: any) => [t.event_type, t.count]));
 
       const metrics: SecurityMetrics = {
         threats: {
-          sqlInjectionAttempts: threatMap.get("SQL_INJECTION_ATTEMPT") || 0,
-          xssAttemptsBlocked: threatMap.get("XSS_ATTEMPT") || 0,
-          bruteForceAttempts: threatMap.get("BRUTE_FORCE_ATTEMPT") || 0,
-          rateLimitViolations: threatMap.get("RATE_LIMIT_EXCEEDED") || 0,
+          sqlInjectionAttempts: (threatMap.get("SQL_INJECTION_ATTEMPT") as number) || 0,
+          xssAttemptsBlocked: (threatMap.get("XSS_ATTEMPT") as number) || 0,
+          bruteForceAttempts: (threatMap.get("BRUTE_FORCE_ATTEMPT") as number) || 0,
+          rateLimitViolations: (threatMap.get("RATE_LIMIT_EXCEEDED") as number) || 0,
           lastHour: {
-            sqlInjection: recentThreatMap.get("SQL_INJECTION_ATTEMPT") || 0,
-            xss: recentThreatMap.get("XSS_ATTEMPT") || 0,
-            bruteForce: recentThreatMap.get("BRUTE_FORCE_ATTEMPT") || 0,
-            rateLimit: recentThreatMap.get("RATE_LIMIT_EXCEEDED") || 0,
+            sqlInjection: (recentThreatMap.get("SQL_INJECTION_ATTEMPT") as number) || 0,
+            xss: (recentThreatMap.get("XSS_ATTEMPT") as number) || 0,
+            bruteForce: (recentThreatMap.get("BRUTE_FORCE_ATTEMPT") as number) || 0,
+            rateLimit: (recentThreatMap.get("RATE_LIMIT_EXCEEDED") as number) || 0,
           },
         },
         authentication: {
           totalLogins: authLogs[0]?.total || 0,
           failedLogins: authLogs[0]?.failed || 0,
           activeSessionsCount: activeSessions[0]?.count || 0,
-          lastLoginTime: lastLogin[0]?.created_at || null,
+          lastLoginTime: lastLogin[0]?.created_at?.toISOString() || null,
           recentFailures: recentFailures[0]?.count || 0,
           suspiciousActivities: authLogs[0]?.suspicious || 0,
         },

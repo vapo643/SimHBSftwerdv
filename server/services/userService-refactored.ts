@@ -60,16 +60,17 @@ export class UserService {
       const newUser = await userRepository.createUser(userData);
 
       // Log security event
-      securityLogger.log(SecurityEventType.USER_CREATED, {
-        userId: createdByUserId,
-        resource: "users",
-        action: "CREATE",
+      securityLogger.logEvent({
+        type: SecurityEventType.USER_CREATED,
+        severity: 'MEDIUM',
+        success: true,
+        userEmail: newUser.email,
+        ipAddress: userIp,
         details: {
           newUserId: newUser.id,
           newUserEmail: newUser.email,
           newUserRole: newUser.role
-        },
-        ip: userIp
+        }
       });
 
       console.log(`✅ [UserService] User created successfully: ${newUser.email}`);
@@ -238,15 +239,15 @@ export class UserService {
       const updatedProfile = await userRepository.updateProfile(userId, updateData);
 
       // Log security event
-      securityLogger.log(SecurityEventType.DATA_ACCESS, {
-        userId: updatedByUserId,
-        resource: "users",
-        action: "UPDATE",
+      securityLogger.logEvent({
+        type: SecurityEventType.DATA_ACCESS,
+        severity: 'LOW',
+        success: true,
+        ipAddress: userIp,
         details: {
           targetUserId: userId,
           updatedFields: Object.keys(updateData)
-        },
-        ip: userIp
+        }
       });
 
       return updatedProfile;

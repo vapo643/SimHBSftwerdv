@@ -52,6 +52,13 @@ export enum SecurityEventType {
   EMAIL_CHANGE_REQUESTED = "EMAIL_CHANGE_REQUESTED",
   EMAIL_CHANGED = "EMAIL_CHANGED",
   INVALID_CREDENTIALS = "INVALID_CREDENTIALS",
+  
+  // Security Alerts
+  SECURITY_ALERT = "SECURITY_ALERT",
+  
+  // User Events
+  USER_CREATED = "USER_CREATED",
+  DATA_ACCESS = "DATA_ACCESS",
 }
 
 export interface SecurityEvent {

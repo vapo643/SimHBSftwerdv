@@ -1,0 +1,42 @@
+### **Pacote de Ativação de Missão (PAM) V15.1: Auditoria Final e Prova de Conformidade (Sprint 0)**
+
+* **Sumário da Missão (O Quê):** Executar uma auditoria final e fornecer a **prova de trabalho irrefutável** de que TODOS os bloqueadores e dívidas técnicas do Sprint 0 foram eliminados, com foco na erradicação dos 13 erros de TypeScript restantes no frontend e na configuração formal do script de linting.
+
+* **Intenção Estratégica (O Porquê):** A confiança é construída sobre verificação, não sobre declarações. Esta missão final de auditoria e remediação para o Sprint 0 é o gate de qualidade mandatório que garante que a "Operação Aço Líquido" está sendo construída sobre uma base de código 100% limpa, compilável e segura. Não haverá progresso para o Sprint 1 até que esta prova seja fornecida.
+
+* **Modelo Mental (Como se Encaixa):** Você atuará como um **Engenheiro de Remediação Final**. Sua tarefa é focar nos débitos técnicos residuais. Primeiro, você deve erradicar os 13 erros de tipo do frontend. Segundo, você deve formalizar a configuração do script de linting. Finalmente, você irá re-executar a auditoria completa e apresentar o relatório de conformidade como prova final.
+
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco (ALTO):** **Relatório Incompleto.** Apresentar novamente um relatório com saídas de comando truncadas (`head -20`) ou com desculpas sobre "erros de frontend" será considerado uma falha total da missão.
+    * **Contramedida Mandatória:** O seu relatório final **DEVE** conter a saída completa e não filtrada de todos os comandos de validação. A transparência radical é inegociável.
+
+---
+
+**DIRETRIZ DE MISSÃO: Erradicação e Prova de Conformidade do Sprint 0**
+
+**CURRENT STATE:**
+O Sprint 0 foi declarado "concluído", mas uma auditoria anterior e o próprio relatório do agente confirmam a existência de 13 erros de TypeScript no frontend, um script de linting não configurado no `package.json` e 5 vulnerabilidades moderadas.
+
+**EXPECTED (Estado Final de Sucesso):**
+A missão será considerada um sucesso quando você produzir um `RELATORIO_CONFORMIDADE_SPRINT_0_V2.md` que prove, através da saída literal de comandos, o seguinte estado:
+1.  **TypeScript Compilando:** O comando `npm run check` (ou `tsc`) executa e reporta **ZERO erros** em todo o projeto (backend E frontend).
+2.  **Linting Funcional:** Um script `lint` existe no `package.json` e o comando `npm run lint` executa e reporta **ZERO erros**.
+3.  **Vulnerabilidades Mitigadas:** O comando `npm audit` não reporta vulnerabilidades de severidade `moderate`, `high` ou `critical`.
+4.  **Container Válido:** O `Dockerfile` é validado como sintaticamente correto.
+
+**CONSTRAINTS (Roadmap de Remediação e Auditoria):**
+
+1.  **Passo 1: Erradicação dos Erros de Frontend.** Analise os 13 erros de tipo restantes nos componentes React e corrija a sua causa raiz.
+2.  **Passo 2: Formalização do Script de Linting.** Forneça o trecho de JSON exato que deve ser adicionado à seção `scripts` do `package.json` para criar o comando `lint`. (Ex: `"lint": "eslint . --ext .ts,.tsx"`). Assumo que o Executor Humano irá aplicar esta mudança.
+3.  **Passo 3: Remediação de Vulnerabilidades.** Execute `npm audit fix` para tentar resolver as 5 vulnerabilidades moderadas. Se `breaking changes` forem um risco, documente a análise e a recomendação.
+4.  **Passo 4: Auditoria Final e Geração de Prova.** Execute novamente todos os passos do PAM de auditoria V14.0, desta vez capturando a saída **completa** e não truncada de cada comando.
+5.  **Passo 5: Compilar Relatório Final.** Crie o `RELATORIO_CONFORMIDADE_SPRINT_0_V2.md` com todas as evidências irrefutáveis de que o Sprint 0 está, finalmente, em conformidade com a "Definition of Done".
+
+---
+
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** 90%
+* **RISCOS IDENTIFICADOS:** ALTO.
+* **DECISÕES TÉCNICAS ASSUMIDAS:** Assumo que os 13 erros de frontend são corrigíveis sem uma refatoração massiva da arquitetura de componentes.
+* **VALIDAÇÃO PENDENTE:** O `RELATORIO_CONFORMIDADE_SPRINT_0_V2.md`, contendo as provas de um sistema 100% limpo, será a única porta de entrada para o Sprint 1.
