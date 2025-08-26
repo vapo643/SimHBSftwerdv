@@ -1,0 +1,46 @@
+### **Pacote de Ativação de Missão (PAM) V5.0: Validação de Sanidade e Eliminação de Débito Técnico Residual (Operação Fênix - P1.4)**
+
+* **Sumário da Missão (O Quê):** Executar uma varredura de diagnóstico completa em toda a base de código para validar a alegação de "zero erros de LSP" e eliminar qualquer débito técnico residual de tipagem ou sintaxe.
+
+* **Intenção Estratégica (O Porquê):** A missão anterior resolveu um erro crítico e reportou a eliminação de 49 erros de LSP. De acordo com o protocolo de **Validação Externa Mandatória**, esta alegação deve ser verificada. Uma base de código verdadeiramente limpa (Zero Micro Erros) é a pré-condição para desativar o PGI e retomar o planejamento arquitetural. Esta missão garante que a "Fundação de Qualidade" está, de fato, solidificada.
+
+* **Modelo Mental (Como se Encaixa):** Você atuará como um Engenheiro de QA Automatizado. Sua tarefa é usar as ferramentas de diagnóstico do ambiente (`get_latest_lsp_diagnostics`) para realizar uma auditoria final. Você não está buscando uma funcionalidade específica, mas sim a saúde geral e a conformidade sintática de todo o projeto.
+
+* **Riscos Antecipados e Contramedidas:**
+    * **Risco (MÉDIO):** **Falso Negativo.** A ferramenta de diagnóstico pode não capturar erros sutis de tipo que só se manifestam em tempo de compilação.
+    * **Contramedida Mandatória:** Além do diagnóstico LSP, você **DEVE** executar o comando de verificação de tipos do TypeScript (`tsc --noEmit`) para realizar uma checagem mais profunda e garantir que não haja erros de tipo ocultos em toda a base de código.
+
+---
+
+**IMPLEMENTAR: Varredura de Qualidade de Código Completa**
+
+**CURRENT STATE:**
+O sistema está operacional e os testes de regressão para as rotas de documentos estão passando. Um relatório anterior indica que 49 erros de LSP foram resolvidos, mas uma verificação completa e independente é necessária.
+
+**EXPECTED (Estado Final de Sucesso):**
+1.  Um relatório de diagnóstico confirmando que `get_latest_lsp_diagnostics` não retorna erros para nenhum arquivo no projeto.
+2.  Um relatório de diagnóstico confirmando que o comando `npx tsc --noEmit` é executado com sucesso e não reporta nenhum erro de tipo.
+3.  Se algum erro for encontrado, ele deve ser corrigido, e os relatórios de validação (LSP e TSC) devem ser reexecutados até que ambos estejam limpos.
+4.  O relatório final da missão deve apresentar a prova (saída do console) de que tanto a verificação LSP quanto a verificação TSC estão 100% limpas.
+
+**CONSTRAINTS (Roadmap de Implementação):**
+
+1.  **Passo 1: Diagnóstico LSP.** Execute o comando `get_latest_lsp_diagnostics` e analise a saída.
+2.  **Passo 2: Diagnóstico TypeScript (TSC).** Execute o comando `npx tsc --noEmit` e analise a saída.
+3.  **Passo 3: Remediação (Se Necessário).** Se qualquer um dos comandos anteriores reportar erros, corrija-os. Priorize erros de tipo (`tsc`) sobre avisos de estilo.
+4.  **Passo 4: Validação Final.** Reexecute os comandos dos Passos 1 e 2 até que ambos retornem um status de sucesso sem erros.
+5.  **Passo 5: Relatório de Conclusão.** Apresente o relatório final com as saídas bem-sucedidas dos comandos de validação.
+
+---
+
+**DECLARAÇÃO DE INCERTEZA (OBRIGATÓRIO):**
+
+* **CONFIANÇA NA IMPLEMENTAÇÃO:** 95%
+* **RISCOS IDENTIFICADOS:** MÉDIO (A descoberta de erros de tipo complexos pode exigir um esforço de refatoração maior do que o previsto).
+* **DECISÕES TÉCNICAS ASSUMIDAS:** Assumo que quaisquer erros restantes são de natureza sintática ou de tipo, e não erros de lógica complexos.
+* **VALIDAÇÃO PENDENTE:** As saídas limpas dos comandos `get_latest_lsp_diagnostics` e `npx tsc --noEmit` serão a prova final da missão.
+
+---
+
+**PROTOCOLO OBRIGATÓRIO 7-CHECK (ADAPTATIVO - Nível FULL):**
+Ao concluir esta missão de **execução**, você **DEVE** executar e reportar o resultado do `7-CHECK FULL`, pois ela conclui a fase de estabilização de alto risco.

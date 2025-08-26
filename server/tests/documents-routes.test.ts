@@ -8,16 +8,17 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 import express from 'express';
+import { type Server } from 'http';
 import { registerRoutes } from '../routes';
 
 describe('Documents Routes Integration Test - PAM V4.0', () => {
   let app: express.Application;
-  let server: any;
+  let server: Server;
   
   beforeAll(async () => {
     // Create test app instance
     app = express();
-    server = await registerRoutes(app);
+    server = await registerRoutes(app as any); // Type assertion for test compatibility
   });
   
   afterAll(async () => {
